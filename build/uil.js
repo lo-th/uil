@@ -227,7 +227,7 @@ UIL.String = function(target, name, callback, value, color ){
 
     UIL.Proto.call( this, target, name, callback );
 
-    this.color = color || 'N';
+    this.color = color || 'G';
 
     this.c[3] = UIL.element('UIL string', 'input' );
 
