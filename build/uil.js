@@ -165,7 +165,7 @@ UIL.Title = function(target, type, id, prefix ){
     
     UIL.Proto.call( this, target, '', null );
 
-    this.color = 'N';
+    this.color = prefix || 'N';
 
     id = id || 0;
     type = type || '';
@@ -223,9 +223,11 @@ UIL.Vector = function(target, name, callback, value ){
 
 UIL.Vector.prototype = Object.create( UIL.Proto.prototype );
 UIL.Vector.prototype.constructor = UIL.Vector;
-UIL.String = function(target, name, callback, value, c ){
+UIL.String = function(target, name, callback, value, color ){
 
-    UIL.Proto.call( this, target, name, callback, c);
+    UIL.Proto.call( this, target, name, callback );
+
+    this.color = color || 'N';
 
     this.c[3] = UIL.element('UIL string', 'input' );
 

@@ -2,7 +2,7 @@ UIL.Title = function(target, type, id, prefix ){
     
     UIL.Proto.call( this, target, '', null );
 
-    this.color = 'N';
+    this.color = prefix || 'N';
 
     id = id || 0;
     type = type || '';
