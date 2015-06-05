@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>UIL TEST</title>
+<style>
+*{ margin: 0; padding: 0; border: 0; } 
+html{ overflow:hidden; width:100%; height:100%; }
+body { font-family:monospace; background:#222; font-size:12px; color:#fff;}
+#debug { position:absolute; top:2px; left:10px; width:200px; height:10px; pointer-events:none;}
+#content1 { position:absolute; top:20px; left:0px; pointer-events:none;}
+#content2 { position:absolute; top:20px; left:340px; pointer-events:none;}
+#content3 { position:absolute; top:20px; left:680px; pointer-events:none;}
+#content4 { position:absolute; top:20px; left:1020px; pointer-events:none;}
+</style>
+<script type="text/javascript" src="build/uil.min.js"></script>
+</head>
+
+<body>
+<div id='content1'></div>
+<div id='content2'></div>
+<div id='content3'></div>
+<div id='content4'></div>
+<div id='debug'>debug</div>
+
+<script>
+var list = ['cool', 'gool', 'tool', 'fool', 'mool']
+var sl = [];
+var n = 0
+var content1 = document.getElementById('content1');
+var content2 = document.getElementById('content2');
+var content3 = document.getElementById('content3');
+var content4 = document.getElementById('content4');
+function addList(id, name, list){
+    var callback = function(v){  }.bind(this);
+    var s = new UIL.List(content, name, callback, this.nodes[id][name], list);
+};
+function addSlide(id, name, min, max, precision){
+    var callback = function(v){  }.bind(this);
+    var s;
+    if(id ==0 )  s = new UIL.List(content1, name, callback, 'cool', list);
+    if(id ==1 )  s = new UIL.List(content2, name, callback, 'cool', list);
+    if(id ==2 )  s = new UIL.Slide(content3, name, callback, 0, min, max, precision);
+    if(id ==3 )  s = new UIL.Slide(content4, name, callback, 0, min, max, precision);
+    return s
+};
+
+requestAnimationFrame(function loop(){
+	sl.push( addSlide(0,'yoo',0,1,2) );
+	sl.push( addSlide(1,'yoo',0,1,2) );
+	sl.push( addSlide(2,'yoo',0,1,2) );
+	sl.push( addSlide(3,'yoo',0,1,2) );
+	var i = sl.length;
+	if(i==240){
+		while(i--){ 
+			sl[i].clear(); 
+			sl.pop();
+		}
+	}
+	requestAnimationFrame(loop);
+});
+
+
+
+</script>
+</body>
+</html>

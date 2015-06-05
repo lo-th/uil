@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>UIL TEST</title>
+<style>
+*{ margin: 0; padding: 0; border: 0; -o-user-select:none; -ms-user-select:none; -khtml-user-select:none; -webkit-user-select:none; -moz-user-select:none; } 
+html{ overflow:hidden; width:100%; height:100%; }
+body { font-family:monospace; background:#111; font-size:12px; color:#fff;}
+#debug { position:absolute; top:110px; left:50%; width:90px; height:10px; pointer-events:none; text-align:right; }
+#content { position:absolute; top:150px; left:50%; margin-left:-150px; width:300px; pointer-events:none;}
+#logo{position:absolute; left:50%; margin-left:-128px;  margin-top:-60px; transform: scale(0.5,0.5);}
+</style>
+<script type="text/javascript" src="src/UIL.js"></script>
+<script type="text/javascript" src="src/Bool.js"></script>
+<script type="text/javascript" src="src/Color.js"></script>
+<script type="text/javascript" src="src/Group.js"></script>
+<script type="text/javascript" src="src/List.js"></script>
+<script type="text/javascript" src="src/Number.js"></script>
+<script type="text/javascript" src="src/Slide.js"></script>
+<script type="text/javascript" src="src/String.js"></script>
+<script type="text/javascript" src="src/Title.js"></script>
+<script type="text/javascript" src="src/Vector.js"></script>
+</head>
+
+<body>
+<img id='logo' src='uil.svg'></img>
+<div id='content'></div>
+<div id='debug'>UIL v:0.1</div>
+
+<script>
+var list = ['item-0', 'item-1', 'item-2', 'item-3', 'item-4', 'item-5', 'item-6', 'item-7', 'item-8', 'item-9', 'item-10', 'item-11', 'item-12'];
+var sl = [];
+var n = 0
+var content = document.getElementById('content');
+
+sl.push( new UIL.Title(content, 'Title'));
+sl.push( new UIL.Bool(content, 'Bool'));
+sl.push( new UIL.Color(content, 'Color'));
+sl.push( new UIL.Number(content, 'Number'));
+sl.push( new UIL.Slide(content, 'Slide'));
+sl.push( new UIL.String(content, 'String'));
+sl.push( new UIL.Vector(content, 'Vector'));
+sl.push( new UIL.List(content, 'List', null, 0, list) );
+
+</script>
+</body>
+</html>
