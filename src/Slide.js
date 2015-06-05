@@ -1,9 +1,6 @@
 UIL.Slide = function(target, name, callback, value, min, max, precision){
 
-    this.callback = callback || function(){};
-
-    this.c = [];
-    this.f = [];
+    UIL.Proto.call( this, target, name, callback );
 
     this.min = min || 0;
     this.max = max || 100;
@@ -16,14 +13,10 @@ UIL.Slide = function(target, name, callback, value, min, max, precision){
     this.value = value || 0;
     this.down = false;
 
-    this.c[0] = target;
-    this.c[1] = UIL.element('UIL base', 'div', 'background:'+UIL.bgcolor('G')+';');
-    this.c[2] = UIL.element('UIL text');
     this.c[3] = UIL.element('UIL text', 'div', 'right:25px; text-align:right; width:40px;');
     this.c[4] = UIL.element('UIL scroll-bg', 'div', 'height:'+this.height+'px; width:'+this.width+'px; background:rgba(0,0,0,0.2);');
     this.c[5] = UIL.element('UIL scroll-sel', 'div', 'height:'+(this.height-8)+'px; background:#666;');
 
-    this.c[2].innerHTML = name;
     this.c[3].innerHTML = this.value;
     this.c[5].style.width = (this.w * ((this.value-this.min)/this.valueRange))+'px';
 
@@ -80,13 +73,8 @@ UIL.Slide = function(target, name, callback, value, min, max, precision){
     this.c[4].onmousedown = this.f[3];
     this.c[4].onmousemove = this.f[4];
 
-    UIL.create(this);
+    this.init();
 };
 
-UIL.Slide.prototype = {
-    constructor: UIL.Slide,
-    clear:function(){
-        UIL.clear(this);
-    }
-};
-
+UIL.Slide.prototype = Object.create( UIL.Proto.prototype );
+UIL.Slide.prototype.constructor = UIL.Slide;

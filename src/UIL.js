@@ -20,13 +20,7 @@ var UIL = UIL || ( function () {
         getAll: function () { return _uis; },
         removeAll: function () { _uis = []; },
         add: function ( ui ) { _uis.push( ui ); },
-        remove: function ( ui ) { var i = _uis.indexOf( ui ); if ( i !== -1 ) { _uis.splice( i, 1 ); } },
-        create:function(el){
-            for(var i = 0; i<el.c.length; i++){
-                if(i==0) el.c[0].appendChild(el.c[1]);
-                else if(i>1) el.c[1].appendChild(el.c[i]);
-            }
-        },
+        remove: function ( ui ) { var i = _uis.indexOf( ui ); if ( i !== -1 ) { _uis.splice( i, 1 ); } },  
         bgcolor: function(p){
             var color = this.nset.nc2;
             if(p){
@@ -38,27 +32,6 @@ var UIL = UIL || ( function () {
                 }
             }
             return color;
-        },
-        clear: function(dom){
-            var i = dom.c.length, j;
-            while(i--){
-                if(i>1){ 
-                    // clear function
-                    j = this.events.length;
-                    while(j--){ if(dom.c[i][this.events[j]]!==null) dom.c[i][this.events[j]] = null; }
-                    dom.c[1].removeChild(dom.c[i]);
-                }
-                else if(i==1) dom.c[0].removeChild(dom.c[1]);
-                dom.c[i] = null;
-            }
-            dom.c = null;
-            if(dom.f){
-                i = dom.f.length;
-                while(i--) dom.f[i] = null;
-                dom.f = null
-            }
-            if(dom.callback)dom.callback = null;
-            if(dom.value)dom.value = null;
         },
         element:function(cName, type, css){ 
             type = type || 'div'; 
@@ -87,7 +60,7 @@ UIL.txt2 = 'font-family:Monospace; font-size:12px; color:#e2e2e2;';
 UIL.createClass('UIL', 'box-sizing:border-box; -o-user-select:none; -ms-user-select:none; -khtml-user-select:none; -webkit-user-select:none; -moz-user-select:none;');
 
 UIL.createClass('UIL.base', 'width:'+(UIL.nset.width)+'px; height:20px; position:relative; left:0px; pointer-events:none; background:rgba(40,40,40,0.5); margin-bottom:1px;');
-UIL.createClass('UIL.title', 'width:'+(UIL.nset.width)+'px; height:30px; position:relative; left:0px; pointer-events:none; margin-bottom:1px;'+UIL.txt1);
+//UIL.createClass('UIL.title', 'width:'+(UIL.nset.width)+'px; height:30px; position:relative; left:0px; pointer-events:none; margin-bottom:1px;'+UIL.txt1);
 
 UIL.createClass('UIL.box', 'position:absolute; left:100px; top:3px; width:14px; height:14px; pointer-events:auto; cursor:pointer; border:2px solid rgba(255,255,255,0.4);');
 UIL.createClass('UIL.text', 'position:absolute; width:90px; top:2px; height:16px; pointer-events:none; padding-left:10px; padding-right:5px; padding-top:2px; text-align:Left; overflow:hidden; white-space:nowrap;'+ UIL.txt1);

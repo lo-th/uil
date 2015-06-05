@@ -1,13 +1,7 @@
 UIL.List = function(target, name, callback, value, list ){
 
-    this.callback = callback || function(){};
+    UIL.Proto.call( this, target, name, callback );
 
-    this.c = [];
-    this.f = [];
-
-    this.c[0] = target;
-    this.c[1] = UIL.element('UIL base', 'div', 'background:'+UIL.bgcolor('G')+';');
-    this.c[2] = UIL.element('UIL text');
     this.c[3] = UIL.element('UIL Listtxt', 'div', 'background:'+UIL.bgcolor('G')+';');
     this.c[4] = UIL.element('UIL list');
 
@@ -41,7 +35,7 @@ UIL.List = function(target, name, callback, value, list ){
         this.listIn.appendChild(item);
     }
 
-    this.c[2].innerHTML = name;
+    //this.c[2].innerHTML = name;
     this.c[3].innerHTML = this.value;
     this.c[4].name = 'list';
 
@@ -116,19 +110,18 @@ UIL.List = function(target, name, callback, value, list ){
     this.c[4].onmouseout = this.f[5];
     this.c[4].onmouseup = this.f[6];
 
-    UIL.create(this);
+    this.init();
 }
 
-UIL.List.prototype = {
-    constructor: UIL.List,
-    clear:function(){
-       
-        while (this.listIn.firstChild) {
-           this.listIn.removeChild(this.listIn.firstChild);
-        }
-        while (this.c[4].firstChild) {
-           this.c[4].removeChild(this.c[4].firstChild);
-        }
-        UIL.clear(this);
+UIL.List.prototype = Object.create( UIL.Proto.prototype );
+UIL.List.prototype.constructor = UIL.List;
+UIL.List.prototype.clear = function(){
+   
+    while (this.listIn.firstChild) {
+       this.listIn.removeChild(this.listIn.firstChild);
     }
+    while (this.c[4].firstChild) {
+       this.c[4].removeChild(this.c[4].firstChild);
+    }
+    UIL.Proto.prototype.clear.call( this );
 }

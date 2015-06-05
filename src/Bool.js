@@ -1,16 +1,9 @@
-
 UIL.Bool = function(target, name, callback, value ){
 
-    this.callback = callback || function(){};
+    UIL.Proto.call( this, target, name, callback );
 
     this.value = value || false;
 
-    this.c = [];
-    this.f = [];
-
-    this.c[0] = target;
-    this.c[1] = UIL.element('UIL base', 'div', 'background:'+UIL.bgcolor('G')+';' );
-    this.c[2] = UIL.element('UIL text');
     this.c[3] = UIL.element('UIL box', 'div');
 
     this.f[0] = function(e){
@@ -24,14 +17,10 @@ UIL.Bool = function(target, name, callback, value ){
         this.callback( this.value );
     }.bind(this);
 
-    this.c[2].innerHTML = name;
     this.c[3].onclick = this.f[0];
 
-    UIL.create(this);
+    this.init();
 }
-UIL.Bool.prototype = {
-    constructor: UIL.Bool,
-    clear:function(){
-        UIL.clear(this);
-    }
-}
+
+UIL.Bool.prototype = Object.create( UIL.Proto.prototype );
+UIL.Bool.prototype.constructor = UIL.Bool;

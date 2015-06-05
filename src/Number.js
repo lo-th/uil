@@ -1,6 +1,7 @@
 UIL.Number = function(target, name, callback, value, min, max, precision, step, isAngle ){
 
-    this.callback = callback || function(){};
+    UIL.Proto.call( this, target, name, callback );
+
     this.min = min || 0;//-Infinity;
     this.max = max || Infinity;
     this.precision = precision || 0;
@@ -14,18 +15,11 @@ UIL.Number = function(target, name, callback, value, min, max, precision, step, 
         this.value = (value * 180 / Math.PI).toFixed( this.precision );
         this.toRad = Math.PI/180;
     };
-    
-    this.c = [];
-    this.f = [];
 
-    this.c[0] = target;
-    this.c[1] = UIL.element('UIL base', 'div', 'background:'+UIL.bgcolor('E')+';' );
-    this.c[2] = UIL.element('UIL text');
     this.c[3] = UIL.element('UIL number', 'input', 'left:100px;');
     this.c[4] = UIL.element('UIL boxbb', 'div', 'left:165px;');
     this.c[5] = UIL.element('UIL big', 'div', 'display:none;');
     
-
     this.f[0] = function(e){
         if (!e) e = window.event;
         if ( e.keyCode === 13 ){ 
@@ -70,18 +64,14 @@ UIL.Number = function(target, name, callback, value, min, max, precision, step, 
         this.c[5].onmouseout = null;
     }.bind(this);
 
-    this.c[2].innerHTML = name;
     if(isAngle) this.c[2].innerHTML = name+ '°';
     this.c[3].value = this.value;
     this.c[3].onkeydown = this.f[0];
     this.c[4].onmousedown = this.f[1];
     this.c[4].innerHTML ='< >';
 
-    UIL.create(this);
+    this.init();
 }
-UIL.Number.prototype = {
-    constructor: UIL.Number,
-    clear:function(){
-        UIL.clear(this);
-    }
-}
+
+UIL.Number.prototype = Object.create( UIL.Proto.prototype );
+UIL.Number.prototype.constructor = UIL.Number;
