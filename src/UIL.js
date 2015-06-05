@@ -10,7 +10,7 @@
 var UIL = UIL || ( function () {
     var _uis = [];
     return {
-        REVISION: '1',
+        REVISION: '0.1',
         events:[ 'onkeyup', 'onkeydown', 'onclick', 'onchange', 'onmouseover', 'onmouseout', 'onmousemove', 'onmousedown', 'onmouseup' ],
         nset:{
             width:300 , height:262, w:40, h:40, r:10, 
