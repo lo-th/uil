@@ -2,12 +2,13 @@ UIL.Number = function(target, name, callback, value, min, max, precision, step, 
 
     UIL.Proto.call( this, target, name, callback );
 
-    this.min = min || 0;//-Infinity;
+    this.min = parseFloat(min) || -Infinity;
     this.max = max || Infinity;
     this.precision = precision || 0;
     this.step = step || 1;
     this.prev = null;
-    this.shiftKey = false;
+
+    ///if(min !== undefined) this.min = min;
 
     this.value = value || 0;
     this.toRad = 1;
