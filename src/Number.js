@@ -17,11 +17,11 @@ UIL.Number = function(target, name, callback, value, min, max, precision, step, 
     };
 
     this.c[3] = UIL.element('UIL number', 'input', 'left:100px;');
-    this.c[4] = UIL.element('UIL boxbb', 'div', 'left:165px;');
-    this.c[5] = UIL.element('UIL big', 'div', 'display:none;');
+    this.c[4] = UIL.element('UIL big', 'div', 'display:none;');
     
     this.f[0] = function(e){
         if (!e) e = window.event;
+        e.stopPropagation();
         if ( e.keyCode === 13 ){ 
             if(!isNaN(e.target.value)){
                 this.value =  this.numValue(e.target.value);
@@ -38,10 +38,11 @@ UIL.Number = function(target, name, callback, value, min, max, precision, step, 
         if (!e) e = window.event;
         e.preventDefault();
         this.prev = { x:e.clientX, y:e.clientY, v:parseFloat( this.value ), d:0};
-        this.c[5].style.display = 'block';
-        this.c[5].onmousemove = this.f[2];
-        this.c[5].onmouseup = this.f[3];
-        this.c[5].onmouseout = this.f[3];
+        this.c[4].style.display = 'block';
+        this.c[4].onmousemove = this.f[2];
+        this.c[4].onmouseup = this.f[3];
+        this.c[4].onmouseout = this.f[3];
+        
     }.bind(this);
 
     this.f[2] = function(e){
@@ -57,18 +58,20 @@ UIL.Number = function(target, name, callback, value, min, max, precision, step, 
 
     this.f[3] = function(e){
         if (!e) e = window.event;
-        e.preventDefault();
-        this.c[5].style.display = 'none'
-        this.c[5].onmousemove = null;
-        this.c[5].onmouseup = null;
-        this.c[5].onmouseout = null;
+        this.c[4].style.display = 'none'
+        this.c[4].onmousemove = null;
+        this.c[4].onmouseup = null;
+        this.c[4].onmouseout = null;
+        if ( Math.abs( this.prev.d ) < 2 ) {
+            this.c[3].focus();
+            this.c[3].select();
+        }
     }.bind(this);
 
     if(isAngle) this.c[2].innerHTML = name+ '°';
     this.c[3].value = this.value;
     this.c[3].onkeydown = this.f[0];
-    this.c[4].onmousedown = this.f[1];
-    this.c[4].innerHTML ='< >';
+    this.c[3].onmousedown = this.f[1];
 
     this.init();
 }
