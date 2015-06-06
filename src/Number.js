@@ -24,7 +24,7 @@ UIL.Number = function(target, name, callback, value, min, max, precision, step, 
         if (!e) e = window.event;
         if ( e.keyCode === 13 ){ 
             if(!isNaN(e.target.value)){
-                this.value =  Math.min( this.max, Math.max( this.min, e.target.value ) ).toFixed( this.precision ) ;
+                this.value =  this.numValue(e.target.value);
                 this.callback( this.value * this.toRad );
             } else {
                 e.target.value = this.value;
@@ -47,8 +47,8 @@ UIL.Number = function(target, name, callback, value, min, max, precision, step, 
     this.f[2] = function(e){
         if (!e) e = window.event;
         this.prev.d += ( e.clientX - this.prev.x ) - ( e.clientY - this.prev.y );
-        var number = this.prev.v + ( this.prev.d * this.step);
-        this.value = Math.min( this.max, Math.max( this.min, number ) ).toFixed( this.precision );
+        var n = this.prev.v + ( this.prev.d * this.step);
+        this.value = this.numValue(n);
         this.c[3].value = this.value;
         this.callback( this.value * this.toRad );
         this.prev.x = e.clientX;

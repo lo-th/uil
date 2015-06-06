@@ -42,9 +42,11 @@ sl.push( new UIL.Color(content, 'Color'));
 sl.push( new UIL.Number(content, 'Number'));
 sl.push( new UIL.Slide(content, 'Slide'));
 sl.push( new UIL.String(content, 'String'));
-sl.push( new UIL.Vector(content, 'Vector'));
-sl.push( new UIL.List(content, 'List', null, 0, list) );
 
+sl.push( new UIL.List(content, 'List', null, 0, list) );
+sl.push( new UIL.Vector(content, 'Vector2', null, [0,0]));
+sl.push( new UIL.Vector(content, 'Vector3', null, [0,0,0]));
+sl.push( new UIL.Vector(content, 'Vector4', null, [0,0,0,0]));
 </script>
 </body>
 </html>
