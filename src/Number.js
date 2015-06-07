@@ -2,13 +2,7 @@ UIL.Number = function(target, name, callback, value, min, max, precision, step, 
 
     UIL.Proto.call( this, target, name, callback );
 
-    this.min = parseFloat(min) || -Infinity;
-    this.max = max || Infinity;
-    this.precision = precision || 0;
-    this.step = step || 1;
-    this.prev = null;
-
-    ///if(min !== undefined) this.min = min;
+    this.setTypeNumber(min, max, precision, step);
 
     this.value = value || 0;
     this.toRad = 1;
@@ -19,6 +13,8 @@ UIL.Number = function(target, name, callback, value, min, max, precision, step, 
 
     this.c[3] = UIL.element('UIL number', 'input', 'left:100px;');
     this.c[4] = UIL.element('UIL big', 'div', 'display:none;');
+
+    
     
     this.f[0] = function(e){
         if (!e) e = window.event;
@@ -32,7 +28,6 @@ UIL.Number = function(target, name, callback, value, min, max, precision, step, 
             }
             e.target.blur();
         }
-        e.stopPropagation();
     }.bind(this);
 
     this.f[1] = function(e){
@@ -43,7 +38,6 @@ UIL.Number = function(target, name, callback, value, min, max, precision, step, 
         this.c[4].onmousemove = this.f[2];
         this.c[4].onmouseup = this.f[3];
         this.c[4].onmouseout = this.f[3];
-        
     }.bind(this);
 
     this.f[2] = function(e){
@@ -73,6 +67,7 @@ UIL.Number = function(target, name, callback, value, min, max, precision, step, 
     this.c[3].value = this.value;
     this.c[3].onkeydown = this.f[0];
     this.c[3].onmousedown = this.f[1];
+
 
     this.init();
 }
