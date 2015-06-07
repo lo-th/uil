@@ -429,10 +429,11 @@ UIL.Number = function(target, name, callback, value, min, max, precision, step, 
 
 UIL.Number.prototype = Object.create( UIL.Proto.prototype );
 UIL.Number.prototype.constructor = UIL.Number;
-UIL.Color = function(target, name, callback, value ){
+UIL.Color = function(target, name, callback, value, type ){
     
     UIL.Proto.call( this, target, name, callback );
 
+    this.type = type || 'array';
     this.width = 170;
     this.wheelWidth = this.width*0.1;
     this.decalLeft = 100;
@@ -460,7 +461,10 @@ UIL.Color = function(target, name, callback, value ){
 
     this.hsl = null;
     this.value = '#ffffff';
-    if(value) this.value = this.pack(value);
+    if(value ){
+        if(value instanceof Array) this.value = this.pack(value);
+        if(value instanceof String) this.value = this.value;
+    }
     this.bcolor = null;
     this.dragging = false;
     this.isShow = false;
@@ -529,7 +533,8 @@ UIL.Color.prototype.updateDisplay = function(){
     var cc = this.invert ? '#fff' : '#000';
     this.c[3].style.color = cc;
 
-    this.callback( this.rgb );
+    if(this.type=='array')this.callback( this.rgb );
+    if(this.type=='html')this.callback( this.value );
 };
 UIL.Color.prototype.hide = function(){
     this.isShow = false;
@@ -883,7 +888,7 @@ UIL.List = function(target, name, callback, value, list ){
         if(name!=='list' && name!==undefined ){
             this.value = e.target.name;
             this.c[4].innerHTML = this.value;
-            this.callback(value);
+            this.callback(this.value);
             this.f[1]();
         }else if (name=='list'){
             this.down = true;

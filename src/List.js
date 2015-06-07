@@ -66,7 +66,7 @@ UIL.List = function(target, name, callback, value, list ){
         if(name!=='list' && name!==undefined ){
             this.value = e.target.name;
             this.c[4].innerHTML = this.value;
-            this.callback(value);
+            this.callback(this.value);
             this.f[1]();
         }else if (name=='list'){
             this.down = true;
