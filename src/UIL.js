@@ -10,7 +10,7 @@
 var UIL = UIL || ( function () {
     var _uis = [];
     return {
-        REVISION: '0.1',
+        REVISION: '0.2',
         events:[ 'onkeyup', 'onkeydown', 'onclick', 'onchange', 'onmouseover', 'onmouseout', 'onmousemove', 'onmousedown', 'onmouseup' ],
         nset:{
             width:300 , height:262, w:40, h:40, r:10, 
@@ -33,10 +33,35 @@ var UIL = UIL || ( function () {
             }
             return color;
         },
-        element:function(cName, type, css){ 
+        canvasURL:function(obj){
+            var canvas = document.createElement( 'canvas' );
+            canvas.width = obj.w || 20;
+            canvas.height = obj.h || 20;
+
+            var context = canvas.getContext( '2d' );
+            context.fillStyle = '#444';
+            context.fillRect( 0, 0, 20, 20 );
+            return canvas.toDataURL();
+        },
+        setSVG:function(dom, type, value){
+            dom.childNodes[0].setAttributeNS(null, type, value );
+        },
+        element:function(cName, type, css, obj){ 
             type = type || 'div'; 
-            var dom = document.createElement(type); 
-            if(cName) dom.className = cName;
+            var dom = null;
+            if(type=='rect' || type=='path' || type=='polygon'){ 
+                dom = document.createElementNS( 'http://www.w3.org/2000/svg', 'svg' );
+                var g = document.createElementNS( 'http://www.w3.org/2000/svg', type );
+                dom.appendChild(g);
+                for(var e in obj){
+                    if(e=='width' || e=='height')dom.setAttribute( e, obj[e] );
+                    g.setAttribute( e, obj[e] );
+                }
+            } else {
+                dom = document.createElement(type);
+                if(cName) dom.className = cName;
+            }
+            
             if(css) dom.style.cssText = css; 
             return dom;
         },
@@ -59,10 +84,10 @@ UIL.txt2 = 'font-family:Monospace; font-size:12px; color:#e2e2e2;';
 
 UIL.createClass('UIL', 'box-sizing:border-box; -o-user-select:none; -ms-user-select:none; -khtml-user-select:none; -webkit-user-select:none; -moz-user-select:none;');
 
-UIL.createClass('UIL.base', 'width:'+(UIL.nset.width)+'px; height:20px; position:relative; left:0px; pointer-events:none; background:rgba(40,40,40,0.5); margin-bottom:1px;');
+UIL.createClass('UIL.base', 'width:'+(UIL.nset.width)+'px; height:21px; position:relative; left:0px; pointer-events:none; background:rgba(40,40,40,0.5); border-bottom:1px solid #333;');
 //UIL.createClass('UIL.title', 'width:'+(UIL.nset.width)+'px; height:30px; position:relative; left:0px; pointer-events:none; margin-bottom:1px;'+UIL.txt1);
 
-UIL.createClass('UIL.box', 'position:absolute; left:100px; top:3px; width:14px; height:14px; pointer-events:auto; cursor:pointer; border:2px solid rgba(255,255,255,0.4);');
+//UIL.createClass('UIL.box', 'position:absolute; left:100px; top:3px; width:14px; height:14px; pointer-events:auto; cursor:pointer; border:2px solid rgba(255,255,255,0.4);');
 UIL.createClass('UIL.text', 'position:absolute; width:90px; top:2px; height:16px; pointer-events:none; padding-left:10px; padding-right:5px; padding-top:2px; text-align:Left; overflow:hidden; white-space:nowrap;'+ UIL.txt1);
 
 UIL.createClass('input.UIL.number', 'position:absolute; width:60px; height:16px; pointer-events:auto; margin-top:2px; padding-left:5px; padding-top:2px; background:rgba(0,0,0,0.2);' + UIL.txt2, true);
@@ -70,7 +95,7 @@ UIL.createClass('input.UIL.string', 'position:absolute; left:100px; width:170px;
 
 UIL.createClass('UIL.boxbb', 'position:absolute; left:100px; top:3px; width:20px; height:14px; pointer-events:auto; cursor:col-resize; text-align:center; color:#000; font-size:12px; background:rgba(255,255,255,0.6); ');
 
-UIL.createClass('UIL.big', 'position:absolute; width:400px; height:100px; left:-100px; top:-50px; pointer-events:auto; cursor:col-resize; background:rgba(255,0,0,0);');
+//UIL.createClass('UIL.big', 'position:absolute; width:400px; height:100px; left:-100px; top:-50px; pointer-events:auto; cursor:col-resize; background:rgba(255,0,0,0);');
 
 UIL.createClass('UIL.Listtxt', 'border:1px solid #333; left:100px; font-size:12px; position:absolute; cursor:pointer; width:170px; height:16px; pointer-events:auto; margin-top:2px; text-align:center;'+UIL.txt1);
 UIL.createClass('UIL.Listtxt:hover', 'border:1px solid #AAA;');
@@ -81,7 +106,7 @@ UIL.createClass('UIL.listItem:hover', 'background:#050; color:#e2e2e2;')
 UIL.createClass('UIL.list-sel', 'position:absolute; right:5px; background:#666; width:10px; height:10px; pointer-events:none; margin-top:5px;');
 
 UIL.createClass('UIL.scroll-bg', 'position:absolute; left:100px; top:2px; cursor:w-resize; pointer-events:auto;');
-UIL.createClass('UIL.scroll-sel', 'position:absolute; left:104px; top:6px; pointer-events:none;');
+//UIL.createClass('UIL.scroll-sel', 'position:absolute; left:104px; top:6px; pointer-events:none;');
 
 UIL.createClass('UIL.canvas', 'position:absolute; pointer-events:none;');
 UIL.createClass('UIL.cc', 'position:absolute; pointer-events:none;');

@@ -15,15 +15,18 @@ UIL.Slide = function(target, name, callback, value, min, max, precision){
 
     this.c[3] = UIL.element('UIL text', 'div', 'right:25px; text-align:right; width:40px;');
     this.c[4] = UIL.element('UIL scroll-bg', 'div', 'height:'+this.height+'px; width:'+this.width+'px; background:rgba(0,0,0,0.2);');
-    this.c[5] = UIL.element('UIL scroll-sel', 'div', 'height:'+(this.height-8)+'px; background:#666;');
+    //this.c[5] = UIL.element('UIL scroll-sel', 'div', 'height:'+(this.height-8)+'px; background:#666;');
+    this.c[5] = UIL.element('UIL scroll-sel', 'rect', 'position:absolute; left:104px; top:6px; pointer-events:none;', {width:this.width-8, height:this.height-8, fill:'#666' });
 
-    this.c[3].innerHTML = this.value;
-    this.c[5].style.width = (this.w * ((this.value-this.min)/this.valueRange))+'px';
+    //this.c[3].innerHTML = this.value;
+    //this.c[5].style.width = (this.w * ((this.value-this.min)/this.valueRange))+'px';
 
     // mouseOver
     this.f[0] = function(e){
         this.c[4].style.background = 'rgba(0,0,0,0.6)';
-        this.c[5].style.backgroundColor = '#AAA';
+        //this.c[5].style.backgroundColor = '#AAA';
+        UIL.setSVG(this.c[5], 'fill','#AAA');
+        //this.c[5].childNodes[0].setAttributeNS(null, 'fill','#AAA' );
         e.preventDefault(); 
     }.bind(this);
 
@@ -31,7 +34,10 @@ UIL.Slide = function(target, name, callback, value, min, max, precision){
     this.f[1] = function(e){
         this.down = false;
         this.c[4].style.background = 'rgba(0,0,0,0.2)'; 
-        this.c[5].style.background = '#666';
+        //this.c[5].style.background = '#666';
+        UIL.setSVG(this.c[5], 'fill','#666');
+
+        //this.c[5].childNodes[0].setAttributeNS(null, 'fill','#666' );
         e.preventDefault();
     }.bind(this);
 
@@ -55,16 +61,19 @@ UIL.Slide = function(target, name, callback, value, min, max, precision){
             this.value = ((((e.clientX-rect.left)/this.w)*this.valueRange+this.min).toFixed(this.precision))*1;
             if(this.value<this.min) this.value = this.min;
             if(this.value>this.max) this.value = this.max;
-            this.f[5]();
+            this.f[5](true);
         }
         e.preventDefault(); 
     }.bind(this);
 
     // update
-    this.f[5] = function(e){
-        this.c[5].style.width = (this.w * ((this.value-this.min)/this.valueRange))+'px';
+    this.f[5] = function(up){
+        var ww = (this.w * ((this.value-this.min)/this.valueRange));
+        //this.c[5].style.width = ww+'px';
+        //this.c[5].childNodes[0].setAttributeNS(null, 'width', ww );
+        UIL.setSVG(this.c[5], 'width', ww );
         this.c[3].innerHTML = this.value;
-        this.callback(this.value); 
+        if(up)this.callback(this.value); 
     }.bind(this);
 
     this.c[4].onmouseover = this.f[0];
@@ -72,6 +81,7 @@ UIL.Slide = function(target, name, callback, value, min, max, precision){
     this.c[4].onmouseup = this.f[2];
     this.c[4].onmousedown = this.f[3];
     this.c[4].onmousemove = this.f[4];
+    this.f[5]();
 
     this.init();
 };

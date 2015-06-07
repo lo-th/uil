@@ -12,7 +12,9 @@ UIL.Number = function(target, name, callback, value, min, max, precision, step, 
     };
 
     this.c[3] = UIL.element('UIL number', 'input', 'left:100px;');
-    this.c[4] = UIL.element('UIL big', 'div', 'display:none;');
+    //this.c[4] = UIL.element('UIL big', 'div', 'display:none;');
+
+    this.c[4] = UIL.element(null, 'rect', 'display:none; position:absolute; left:-50px; top:-40px; pointer-events:auto;  cursor:col-resize;', {width:400, height:100, fill:'rgba(255,0,0,0)'});
 
     
     
@@ -35,6 +37,7 @@ UIL.Number = function(target, name, callback, value, min, max, precision, step, 
         e.preventDefault();
         this.prev = { x:e.clientX, y:e.clientY, v:parseFloat( this.value ), d:0};
         this.c[4].style.display = 'block';
+        this.c[4].style.zIndex = 1;
         this.c[4].onmousemove = this.f[2];
         this.c[4].onmouseup = this.f[3];
         this.c[4].onmouseout = this.f[3];
@@ -53,7 +56,8 @@ UIL.Number = function(target, name, callback, value, min, max, precision, step, 
 
     this.f[3] = function(e){
         if (!e) e = window.event;
-        this.c[4].style.display = 'none'
+        this.c[4].style.display = 'none';
+        this.c[4].style.zIndex = 0;
         this.c[4].onmousemove = null;
         this.c[4].onmouseup = null;
         this.c[4].onmouseout = null;

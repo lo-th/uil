@@ -15,7 +15,8 @@ UIL.Vector = function(target, name, callback, value, min, max, precision, step )
         this.c[3+i].name = i;
         this.c[3+i].value = this.value[i];
     }
-    this.c[this.big] = UIL.element('UIL big', 'div', 'display:none;');
+    //this.c[this.big] = UIL.element('UIL big', 'div', 'display:none;');
+    this.c[this.big] = UIL.element(null, 'rect', 'display:none; position:absolute; left:-50px; top:-40px; pointer-events:auto; cursor:col-resize;', {width:400, height:100, fill:'rgba(255,0,0,0)'});
 
     this.f[0] = function(e){
         if (!e) e = window.event;
@@ -36,6 +37,7 @@ UIL.Vector = function(target, name, callback, value, min, max, precision, step )
         e.preventDefault();
         this.prev = { x:e.clientX, y:e.clientY, v:parseFloat( this.value[this.current] ), d:0, id:(this.current+3)};
         this.c[this.big].style.display = 'block';
+        this.c[this.big].style.zIndex = 1;
         this.c[this.big].onmousemove = this.f[2];
         this.c[this.big].onmouseup = this.f[3];
         this.c[this.big].onmouseout = this.f[3];
@@ -54,7 +56,8 @@ UIL.Vector = function(target, name, callback, value, min, max, precision, step )
 
     this.f[3] = function(e){
         if (!e) e = window.event;
-        this.c[this.big].style.display = 'none'
+        this.c[this.big].style.display = 'none';
+        this.c[this.big].style.zIndex = 0;
         this.c[this.big].onmousemove = null;
         this.c[this.big].onmouseup = null;
         this.c[this.big].onmouseout = null;
