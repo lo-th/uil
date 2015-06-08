@@ -6,7 +6,7 @@ UIL.Slide = function(obj){
     this.max = obj.max || 100;
     this.precision = obj.precision || 0;
 
-    this.valueRange = this.max - this.min;
+    this.range = this.max - this.min;
     this.width = 140;
     this.height = 16;
     this.w = this.width-8;
@@ -14,7 +14,7 @@ UIL.Slide = function(obj){
     this.down = false;
 
     this.c[2] = UIL.element('UIL text', 'div', 'right:25px; text-align:right; width:40px;');
-    this.c[3] = UIL.element('UIL scroll-bg', 'div', 'height:'+this.height+'px; width:'+this.width+'px; background:rgba(0,0,0,0.2);');
+    this.c[3] = UIL.element('UIL scroll-bg', 'div', 'left:100px; top:2px; height:'+this.height+'px; width:'+this.width+'px; ');
     //this.c[5] = UIL.element('UIL scroll-sel', 'div', 'height:'+(this.height-8)+'px; background:#666;');
     this.c[4] = UIL.element('UIL scroll-sel', 'rect', 'position:absolute; left:104px; top:6px; pointer-events:none;', {width:this.width-8, height:this.height-8, fill:'#666' });
 
@@ -58,7 +58,7 @@ UIL.Slide = function(obj){
     this.f[4] = function(e){
         if(this.down){
             var rect = this.c[3].getBoundingClientRect();
-            this.value = ((((e.clientX-rect.left)/this.w)*this.valueRange+this.min).toFixed(this.precision))*1;
+            this.value = ((((e.clientX-rect.left)/this.w)*this.range+this.min).toFixed(this.precision))*1;
             if(this.value<this.min) this.value = this.min;
             if(this.value>this.max) this.value = this.max;
             this.f[5](true);
@@ -68,7 +68,7 @@ UIL.Slide = function(obj){
 
     // update
     this.f[5] = function(up){
-        var ww = (this.w * ((this.value-this.min)/this.valueRange));
+        var ww = (this.w * ((this.value-this.min)/this.range));
         //this.c[5].style.width = ww+'px';
         //this.c[5].childNodes[0].setAttributeNS(null, 'width', ww );
         UIL.setSVG(this.c[4], 'width', ww );

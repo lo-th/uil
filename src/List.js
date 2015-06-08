@@ -54,15 +54,19 @@ UIL.List = function(obj){
     // close
     this.f[1] = function(e){
         this.show = false;
-        this.c[0].style.height = '21px';
+        this.h = 21;
+        this.c[0].style.height = this.h+'px';
         this.c[2].style.display = 'none';
+        UIL.calc();
     }.bind(this);
 
     // open
     this.f[2] = function(e){
         this.show = true;
-        this.c[0].style.height = '110px';
+        this.h = 110;
+        this.c[0].style.height = this.h+'px';
         this.c[2].style.display = 'block';
+        UIL.calc();
     }.bind(this);
 
     // mousedown

@@ -107,19 +107,23 @@ UIL.Color.prototype.updateDisplay = function(){
 };
 UIL.Color.prototype.hide = function(){
     this.isShow = false;
-    this.c[0].style.height = '21px';
+    this.h = 21;
+    this.c[0].style.height = this.h+'px';
     this.c[3].style.display = 'none';
     this.c[4].style.display = 'none';
     this.c[5].style.display = 'none';
     this.c[5].onmousedown = null;
+    UIL.calc();
 };
 UIL.Color.prototype.show = function(){
     this.isShow = true;
-    this.c[0].style.height = '194px';
+    this.h = 194;
+    this.c[0].style.height = this.h+'px';
     this.c[3].style.display = 'block';
     this.c[4].style.display = 'block';
     this.c[5].style.display = 'block';
     this.c[5].onmousedown = this.f[1];
+    UIL.calc();
 };
 UIL.Color.prototype.updateValue = function(e){
     if (this.value && this.value != this.bcolor) {

@@ -2,6 +2,8 @@ UIL.Proto = function(obj){
 
     obj = obj || {};
 
+    this.h = 21;
+
     this.color = obj.color || 'G';
     this.txt = obj.name || '';
     this.callback = obj.callback || function(){};
@@ -22,7 +24,7 @@ UIL.Proto.prototype = {
     init:function(){
         this.c[0].style.background = UIL.bgcolor(this.color);
         for(var i = 0; i<this.c.length; i++){
-            if(i==0) UIL.content.appendChild(this.c[0]);
+            if(i==0) UIL.main.inner.appendChild(this.c[0]);
             else this.c[0].appendChild(this.c[i]);
         }
     },
@@ -31,7 +33,7 @@ UIL.Proto.prototype = {
         var i = this.c.length, j;
         while(i--){
             if(i==0){ 
-                UIL.content.removeChild(this.c[0]);
+                UIL.main.inner.removeChild(this.c[0]);
             } else {
                 j = ev.length;
                 while(j--){ if(this.c[i][ev[j]]!==null) this.c[i][ev[j]] = null; }
