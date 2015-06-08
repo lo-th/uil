@@ -31,7 +31,7 @@ version.innerHTML = 'uil '+UIL.REVISION;
 var debug = document.getElementById('debug');
 var callback = function(v){ debug.innerHTML = v; }
 
-var ui = new UIL.Gui('position:absolute; top:150px; left:50%; margin-left:-150px;');
+var ui = new UIL.Gui('position:absolute; top:150px; left:50%; height:calc(100% - 150px); margin-left:-150px; overflow:auto; overflow-x:hidden; pointer-events:auto;');
 
 ui.add('title', {name:'Title'});
 ui.add('bool', {name:'Bool', callback:callback});
