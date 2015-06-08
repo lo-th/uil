@@ -31,18 +31,16 @@ body { font-family:monospace; background:#111; font-size:12px; color:#fff;}
 <script>
 var list = ['item-0', 'item-1', 'item-2', 'item-3', 'item-4', 'item-5', 'item-6', 'item-7', 'item-8', 'item-9', 'item-10', 'item-11', 'item-12'];
 
-var version = document.getElementById('version');
-version.innerHTML = 'uil '+UIL.REVISION;
+document.getElementById('version').innerHTML = 'uil '+UIL.REVISION;
 
 var debug = document.getElementById('debug');
 var callback = function(v){ debug.innerHTML = v; }
 
-//var ui = new UIL.Gui('position:absolute; top:150px; left:50%; height:calc(100% - 150px);  margin-left:-150px; overflow:auto; overflow-x:hidden; pointer-events:auto;');
 var ui = new UIL.Gui('top:150px; left:50%; margin-left:-150px;');
 
 ui.add('title', {name:'Title'});
 ui.add('bool', {name:'Bool', callback:callback});
-ui.add('color', {name:'Color', callback:callback, type:'html'});
+ui.add('color', {name:'Color', callback:callback, type:'html', value:0xff0000});
 ui.add('slide', {name:'Slide', callback:callback, value:50});
 ui.add('string', {name:'String', callback:callback, value:'welcome to uil'});
 ui.add('list', {name:'List', callback:callback, list:list});
