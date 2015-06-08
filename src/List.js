@@ -1,14 +1,19 @@
-UIL.List = function(target, name, callback, value, list ){
+UIL.List = function(obj){
 
-    UIL.Proto.call( this, target, name, callback );
+    UIL.Proto.call( this, obj );
 
-    this.c[3] = UIL.element('UIL list');
-    this.c[4] = UIL.element('UIL Listtxt', 'div', 'background:'+UIL.bgcolor('G')+';');
+    this.c[2] = UIL.element('UIL list');
+    this.c[3] = UIL.element('UIL Listtxt', 'div', 'background:'+UIL.bgcolor('G')+';');
+
+    this.list = obj.list || [];
+    if(obj.value){
+        if(!isNaN(obj.value)) this.value = this.list[obj.value];
+        else this.value = obj.value;
+    }else{
+        this.value = this.list[0];
+    } 
     
-
-    if(!isNaN(value)) this.value = list[value];
-    else this.value = value;
-    this.list = list || [];
+    
     this.show = false;
     this.length = this.list.length;
     this.max = this.length*16;
@@ -23,8 +28,8 @@ UIL.List = function(target, name, callback, value, list ){
     this.listsel = UIL.element('UIL list-sel');
     this.listIn.name = 'list';
     this.listsel.name = 'list';
-    this.c[3].appendChild(this.listIn)
-    this.c[3].appendChild(this.listsel)
+    this.c[2].appendChild(this.listIn)
+    this.c[2].appendChild(this.listsel)
 
     // populate list
     var item, n, l = 170;
@@ -37,8 +42,8 @@ UIL.List = function(target, name, callback, value, list ){
     }
 
     //this.c[2].innerHTML = name;
-    this.c[4].innerHTML = this.value;
-    this.c[3].name = 'list';
+    this.c[3].innerHTML = this.value;
+    this.c[2].name = 'list';
 
     // click top
     this.f[0] = function(e){
@@ -49,15 +54,15 @@ UIL.List = function(target, name, callback, value, list ){
     // close
     this.f[1] = function(e){
         this.show = false;
-        this.c[1].style.height = '20px';
-        this.c[3].style.display = 'none';
+        this.c[0].style.height = '21px';
+        this.c[2].style.display = 'none';
     }.bind(this);
 
     // open
     this.f[2] = function(e){
         this.show = true;
-        this.c[1].style.height = '110px';
-        this.c[3].style.display = 'block';
+        this.c[0].style.height = '110px';
+        this.c[2].style.display = 'block';
     }.bind(this);
 
     // mousedown
@@ -65,7 +70,7 @@ UIL.List = function(target, name, callback, value, list ){
         var name = e.target.name;
         if(name!=='list' && name!==undefined ){
             this.value = e.target.name;
-            this.c[4].innerHTML = this.value;
+            this.c[3].innerHTML = this.value;
             this.callback(this.value);
             this.f[1]();
         }else if (name=='list'){
@@ -80,7 +85,7 @@ UIL.List = function(target, name, callback, value, list ){
     // mousemove
     this.f[4] = function(e){
        if(this.down){
-            var rect =this.c[3].getBoundingClientRect();
+            var rect =this.c[2].getBoundingClientRect();
             var y = e.clientY-rect.top;
             if(y<30) y = 30;
             if(y>90) y = 90;
@@ -105,11 +110,11 @@ UIL.List = function(target, name, callback, value, list ){
     }.bind(this);
 
 
-    this.c[4].onclick = this.f[0];
-    this.c[3].onmousedown = this.f[3];
-    this.c[3].onmousemove = this.f[4];
-    this.c[3].onmouseout = this.f[5];
-    this.c[3].onmouseup = this.f[6];
+    this.c[3].onclick = this.f[0];
+    this.c[2].onmousedown = this.f[3];
+    this.c[2].onmousemove = this.f[4];
+    this.c[2].onmouseout = this.f[5];
+    this.c[2].onmouseup = this.f[6];
 
     this.init();
 }
@@ -121,8 +126,8 @@ UIL.List.prototype.clear = function(){
     while (this.listIn.firstChild) {
        this.listIn.removeChild(this.listIn.firstChild);
     }
-    while (this.c[3].firstChild) {
-       this.c[3].removeChild(this.c[3].firstChild);
+    while (this.c[2].firstChild) {
+       this.c[2].removeChild(this.c[2].firstChild);
     }
     UIL.Proto.prototype.clear.call( this );
 }

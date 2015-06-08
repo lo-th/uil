@@ -8,19 +8,20 @@
 'use strict';
 
 var UIL = UIL || ( function () {
-    var _uis = [];
+    //var _uis = [];
     return {
-        REVISION: '0.2',
+        content:null,
+        REVISION: '0.3',
         events:[ 'onkeyup', 'onkeydown', 'onclick', 'onchange', 'onmouseover', 'onmouseout', 'onmousemove', 'onmousedown', 'onmouseup' ],
         nset:{
             width:300 , height:262, w:40, h:40, r:10, 
             rc1:'rgba(120,30,60,0.5)', gc1:'rgba(30,120,60,0.5)', bc1:'rgba(30,60,120,0.5)', nc1:'rgba(40,40,40,0.5)',
             rc2:'rgba(120,30,60,0.8)', gc2:'rgba(30,120,60,0.8)', bc2:'rgba(30,60,120,0.8)', nc2:'rgba(40,40,40,0.8)',
         },
-        getAll: function () { return _uis; },
-        removeAll: function () { _uis = []; },
-        add: function ( ui ) { _uis.push( ui ); },
-        remove: function ( ui ) { var i = _uis.indexOf( ui ); if ( i !== -1 ) { _uis.splice( i, 1 ); } },  
+        //getAll: function () { return _uis; },
+        //removeAll: function () { _uis = []; },
+        //add: function ( ui ) { _uis.push( ui ); },
+        //remove: function ( ui ) { var i = _uis.indexOf( ui ); if ( i !== -1 ) { _uis.splice( i, 1 ); } },  
         bgcolor: function(p){
             var color = this.nset.nc2;
             if(p){
@@ -79,11 +80,64 @@ var UIL = UIL || ( function () {
 })();
 
 
+
+UIL.Gui = function(css){
+    this.uis = [];
+    UIL.content = UIL.element('UIL content', 'div', css);
+    document.body.appendChild(UIL.content);
+}
+
+UIL.Gui.prototype = {
+    constructor: UIL.Gui,
+    show:function(){
+        UIL.content.style.display = 'block';
+    },
+    hide:function(){
+        UIL.content.style.display = 'none';
+    },
+    add:function(type, obj){
+        var n;
+        switch(type){
+            case 'title':  n = new UIL.Title(obj);  break;
+            case 'bool':   n = new UIL.Bool(obj);   break;
+            case 'color':  n = new UIL.Color(obj);  break;
+            case 'number': n = new UIL.Number(obj); break;
+            case 'slide':  n = new UIL.Slide(obj);  break;
+            case 'string': n = new UIL.String(obj); break;
+            case 'list':   n = new UIL.List(obj);   break;
+        }
+        this.uis.push(n);
+    },
+    remove: function ( n ) { 
+        var i = this.uis.indexOf( n ); 
+        if ( i !== -1 ) { 
+            this.uis[i].clear();
+            this.uis.splice( i, 1 ); 
+        }
+    },
+    clear:function(){
+        var i = this.uis.length;
+        while(i--){
+            this.uis[i].clear();
+            this.uis.pop();
+        }
+        this.uis = [];
+    }
+}
+
+
+
+
+
+
+
+
 UIL.txt1 = 'font-family:Helvetica, Arial, sans-serif; font-size:12px; color:#e2e2e2;';
 UIL.txt2 = 'font-family:Monospace; font-size:12px; color:#e2e2e2;';
 
 UIL.createClass('UIL', 'box-sizing:border-box; -o-user-select:none; -ms-user-select:none; -khtml-user-select:none; -webkit-user-select:none; -moz-user-select:none;');
 
+UIL.createClass('UIL.content', 'position:absolute; width:'+(UIL.nset.width)+'px; height:auto; pointer-events:none; background:rgba(40,0,0,0.5);');
 UIL.createClass('UIL.base', 'width:'+(UIL.nset.width)+'px; height:21px; position:relative; left:0px; pointer-events:none; background:rgba(40,40,40,0.5); border-bottom:1px solid #333;');
 //UIL.createClass('UIL.title', 'width:'+(UIL.nset.width)+'px; height:30px; position:relative; left:0px; pointer-events:none; margin-bottom:1px;'+UIL.txt1);
 
@@ -134,20 +188,21 @@ UIL.Group.prototype = {
 
     }
 }
-UIL.Proto = function(target, name, callback){
+UIL.Proto = function(obj){
 
-    this.color = 'G';
+    obj = obj || {};
 
-    this.callback = callback || function(){};
+    this.color = obj.color || 'G';
+    this.txt = obj.name || '';
+    this.callback = obj.callback || function(){};
 
     this.c = [];
     this.f = [];
 
-    this.c[0] = target;
-    this.c[1] = UIL.element('UIL base');
-    if(name!==''){
-        this.c[2] = UIL.element('UIL text');
-        this.c[2].innerHTML = name;
+    this.c[0] = UIL.element('UIL base');
+    if(this.txt!==''){
+        this.c[1] = UIL.element('UIL text');
+        this.c[1].innerHTML = this.txt;
     }
 }
 
@@ -155,26 +210,26 @@ UIL.Proto.prototype = {
     constructor: UIL.Proto,
 
     init:function(){
-        this.c[1].style.background = UIL.bgcolor(this.color);
+        this.c[0].style.background = UIL.bgcolor(this.color);
         for(var i = 0; i<this.c.length; i++){
-            if(i==0) this.c[0].appendChild(this.c[1]);
-            else if(i>1) this.c[1].appendChild(this.c[i]);
+            if(i==0) UIL.content.appendChild(this.c[0]);
+            else this.c[0].appendChild(this.c[i]);
         }
     },
-
     clear:function(){
         var ev = UIL.events;
         var i = this.c.length, j;
-            while(i--){
-            if(i>1){ 
-                // clear function
+        while(i--){
+            if(i==0){ 
+                UIL.content.removeChild(this.c[0]);
+            } else {
                 j = ev.length;
                 while(j--){ if(this.c[i][ev[j]]!==null) this.c[i][ev[j]] = null; }
-                this.c[1].removeChild(this.c[i]);
+                this.c[0].removeChild(this.c[i]);
             }
-            else if(i==1) this.c[0].removeChild(this.c[1]);
             this.c[i] = null;
         }
+
         this.c = null;
         if(this.f){
             i = this.f.length;
@@ -184,22 +239,22 @@ UIL.Proto.prototype = {
         if(this.callback)this.callback = null;
         if(this.value)this.value = null;
     },
-    setTypeNumber:function( min, max, precision, step ){
+    setTypeNumber:function( obj ){
         this.min = -Infinity;
         this.max = Infinity;
         this.precision = 0;
-        this.step = 1;
         this.prev = null;
+        this.step = 1;
 
-        if(min !== undefined ) this.min = min;
-        if(max !== undefined ) this.max = max;
-        if(step !== undefined ) this.step = step;
-        if(precision !== undefined ) this.precision = precision;
+        if(obj.min !== undefined ) this.min = obj.min;
+        if(obj.max !== undefined ) this.max = obj.max;
+        if(obj.step !== undefined ) this.step = obj.step;
+        if(obj.precision !== undefined ) this.precision = obj.precision;
     },
     numValue:function(n){
         return Math.min( this.max, Math.max( this.min, n ) ).toFixed( this.precision );
     },
-    setRange:function(min,max){
+    /*setRange:function(min,max){
         this.min=min;
         this.max=max;
         return this;
@@ -207,31 +262,33 @@ UIL.Proto.prototype = {
     setPrecision:function(precision){
         this.precision=precision;
         return this;
-    },
+    },*/
 
 
 }
-UIL.Title = function(target, type, id, prefix ){
+UIL.Title = function(obj){
     
-    UIL.Proto.call( this, target, '', null );
+    UIL.Proto.call( this, obj );
 
-    this.color = prefix || 'N';
+    this.color = obj.prefix || 'N';
 
-    id = id || 0;
-    type = type || '';
-    prefix = prefix || '';
+    var id = obj.id || 0;
+    //var type = obj.type || 'Title';
+    var prefix = obj.prefix || '';
 
     //this.c[0] = target;
     //this.c[1] = UIL.element('UIL title', 'div', 'background:'+UIL.bgcolor(prefix)+';' );
-    this.c[1].style.height = '30px';
-    this.c[2] = UIL.element('UIL text', 'div', 'width:200px; font-size:12px; top:8px;');
-    this.c[3] = UIL.element('UIL text', 'div', 'right:25px; text-align:right; font-size:12px; top:8px;');
+    this.c[0].style.height = '30px';
+    this.c[1].style.width = '200px';
+    this.c[1].style.top = '8px';
+    //this.c[2] = UIL.element('UIL text', 'div', 'width:200px; font-size:12px; top:8px;');
+    this.c[2] = UIL.element('UIL text', 'div', 'right:25px; text-align:right; font-size:12px; top:8px;');
 
     var idt = id || 0;
     if(id<10) idt = '0'+id;
 
-    this.c[2].innerHTML = type.replace("-", " ").toUpperCase();
-    this.c[3].innerHTML = prefix.toUpperCase()+' '+idt;
+    this.c[1].innerHTML = this.txt.substring(0,1).toUpperCase() + this.txt.substring(1).replace("-", " ");
+    this.c[2].innerHTML = prefix.toUpperCase()+' '+idt;
 
     this.init();
 }
@@ -239,34 +296,86 @@ UIL.Title = function(target, type, id, prefix ){
 
 UIL.Title.prototype = Object.create( UIL.Proto.prototype );
 UIL.Title.prototype.constructor = UIL.Title;
-UIL.Vector = function(target, name, callback, value, min, max, precision, step ){
+UIL.String = function(obj){
 
-    UIL.Proto.call( this, target, name, callback );
+    UIL.Proto.call( this, obj );
 
-    this.setTypeNumber(min, max, precision, step);
+    this.value = obj.value || '';
 
-    this.value = value || [0,0];
+    this.c[2] = UIL.element('UIL string', 'input' );
+
+    this.f[0] = function(e){
+        if (!e) e = window.event;
+        if ( e.keyCode === 13 ){ 
+            this.callback( e.target.value );
+            e.target.blur();
+        }
+        e.stopPropagation();
+    }.bind(this);
+
+    this.c[2].value = this.value;
+    this.c[2].onkeydown = this.f[0];
+
+    this.init();
+}
+
+UIL.String.prototype = Object.create( UIL.Proto.prototype );
+UIL.String.prototype.constructor = UIL.String;
+UIL.Number = function(obj){
+
+    UIL.Proto.call( this, obj );
+
+    this.setTypeNumber(obj);
+
+    this.value = [0];
+    this.toRad = 1;
+    this.isNumber = true;
+    this.isAngle = false;
+    this.isVector = false;
+
+    if(obj.value){
+        if(!isNaN(obj.value)){ this.value = [obj.value];}
+        else if(obj.value instanceof Array){ this.value = obj.value; this.isNumber=false;}
+        else if(obj.value instanceof Object){ 
+            this.value = [];
+            if(obj.value.x) this.value[0] = obj.value.x;
+            if(obj.value.y) this.value[1] = obj.value.y;
+            if(obj.value.z) this.value[2] = obj.value.z;
+            if(obj.value.w) this.value[3] = obj.value.w;
+            this.isVector=true;
+        }
+    }
+
     this.length = this.value.length;
+
+    if(obj.isAngle){
+        this.isAngle = true;
+        this.toRad = Math.PI/180;
+    }
+
     this.w = (175/(this.length))-5;
-    this.big = 3+this.length;
+    this.big = 2+this.length;
     this.current = null;
 
-    for(var i=0; i<this.length; i++){
-        this.c[3+i] = UIL.element('UIL number', 'input', 'width:'+this.w+'px; left:'+(100+(this.w*i)+(5*i))+'px;');
-        this.c[3+i].name = i;
-        this.c[3+i].value = this.value[i];
+    var i = this.length;
+    while(i--){
+        if(this.isAngle) this.value[i] = (this.value[i] * 180 / Math.PI).toFixed( this.precision );
+        this.c[2+i] = UIL.element('UIL number', 'input', 'width:'+this.w+'px; left:'+(100+(this.w*i)+(5*i))+'px;');
+        this.c[2+i].name = i;
+        this.c[2+i].value = this.value[i];
     }
-    //this.c[this.big] = UIL.element('UIL big', 'div', 'display:none;');
+
     this.c[this.big] = UIL.element(null, 'rect', 'display:none; position:absolute; left:-50px; top:-40px; pointer-events:auto; cursor:col-resize;', {width:400, height:100, fill:'rgba(255,0,0,0)'});
 
     this.f[0] = function(e){
         if (!e) e = window.event;
         e.stopPropagation();
         if ( e.keyCode === 13 ){
-            for(var i=0; i<this.length; i++){
-                this.f[4](i);
-            }
-            this.callback( this.value );
+            this.current = parseFloat(e.target.name);
+            this.f[4](this.current);
+
+            this.f[5]();
+
             e.target.blur();
         }
     }.bind(this);
@@ -276,7 +385,9 @@ UIL.Vector = function(target, name, callback, value, min, max, precision, step )
         this.current = parseFloat(e.target.name);
         if(this.current == undefined) return;
         e.preventDefault();
-        this.prev = { x:e.clientX, y:e.clientY, v:parseFloat( this.value[this.current] ), d:0, id:(this.current+3)};
+        this.prev = { x:e.clientX, y:e.clientY, d:0, id:(this.current+2)};
+        if(this.isNumber) this.prev.v = parseFloat(this.value);
+        else this.prev.v = parseFloat(this.value[this.current]);
         this.c[this.big].style.display = 'block';
         this.c[this.big].style.zIndex = 1;
         this.c[this.big].onmousemove = this.f[2];
@@ -288,9 +399,14 @@ UIL.Vector = function(target, name, callback, value, min, max, precision, step )
         if (!e) e = window.event;
         this.prev.d += ( e.clientX - this.prev.x ) - ( e.clientY - this.prev.y );
         var n = this.prev.v + ( this.prev.d * this.step);
+
         this.value[this.current] = this.numValue(n);
         this.c[this.prev.id].value = this.value[this.current];
-        this.callback( this.value );
+        
+        this.c[this.prev.id].value = this.value[this.current];
+
+        this.f[5]();
+
         this.prev.x = e.clientX;
         this.prev.y = e.clientY;
     }.bind(this);
@@ -310,130 +426,36 @@ UIL.Vector = function(target, name, callback, value, min, max, precision, step )
 
     // test value
     this.f[4] = function(n){
-         if(!isNaN(this.c[3+n].value)) this.value[n] = this.c[3+n].value;
-         else this.c[3+n].value = this.value[n];
-    };
+        if(!isNaN(this.c[2+n].value)) this.value[n] = this.c[2+n].value;
+        else this.c[2+n].value = this.value[n];
+    }.bind(this);
 
-    for(var i=0; i<this.length; i++){
-        this.c[3+i].onkeydown = this.f[0];
-        this.c[3+i].onmousedown = this.f[1];
+    // export
+    this.f[5] = function(){
+        var ar = [];
+        var i = this.length;
+        while(i--) ar[i]=this.value[i]*this.toRad;
+
+        if(this.isNumber) this.callback( ar[0] );
+        else this.callback( ar );
+
+    }.bind(this);
+
+    for(i=0; i<this.length; i++){
+        this.c[2+i].onkeydown = this.f[0];
+        this.c[2+i].onmousedown = this.f[1];
     }
-
-    this.init();
-}
-
-UIL.Vector.prototype = Object.create( UIL.Proto.prototype );
-UIL.Vector.prototype.constructor = UIL.Vector;
-UIL.String = function(target, name, callback, value, color ){
-
-    UIL.Proto.call( this, target, name, callback );
-
-    this.color = color || 'G';
-
-    this.c[3] = UIL.element('UIL string', 'input' );
-
-    this.f[0] = function(e){
-        if (!e) e = window.event;
-        if ( e.keyCode === 13 ){ 
-            this.callback( e.target.value );
-            e.target.blur();
-        }
-        e.stopPropagation();
-    }.bind(this);
-
-    this.c[3].value = value || '';
-    this.c[3].onkeydown = this.f[0];
-
-    this.init();
-}
-
-UIL.String.prototype = Object.create( UIL.Proto.prototype );
-UIL.String.prototype.constructor = UIL.String;
-UIL.Number = function(target, name, callback, value, min, max, precision, step, isAngle ){
-
-    UIL.Proto.call( this, target, name, callback );
-
-    this.setTypeNumber(min, max, precision, step);
-
-    this.value = value || 0;
-    this.toRad = 1;
-    if(isAngle){ 
-        this.value = (value * 180 / Math.PI).toFixed( this.precision );
-        this.toRad = Math.PI/180;
-    };
-
-    this.c[3] = UIL.element('UIL number', 'input', 'left:100px;');
-    //this.c[4] = UIL.element('UIL big', 'div', 'display:none;');
-
-    this.c[4] = UIL.element(null, 'rect', 'display:none; position:absolute; left:-50px; top:-40px; pointer-events:auto;  cursor:col-resize;', {width:400, height:100, fill:'rgba(255,0,0,0)'});
-
-    
-    
-    this.f[0] = function(e){
-        if (!e) e = window.event;
-        e.stopPropagation();
-        if ( e.keyCode === 13 ){ 
-            if(!isNaN(e.target.value)){
-                this.value =  this.numValue(e.target.value);
-                this.callback( this.value * this.toRad );
-            } else {
-                e.target.value = this.value;
-            }
-            e.target.blur();
-        }
-    }.bind(this);
-
-    this.f[1] = function(e){
-        if (!e) e = window.event;
-        e.preventDefault();
-        this.prev = { x:e.clientX, y:e.clientY, v:parseFloat( this.value ), d:0};
-        this.c[4].style.display = 'block';
-        this.c[4].style.zIndex = 1;
-        this.c[4].onmousemove = this.f[2];
-        this.c[4].onmouseup = this.f[3];
-        this.c[4].onmouseout = this.f[3];
-    }.bind(this);
-
-    this.f[2] = function(e){
-        if (!e) e = window.event;
-        this.prev.d += ( e.clientX - this.prev.x ) - ( e.clientY - this.prev.y );
-        var n = this.prev.v + ( this.prev.d * this.step);
-        this.value = this.numValue(n);
-        this.c[3].value = this.value;
-        this.callback( this.value * this.toRad );
-        this.prev.x = e.clientX;
-        this.prev.y = e.clientY;
-    }.bind(this);
-
-    this.f[3] = function(e){
-        if (!e) e = window.event;
-        this.c[4].style.display = 'none';
-        this.c[4].style.zIndex = 0;
-        this.c[4].onmousemove = null;
-        this.c[4].onmouseup = null;
-        this.c[4].onmouseout = null;
-        if ( Math.abs( this.prev.d ) < 2 ) {
-            this.c[3].focus();
-            this.c[3].select();
-        }
-    }.bind(this);
-
-    if(isAngle) this.c[2].innerHTML = name+ '°';
-    this.c[3].value = this.value;
-    this.c[3].onkeydown = this.f[0];
-    this.c[3].onmousedown = this.f[1];
-
 
     this.init();
 }
 
 UIL.Number.prototype = Object.create( UIL.Proto.prototype );
 UIL.Number.prototype.constructor = UIL.Number;
-UIL.Color = function(target, name, callback, value, type ){
+UIL.Color = function(obj){
     
-    UIL.Proto.call( this, target, name, callback );
+    UIL.Proto.call( this, obj );
 
-    this.type = type || 'array';
+    this.type = obj.type || 'array';
     this.width = 170;
     this.wheelWidth = this.width*0.1;
     this.decalLeft = 100;
@@ -443,16 +465,16 @@ UIL.Color = function(target, name, callback, value, type ){
     this.mid = Math.floor(this.width * 0.5 );
     this.markerSize = this.wheelWidth * 0.3;
    
-    this.c[3] = UIL.element('UIL color-txt');
-    this.c[4] = UIL.element('UIL cc', 'div', 'width:'+(this.square * 2 - 1)+'px; ' + 'height:'+(this.square * 2 - 1)+'px; ' + 'left:'+((this.mid - this.square)+this.decalLeft)+'px; '+ 'top:'+((this.mid - this.square)+this.decal)+'px;  display:none;');
-    this.c[5] = UIL.element('UIL canvas', 'canvas', 'left:'+this.decalLeft+'px;  top:'+this.decal+'px;  display:none;');
-    this.c[6] = UIL.element('UIL canvas', 'canvas', 'left:'+this.decalLeft+'px;  top:'+this.decal+'px;  pointer-events:auto; cursor:pointer; display:none;');
+    this.c[2] = UIL.element('UIL color-txt');
+    this.c[3] = UIL.element('UIL cc', 'div', 'width:'+(this.square * 2 - 1)+'px; ' + 'height:'+(this.square * 2 - 1)+'px; ' + 'left:'+((this.mid - this.square)+this.decalLeft)+'px; '+ 'top:'+((this.mid - this.square)+this.decal)+'px;  display:none;');
+    this.c[4] = UIL.element('UIL canvas', 'canvas', 'left:'+this.decalLeft+'px;  top:'+this.decal+'px;  display:none;');
+    this.c[5] = UIL.element('UIL canvas', 'canvas', 'left:'+this.decalLeft+'px;  top:'+this.decal+'px;  pointer-events:auto; cursor:pointer; display:none;');
 
+    this.c[4].width = this.c[4].height = this.width;
     this.c[5].width = this.c[5].height = this.width;
-    this.c[6].width = this.c[6].height = this.width;
 
-    this.ctxMask = this.c[5].getContext('2d');
-    this.ctxOverlay = this.c[6].getContext('2d');
+    this.ctxMask = this.c[4].getContext('2d');
+    this.ctxOverlay = this.c[5].getContext('2d');
     this.ctxMask.translate(this.mid, this.mid);
     this.ctxOverlay.translate(this.mid, this.mid);
 
@@ -461,9 +483,9 @@ UIL.Color = function(target, name, callback, value, type ){
 
     this.hsl = null;
     this.value = '#ffffff';
-    if(value ){
-        if(value instanceof Array) this.value = this.pack(value);
-        if(value instanceof String) this.value = this.value;
+    if(obj.value){
+        if(obj.value instanceof Array) this.value = this.pack(obj.value);
+        if(obj.value instanceof String) this.value = obj.value;
     }
     this.bcolor = null;
     this.dragging = false;
@@ -479,8 +501,8 @@ UIL.Color = function(target, name, callback, value, type ){
     this.f[1] = function(e){
         if(!this.dragging){
             this.dragging = true;
-            this.c[6].onmousemove = this.f[2];
-            this.c[6].onmouseup = this.f[3];
+            this.c[5].onmousemove = this.f[2];
+            this.c[5].onmouseup = this.f[3];
         }
         this.offset = this.c[5].getBoundingClientRect();
         var pos = this.widgetCoords(e);
@@ -505,13 +527,13 @@ UIL.Color = function(target, name, callback, value, type ){
 
     //mouseUp
     this.f[3] = function(e){
-        this.c[6].onmouseup = null;
-        this.c[6].onmousemove = null;
+        this.c[5].onmouseup = null;
+        this.c[5].onmousemove = null;
         this.dragging = false;
     }.bind(this);
 
 
-    this.c[3].onclick = this.f[0];
+    this.c[2].onclick = this.f[0];
 
     this.updateValue(this.value);
     this.updateDisplay();
@@ -524,38 +546,38 @@ UIL.Color.prototype.constructor = UIL.Color;
 
 UIL.Color.prototype.updateDisplay = function(){
     this.invert = (this.rgb[0] * 0.3 + this.rgb[1] * .59 + this.rgb[2] * .11) <= 0.6;
-    this.c[4].style.background = this.pack(this.HSLToRGB([this.hsl[0], 1, 0.5]));
+    this.c[3].style.background = this.pack(this.HSLToRGB([this.hsl[0], 1, 0.5]));
     this.drawMarkers();
     
     this.value = this.bcolor;
-    this.c[3].innerHTML = this.hexFormat(this.value);
-    this.c[3].style.background = this.bcolor;
+    this.c[2].innerHTML = this.hexFormat(this.value);
+    this.c[2].style.background = this.bcolor;
     var cc = this.invert ? '#fff' : '#000';
-    this.c[3].style.color = cc;
+    this.c[2].style.color = cc;
 
     if(this.type=='array')this.callback( this.rgb );
     if(this.type=='html')this.callback( this.value );
 };
 UIL.Color.prototype.hide = function(){
     this.isShow = false;
-    this.c[1].style.height = '20px';
+    this.c[0].style.height = '21px';
+    this.c[3].style.display = 'none';
     this.c[4].style.display = 'none';
     this.c[5].style.display = 'none';
-    this.c[6].style.display = 'none';
-    this.c[6].onmousedown = null;
+    this.c[5].onmousedown = null;
 };
 UIL.Color.prototype.show = function(){
     this.isShow = true;
-    this.c[1].style.height = '194px';
+    this.c[0].style.height = '194px';
+    this.c[3].style.display = 'block';
     this.c[4].style.display = 'block';
     this.c[5].style.display = 'block';
-    this.c[6].style.display = 'block';
-    this.c[6].onmousedown = this.f[1];
+    this.c[5].onmousedown = this.f[1];
 };
 UIL.Color.prototype.updateValue = function(e){
     if (this.value && this.value != this.bcolor) {
         this.setColor(this.value);
-        this.c[3].innerHTML = this.hexFormat(this.value);
+        this.c[2].innerHTML = this.hexFormat(this.value);
     }
 };
 UIL.Color.prototype.hexFormat = function(v){
@@ -730,34 +752,34 @@ UIL.Color.prototype.clear = function(){
     if(this.isShow) this.hide();
     UIL.Proto.prototype.clear.call( this );
 };
-UIL.Slide = function(target, name, callback, value, min, max, precision){
+UIL.Slide = function(obj){
 
-    UIL.Proto.call( this, target, name, callback );
+    UIL.Proto.call( this, obj );
 
-    this.min = min || 0;
-    this.max = max || 100;
-    this.precision = precision || 0;
+    this.min = obj.min || 0;
+    this.max = obj.max || 100;
+    this.precision = obj.precision || 0;
+
     this.valueRange = this.max - this.min;
-    this.callback = callback || function(){}; 
     this.width = 140;
     this.height = 16;
     this.w = this.width-8;
-    this.value = value || 0;
+    this.value = obj.value || 0;
     this.down = false;
 
-    this.c[3] = UIL.element('UIL text', 'div', 'right:25px; text-align:right; width:40px;');
-    this.c[4] = UIL.element('UIL scroll-bg', 'div', 'height:'+this.height+'px; width:'+this.width+'px; background:rgba(0,0,0,0.2);');
+    this.c[2] = UIL.element('UIL text', 'div', 'right:25px; text-align:right; width:40px;');
+    this.c[3] = UIL.element('UIL scroll-bg', 'div', 'height:'+this.height+'px; width:'+this.width+'px; background:rgba(0,0,0,0.2);');
     //this.c[5] = UIL.element('UIL scroll-sel', 'div', 'height:'+(this.height-8)+'px; background:#666;');
-    this.c[5] = UIL.element('UIL scroll-sel', 'rect', 'position:absolute; left:104px; top:6px; pointer-events:none;', {width:this.width-8, height:this.height-8, fill:'#666' });
+    this.c[4] = UIL.element('UIL scroll-sel', 'rect', 'position:absolute; left:104px; top:6px; pointer-events:none;', {width:this.width-8, height:this.height-8, fill:'#666' });
 
     //this.c[3].innerHTML = this.value;
     //this.c[5].style.width = (this.w * ((this.value-this.min)/this.valueRange))+'px';
 
     // mouseOver
     this.f[0] = function(e){
-        this.c[4].style.background = 'rgba(0,0,0,0.6)';
+        this.c[3].style.background = 'rgba(0,0,0,0.6)';
         //this.c[5].style.backgroundColor = '#AAA';
-        UIL.setSVG(this.c[5], 'fill','#AAA');
+        UIL.setSVG(this.c[4], 'fill','#AAA');
         //this.c[5].childNodes[0].setAttributeNS(null, 'fill','#AAA' );
         e.preventDefault(); 
     }.bind(this);
@@ -765,9 +787,9 @@ UIL.Slide = function(target, name, callback, value, min, max, precision){
     // mouseOut
     this.f[1] = function(e){
         this.down = false;
-        this.c[4].style.background = 'rgba(0,0,0,0.2)'; 
+        this.c[3].style.background = 'rgba(0,0,0,0.2)'; 
         //this.c[5].style.background = '#666';
-        UIL.setSVG(this.c[5], 'fill','#666');
+        UIL.setSVG(this.c[4], 'fill','#666');
 
         //this.c[5].childNodes[0].setAttributeNS(null, 'fill','#666' );
         e.preventDefault();
@@ -789,7 +811,7 @@ UIL.Slide = function(target, name, callback, value, min, max, precision){
     // mouseMove
     this.f[4] = function(e){
         if(this.down){
-            var rect = this.c[4].getBoundingClientRect();
+            var rect = this.c[3].getBoundingClientRect();
             this.value = ((((e.clientX-rect.left)/this.w)*this.valueRange+this.min).toFixed(this.precision))*1;
             if(this.value<this.min) this.value = this.min;
             if(this.value>this.max) this.value = this.max;
@@ -803,16 +825,16 @@ UIL.Slide = function(target, name, callback, value, min, max, precision){
         var ww = (this.w * ((this.value-this.min)/this.valueRange));
         //this.c[5].style.width = ww+'px';
         //this.c[5].childNodes[0].setAttributeNS(null, 'width', ww );
-        UIL.setSVG(this.c[5], 'width', ww );
-        this.c[3].innerHTML = this.value;
+        UIL.setSVG(this.c[4], 'width', ww );
+        this.c[2].innerHTML = this.value;
         if(up)this.callback(this.value); 
     }.bind(this);
 
-    this.c[4].onmouseover = this.f[0];
-    this.c[4].onmouseout = this.f[1];
-    this.c[4].onmouseup = this.f[2];
-    this.c[4].onmousedown = this.f[3];
-    this.c[4].onmousemove = this.f[4];
+    this.c[3].onmouseover = this.f[0];
+    this.c[3].onmouseout = this.f[1];
+    this.c[3].onmouseup = this.f[2];
+    this.c[3].onmousedown = this.f[3];
+    this.c[3].onmousemove = this.f[4];
     this.f[5]();
 
     this.init();
@@ -820,17 +842,22 @@ UIL.Slide = function(target, name, callback, value, min, max, precision){
 
 UIL.Slide.prototype = Object.create( UIL.Proto.prototype );
 UIL.Slide.prototype.constructor = UIL.Slide;
-UIL.List = function(target, name, callback, value, list ){
+UIL.List = function(obj){
 
-    UIL.Proto.call( this, target, name, callback );
+    UIL.Proto.call( this, obj );
 
-    this.c[3] = UIL.element('UIL list');
-    this.c[4] = UIL.element('UIL Listtxt', 'div', 'background:'+UIL.bgcolor('G')+';');
+    this.c[2] = UIL.element('UIL list');
+    this.c[3] = UIL.element('UIL Listtxt', 'div', 'background:'+UIL.bgcolor('G')+';');
+
+    this.list = obj.list || [];
+    if(obj.value){
+        if(!isNaN(obj.value)) this.value = this.list[obj.value];
+        else this.value = obj.value;
+    }else{
+        this.value = this.list[0];
+    } 
     
-
-    if(!isNaN(value)) this.value = list[value];
-    else this.value = value;
-    this.list = list || [];
+    
     this.show = false;
     this.length = this.list.length;
     this.max = this.length*16;
@@ -845,8 +872,8 @@ UIL.List = function(target, name, callback, value, list ){
     this.listsel = UIL.element('UIL list-sel');
     this.listIn.name = 'list';
     this.listsel.name = 'list';
-    this.c[3].appendChild(this.listIn)
-    this.c[3].appendChild(this.listsel)
+    this.c[2].appendChild(this.listIn)
+    this.c[2].appendChild(this.listsel)
 
     // populate list
     var item, n, l = 170;
@@ -859,8 +886,8 @@ UIL.List = function(target, name, callback, value, list ){
     }
 
     //this.c[2].innerHTML = name;
-    this.c[4].innerHTML = this.value;
-    this.c[3].name = 'list';
+    this.c[3].innerHTML = this.value;
+    this.c[2].name = 'list';
 
     // click top
     this.f[0] = function(e){
@@ -871,15 +898,15 @@ UIL.List = function(target, name, callback, value, list ){
     // close
     this.f[1] = function(e){
         this.show = false;
-        this.c[1].style.height = '20px';
-        this.c[3].style.display = 'none';
+        this.c[0].style.height = '21px';
+        this.c[2].style.display = 'none';
     }.bind(this);
 
     // open
     this.f[2] = function(e){
         this.show = true;
-        this.c[1].style.height = '110px';
-        this.c[3].style.display = 'block';
+        this.c[0].style.height = '110px';
+        this.c[2].style.display = 'block';
     }.bind(this);
 
     // mousedown
@@ -887,7 +914,7 @@ UIL.List = function(target, name, callback, value, list ){
         var name = e.target.name;
         if(name!=='list' && name!==undefined ){
             this.value = e.target.name;
-            this.c[4].innerHTML = this.value;
+            this.c[3].innerHTML = this.value;
             this.callback(this.value);
             this.f[1]();
         }else if (name=='list'){
@@ -902,7 +929,7 @@ UIL.List = function(target, name, callback, value, list ){
     // mousemove
     this.f[4] = function(e){
        if(this.down){
-            var rect =this.c[3].getBoundingClientRect();
+            var rect =this.c[2].getBoundingClientRect();
             var y = e.clientY-rect.top;
             if(y<30) y = 30;
             if(y>90) y = 90;
@@ -927,11 +954,11 @@ UIL.List = function(target, name, callback, value, list ){
     }.bind(this);
 
 
-    this.c[4].onclick = this.f[0];
-    this.c[3].onmousedown = this.f[3];
-    this.c[3].onmousemove = this.f[4];
-    this.c[3].onmouseout = this.f[5];
-    this.c[3].onmouseup = this.f[6];
+    this.c[3].onclick = this.f[0];
+    this.c[2].onmousedown = this.f[3];
+    this.c[2].onmousemove = this.f[4];
+    this.c[2].onmouseout = this.f[5];
+    this.c[2].onmouseup = this.f[6];
 
     this.init();
 }
@@ -943,34 +970,34 @@ UIL.List.prototype.clear = function(){
     while (this.listIn.firstChild) {
        this.listIn.removeChild(this.listIn.firstChild);
     }
-    while (this.c[3].firstChild) {
-       this.c[3].removeChild(this.c[3].firstChild);
+    while (this.c[2].firstChild) {
+       this.c[2].removeChild(this.c[2].firstChild);
     }
     UIL.Proto.prototype.clear.call( this );
 }
-UIL.Bool = function(target, name, callback, value ){
+UIL.Bool = function(obj){
 
-    UIL.Proto.call( this, target, name, callback );
+    UIL.Proto.call( this, obj );
 
-    this.value = value || false;
+    this.value = obj.value || false;
 
     //this.c[3] = UIL.element('UIL box', 'div');
-    this.c[3] = UIL.element(null, 'rect','position:absolute; left:100px; top:3px; pointer-events:auto; cursor:pointer;',{width:14, height:14, fill:'rgba(0,0,0,0)', 'stroke-width':2, stroke:'#AAA'});
+    this.c[2] = UIL.element(null, 'rect','position:absolute; left:100px; top:3px; pointer-events:auto; cursor:pointer;',{width:14, height:14, fill:'rgba(0,0,0,0)', 'stroke-width':2, stroke:'#AAA'});
 
     this.f[0] = function(e){
         if(this.value){
             this.value = false;
             //this.c[3].style.background = 'none';
-            UIL.setSVG(this.c[3], 'fill','rgba(0,0,0,0)');
+            UIL.setSVG(this.c[2], 'fill','rgba(0,0,0,0)');
         } else {
             this.value = true;
             //this.c[3].style.background = '#FFF';
-            UIL.setSVG(this.c[3], 'fill','#AAA');
+            UIL.setSVG(this.c[2], 'fill','#AAA');
         }
         this.callback( this.value );
     }.bind(this);
 
-    this.c[3].onclick = this.f[0];
+    this.c[2].onclick = this.f[0];
 
     this.init();
 }

@@ -24,23 +24,26 @@ body { font-family:monospace; background:#111; font-size:12px; color:#fff;}
 
 <script>
 var list = ['item-0', 'item-1', 'item-2', 'item-3', 'item-4', 'item-5', 'item-6', 'item-7', 'item-8', 'item-9', 'item-10', 'item-11', 'item-12'];
-var sl = [];
-var n = 0;
 
-var content = document.getElementById('content');
+var version = document.getElementById('version');
+version.innerHTML = 'uil '+UIL.REVISION;
+
 var debug = document.getElementById('debug');
 var callback = function(v){ debug.innerHTML = v; }
 
-sl.push( new UIL.Title(content, 'Title'));
-sl.push( new UIL.Bool(content, 'Bool', callback));
-sl.push( new UIL.Color(content, 'Color', callback, '#FFFFFF', 'html'));
-sl.push( new UIL.Number(content, 'Number', callback, 0, 0, 100, 0, 1));
-sl.push( new UIL.Slide(content, 'Slide', callback));
-sl.push( new UIL.String(content, 'String', callback));
-sl.push( new UIL.List(content, 'List', callback, 0, list) );
-sl.push( new UIL.Vector(content, 'Vector2', callback, [0,0]));
-sl.push( new UIL.Vector(content, 'Vector3', callback, [0,0,0]));
-sl.push( new UIL.Vector(content, 'Vector4', callback, [0,0,0,0]));
+var ui = new UIL.Gui('position:absolute; top:150px; left:50%; margin-left:-150px;');
+
+ui.add('title', {name:'Title'});
+ui.add('bool', {name:'Bool', callback:callback});
+ui.add('color', {name:'Color', callback:callback, type:'html'});
+ui.add('slide', {name:'Slide', callback:callback, value:50});
+ui.add('string', {name:'String', callback:callback, value:'welcome to uil'});
+ui.add('list', {name:'List', callback:callback, list:list});
+ui.add('number', {name:'Number', callback:callback, value:20});
+ui.add('number', {name:'Vector2', callback:callback, value:[0,0] });
+ui.add('number', {name:'Vector3', callback:callback, value:[0,0,0] });
+ui.add('number', {name:'Vector4', callback:callback, value:[0,0,0,0] });
+
 </script>
 </body>
 </html>

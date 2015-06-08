@@ -1,10 +1,10 @@
-UIL.String = function(target, name, callback, value, color ){
+UIL.String = function(obj){
 
-    UIL.Proto.call( this, target, name, callback );
+    UIL.Proto.call( this, obj );
 
-    this.color = color || 'G';
+    this.value = obj.value || '';
 
-    this.c[3] = UIL.element('UIL string', 'input' );
+    this.c[2] = UIL.element('UIL string', 'input' );
 
     this.f[0] = function(e){
         if (!e) e = window.event;
@@ -15,8 +15,8 @@ UIL.String = function(target, name, callback, value, color ){
         e.stopPropagation();
     }.bind(this);
 
-    this.c[3].value = value || '';
-    this.c[3].onkeydown = this.f[0];
+    this.c[2].value = this.value;
+    this.c[2].onkeydown = this.f[0];
 
     this.init();
 }

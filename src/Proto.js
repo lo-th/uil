@@ -1,17 +1,18 @@
-UIL.Proto = function(target, name, callback){
+UIL.Proto = function(obj){
 
-    this.color = 'G';
+    obj = obj || {};
 
-    this.callback = callback || function(){};
+    this.color = obj.color || 'G';
+    this.txt = obj.name || '';
+    this.callback = obj.callback || function(){};
 
     this.c = [];
     this.f = [];
 
-    this.c[0] = target;
-    this.c[1] = UIL.element('UIL base');
-    if(name!==''){
-        this.c[2] = UIL.element('UIL text');
-        this.c[2].innerHTML = name;
+    this.c[0] = UIL.element('UIL base');
+    if(this.txt!==''){
+        this.c[1] = UIL.element('UIL text');
+        this.c[1].innerHTML = this.txt;
     }
 }
 
@@ -19,26 +20,26 @@ UIL.Proto.prototype = {
     constructor: UIL.Proto,
 
     init:function(){
-        this.c[1].style.background = UIL.bgcolor(this.color);
+        this.c[0].style.background = UIL.bgcolor(this.color);
         for(var i = 0; i<this.c.length; i++){
-            if(i==0) this.c[0].appendChild(this.c[1]);
-            else if(i>1) this.c[1].appendChild(this.c[i]);
+            if(i==0) UIL.content.appendChild(this.c[0]);
+            else this.c[0].appendChild(this.c[i]);
         }
     },
-
     clear:function(){
         var ev = UIL.events;
         var i = this.c.length, j;
-            while(i--){
-            if(i>1){ 
-                // clear function
+        while(i--){
+            if(i==0){ 
+                UIL.content.removeChild(this.c[0]);
+            } else {
                 j = ev.length;
                 while(j--){ if(this.c[i][ev[j]]!==null) this.c[i][ev[j]] = null; }
-                this.c[1].removeChild(this.c[i]);
+                this.c[0].removeChild(this.c[i]);
             }
-            else if(i==1) this.c[0].removeChild(this.c[1]);
             this.c[i] = null;
         }
+
         this.c = null;
         if(this.f){
             i = this.f.length;
@@ -48,22 +49,22 @@ UIL.Proto.prototype = {
         if(this.callback)this.callback = null;
         if(this.value)this.value = null;
     },
-    setTypeNumber:function( min, max, precision, step ){
+    setTypeNumber:function( obj ){
         this.min = -Infinity;
         this.max = Infinity;
         this.precision = 0;
-        this.step = 1;
         this.prev = null;
+        this.step = 1;
 
-        if(min !== undefined ) this.min = min;
-        if(max !== undefined ) this.max = max;
-        if(step !== undefined ) this.step = step;
-        if(precision !== undefined ) this.precision = precision;
+        if(obj.min !== undefined ) this.min = obj.min;
+        if(obj.max !== undefined ) this.max = obj.max;
+        if(obj.step !== undefined ) this.step = obj.step;
+        if(obj.precision !== undefined ) this.precision = obj.precision;
     },
     numValue:function(n){
         return Math.min( this.max, Math.max( this.min, n ) ).toFixed( this.precision );
     },
-    setRange:function(min,max){
+    /*setRange:function(min,max){
         this.min=min;
         this.max=max;
         return this;
@@ -71,7 +72,7 @@ UIL.Proto.prototype = {
     setPrecision:function(precision){
         this.precision=precision;
         return this;
-    },
+    },*/
 
 
 }

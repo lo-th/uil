@@ -1,24 +1,26 @@
-UIL.Title = function(target, type, id, prefix ){
+UIL.Title = function(obj){
     
-    UIL.Proto.call( this, target, '', null );
+    UIL.Proto.call( this, obj );
 
-    this.color = prefix || 'N';
+    this.color = obj.prefix || 'N';
 
-    id = id || 0;
-    type = type || '';
-    prefix = prefix || '';
+    var id = obj.id || 0;
+    //var type = obj.type || 'Title';
+    var prefix = obj.prefix || '';
 
     //this.c[0] = target;
     //this.c[1] = UIL.element('UIL title', 'div', 'background:'+UIL.bgcolor(prefix)+';' );
-    this.c[1].style.height = '30px';
-    this.c[2] = UIL.element('UIL text', 'div', 'width:200px; font-size:12px; top:8px;');
-    this.c[3] = UIL.element('UIL text', 'div', 'right:25px; text-align:right; font-size:12px; top:8px;');
+    this.c[0].style.height = '30px';
+    this.c[1].style.width = '200px';
+    this.c[1].style.top = '8px';
+    //this.c[2] = UIL.element('UIL text', 'div', 'width:200px; font-size:12px; top:8px;');
+    this.c[2] = UIL.element('UIL text', 'div', 'right:25px; text-align:right; font-size:12px; top:8px;');
 
     var idt = id || 0;
     if(id<10) idt = '0'+id;
 
-    this.c[2].innerHTML = type.replace("-", " ").toUpperCase();
-    this.c[3].innerHTML = prefix.toUpperCase()+' '+idt;
+    this.c[1].innerHTML = this.txt.substring(0,1).toUpperCase() + this.txt.substring(1).replace("-", " ");
+    this.c[2].innerHTML = prefix.toUpperCase()+' '+idt;
 
     this.init();
 }

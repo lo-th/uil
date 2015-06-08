@@ -1,8 +1,8 @@
-UIL.Color = function(target, name, callback, value, type ){
+UIL.Color = function(obj){
     
-    UIL.Proto.call( this, target, name, callback );
+    UIL.Proto.call( this, obj );
 
-    this.type = type || 'array';
+    this.type = obj.type || 'array';
     this.width = 170;
     this.wheelWidth = this.width*0.1;
     this.decalLeft = 100;
@@ -12,16 +12,16 @@ UIL.Color = function(target, name, callback, value, type ){
     this.mid = Math.floor(this.width * 0.5 );
     this.markerSize = this.wheelWidth * 0.3;
    
-    this.c[3] = UIL.element('UIL color-txt');
-    this.c[4] = UIL.element('UIL cc', 'div', 'width:'+(this.square * 2 - 1)+'px; ' + 'height:'+(this.square * 2 - 1)+'px; ' + 'left:'+((this.mid - this.square)+this.decalLeft)+'px; '+ 'top:'+((this.mid - this.square)+this.decal)+'px;  display:none;');
-    this.c[5] = UIL.element('UIL canvas', 'canvas', 'left:'+this.decalLeft+'px;  top:'+this.decal+'px;  display:none;');
-    this.c[6] = UIL.element('UIL canvas', 'canvas', 'left:'+this.decalLeft+'px;  top:'+this.decal+'px;  pointer-events:auto; cursor:pointer; display:none;');
+    this.c[2] = UIL.element('UIL color-txt');
+    this.c[3] = UIL.element('UIL cc', 'div', 'width:'+(this.square * 2 - 1)+'px; ' + 'height:'+(this.square * 2 - 1)+'px; ' + 'left:'+((this.mid - this.square)+this.decalLeft)+'px; '+ 'top:'+((this.mid - this.square)+this.decal)+'px;  display:none;');
+    this.c[4] = UIL.element('UIL canvas', 'canvas', 'left:'+this.decalLeft+'px;  top:'+this.decal+'px;  display:none;');
+    this.c[5] = UIL.element('UIL canvas', 'canvas', 'left:'+this.decalLeft+'px;  top:'+this.decal+'px;  pointer-events:auto; cursor:pointer; display:none;');
 
+    this.c[4].width = this.c[4].height = this.width;
     this.c[5].width = this.c[5].height = this.width;
-    this.c[6].width = this.c[6].height = this.width;
 
-    this.ctxMask = this.c[5].getContext('2d');
-    this.ctxOverlay = this.c[6].getContext('2d');
+    this.ctxMask = this.c[4].getContext('2d');
+    this.ctxOverlay = this.c[5].getContext('2d');
     this.ctxMask.translate(this.mid, this.mid);
     this.ctxOverlay.translate(this.mid, this.mid);
 
@@ -30,9 +30,9 @@ UIL.Color = function(target, name, callback, value, type ){
 
     this.hsl = null;
     this.value = '#ffffff';
-    if(value ){
-        if(value instanceof Array) this.value = this.pack(value);
-        if(value instanceof String) this.value = this.value;
+    if(obj.value){
+        if(obj.value instanceof Array) this.value = this.pack(obj.value);
+        if(obj.value instanceof String) this.value = obj.value;
     }
     this.bcolor = null;
     this.dragging = false;
@@ -48,8 +48,8 @@ UIL.Color = function(target, name, callback, value, type ){
     this.f[1] = function(e){
         if(!this.dragging){
             this.dragging = true;
-            this.c[6].onmousemove = this.f[2];
-            this.c[6].onmouseup = this.f[3];
+            this.c[5].onmousemove = this.f[2];
+            this.c[5].onmouseup = this.f[3];
         }
         this.offset = this.c[5].getBoundingClientRect();
         var pos = this.widgetCoords(e);
@@ -74,13 +74,13 @@ UIL.Color = function(target, name, callback, value, type ){
 
     //mouseUp
     this.f[3] = function(e){
-        this.c[6].onmouseup = null;
-        this.c[6].onmousemove = null;
+        this.c[5].onmouseup = null;
+        this.c[5].onmousemove = null;
         this.dragging = false;
     }.bind(this);
 
 
-    this.c[3].onclick = this.f[0];
+    this.c[2].onclick = this.f[0];
 
     this.updateValue(this.value);
     this.updateDisplay();
@@ -93,38 +93,38 @@ UIL.Color.prototype.constructor = UIL.Color;
 
 UIL.Color.prototype.updateDisplay = function(){
     this.invert = (this.rgb[0] * 0.3 + this.rgb[1] * .59 + this.rgb[2] * .11) <= 0.6;
-    this.c[4].style.background = this.pack(this.HSLToRGB([this.hsl[0], 1, 0.5]));
+    this.c[3].style.background = this.pack(this.HSLToRGB([this.hsl[0], 1, 0.5]));
     this.drawMarkers();
     
     this.value = this.bcolor;
-    this.c[3].innerHTML = this.hexFormat(this.value);
-    this.c[3].style.background = this.bcolor;
+    this.c[2].innerHTML = this.hexFormat(this.value);
+    this.c[2].style.background = this.bcolor;
     var cc = this.invert ? '#fff' : '#000';
-    this.c[3].style.color = cc;
+    this.c[2].style.color = cc;
 
     if(this.type=='array')this.callback( this.rgb );
     if(this.type=='html')this.callback( this.value );
 };
 UIL.Color.prototype.hide = function(){
     this.isShow = false;
-    this.c[1].style.height = '20px';
+    this.c[0].style.height = '21px';
+    this.c[3].style.display = 'none';
     this.c[4].style.display = 'none';
     this.c[5].style.display = 'none';
-    this.c[6].style.display = 'none';
-    this.c[6].onmousedown = null;
+    this.c[5].onmousedown = null;
 };
 UIL.Color.prototype.show = function(){
     this.isShow = true;
-    this.c[1].style.height = '194px';
+    this.c[0].style.height = '194px';
+    this.c[3].style.display = 'block';
     this.c[4].style.display = 'block';
     this.c[5].style.display = 'block';
-    this.c[6].style.display = 'block';
-    this.c[6].onmousedown = this.f[1];
+    this.c[5].onmousedown = this.f[1];
 };
 UIL.Color.prototype.updateValue = function(e){
     if (this.value && this.value != this.bcolor) {
         this.setColor(this.value);
-        this.c[3].innerHTML = this.hexFormat(this.value);
+        this.c[2].innerHTML = this.hexFormat(this.value);
     }
 };
 UIL.Color.prototype.hexFormat = function(v){

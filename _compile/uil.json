@@ -3,7 +3,6 @@
     "src/Group.js",
     "src/Proto.js",
     "src/Title.js",
-    "src/Vector.js",
     "src/String.js",
     "src/Number.js",
     "src/Color.js",
