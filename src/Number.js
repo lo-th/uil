@@ -9,6 +9,7 @@ UIL.Number = function(obj){
     this.isNumber = true;
     this.isAngle = false;
     this.isVector = false;
+    this.mask = UIL.main.mask;
 
     if(obj.value){
         if(!isNaN(obj.value)){ this.value = [obj.value];}
@@ -31,7 +32,6 @@ UIL.Number = function(obj){
     }
 
     this.w = (175/(this.length))-5;
-    this.big = 2+this.length;
     this.current = null;
 
     var i = this.length;
@@ -42,17 +42,13 @@ UIL.Number = function(obj){
         this.c[2+i].value = this.value[i];
     }
 
-    this.c[this.big] = UIL.element(null, 'rect', 'display:none; position:absolute; left:-50px; top:-40px; pointer-events:auto; cursor:col-resize;', {width:400, height:100, fill:'rgba(255,0,0,0)'});
-
     this.f[0] = function(e){
         if (!e) e = window.event;
         e.stopPropagation();
         if ( e.keyCode === 13 ){
             this.current = parseFloat(e.target.name);
             this.f[4](this.current);
-
             this.f[5]();
-
             e.target.blur();
         }
     }.bind(this);
@@ -65,11 +61,12 @@ UIL.Number = function(obj){
         this.prev = { x:e.clientX, y:e.clientY, d:0, id:(this.current+2)};
         if(this.isNumber) this.prev.v = parseFloat(this.value);
         else this.prev.v = parseFloat(this.value[this.current]);
-        this.c[this.big].style.display = 'block';
-        this.c[this.big].style.zIndex = 1;
-        this.c[this.big].onmousemove = this.f[2];
-        this.c[this.big].onmouseup = this.f[3];
-        this.c[this.big].onmouseout = this.f[3];
+
+        this.mask.style.display = 'block';
+        this.mask.onmousemove = this.f[2];
+        this.mask.onmouseup = this.f[3];
+        this.mask.onmouseout = this.f[3];
+
     }.bind(this);
 
     this.f[2] = function(e){
@@ -90,11 +87,12 @@ UIL.Number = function(obj){
 
     this.f[3] = function(e){
         if (!e) e = window.event;
-        this.c[this.big].style.display = 'none';
-        this.c[this.big].style.zIndex = 0;
-        this.c[this.big].onmousemove = null;
-        this.c[this.big].onmouseup = null;
-        this.c[this.big].onmouseout = null;
+
+        this.mask.style.display = 'none';
+        this.mask.onmousemove = null;
+        this.mask.onmouseup = null;
+        this.mask.onmouseout = null;
+
         if ( Math.abs( this.prev.d ) < 2 ) {
             this.c[this.prev.id].focus();
             this.c[this.prev.id].select();

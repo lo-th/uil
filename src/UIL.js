@@ -81,9 +81,16 @@ var UIL = UIL || ( function () {
 
 UIL.Gui = function(css){
     this.uis = [];
-    UIL.main = this;
+    
     this.content = UIL.element('UIL content', 'div', css);
     document.body.appendChild(this.content);
+
+    var margin = this.content.style.marginLeft;
+    var decal = Number(margin.substring(0,margin.length-2));
+
+    this.mask = UIL.element('UIL mask', 'div', css);
+    document.body.appendChild(this.mask);
+    this.mask.style.marginLeft = (decal-50)+'px';
 
     this.inner = UIL.element('UIL inner');
     this.content.appendChild(this.inner);
@@ -92,12 +99,16 @@ UIL.Gui = function(css){
     this.content.appendChild(this.scrollBG);
     this.scrollBG.name = 'move';
 
-    this.scrollBG2 = UIL.element('UIL scroll-bg', 'div', 'position:absolute; left:0; top:0; width:90px; height:100%; cursor:s-resize; display:none;background:none;');
+    this.scrollBG2 = UIL.element('UIL scroll-bg', 'div', 'position:absolute; left:0; top:0; width:90px; height:100%; cursor:s-resize; display:none; background:none;');
     this.content.appendChild(this.scrollBG2);
     this.scrollBG2.name = 'move';
     
     this.scroll = UIL.element(null, 'rect', 'position:absolute; right:3px; top:6px; pointer-events:none;', {width:12, height:40, fill:'#666' });
     this.scrollBG.appendChild(this.scroll);
+
+    
+
+    UIL.main = this;
 
     this.down = false;
 
@@ -227,10 +238,11 @@ UIL.txt2 = 'font-family:Monospace; font-size:12px; color:#e2e2e2;';
 
 UIL.createClass('UIL', 'box-sizing:border-box; -o-user-select:none; -ms-user-select:none; -khtml-user-select:none; -webkit-user-select:none; -moz-user-select:none;');
 
-UIL.createClass('UIL.content', 'position:absolute; width:'+(UIL.WIDTH)+'px; pointer-events:none; overflow:hidden; background:none;');
+UIL.createClass('UIL.content', 'position:absolute; width:'+(UIL.WIDTH)+'px; pointer-events:none; margin-left:0px; overflow:hidden; background:none;');
+UIL.createClass('UIL.mask', 'position:absolute; width:'+(UIL.WIDTH+100)+'px; height:100%; margin-left:-50px; pointer-events:auto; cursor:col-resize; background:none; display:none;' );
 UIL.createClass('UIL.inner', 'position:absolute; width:'+(UIL.WIDTH)+'px; top:0; left:0; height:auto; pointer-events:none; overflow:hidden;background:none;');
 
-UIL.createClass('UIL.base', 'width:'+(UIL.WIDTH)+'px; height:21px; position:relative; left:0px; pointer-events:none; background:rgba(40,40,40,0.5); border-bottom:1px solid #333;');
+UIL.createClass('UIL.base', 'transition: 0.2s ease-out; width:'+(UIL.WIDTH)+'px; height:21px; position:relative; left:0px; pointer-events:none; background:rgba(40,40,40,0.5); border-bottom:1px solid #333;');
 
 UIL.createClass('UIL.text', 'position:absolute; width:90px; top:2px; height:16px; pointer-events:none; padding-left:10px; padding-right:5px; padding-top:2px; text-align:Left; overflow:hidden; white-space:nowrap;'+ UIL.txt1);
 
@@ -238,8 +250,6 @@ UIL.createClass('input.UIL.number', 'position:absolute; width:60px; height:16px;
 UIL.createClass('input.UIL.string', 'position:absolute; left:100px; width:170px; height:16px; pointer-events:auto; margin-top:2px; padding-left:4px; padding-top:2px; background:rgba(0,0,0,0.2);' + UIL.txt2, true);
 
 UIL.createClass('UIL.boxbb', 'position:absolute; left:100px; top:3px; width:20px; height:14px; pointer-events:auto; cursor:col-resize; text-align:center; color:#000; font-size:12px; background:rgba(255,255,255,0.6); ');
-
-//UIL.createClass('UIL.big', 'position:absolute; width:400px; height:100px; left:-100px; top:-50px; pointer-events:auto; cursor:col-resize; background:rgba(255,0,0,0);');
 
 UIL.createClass('UIL.Listtxt', 'border:1px solid #333; left:100px; font-size:12px; position:absolute; cursor:pointer; width:170px; height:16px; pointer-events:auto; margin-top:2px; text-align:center;'+UIL.txt1);
 UIL.createClass('UIL.Listtxt:hover', 'border:1px solid #AAA;');
@@ -250,7 +260,6 @@ UIL.createClass('UIL.listItem:hover', 'background:#050; color:#e2e2e2;')
 UIL.createClass('UIL.list-sel', 'position:absolute; right:5px; background:#666; width:10px; height:10px; pointer-events:none; margin-top:5px;');
 
 UIL.createClass('UIL.scroll-bg', 'position:absolute;  cursor:w-resize; pointer-events:auto; background:rgba(0,0,0,0.2);');
-//UIL.createClass('UIL.scroll-sel', 'position:absolute; left:104px; top:6px; pointer-events:none;');
 
 UIL.createClass('UIL.canvas', 'position:absolute; pointer-events:none;');
 UIL.createClass('UIL.cc', 'position:absolute; pointer-events:none;');

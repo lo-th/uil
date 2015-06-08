@@ -32,7 +32,7 @@ UIL.Color = function(obj){
     this.value = '#ffffff';
     if(obj.value){
         if(obj.value instanceof Array) this.value = this.pack(obj.value);
-        if(!isNaN(obj.value)) this.value = this.numFormat(obj.value);
+        else if(!isNaN(obj.value)) this.value = this.numFormat(obj.value);
         else this.value = obj.value;
     }
     this.bcolor = null;
@@ -127,32 +127,6 @@ UIL.Color.prototype.updateDisplay = function(){
     if(this.type=='array')this.callback( this.rgb );
     if(this.type=='html')this.callback( this.value );
 };
-/*UIL.Color.prototype.hide = function(){
-    this.isShow = false;
-    this.h = 21;
-    this.c[0].style.height = this.h+'px';
-    this.c[3].style.display = 'none';
-    this.c[4].style.display = 'none';
-    this.c[5].style.display = 'none';
-    this.c[5].onmousedown = null;
-    UIL.calc();
-};
-UIL.Color.prototype.show = function(){
-    this.isShow = true;
-    this.h = 194;
-    this.c[0].style.height = this.h+'px';
-    this.c[3].style.display = 'block';
-    this.c[4].style.display = 'block';
-    this.c[5].style.display = 'block';
-    this.c[5].onmousedown = this.f[1];
-    UIL.calc();
-};
-UIL.Color.prototype.updateValue = function(e){
-    if (this.value && this.value != this.bcolor) {
-        this.setColor(this.value);
-        this.c[2].innerHTML = this.hexFormat(this.value);
-    }
-};*/
 UIL.Color.prototype.numFormat = function(v){
     return "#"+v.toString(16);
 };
