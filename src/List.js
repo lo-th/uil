@@ -3,7 +3,10 @@ UIL.List = function(obj){
     UIL.Proto.call( this, obj );
 
     this.c[2] = UIL.DOM('UIL list');
-    this.c[3] = UIL.DOM('UIL Listtxt', 'div', 'background:'+UIL.bgcolor('G')+';');
+    this.c[3] = UIL.DOM('UIL Listtxt', 'div', 'background:'+UIL.bgcolor(UIL.COLOR)+';');
+    this.c[4] = UIL.DOM('UIL', 'path','position:absolute; left:252px; top:2px; pointer-events:none;',{width:16, height:16, 'd':'M 6 4 L 10 8 6 12', 'stroke-width':2, stroke:'#e2e2e2', fill:'none', 'stroke-linecap':'butt' });
+
+
 
     this.list = obj.list || [];
     if(obj.value){
@@ -56,6 +59,7 @@ UIL.List = function(obj){
         this.h = 21;
         this.c[0].style.height = this.h+'px';
         this.c[2].style.display = 'none';
+        UIL.setSVG(this.c[4], 'd','M 6 4 L 10 8 6 12');
         UIL.calc();
     }.bind(this);
 
@@ -65,6 +69,7 @@ UIL.List = function(obj){
         this.h = 110;
         this.c[0].style.height = this.h+'px';
         this.c[2].style.display = 'block';
+        UIL.setSVG(this.c[4], 'd','M 12 6 L 8 10 4 6');
         UIL.calc();
     }.bind(this);
 

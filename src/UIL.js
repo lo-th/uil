@@ -244,12 +244,12 @@ UIL.CC('input:focus', 'border: solid 1px rgba(0,0,0,0); background:rgba(0,0,0,0.
 
 //UIL.CC('UIL.boxbb', 'position:absolute; left:100px; top:3px; width:20px; height:14px; pointer-events:auto; cursor:col-resize; text-align:center; color:#000; font-size:12px; background:rgba(255,255,255,0.6); ');
 
-UIL.CC('UIL.Listtxt', 'border:1px solid #333; left:100px; font-size:12px; position:absolute; cursor:pointer; width:170px; height:16px; pointer-events:auto; margin-top:2px; text-align:center;'+UIL.txt1);
-UIL.CC('UIL.Listtxt:hover', 'border:1px solid #AAA;');
+UIL.CC('UIL.Listtxt', UIL.BASIC+'height:16px; width:170px; text-align:center;'+UIL.txt1);
+UIL.CC('UIL.Listtxt:hover', 'border:1px solid rgba(90,90,90,0.8);');
 UIL.CC('UIL.list', 'box-sizing:content-box; border:20px solid rgba(0,0,0,0);  border-bottom:10px solid transparent; position:absolute; left:80px; top:0px; width:170px; height:80px; overflow:hidden; cursor:s-resize; pointer-events:auto; display:none;');
 UIL.CC('UIL.list-in', 'position:absolute; left:0; top:0; width:170px; pointer-events:none; background:rgba(0,0,0,0.2); ');
-UIL.CC('UIL.listItem', 'position:relative; width:170px; height:16px; background:#020; padding-left:5px; border-bottom:1px solid #333; pointer-events:auto; cursor:pointer;'+UIL.txt1);
-UIL.CC('UIL.listItem:hover', 'background:#050; color:#e2e2e2;')
+UIL.CC('UIL.listItem', 'position:relative; width:170px; height:16px; background:rgba(0,0,0,0.2); padding-left:5px; border-bottom:1px solid rgba(0,0,0,0.2); pointer-events:auto; cursor:pointer;'+UIL.txt1);
+UIL.CC('UIL.listItem:hover', 'background:#035fcf; color:#FFFFFF;')
 UIL.CC('UIL.list-sel', 'position:absolute; right:5px; background:#666; width:10px; height:10px; pointer-events:none; margin-top:5px;');
 
 UIL.CC('UIL.scroll-bg', 'position:absolute; cursor:w-resize; pointer-events:auto; background:rgba(0,0,0,0.2);');
