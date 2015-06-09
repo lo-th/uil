@@ -16,7 +16,7 @@ body { font-family:monospace; background-color:#111; background-image:url(images
     background:linear-gradient( -15deg, #111 20%, rgba(17,17,17,0) 50% );
     background:-webkit-linear-gradient( 105deg, #111 20%, rgba(17,17,17,0) 50% );
 }
-#version { position:absolute; top:110px; left:50%; width:90px; height:10px; pointer-events:none; text-align:right; }
+#version { position:absolute; top:100px; left:50%; width:85px; height:10px; pointer-events:none; text-align:right;  font-size:16px;}
 #debug { position:absolute; top:10px; left:10px; width:300px; pointer-events:none;}
 #logo{position:absolute; left:50%; margin-left:-128px;  margin-top:-60px; transform: scale(0.5,0.5);}
 </style>
@@ -41,7 +41,7 @@ body { font-family:monospace; background-color:#111; background-image:url(images
 <script>
 var list = ['item-0', 'item-1', 'item-2', 'item-3', 'item-4', 'item-5', 'item-6', 'item-7', 'item-8', 'item-9', 'item-10', 'item-11', 'item-12'];
 
-document.getElementById('version').innerHTML = 'uil '+UIL.REVISION;
+document.getElementById('version').innerHTML = 'il '+UIL.REVISION;
 
 var debug = document.getElementById('debug');
 var callback = function(v){ debug.innerHTML = v; }
