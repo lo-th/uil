@@ -13,45 +13,38 @@ UIL.Slide = function(obj){
     this.value = obj.value || 0;
     this.down = false;
 
-    this.c[2] = UIL.element('UIL text', 'div', 'right:25px; text-align:right; width:40px;');
-    this.c[3] = UIL.element('UIL scroll-bg', 'div', 'left:100px; top:2px; height:'+this.height+'px; width:'+this.width+'px; ');
-    //this.c[5] = UIL.element('UIL scroll-sel', 'div', 'height:'+(this.height-8)+'px; background:#666;');
-    this.c[4] = UIL.element('UIL scroll-sel', 'rect', 'position:absolute; left:104px; top:6px; pointer-events:none;', {width:this.width-8, height:this.height-8, fill:'#666' });
-
-    //this.c[3].innerHTML = this.value;
-    //this.c[5].style.width = (this.w * ((this.value-this.min)/this.valueRange))+'px';
+    this.c[2] = UIL.DOM('UIL text', 'div', 'right:25px; text-align:right; width:40px;');
+    this.c[3] = UIL.DOM(null, 'rect', UIL.BASIC + 'cursor:w-resize;', {width:this.width-2, height:this.height-2, fill:'rgba(0,0,0,0.2)' });
+    this.c[4] = UIL.DOM(null, 'rect', 'position:absolute; left:104px; top:6px; pointer-events:none;', {width:this.width-8, height:this.height-8, fill:'#666' });
 
     // mouseOver
     this.f[0] = function(e){
-        this.c[3].style.background = 'rgba(0,0,0,0.6)';
-        //this.c[5].style.backgroundColor = '#AAA';
+        //this.c[3].style.background = 'rgba(0,0,0,0.6)';
+        UIL.setSVG(this.c[3], 'fill','rgba(0,0,0,0.6)');
         UIL.setSVG(this.c[4], 'fill','#AAA');
-        //this.c[5].childNodes[0].setAttributeNS(null, 'fill','#AAA' );
         e.preventDefault(); 
     }.bind(this);
 
     // mouseOut
     this.f[1] = function(e){
         this.down = false;
-        this.c[3].style.background = 'rgba(0,0,0,0.2)'; 
-        //this.c[5].style.background = '#666';
+        //this.c[3].style.background = 'rgba(0,0,0,0.2)';
+        UIL.setSVG(this.c[3], 'fill','rgba(0,0,0,0.2)');
         UIL.setSVG(this.c[4], 'fill','#666');
-
-        //this.c[5].childNodes[0].setAttributeNS(null, 'fill','#666' );
         e.preventDefault();
     }.bind(this);
 
     // mouseUp
     this.f[2] = function(e){
         this.down = false;
-        e.preventDefault(); 
+        e.preventDefault();
     }.bind(this);
 
     // mouseDown
     this.f[3] = function(e){
         this.down = true;
         this.f[4](e);
-        e.preventDefault(); 
+        e.preventDefault();
     }.bind(this);
 
     // mouseMove
@@ -69,8 +62,6 @@ UIL.Slide = function(obj){
     // update
     this.f[5] = function(up){
         var ww = (this.w * ((this.value-this.min)/this.range));
-        //this.c[5].style.width = ww+'px';
-        //this.c[5].childNodes[0].setAttributeNS(null, 'width', ww );
         UIL.setSVG(this.c[4], 'width', ww );
         this.c[2].innerHTML = this.value;
         if(up)this.callback(this.value); 

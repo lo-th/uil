@@ -10,9 +10,9 @@ UIL.Proto = function(obj){
     this.c = [];
     this.f = [];
 
-    this.c[0] = UIL.element('UIL base');
+    this.c[0] = UIL.DOM('UIL base');
     if(this.txt!==''){
-        this.c[1] = UIL.element('UIL text');
+        this.c[1] = UIL.DOM('UIL text');
         this.c[1].innerHTML = this.txt;
     }
 }

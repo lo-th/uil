@@ -2,8 +2,8 @@ UIL.List = function(obj){
 
     UIL.Proto.call( this, obj );
 
-    this.c[2] = UIL.element('UIL list');
-    this.c[3] = UIL.element('UIL Listtxt', 'div', 'background:'+UIL.bgcolor('G')+';');
+    this.c[2] = UIL.DOM('UIL list');
+    this.c[3] = UIL.DOM('UIL Listtxt', 'div', 'background:'+UIL.bgcolor('G')+';');
 
     this.list = obj.list || [];
     if(obj.value){
@@ -12,7 +12,6 @@ UIL.List = function(obj){
     }else{
         this.value = this.list[0];
     } 
-    
     
     this.show = false;
     this.length = this.list.length;
@@ -24,8 +23,8 @@ UIL.List = function(obj){
 
     if(this.max>80) this.w = 150;
 
-    this.listIn = UIL.element('UIL list-in');
-    this.listsel = UIL.element('UIL list-sel');
+    this.listIn = UIL.DOM('UIL list-in');
+    this.listsel = UIL.DOM('UIL list-sel');
     this.listIn.name = 'list';
     this.listsel.name = 'list';
     this.c[2].appendChild(this.listIn)
@@ -35,7 +34,7 @@ UIL.List = function(obj){
     var item, n, l = 170;
     for(var i=0; i<this.length; i++){
         n = this.list[i];
-        item = UIL.element('UIL listItem', 'div', 'width:'+this.w+'px;');
+        item = UIL.DOM('UIL listItem', 'div', 'width:'+this.w+'px;');
         item.innerHTML = n;
         item.name = n;
         this.listIn.appendChild(item);

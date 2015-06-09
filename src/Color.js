@@ -12,11 +12,11 @@ UIL.Color = function(obj){
     this.mid = Math.floor(this.width * 0.5 );
     this.markerSize = this.wheelWidth * 0.3;
 
-    this.c[2] = UIL.element('UIL', 'rect', 'position:absolute; left:100px; top:2px; pointer-events:none;',  {width:170, height:16, fill:'#666', rx:4, ry:4, 'stroke-width':1, stroke:'rgba(0,0,0,0.2)' });
-    this.c[3] = UIL.element('UIL color-txt', 'div', 'top:1px;');
-    this.c[4] = UIL.element('UIL cc', 'div', 'width:'+(this.square * 2 - 1)+'px; ' + 'height:'+(this.square * 2 - 1)+'px; ' + 'left:'+((this.mid - this.square)+this.decalLeft)+'px; '+ 'top:'+((this.mid - this.square)+this.decal)+'px;  display:none;');
-    this.c[5] = UIL.element('UIL canvas', 'canvas', 'left:'+this.decalLeft+'px;  top:'+this.decal+'px;  display:none;');
-    this.c[6] = UIL.element('UIL canvas', 'canvas', 'left:'+this.decalLeft+'px;  top:'+this.decal+'px;  pointer-events:auto; cursor:pointer; display:none;');
+    this.c[2] = UIL.DOM('UIL', 'rect', UIL.BASIC,  { width:168, height:14, fill:'#000' });
+    this.c[3] = UIL.DOM('UIL color-txt', 'div', 'top:1px;');
+    this.c[4] = UIL.DOM('UIL cc', 'div', 'width:'+(this.square * 2 - 1)+'px; ' + 'height:'+(this.square * 2 - 1)+'px; ' + 'left:'+((this.mid - this.square)+this.decalLeft)+'px; '+ 'top:'+((this.mid - this.square)+this.decal)+'px;  display:none;');
+    this.c[5] = UIL.DOM('UIL canvas', 'canvas', 'left:'+this.decalLeft+'px;  top:'+this.decal+'px;  display:none;');
+    this.c[6] = UIL.DOM('UIL canvas', 'canvas', 'left:'+this.decalLeft+'px;  top:'+this.decal+'px;  pointer-events:auto; cursor:pointer; display:none;');
 
     this.c[5].width = this.c[5].height = this.width;
     this.c[6].width = this.c[6].height = this.width;
@@ -32,13 +32,12 @@ UIL.Color = function(obj){
     this.hsl = null;
     this.value = '#ffffff';
     if(obj.value){
-        //if(obj.value instanceof Array) this.value = this.pack(obj.value);
         if(obj.value instanceof Array) this.value = UIL.pack(obj.value);
         else if(!isNaN(obj.value)) this.value = UIL.numFormat(obj.value);
         else this.value = obj.value;
     }
     this.bcolor = null;
-    this.dragging = false;
+    this.down = false;
     this.isShow = false;
 
     // click
@@ -49,8 +48,8 @@ UIL.Color = function(obj){
 
     // mouseDown
     this.f[1] = function(e){
-        if(!this.dragging){
-            this.dragging = true;
+        if(!this.down){
+            this.down = true;
             this.c[6].onmousemove = this.f[2];
             this.c[6].onmouseup = this.f[3];
         }
@@ -79,7 +78,8 @@ UIL.Color = function(obj){
     this.f[3] = function(e){
         this.c[6].onmouseup = null;
         this.c[6].onmousemove = null;
-        this.dragging = false;
+        
+        this.down = false;
     }.bind(this);
 
     //hide
@@ -91,6 +91,7 @@ UIL.Color = function(obj){
         this.c[5].style.display = 'none';
         this.c[6].style.display = 'none';
         this.c[6].onmousedown = null;
+        this.c[6].onmouseout = null;
         UIL.calc();
     }.bind(this);
 
@@ -103,10 +104,11 @@ UIL.Color = function(obj){
         this.c[5].style.display = 'block';
         this.c[6].style.display = 'block';
         this.c[6].onmousedown = this.f[1];
+        this.c[6].onmouseout = this.f[4];
         UIL.calc();
     }.bind(this);
 
-    this.c[3].onclick = this.f[0];
+    this.c[2].onclick = this.f[0];
     this.setColor(this.value);
 
     this.init();
@@ -123,7 +125,6 @@ UIL.Color.prototype.updateDisplay = function(){
     this.value = this.bcolor;
     UIL.setSVG(this.c[2], 'fill', this.bcolor);
     this.c[3].innerHTML = UIL.hexFormat(this.value);
-    //this.c[3].style.background = this.bcolor;
     
     var cc = this.invert ? '#fff' : '#000';
     
@@ -155,7 +156,6 @@ UIL.Color.prototype.calculateMask = function(sizex, sizey, outputPixel){
         var l = 1 - y * isy;
         for (var x = 0; x <= sizex; ++x) {
             var s = 1 - x * isx;
-            // From sat/lum to alpha and color (grayscale)
             var a = 1 - 2 * Math.min(l * s, (1 - l) * s);
             var c = (a > 0) ? ((2 * l - 1 + a) * .5 / a) : 0;
             outputPixel(x, y, c, a);
@@ -164,7 +164,6 @@ UIL.Color.prototype.calculateMask = function(sizex, sizey, outputPixel){
 };
 UIL.Color.prototype.drawMask = function(){
     var size = this.square * 2, sq = this.square;
-    // Create half-resolution buffer.
     var sz = Math.floor(size / 2);
     var buffer = document.createElement('canvas');
     buffer.width = buffer.height = sz + 1;
@@ -181,60 +180,46 @@ UIL.Color.prototype.drawMask = function(){
     this.ctxMask.drawImage(buffer, 0, 0, sz + 1, sz + 1, -sq, -sq, sq * 2, sq * 2);
 };
 UIL.Color.prototype.drawCircle = function(){
-    var n = 24,r = this.radius, w = this.wheelWidth, nudge = 8 / r / n * Math.PI, m = this.ctxMask, angle1 = 0, color1, d1;
-    var x1, x2, y1, y2, ym, am, tan, xm, color2, d2, angle2;
+    var n = 24,r = this.radius, w = this.wheelWidth, nudge = 8 / r / n * Math.PI, m = this.ctxMask, a1 = 0, color1, d1;
+    var ym, am, tan, xm, color2, d2, a2, ar;
     m.save();
     m.lineWidth = w / r;
     m.scale(r, r);
-    // Each segment goes from angle1 to angle2.
     for (var i = 0; i <= n; ++i) {
         d2 = i / n;
-        angle2 = d2 * Math.PI * 2;
-        // Endpoints
-        x1 = Math.sin(angle1);
-        y1 = -Math.cos(angle1);
-        x2 = Math.sin(angle2);
-        y2 = -Math.cos(angle2);
-        // Midpoint chosen so that the endpoints are tangent to the circle.
-        am = (angle1 + angle2) * 0.5;
-        tan = 1 / Math.cos((angle2 - angle1) * 0.5);
+        a2 = d2 * Math.PI * 2;
+        ar = [Math.sin(a1), -Math.cos(a1), Math.sin(a2), -Math.cos(a2)];
+        am = (a1 + a2) * 0.5;
+        tan = 1 / Math.cos((a2 - a1) * 0.5);
         xm = Math.sin(am) * tan, ym = -Math.cos(am) * tan;
-        // New color
         color2 = UIL.pack(UIL.HSLToRGB([d2, 1, 0.5]));
         if (i > 0) {
-            var grad = m.createLinearGradient(x1, y1, x2, y2);
+            var grad = m.createLinearGradient(ar[0], ar[1], ar[2], ar[3]);
             grad.addColorStop(0, color1);
             grad.addColorStop(1, color2);
             m.strokeStyle = grad;
-            // Draw quadratic curve segment.
             m.beginPath();
-            m.moveTo(x1, y1);
-            m.quadraticCurveTo(xm, ym, x2, y2);
+            m.moveTo(ar[0], ar[1]);
+            m.quadraticCurveTo(xm, ym, ar[2], ar[3]);
             m.stroke();
         }
-        // Prevent seams where curves join.
-        angle1 = angle2 - nudge; 
+        a1 = a2 - nudge; 
         color1 = color2;
         d1 = d2;
     }
     m.restore();
 };
 UIL.Color.prototype.drawMarkers = function(){
-    var sz = this.width, lw = Math.ceil(this.markerSize / 4), r = this.markerSize - lw + 1;
-    var angle = this.hsl[0] * 6.28,
-    x1 =  Math.sin(angle) * this.radius,
-    y1 = -Math.cos(angle) * this.radius,
-    x2 = 2 * this.square * (.5 - this.hsl[1]),
-    y2 = 2 * this.square * (.5 - this.hsl[2]),
-    c1 = this.invert ? '#fff' : '#000',
-    c2 = this.invert ? '#000' : '#fff';
+    var m=this.markerSize, ra=this.radius, sz = this.width, lw = Math.ceil(m/ 4), r = m - lw + 1, c1 = this.invert ? '#fff' : '#000', c2 = this.invert ? '#000' : '#fff';
+    var angle = this.hsl[0] * 6.28;
+    var ar = [Math.sin(angle) * ra, -Math.cos(angle) * ra, 2 * this.square * (.5 - this.hsl[1]), 2 * this.square * (.5 - this.hsl[2]) ];
+  
     var circles = [
-        { x: x2, y: y2, r: this.markerSize, c: c1,     lw: lw },
-        { x: x2, y: y2, r: r,             c: c2,     lw: lw + 1 },
-        { x: x1, y: y1, r: this.markerSize, c: '#fff', lw: lw },
-        { x: x1, y: y1, r: r,             c: '#000', lw: lw + 1 },
+        { x: ar[2], y: ar[3], r: m, c: c1,     lw: lw },
+        { x: ar[2], y: ar[3], r: r, c: c2,     lw: lw + 1 },
+        { x: ar[0], y: ar[1], r: m, c: '#fff', lw: lw },
+        { x: ar[0], y: ar[1], r: r, c: '#000', lw: lw + 1 },
     ];
-    // Update the overlay canvas.
     this.ctxOverlay.clearRect(-this.mid, -this.mid, sz, sz);
     var i = circles.length;
     while(i--){
