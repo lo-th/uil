@@ -19,9 +19,9 @@ var UIL = UIL || ( function () {
             a= a || 0.66;
             if(p){
                 switch(p){
-                    case 'r': case 'R': case 'S': r=160; g=60; break;
-                    case 'g': case 'G': case 'E': g=120; b=60; break;
-                    case 'b': case 'B': case 'T': b=120; g=60; break;
+                    case 'r': case 'R': case 'S': r=160; b=68; break;
+                    case 'g': case 'G': case 'E': g=120; b=68; break;
+                    case 'b': case 'B': case 'T': b=120; g=68; break;
                 }
             }
             return 'rgba('+r+','+g+','+b+','+a+')';
