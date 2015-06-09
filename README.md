@@ -1,4 +1,4 @@
-<img src="http://lo-th.github.io/uil/images/U_128.jpg"/> uil v0.3
+<img src="http://lo-th.github.io/uil/images/uil.png"/> uil v0.3
 
 uil.js is a lightweight ui for javascript.
 [**example**](http://lo-th.github.io/uil/index.html)
