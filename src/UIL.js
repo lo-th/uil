@@ -15,8 +15,8 @@ var UIL = UIL || ( function () {
         events:[ 'onkeyup', 'onkeydown', 'onclick', 'onchange', 'onmouseover', 'onmouseout', 'onmousemove', 'onmousedown', 'onmouseup' ],
         WIDTH:300, 
         bgcolor: function(p, a){
-            var r=30, g=30, b=30; 
-            a= a || 0.5;
+            var r=48, g=48, b=48; 
+            a= a || 0.66;
             if(p){
                 switch(p){
                     case 'r': case 'R': case 'S': r=160; g=60; break;
@@ -224,7 +224,7 @@ UIL.Gui.prototype = {
     }
 }
 
-
+UIL.COLOR = 'N';
 UIL.txt1 = 'font-family:Helvetica, Arial, sans-serif; font-size:12px; color:#e2e2e2;';
 UIL.txt2 = 'font-family:Monospace; font-size:12px; color:#e2e2e2; outline:none; padding:2px 4px; position:absolute; width:170px; height:16px; left:100px; top:2px';
 UIL.BASIC = 'position:absolute; left:100px; top:2px; pointer-events:auto; cursor:pointer; border:solid 1px rgba(0,0,0,0.2);'

@@ -3,7 +3,9 @@ UIL.Proto = function(obj){
     obj = obj || {};
 
     this.h = 21;
-    this.color = obj.color || 'G';
+    if(obj.color) UIL.COLOR = obj.color;
+    this.color = UIL.COLOR
+
     this.txt = obj.name || '';
     this.callback = obj.callback || function(){};
 
