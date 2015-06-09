@@ -29,3 +29,5 @@ var callback = function(value){ debug.innerHTML = value; }
 ```sh
 ui.clear();
 ```
+
+<img src="http://lo-th.github.io/uil/images/preview.jpg"/>
