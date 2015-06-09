@@ -234,7 +234,7 @@ UIL.Gui.prototype = {
 
 
 UIL.txt1 = 'font-family:Helvetica, Arial, sans-serif; font-size:12px; color:#e2e2e2;';
-UIL.txt2 = 'font-family:Monospace; font-size:12px; color:#e2e2e2;';
+UIL.txt2 = 'font-family:Monospace; font-size:12px; color:#e2e2e2; border-radius:none; outline:none;';
 
 UIL.createClass('UIL', 'box-sizing:border-box; -o-user-select:none; -ms-user-select:none; -khtml-user-select:none; -webkit-user-select:none; -moz-user-select:none;');
 
@@ -242,14 +242,14 @@ UIL.createClass('UIL.content', 'position:absolute; width:'+(UIL.WIDTH)+'px; poin
 UIL.createClass('UIL.mask', 'position:absolute; width:'+(UIL.WIDTH+100)+'px; height:100%; margin-left:-50px; pointer-events:auto; cursor:col-resize; background:none; display:none;' );
 UIL.createClass('UIL.inner', 'position:absolute; width:'+(UIL.WIDTH)+'px; top:0; left:0; height:auto; pointer-events:none; overflow:hidden;background:none;');
 
-UIL.createClass('UIL.base', 'transition: 0.2s ease-out; width:'+(UIL.WIDTH)+'px; height:21px; position:relative; left:0px; pointer-events:none; background:rgba(40,40,40,0.5); border-bottom:1px solid #333;');
+UIL.createClass('UIL.base', 'transition: 0.2s ease-out; width:'+(UIL.WIDTH)+'px; height:21px; position:relative; left:0px; pointer-events:none; background:rgba(40,40,40,0.5); border-bottom:1px solid rgba(0,0,0,0.2);');
 
 UIL.createClass('UIL.text', 'position:absolute; width:90px; top:2px; height:16px; pointer-events:none; padding-left:10px; padding-right:5px; padding-top:2px; text-align:Left; overflow:hidden; white-space:nowrap;'+ UIL.txt1);
 
-UIL.createClass('input.UIL.number', 'position:absolute; width:60px; height:16px; pointer-events:auto; margin-top:2px; padding-left:5px; padding-top:2px; background:rgba(0,0,0,0.2);' + UIL.txt2, true);
-UIL.createClass('input.UIL.string', 'position:absolute; left:100px; width:170px; height:16px; pointer-events:auto; margin-top:2px; padding-left:4px; padding-top:2px; background:rgba(0,0,0,0.2);' + UIL.txt2, true);
+UIL.createClass('input', 'position:absolute; width:170px; height:16px; left:100px; pointer-events:auto; padding-left:5px; margin-top:2px; border: solid 1px rgba(0,0,0,0.2); background:rgba(0,0,0,0.2); -webkit-transition: border 0.3s; -moz-transition: border 0.3s; -o-transition: border 0.3s; transition: border 0.3s;'+ UIL.txt2, true);
+UIL.createClass('input:focus', 'border: solid 1px rgba(0,0,0,0); background:rgba(0,0,0,0.6);', true);
 
-UIL.createClass('UIL.boxbb', 'position:absolute; left:100px; top:3px; width:20px; height:14px; pointer-events:auto; cursor:col-resize; text-align:center; color:#000; font-size:12px; background:rgba(255,255,255,0.6); ');
+//UIL.createClass('UIL.boxbb', 'position:absolute; left:100px; top:3px; width:20px; height:14px; pointer-events:auto; cursor:col-resize; text-align:center; color:#000; font-size:12px; background:rgba(255,255,255,0.6); ');
 
 UIL.createClass('UIL.Listtxt', 'border:1px solid #333; left:100px; font-size:12px; position:absolute; cursor:pointer; width:170px; height:16px; pointer-events:auto; margin-top:2px; text-align:center;'+UIL.txt1);
 UIL.createClass('UIL.Listtxt:hover', 'border:1px solid #AAA;');
@@ -392,7 +392,7 @@ UIL.String = function(obj){
 
     this.value = obj.value || '';
 
-    this.c[2] = UIL.element('UIL string', 'input' );
+    this.c[2] = UIL.element('UIL', 'input' );
 
     this.f[0] = function(e){
         if (!e) e = window.event;
@@ -450,7 +450,7 @@ UIL.Number = function(obj){
     var i = this.length;
     while(i--){
         if(this.isAngle) this.value[i] = (this.value[i] * 180 / Math.PI).toFixed( this.precision );
-        this.c[2+i] = UIL.element('UIL number', 'input', 'width:'+this.w+'px; left:'+(100+(this.w*i)+(5*i))+'px;');
+        this.c[2+i] = UIL.element('UIL', 'input', 'width:'+this.w+'px; left:'+(100+(this.w*i)+(5*i))+'px;');
         this.c[2+i].name = i;
         this.c[2+i].value = this.value[i];
     }
@@ -572,8 +572,9 @@ UIL.Color = function(obj){
     this.hsl = null;
     this.value = '#ffffff';
     if(obj.value){
-        if(obj.value instanceof Array) this.value = this.pack(obj.value);
-        else if(!isNaN(obj.value)) this.value = this.numFormat(obj.value);
+        //if(obj.value instanceof Array) this.value = this.pack(obj.value);
+        if(obj.value instanceof Array) this.value = UIL.pack(obj.value);
+        else if(!isNaN(obj.value)) this.value = UIL.numFormat(obj.value);
         else this.value = obj.value;
     }
     this.bcolor = null;
@@ -656,11 +657,11 @@ UIL.Color.prototype.constructor = UIL.Color;
 
 UIL.Color.prototype.updateDisplay = function(){
     this.invert = (this.rgb[0] * 0.3 + this.rgb[1] * .59 + this.rgb[2] * .11) <= 0.6;
-    this.c[3].style.background = this.pack(this.HSLToRGB([this.hsl[0], 1, 0.5]));
+    this.c[3].style.background = UIL.pack(UIL.HSLToRGB([this.hsl[0], 1, 0.5]));
     this.drawMarkers();
     
     this.value = this.bcolor;
-    this.c[2].innerHTML = this.hexFormat(this.value);
+    this.c[2].innerHTML = UIL.hexFormat(this.value);
     this.c[2].style.background = this.bcolor;
     var cc = this.invert ? '#fff' : '#000';
     this.c[2].style.color = cc;
@@ -668,26 +669,20 @@ UIL.Color.prototype.updateDisplay = function(){
     if(this.type=='array')this.callback( this.rgb );
     if(this.type=='html')this.callback( this.value );
 };
-UIL.Color.prototype.numFormat = function(v){
-    return "#"+v.toString(16);
-};
-UIL.Color.prototype.hexFormat = function(v){
-    return v.toUpperCase().replace("#", "0x");
-};
 UIL.Color.prototype.setColor = function(color){
-    var unpack = this.unpack(color);
+    var unpack = UIL.unpack(color);
     if (this.bcolor != color && unpack) {
         this.bcolor = color;
         this.rgb = unpack;
-        this.hsl = this.RGBToHSL(this.rgb);
+        this.hsl = UIL.RGBtoHSL(this.rgb);
         this.updateDisplay();
     }
     return this;
 };
 UIL.Color.prototype.setHSL = function(hsl){
     this.hsl = hsl;
-    this.rgb = this.HSLToRGB(hsl);
-    this.bcolor = this.pack(this.rgb);
+    this.rgb = UIL.HSLToRGB(hsl);
+    this.bcolor = UIL.pack(this.rgb);
     this.updateDisplay();
     return this;
 };
@@ -742,7 +737,7 @@ UIL.Color.prototype.drawCircle = function(){
         tan = 1 / Math.cos((angle2 - angle1) * 0.5);
         xm = Math.sin(am) * tan, ym = -Math.cos(am) * tan;
         // New color
-        color2 = this.pack(this.HSLToRGB([d2, 1, 0.5]));
+        color2 = UIL.pack(UIL.HSLToRGB([d2, 1, 0.5]));
         if (i > 0) {
             var grad = m.createLinearGradient(x1, y1, x2, y2);
             grad.addColorStop(0, color1);
@@ -755,7 +750,9 @@ UIL.Color.prototype.drawCircle = function(){
             m.stroke();
         }
         // Prevent seams where curves join.
-        angle1 = angle2 - nudge; color1 = color2; d1 = d2;
+        angle1 = angle2 - nudge; 
+        color1 = color2;
+        d1 = d2;
     }
     m.restore();
 };
@@ -789,45 +786,55 @@ UIL.Color.prototype.drawMarkers = function(){
 UIL.Color.prototype.widgetCoords = function(e){
     return { x: e.pageX - this.offset.left - this.mid, y: e.pageY - this.offset.top - this.mid };
 };
-UIL.Color.prototype.pack = function(rgb){
+UIL.Color.prototype.clear = function(){
+    if(this.isShow) this.f[4]();
+    UIL.Proto.prototype.clear.call( this );
+};
+
+//-----------------------------------------
+// COLOR FUNCTION
+
+UIL.numFormat = function(v){ return "#"+v.toString(16); };
+UIL.hexFormat = function(v){ return v.toUpperCase().replace("#", "0x"); };
+
+UIL.pack = function(rgb){
     var r = Math.round(rgb[0] * 255);
     var g = Math.round(rgb[1] * 255);
     var b = Math.round(rgb[2] * 255);
-    return '#' + this.dec2hex(r) + this.dec2hex(g) + this.dec2hex(b);
+    return '#' + UIL.dec2hex(r) + UIL.dec2hex(g) + UIL.dec2hex(b);
 };
-UIL.Color.prototype.u255 = function(color, i){
+UIL.u255 = function(color, i){
     return parseInt(color.substring(i, i + 2), 16) / 255;
 };
-UIL.Color.prototype.u16 = function(color, i){
+UIL.u16 = function(color, i){
     return parseInt(color.substring(i, i + 1), 16) / 15;
 };
-UIL.Color.prototype.unpack = function(color){
-    if (color.length == 7) return [ this.u255(color, 1), this.u255(color, 3), this.u255(color, 5) ];
-    else if (color.length == 4) return [ this.u16(color,1), this.u16(color,2), this.u16(color,3) ];
+UIL.unpack = function(color){
+    if (color.length == 7) return [ UIL.u255(color, 1), UIL.u255(color, 3), UIL.u255(color, 5) ];
+    else if (color.length == 4) return [ UIL.u16(color,1), UIL.u16(color,2), UIL.u16(color,3) ];
 };
-UIL.Color.prototype.packDX = function(c, a){
-    return '#' + this.dec2hex(a) + this.dec2hex(c) + this.dec2hex(c) + this.dec2hex(c);
+UIL.packDX = function(c, a){
+    return '#' + UIL.dec2hex(a) + UIL.dec2hex(c) + UIL.dec2hex(c) + UIL.dec2hex(c);
 };
-UIL.Color.prototype.dec2hex = function(x){
+UIL.dec2hex = function(x){
     return (x < 16 ? '0' : '') + x.toString(16);
 };
-UIL.Color.prototype.HSLToRGB = function(hsl){
+UIL.HSLToRGB = function(hsl){
     var m1, m2, r, g, b;
     var h = hsl[0], s = hsl[1], l = hsl[2];
     m2 = (l <= 0.5) ? l * (s + 1) : l + s - l * s;
     m1 = l * 2 - m2;
-    return [ this.hueToRGB(m1, m2, h + 0.33333), this.hueToRGB(m1, m2, h), this.hueToRGB(m1, m2, h - 0.33333) ];
+    return [ UIL.HUEtoRGB(m1, m2, h + 0.33333), UIL.HUEtoRGB(m1, m2, h), UIL.HUEtoRGB(m1, m2, h - 0.33333) ];
 };
-UIL.Color.prototype.hueToRGB = function(m1, m2, h){
+UIL.HUEtoRGB = function(m1, m2, h){
      h = (h + 1) % 1;
     if (h * 6 < 1) return m1 + (m2 - m1) * h * 6;
     if (h * 2 < 1) return m2;
     if (h * 3 < 2) return m1 + (m2 - m1) * (0.66666 - h) * 6;
     return m1;
 };
-UIL.Color.prototype.RGBToHSL = function(rgb){
-    var r = rgb[0], g = rgb[1], b = rgb[2], min = Math.min(r, g, b), max = Math.max(r, g, b), delta = max - min,
-    h = 0, s = 0, l = (min + max) / 2;
+UIL.RGBtoHSL = function(rgb){
+    var r = rgb[0], g = rgb[1], b = rgb[2], min = Math.min(r, g, b), max = Math.max(r, g, b), delta = max - min, h = 0, s = 0, l = (min + max) / 2;
     if (l > 0 && l < 1) {
         s = delta / (l < 0.5 ? (2 * l) : (2 - 2 * l));
     }
@@ -838,10 +845,6 @@ UIL.Color.prototype.RGBToHSL = function(rgb){
         h /= 6;
     }
     return [h, s, l];
-};
-UIL.Color.prototype.clear = function(){
-    if(this.isShow) this.f[4]();
-    UIL.Proto.prototype.clear.call( this );
 };
 UIL.Slide = function(obj){
 

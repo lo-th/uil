@@ -37,7 +37,7 @@ UIL.Number = function(obj){
     var i = this.length;
     while(i--){
         if(this.isAngle) this.value[i] = (this.value[i] * 180 / Math.PI).toFixed( this.precision );
-        this.c[2+i] = UIL.element('UIL number', 'input', 'width:'+this.w+'px; left:'+(100+(this.w*i)+(5*i))+'px;');
+        this.c[2+i] = UIL.element('UIL', 'input', 'width:'+this.w+'px; left:'+(100+(this.w*i)+(5*i))+'px;');
         this.c[2+i].name = i;
         this.c[2+i].value = this.value[i];
     }
