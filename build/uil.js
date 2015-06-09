@@ -203,6 +203,8 @@ UIL.Gui.prototype = {
         }
     },
     clear:function(){
+        this.inner.style.top = '0px';
+        this.scroll.style.top = '0px';
         var i = this.uis.length;
         while(i--){
             this.uis[i].clear();
@@ -219,6 +221,8 @@ UIL.Gui.prototype = {
         this.scrollBG2.style.display = 'block';
     },
     hideScroll:function(){
+        this.inner.style.top = '0px';
+        this.scroll.style.top = '0px';
         this.scrollBG.style.display = 'none';
         this.scrollBG2.style.display = 'none';
     }
