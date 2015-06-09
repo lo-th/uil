@@ -234,7 +234,7 @@ UIL.Gui.prototype = {
 
 
 UIL.txt1 = 'font-family:Helvetica, Arial, sans-serif; font-size:12px; color:#e2e2e2;';
-UIL.txt2 = 'font-family:Monospace; font-size:12px; color:#e2e2e2; border-radius:none; outline:none;';
+UIL.txt2 = 'font-family:Monospace; font-size:12px; color:#e2e2e2; outline:none; padding:2px 4px; position:absolute; width:170px; height:16px; left:100px; top:2px';
 
 UIL.createClass('UIL', 'box-sizing:border-box; -o-user-select:none; -ms-user-select:none; -khtml-user-select:none; -webkit-user-select:none; -moz-user-select:none;');
 
@@ -246,14 +246,14 @@ UIL.createClass('UIL.base', 'transition: 0.2s ease-out; width:'+(UIL.WIDTH)+'px;
 
 UIL.createClass('UIL.text', 'position:absolute; width:90px; top:2px; height:16px; pointer-events:none; padding-left:10px; padding-right:5px; padding-top:2px; text-align:Left; overflow:hidden; white-space:nowrap;'+ UIL.txt1);
 
-UIL.createClass('input', 'position:absolute; width:170px; height:16px; left:100px; pointer-events:auto; padding-left:5px; margin-top:2px; border: solid 1px rgba(0,0,0,0.2); background:rgba(0,0,0,0.2); -webkit-transition: border 0.3s; -moz-transition: border 0.3s; -o-transition: border 0.3s; transition: border 0.3s;'+ UIL.txt2, true);
+UIL.createClass('input', ' pointer-events:auto; border:solid 1px rgba(0,0,0,0.2); background:rgba(0,0,0,0.2); -webkit-transition: border 0.3s; -moz-transition: border 0.3s; -o-transition: border 0.3s; transition: border 0.3s;'+ UIL.txt2, true);
 UIL.createClass('input:focus', 'border: solid 1px rgba(0,0,0,0); background:rgba(0,0,0,0.6);', true);
 
 //UIL.createClass('UIL.boxbb', 'position:absolute; left:100px; top:3px; width:20px; height:14px; pointer-events:auto; cursor:col-resize; text-align:center; color:#000; font-size:12px; background:rgba(255,255,255,0.6); ');
 
 UIL.createClass('UIL.Listtxt', 'border:1px solid #333; left:100px; font-size:12px; position:absolute; cursor:pointer; width:170px; height:16px; pointer-events:auto; margin-top:2px; text-align:center;'+UIL.txt1);
 UIL.createClass('UIL.Listtxt:hover', 'border:1px solid #AAA;');
-UIL.createClass('UIL.list', 'box-sizing:content-box; border:20px solid rgba(0,0,0,0);  border-bottom:10px solid rgba(0,0,0,0); position:absolute; left:80px; top:0px; width:170px; height:80px; overflow:hidden; cursor:s-resize; pointer-events:auto; display:none;');
+UIL.createClass('UIL.list', 'box-sizing:content-box; border:20px solid rgba(0,0,0,0);  border-bottom:10px solid transparent; position:absolute; left:80px; top:0px; width:170px; height:80px; overflow:hidden; cursor:s-resize; pointer-events:auto; display:none;');
 UIL.createClass('UIL.list-in', 'position:absolute; left:0; top:0; width:170px; pointer-events:none; background:rgba(0,0,0,0.2); ');
 UIL.createClass('UIL.listItem', 'position:relative; width:170px; height:16px; background:#020; padding-left:5px; border-bottom:1px solid #333; pointer-events:auto; cursor:pointer;'+UIL.txt1);
 UIL.createClass('UIL.listItem:hover', 'background:#050; color:#e2e2e2;')
@@ -264,7 +264,7 @@ UIL.createClass('UIL.scroll-bg', 'position:absolute;  cursor:w-resize; pointer-e
 UIL.createClass('UIL.canvas', 'position:absolute; pointer-events:none;');
 UIL.createClass('UIL.cc', 'position:absolute; pointer-events:none;');
 
-UIL.createClass('UIL.color-txt', 'position:absolute; width:170px; left:100px; top:3px; height:14px; padding-left:10px; pointer-events:auto; cursor:pointer; border-radius:6px;'+ UIL.txt2 );
+UIL.createClass('UIL.color-txt', 'pointer-events:auto; cursor:pointer;'+ UIL.txt2 );
 
 
 // UMD (Universal Module Definition)

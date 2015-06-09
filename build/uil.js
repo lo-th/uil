@@ -234,7 +234,7 @@ UIL.Gui.prototype = {
 
 
 UIL.txt1 = 'font-family:Helvetica, Arial, sans-serif; font-size:12px; color:#e2e2e2;';
-UIL.txt2 = 'font-family:Monospace; font-size:12px; color:#e2e2e2; border-radius:none; outline:none;';
+UIL.txt2 = 'font-family:Monospace; font-size:12px; color:#e2e2e2; outline:none; padding:2px 4px; position:absolute; width:170px; height:16px; left:100px; top:2px';
 
 UIL.createClass('UIL', 'box-sizing:border-box; -o-user-select:none; -ms-user-select:none; -khtml-user-select:none; -webkit-user-select:none; -moz-user-select:none;');
 
@@ -246,14 +246,14 @@ UIL.createClass('UIL.base', 'transition: 0.2s ease-out; width:'+(UIL.WIDTH)+'px;
 
 UIL.createClass('UIL.text', 'position:absolute; width:90px; top:2px; height:16px; pointer-events:none; padding-left:10px; padding-right:5px; padding-top:2px; text-align:Left; overflow:hidden; white-space:nowrap;'+ UIL.txt1);
 
-UIL.createClass('input', 'position:absolute; width:170px; height:16px; left:100px; pointer-events:auto; padding-left:5px; margin-top:2px; border: solid 1px rgba(0,0,0,0.2); background:rgba(0,0,0,0.2); -webkit-transition: border 0.3s; -moz-transition: border 0.3s; -o-transition: border 0.3s; transition: border 0.3s;'+ UIL.txt2, true);
+UIL.createClass('input', ' pointer-events:auto; border:solid 1px rgba(0,0,0,0.2); background:rgba(0,0,0,0.2); -webkit-transition: border 0.3s; -moz-transition: border 0.3s; -o-transition: border 0.3s; transition: border 0.3s;'+ UIL.txt2, true);
 UIL.createClass('input:focus', 'border: solid 1px rgba(0,0,0,0); background:rgba(0,0,0,0.6);', true);
 
 //UIL.createClass('UIL.boxbb', 'position:absolute; left:100px; top:3px; width:20px; height:14px; pointer-events:auto; cursor:col-resize; text-align:center; color:#000; font-size:12px; background:rgba(255,255,255,0.6); ');
 
 UIL.createClass('UIL.Listtxt', 'border:1px solid #333; left:100px; font-size:12px; position:absolute; cursor:pointer; width:170px; height:16px; pointer-events:auto; margin-top:2px; text-align:center;'+UIL.txt1);
 UIL.createClass('UIL.Listtxt:hover', 'border:1px solid #AAA;');
-UIL.createClass('UIL.list', 'box-sizing:content-box; border:20px solid rgba(0,0,0,0);  border-bottom:10px solid rgba(0,0,0,0); position:absolute; left:80px; top:0px; width:170px; height:80px; overflow:hidden; cursor:s-resize; pointer-events:auto; display:none;');
+UIL.createClass('UIL.list', 'box-sizing:content-box; border:20px solid rgba(0,0,0,0);  border-bottom:10px solid transparent; position:absolute; left:80px; top:0px; width:170px; height:80px; overflow:hidden; cursor:s-resize; pointer-events:auto; display:none;');
 UIL.createClass('UIL.list-in', 'position:absolute; left:0; top:0; width:170px; pointer-events:none; background:rgba(0,0,0,0.2); ');
 UIL.createClass('UIL.listItem', 'position:relative; width:170px; height:16px; background:#020; padding-left:5px; border-bottom:1px solid #333; pointer-events:auto; cursor:pointer;'+UIL.txt1);
 UIL.createClass('UIL.listItem:hover', 'background:#050; color:#e2e2e2;')
@@ -264,7 +264,7 @@ UIL.createClass('UIL.scroll-bg', 'position:absolute;  cursor:w-resize; pointer-e
 UIL.createClass('UIL.canvas', 'position:absolute; pointer-events:none;');
 UIL.createClass('UIL.cc', 'position:absolute; pointer-events:none;');
 
-UIL.createClass('UIL.color-txt', 'position:absolute; width:170px; left:100px; top:3px; height:14px; padding-left:10px; pointer-events:auto; cursor:pointer; border-radius:6px;'+ UIL.txt2 );
+UIL.createClass('UIL.color-txt', 'pointer-events:auto; cursor:pointer;'+ UIL.txt2 );
 
 
 // UMD (Universal Module Definition)
@@ -552,17 +552,18 @@ UIL.Color = function(obj){
     this.square = Math.floor((this.radius - this.wheelWidth * 0.5) * 0.7) - 1;
     this.mid = Math.floor(this.width * 0.5 );
     this.markerSize = this.wheelWidth * 0.3;
-   
-    this.c[2] = UIL.element('UIL color-txt');
-    this.c[3] = UIL.element('UIL cc', 'div', 'width:'+(this.square * 2 - 1)+'px; ' + 'height:'+(this.square * 2 - 1)+'px; ' + 'left:'+((this.mid - this.square)+this.decalLeft)+'px; '+ 'top:'+((this.mid - this.square)+this.decal)+'px;  display:none;');
-    this.c[4] = UIL.element('UIL canvas', 'canvas', 'left:'+this.decalLeft+'px;  top:'+this.decal+'px;  display:none;');
-    this.c[5] = UIL.element('UIL canvas', 'canvas', 'left:'+this.decalLeft+'px;  top:'+this.decal+'px;  pointer-events:auto; cursor:pointer; display:none;');
 
-    this.c[4].width = this.c[4].height = this.width;
+    this.c[2] = UIL.element('UIL', 'rect', 'position:absolute; left:100px; top:2px; pointer-events:none;',  {width:170, height:16, fill:'#666', rx:4, ry:4, 'stroke-width':1, stroke:'rgba(0,0,0,0.2)' });
+    this.c[3] = UIL.element('UIL color-txt', 'div', 'top:1px;');
+    this.c[4] = UIL.element('UIL cc', 'div', 'width:'+(this.square * 2 - 1)+'px; ' + 'height:'+(this.square * 2 - 1)+'px; ' + 'left:'+((this.mid - this.square)+this.decalLeft)+'px; '+ 'top:'+((this.mid - this.square)+this.decal)+'px;  display:none;');
+    this.c[5] = UIL.element('UIL canvas', 'canvas', 'left:'+this.decalLeft+'px;  top:'+this.decal+'px;  display:none;');
+    this.c[6] = UIL.element('UIL canvas', 'canvas', 'left:'+this.decalLeft+'px;  top:'+this.decal+'px;  pointer-events:auto; cursor:pointer; display:none;');
+
     this.c[5].width = this.c[5].height = this.width;
+    this.c[6].width = this.c[6].height = this.width;
 
-    this.ctxMask = this.c[4].getContext('2d');
-    this.ctxOverlay = this.c[5].getContext('2d');
+    this.ctxMask = this.c[5].getContext('2d');
+    this.ctxOverlay = this.c[6].getContext('2d');
     this.ctxMask.translate(this.mid, this.mid);
     this.ctxOverlay.translate(this.mid, this.mid);
 
@@ -591,10 +592,10 @@ UIL.Color = function(obj){
     this.f[1] = function(e){
         if(!this.dragging){
             this.dragging = true;
-            this.c[5].onmousemove = this.f[2];
-            this.c[5].onmouseup = this.f[3];
+            this.c[6].onmousemove = this.f[2];
+            this.c[6].onmouseup = this.f[3];
         }
-        this.offset = this.c[5].getBoundingClientRect();
+        this.offset = this.c[6].getBoundingClientRect();
         var pos = this.widgetCoords(e);
         this.circleDrag = Math.max(Math.abs(pos.x), Math.abs(pos.y)) > (this.square + 2);
         this.f[2](e);
@@ -617,8 +618,8 @@ UIL.Color = function(obj){
 
     //mouseUp
     this.f[3] = function(e){
-        this.c[5].onmouseup = null;
-        this.c[5].onmousemove = null;
+        this.c[6].onmouseup = null;
+        this.c[6].onmousemove = null;
         this.dragging = false;
     }.bind(this);
 
@@ -627,10 +628,10 @@ UIL.Color = function(obj){
         this.isShow = false;
         this.h = 21;
         this.c[0].style.height = this.h+'px';
-        this.c[3].style.display = 'none';
         this.c[4].style.display = 'none';
         this.c[5].style.display = 'none';
-        this.c[5].onmousedown = null;
+        this.c[6].style.display = 'none';
+        this.c[6].onmousedown = null;
         UIL.calc();
     }.bind(this);
 
@@ -639,14 +640,14 @@ UIL.Color = function(obj){
         this.isShow = true;
         this.h = 194;
         this.c[0].style.height = this.h+'px';
-        this.c[3].style.display = 'block';
         this.c[4].style.display = 'block';
         this.c[5].style.display = 'block';
-        this.c[5].onmousedown = this.f[1];
+        this.c[6].style.display = 'block';
+        this.c[6].onmousedown = this.f[1];
         UIL.calc();
     }.bind(this);
 
-    this.c[2].onclick = this.f[0];
+    this.c[3].onclick = this.f[0];
     this.setColor(this.value);
 
     this.init();
@@ -657,14 +658,17 @@ UIL.Color.prototype.constructor = UIL.Color;
 
 UIL.Color.prototype.updateDisplay = function(){
     this.invert = (this.rgb[0] * 0.3 + this.rgb[1] * .59 + this.rgb[2] * .11) <= 0.6;
-    this.c[3].style.background = UIL.pack(UIL.HSLToRGB([this.hsl[0], 1, 0.5]));
+    this.c[4].style.background = UIL.pack(UIL.HSLToRGB([this.hsl[0], 1, 0.5]));
     this.drawMarkers();
     
     this.value = this.bcolor;
-    this.c[2].innerHTML = UIL.hexFormat(this.value);
-    this.c[2].style.background = this.bcolor;
+    UIL.setSVG(this.c[2], 'fill', this.bcolor);
+    this.c[3].innerHTML = UIL.hexFormat(this.value);
+    //this.c[3].style.background = this.bcolor;
+    
     var cc = this.invert ? '#fff' : '#000';
-    this.c[2].style.color = cc;
+    
+    this.c[3].style.color = cc;
 
     if(this.type=='array')this.callback( this.rgb );
     if(this.type=='html')this.callback( this.value );
@@ -1079,18 +1083,20 @@ UIL.Bool = function(obj){
 
     this.value = obj.value || false;
 
-    //this.c[3] = UIL.element('UIL box', 'div');
-    this.c[2] = UIL.element(null, 'rect','position:absolute; left:100px; top:3px; pointer-events:auto; cursor:pointer;',{width:14, height:14, fill:'rgba(0,0,0,0)', 'stroke-width':2, stroke:'#AAA'});
+    this.c[2] = UIL.element('UIL', 'path','position:absolute; left:100px; top:2px; pointer-events:auto; cursor:pointer; border:solid 1px rgba(0,0,0,0.2);',{width:14, height:14, d:'M 0 0 L 0 14 14 14 14 0 0 0 Z', 'stroke-width':1, stroke:'none', fill:'rgba(0,0,0,0.2)' });
+    this.c[3] = UIL.element('UIL', 'path','position:absolute; left:100px; top:2px; pointer-events:none;',{width:16, height:16, d:'M 3 9 L 5 12 13 4', 'stroke-width':2, stroke:'#e2e2e2', fill:'none', 'stroke-linecap':'butt' });
+
+    if(!this.value) this.c[3].style.display = 'none';
 
     this.f[0] = function(e){
         if(this.value){
             this.value = false;
-            //this.c[3].style.background = 'none';
-            UIL.setSVG(this.c[2], 'fill','rgba(0,0,0,0)');
+            this.c[3].style.display = 'none';
+            UIL.setSVG(this.c[2], 'fill','rgba(0,0,0,0.2)');
         } else {
             this.value = true;
-            //this.c[3].style.background = '#FFF';
-            UIL.setSVG(this.c[2], 'fill','#AAA');
+            this.c[3].style.display = 'block';
+            UIL.setSVG(this.c[2], 'fill','rgba(0,0,0,0.4)');
         }
         this.callback( this.value );
     }.bind(this);

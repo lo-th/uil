@@ -11,17 +11,18 @@ UIL.Color = function(obj){
     this.square = Math.floor((this.radius - this.wheelWidth * 0.5) * 0.7) - 1;
     this.mid = Math.floor(this.width * 0.5 );
     this.markerSize = this.wheelWidth * 0.3;
-   
-    this.c[2] = UIL.element('UIL color-txt');
-    this.c[3] = UIL.element('UIL cc', 'div', 'width:'+(this.square * 2 - 1)+'px; ' + 'height:'+(this.square * 2 - 1)+'px; ' + 'left:'+((this.mid - this.square)+this.decalLeft)+'px; '+ 'top:'+((this.mid - this.square)+this.decal)+'px;  display:none;');
-    this.c[4] = UIL.element('UIL canvas', 'canvas', 'left:'+this.decalLeft+'px;  top:'+this.decal+'px;  display:none;');
-    this.c[5] = UIL.element('UIL canvas', 'canvas', 'left:'+this.decalLeft+'px;  top:'+this.decal+'px;  pointer-events:auto; cursor:pointer; display:none;');
 
-    this.c[4].width = this.c[4].height = this.width;
+    this.c[2] = UIL.element('UIL', 'rect', 'position:absolute; left:100px; top:2px; pointer-events:none;',  {width:170, height:16, fill:'#666', rx:4, ry:4, 'stroke-width':1, stroke:'rgba(0,0,0,0.2)' });
+    this.c[3] = UIL.element('UIL color-txt', 'div', 'top:1px;');
+    this.c[4] = UIL.element('UIL cc', 'div', 'width:'+(this.square * 2 - 1)+'px; ' + 'height:'+(this.square * 2 - 1)+'px; ' + 'left:'+((this.mid - this.square)+this.decalLeft)+'px; '+ 'top:'+((this.mid - this.square)+this.decal)+'px;  display:none;');
+    this.c[5] = UIL.element('UIL canvas', 'canvas', 'left:'+this.decalLeft+'px;  top:'+this.decal+'px;  display:none;');
+    this.c[6] = UIL.element('UIL canvas', 'canvas', 'left:'+this.decalLeft+'px;  top:'+this.decal+'px;  pointer-events:auto; cursor:pointer; display:none;');
+
     this.c[5].width = this.c[5].height = this.width;
+    this.c[6].width = this.c[6].height = this.width;
 
-    this.ctxMask = this.c[4].getContext('2d');
-    this.ctxOverlay = this.c[5].getContext('2d');
+    this.ctxMask = this.c[5].getContext('2d');
+    this.ctxOverlay = this.c[6].getContext('2d');
     this.ctxMask.translate(this.mid, this.mid);
     this.ctxOverlay.translate(this.mid, this.mid);
 
@@ -50,10 +51,10 @@ UIL.Color = function(obj){
     this.f[1] = function(e){
         if(!this.dragging){
             this.dragging = true;
-            this.c[5].onmousemove = this.f[2];
-            this.c[5].onmouseup = this.f[3];
+            this.c[6].onmousemove = this.f[2];
+            this.c[6].onmouseup = this.f[3];
         }
-        this.offset = this.c[5].getBoundingClientRect();
+        this.offset = this.c[6].getBoundingClientRect();
         var pos = this.widgetCoords(e);
         this.circleDrag = Math.max(Math.abs(pos.x), Math.abs(pos.y)) > (this.square + 2);
         this.f[2](e);
@@ -76,8 +77,8 @@ UIL.Color = function(obj){
 
     //mouseUp
     this.f[3] = function(e){
-        this.c[5].onmouseup = null;
-        this.c[5].onmousemove = null;
+        this.c[6].onmouseup = null;
+        this.c[6].onmousemove = null;
         this.dragging = false;
     }.bind(this);
 
@@ -86,10 +87,10 @@ UIL.Color = function(obj){
         this.isShow = false;
         this.h = 21;
         this.c[0].style.height = this.h+'px';
-        this.c[3].style.display = 'none';
         this.c[4].style.display = 'none';
         this.c[5].style.display = 'none';
-        this.c[5].onmousedown = null;
+        this.c[6].style.display = 'none';
+        this.c[6].onmousedown = null;
         UIL.calc();
     }.bind(this);
 
@@ -98,14 +99,14 @@ UIL.Color = function(obj){
         this.isShow = true;
         this.h = 194;
         this.c[0].style.height = this.h+'px';
-        this.c[3].style.display = 'block';
         this.c[4].style.display = 'block';
         this.c[5].style.display = 'block';
-        this.c[5].onmousedown = this.f[1];
+        this.c[6].style.display = 'block';
+        this.c[6].onmousedown = this.f[1];
         UIL.calc();
     }.bind(this);
 
-    this.c[2].onclick = this.f[0];
+    this.c[3].onclick = this.f[0];
     this.setColor(this.value);
 
     this.init();
@@ -116,14 +117,17 @@ UIL.Color.prototype.constructor = UIL.Color;
 
 UIL.Color.prototype.updateDisplay = function(){
     this.invert = (this.rgb[0] * 0.3 + this.rgb[1] * .59 + this.rgb[2] * .11) <= 0.6;
-    this.c[3].style.background = UIL.pack(UIL.HSLToRGB([this.hsl[0], 1, 0.5]));
+    this.c[4].style.background = UIL.pack(UIL.HSLToRGB([this.hsl[0], 1, 0.5]));
     this.drawMarkers();
     
     this.value = this.bcolor;
-    this.c[2].innerHTML = UIL.hexFormat(this.value);
-    this.c[2].style.background = this.bcolor;
+    UIL.setSVG(this.c[2], 'fill', this.bcolor);
+    this.c[3].innerHTML = UIL.hexFormat(this.value);
+    //this.c[3].style.background = this.bcolor;
+    
     var cc = this.invert ? '#fff' : '#000';
-    this.c[2].style.color = cc;
+    
+    this.c[3].style.color = cc;
 
     if(this.type=='array')this.callback( this.rgb );
     if(this.type=='html')this.callback( this.value );
