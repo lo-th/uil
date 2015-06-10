@@ -14,9 +14,9 @@ UIL.Color = function(obj){
 
     this.c[2] = UIL.DOM('UIL', 'rect', UIL.BASIC,  { width:168, height:14, fill:'#000' });
     this.c[3] = UIL.DOM('UIL color-txt', 'div', 'top:1px;');
-    this.c[4] = UIL.DOM('UIL cc', 'div', 'width:'+(this.square * 2 - 1)+'px; ' + 'height:'+(this.square * 2 - 1)+'px; ' + 'left:'+((this.mid - this.square)+this.decalLeft)+'px; '+ 'top:'+((this.mid - this.square)+this.decal)+'px;  display:none;');
-    this.c[5] = UIL.DOM('UIL canvas', 'canvas', 'left:'+this.decalLeft+'px;  top:'+this.decal+'px;  display:none;');
-    this.c[6] = UIL.DOM('UIL canvas', 'canvas', 'left:'+this.decalLeft+'px;  top:'+this.decal+'px;  pointer-events:auto; cursor:pointer; display:none;');
+    this.c[4] = UIL.DOM('UIL', 'div', 'width:'+(this.square * 2 - 1)+'px; ' + 'height:'+(this.square * 2 - 1)+'px; ' + 'left:'+((this.mid - this.square)+this.decalLeft)+'px; '+ 'top:'+((this.mid - this.square)+this.decal)+'px;  display:none;');
+    this.c[5] = UIL.DOM('UIL', 'canvas', 'left:'+this.decalLeft+'px;  top:'+this.decal+'px;  display:none;');
+    this.c[6] = UIL.DOM('UIL', 'canvas', 'left:'+this.decalLeft+'px;  top:'+this.decal+'px;  pointer-events:auto; cursor:pointer; display:none;');
 
     this.c[5].width = this.c[5].height = this.width;
     this.c[6].width = this.c[6].height = this.width;

@@ -39,20 +39,20 @@ var UIL = UIL || ( function () {
         setSVG:function(dom, type, value){
             dom.childNodes[0].setAttributeNS(null, type, value );
         },
-        DOM:function(cName, type, css, obj){ 
-            type = type || 'div'; 
-            var dom = null;
-            if(type=='rect' || type=='path' || type=='polygon'){ 
-                dom = document.createElementNS( 'http://www.w3.org/2000/svg', 'svg' );
+        DOM:function(cc, type, css, obj, dom){ 
+            type = type || 'div';
+            if(type=='rect' || type=='path' || type=='polygon' || type == 'text'){
+                if(dom==undefined) dom = document.createElementNS( 'http://www.w3.org/2000/svg', 'svg' );
                 var g = document.createElementNS( 'http://www.w3.org/2000/svg', type );
                 dom.appendChild(g);
+                
                 for(var e in obj){
                     if(e=='width' || e=='height')dom.setAttribute( e, obj[e] );
                     g.setAttribute( e, obj[e] );
                 }
             } else {
-                dom = document.createElement(type);
-                if(cName) dom.className = cName;
+                if(dom==undefined) dom = document.createElement(type);
+                if(cc) dom.className = cc;
             }
             
             if(css) dom.style.cssText = css; 
@@ -229,39 +229,35 @@ UIL.Gui.prototype = {
 }
 
 UIL.COLOR = 'N';
-UIL.txt1 = 'font-family:"Open Sans", sans-serif; font-size:12px; color:#e2e2e2; font-smooth:never; -webkit-font-smoothing:none; font-weight:normal; font-style: normal;';
-UIL.txt2 = 'font-family:"Consolas", Monospace; font-size:12px; color:#e2e2e2; outline:none; padding:2px 4px; position:absolute; width:170px; height:16px; left:100px; top:2px; font-smooth:never; -webkit-font-smoothing:none; font-weight: normal; font-style: normal;';
+UIL.SELECT = '#035fcf';
+UIL.txt1 = 'font-family:"Open Sans", sans-serif; font-size:12px; color:#e2e2e2;';
+UIL.txt2 = 'font-family:"Consolas", Monospace; font-size:12px; color:#e2e2e2; outline:none; padding:2px 4px; width:170px; height:16px; left:100px; top:2px;';
 UIL.BASIC = 'position:absolute; left:100px; top:2px; pointer-events:auto; cursor:pointer; border:solid 1px rgba(0,0,0,0.2);'
 
-UIL.CC('UIL', 'box-sizing:border-box; -o-user-select:none; -ms-user-select:none; -khtml-user-select:none; -webkit-user-select:none; -moz-user-select:none;');
+UIL.CC('UIL', 'position:absolute; pointer-events:none; box-sizing:border-box; -o-user-select:none; -ms-user-select:none; -khtml-user-select:none; -webkit-user-select:none; -moz-user-select:none;');
 
-UIL.CC('UIL.content', 'position:absolute; width:'+(UIL.WIDTH)+'px; pointer-events:none; margin-left:0px; overflow:hidden; background:none;');
-UIL.CC('UIL.mask', 'position:absolute; width:'+(UIL.WIDTH+100)+'px; height:100%; margin-left:-50px; pointer-events:auto; cursor:col-resize; background:none; display:none;' );
-UIL.CC('UIL.inner', 'position:absolute; width:'+(UIL.WIDTH)+'px; top:0; left:0; height:auto; pointer-events:none; overflow:hidden;background:none;');
+UIL.CC('UIL.content', 'width:'+(UIL.WIDTH)+'px; margin-left:0px; overflow:hidden; background:none;');
+UIL.CC('UIL.mask', 'width:'+(UIL.WIDTH+100)+'px; height:100%; margin-left:-50px; pointer-events:auto; cursor:col-resize; background:none; display:none;' );
+UIL.CC('UIL.inner', 'width:'+(UIL.WIDTH)+'px; top:0; left:0; height:auto; overflow:hidden; background:none;');
 
-UIL.CC('UIL.base', 'transition: 0.2s ease-out; width:'+(UIL.WIDTH)+'px; height:21px; position:relative; left:0px; pointer-events:none; background:rgba(40,40,40,0.5); border-bottom:1px solid rgba(0,0,0,0.2); overflow:hidden;');
+UIL.CC('UIL.base', 'position:relative; transition: 0.1s ease-out; width:'+(UIL.WIDTH)+'px; height:21px; left:0px; background:rgba(40,40,40,0.5); border-bottom:1px solid rgba(0,0,0,0.2); overflow:hidden;');
 
-UIL.CC('UIL.text', 'position:absolute; width:90px; top:2px; height:16px; pointer-events:none; padding-left:10px; padding-right:5px;  text-align:Left; overflow:hidden; white-space:nowrap;'+ UIL.txt1);
+UIL.CC('UIL.text', 'width:90px; top:2px; height:16px; padding-left:10px; padding-right:5px; text-align:Left; overflow:hidden; white-space:nowrap;'+ UIL.txt1);
+UIL.CC('UIL.itext', 'pointer-events:auto;');
 
-UIL.CC('input', ' pointer-events:auto; border:solid 1px rgba(0,0,0,0.2); background:rgba(0,0,0,0.2); -webkit-transition: border 0.3s; -moz-transition: border 0.3s; -o-transition: border 0.3s; transition: border 0.3s;'+ UIL.txt2, true);
+UIL.CC('input', ' border:solid 1px rgba(0,0,0,0.2); background:rgba(0,0,0,0.2); -webkit-transition: border 0.3s; -moz-transition: border 0.3s; -o-transition: border 0.3s; transition: border 0.3s;'+ UIL.txt2, true);
 UIL.CC('input:focus', 'border: solid 1px rgba(0,0,0,0); background:rgba(0,0,0,0.6);', true);
 
-//UIL.CC('UIL.boxbb', 'position:absolute; left:100px; top:3px; width:20px; height:14px; pointer-events:auto; cursor:col-resize; text-align:center; color:#000; font-size:12px; background:rgba(255,255,255,0.6); ');
-
-UIL.CC('UIL.Listtxt', UIL.BASIC+'top:1px; height:18px; width:170px; text-align:center;'+UIL.txt1);
-UIL.CC('UIL.Listtxt:hover', 'border:1px solid rgba(90,90,90,0.8);');
-UIL.CC('UIL.list', 'box-sizing:content-box; border:20px solid rgba(0,0,0,0); border-bottom:10px solid transparent; position:absolute; left:80px; top:0px; width:170px; height:90px; overflow:hidden; cursor:s-resize; pointer-events:auto; display:none;');
-UIL.CC('UIL.list-in', 'position:absolute; left:0; top:0; width:170px; pointer-events:none; background:rgba(0,0,0,0.2); ');
+UIL.CC('UIL.Listtxt', UIL.BASIC+'top:1px; height:18px; width:170px; text-align:center; border:solid 1px rgba(90,90,90,0.6); '+UIL.txt1);
+UIL.CC('UIL.Listtxt:hover', 'border:1px solid '+UIL.SELECT+';');
+UIL.CC('UIL.list', 'box-sizing:content-box; border:20px solid rgba(0,0,0,0); border-bottom:10px solid transparent; left:80px; top:0px; width:170px; height:90px; overflow:hidden; cursor:s-resize; pointer-events:auto; display:none;');
+UIL.CC('UIL.list-in', 'left:0; top:0; width:170px; background:rgba(0,0,0,0.2); ');
 UIL.CC('UIL.listItem', 'position:relative; width:170px; height:18px; background:rgba(0,0,0,0.2); padding-left:5px; border-bottom:1px solid rgba(0,0,0,0.2); pointer-events:auto; cursor:pointer;'+UIL.txt1);
-UIL.CC('UIL.listItem:hover', 'background:#035fcf; color:#FFFFFF;')
-UIL.CC('UIL.list-sel', 'position:absolute; right:5px; background:#666; width:10px; height:10px; pointer-events:none; margin-top:5px;');
+UIL.CC('UIL.listItem:hover', 'background:'+UIL.SELECT+'; color:#FFFFFF;')
+UIL.CC('UIL.list-sel', 'width:10px; height:10px; right:5px; background:#666; margin-top:5px;');
 
-UIL.CC('UIL.scroll-bg', 'position:absolute; cursor:w-resize; pointer-events:auto; background:rgba(0,0,0,0.2);');
-
-UIL.CC('UIL.canvas', 'position:absolute; pointer-events:none;');
-UIL.CC('UIL.cc', 'position:absolute; pointer-events:none;');
-
-UIL.CC('UIL.color-txt', 'pointer-events:none;'+ UIL.txt2 );
+UIL.CC('UIL.scroll-bg', 'cursor:w-resize; pointer-events:auto; background:rgba(0,0,0,0.2);');
+UIL.CC('UIL.color-txt', UIL.txt2 );
 
 
 // UMD (Universal Module Definition)
@@ -387,7 +383,7 @@ UIL.String = function(obj){
 
     this.value = obj.value || '';
 
-    this.c[2] = UIL.DOM('UIL', 'input' );
+    this.c[2] = UIL.DOM('UIL itext', 'input' );
 
     this.f[0] = function(e){
         if (!e) e = window.event;
@@ -445,7 +441,7 @@ UIL.Number = function(obj){
     var i = this.length;
     while(i--){
         if(this.isAngle) this.value[i] = (this.value[i] * 180 / Math.PI).toFixed( this.precision );
-        this.c[2+i] = UIL.DOM('UIL', 'input', 'width:'+this.w+'px; left:'+(100+(this.w*i)+(5*i))+'px;');
+        this.c[2+i] = UIL.DOM('UIL itext', 'input', 'width:'+this.w+'px; left:'+(100+(this.w*i)+(5*i))+'px;');
         this.c[2+i].name = i;
         this.c[2+i].value = this.value[i];
     }
@@ -550,9 +546,9 @@ UIL.Color = function(obj){
 
     this.c[2] = UIL.DOM('UIL', 'rect', UIL.BASIC,  { width:168, height:14, fill:'#000' });
     this.c[3] = UIL.DOM('UIL color-txt', 'div', 'top:1px;');
-    this.c[4] = UIL.DOM('UIL cc', 'div', 'width:'+(this.square * 2 - 1)+'px; ' + 'height:'+(this.square * 2 - 1)+'px; ' + 'left:'+((this.mid - this.square)+this.decalLeft)+'px; '+ 'top:'+((this.mid - this.square)+this.decal)+'px;  display:none;');
-    this.c[5] = UIL.DOM('UIL canvas', 'canvas', 'left:'+this.decalLeft+'px;  top:'+this.decal+'px;  display:none;');
-    this.c[6] = UIL.DOM('UIL canvas', 'canvas', 'left:'+this.decalLeft+'px;  top:'+this.decal+'px;  pointer-events:auto; cursor:pointer; display:none;');
+    this.c[4] = UIL.DOM('UIL', 'div', 'width:'+(this.square * 2 - 1)+'px; ' + 'height:'+(this.square * 2 - 1)+'px; ' + 'left:'+((this.mid - this.square)+this.decalLeft)+'px; '+ 'top:'+((this.mid - this.square)+this.decal)+'px;  display:none;');
+    this.c[5] = UIL.DOM('UIL', 'canvas', 'left:'+this.decalLeft+'px;  top:'+this.decal+'px;  display:none;');
+    this.c[6] = UIL.DOM('UIL', 'canvas', 'left:'+this.decalLeft+'px;  top:'+this.decal+'px;  pointer-events:auto; cursor:pointer; display:none;');
 
     this.c[5].width = this.c[5].height = this.width;
     this.c[6].width = this.c[6].height = this.width;
@@ -1058,7 +1054,7 @@ UIL.Bool = function(obj){
 
     this.value = obj.value || false;
 
-    this.c[2] = UIL.DOM('UIL', 'rect', UIL.BASIC, {width:14, height:14, fill:'rgba(0,0,0,0.2)' });
+    this.c[2] = UIL.DOM('UIL', 'rect', UIL.BASIC+'border:solid 1px rgba(90,90,90,0.6);', {width:14, height:14, fill:'rgba(0,0,0,0.2)' });
     this.c[3] = UIL.DOM('UIL', 'path','position:absolute; left:100px; top:2px; pointer-events:none;',{width:16, height:16, d:'M 3 9 L 5 12 13 4', 'stroke-width':2, stroke:'#e2e2e2', fill:'none', 'stroke-linecap':'butt' });
 
     if(!this.value) this.c[3].style.display = 'none';
