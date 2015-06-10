@@ -971,6 +971,7 @@ UIL.List = function(obj){
 
     // open
     this.f[2] = function(e){
+        this.f[8](0);
         this.show = true;
         this.h = 120;
         this.c[0].style.height = this.h+'px';
@@ -1004,8 +1005,7 @@ UIL.List = function(obj){
             if(y<30) y = 30;
             if(y>100) y = 100;
             this.py = (((y-30)/70)*this.range).toFixed(0);
-            this.listIn.style.top = -this.py+'px';
-            this.listsel.style.top = (y-30)+'px';
+            this.f[8]();
         }
     }.bind(this);
 
@@ -1032,10 +1032,15 @@ UIL.List = function(obj){
         this.py+=delta;
         if(this.py<0) this.py=0;
         if(this.py>this.range) this.py=this.range;
-        this.listIn.style.top = -this.py+'px';
-        this.listsel.style.top = ((this.py*70)/this.range)+'px'
+        this.f[8]();
     }.bind(this);
 
+    //update position
+    this.f[8] = function(y){
+        if(y !== undefined) this.py = y;
+        this.listIn.style.top = -this.py+'px';
+        this.listsel.style.top = ((this.py*70)/this.range)+'px';
+    }.bind(this);
 
     this.c[3].onclick = this.f[0];
     this.c[2].onmousedown = this.f[3];
