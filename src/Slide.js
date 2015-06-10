@@ -19,7 +19,6 @@ UIL.Slide = function(obj){
 
     // mouseOver
     this.f[0] = function(e){
-        //this.c[3].style.background = 'rgba(0,0,0,0.6)';
         UIL.setSVG(this.c[3], 'fill','rgba(0,0,0,0.6)');
         UIL.setSVG(this.c[4], 'fill','#AAA');
         e.preventDefault(); 
@@ -28,7 +27,6 @@ UIL.Slide = function(obj){
     // mouseOut
     this.f[1] = function(e){
         this.down = false;
-        //this.c[3].style.background = 'rgba(0,0,0,0.2)';
         UIL.setSVG(this.c[3], 'fill','rgba(0,0,0,0.2)');
         UIL.setSVG(this.c[4], 'fill','#666');
         e.preventDefault();
