@@ -229,7 +229,7 @@ UIL.Gui.prototype = {
 }
 
 UIL.COLOR = 'N';
-UIL.txt1 = 'font-family:"Segoe UI", Arial, sans-serif; font-size:12px; color:#e2e2e2; font-smooth:never; -webkit-font-smoothing:none; font-weight:normal; font-style: normal;';
+UIL.txt1 = 'font-family:"Open Sans", sans-serif; font-size:12px; color:#e2e2e2; font-smooth:never; -webkit-font-smoothing:none; font-weight:normal; font-style: normal;';
 UIL.txt2 = 'font-family:"Consolas", Monospace; font-size:12px; color:#e2e2e2; outline:none; padding:2px 4px; position:absolute; width:170px; height:16px; left:100px; top:2px; font-smooth:never; -webkit-font-smoothing:none; font-weight: normal; font-style: normal;';
 UIL.BASIC = 'position:absolute; left:100px; top:2px; pointer-events:auto; cursor:pointer; border:solid 1px rgba(0,0,0,0.2);'
 
