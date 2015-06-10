@@ -1025,12 +1025,25 @@ UIL.List = function(obj){
         this.listsel.style.backgroundColor = '#666'
     }.bind(this);
 
+    this.f[7] = function(e){
+        var delta = 0;
+        if(e.wheelDeltaY) delta= -e.wheelDeltaY*0.04;
+        else if(e.wheelDelta) delta= -e.wheelDelta*0.2;
+        else if(e.detail) delta=e.detail*4.0;
+        this.py+=delta;
+        if(this.py<0) this.py=0;
+        if(this.py>this.range) this.py=this.range;
+        this.listIn.style.top = -this.py+'px';
+        this.listsel.style.top = ((this.py*70)/this.range)+'px'
+    }.bind(this);
+
 
     this.c[3].onclick = this.f[0];
     this.c[2].onmousedown = this.f[3];
     this.c[2].onmousemove = this.f[4];
     this.c[2].onmouseout = this.f[5];
     this.c[2].onmouseup = this.f[6];
+    this.c[2].onmousewheel = this.f[7]; 
 
     this.init();
 }
