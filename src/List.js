@@ -96,8 +96,8 @@ UIL.List = function(obj){
             var rect =this.c[2].getBoundingClientRect();
             var y = e.clientY-rect.top;
             if(y<30) y = 30;
-            if(y>90) y = 90;
-            this.py = (((y-30)/60)*this.range).toFixed(0);
+            if(y>100) y = 100;
+            this.py = (((y-30)/70)*this.range).toFixed(0);
             this.listIn.style.top = -this.py+'px';
             this.listsel.style.top = (y-30)+'px';
         }
