@@ -18,13 +18,13 @@ UIL.List = function(obj){
     
     this.show = false;
     this.length = this.list.length;
-    this.max = this.length*16;
+    this.max = this.length*18;
     this.w = 170;
     this.down = false;
-    this.range = this.max - 80;
+    this.range = this.max - 90;
     this.py = 0;
 
-    if(this.max>80) this.w = 150;
+    if(this.max>90) this.w = 150;
 
     this.listIn = UIL.DOM('UIL list-in');
     this.listsel = UIL.DOM('UIL list-sel');
@@ -66,7 +66,7 @@ UIL.List = function(obj){
     // open
     this.f[2] = function(e){
         this.show = true;
-        this.h = 110;
+        this.h = 120;
         this.c[0].style.height = this.h+'px';
         this.c[2].style.display = 'block';
         UIL.setSVG(this.c[4], 'd','M 12 6 L 8 10 4 6');

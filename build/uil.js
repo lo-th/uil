@@ -229,8 +229,8 @@ UIL.Gui.prototype = {
 }
 
 UIL.COLOR = 'N';
-UIL.txt1 = 'font-family:Helvetica, Arial, sans-serif; font-size:12px; color:#e2e2e2;';
-UIL.txt2 = 'font-family:Monospace; font-size:12px; color:#e2e2e2; outline:none; padding:2px 4px; position:absolute; width:170px; height:16px; left:100px; top:2px';
+UIL.txt1 = 'font-family:"Segoe UI", Arial, sans-serif; font-size:12px; color:#e2e2e2; font-smooth:never; -webkit-font-smoothing:none; font-weight:normal; font-style: normal;';
+UIL.txt2 = 'font-family:"Consolas", Monospace; font-size:12px; color:#e2e2e2; outline:none; padding:2px 4px; position:absolute; width:170px; height:16px; left:100px; top:2px; font-smooth:never; -webkit-font-smoothing:none; font-weight: normal; font-style: normal;';
 UIL.BASIC = 'position:absolute; left:100px; top:2px; pointer-events:auto; cursor:pointer; border:solid 1px rgba(0,0,0,0.2);'
 
 UIL.CC('UIL', 'box-sizing:border-box; -o-user-select:none; -ms-user-select:none; -khtml-user-select:none; -webkit-user-select:none; -moz-user-select:none;');
@@ -241,18 +241,18 @@ UIL.CC('UIL.inner', 'position:absolute; width:'+(UIL.WIDTH)+'px; top:0; left:0; 
 
 UIL.CC('UIL.base', 'transition: 0.2s ease-out; width:'+(UIL.WIDTH)+'px; height:21px; position:relative; left:0px; pointer-events:none; background:rgba(40,40,40,0.5); border-bottom:1px solid rgba(0,0,0,0.2); overflow:hidden;');
 
-UIL.CC('UIL.text', 'position:absolute; width:90px; top:2px; height:16px; pointer-events:none; padding-left:10px; padding-right:5px; padding-top:2px; text-align:Left; overflow:hidden; white-space:nowrap;'+ UIL.txt1);
+UIL.CC('UIL.text', 'position:absolute; width:90px; top:2px; height:16px; pointer-events:none; padding-left:10px; padding-right:5px;  text-align:Left; overflow:hidden; white-space:nowrap;'+ UIL.txt1);
 
 UIL.CC('input', ' pointer-events:auto; border:solid 1px rgba(0,0,0,0.2); background:rgba(0,0,0,0.2); -webkit-transition: border 0.3s; -moz-transition: border 0.3s; -o-transition: border 0.3s; transition: border 0.3s;'+ UIL.txt2, true);
 UIL.CC('input:focus', 'border: solid 1px rgba(0,0,0,0); background:rgba(0,0,0,0.6);', true);
 
 //UIL.CC('UIL.boxbb', 'position:absolute; left:100px; top:3px; width:20px; height:14px; pointer-events:auto; cursor:col-resize; text-align:center; color:#000; font-size:12px; background:rgba(255,255,255,0.6); ');
 
-UIL.CC('UIL.Listtxt', UIL.BASIC+'height:16px; width:170px; text-align:center;'+UIL.txt1);
+UIL.CC('UIL.Listtxt', UIL.BASIC+'top:1px; height:18px; width:170px; text-align:center;'+UIL.txt1);
 UIL.CC('UIL.Listtxt:hover', 'border:1px solid rgba(90,90,90,0.8);');
-UIL.CC('UIL.list', 'box-sizing:content-box; border:20px solid rgba(0,0,0,0);  border-bottom:10px solid transparent; position:absolute; left:80px; top:0px; width:170px; height:80px; overflow:hidden; cursor:s-resize; pointer-events:auto; display:none;');
+UIL.CC('UIL.list', 'box-sizing:content-box; border:20px solid rgba(0,0,0,0); border-bottom:10px solid transparent; position:absolute; left:80px; top:0px; width:170px; height:90px; overflow:hidden; cursor:s-resize; pointer-events:auto; display:none;');
 UIL.CC('UIL.list-in', 'position:absolute; left:0; top:0; width:170px; pointer-events:none; background:rgba(0,0,0,0.2); ');
-UIL.CC('UIL.listItem', 'position:relative; width:170px; height:16px; background:rgba(0,0,0,0.2); padding-left:5px; border-bottom:1px solid rgba(0,0,0,0.2); pointer-events:auto; cursor:pointer;'+UIL.txt1);
+UIL.CC('UIL.listItem', 'position:relative; width:170px; height:18px; background:rgba(0,0,0,0.2); padding-left:5px; border-bottom:1px solid rgba(0,0,0,0.2); pointer-events:auto; cursor:pointer;'+UIL.txt1);
 UIL.CC('UIL.listItem:hover', 'background:#035fcf; color:#FFFFFF;')
 UIL.CC('UIL.list-sel', 'position:absolute; right:5px; background:#666; width:10px; height:10px; pointer-events:none; margin-top:5px;');
 
@@ -931,13 +931,13 @@ UIL.List = function(obj){
     
     this.show = false;
     this.length = this.list.length;
-    this.max = this.length*16;
+    this.max = this.length*18;
     this.w = 170;
     this.down = false;
-    this.range = this.max - 80;
+    this.range = this.max - 90;
     this.py = 0;
 
-    if(this.max>80) this.w = 150;
+    if(this.max>90) this.w = 150;
 
     this.listIn = UIL.DOM('UIL list-in');
     this.listsel = UIL.DOM('UIL list-sel');
@@ -979,7 +979,7 @@ UIL.List = function(obj){
     // open
     this.f[2] = function(e){
         this.show = true;
-        this.h = 110;
+        this.h = 120;
         this.c[0].style.height = this.h+'px';
         this.c[2].style.display = 'block';
         UIL.setSVG(this.c[4], 'd','M 12 6 L 8 10 4 6');
