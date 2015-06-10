@@ -12,7 +12,7 @@ var UIL = UIL || ( function () {
     return {
         main:null,
         REVISION: '0.4',
-        events:[ 'onkeyup', 'onkeydown', 'onclick', 'onchange', 'onmouseover', 'onmouseout', 'onmousemove', 'onmousedown', 'onmouseup' ],
+        events:[ 'onkeyup', 'onkeydown', 'onclick', 'onchange', 'onmouseover', 'onmouseout', 'onmousemove', 'onmousedown', 'onmouseup', 'onmousewheel' ],
         WIDTH:300, 
         bgcolor: function(p, a){
             var r=48, g=48, b=48; 
