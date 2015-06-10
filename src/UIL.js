@@ -41,7 +41,7 @@ var UIL = UIL || ( function () {
         },
         DOM:function(cc, type, css, obj, dom){ 
             type = type || 'div';
-            if(type=='rect' || type=='path' || type=='polygon' || type == 'text'){
+            if(type=='rect' || type=='path' || type=='polygon' || type=='text'){
                 if(dom==undefined) dom = document.createElementNS( 'http://www.w3.org/2000/svg', 'svg' );
                 var g = document.createElementNS( 'http://www.w3.org/2000/svg', type );
                 dom.appendChild(g);

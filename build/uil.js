@@ -41,7 +41,7 @@ var UIL = UIL || ( function () {
         },
         DOM:function(cc, type, css, obj, dom){ 
             type = type || 'div';
-            if(type=='rect' || type=='path' || type=='polygon' || type == 'text'){
+            if(type=='rect' || type=='path' || type=='polygon' || type=='text'){
                 if(dom==undefined) dom = document.createElementNS( 'http://www.w3.org/2000/svg', 'svg' );
                 var g = document.createElementNS( 'http://www.w3.org/2000/svg', type );
                 dom.appendChild(g);
@@ -912,15 +912,13 @@ UIL.List = function(obj){
     this.c[3] = UIL.DOM('UIL Listtxt', 'div', 'left:100px; background:'+UIL.bgcolor(UIL.COLOR)+';');
     this.c[4] = UIL.DOM('UIL', 'path','position:absolute; left:252px; top:1px; pointer-events:none;',{width:16, height:16, 'd':'M 6 4 L 10 8 6 12', 'stroke-width':2, stroke:'#e2e2e2', fill:'none', 'stroke-linecap':'butt' });
 
-
-
     this.list = obj.list || [];
     if(obj.value){
         if(!isNaN(obj.value)) this.value = this.list[obj.value];
         else this.value = obj.value;
     }else{
         this.value = this.list[0];
-    } 
+    }
     
     this.show = false;
     this.length = this.list.length;
@@ -929,15 +927,19 @@ UIL.List = function(obj){
     this.down = false;
     this.range = this.max - 90;
     this.py = 0;
+    this.scroll = false;
 
-    if(this.max>90) this.w = 150;
+    if(this.max>90){ 
+        this.w = 150;
+        this.scroll = true;
+    }
 
     this.listIn = UIL.DOM('UIL list-in');
     this.listsel = UIL.DOM('UIL list-sel');
     this.listIn.name = 'list';
     this.listsel.name = 'list';
-    this.c[2].appendChild(this.listIn)
-    this.c[2].appendChild(this.listsel)
+    this.c[2].appendChild(this.listIn);
+    this.c[2].appendChild(this.listsel);
 
     // populate list
     var item, n, l = 170;
@@ -949,7 +951,6 @@ UIL.List = function(obj){
         this.listIn.appendChild(item);
     }
 
-    //this.c[2].innerHTML = name;
     this.c[3].innerHTML = this.value;
     this.c[2].name = 'list';
 
@@ -974,6 +975,12 @@ UIL.List = function(obj){
         this.f[8](0);
         this.show = true;
         this.h = 120;
+        if(!this.scroll){
+            this.h = 30+this.max;
+            this.listsel.style.display = 'none';
+            this.c[2].onmousemove = null;
+            this.c[2].onmousewheel = null; 
+        }
         this.c[0].style.height = this.h+'px';
         this.c[2].style.display = 'block';
         UIL.setSVG(this.c[4], 'd','M 12 6 L 8 10 4 6');
