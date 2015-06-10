@@ -13,8 +13,8 @@ UIL.Slide = function(obj){
     this.value = obj.value || 0;
     this.down = false;
 
-    this.c[2] = UIL.DOM('UIL text', 'div', 'right:25px; text-align:right; width:40px;');
-    this.c[3] = UIL.DOM(null, 'rect', UIL.BASIC + 'cursor:w-resize;', {width:this.width-2, height:this.height-2, fill:'rgba(0,0,0,0.2)' });
+    this.c[2] = UIL.DOM('UIL text', 'div', 'left:235px; text-align:right; width:40px;');
+    this.c[3] = UIL.DOM(null, 'rect', UIL.BASIC + 'top:2px; cursor:w-resize;', {width:this.width-2, height:this.height-2, fill:'rgba(0,0,0,0.2)' });
     this.c[4] = UIL.DOM(null, 'rect', 'position:absolute; left:104px; top:6px; pointer-events:none;', {width:this.width-8, height:this.height-8, fill:'#666' });
 
     // mouseOver
