@@ -8,19 +8,19 @@ UIL.Slide = function(obj){
 
     this.range = this.max - this.min;
     this.width = 140;
-    this.height = 16;
+    this.height = 17;
     this.w = this.width-8;
     this.value = obj.value || 0;
     this.down = false;
 
     this.c[2] = UIL.DOM('UIL text', 'div', 'left:235px; text-align:right; width:40px;');
-    this.c[3] = UIL.DOM(null, 'rect', UIL.BASIC + 'top:2px; cursor:w-resize;', {width:this.width-2, height:this.height-2, fill:'rgba(0,0,0,0.2)' });
-    this.c[4] = UIL.DOM(null, 'rect', 'position:absolute; left:104px; top:6px; pointer-events:none;', {width:this.width-8, height:this.height-8, fill:'#666' });
+    this.c[3] = UIL.DOM(null, 'rect', UIL.BASIC + 'top:1px; cursor:w-resize;', {width:this.width-2, height:this.height-2, fill:'rgba(0,0,0,0.2)' });
+    this.c[4] = UIL.DOM(null, 'rect', 'position:absolute; left:104px; top:5px; pointer-events:none;', {width:this.width-8, height:this.height-8, fill:'#CCC' });
 
     // mouseOver
     this.f[0] = function(e){
         UIL.setSVG(this.c[3], 'fill','rgba(0,0,0,0.6)');
-        UIL.setSVG(this.c[4], 'fill','#AAA');
+        UIL.setSVG(this.c[4], 'fill', UIL.SELECT );
         e.preventDefault(); 
     }.bind(this);
 
@@ -28,7 +28,7 @@ UIL.Slide = function(obj){
     this.f[1] = function(e){
         this.down = false;
         UIL.setSVG(this.c[3], 'fill','rgba(0,0,0,0.2)');
-        UIL.setSVG(this.c[4], 'fill','#666');
+        UIL.setSVG(this.c[4], 'fill','#CCC');
         e.preventDefault();
     }.bind(this);
 

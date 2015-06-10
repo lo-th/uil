@@ -39,7 +39,7 @@ UIL.List = function(obj){
     var item, n, l = 170;
     for(var i=0; i<this.length; i++){
         n = this.list[i];
-        item = UIL.DOM('UIL listItem', 'div', 'width:'+this.w+'px;');
+        item = UIL.DOM('UIL listItem', 'div', 'width:'+this.w+'px; height:18px;');
         item.innerHTML = n;
         item.name = n;
         this.listIn.appendChild(item);
@@ -57,7 +57,7 @@ UIL.List = function(obj){
     // close
     this.f[1] = function(e){
         this.show = false;
-        this.h = 21;
+        this.h = 20;
         this.c[0].style.height = this.h+'px';
         this.c[2].style.display = 'none';
         UIL.setSVG(this.c[4], 'd','M 6 4 L 10 8 6 12');

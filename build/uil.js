@@ -95,15 +95,15 @@ UIL.Gui = function(css){
     this.inner = UIL.DOM('UIL inner');
     this.content.appendChild(this.inner);
     
-    this.scrollBG = UIL.DOM('UIL scroll-bg', 'div', 'position:absolute; right:0; top:0; width:20px; height:100%; cursor:s-resize; display:none; ');
+    this.scrollBG = UIL.DOM('UIL scroll-bg', 'div', 'right:0; top:0; width:20px; height:100%; cursor:s-resize; display:none; ');
     this.content.appendChild(this.scrollBG);
     this.scrollBG.name = 'move';
 
-    this.scrollBG2 = UIL.DOM('UIL scroll-bg', 'div', 'position:absolute; left:0; top:0; width:90px; height:100%; cursor:s-resize; display:none; background:none;');
+    this.scrollBG2 = UIL.DOM('UIL scroll-bg', 'div', 'left:0; top:0; width:90px; height:100%; cursor:s-resize; display:none; background:none;');
     this.content.appendChild(this.scrollBG2);
     this.scrollBG2.name = 'move';
     
-    this.scroll = UIL.DOM(null, 'rect', 'position:absolute; right:3px; top:6px; pointer-events:none;', {width:12, height:40, fill:'#666' });
+    this.scroll = UIL.DOM(null, 'rect', 'right:3px; top:6px;', {width:12, height:40, fill:'#666' });
     this.scrollBG.appendChild(this.scroll);  
 
     UIL.main = this;
@@ -112,6 +112,7 @@ UIL.Gui = function(css){
 
     this.f = [];
 
+    // onmousedown
     this.f[0] = function(e){
         if(e.target.name){
             if(e.target.name=='move'){
@@ -121,21 +122,19 @@ UIL.Gui = function(css){
                 UIL.setSVG(this.scroll, 'fill','#FFF');
                 e.preventDefault();
             }
-            
         }
     }.bind(this);
 
     // mousemove
     this.f[1] = function(e){
-       if(this.down){
-            var rect =this.content.getBoundingClientRect();
-            var y = e.clientY-rect.top;
-            if(y<20) y = 20;
-            if(y>(this.height-20)) y = this.height-20;
-            this.py = (((y-20)/(this.height-40))*this.range).toFixed(0);
-            this.inner.style.top = -this.py+'px';
-            this.scroll.style.top = (y-20)+'px';
-        }
+        if(!this.down) return;
+        var rect = this.content.getBoundingClientRect();
+        var y = e.clientY-rect.top;
+        if(y<20) y = 20;
+        if(y>(this.height-20)) y = this.height-20;
+        this.py = (((y-20)/(this.height-40))*this.range).toFixed(0);
+        this.inner.style.top = -this.py+'px';
+        this.scroll.style.top = (y-20)+'px';
     }.bind(this);
 
     // mouseup
@@ -177,14 +176,14 @@ UIL.Gui.prototype = {
     add:function(type, obj){
         var n;
         switch(type){
-            case 'title':  n = new UIL.Title(obj);  break;
-            case 'bool':   n = new UIL.Bool(obj);   break;
-            case 'color':  n = new UIL.Color(obj);  break;
-            case 'number': n = new UIL.Number(obj); break;
-            case 'slide':  n = new UIL.Slide(obj);  break;
+            case 'button': n = new UIL.Button(obj); break;
             case 'string': n = new UIL.String(obj); break;
+            case 'number': n = new UIL.Number(obj); break;
+            case 'title':  n = new UIL.Title(obj);  break;
+            case 'color':  n = new UIL.Color(obj);  break;
+            case 'slide':  n = new UIL.Slide(obj);  break;
+            case 'bool':   n = new UIL.Bool(obj);   break;
             case 'list':   n = new UIL.List(obj);   break;
-            case 'button': n = new UIL.Button(obj);   break;
         }
         this.uis.push(n);
         UIL.calc();
@@ -232,21 +231,21 @@ UIL.Gui.prototype = {
 UIL.COLOR = 'N';
 UIL.SELECT = '#035fcf';
 UIL.SELECTDOWN = '#024699'
-UIL.txt1 = 'font-family:"Open Sans", sans-serif; font-size:12px; color:#cccccc; outline:none; padding:0px 5px; width:170px; height:18px; left:0; top:0;';
+UIL.txt1 = 'font-family:"Open Sans", sans-serif; font-size:12px; color:#cccccc; outline:none; padding:0px 5px; width:170px; left:0; top:1px; height:17px; padding-bottom:1px;';
 UIL.BASIC = 'position:absolute; left:100px; pointer-events:auto; cursor:pointer; border:solid 1px rgba(0,0,0,0.2);'
 
 UIL.CC('UIL', 'position:absolute; pointer-events:none; box-sizing:border-box; -o-user-select:none; -ms-user-select:none; -khtml-user-select:none; -webkit-user-select:none; -moz-user-select:none;');
 
 UIL.CC('UIL.content', 'width:'+(UIL.WIDTH)+'px; margin-left:0px; overflow:hidden; background:none;');
-UIL.CC('UIL.mask', 'width:'+(UIL.WIDTH+100)+'px; height:100%; margin-left:-50px; pointer-events:auto; cursor:col-resize; background:none; display:none;' );
+UIL.CC('UIL.mask', 'width:'+(UIL.WIDTH+100)+'px; height:100%; margin-left:-50px; pointer-events:auto; cursor:col-resize; background:none; display:none;');
 UIL.CC('UIL.inner', 'width:'+(UIL.WIDTH)+'px; top:0; left:0; height:auto; overflow:hidden; background:none;');
 
-UIL.CC('UIL.base', 'position:relative; transition: 0.1s ease-out; width:'+(UIL.WIDTH)+'px; height:21px; left:0px; background:rgba(40,40,40,0.5); border-bottom:1px solid rgba(0,0,0,0.2); overflow:hidden;');
+UIL.CC('UIL.base', 'position:relative; transition: 0.1s ease-out; width:'+(UIL.WIDTH)+'px; height:20px; left:0px; background:rgba(40,40,40,0.5); border-bottom:1px solid rgba(0,0,0,0.2); overflow:hidden;');
 
 UIL.CC('UIL.text', 'width:90px; top:2px; height:16px; padding-left:10px; padding-right:5px; text-align:Left; overflow:hidden; white-space:nowrap;'+ UIL.txt1);
 UIL.CC('UIL.itext', 'pointer-events:auto; left:100px;');
 
-UIL.CC('input', ' border:solid 1px rgba(0,0,0,0.2); background:rgba(0,0,0,0.2); -webkit-transition: border 0.3s; -moz-transition: border 0.3s; -o-transition: border 0.3s; transition: border 0.3s;'+ UIL.txt1, true);
+UIL.CC('input', ' border:solid 1px rgba(0,0,0,0.2); background:rgba(0,0,0,0.2); transition: 0.1s ease-out;'+ UIL.txt1, true);
 UIL.CC('input:focus', 'border: solid 1px rgba(0,0,0,0); background:rgba(0,0,0,0.6);', true);
 
 UIL.CC('UIL.Listtxt', UIL.BASIC+'left:100px; text-align:center; border:solid 1px rgba(90,90,90,0.6);'+UIL.txt1);
@@ -547,7 +546,7 @@ UIL.Color = function(obj){
     this.mid = Math.floor(this.width * 0.5 );
     this.markerSize = this.wheelWidth * 0.3;
 
-    this.c[2] = UIL.DOM('UIL', 'rect', UIL.BASIC,  { width:168, height:14, fill:'#000' });
+    this.c[2] = UIL.DOM('UIL', 'rect', UIL.BASIC+'top:1px;',  { width:168, height:15, fill:'#000' });
     this.c[3] = UIL.DOM('UIL color-txt', 'div', 'left:100px;');
     this.c[4] = UIL.DOM('UIL', 'div', 'width:'+(this.square * 2 - 1)+'px; ' + 'height:'+(this.square * 2 - 1)+'px; ' + 'left:'+((this.mid - this.square)+this.decalLeft)+'px; '+ 'top:'+((this.mid - this.square)+this.decal)+'px;  display:none;');
     this.c[5] = UIL.DOM('UIL', 'canvas', 'left:'+this.decalLeft+'px;  top:'+this.decal+'px;  display:none;');
@@ -620,7 +619,7 @@ UIL.Color = function(obj){
     //hide
     this.f[4] = function(){
         this.isShow = false;
-        this.h = 21;
+        this.h = 20;
         this.c[0].style.height = this.h+'px';
         this.c[4].style.display = 'none';
         this.c[5].style.display = 'none';
@@ -839,19 +838,19 @@ UIL.Slide = function(obj){
 
     this.range = this.max - this.min;
     this.width = 140;
-    this.height = 16;
+    this.height = 17;
     this.w = this.width-8;
     this.value = obj.value || 0;
     this.down = false;
 
     this.c[2] = UIL.DOM('UIL text', 'div', 'left:235px; text-align:right; width:40px;');
-    this.c[3] = UIL.DOM(null, 'rect', UIL.BASIC + 'top:2px; cursor:w-resize;', {width:this.width-2, height:this.height-2, fill:'rgba(0,0,0,0.2)' });
-    this.c[4] = UIL.DOM(null, 'rect', 'position:absolute; left:104px; top:6px; pointer-events:none;', {width:this.width-8, height:this.height-8, fill:'#666' });
+    this.c[3] = UIL.DOM(null, 'rect', UIL.BASIC + 'top:1px; cursor:w-resize;', {width:this.width-2, height:this.height-2, fill:'rgba(0,0,0,0.2)' });
+    this.c[4] = UIL.DOM(null, 'rect', 'position:absolute; left:104px; top:5px; pointer-events:none;', {width:this.width-8, height:this.height-8, fill:'#CCC' });
 
     // mouseOver
     this.f[0] = function(e){
         UIL.setSVG(this.c[3], 'fill','rgba(0,0,0,0.6)');
-        UIL.setSVG(this.c[4], 'fill','#AAA');
+        UIL.setSVG(this.c[4], 'fill', UIL.SELECT );
         e.preventDefault(); 
     }.bind(this);
 
@@ -859,7 +858,7 @@ UIL.Slide = function(obj){
     this.f[1] = function(e){
         this.down = false;
         UIL.setSVG(this.c[3], 'fill','rgba(0,0,0,0.2)');
-        UIL.setSVG(this.c[4], 'fill','#666');
+        UIL.setSVG(this.c[4], 'fill','#CCC');
         e.preventDefault();
     }.bind(this);
 
@@ -949,7 +948,7 @@ UIL.List = function(obj){
     var item, n, l = 170;
     for(var i=0; i<this.length; i++){
         n = this.list[i];
-        item = UIL.DOM('UIL listItem', 'div', 'width:'+this.w+'px;');
+        item = UIL.DOM('UIL listItem', 'div', 'width:'+this.w+'px; height:18px;');
         item.innerHTML = n;
         item.name = n;
         this.listIn.appendChild(item);
@@ -967,7 +966,7 @@ UIL.List = function(obj){
     // close
     this.f[1] = function(e){
         this.show = false;
-        this.h = 21;
+        this.h = 20;
         this.c[0].style.height = this.h+'px';
         this.c[2].style.display = 'none';
         UIL.setSVG(this.c[4], 'd','M 6 4 L 10 8 6 12');
@@ -1112,7 +1111,7 @@ UIL.Button = function(obj){
 
     this.value = obj.value || false;
 
-    this.c[2] = UIL.DOM('UIL', 'rect', UIL.BASIC+'top:1px; border:solid 1px rgba(90,90,90,0.6);', {width:168, height:16, fill:UIL.bgcolor(UIL.COLOR) });
+    this.c[2] = UIL.DOM('UIL', 'rect', UIL.BASIC+'top:1px; border:solid 1px rgba(90,90,90,0.6);', {width:168, height:15, fill:UIL.bgcolor(UIL.COLOR) });
     this.c[3] = UIL.DOM('UIL color-txt', 'div', 'top:1px; left:100px; text-align:center;');
 
     this.c[1].innerHTML = '';

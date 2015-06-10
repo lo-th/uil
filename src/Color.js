@@ -12,7 +12,7 @@ UIL.Color = function(obj){
     this.mid = Math.floor(this.width * 0.5 );
     this.markerSize = this.wheelWidth * 0.3;
 
-    this.c[2] = UIL.DOM('UIL', 'rect', UIL.BASIC,  { width:168, height:14, fill:'#000' });
+    this.c[2] = UIL.DOM('UIL', 'rect', UIL.BASIC+'top:1px;',  { width:168, height:15, fill:'#000' });
     this.c[3] = UIL.DOM('UIL color-txt', 'div', 'left:100px;');
     this.c[4] = UIL.DOM('UIL', 'div', 'width:'+(this.square * 2 - 1)+'px; ' + 'height:'+(this.square * 2 - 1)+'px; ' + 'left:'+((this.mid - this.square)+this.decalLeft)+'px; '+ 'top:'+((this.mid - this.square)+this.decal)+'px;  display:none;');
     this.c[5] = UIL.DOM('UIL', 'canvas', 'left:'+this.decalLeft+'px;  top:'+this.decal+'px;  display:none;');
@@ -85,7 +85,7 @@ UIL.Color = function(obj){
     //hide
     this.f[4] = function(){
         this.isShow = false;
-        this.h = 21;
+        this.h = 20;
         this.c[0].style.height = this.h+'px';
         this.c[4].style.display = 'none';
         this.c[5].style.display = 'none';

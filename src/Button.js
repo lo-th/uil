@@ -4,7 +4,7 @@ UIL.Button = function(obj){
 
     this.value = obj.value || false;
 
-    this.c[2] = UIL.DOM('UIL', 'rect', UIL.BASIC+'top:1px; border:solid 1px rgba(90,90,90,0.6);', {width:168, height:16, fill:UIL.bgcolor(UIL.COLOR) });
+    this.c[2] = UIL.DOM('UIL', 'rect', UIL.BASIC+'top:1px; border:solid 1px rgba(90,90,90,0.6);', {width:168, height:15, fill:UIL.bgcolor(UIL.COLOR) });
     this.c[3] = UIL.DOM('UIL color-txt', 'div', 'top:1px; left:100px; text-align:center;');
 
     this.c[1].innerHTML = '';

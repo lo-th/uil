@@ -231,7 +231,7 @@ UIL.Gui.prototype = {
 UIL.COLOR = 'N';
 UIL.SELECT = '#035fcf';
 UIL.SELECTDOWN = '#024699'
-UIL.txt1 = 'font-family:"Open Sans", sans-serif; font-size:12px; color:#cccccc; outline:none; padding:0px 5px; width:170px; height:18px; left:0; top:0;';
+UIL.txt1 = 'font-family:"Open Sans", sans-serif; font-size:12px; color:#cccccc; outline:none; padding:0px 5px; width:170px; left:0; top:1px; height:17px; padding-bottom:1px;';
 UIL.BASIC = 'position:absolute; left:100px; pointer-events:auto; cursor:pointer; border:solid 1px rgba(0,0,0,0.2);'
 
 UIL.CC('UIL', 'position:absolute; pointer-events:none; box-sizing:border-box; -o-user-select:none; -ms-user-select:none; -khtml-user-select:none; -webkit-user-select:none; -moz-user-select:none;');
@@ -240,12 +240,12 @@ UIL.CC('UIL.content', 'width:'+(UIL.WIDTH)+'px; margin-left:0px; overflow:hidden
 UIL.CC('UIL.mask', 'width:'+(UIL.WIDTH+100)+'px; height:100%; margin-left:-50px; pointer-events:auto; cursor:col-resize; background:none; display:none;');
 UIL.CC('UIL.inner', 'width:'+(UIL.WIDTH)+'px; top:0; left:0; height:auto; overflow:hidden; background:none;');
 
-UIL.CC('UIL.base', 'position:relative; transition: 0.1s ease-out; width:'+(UIL.WIDTH)+'px; height:21px; left:0px; background:rgba(40,40,40,0.5); border-bottom:1px solid rgba(0,0,0,0.2); overflow:hidden;');
+UIL.CC('UIL.base', 'position:relative; transition: 0.1s ease-out; width:'+(UIL.WIDTH)+'px; height:20px; left:0px; background:rgba(40,40,40,0.5); border-bottom:1px solid rgba(0,0,0,0.2); overflow:hidden;');
 
 UIL.CC('UIL.text', 'width:90px; top:2px; height:16px; padding-left:10px; padding-right:5px; text-align:Left; overflow:hidden; white-space:nowrap;'+ UIL.txt1);
 UIL.CC('UIL.itext', 'pointer-events:auto; left:100px;');
 
-UIL.CC('input', ' border:solid 1px rgba(0,0,0,0.2); background:rgba(0,0,0,0.2); -webkit-transition: border 0.3s; -moz-transition: border 0.3s; -o-transition: border 0.3s; transition: border 0.3s;'+ UIL.txt1, true);
+UIL.CC('input', ' border:solid 1px rgba(0,0,0,0.2); background:rgba(0,0,0,0.2); transition: 0.1s ease-out;'+ UIL.txt1, true);
 UIL.CC('input:focus', 'border: solid 1px rgba(0,0,0,0); background:rgba(0,0,0,0.6);', true);
 
 UIL.CC('UIL.Listtxt', UIL.BASIC+'left:100px; text-align:center; border:solid 1px rgba(90,90,90,0.6);'+UIL.txt1);
