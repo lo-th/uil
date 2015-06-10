@@ -910,7 +910,7 @@ UIL.List = function(obj){
 
     this.c[2] = UIL.DOM('UIL list');
     this.c[3] = UIL.DOM('UIL Listtxt', 'div', 'left:100px; background:'+UIL.bgcolor(UIL.COLOR)+';');
-    this.c[4] = UIL.DOM('UIL', 'path','position:absolute; left:252px; top:2px; pointer-events:none;',{width:16, height:16, 'd':'M 6 4 L 10 8 6 12', 'stroke-width':2, stroke:'#e2e2e2', fill:'none', 'stroke-linecap':'butt' });
+    this.c[4] = UIL.DOM('UIL', 'path','position:absolute; left:252px; top:1px; pointer-events:none;',{width:16, height:16, 'd':'M 6 4 L 10 8 6 12', 'stroke-width':2, stroke:'#e2e2e2', fill:'none', 'stroke-linecap':'butt' });
 
 
 
