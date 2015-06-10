@@ -27,6 +27,7 @@ body { font-family: 'Open Sans', sans-serif; background-color:#111; background-i
 <script type="text/javascript" src="src/Slide.js"></script>
 <script type="text/javascript" src="src/String.js"></script>
 <script type="text/javascript" src="src/Title.js"></script>
+<script type="text/javascript" src="src/Button.js"></script>
 </head>
 
 <body>
@@ -42,6 +43,7 @@ document.getElementById('version').innerHTML = 'il '+UIL.REVISION;
 
 var debug = document.getElementById('debug');
 var callback = function(v){ debug.innerHTML = v; }
+var callbackButton = function(){ debug.innerHTML = "i'm a button !!" ; }
 
 var ui = new UIL.Gui('top:145px; left:50%; margin-left:-150px;');
 
@@ -57,6 +59,7 @@ ui.add('number', { name:'number', callback:callback, value:20});
 ui.add('number', { name:'vector2', callback:callback, value:[0,0] });
 ui.add('number', { name:'vector3', callback:callback, value:[0,0,0] });
 ui.add('number', { name:'vector4', callback:callback, value:[0,0,0,0] });
+ui.add('button', { name:'button', callback:callbackButton });
 
 </script>
 </body>

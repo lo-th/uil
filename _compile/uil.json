@@ -8,5 +8,6 @@
     "src/Color.js",
     "src/Slide.js",
     "src/List.js",
-    "src/Bool.js"
+    "src/Bool.js",
+    "src/Button.js"
 ]

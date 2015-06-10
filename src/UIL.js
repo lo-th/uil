@@ -184,6 +184,7 @@ UIL.Gui.prototype = {
             case 'slide':  n = new UIL.Slide(obj);  break;
             case 'string': n = new UIL.String(obj); break;
             case 'list':   n = new UIL.List(obj);   break;
+            case 'button': n = new UIL.Button(obj);   break;
         }
         this.uis.push(n);
         UIL.calc();
@@ -230,6 +231,7 @@ UIL.Gui.prototype = {
 
 UIL.COLOR = 'N';
 UIL.SELECT = '#035fcf';
+UIL.SELECTDOWN = '#024699'
 UIL.txt1 = 'font-family:"Open Sans", sans-serif; font-size:12px; color:#cccccc; outline:none; padding:0px 5px; width:170px; height:18px; left:0; top:0;';
 UIL.BASIC = 'position:absolute; left:100px; pointer-events:auto; cursor:pointer; border:solid 1px rgba(0,0,0,0.2);'
 
@@ -257,6 +259,8 @@ UIL.CC('UIL.list-sel', 'width:10px; height:10px; right:5px; background:#666; mar
 
 UIL.CC('UIL.scroll-bg', 'cursor:w-resize; pointer-events:auto; background:rgba(0,0,0,0.2);');
 UIL.CC('UIL.color-txt', UIL.txt1 );
+
+
 
 
 // UMD (Universal Module Definition)

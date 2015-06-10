@@ -30,25 +30,29 @@ body { font-family:'Open Sans', sans-serif; background-color:#111; background-im
 
 <script>
 var list = ['item-0', 'item-1', 'item-2', 'item-3', 'item-4', 'item-5', 'item-6', 'item-7', 'item-8', 'item-9', 'item-10', 'item-11', 'item-12'];
+var list2 = ['item-0', 'item-1', 'item-2'];
 
 document.getElementById('version').innerHTML = 'il '+UIL.REVISION;
 
 var debug = document.getElementById('debug');
 var callback = function(v){ debug.innerHTML = v; }
+var callbackButton = function(){ debug.innerHTML = "i'm a button !!" ; }
 
 var ui = new UIL.Gui('top:145px; left:50%; margin-left:-150px;');
 
 ui.add('title', {name:'Title'});
 ui.add('bool', {name:'bool', callback:callback});
-ui.add('color', {name:'color', callback:callback, type:'html', value:0xff0000});
+ui.add('color', {name:'color', callback:callback, type:'html', value:0xffffff});
 ui.add('color',  { name:'color', callback:callback, type:'html', value:[0,1,1,1]});
 ui.add('slide', {name:'slide', callback:callback, value:50});
 ui.add('string', {name:'string', callback:callback, value:'welcome to uil'});
 ui.add('list', {name:'list', callback:callback, list:list});
+ui.add('list',   { name:'list', callback:callback, list:list2});
 ui.add('number', {name:'number', callback:callback, value:20});
 ui.add('number', {name:'vector2', callback:callback, value:[0,0] });
 ui.add('number', {name:'vector3', callback:callback, value:[0,0,0] });
 ui.add('number', {name:'vector4', callback:callback, value:[0,0,0,0] });
+ui.add('button', { name:'button', callback:callbackButton });
 
 </script>
 </body>

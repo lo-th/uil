@@ -184,6 +184,7 @@ UIL.Gui.prototype = {
             case 'slide':  n = new UIL.Slide(obj);  break;
             case 'string': n = new UIL.String(obj); break;
             case 'list':   n = new UIL.List(obj);   break;
+            case 'button': n = new UIL.Button(obj);   break;
         }
         this.uis.push(n);
         UIL.calc();
@@ -230,6 +231,7 @@ UIL.Gui.prototype = {
 
 UIL.COLOR = 'N';
 UIL.SELECT = '#035fcf';
+UIL.SELECTDOWN = '#024699'
 UIL.txt1 = 'font-family:"Open Sans", sans-serif; font-size:12px; color:#cccccc; outline:none; padding:0px 5px; width:170px; height:18px; left:0; top:0;';
 UIL.BASIC = 'position:absolute; left:100px; pointer-events:auto; cursor:pointer; border:solid 1px rgba(0,0,0,0.2);'
 
@@ -257,6 +259,8 @@ UIL.CC('UIL.list-sel', 'width:10px; height:10px; right:5px; background:#666; mar
 
 UIL.CC('UIL.scroll-bg', 'cursor:w-resize; pointer-events:auto; background:rgba(0,0,0,0.2);');
 UIL.CC('UIL.color-txt', UIL.txt1 );
+
+
 
 
 // UMD (Universal Module Definition)
@@ -1102,3 +1106,45 @@ UIL.Bool = function(obj){
 
 UIL.Bool.prototype = Object.create( UIL.Proto.prototype );
 UIL.Bool.prototype.constructor = UIL.Bool;
+UIL.Button = function(obj){
+
+    UIL.Proto.call( this, obj );
+
+    this.value = obj.value || false;
+
+    this.c[2] = UIL.DOM('UIL', 'rect', UIL.BASIC+'top:1px; border:solid 1px rgba(90,90,90,0.6);', {width:168, height:16, fill:UIL.bgcolor(UIL.COLOR) });
+    this.c[3] = UIL.DOM('UIL color-txt', 'div', 'top:1px; left:100px; text-align:center;');
+
+    this.c[1].innerHTML = '';
+    this.c[3].innerHTML = this.txt;
+
+    this.f[0] = function(e){
+        this.callback( this.value );
+    }.bind(this);
+
+    this.f[1] = function(e){
+        this.c[3].style.color = '#FFF';
+        UIL.setSVG(this.c[2], 'fill', UIL.SELECT );
+    }.bind(this);
+
+    this.f[2] = function(e){
+        this.c[3].style.color = '#CCC';
+        UIL.setSVG(this.c[2], 'fill', UIL.bgcolor(UIL.COLOR) );
+    }.bind(this);
+
+    this.f[3] = function(e){
+        this.c[3].style.color = '#CCC';
+        UIL.setSVG(this.c[2], 'fill', UIL.SELECTDOWN );
+    }.bind(this);
+
+    this.c[2].onclick = this.f[0];
+    this.c[2].onmouseover = this.f[1];
+    this.c[2].onmouseout = this.f[2];
+    this.c[2].onmouseup = this.f[1];
+    this.c[2].onmousedown = this.f[3];
+
+    this.init();
+}
+
+UIL.Button.prototype = Object.create( UIL.Proto.prototype );
+UIL.Button.prototype.constructor = UIL.Button;
