@@ -95,15 +95,15 @@ UIL.Gui = function(css){
     this.inner = UIL.DOM('UIL inner');
     this.content.appendChild(this.inner);
     
-    this.scrollBG = UIL.DOM('UIL scroll-bg', 'div', 'position:absolute; right:0; top:0; width:20px; height:100%; cursor:s-resize; display:none; ');
+    this.scrollBG = UIL.DOM('UIL scroll-bg', 'div', 'right:0; top:0; width:20px; height:100%; cursor:s-resize; display:none; ');
     this.content.appendChild(this.scrollBG);
     this.scrollBG.name = 'move';
 
-    this.scrollBG2 = UIL.DOM('UIL scroll-bg', 'div', 'position:absolute; left:0; top:0; width:90px; height:100%; cursor:s-resize; display:none; background:none;');
+    this.scrollBG2 = UIL.DOM('UIL scroll-bg', 'div', 'left:0; top:0; width:90px; height:100%; cursor:s-resize; display:none; background:none;');
     this.content.appendChild(this.scrollBG2);
     this.scrollBG2.name = 'move';
     
-    this.scroll = UIL.DOM(null, 'rect', 'position:absolute; right:3px; top:6px; pointer-events:none;', {width:12, height:40, fill:'#666' });
+    this.scroll = UIL.DOM(null, 'rect', 'right:3px; top:6px;', {width:12, height:40, fill:'#666' });
     this.scrollBG.appendChild(this.scroll);  
 
     UIL.main = this;
@@ -112,6 +112,7 @@ UIL.Gui = function(css){
 
     this.f = [];
 
+    // onmousedown
     this.f[0] = function(e){
         if(e.target.name){
             if(e.target.name=='move'){
@@ -121,21 +122,19 @@ UIL.Gui = function(css){
                 UIL.setSVG(this.scroll, 'fill','#FFF');
                 e.preventDefault();
             }
-            
         }
     }.bind(this);
 
     // mousemove
     this.f[1] = function(e){
-       if(this.down){
-            var rect =this.content.getBoundingClientRect();
-            var y = e.clientY-rect.top;
-            if(y<20) y = 20;
-            if(y>(this.height-20)) y = this.height-20;
-            this.py = (((y-20)/(this.height-40))*this.range).toFixed(0);
-            this.inner.style.top = -this.py+'px';
-            this.scroll.style.top = (y-20)+'px';
-        }
+        if(!this.down) return;
+        var rect = this.content.getBoundingClientRect();
+        var y = e.clientY-rect.top;
+        if(y<20) y = 20;
+        if(y>(this.height-20)) y = this.height-20;
+        this.py = (((y-20)/(this.height-40))*this.range).toFixed(0);
+        this.inner.style.top = -this.py+'px';
+        this.scroll.style.top = (y-20)+'px';
     }.bind(this);
 
     // mouseup
@@ -177,14 +176,14 @@ UIL.Gui.prototype = {
     add:function(type, obj){
         var n;
         switch(type){
-            case 'title':  n = new UIL.Title(obj);  break;
-            case 'bool':   n = new UIL.Bool(obj);   break;
-            case 'color':  n = new UIL.Color(obj);  break;
-            case 'number': n = new UIL.Number(obj); break;
-            case 'slide':  n = new UIL.Slide(obj);  break;
+            case 'button': n = new UIL.Button(obj); break;
             case 'string': n = new UIL.String(obj); break;
+            case 'number': n = new UIL.Number(obj); break;
+            case 'title':  n = new UIL.Title(obj);  break;
+            case 'color':  n = new UIL.Color(obj);  break;
+            case 'slide':  n = new UIL.Slide(obj);  break;
+            case 'bool':   n = new UIL.Bool(obj);   break;
             case 'list':   n = new UIL.List(obj);   break;
-            case 'button': n = new UIL.Button(obj);   break;
         }
         this.uis.push(n);
         UIL.calc();
@@ -238,7 +237,7 @@ UIL.BASIC = 'position:absolute; left:100px; pointer-events:auto; cursor:pointer;
 UIL.CC('UIL', 'position:absolute; pointer-events:none; box-sizing:border-box; -o-user-select:none; -ms-user-select:none; -khtml-user-select:none; -webkit-user-select:none; -moz-user-select:none;');
 
 UIL.CC('UIL.content', 'width:'+(UIL.WIDTH)+'px; margin-left:0px; overflow:hidden; background:none;');
-UIL.CC('UIL.mask', 'width:'+(UIL.WIDTH+100)+'px; height:100%; margin-left:-50px; pointer-events:auto; cursor:col-resize; background:none; display:none;' );
+UIL.CC('UIL.mask', 'width:'+(UIL.WIDTH+100)+'px; height:100%; margin-left:-50px; pointer-events:auto; cursor:col-resize; background:none; display:none;');
 UIL.CC('UIL.inner', 'width:'+(UIL.WIDTH)+'px; top:0; left:0; height:auto; overflow:hidden; background:none;');
 
 UIL.CC('UIL.base', 'position:relative; transition: 0.1s ease-out; width:'+(UIL.WIDTH)+'px; height:21px; left:0px; background:rgba(40,40,40,0.5); border-bottom:1px solid rgba(0,0,0,0.2); overflow:hidden;');
