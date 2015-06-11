@@ -1,11 +1,10 @@
 @font-face {
     font-family: 'Open Sans';
-    src: url("open-sans/OpenSans-Regular.eot?v=1.1.0");
-    src: url("open-sans/OpenSans-Regular.eot?#iefix&v=1.1.0") format("embedded-opentype"),
-    url("open-sans/OpenSans-Regular.woff2?v=1.1.0") format("woff2"),
-    url("open-sans/OpenSans-Regular.woff?v=1.1.0") format("woff"),
-    url("open-sans/OpenSans-Regular.ttf?v=1.1.0") format("truetype"),
-    url("open-sans/OpenSans-Regular.svg?v=1.1.0#Regular") format("svg");
+    src: url("open-sans/regular.eot?v=1.1.0");
+    src: url("open-sans/regular.eot?#iefix&v=1.1.0") format("embedded-opentype"),
+    url("open-sans/regular.woff?v=1.1.0") format("woff"),
+    url("open-sans/regular.ttf?v=1.1.0") format("truetype"),
+    url("open-sans/regular.svg?v=1.1.0#open-sans") format("svg");
     font-weight: normal;
     font-style: normal;
     font-smooth: never;

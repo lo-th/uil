@@ -3,8 +3,11 @@ UIL.List = function(obj){
     UIL.Proto.call( this, obj );
 
     this.c[2] = UIL.DOM('UIL list');
-    this.c[3] = UIL.DOM('UIL Listtxt', 'div', 'left:100px; background:'+UIL.bgcolor(UIL.COLOR)+';');
-    this.c[4] = UIL.DOM('UIL', 'path','position:absolute; left:252px; top:1px; pointer-events:none;',{width:16, height:16, 'd':'M 6 4 L 10 8 6 12', 'stroke-width':2, stroke:'#e2e2e2', fill:'none', 'stroke-linecap':'butt' });
+    this.c[3] = UIL.DOM('UIL', 'rect', UIL.BASIC+'top:1px; border:solid 1px rgba(90,90,90,0.6);', {width:168, height:15, fill:UIL.bgcolor(UIL.COLOR) });
+    //this.c[4] = UIL.DOM('UIL', 'path', '',{x:160, 'd':'M 6 4 L 10 8 6 12', 'stroke-width':2, stroke:'#e2e2e2', fill:'none', 'stroke-linecap':'butt' }, this.c[3] );
+    this.c[4] = UIL.DOM('UIL', 'path','position:absolute; left:252px; top:1px; pointer-events:none;',{width:16, height:16, 'd':'M 6 4 L 10 8 6 12', 'stroke-width':2, stroke:'#e2e2e2', fill:'none', 'stroke-linecap':'butt' } );
+    this.c[5] = UIL.DOM('UIL color-txt', 'div', 'top:1px; left:100px; text-align:center;');
+
 
     this.list = obj.list || [];
     if(obj.value){
@@ -45,7 +48,7 @@ UIL.List = function(obj){
         this.listIn.appendChild(item);
     }
 
-    this.c[3].innerHTML = this.value;
+    this.c[5].innerHTML = this.value;
     this.c[2].name = 'list';
 
     // click top
@@ -86,7 +89,7 @@ UIL.List = function(obj){
         var name = e.target.name;
         if(name!=='list' && name!==undefined ){
             this.value = e.target.name;
-            this.c[3].innerHTML = this.value;
+            this.c[5].innerHTML = this.value;
             this.callback(this.value);
             this.f[1]();
         }else if (name=='list'){
@@ -112,6 +115,7 @@ UIL.List = function(obj){
 
     // mouseout
     this.f[5] = function(e){
+        UIL.main.lockwheel = false;
         this.f[6]();
         var name = e.relatedTarget.name;
         if(name==undefined)this.f[1]();
@@ -126,6 +130,7 @@ UIL.List = function(obj){
 
     //onmousewheel
     this.f[7] = function(e){
+        UIL.main.lockwheel = true;
         var delta = 0;
         if(e.wheelDeltaY) delta= -e.wheelDeltaY*0.04;
         else if(e.wheelDelta) delta= -e.wheelDelta*0.2;
@@ -143,12 +148,32 @@ UIL.List = function(obj){
         this.listsel.style.top = ((this.py*70)/this.range)+'px';
     }.bind(this);
 
+    this.f[9] = function(e){
+        this.c[5].style.color = '#FFF';
+        UIL.setSVG(this.c[3], 'fill', UIL.SELECT );
+    }.bind(this);
+
+    this.f[10] = function(e){
+        this.c[5].style.color = '#CCC';
+        UIL.setSVG(this.c[3], 'fill', UIL.bgcolor(UIL.COLOR) );
+    }.bind(this);
+
+    this.f[11] = function(e){
+        this.c[5].style.color = '#CCC';
+        UIL.setSVG(this.c[3], 'fill', UIL.SELECTDOWN );
+    }.bind(this);
+
     this.c[3].onclick = this.f[0];
     this.c[2].onmousedown = this.f[3];
     this.c[2].onmousemove = this.f[4];
     this.c[2].onmouseout = this.f[5];
     this.c[2].onmouseup = this.f[6];
     this.c[2].onmousewheel = this.f[7]; 
+
+    this.c[3].onmouseover = this.f[9];
+    this.c[3].onmouseout = this.f[10];
+    this.c[3].onmouseup = this.f[10];
+    this.c[3].onmousedown = this.f[11];
 
     this.init();
 }
