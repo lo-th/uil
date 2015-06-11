@@ -45,7 +45,8 @@ var debug = document.getElementById('debug');
 var callback = function(v){ debug.innerHTML = v; }
 var callbackButton = function(){ debug.innerHTML = "i'm a button !!" ; }
 
-var ui = new UIL.Gui('top:145px; left:50%; margin-left:-150px;');
+//var ui = new UIL.Gui('top:145px; left:50%; margin-left:-150px;');
+var ui = new UIL.Gui('top:145px; left:50%; margin-left:-100px;', 200);
 
 ui.add('title',  { name:'Title'});
 ui.add('bool',   { name:'bool', callback:callback});

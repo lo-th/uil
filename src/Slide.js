@@ -7,15 +7,15 @@ UIL.Slide = function(obj){
     this.precision = obj.precision || 0;
 
     this.range = this.max - this.min;
-    this.width = 140;
+    this.width = UIL.BW-40;//140;
     this.height = 17;
     this.w = this.width-8;
     this.value = obj.value || 0;
     this.down = false;
 
-    this.c[2] = UIL.DOM('UIL text', 'div', 'left:235px; text-align:right; width:40px;');
+    this.c[2] = UIL.DOM('UIL text', 'div', 'left:'+(UIL.AW+this.width)+'px; text-align:right; width:40px; padding:0px 5px;');
     this.c[3] = UIL.DOM(null, 'rect', UIL.BASIC + 'top:1px; cursor:w-resize;', {width:this.width-2, height:this.height-2, fill:'rgba(0,0,0,0.2)' });
-    this.c[4] = UIL.DOM(null, 'rect', 'position:absolute; left:104px; top:5px; pointer-events:none;', {width:this.width-8, height:this.height-8, fill:'#CCC' });
+    this.c[4] = UIL.DOM(null, 'rect', 'position:absolute; left:'+(UIL.AW+4)+'px; top:5px; pointer-events:none;', {width:this.width-8, height:this.height-8, fill:'#CCC' });
 
     // mouseOver
     this.f[0] = function(e){

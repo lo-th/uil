@@ -31,13 +31,14 @@ UIL.Number = function(obj){
         this.toRad = Math.PI/180;
     }
 
-    this.w = (175/(this.length))-5;
+    //this.w = (175/(this.length))-5;
+    this.w = ((UIL.BW+5)/(this.length))-5;
     this.current = null;
 
     var i = this.length;
     while(i--){
         if(this.isAngle) this.value[i] = (this.value[i] * 180 / Math.PI).toFixed( this.precision );
-        this.c[2+i] = UIL.DOM('UIL itext', 'input', 'width:'+this.w+'px; left:'+(100+(this.w*i)+(5*i))+'px;');
+        this.c[2+i] = UIL.DOM('UIL itext', 'input', 'width:'+this.w+'px; left:'+(UIL.AW+(this.w*i)+(5*i))+'px;');
         this.c[2+i].name = i;
         this.c[2+i].value = this.value[i];
     }

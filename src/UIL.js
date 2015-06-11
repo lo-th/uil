@@ -11,12 +11,52 @@ var UIL = UIL || ( function () {
     //var _uis = [];
     return {
         main:null,
-        REVISION: '0.4',
+        REVISION: '0.5',
         events:[ 'onkeyup', 'onkeydown', 'onclick', 'onchange', 'onmouseover', 'onmouseout', 'onmousemove', 'onmousedown', 'onmouseup', 'onmousewheel' ],
-        WIDTH:300, 
+        WIDTH:0,
+        BW:0,
+        AW:0, 
         svgns:"http://www.w3.org/2000/svg",
+        sizer:function(w){
+            this.WIDTH = w;
+            var s = this.WIDTH/3;
+            this.BW = (s*2)-10;
+            this.AW = s;
+
+            UIL.COLOR = 'N';
+            UIL.SELECT = '#035fcf';
+            UIL.SELECTDOWN = '#024699'
+            UIL.txt1 = 'font-family:"Open Sans", sans-serif; font-size:12px; color:#cccccc; outline:none; padding:0px 10px; left:0; top:1px; height:17px; width:'+this.AW+'px; overflow:hidden;';
+            UIL.txt2 = UIL.txt1 + 'width:'+UIL.BW+'px; left:'+ this.AW+'px';
+            UIL.BASIC = 'position:absolute; left:'+this.AW+'px; pointer-events:auto; cursor:pointer; border:solid 1px rgba(0,0,0,0.2);'
+
+            UIL.CC('UIL', 'position:absolute; pointer-events:none; box-sizing:border-box; -o-user-select:none; -ms-user-select:none; -khtml-user-select:none; -webkit-user-select:none; -moz-user-select:none;');
+
+            UIL.CC('UIL.content', 'width:'+(UIL.WIDTH)+'px; margin-left:0px; overflow:hidden; background:none;');
+            UIL.CC('UIL.mask', 'width:'+(UIL.WIDTH+100)+'px; height:100%; margin-left:-50px; pointer-events:auto; cursor:col-resize; background:none; display:none;');
+            UIL.CC('UIL.inner', 'width:'+(UIL.WIDTH)+'px; top:0; left:0; height:auto; overflow:hidden; background:none;');
+
+            UIL.CC('UIL.base', 'position:relative; transition: 0.1s ease-out; width:'+(UIL.WIDTH)+'px; height:20px; left:0px; background:rgba(40,40,40,0.5); border-bottom:1px solid rgba(0,0,0,0.2); overflow:hidden;');
+
+            //UIL.CC('UIL.text', 'background:#F00;'+ UIL.txt1);
+            //UIL.CC('UIL.text-r', 'background:#0F0;'+ UIL.txt2 ); 
+            UIL.CC('UIL.text', UIL.txt1);
+            UIL.CC('UIL.text-r', UIL.txt2 );
+            UIL.CC('UIL.itext', 'pointer-events:auto; padding:0px 5px; ');
+
+            UIL.CC('input', ' border:solid 1px rgba(0,0,0,0.2); background:rgba(0,0,0,0.2); transition: 0.1s ease-out;'+UIL.txt2, true);
+            UIL.CC('input:focus', 'border: solid 1px rgba(0,0,0,0); background:rgba(0,0,0,0.6);', true);
+
+            UIL.CC('UIL.list', 'box-sizing:content-box; border:20px solid rgba(0,0,0,0); border-bottom:10px solid transparent; left:'+(this.AW-20)+'px; top:0px; width:'+UIL.BW+'px; height:90px; overflow:hidden; cursor:s-resize; pointer-events:auto; display:none;');
+            UIL.CC('UIL.list-in', 'left:0; top:0; width:'+UIL.BW+'px; background:rgba(0,0,0,0.2); ');
+            UIL.CC('UIL.listItem', 'position:relative; width:'+UIL.BW+'px; height:18px; background:rgba(0,0,0,0.2); border-bottom:1px solid rgba(0,0,0,0.2); pointer-events:auto; cursor:pointer;'+UIL.txt1);
+            UIL.CC('UIL.listItem:hover', 'background:'+UIL.SELECT+'; color:#FFFFFF;')
+            UIL.CC('UIL.list-sel', 'width:10px; height:10px; right:5px; background:#666; margin-top:5px;');
+
+            UIL.CC('UIL.scroll-bg', 'cursor:w-resize; pointer-events:auto; background:rgba(256,0,0,0.2);');
+        },
         bgcolor: function(p, a){
-            var r=48, g=48, b=48; 
+            var r=48, g=48, b=48;
             a = a || 0.66;
             if(p){
                 switch(p){
@@ -76,29 +116,21 @@ var UIL = UIL || ( function () {
             document.getElementsByTagName('head')[0].appendChild(style);
             if(!(style.sheet||{}).insertRule) (style.styleSheet || style.sheet).addRule(adds+name, rules);
             else style.sheet.insertRule(adds+name+"{"+rules+"}",0);
-        },
-        calc:function(){
-            var total = 0;
-            var i = this.main.uis.length;
-            while(i--) total+=this.main.uis[i].h;
-            if(total>this.main.height) this.main.showScroll(total);
-            else this.main.hideScroll();
         }
     };
 })();
 
 
-UIL.Gui = function(css){
+UIL.Gui = function(css, w){
+    UIL.sizer(w || 300);
     this.uis = [];
-    this.lockwheel = false;
-    this.py = 0;
-    this.height = 0;
-    this.sh=20;
-    this.range = 0;
 
-    
+    this.lockwheel = false;
+
     this.content = UIL.DOM('UIL content', 'div', css);
     document.body.appendChild(this.content);
+
+    this.top = parseFloat(this.content.style.top.substring(0,this.content.style.top.length-2));
 
     var margin = this.content.style.marginLeft;
     var decal = Number(margin.substring(0,margin.length-2));
@@ -110,15 +142,15 @@ UIL.Gui = function(css){
     this.inner = UIL.DOM('UIL inner');
     this.content.appendChild(this.inner);
     
-    this.scrollBG = UIL.DOM('UIL scroll-bg', 'div', 'right:0; top:0; width:20px; height:100%; cursor:s-resize; display:none; background:none; ');
+    this.scrollBG = UIL.DOM('UIL scroll-bg', 'div', 'right:0; top:0; width:10px; height:100%; cursor:s-resize; display:none; background:none; ');
     this.content.appendChild(this.scrollBG);
     this.scrollBG.name = 'move';
 
-    this.scrollBG2 = UIL.DOM('UIL scroll-bg', 'div', 'left:0; top:0; width:90px; height:100%; cursor:s-resize; display:none; background:none;');
+    this.scrollBG2 = UIL.DOM('UIL scroll-bg', 'div', 'left:0; top:0; width:'+UIL.AW+'px; height:100%; cursor:s-resize; display:none; background:none;');
     this.content.appendChild(this.scrollBG2);
     this.scrollBG2.name = 'move';
     
-    this.scroll = UIL.DOM(null, 'rect', 'position:absolute; width:100%; height:100%; pointer-events:none;', {width:1, height:20, x:299, fill:'#666' });
+    this.scroll = UIL.DOM(null, 'rect', 'position:absolute; width:100%; height:100%; pointer-events:none;', {width:1, height:20, x:UIL.WIDTH-1, fill:'#666' });
     UIL.DOM(null, 'rect', '', {width:1, height:20, x:0, fill:'#666' }, this.scroll);
     UIL.DOM(null, 'rect', '', {width:300, height:1, x:0, fill:'#666' }, this.scroll);
     this.content.appendChild(this.scroll);  
@@ -147,11 +179,14 @@ UIL.Gui = function(css){
     this.f[1] = function(e){
         if(!this.down) return;
         var rect = this.content.getBoundingClientRect();
-        var y = (e.clientY-rect.top);
-        if(y<20) y = 20;
-        if(y>(this.height-20)) y = this.height-20;
-        this.py = (((y-20)/(this.height-40))*this.range).toFixed(0);
+        var y = (e.clientY-rect.top)-(this.zone*0.5);
+
+        if(y<0) y = 0;
+        if(y>this.zone) y = this.zone;
+        this.py = ((y/this.zone)*this.range);
+
         this.f[5]();
+
     }.bind(this);
 
     // mouseup
@@ -179,7 +214,9 @@ UIL.Gui = function(css){
         this.py+=delta;
         if(this.py<0) this.py=0;
         if(this.py>this.range) this.py=this.range;
+
         this.f[5]();
+
     }.bind(this);
 
     //update position
@@ -201,15 +238,10 @@ UIL.Gui = function(css){
     this.content.onmouseout = this.f[2];
     this.content.onmouseup = this.f[2];
     this.content.onmouseover = this.f[3];
-    this.content.onmousewheel = this.f[4];
-
-    this.height = 0;
-    this.top = parseFloat(this.content.style.top.substring(0,this.content.style.top.length-2));
-    this.height = window.innerHeight-this.top;
-
-    this.content.style.height = this.height+'px';
+    
 
     window.addEventListener("resize", function(e){this.resize(e)}.bind(this), false );
+    this.resize();
 }
 
 UIL.Gui.prototype = {
@@ -233,15 +265,14 @@ UIL.Gui.prototype = {
             case 'list':   n = new UIL.List(obj);   break;
         }
         this.uis.push(n);
-        UIL.calc();
+        this.calc();
     },
     resize:function(e){
-        this.height = window.innerHeight-this.top;
-        this.f[5](0);
-        //this.inner.style.top = '0px';
-        //this.scroll.style.top = '0px';
+        this.height = window.innerHeight-this.top-5;
         this.content.style.height = this.height+'px';
-        UIL.calc();
+        this.zone = this.height-40;
+        this.calc();
+        this.f[5](0);
     },
     remove: function ( n ) { 
         var i = this.uis.indexOf( n ); 
@@ -252,15 +283,13 @@ UIL.Gui.prototype = {
     },
     clear:function(){
         this.f[5](0);
-        //this.inner.style.top = '0px';
-        //this.scroll.style.top = '0px';
         var i = this.uis.length;
         while(i--){
             this.uis[i].clear();
             this.uis.pop();
         }
         this.uis = [];
-        UIL.calc();
+        this.calc();
     },
     showScroll:function(h){
         this.min = 0;
@@ -275,6 +304,9 @@ UIL.Gui.prototype = {
         this.scroll.style.display = 'block';
         this.scrollBG.style.display = 'block';
         this.scrollBG2.style.display = 'block';
+
+        this.content.onmousewheel = this.f[4];
+
         this.f[5](0);
     },
     hideScroll:function(){
@@ -282,38 +314,19 @@ UIL.Gui.prototype = {
         this.scroll.style.display = 'none';
         this.scrollBG.style.display = 'none';
         this.scrollBG2.style.display = 'none';
+
+        this.content.onmousewheel = null;
+    },
+    calc:function(){
+        var total = 0;
+        var i = this.uis.length;
+        while(i--) total+=this.uis[i].h;
+        if(total>this.height) this.showScroll(total);
+        else this.hideScroll();
     }
 }
 
-UIL.COLOR = 'N';
-UIL.SELECT = '#035fcf';
-UIL.SELECTDOWN = '#024699'
-UIL.txt1 = 'font-family:"Open Sans", sans-serif; font-size:12px; color:#cccccc; outline:none; padding:0px 10px; width:170px; left:0; top:1px; height:17px; padding-bottom:1px;';
-UIL.txt2 = UIL.txt1 + 'padding:0px 5px;';
-UIL.BASIC = 'position:absolute; left:100px; pointer-events:auto; cursor:pointer; border:solid 1px rgba(0,0,0,0.2);'
 
-UIL.CC('UIL', 'position:absolute; pointer-events:none; box-sizing:border-box; -o-user-select:none; -ms-user-select:none; -khtml-user-select:none; -webkit-user-select:none; -moz-user-select:none;');
-
-UIL.CC('UIL.content', 'width:'+(UIL.WIDTH)+'px; margin-left:0px; overflow:hidden; background:none;');
-UIL.CC('UIL.mask', 'width:'+(UIL.WIDTH+100)+'px; height:100%; margin-left:-50px; pointer-events:auto; cursor:col-resize; background:none; display:none;');
-UIL.CC('UIL.inner', 'width:'+(UIL.WIDTH)+'px; top:0; left:0; height:auto; overflow:hidden; background:none;');
-
-UIL.CC('UIL.base', 'position:relative; transition: 0.1s ease-out; width:'+(UIL.WIDTH)+'px; height:20px; left:0px; background:rgba(40,40,40,0.5); border-bottom:1px solid rgba(0,0,0,0.2); overflow:hidden;');
-
-UIL.CC('UIL.text', 'width:90px; top:2px; height:16px; text-align:Left; overflow:hidden; white-space:nowrap;'+ UIL.txt1);
-UIL.CC('UIL.itext', 'pointer-events:auto; left:100px;');
-
-UIL.CC('input', ' border:solid 1px rgba(0,0,0,0.2); background:rgba(0,0,0,0.2); transition: 0.1s ease-out;'+ UIL.txt2, true);
-UIL.CC('input:focus', 'border: solid 1px rgba(0,0,0,0); background:rgba(0,0,0,0.6);', true);
-
-UIL.CC('UIL.list', 'box-sizing:content-box; border:20px solid rgba(0,0,0,0); border-bottom:10px solid transparent; left:80px; top:0px; width:170px; height:90px; overflow:hidden; cursor:s-resize; pointer-events:auto; display:none;');
-UIL.CC('UIL.list-in', 'left:0; top:0; width:170px; background:rgba(0,0,0,0.2); ');
-UIL.CC('UIL.listItem', 'position:relative; width:170px; height:18px; background:rgba(0,0,0,0.2); padding-left:5px; border-bottom:1px solid rgba(0,0,0,0.2); pointer-events:auto; cursor:pointer;'+UIL.txt1);
-UIL.CC('UIL.listItem:hover', 'background:'+UIL.SELECT+'; color:#FFFFFF;')
-UIL.CC('UIL.list-sel', 'width:10px; height:10px; right:5px; background:#666; margin-top:5px;');
-
-UIL.CC('UIL.scroll-bg', 'cursor:w-resize; pointer-events:auto; background:rgba(256,0,0,0.2);');
-UIL.CC('UIL.color-txt', UIL.txt1 );
 
 
 

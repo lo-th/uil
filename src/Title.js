@@ -9,9 +9,9 @@ UIL.Title = function(obj){
     var prefix = obj.prefix || '';
 
     this.c[0].style.height = this.h+'px';
-    this.c[1].style.width = '200px';
+    this.c[1].style.width = UIL.WIDTH-50 + 'px';
     this.c[1].style.top = '8px';
-    this.c[2] = UIL.DOM('UIL text', 'div', 'left:235px; text-align:right; top:8px; width:40px;');
+    this.c[2] = UIL.DOM('UIL text', 'div', 'left:'+(UIL.WIDTH-50)+'px; text-align:right; top:8px; width:40px;');
 
     var idt = id || 0;
     if(id<10) idt = '0'+id;

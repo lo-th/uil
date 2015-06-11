@@ -3,10 +3,10 @@ UIL.List = function(obj){
     UIL.Proto.call( this, obj );
 
     this.c[2] = UIL.DOM('UIL list');
-    this.c[3] = UIL.DOM('UIL', 'rect', UIL.BASIC+'top:1px; border:solid 1px rgba(90,90,90,0.6);', {width:168, height:15, fill:UIL.bgcolor(UIL.COLOR) });
+    this.c[3] = UIL.DOM('UIL', 'rect', UIL.BASIC+'top:1px; border:solid 1px rgba(90,90,90,0.6); ', {width:UIL.BW-2, height:15, fill:UIL.bgcolor(UIL.COLOR) });
     //this.c[4] = UIL.DOM('UIL', 'path', '',{x:160, 'd':'M 6 4 L 10 8 6 12', 'stroke-width':2, stroke:'#e2e2e2', fill:'none', 'stroke-linecap':'butt' }, this.c[3] );
-    this.c[4] = UIL.DOM('UIL', 'path','position:absolute; left:252px; top:1px; pointer-events:none;',{width:16, height:16, 'd':'M 6 4 L 10 8 6 12', 'stroke-width':2, stroke:'#e2e2e2', fill:'none', 'stroke-linecap':'butt' } );
-    this.c[5] = UIL.DOM('UIL color-txt', 'div', 'top:1px; left:100px; text-align:center;');
+    this.c[4] = UIL.DOM('UIL', 'path','position:absolute; left:'+(UIL.BW+84)+'px; top:1px; pointer-events:none;',{width:16, height:16, 'd':'M 6 4 L 10 8 6 12', 'stroke-width':2, stroke:'#e2e2e2', fill:'none', 'stroke-linecap':'butt' } );
+    this.c[5] = UIL.DOM('UIL text-r', 'div', 'text-align:center;');
 
 
     this.list = obj.list || [];
@@ -20,14 +20,14 @@ UIL.List = function(obj){
     this.show = false;
     this.length = this.list.length;
     this.max = this.length*18;
-    this.w = 170;
+    this.w = UIL.BW;
     this.down = false;
     this.range = this.max - 90;
     this.py = 0;
     this.scroll = false;
 
     if(this.max>90){ 
-        this.w = 150;
+        this.w = UIL.BW-20;
         this.scroll = true;
     }
 
@@ -39,7 +39,7 @@ UIL.List = function(obj){
     this.c[2].appendChild(this.listsel);
 
     // populate list
-    var item, n, l = 170;
+    var item, n, l = UIL.BW;
     for(var i=0; i<this.length; i++){
         n = this.list[i];
         item = UIL.DOM('UIL listItem', 'div', 'width:'+this.w+'px; height:18px;');
@@ -64,7 +64,7 @@ UIL.List = function(obj){
         this.c[0].style.height = this.h+'px';
         this.c[2].style.display = 'none';
         UIL.setSVG(this.c[4], 'd','M 6 4 L 10 8 6 12');
-        UIL.calc();
+        UIL.main.calc();
     }.bind(this);
 
     // open
@@ -81,7 +81,7 @@ UIL.List = function(obj){
         this.c[0].style.height = this.h+'px';
         this.c[2].style.display = 'block';
         UIL.setSVG(this.c[4], 'd','M 12 6 L 8 10 4 6');
-        UIL.calc();
+        UIL.main.calc();
     }.bind(this);
 
     // mousedown

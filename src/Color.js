@@ -3,17 +3,17 @@ UIL.Color = function(obj){
     UIL.Proto.call( this, obj );
 
     this.type = obj.type || 'array';
-    this.width = 170;
+    this.width = UIL.BW;
     this.wheelWidth = this.width*0.1;
-    this.decalLeft = 100;
+    this.decalLeft = UIL.AW;
     this.decal = 22;
     this.radius = (this.width - this.wheelWidth) * 0.5 - 1;
     this.square = Math.floor((this.radius - this.wheelWidth * 0.5) * 0.7) - 1;
     this.mid = Math.floor(this.width * 0.5 );
     this.markerSize = this.wheelWidth * 0.3;
 
-    this.c[2] = UIL.DOM('UIL', 'rect', UIL.BASIC+'top:1px;',  { width:168, height:15, fill:'#000' });
-    this.c[3] = UIL.DOM('UIL color-txt', 'div', 'left:100px;');
+    this.c[2] = UIL.DOM('UIL', 'rect', UIL.BASIC+'top:1px;',  { width:UIL.BW-2, height:15, fill:'#000' });
+    this.c[3] = UIL.DOM('UIL text-r');
     this.c[4] = UIL.DOM('UIL', 'div', 'width:'+(this.square * 2 - 1)+'px; ' + 'height:'+(this.square * 2 - 1)+'px; ' + 'left:'+((this.mid - this.square)+this.decalLeft)+'px; '+ 'top:'+((this.mid - this.square)+this.decal)+'px;  display:none;');
     this.c[5] = UIL.DOM('UIL', 'canvas', 'left:'+this.decalLeft+'px;  top:'+this.decal+'px;  display:none;');
     this.c[6] = UIL.DOM('UIL', 'canvas', 'left:'+this.decalLeft+'px;  top:'+this.decal+'px;  pointer-events:auto; cursor:pointer; display:none;');
@@ -92,20 +92,20 @@ UIL.Color = function(obj){
         this.c[6].style.display = 'none';
         this.c[6].onmousedown = null;
         this.c[6].onmouseout = null;
-        UIL.calc();
+        UIL.main.calc();
     }.bind(this);
 
     //show
     this.f[5] = function(){
         this.isShow = true;
-        this.h = 194;
+        this.h = this.width+30;// 194;
         this.c[0].style.height = this.h+'px';
         this.c[4].style.display = 'block';
         this.c[5].style.display = 'block';
         this.c[6].style.display = 'block';
         this.c[6].onmousedown = this.f[1];
         this.c[6].onmouseout = this.f[4];
-        UIL.calc();
+        UIL.main.calc();
     }.bind(this);
 
     this.c[2].onclick = this.f[0];
