@@ -4,7 +4,7 @@ UIL.String = function(obj){
 
     this.value = obj.value || '';
 
-    this.c[2] = UIL.DOM('UIL itext', 'input' );
+    this.c[2] = UIL.DOM('UIL text-r', 'input', 'pointer-events:auto; padding:0px 5px;' );
 
     this.f[0] = function(e){
         if (!e) e = window.event;

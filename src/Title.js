@@ -8,9 +8,11 @@ UIL.Title = function(obj){
     var id = obj.id || 0;
     var prefix = obj.prefix || '';
 
-    this.c[0].style.height = this.h+'px';
-    this.c[1].className = 'UIL text-t';
-    this.c[2] = UIL.DOM('UIL text-m', 'div', 'top:8px;');
+    this.c[2] = UIL.DOM('UIL text', 'div', 'text-align:right; width:40px; padding:0px 5px; top:8px;');
+
+    this.setDom(0, 'height', this.h);
+    this.setDom(1, 'top', 8);
+    
 
     var idt = id || 0;
     if(id<10) idt = '0'+id;

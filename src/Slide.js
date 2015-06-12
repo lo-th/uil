@@ -11,7 +11,9 @@ UIL.Slide = function(obj){
     this.value = obj.value || 0;
     this.down = false;
 
-    this.c[2] = UIL.DOM('UIL text-m');
+    //this.c[2] = UIL.DOM('UIL text-m');
+    this.c[2] = UIL.DOM('UIL text', 'div', 'text-align:right; width:40px; padding:0px 5px;');
+
     this.c[3] = UIL.DOM('UIL svgbox', 'rect', 'width:'+this.width+'px; height:'+this.height+'px; cursor:w-resize;', { width:this.width, height:this.height, fill:'rgba(0,0,0,0.2)' });
     this.c[4] = UIL.DOM('UIL svgbox', 'rect', 'width:'+this.width+'px; height:'+this.height+'px; pointer-events:none;', {x:3, y:3, width:this.width-8, height:this.height-8, fill:'#CCC' });
 
