@@ -59,9 +59,9 @@ UIL.Proto.prototype = {
     setTypeNumber:function( obj ){
         this.min = -Infinity;
         this.max = Infinity;
-        this.precision = 0;
+        this.precision = 2;
         this.prev = null;
-        this.step = 1;
+        this.step = 0.01;
 
         if(obj.min !== undefined ) this.min = obj.min;
         if(obj.max !== undefined ) this.max = obj.max;

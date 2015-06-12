@@ -132,7 +132,8 @@ var UIL = UIL || ( function () {
 })();
 
 
-UIL.Gui = function(css, w){
+UIL.Gui = function(css, w, center){
+    this.isCenter = center || false;
     UIL.sizer(w || 300);
     UIL.classDefine();
     this.uis = [];
@@ -144,12 +145,8 @@ UIL.Gui = function(css, w){
 
     this.top = parseFloat(this.content.style.top.substring(0,this.content.style.top.length-2));
 
-    var margin = this.content.style.marginLeft;
-    var decal = Number(margin.substring(0,margin.length-2));
-
     this.mask = UIL.DOM('UIL mask', 'div', css);
     document.body.appendChild(this.mask);
-    this.mask.style.marginLeft = (decal-50)+'px';
 
     this.inner = UIL.DOM('UIL inner');
     this.content.appendChild(this.inner);
@@ -168,6 +165,8 @@ UIL.Gui = function(css, w){
     this.content.appendChild(this.scroll);  
 
     UIL.main = this;
+
+    this.changeWidth();
 
     this.down = false;
 
@@ -338,7 +337,16 @@ UIL.Gui.prototype = {
     },
     changeWidth:function(){
         UIL.setDOM(this.content, 'width', UIL.WIDTH);
-        UIL.setDOM(this.content, 'margin-left', -UIL.WIDTH*0.5);
+        var decal = 0;
+        if(this.isCenter){
+            decal = -UIL.WIDTH*0.5; 
+            UIL.setDOM(this.content, 'margin-left', decal);
+        }
+
+
+        UIL.setDOM(this.mask, 'margin-left', decal-50);
+        UIL.setDOM(this.mask, 'width', UIL.WIDTH+100);
+
         UIL.setDOM(this.inner, 'width', UIL.WIDTH);
         UIL.setSVG(this.scroll, 'x',UIL.WIDTH-1,0);
         UIL.setSVG(this.scroll, 'width',UIL.WIDTH,2);
