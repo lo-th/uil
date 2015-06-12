@@ -57,16 +57,26 @@ UIL.Proto.prototype = {
         if(this.value)this.value = null;
     },
     setTypeNumber:function( obj ){
+        
         this.min = -Infinity;
         this.max = Infinity;
+
         this.precision = 2;
-        this.prev = null;
+        if(obj.precision !== undefined ) this.precision = obj.precision;
+        //this.prev = null;
         this.step = 0.01;
+        switch(this.precision){
+            case 0:  this.step = 1; break;
+            case 1:  this.step = 0.1; break;
+            case 2:  this.step = 0.01; break;
+            case 3:  this.step = 0.001; break;
+            case 4:  this.step = 0.0001; break;
+        }
 
         if(obj.min !== undefined ) this.min = obj.min;
         if(obj.max !== undefined ) this.max = obj.max;
         if(obj.step !== undefined ) this.step = obj.step;
-        if(obj.precision !== undefined ) this.precision = obj.precision;
+        
     },
     numValue:function(n){
         return Math.min( this.max, Math.max( this.min, n ) ).toFixed( this.precision )*1;
