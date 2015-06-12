@@ -4,19 +4,19 @@ UIL.Proto = function(obj){
 
     this.h = 20;
     if(obj.color) UIL.COLOR = obj.color;
-    this.color = UIL.COLOR
+    this.color = UIL.COLOR;
 
-    this.txt = obj.name || '';
+    this.txt = obj.name || 'Proto';
+    this.target = obj.target || null;
     this.callback = obj.callback || function(){};
 
     this.c = [];
     this.f = [];
 
     this.c[0] = UIL.DOM('UIL base');
-    if(this.txt!==''){
-        this.c[1] = UIL.DOM('UIL text');
-        this.c[1].innerHTML = this.txt;
-    }
+
+    this.c[1] = UIL.DOM('UIL text');
+    this.c[1].innerHTML = this.txt;
 }
 
 UIL.Proto.prototype = {
@@ -25,7 +25,10 @@ UIL.Proto.prototype = {
     init:function(){
         this.c[0].style.background = UIL.bgcolor(this.color);
         for(var i = 0; i<this.c.length; i++){
-            if(i==0) UIL.main.inner.appendChild(this.c[0]);
+            if(i==0){ 
+                if(this.target!==null) this.target.appendChild(this.c[0]);
+                else UIL.main.inner.appendChild(this.c[0]);
+            }
             else this.c[0].appendChild(this.c[i]);
         }
     },
@@ -34,7 +37,8 @@ UIL.Proto.prototype = {
         var i = this.c.length, j;
         while(i--){
             if(i==0){ 
-                UIL.main.inner.removeChild(this.c[0]);
+                if(this.target!==null) this.target.removeChild(this.c[0]);
+                else UIL.main.inner.removeChild(this.c[0]);
             } else {
                 j = ev.length;
                 while(j--){ if(this.c[i][ev[j]]!==null) this.c[i][ev[j]] = null; }
@@ -65,6 +69,10 @@ UIL.Proto.prototype = {
         if(obj.precision !== undefined ) this.precision = obj.precision;
     },
     numValue:function(n){
-        return Math.min( this.max, Math.max( this.min, n ) ).toFixed( this.precision );
+        return Math.min( this.max, Math.max( this.min, n ) ).toFixed( this.precision )*1;
     },
+    rSize:function(){
+        this.c[0].style.width = UIL.WIDTH+'px';
+        this.c[1].style.width = UIL.AW+'px';
+    }
 }

@@ -3,9 +3,9 @@ UIL.List = function(obj){
     UIL.Proto.call( this, obj );
 
     this.c[2] = UIL.DOM('UIL list');
-    this.c[3] = UIL.DOM('UIL', 'rect', UIL.BASIC+'top:1px; border:solid 1px rgba(90,90,90,0.6); ', {width:UIL.BW-2, height:15, fill:UIL.bgcolor(UIL.COLOR) });
+    this.c[3] = UIL.DOM('UIL svgbox', 'rect', '', {width:UIL.BW, height:15, fill:UIL.bgcolor(UIL.COLOR) });
     //this.c[4] = UIL.DOM('UIL', 'path', '',{x:160, 'd':'M 6 4 L 10 8 6 12', 'stroke-width':2, stroke:'#e2e2e2', fill:'none', 'stroke-linecap':'butt' }, this.c[3] );
-    this.c[4] = UIL.DOM('UIL', 'path','position:absolute; left:'+(UIL.BW+84)+'px; top:1px; pointer-events:none;',{width:16, height:16, 'd':'M 6 4 L 10 8 6 12', 'stroke-width':2, stroke:'#e2e2e2', fill:'none', 'stroke-linecap':'butt' } );
+    this.c[4] = UIL.DOM('UIL', 'path','position:absolute; width:16px; left:'+(UIL.AW+UIL.BW-17)+'px; top:1px; pointer-events:none;',{ width:16, height:16, 'd':'M 6 4 L 10 8 6 12', 'stroke-width':2, stroke:'#e2e2e2', fill:'none', 'stroke-linecap':'butt' } );
     this.c[5] = UIL.DOM('UIL text-r', 'div', 'text-align:center;');
 
 
@@ -190,3 +190,39 @@ UIL.List.prototype.clear = function(){
     }
     UIL.Proto.prototype.clear.call( this );
 }
+
+UIL.List.prototype.rSize = function(){
+    UIL.setSVG(this.c[3], 'width', UIL.BW);
+    UIL.setDOM(this.c[3], 'width', UIL.BW);
+    UIL.setDOM(this.c[3], 'left', UIL.AW);
+
+    UIL.setDOM(this.c[4], 'left', UIL.AW+UIL.BW-17);
+
+    UIL.setDOM(this.c[5], 'left', UIL.AW);
+    UIL.setDOM(this.c[5], 'width', UIL.BW);
+
+    UIL.setDOM(this.c[2], 'left', UIL.AW-20);
+    UIL.setDOM(this.c[2], 'width', UIL.BW);
+
+
+    this.w = UIL.BW;
+    if(this.max>90) this.w = UIL.BW-20;
+    for(var i=0; i<this.length; i++){
+        UIL.setDOM(this.listIn.children[i], 'width', this.w);
+    }
+    
+    /*this.width = UIL.BW-40;
+    this.w = this.width-8;
+    
+    //UIL.setSVG(this.c[4], 'width',this.width);
+    
+    UIL.setDOM(this.c[4], 'left', UIL.AW);
+    
+    UIL.setDOM(this.c[4], 'width', this.width);
+
+    UIL.setDOM(this.c[2], 'left', UIL.WIDTH-50);
+
+    this.f[5](false);*/
+
+    UIL.Proto.prototype.rSize.call( this );
+};

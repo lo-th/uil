@@ -18,17 +18,22 @@ var UIL = UIL || ( function () {
         AW:0, 
         svgns:"http://www.w3.org/2000/svg",
         sizer:function(w){
-            this.WIDTH = w;
+            this.WIDTH = w.toFixed(0);
             var s = this.WIDTH/3;
             this.BW = (s*2)-10;
             this.AW = s;
 
+            
+
+            if(this.main) this.main.changeWidth();
+        },
+        classDefine:function(){
             UIL.COLOR = 'N';
             UIL.SELECT = '#035fcf';
             UIL.SELECTDOWN = '#024699'
             UIL.txt1 = 'font-family:"Open Sans", sans-serif; font-size:12px; color:#cccccc; outline:none; padding:0px 10px; left:0; top:1px; height:17px; width:'+this.AW+'px; overflow:hidden;';
-            UIL.txt2 = UIL.txt1 + 'width:'+UIL.BW+'px; left:'+ this.AW+'px';
-            UIL.BASIC = 'position:absolute; left:'+this.AW+'px; pointer-events:auto; cursor:pointer; border:solid 1px rgba(0,0,0,0.2);'
+            UIL.txt2 = UIL.txt1 + 'width:'+UIL.BW+'px; left:'+ this.AW+'px;';
+            //UIL.BASIC = 'position:absolute; left:'+this.AW+'px; pointer-events:auto; cursor:pointer; border:solid 1px rgba(0,0,0,0.2);'
 
             UIL.CC('UIL', 'position:absolute; pointer-events:none; box-sizing:border-box; -o-user-select:none; -ms-user-select:none; -khtml-user-select:none; -webkit-user-select:none; -moz-user-select:none;');
 
@@ -36,24 +41,25 @@ var UIL = UIL || ( function () {
             UIL.CC('UIL.mask', 'width:'+(UIL.WIDTH+100)+'px; height:100%; margin-left:-50px; pointer-events:auto; cursor:col-resize; background:none; display:none;');
             UIL.CC('UIL.inner', 'width:'+(UIL.WIDTH)+'px; top:0; left:0; height:auto; overflow:hidden; background:none;');
 
-            UIL.CC('UIL.base', 'position:relative; transition: 0.1s ease-out; width:'+(UIL.WIDTH)+'px; height:20px; left:0px; background:rgba(40,40,40,0.5); border-bottom:1px solid rgba(0,0,0,0.2); overflow:hidden;');
+            UIL.CC('UIL.base', 'position:relative; transition: 0.1s ease-out; width:'+(UIL.WIDTH)+'px; height:20px; left:0; background:rgba(40,40,40,0.5); border-bottom:1px solid rgba(0,0,0,0.2); overflow:hidden;');
 
-            //UIL.CC('UIL.text', 'background:#F00;'+ UIL.txt1);
-            //UIL.CC('UIL.text-r', 'background:#0F0;'+ UIL.txt2 ); 
             UIL.CC('UIL.text', UIL.txt1);
-            UIL.CC('UIL.text-r', UIL.txt2 );
-            UIL.CC('UIL.itext', 'pointer-events:auto; padding:0px 5px; ');
+            UIL.CC('UIL.text-t', UIL.txt1+'width:'+(this.WIDTH-50)+'px; top:8px; ');
+            UIL.CC('UIL.text-m', UIL.txt1+'left:'+(this.WIDTH-50)+'px; text-align:right; width:40px; padding:0px 5px;');
+            UIL.CC('UIL.text-r', UIL.txt2);
+            UIL.CC('UIL.itext', 'pointer-events:auto; padding:0px 5px;');
 
             UIL.CC('input', ' border:solid 1px rgba(0,0,0,0.2); background:rgba(0,0,0,0.2); transition: 0.1s ease-out;'+UIL.txt2, true);
             UIL.CC('input:focus', 'border: solid 1px rgba(0,0,0,0); background:rgba(0,0,0,0.6);', true);
 
-            UIL.CC('UIL.list', 'box-sizing:content-box; border:20px solid rgba(0,0,0,0); border-bottom:10px solid transparent; left:'+(this.AW-20)+'px; top:0px; width:'+UIL.BW+'px; height:90px; overflow:hidden; cursor:s-resize; pointer-events:auto; display:none;');
-            UIL.CC('UIL.list-in', 'left:0; top:0; width:'+UIL.BW+'px; background:rgba(0,0,0,0.2); ');
-            UIL.CC('UIL.listItem', 'position:relative; width:'+UIL.BW+'px; height:18px; background:rgba(0,0,0,0.2); border-bottom:1px solid rgba(0,0,0,0.2); pointer-events:auto; cursor:pointer;'+UIL.txt1);
+            UIL.CC('UIL.list', 'box-sizing:content-box; border:20px solid transparent; border-bottom:10px solid transparent; left:'+(this.AW-20)+'px; top:0px; width:'+UIL.BW+'px; height:90px; overflow:hidden; cursor:s-resize; pointer-events:auto; display:none;');
+            UIL.CC('UIL.list-in', 'left:0; top:0; width:100%; background:rgba(0,0,0,0.2); ');
+            UIL.CC('UIL.listItem', 'position:relative; height:18px; background:rgba(0,0,0,0.2); border-bottom:1px solid rgba(0,0,0,0.2); pointer-events:auto; cursor:pointer;'+UIL.txt1);
             UIL.CC('UIL.listItem:hover', 'background:'+UIL.SELECT+'; color:#FFFFFF;')
             UIL.CC('UIL.list-sel', 'width:10px; height:10px; right:5px; background:#666; margin-top:5px;');
 
             UIL.CC('UIL.scroll-bg', 'cursor:w-resize; pointer-events:auto; background:rgba(256,0,0,0.2);');
+            UIL.CC('UIL.svgbox', 'left:'+(this.AW)+'px; top:1px; width:'+(this.BW)+'px; height:17px; top:1px; pointer-events:auto; cursor:pointer; border:solid 1px rgba(90,90,90,0.6);');
         },
         bgcolor: function(p, a){
             var r=48, g=48, b=48;
@@ -63,6 +69,7 @@ var UIL = UIL || ( function () {
                     case 'r': case 'R': case 'S': r=160; b=68; break;
                     case 'g': case 'G': case 'E': g=120; b=68; break;
                     case 'b': case 'B': case 'T': b=120; g=68; break;
+                    case 'no': case 'NO': a=0; break;
                 }
             }
             return 'rgba('+r+','+g+','+b+','+a+')';
@@ -80,6 +87,9 @@ var UIL = UIL || ( function () {
         setSVG:function(dom, type, value, id){
             dom.childNodes[id || 0].setAttributeNS(null, type, value );
         },
+        setDOM:function(dom, type, value){
+            dom.style[type] = value+'px';
+        },
 
         DOM:function(cc, type, css, obj, dom){ 
             type = type || 'div';
@@ -95,9 +105,10 @@ var UIL = UIL || ( function () {
                 dom.appendChild(g);
                 
                 for(var e in obj){
-                    if(e=='width' || e=='height') dom.setAttribute( e, obj[e] );
+                    //if(e=='width' || e=='height') dom.setAttribute( e, obj[e] );
                     g.setAttribute( e, obj[e] );
                 }
+                if(cc) dom.setAttribute('class', cc);
             } else {
                 if(dom==undefined) dom = document.createElement(type);
                 if(cc) dom.className = cc;
@@ -123,6 +134,7 @@ var UIL = UIL || ( function () {
 
 UIL.Gui = function(css, w){
     UIL.sizer(w || 300);
+    UIL.classDefine();
     this.uis = [];
 
     this.lockwheel = false;
@@ -323,6 +335,17 @@ UIL.Gui.prototype = {
         while(i--) total+=this.uis[i].h;
         if(total>this.height) this.showScroll(total);
         else this.hideScroll();
+    },
+    changeWidth:function(){
+        UIL.setDOM(this.content, 'width', UIL.WIDTH);
+        UIL.setDOM(this.content, 'margin-left', -UIL.WIDTH*0.5);
+        UIL.setDOM(this.inner, 'width', UIL.WIDTH);
+        UIL.setSVG(this.scroll, 'x',UIL.WIDTH-1,0);
+        UIL.setSVG(this.scroll, 'width',UIL.WIDTH,2);
+        var i = this.uis.length;
+        while(i--){
+            if(this.uis[i].rSize) this.uis[i].rSize();
+        }
     }
 }
 

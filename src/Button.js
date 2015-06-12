@@ -4,7 +4,9 @@ UIL.Button = function(obj){
 
     this.value = obj.value || false;
 
-    this.c[2] = UIL.DOM('UIL', 'rect', UIL.BASIC+'top:1px; border:solid 1px rgba(90,90,90,0.6);', {width:UIL.BW-2, height:15, fill:UIL.bgcolor(UIL.COLOR) });
+    //this.c[2] = UIL.DOM('UIL', 'rect', UIL.BASIC+'top:1px; border:solid 1px rgba(90,90,90,0.6);', {width:UIL.BW-2, height:15, fill:UIL.bgcolor(UIL.COLOR) });
+
+    this.c[2] = UIL.DOM('UIL svgbox', 'rect', '', {width:UIL.BW, height:15, fill:UIL.bgcolor(UIL.COLOR) });
     //UIL.DOM('UIL', 'text', UIL.BASIC+'top:1px;', {width:168, height:15, 'font-family':'Open Sans', fill:'#CCC' }, this.c[2]);
     this.c[3] = UIL.DOM('UIL text-r', 'div', 'text-align:center;');
 
@@ -41,3 +43,12 @@ UIL.Button = function(obj){
 
 UIL.Button.prototype = Object.create( UIL.Proto.prototype );
 UIL.Button.prototype.constructor = UIL.Button;
+
+UIL.Button.prototype.rSize = function(){
+    UIL.setSVG(this.c[2], 'width',UIL.BW);
+    UIL.setDOM(this.c[2], 'width', UIL.BW);
+    UIL.setDOM(this.c[2], 'left', UIL.AW);
+    UIL.setDOM(this.c[3], 'width', UIL.BW);
+    UIL.setDOM(this.c[3], 'left', UIL.AW);
+    UIL.Proto.prototype.rSize.call( this );
+};

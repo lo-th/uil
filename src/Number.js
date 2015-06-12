@@ -31,7 +31,6 @@ UIL.Number = function(obj){
         this.toRad = Math.PI/180;
     }
 
-    //this.w = (175/(this.length))-5;
     this.w = ((UIL.BW+5)/(this.length))-5;
     this.current = null;
 
@@ -43,6 +42,7 @@ UIL.Number = function(obj){
         this.c[2+i].value = this.value[i];
     }
 
+    // key
     this.f[0] = function(e){
         if (!e) e = window.event;
         e.stopPropagation();
@@ -54,6 +54,7 @@ UIL.Number = function(obj){
         }
     }.bind(this);
 
+    // mouseDown
     this.f[1] = function(e){
         if (!e) e = window.event;
         this.current = parseFloat(e.target.name);
@@ -70,14 +71,13 @@ UIL.Number = function(obj){
 
     }.bind(this);
 
+    // mouseMove
     this.f[2] = function(e){
         if (!e) e = window.event;
         this.prev.d += ( e.clientX - this.prev.x ) - ( e.clientY - this.prev.y );
         var n = this.prev.v + ( this.prev.d * this.step);
 
         this.value[this.current] = this.numValue(n);
-        this.c[this.prev.id].value = this.value[this.current];
-        
         this.c[this.prev.id].value = this.value[this.current];
 
         this.f[5]();
@@ -86,6 +86,7 @@ UIL.Number = function(obj){
         this.prev.y = e.clientY;
     }.bind(this);
 
+    // mouseUp, mouseOut
     this.f[3] = function(e){
         if (!e) e = window.event;
 
@@ -127,3 +128,13 @@ UIL.Number = function(obj){
 
 UIL.Number.prototype = Object.create( UIL.Proto.prototype );
 UIL.Number.prototype.constructor = UIL.Number;
+
+UIL.Number.prototype.rSize = function(){
+    this.w = ((UIL.BW+5)/(this.length))-5;
+    var i = this.length;
+    while(i--){
+        this.c[2+i].style.width = this.w+'px';
+        this.c[2+i].style.left = (UIL.AW+(this.w*i)+(5*i))+'px';
+    }
+    UIL.Proto.prototype.rSize.call( this );
+}
