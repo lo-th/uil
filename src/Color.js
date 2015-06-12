@@ -14,7 +14,7 @@ UIL.Color = function(obj){
     this.markerSize = this.wheelWidth * 0.3;
 
     this.c[2] = UIL.DOM('UIL svgbox', 'rect', '',  { width:this.sb, height:15, fill:'#000' });
-    this.c[3] = UIL.DOM('UIL text-r');
+    this.c[3] = UIL.DOM('UIL text');
     
     this.c[4] = UIL.DOM('UIL', 'rect', 'left:'+ this.sa+'px;  top:'+this.decal+'px; width:'+this.width+'px; height:'+this.width+'px;',  {x:(this.mid - this.square), y:(this.mid - this.square), width:(this.square * 2 - 1), height:(this.square * 2 - 1), fill:'#000' });
     this.c[5] = UIL.DOM('UIL', 'canvas', 'left:'+ this.sa+'px;  top:'+this.decal+'px;  display:none;');

@@ -36,6 +36,8 @@ body { font-family: 'Open Sans', sans-serif; background-color:#111; background-i
 <div id='version'></div>
 <div id='debug'></div>
 <script>
+var gr0 = null;
+var timer = null;
 var display = false;
 var list = ['item-0', 'item-1', 'item-2', 'item-3', 'item-4', 'item-5', 'item-6', 'item-7', 'item-8', 'item-9', 'item-10', 'item-11', 'item-12'];
 var list2 = ['item-0', 'item-1', 'item-2'];
@@ -45,9 +47,10 @@ document.getElementById('version').innerHTML = 'il '+UIL.REVISION;
 var debug = document.getElementById('debug');
 var callback = function(v){ debug.innerHTML = v; }
 var callbackButton = function(){ debug.innerHTML = "i'm a button !!" ; }
-var callbackSize = function(v){ UIL.sizer(v); }
+var callbackSize = function(v){ timer = setTimeout( UIL.sizer(v), 1000); }
 
 var ui = new UIL.Gui('top:145px; left:50%;', 300, true);
+//var ui = new UIL.Group('top:145px; left:50%;', 300, true);
 
 var s = new UIL.Slide({target:document.body, callback:callbackSize, name:'ui size', min:100, max:400, value:300, step:10, color:'no', size:200});
 s.c[0].style.top = '40px';
@@ -75,6 +78,15 @@ function populate(){
         ui.add('number', { name:'vector3', callback:callback, value:[0,0,0] });
         ui.add('number', { name:'vector4', callback:callback, value:[0,0,0,0], step:1, precision:0 });
         ui.add('button', { name:'button', callback:callbackButton });
+
+        gr0 = ui.add('group', { name:'Group' });
+        gr0.add('slide',  { name:'slide', callback:callback, min:-100, max:100, value:0, precision:0 });
+        gr0.add('slide',  { name:'slide', callback:callback, min:-100, max:100, value:0, precision:0 });
+        gr0.add('slide',  { name:'slide', callback:callback, min:-100, max:100, value:0, precision:0 });
+        gr0.add('slide',  { name:'slide', callback:callback, min:-100, max:100, value:0, precision:0 });
+        gr0.add('slide',  { name:'slide', callback:callback, min:-100, max:100, value:0, precision:0 });
+        //gr0.open();
+
         display = true;
         b.label('clear');
     } else {

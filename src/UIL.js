@@ -8,10 +8,13 @@
 'use strict';
 
 var UIL = UIL || ( function () {
-    //var _uis = [];
+
+    
+
     return {
         main:null,
-        REVISION: '0.5',
+        REVISION: '0.6',
+        DEF:false,
         events:[ 'onkeyup', 'onkeydown', 'onclick', 'onchange', 'onmouseover', 'onmouseout', 'onmousemove', 'onmousedown', 'onmouseup', 'onmousewheel' ],
         WIDTH:0,
         BW:0,
@@ -29,31 +32,31 @@ var UIL = UIL || ( function () {
             UIL.COLOR = 'N';
             UIL.SELECT = '#035fcf';
             UIL.SELECTDOWN = '#024699'
-            UIL.txt1 = 'font-family:"Open Sans", sans-serif; font-size:12px; color:#cccccc; outline:none; padding:0px 10px; left:0; top:1px; height:17px; width:'+this.AW+'px; overflow:hidden;';
-            UIL.txt2 = UIL.txt1 + 'width:'+UIL.BW+'px; left:'+ this.AW+'px;';
+            UIL.txt1 = 'font-family:"Open Sans", sans-serif; font-size:12px; color:#cccccc; outline:none; padding:0px 10px; left:0; top:1px; height:17px; width:100px; overflow:hidden;';
 
-            UIL.CC('UIL', 'position:absolute; pointer-events:none; box-sizing:border-box; -o-user-select:none; -ms-user-select:none; -khtml-user-select:none; -webkit-user-select:none; -moz-user-select:none; transition: 0.1s ease-linear;');
+            UIL.CC('UIL', 'position:absolute; pointer-events:none; box-sizing:border-box; -o-user-select:none; -ms-user-select:none; -khtml-user-select:none; -webkit-user-select:none; -moz-user-select:none;');
 
-            UIL.CC('UIL.content', 'width:'+(UIL.WIDTH)+'px; margin-left:0px; overflow:hidden; background:none;');
-            UIL.CC('UIL.mask', 'width:'+(UIL.WIDTH+100)+'px; height:100%; margin-left:-50px; pointer-events:auto; cursor:col-resize; background:none; display:none;');
-            UIL.CC('UIL.inner', 'width:'+(UIL.WIDTH)+'px; top:0; left:0; height:auto; overflow:hidden; background:none;');
+            UIL.CC('UIL.content', 'width:300px; margin-left:0px; overflow:hidden; background:none;');
+            UIL.CC('UIL.mask', 'width:400px; height:100%; margin-left:-50px; pointer-events:auto; cursor:col-resize; background:none; display:none;');
+            UIL.CC('UIL.inner', 'width:300px; top:0; left:0; height:auto; overflow:hidden; background:none;');
 
-            UIL.CC('UIL.base', 'position:relative; transition:height, 0.1s ease-out; width:'+(UIL.WIDTH)+'px; height:20px; left:0; background:rgba(40,40,40,0.5); border-bottom:1px solid rgba(0,0,0,0.2); overflow:hidden;');
+            UIL.CC('UIL.base', 'position:relative; transition:height, 0.1s ease-out; width:300px; height:20px; left:0; background:rgba(40,40,40,0.5); border-bottom:1px solid rgba(0,0,0,0.2); overflow:hidden;');
 
             UIL.CC('UIL.text', UIL.txt1);
-            UIL.CC('UIL.text-r', UIL.txt2);
 
             UIL.CC('input', ' border:solid 1px rgba(0,0,0,0.2); background:rgba(0,0,0,0.2); transition: 0.1s ease-out;', true);
             UIL.CC('input:focus', 'border: solid 1px rgba(0,0,0,0); background:rgba(0,0,0,0.6);', true);
 
-            UIL.CC('UIL.list', 'box-sizing:content-box; border:20px solid transparent; border-bottom:10px solid transparent; left:'+(this.AW-20)+'px; top:0px; width:'+UIL.BW+'px; height:90px; overflow:hidden; cursor:s-resize; pointer-events:auto; display:none;');
+            UIL.CC('UIL.list', 'box-sizing:content-box; border:20px solid transparent; border-bottom:10px solid transparent; left:80px; top:0px; width:190px; height:90px; overflow:hidden; cursor:s-resize; pointer-events:auto; display:none;');
             UIL.CC('UIL.list-in', 'left:0; top:0; width:100%; background:rgba(0,0,0,0.2); ');
             UIL.CC('UIL.listItem', 'position:relative; height:18px; background:rgba(0,0,0,0.2); border-bottom:1px solid rgba(0,0,0,0.2); pointer-events:auto; cursor:pointer;'+UIL.txt1);
             UIL.CC('UIL.listItem:hover', 'background:'+UIL.SELECT+'; color:#FFFFFF;')
             UIL.CC('UIL.list-sel', 'width:10px; height:10px; right:5px; background:#666; margin-top:5px;');
 
             UIL.CC('UIL.scroll-bg', 'cursor:w-resize; pointer-events:auto; background:rgba(256,0,0,0.2);');
-            UIL.CC('UIL.svgbox', 'left:'+(this.AW)+'px; top:1px; width:'+(this.BW)+'px; height:17px; top:1px; pointer-events:auto; cursor:pointer; border:solid 1px rgba(90,90,90,0.6);');
+            UIL.CC('UIL.svgbox', 'left:100px; top:1px; width:190px; height:17px; top:1px; pointer-events:auto; cursor:pointer; border:solid 1px rgba(90,90,90,0.6);');
+
+            UIL.DEF = true;
         },
         bgcolor: function(p, a){
             var r=48, g=48, b=48;
@@ -123,16 +126,19 @@ var UIL = UIL || ( function () {
             else style.sheet.insertRule(adds+name+"{"+rules+"}",0);
         }
     };
+
 })();
 
 
 UIL.Gui = function(css, w, center){
-    this.isCenter = center || false;
-    UIL.sizer(w || 300);
-    UIL.classDefine();
-    this.uis = [];
+    
+    if(!UIL.DEF)UIL.classDefine();
 
+    UIL.sizer(w || 300);
+    this.isCenter = center || false;
     this.lockwheel = false;
+
+    this.uis = [];
 
     this.content = UIL.DOM('UIL content', 'div', css);
     document.body.appendChild(this.content);
@@ -235,7 +241,6 @@ UIL.Gui = function(css, w, center){
         if(this.py==0) UIL.setSVG(this.scroll, 'y',0, 2);
         else if(this.py==this.max) UIL.setSVG(this.scroll, 'y',this.height-1, 2);
         else UIL.setSVG(this.scroll, 'y',-1, 2);
-
     }.bind(this);
 
     this.content.onmousedown = this.f[0];
@@ -268,9 +273,12 @@ UIL.Gui.prototype = {
             case 'slide':  n = new UIL.Slide(obj);  break;
             case 'bool':   n = new UIL.Bool(obj);   break;
             case 'list':   n = new UIL.List(obj);   break;
+            case 'group':  n = new UIL.Group(obj);  break;
         }
         this.uis.push(n);
         this.calc();
+
+        return n;
     },
     resize:function(e){
         this.height = window.innerHeight-this.top-5;
@@ -336,7 +344,6 @@ UIL.Gui.prototype = {
             decal = -UIL.WIDTH*0.5; 
             UIL.setDOM(this.content, 'margin-left', decal);
         }
-
 
         UIL.setDOM(this.mask, 'margin-left', decal-50);
         UIL.setDOM(this.mask, 'width', UIL.WIDTH+100);

@@ -5,7 +5,7 @@ UIL.Button = function(obj){
     this.value = obj.value || false;
 
     this.c[2] = UIL.DOM('UIL svgbox', 'rect', '', {width:this.sb, height:15, fill:UIL.bgcolor(UIL.COLOR) });
-    this.c[3] = UIL.DOM('UIL text-r', 'div', 'text-align:center;');
+    this.c[3] = UIL.DOM('UIL text', 'div', 'text-align:center;');
 
     this.c[1].innerHTML = '';
     this.c[3].innerHTML = this.txt;
