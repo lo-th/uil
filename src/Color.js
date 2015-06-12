@@ -3,7 +3,7 @@ UIL.Color = function(obj){
     UIL.Proto.call( this, obj );
 
     this.type = obj.type || 'array';
-    this.width = UIL.BW;
+    this.width = this.sb;
     this.oldWidth = 0;
    
     this.wheelWidth = this.width*0.1;
@@ -13,12 +13,12 @@ UIL.Color = function(obj){
     this.mid = Math.floor(this.width * 0.5 );
     this.markerSize = this.wheelWidth * 0.3;
 
-    this.c[2] = UIL.DOM('UIL svgbox', 'rect', '',  { width:UIL.BW, height:15, fill:'#000' });
+    this.c[2] = UIL.DOM('UIL svgbox', 'rect', '',  { width:this.sb, height:15, fill:'#000' });
     this.c[3] = UIL.DOM('UIL text-r');
     
-    this.c[4] = UIL.DOM('UIL', 'rect', 'left:'+ UIL.AW+'px;  top:'+this.decal+'px; width:'+this.width+'px; height:'+this.width+'px;',  {x:(this.mid - this.square), y:(this.mid - this.square), width:(this.square * 2 - 1), height:(this.square * 2 - 1), fill:'#000' });
-    this.c[5] = UIL.DOM('UIL', 'canvas', 'left:'+ UIL.AW+'px;  top:'+this.decal+'px;  display:none;');
-    this.c[6] = UIL.DOM('UIL', 'canvas', 'left:'+ UIL.AW+'px;  top:'+this.decal+'px;  pointer-events:auto; cursor:pointer; display:none;');
+    this.c[4] = UIL.DOM('UIL', 'rect', 'left:'+ this.sa+'px;  top:'+this.decal+'px; width:'+this.width+'px; height:'+this.width+'px;',  {x:(this.mid - this.square), y:(this.mid - this.square), width:(this.square * 2 - 1), height:(this.square * 2 - 1), fill:'#000' });
+    this.c[5] = UIL.DOM('UIL', 'canvas', 'left:'+ this.sa+'px;  top:'+this.decal+'px;  display:none;');
+    this.c[6] = UIL.DOM('UIL', 'canvas', 'left:'+ this.sa+'px;  top:'+this.decal+'px;  pointer-events:auto; cursor:pointer; display:none;');
 
     this.c[5].width = this.c[5].height = this.width;
     this.c[6].width = this.c[6].height = this.width;
@@ -132,14 +132,12 @@ UIL.Color.prototype.constructor = UIL.Color;
 
 UIL.Color.prototype.updateDisplay = function(){
     this.invert = (this.rgb[0] * 0.3 + this.rgb[1] * .59 + this.rgb[2] * .11) <= 0.6;
-    //this.c[4].style.background = UIL.pack(UIL.HSLToRGB([this.hsl[0], 1, 0.5]));
 
-    UIL.setSVG(this.c[4], 'fill',UIL.pack(UIL.HSLToRGB([this.hsl[0], 1, 0.5])));
+    this.setSvg(4, 'fill',UIL.pack(UIL.HSLToRGB([this.hsl[0], 1, 0.5])));
     this.drawMarkers();
     
     this.value = this.bcolor;
-    UIL.setSVG(this.c[2], 'fill', this.bcolor);
-    //UIL.setSVG(this.c[4], 'fill',this.bcolor);
+    this.setSvg(2, 'fill', this.bcolor);
     this.c[3].innerHTML = UIL.hexFormat(this.value);
 
     
@@ -251,14 +249,14 @@ UIL.Color.prototype.drawMarkers = function(){
 UIL.Color.prototype.widgetCoords = function(e){
     return { x: e.pageX - this.offset.left - this.mid, y: e.pageY - this.offset.top - this.mid };
 };
-UIL.Color.prototype.clear = function(){
+/*UIL.Color.prototype.clear = function(){
     if(this.isShow) this.f[4]();
     UIL.Proto.prototype.clear.call( this );
-};
+};*/
 
 UIL.Color.prototype.rSize = function(){
     UIL.Proto.prototype.rSize.call( this );
-    this.width = UIL.BW;
+    this.width = this.sb;
     this.wheelWidth = this.width*0.1;
     this.decal = 22;
     this.radius = (this.width - this.wheelWidth) * 0.5 - 1;
@@ -266,28 +264,28 @@ UIL.Color.prototype.rSize = function(){
     this.mid = Math.floor(this.width * 0.5 );
     this.markerSize = this.wheelWidth * 0.3;
 
-    UIL.setSVG(this.c[2], 'width',UIL.BW);
-    UIL.setDOM(this.c[2], 'width', UIL.BW);
-    UIL.setDOM(this.c[2], 'left', UIL.AW);
-    UIL.setDOM(this.c[3], 'width', UIL.BW);
-    UIL.setDOM(this.c[3], 'left', UIL.AW);
+    this.setSvg(2, 'width',this.sb);
+    this.setDom(2, 'width', this.sb);
+    this.setDom(2, 'left', this.sa);
+    this.setDom(3, 'width', this.sb);
+    this.setDom(3, 'left', this.sa);
 
-    UIL.setDOM(this.c[4], 'left', UIL.AW);
-    UIL.setDOM(this.c[4], 'width', this.width);
-    UIL.setDOM(this.c[4], 'height', this.width);
-    UIL.setDOM(this.c[5], 'left', UIL.AW);
-    UIL.setDOM(this.c[6], 'left', UIL.AW);
+    this.setDom(4, 'left', this.sa);
+    this.setDom(4, 'width', this.width);
+    this.setDom(4, 'height', this.width);
+    this.setDom(5, 'left', this.sa);
+    this.setDom(6, 'left', this.sa);
 
-    UIL.setSVG(this.c[4], 'width',this.square * 2 - 1);
-    UIL.setSVG(this.c[4], 'height',this.square * 2 - 1);
-    UIL.setSVG(this.c[4], 'x',this.mid - this.square);
-    UIL.setSVG(this.c[4], 'y',this.mid - this.square);
+    this.setSvg(4, 'width',this.square * 2 - 1);
+    this.setSvg(4, 'height',this.square * 2 - 1);
+    this.setSvg(4, 'x',this.mid - this.square);
+    this.setSvg(4, 'y',this.mid - this.square);
 
     this.c[5].width = this.c[5].height = this.width;
     this.c[6].width = this.c[6].height = this.width;
 
-    this.c[5].style.left = UIL.AW+'px';
-    this.c[6].style.left = UIL.AW+'px';
+    this.c[5].style.left = this.sa+'px';
+    this.c[6].style.left = this.sa+'px';
     this.c[5].style.top = this.decal+'px';
     this.c[6].style.top = this.decal+'px';
 
@@ -297,7 +295,7 @@ UIL.Color.prototype.rSize = function(){
     if(this.isShow){ 
         this.f[6]();
         this.h = this.width+30;
-        UIL.setDOM(this.c[0], 'height', this.h);
+        this.setDom(0, 'height', this.h);
         UIL.main.calc();
     }
 };

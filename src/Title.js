@@ -10,8 +10,6 @@ UIL.Title = function(obj){
 
     this.c[0].style.height = this.h+'px';
     this.c[1].className = 'UIL text-t';
-    //this.c[1].style.width = UIL.WIDTH-50 + 'px';
-    //this.c[1].style.top = '8px';
     this.c[2] = UIL.DOM('UIL text-m', 'div', 'top:8px;');
 
     var idt = id || 0;
@@ -30,6 +28,6 @@ UIL.Title.prototype.constructor = UIL.Title;
 
 UIL.Title.prototype.rSize = function(){
     UIL.Proto.prototype.rSize.call( this );
-    UIL.setDOM(this.c[1], 'width', UIL.WIDTH-50);
-    UIL.setDOM(this.c[2], 'left', UIL.WIDTH-50);
+    this.setDom(1, 'width', this.size-50);
+    this.setDom(2, 'left', this.size-50);
 };

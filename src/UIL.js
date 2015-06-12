@@ -23,8 +23,6 @@ var UIL = UIL || ( function () {
             this.BW = (s*2)-10;
             this.AW = s;
 
-            
-
             if(this.main) this.main.changeWidth();
         },
         classDefine:function(){
@@ -351,8 +349,10 @@ UIL.Gui.prototype = {
         UIL.setSVG(this.scroll, 'x',UIL.WIDTH-1,0);
         UIL.setSVG(this.scroll, 'width',UIL.WIDTH,2);
         var i = this.uis.length;
+
         while(i--){
-            if(this.uis[i].rSize) this.uis[i].rSize();
+            this.uis[i].setSize();
+            this.uis[i].rSize();
         }
     }
 }

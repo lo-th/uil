@@ -9,6 +9,7 @@ UIL.Number = function(obj){
     this.isNumber = true;
     this.isAngle = false;
     this.isVector = false;
+
     this.mask = UIL.main.mask;
 
     if(obj.value){
@@ -45,7 +46,7 @@ UIL.Number = function(obj){
     // key
     this.f[0] = function(e){
         if (!e) e = window.event;
-        e.stopPropagation();
+        //e.stopPropagation();
         if ( e.keyCode === 13 ){
             this.current = parseFloat(e.target.name);
             this.f[4](this.current);
@@ -56,10 +57,12 @@ UIL.Number = function(obj){
 
     // mouseDown
     this.f[1] = function(e){
-        if (!e) e = window.event;
+        //if (!e) e = window.event;
         this.current = parseFloat(e.target.name);
         if(this.current == undefined) return;
+
         e.preventDefault();
+
         this.prev = { x:e.clientX, y:e.clientY, d:0, id:(this.current+2)};
         if(this.isNumber) this.prev.v = parseFloat(this.value);
         else this.prev.v = parseFloat(this.value[this.current]);
@@ -73,7 +76,7 @@ UIL.Number = function(obj){
 
     // mouseMove
     this.f[2] = function(e){
-        if (!e) e = window.event;
+       // if (!e) e = window.event;
         this.prev.d += ( e.clientX - this.prev.x ) - ( e.clientY - this.prev.y );
         var n = this.prev.v + ( this.prev.d * this.step);
 
@@ -88,7 +91,7 @@ UIL.Number = function(obj){
 
     // mouseUp, mouseOut
     this.f[3] = function(e){
-        if (!e) e = window.event;
+        //if (!e) e = window.event;
 
         this.mask.style.display = 'none';
         this.mask.onmousemove = null;
@@ -131,10 +134,10 @@ UIL.Number.prototype.constructor = UIL.Number;
 
 UIL.Number.prototype.rSize = function(){
     UIL.Proto.prototype.rSize.call( this );
-    this.w = ((UIL.BW+5)/(this.length))-5;
+    this.w = ((this.sb+5)/(this.length))-5;
     var i = this.length;
     while(i--){
-        this.c[2+i].style.width = this.w+'px';
-        this.c[2+i].style.left = (UIL.AW+(this.w*i)+(5*i))+'px';
+        this.setDom(2+i, 'left', this.sa+(this.w*i)+(5*i));
+        this.setDom(2+i, 'width', this.w );
     }
 }

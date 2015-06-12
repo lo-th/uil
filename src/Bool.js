@@ -4,7 +4,6 @@ UIL.Bool = function(obj){
 
     this.value = obj.value || false;
 
-    //this.c[2] = UIL.DOM('UIL', 'rect', UIL.BASIC+'top:2px; border:solid 1px rgba(90,90,90,0.6);', {width:14, height:14, fill:'rgba(0,0,0,0.2)' });
     this.c[2] = UIL.DOM('UIL svgbox', 'rect', 'width:17px;', {width:15, height:15, fill:'rgba(0,0,0,0.2)' });
     this.c[3] = UIL.DOM('UIL svgbox', 'path','width:17px; pointer-events:none;',{width:16, height:16, d:'M 3 9 L 5 12 13 4', 'stroke-width':2, stroke:'#e2e2e2', fill:'none', 'stroke-linecap':'butt' });
 
@@ -33,6 +32,6 @@ UIL.Bool.prototype.constructor = UIL.Bool;
 
 UIL.Bool.prototype.rSize = function(){
     UIL.Proto.prototype.rSize.call( this );
-    UIL.setDOM(this.c[2], 'left', UIL.AW);
-    UIL.setDOM(this.c[3], 'left', UIL.AW);
+    this.setDom(2, 'left', this.sa);
+    this.setDom(3, 'left', this.sa);
 };

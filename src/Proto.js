@@ -2,6 +2,10 @@ UIL.Proto = function(obj){
 
     obj = obj || {};
 
+    // define obj size
+    this.setSize(obj.size);
+    
+
     this.h = 20;
     if(obj.color) UIL.COLOR = obj.color;
     this.color = UIL.COLOR;
@@ -31,6 +35,18 @@ UIL.Proto.prototype = {
             }
             else this.c[0].appendChild(this.c[i]);
         }
+        this.rSize();
+    },
+    setSize:function(sx){
+        this.size = sx || UIL.WIDTH;
+        this.sa = (this.size/3).toFixed(0)*1;
+        this.sb = ((this.sa*2)-10).toFixed(0)*1;
+    },
+    setDom:function(id, type, value){
+        this.c[id].style[type] = value+'px';
+    },
+    setSvg:function(domId, type, value, id){
+        this.c[domId].childNodes[id || 0].setAttributeNS(null, type, value );
     },
     clear:function(){
         var ev = UIL.events;
@@ -42,6 +58,7 @@ UIL.Proto.prototype = {
             } else {
                 j = ev.length;
                 while(j--){ if(this.c[i][ev[j]]!==null) this.c[i][ev[j]] = null; }
+                if(this.c[i].children) this.clearDOM(this.c[i]);
                 this.c[0].removeChild(this.c[i]);
             }
             this.c[i] = null;
@@ -56,8 +73,14 @@ UIL.Proto.prototype = {
         if(this.callback)this.callback = null;
         if(this.value)this.value = null;
     },
+    clearDOM:function(dom){
+        while ( dom.children.length ){
+            if(dom.lastChild.children) while ( dom.lastChild.children.length ) dom.lastChild.removeChild( dom.lastChild.lastChild );
+            dom.removeChild( dom.lastChild );
+        }
+    },
     setTypeNumber:function( obj ){
-        
+
         this.min = -Infinity;
         this.max = Infinity;
 
@@ -82,7 +105,7 @@ UIL.Proto.prototype = {
         return Math.min( this.max, Math.max( this.min, n ) ).toFixed( this.precision )*1;
     },
     rSize:function(){
-        this.c[0].style.width = UIL.WIDTH+'px';
-        this.c[1].style.width = UIL.AW+'px';
+        this.c[0].style.width = this.size+'px';
+        this.c[1].style.width = this.sa+'px';
     }
 }

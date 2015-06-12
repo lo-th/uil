@@ -23,8 +23,6 @@ var UIL = UIL || ( function () {
             this.BW = (s*2)-10;
             this.AW = s;
 
-            
-
             if(this.main) this.main.changeWidth();
         },
         classDefine:function(){
@@ -351,8 +349,10 @@ UIL.Gui.prototype = {
         UIL.setSVG(this.scroll, 'x',UIL.WIDTH-1,0);
         UIL.setSVG(this.scroll, 'width',UIL.WIDTH,2);
         var i = this.uis.length;
+
         while(i--){
-            if(this.uis[i].rSize) this.uis[i].rSize();
+            this.uis[i].setSize();
+            this.uis[i].rSize();
         }
     }
 }
@@ -386,6 +386,10 @@ UIL.Proto = function(obj){
 
     obj = obj || {};
 
+    // define obj size
+    this.setSize(obj.size);
+    
+
     this.h = 20;
     if(obj.color) UIL.COLOR = obj.color;
     this.color = UIL.COLOR;
@@ -415,6 +419,18 @@ UIL.Proto.prototype = {
             }
             else this.c[0].appendChild(this.c[i]);
         }
+        this.rSize();
+    },
+    setSize:function(sx){
+        this.size = sx || UIL.WIDTH;
+        this.sa = (this.size/3).toFixed(0)*1;
+        this.sb = ((this.sa*2)-10).toFixed(0)*1;
+    },
+    setDom:function(id, type, value){
+        this.c[id].style[type] = value+'px';
+    },
+    setSvg:function(domId, type, value, id){
+        this.c[domId].childNodes[id || 0].setAttributeNS(null, type, value );
     },
     clear:function(){
         var ev = UIL.events;
@@ -426,6 +442,7 @@ UIL.Proto.prototype = {
             } else {
                 j = ev.length;
                 while(j--){ if(this.c[i][ev[j]]!==null) this.c[i][ev[j]] = null; }
+                if(this.c[i].children) this.clearDOM(this.c[i]);
                 this.c[0].removeChild(this.c[i]);
             }
             this.c[i] = null;
@@ -440,8 +457,14 @@ UIL.Proto.prototype = {
         if(this.callback)this.callback = null;
         if(this.value)this.value = null;
     },
+    clearDOM:function(dom){
+        while ( dom.children.length ){
+            if(dom.lastChild.children) while ( dom.lastChild.children.length ) dom.lastChild.removeChild( dom.lastChild.lastChild );
+            dom.removeChild( dom.lastChild );
+        }
+    },
     setTypeNumber:function( obj ){
-        
+
         this.min = -Infinity;
         this.max = Infinity;
 
@@ -466,8 +489,8 @@ UIL.Proto.prototype = {
         return Math.min( this.max, Math.max( this.min, n ) ).toFixed( this.precision )*1;
     },
     rSize:function(){
-        this.c[0].style.width = UIL.WIDTH+'px';
-        this.c[1].style.width = UIL.AW+'px';
+        this.c[0].style.width = this.size+'px';
+        this.c[1].style.width = this.sa+'px';
     }
 }
 UIL.Title = function(obj){
@@ -482,8 +505,6 @@ UIL.Title = function(obj){
 
     this.c[0].style.height = this.h+'px';
     this.c[1].className = 'UIL text-t';
-    //this.c[1].style.width = UIL.WIDTH-50 + 'px';
-    //this.c[1].style.top = '8px';
     this.c[2] = UIL.DOM('UIL text-m', 'div', 'top:8px;');
 
     var idt = id || 0;
@@ -502,8 +523,8 @@ UIL.Title.prototype.constructor = UIL.Title;
 
 UIL.Title.prototype.rSize = function(){
     UIL.Proto.prototype.rSize.call( this );
-    UIL.setDOM(this.c[1], 'width', UIL.WIDTH-50);
-    UIL.setDOM(this.c[2], 'left', UIL.WIDTH-50);
+    this.setDom(1, 'width', this.size-50);
+    this.setDom(2, 'left', this.size-50);
 };
 UIL.String = function(obj){
 
@@ -533,8 +554,8 @@ UIL.String.prototype.constructor = UIL.String;
 
 UIL.String.prototype.rSize = function(){
     UIL.Proto.prototype.rSize.call( this );
-    UIL.setDOM(this.c[2], 'width', UIL.BW);
-    UIL.setDOM(this.c[2], 'left', UIL.AW);
+    this.setDom(2, 'width', this.sb);
+    this.setDom(2, 'left', this.sa);
 }
 UIL.Number = function(obj){
 
@@ -547,6 +568,7 @@ UIL.Number = function(obj){
     this.isNumber = true;
     this.isAngle = false;
     this.isVector = false;
+
     this.mask = UIL.main.mask;
 
     if(obj.value){
@@ -583,7 +605,7 @@ UIL.Number = function(obj){
     // key
     this.f[0] = function(e){
         if (!e) e = window.event;
-        e.stopPropagation();
+        //e.stopPropagation();
         if ( e.keyCode === 13 ){
             this.current = parseFloat(e.target.name);
             this.f[4](this.current);
@@ -594,10 +616,12 @@ UIL.Number = function(obj){
 
     // mouseDown
     this.f[1] = function(e){
-        if (!e) e = window.event;
+        //if (!e) e = window.event;
         this.current = parseFloat(e.target.name);
         if(this.current == undefined) return;
+
         e.preventDefault();
+
         this.prev = { x:e.clientX, y:e.clientY, d:0, id:(this.current+2)};
         if(this.isNumber) this.prev.v = parseFloat(this.value);
         else this.prev.v = parseFloat(this.value[this.current]);
@@ -611,7 +635,7 @@ UIL.Number = function(obj){
 
     // mouseMove
     this.f[2] = function(e){
-        if (!e) e = window.event;
+       // if (!e) e = window.event;
         this.prev.d += ( e.clientX - this.prev.x ) - ( e.clientY - this.prev.y );
         var n = this.prev.v + ( this.prev.d * this.step);
 
@@ -626,7 +650,7 @@ UIL.Number = function(obj){
 
     // mouseUp, mouseOut
     this.f[3] = function(e){
-        if (!e) e = window.event;
+        //if (!e) e = window.event;
 
         this.mask.style.display = 'none';
         this.mask.onmousemove = null;
@@ -669,11 +693,11 @@ UIL.Number.prototype.constructor = UIL.Number;
 
 UIL.Number.prototype.rSize = function(){
     UIL.Proto.prototype.rSize.call( this );
-    this.w = ((UIL.BW+5)/(this.length))-5;
+    this.w = ((this.sb+5)/(this.length))-5;
     var i = this.length;
     while(i--){
-        this.c[2+i].style.width = this.w+'px';
-        this.c[2+i].style.left = (UIL.AW+(this.w*i)+(5*i))+'px';
+        this.setDom(2+i, 'left', this.sa+(this.w*i)+(5*i));
+        this.setDom(2+i, 'width', this.w );
     }
 }
 UIL.Color = function(obj){
@@ -681,7 +705,7 @@ UIL.Color = function(obj){
     UIL.Proto.call( this, obj );
 
     this.type = obj.type || 'array';
-    this.width = UIL.BW;
+    this.width = this.sb;
     this.oldWidth = 0;
    
     this.wheelWidth = this.width*0.1;
@@ -691,12 +715,12 @@ UIL.Color = function(obj){
     this.mid = Math.floor(this.width * 0.5 );
     this.markerSize = this.wheelWidth * 0.3;
 
-    this.c[2] = UIL.DOM('UIL svgbox', 'rect', '',  { width:UIL.BW, height:15, fill:'#000' });
+    this.c[2] = UIL.DOM('UIL svgbox', 'rect', '',  { width:this.sb, height:15, fill:'#000' });
     this.c[3] = UIL.DOM('UIL text-r');
     
-    this.c[4] = UIL.DOM('UIL', 'rect', 'left:'+ UIL.AW+'px;  top:'+this.decal+'px; width:'+this.width+'px; height:'+this.width+'px;',  {x:(this.mid - this.square), y:(this.mid - this.square), width:(this.square * 2 - 1), height:(this.square * 2 - 1), fill:'#000' });
-    this.c[5] = UIL.DOM('UIL', 'canvas', 'left:'+ UIL.AW+'px;  top:'+this.decal+'px;  display:none;');
-    this.c[6] = UIL.DOM('UIL', 'canvas', 'left:'+ UIL.AW+'px;  top:'+this.decal+'px;  pointer-events:auto; cursor:pointer; display:none;');
+    this.c[4] = UIL.DOM('UIL', 'rect', 'left:'+ this.sa+'px;  top:'+this.decal+'px; width:'+this.width+'px; height:'+this.width+'px;',  {x:(this.mid - this.square), y:(this.mid - this.square), width:(this.square * 2 - 1), height:(this.square * 2 - 1), fill:'#000' });
+    this.c[5] = UIL.DOM('UIL', 'canvas', 'left:'+ this.sa+'px;  top:'+this.decal+'px;  display:none;');
+    this.c[6] = UIL.DOM('UIL', 'canvas', 'left:'+ this.sa+'px;  top:'+this.decal+'px;  pointer-events:auto; cursor:pointer; display:none;');
 
     this.c[5].width = this.c[5].height = this.width;
     this.c[6].width = this.c[6].height = this.width;
@@ -810,14 +834,12 @@ UIL.Color.prototype.constructor = UIL.Color;
 
 UIL.Color.prototype.updateDisplay = function(){
     this.invert = (this.rgb[0] * 0.3 + this.rgb[1] * .59 + this.rgb[2] * .11) <= 0.6;
-    //this.c[4].style.background = UIL.pack(UIL.HSLToRGB([this.hsl[0], 1, 0.5]));
 
-    UIL.setSVG(this.c[4], 'fill',UIL.pack(UIL.HSLToRGB([this.hsl[0], 1, 0.5])));
+    this.setSvg(4, 'fill',UIL.pack(UIL.HSLToRGB([this.hsl[0], 1, 0.5])));
     this.drawMarkers();
     
     this.value = this.bcolor;
-    UIL.setSVG(this.c[2], 'fill', this.bcolor);
-    //UIL.setSVG(this.c[4], 'fill',this.bcolor);
+    this.setSvg(2, 'fill', this.bcolor);
     this.c[3].innerHTML = UIL.hexFormat(this.value);
 
     
@@ -929,14 +951,14 @@ UIL.Color.prototype.drawMarkers = function(){
 UIL.Color.prototype.widgetCoords = function(e){
     return { x: e.pageX - this.offset.left - this.mid, y: e.pageY - this.offset.top - this.mid };
 };
-UIL.Color.prototype.clear = function(){
+/*UIL.Color.prototype.clear = function(){
     if(this.isShow) this.f[4]();
     UIL.Proto.prototype.clear.call( this );
-};
+};*/
 
 UIL.Color.prototype.rSize = function(){
     UIL.Proto.prototype.rSize.call( this );
-    this.width = UIL.BW;
+    this.width = this.sb;
     this.wheelWidth = this.width*0.1;
     this.decal = 22;
     this.radius = (this.width - this.wheelWidth) * 0.5 - 1;
@@ -944,28 +966,28 @@ UIL.Color.prototype.rSize = function(){
     this.mid = Math.floor(this.width * 0.5 );
     this.markerSize = this.wheelWidth * 0.3;
 
-    UIL.setSVG(this.c[2], 'width',UIL.BW);
-    UIL.setDOM(this.c[2], 'width', UIL.BW);
-    UIL.setDOM(this.c[2], 'left', UIL.AW);
-    UIL.setDOM(this.c[3], 'width', UIL.BW);
-    UIL.setDOM(this.c[3], 'left', UIL.AW);
+    this.setSvg(2, 'width',this.sb);
+    this.setDom(2, 'width', this.sb);
+    this.setDom(2, 'left', this.sa);
+    this.setDom(3, 'width', this.sb);
+    this.setDom(3, 'left', this.sa);
 
-    UIL.setDOM(this.c[4], 'left', UIL.AW);
-    UIL.setDOM(this.c[4], 'width', this.width);
-    UIL.setDOM(this.c[4], 'height', this.width);
-    UIL.setDOM(this.c[5], 'left', UIL.AW);
-    UIL.setDOM(this.c[6], 'left', UIL.AW);
+    this.setDom(4, 'left', this.sa);
+    this.setDom(4, 'width', this.width);
+    this.setDom(4, 'height', this.width);
+    this.setDom(5, 'left', this.sa);
+    this.setDom(6, 'left', this.sa);
 
-    UIL.setSVG(this.c[4], 'width',this.square * 2 - 1);
-    UIL.setSVG(this.c[4], 'height',this.square * 2 - 1);
-    UIL.setSVG(this.c[4], 'x',this.mid - this.square);
-    UIL.setSVG(this.c[4], 'y',this.mid - this.square);
+    this.setSvg(4, 'width',this.square * 2 - 1);
+    this.setSvg(4, 'height',this.square * 2 - 1);
+    this.setSvg(4, 'x',this.mid - this.square);
+    this.setSvg(4, 'y',this.mid - this.square);
 
     this.c[5].width = this.c[5].height = this.width;
     this.c[6].width = this.c[6].height = this.width;
 
-    this.c[5].style.left = UIL.AW+'px';
-    this.c[6].style.left = UIL.AW+'px';
+    this.c[5].style.left = this.sa+'px';
+    this.c[6].style.left = this.sa+'px';
     this.c[5].style.top = this.decal+'px';
     this.c[6].style.top = this.decal+'px';
 
@@ -975,7 +997,7 @@ UIL.Color.prototype.rSize = function(){
     if(this.isShow){ 
         this.f[6]();
         this.h = this.width+30;
-        UIL.setDOM(this.c[0], 'height', this.h);
+        this.setDom(0, 'height', this.h);
         UIL.main.calc();
     }
 };
@@ -1039,10 +1061,6 @@ UIL.Slide = function(obj){
 
     UIL.Proto.call( this, obj );
 
-    //this.min = obj.min || 0;
-    //this.max = obj.max || 100;
-    //this.precision = obj.precision || 0;
-
     this.setTypeNumber(obj)
 
     this.range = this.max - this.min;
@@ -1055,30 +1073,23 @@ UIL.Slide = function(obj){
     this.c[2] = UIL.DOM('UIL text-m');
     this.c[3] = UIL.DOM('UIL svgbox', 'rect', 'width:'+this.width+'px; height:'+this.height+'px; cursor:w-resize;', { width:this.width, height:this.height, fill:'rgba(0,0,0,0.2)' });
     this.c[4] = UIL.DOM('UIL svgbox', 'rect', 'width:'+this.width+'px; height:'+this.height+'px; pointer-events:none;', {x:3, y:3, width:this.width-8, height:this.height-8, fill:'#CCC' });
-    //
-
-    //this.c[3] = UIL.DOM(null, 'rect', UIL.BASIC + 'top:1px; cursor:w-resize;', {width:this.width-2, height:this.height-2, fill:'rgba(0,0,0,0.2)' });
-    //this.c[4] = UIL.DOM(null, 'rect', 'position:absolute; left:'+(UIL.AW+4)+'px; top:5px; pointer-events:none;', {width:this.width-8, height:this.height-8, fill:'#CCC' });
 
     // mouseOver
     this.f[0] = function(e){
-        UIL.setSVG(this.c[3], 'fill','rgba(0,0,0,0.6)');
-        UIL.setSVG(this.c[4], 'fill', UIL.SELECT );
-        e.preventDefault(); 
+        this.setSvg(3, 'fill','rgba(0,0,0,0.6)');
+        this.setSvg(4, 'fill', UIL.SELECT );
     }.bind(this);
 
     // mouseOut
     this.f[1] = function(e){
         this.down = false;
-        UIL.setSVG(this.c[3], 'fill','rgba(0,0,0,0.2)');
-        UIL.setSVG(this.c[4], 'fill','#CCC');
-        e.preventDefault();
+        this.setSvg(3, 'fill','rgba(0,0,0,0.2)');
+        this.setSvg(4, 'fill','#CCC');
     }.bind(this);
 
     // mouseUp
     this.f[2] = function(e){
         this.down = false;
-        e.preventDefault();
     }.bind(this);
 
     // mouseDown
@@ -1086,20 +1097,13 @@ UIL.Slide = function(obj){
         this.down = true;
         this.prev = { x:e.clientX, d:0, v:parseFloat(this.value)};
         this.f[4](e);
-        e.preventDefault();
     }.bind(this);
 
     // mouseMove
     this.f[4] = function(e){
         if(this.down){
+            e.preventDefault(); 
             var rect = this.c[3].getBoundingClientRect();
-            //var nv = this.value-(((e.clientX-rect.left)/this.w)*this.range+this.min)//.toFixed(this.precision))*1;
-            //var n = this.value + ( nv * this.step);
-
-            //this.prev.d += e.clientX - this.prev.x ;//(e.clientX-rect.left)/this.w;
-            //var n = this.prev.v + ( this.prev.d * this.step);
-
-           // var n = ((((((e.clientX-rect.left-4)/this.w)*this.range+this.min).toFixed(this.precision))*1)-this.prev.v);
             var n = ((((e.clientX-rect.left-4)/this.w)*this.range+this.min)-this.prev.v);
             if(n > this.step || n < this.step){ 
                 n = (n/this.step).toFixed(0)*1;
@@ -1107,24 +1111,15 @@ UIL.Slide = function(obj){
                 this.f[5](true);
                 this.prev.v = this.value;
             }
-            //this.value = ((((e.clientX-rect.left)/this.w)*this.range+this.min).toFixed(this.precision))*1;
-            //if(this.value<this.min) this.value = this.min;
-            //if(this.value>this.max) this.value = this.max;
-
-            //this.value = this.numValue(n);
-            //this.f[5](true);
-
-            //this.prev.x = e.clientX;
         }
-        e.preventDefault(); 
     }.bind(this);
 
     // update
     this.f[5] = function(up){
         var ww = (this.w * ((this.value-this.min)/this.range));
-        UIL.setSVG(this.c[4], 'width', ww );
+        this.setSvg(4, 'width', ww );
         this.c[2].innerHTML = this.value;
-        if(up)this.callback(this.value); 
+        if(up) this.callback(this.value); 
     }.bind(this);
 
     this.c[3].onmouseover = this.f[0];
@@ -1142,14 +1137,14 @@ UIL.Slide.prototype.constructor = UIL.Slide;
 
 UIL.Slide.prototype.rSize = function(){
     UIL.Proto.prototype.rSize.call( this );
-    this.width = UIL.BW-40;
+    this.width = this.sb-40;
     this.w = this.width-8;
-    UIL.setDOM(this.c[2], 'left', UIL.WIDTH-50);
-    UIL.setSVG(this.c[3], 'width',this.width);
-    UIL.setDOM(this.c[3], 'left', UIL.AW);
-    UIL.setDOM(this.c[3], 'width', this.width);
-    UIL.setDOM(this.c[4], 'left', UIL.AW);
-    UIL.setDOM(this.c[4], 'width', this.width);
+    this.setDom(2, 'left', this.size-50);
+    this.setSvg(3, 'width',this.width);
+    this.setDom(3, 'left', this.sa);
+    this.setDom(3, 'width', this.width);
+    this.setDom(4, 'left', this.sa);
+    this.setDom(4, 'width', this.width);
     
     this.f[5](false);
 };
@@ -1158,9 +1153,9 @@ UIL.List = function(obj){
     UIL.Proto.call( this, obj );
 
     this.c[2] = UIL.DOM('UIL list');
-    this.c[3] = UIL.DOM('UIL svgbox', 'rect', '', {width:UIL.BW, height:15, fill:UIL.bgcolor(UIL.COLOR) });
+    this.c[3] = UIL.DOM('UIL svgbox', 'rect', '', {width:this.sb, height:15, fill:UIL.bgcolor(UIL.COLOR) });
     //this.c[4] = UIL.DOM('UIL', 'path', '',{x:160, 'd':'M 6 4 L 10 8 6 12', 'stroke-width':2, stroke:'#e2e2e2', fill:'none', 'stroke-linecap':'butt' }, this.c[3] );
-    this.c[4] = UIL.DOM('UIL', 'path','position:absolute; width:16px; left:'+(UIL.AW+UIL.BW-17)+'px; top:1px; pointer-events:none;',{ width:16, height:16, 'd':'M 6 4 L 10 8 6 12', 'stroke-width':2, stroke:'#e2e2e2', fill:'none', 'stroke-linecap':'butt' } );
+    this.c[4] = UIL.DOM('UIL', 'path','position:absolute; width:16px; left:'+(this.sa+this.sb-17)+'px; top:1px; pointer-events:none;',{ width:16, height:16, 'd':'M 6 4 L 10 8 6 12', 'stroke-width':2, stroke:'#e2e2e2', fill:'none', 'stroke-linecap':'butt' } );
     this.c[5] = UIL.DOM('UIL text-r', 'div', 'text-align:center;');
 
 
@@ -1175,14 +1170,14 @@ UIL.List = function(obj){
     this.show = false;
     this.length = this.list.length;
     this.max = this.length*18;
-    this.w = UIL.BW;
+    this.w = this.sb;
     this.down = false;
     this.range = this.max - 90;
     this.py = 0;
     this.scroll = false;
 
     if(this.max>90){ 
-        this.w = UIL.BW-20;
+        this.w = this.sb-20;
         this.scroll = true;
     }
 
@@ -1194,7 +1189,7 @@ UIL.List = function(obj){
     this.c[2].appendChild(this.listsel);
 
     // populate list
-    var item, n, l = UIL.BW;
+    var item, n, l = this.sb;
     for(var i=0; i<this.length; i++){
         n = this.list[i];
         item = UIL.DOM('UIL listItem', 'div', 'width:'+this.w+'px; height:18px;');
@@ -1218,7 +1213,7 @@ UIL.List = function(obj){
         this.h = 20;
         this.c[0].style.height = this.h+'px';
         this.c[2].style.display = 'none';
-        UIL.setSVG(this.c[4], 'd','M 6 4 L 10 8 6 12');
+        this.setSvg(4, 'd','M 6 4 L 10 8 6 12');
         UIL.main.calc();
     }.bind(this);
 
@@ -1235,7 +1230,7 @@ UIL.List = function(obj){
         }
         this.c[0].style.height = this.h+'px';
         this.c[2].style.display = 'block';
-        UIL.setSVG(this.c[4], 'd','M 12 6 L 8 10 4 6');
+        this.setSvg(4, 'd','M 12 6 L 8 10 4 6');
         UIL.main.calc();
     }.bind(this);
 
@@ -1305,17 +1300,17 @@ UIL.List = function(obj){
 
     this.f[9] = function(e){
         this.c[5].style.color = '#FFF';
-        UIL.setSVG(this.c[3], 'fill', UIL.SELECT );
+        this.setSvg(3, 'fill', UIL.SELECT );
     }.bind(this);
 
     this.f[10] = function(e){
         this.c[5].style.color = '#CCC';
-        UIL.setSVG(this.c[3], 'fill', UIL.bgcolor(UIL.COLOR) );
+        this.setSvg(3, 'fill', UIL.bgcolor(UIL.COLOR) );
     }.bind(this);
 
     this.f[11] = function(e){
         this.c[5].style.color = '#CCC';
-        UIL.setSVG(this.c[3], 'fill', UIL.SELECTDOWN );
+        this.setSvg(3, 'fill', UIL.SELECTDOWN );
     }.bind(this);
 
     this.c[3].onclick = this.f[0];
@@ -1335,7 +1330,7 @@ UIL.List = function(obj){
 
 UIL.List.prototype = Object.create( UIL.Proto.prototype );
 UIL.List.prototype.constructor = UIL.List;
-UIL.List.prototype.clear = function(){
+/*UIL.List.prototype.clear = function(){
    
     while (this.listIn.firstChild) {
        this.listIn.removeChild(this.listIn.firstChild);
@@ -1344,24 +1339,24 @@ UIL.List.prototype.clear = function(){
        this.c[2].removeChild(this.c[2].firstChild);
     }
     UIL.Proto.prototype.clear.call( this );
-}
+}*/
 
 UIL.List.prototype.rSize = function(){
     UIL.Proto.prototype.rSize.call( this );
-    UIL.setSVG(this.c[3], 'width', UIL.BW);
-    UIL.setDOM(this.c[3], 'width', UIL.BW);
-    UIL.setDOM(this.c[3], 'left', UIL.AW);
+    this.setSvg(3, 'width', this.sb);
+    this.setDom(3, 'width', this.sb);
+    this.setDom(3, 'left', this.sa);
 
-    UIL.setDOM(this.c[4], 'left', UIL.AW+UIL.BW-17);
+    this.setDom(4, 'left', this.sa+this.sb-17);
 
-    UIL.setDOM(this.c[5], 'left', UIL.AW);
-    UIL.setDOM(this.c[5], 'width', UIL.BW);
+    this.setDom(5, 'left', this.sa);
+    this.setDom(5, 'width', this.sb);
 
-    UIL.setDOM(this.c[2], 'left', UIL.AW-20);
-    UIL.setDOM(this.c[2], 'width', UIL.BW);
+    this.setDom(2, 'left', this.sa-20);
+    this.setDom(2, 'width', this.sb);
 
-    this.w = UIL.BW;
-    if(this.max>90) this.w = UIL.BW-20;
+    this.w = this.sb;
+    if(this.max>90) this.w = this.sb-20;
     for(var i=0; i<this.length; i++){
         UIL.setDOM(this.listIn.children[i], 'width', this.w);
     }
@@ -1372,7 +1367,6 @@ UIL.Bool = function(obj){
 
     this.value = obj.value || false;
 
-    //this.c[2] = UIL.DOM('UIL', 'rect', UIL.BASIC+'top:2px; border:solid 1px rgba(90,90,90,0.6);', {width:14, height:14, fill:'rgba(0,0,0,0.2)' });
     this.c[2] = UIL.DOM('UIL svgbox', 'rect', 'width:17px;', {width:15, height:15, fill:'rgba(0,0,0,0.2)' });
     this.c[3] = UIL.DOM('UIL svgbox', 'path','width:17px; pointer-events:none;',{width:16, height:16, d:'M 3 9 L 5 12 13 4', 'stroke-width':2, stroke:'#e2e2e2', fill:'none', 'stroke-linecap':'butt' });
 
@@ -1401,8 +1395,8 @@ UIL.Bool.prototype.constructor = UIL.Bool;
 
 UIL.Bool.prototype.rSize = function(){
     UIL.Proto.prototype.rSize.call( this );
-    UIL.setDOM(this.c[2], 'left', UIL.AW);
-    UIL.setDOM(this.c[3], 'left', UIL.AW);
+    this.setDom(2, 'left', this.sa);
+    this.setDom(3, 'left', this.sa);
 };
 UIL.Button = function(obj){
 
@@ -1410,10 +1404,7 @@ UIL.Button = function(obj){
 
     this.value = obj.value || false;
 
-    //this.c[2] = UIL.DOM('UIL', 'rect', UIL.BASIC+'top:1px; border:solid 1px rgba(90,90,90,0.6);', {width:UIL.BW-2, height:15, fill:UIL.bgcolor(UIL.COLOR) });
-
-    this.c[2] = UIL.DOM('UIL svgbox', 'rect', '', {width:UIL.BW, height:15, fill:UIL.bgcolor(UIL.COLOR) });
-    //UIL.DOM('UIL', 'text', UIL.BASIC+'top:1px;', {width:168, height:15, 'font-family':'Open Sans', fill:'#CCC' }, this.c[2]);
+    this.c[2] = UIL.DOM('UIL svgbox', 'rect', '', {width:this.sb, height:15, fill:UIL.bgcolor(UIL.COLOR) });
     this.c[3] = UIL.DOM('UIL text-r', 'div', 'text-align:center;');
 
     this.c[1].innerHTML = '';
@@ -1450,11 +1441,15 @@ UIL.Button = function(obj){
 UIL.Button.prototype = Object.create( UIL.Proto.prototype );
 UIL.Button.prototype.constructor = UIL.Button;
 
+UIL.Button.prototype.label = function(string){
+    this.c[3].innerHTML = string;
+}
+
 UIL.Button.prototype.rSize = function(){
     UIL.Proto.prototype.rSize.call( this );
-    UIL.setSVG(this.c[2], 'width',UIL.BW);
-    UIL.setDOM(this.c[2], 'width', UIL.BW);
-    UIL.setDOM(this.c[2], 'left', UIL.AW);
-    UIL.setDOM(this.c[3], 'width', UIL.BW);
-    UIL.setDOM(this.c[3], 'left', UIL.AW);  
+    this.setSvg(2, 'width', this.sb);
+    this.setDom(2, 'width', this.sb);
+    this.setDom(2, 'left', this.sa);
+    this.setDom(3, 'width', this.sb);
+    this.setDom(3, 'left', this.sa);
 };

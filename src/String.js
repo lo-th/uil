@@ -26,6 +26,6 @@ UIL.String.prototype.constructor = UIL.String;
 
 UIL.String.prototype.rSize = function(){
     UIL.Proto.prototype.rSize.call( this );
-    UIL.setDOM(this.c[2], 'width', UIL.BW);
-    UIL.setDOM(this.c[2], 'left', UIL.AW);
+    this.setDom(2, 'width', this.sb);
+    this.setDom(2, 'left', this.sa);
 }

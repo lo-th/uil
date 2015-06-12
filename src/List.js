@@ -3,9 +3,9 @@ UIL.List = function(obj){
     UIL.Proto.call( this, obj );
 
     this.c[2] = UIL.DOM('UIL list');
-    this.c[3] = UIL.DOM('UIL svgbox', 'rect', '', {width:UIL.BW, height:15, fill:UIL.bgcolor(UIL.COLOR) });
+    this.c[3] = UIL.DOM('UIL svgbox', 'rect', '', {width:this.sb, height:15, fill:UIL.bgcolor(UIL.COLOR) });
     //this.c[4] = UIL.DOM('UIL', 'path', '',{x:160, 'd':'M 6 4 L 10 8 6 12', 'stroke-width':2, stroke:'#e2e2e2', fill:'none', 'stroke-linecap':'butt' }, this.c[3] );
-    this.c[4] = UIL.DOM('UIL', 'path','position:absolute; width:16px; left:'+(UIL.AW+UIL.BW-17)+'px; top:1px; pointer-events:none;',{ width:16, height:16, 'd':'M 6 4 L 10 8 6 12', 'stroke-width':2, stroke:'#e2e2e2', fill:'none', 'stroke-linecap':'butt' } );
+    this.c[4] = UIL.DOM('UIL', 'path','position:absolute; width:16px; left:'+(this.sa+this.sb-17)+'px; top:1px; pointer-events:none;',{ width:16, height:16, 'd':'M 6 4 L 10 8 6 12', 'stroke-width':2, stroke:'#e2e2e2', fill:'none', 'stroke-linecap':'butt' } );
     this.c[5] = UIL.DOM('UIL text-r', 'div', 'text-align:center;');
 
 
@@ -20,14 +20,14 @@ UIL.List = function(obj){
     this.show = false;
     this.length = this.list.length;
     this.max = this.length*18;
-    this.w = UIL.BW;
+    this.w = this.sb;
     this.down = false;
     this.range = this.max - 90;
     this.py = 0;
     this.scroll = false;
 
     if(this.max>90){ 
-        this.w = UIL.BW-20;
+        this.w = this.sb-20;
         this.scroll = true;
     }
 
@@ -39,7 +39,7 @@ UIL.List = function(obj){
     this.c[2].appendChild(this.listsel);
 
     // populate list
-    var item, n, l = UIL.BW;
+    var item, n, l = this.sb;
     for(var i=0; i<this.length; i++){
         n = this.list[i];
         item = UIL.DOM('UIL listItem', 'div', 'width:'+this.w+'px; height:18px;');
@@ -63,7 +63,7 @@ UIL.List = function(obj){
         this.h = 20;
         this.c[0].style.height = this.h+'px';
         this.c[2].style.display = 'none';
-        UIL.setSVG(this.c[4], 'd','M 6 4 L 10 8 6 12');
+        this.setSvg(4, 'd','M 6 4 L 10 8 6 12');
         UIL.main.calc();
     }.bind(this);
 
@@ -80,7 +80,7 @@ UIL.List = function(obj){
         }
         this.c[0].style.height = this.h+'px';
         this.c[2].style.display = 'block';
-        UIL.setSVG(this.c[4], 'd','M 12 6 L 8 10 4 6');
+        this.setSvg(4, 'd','M 12 6 L 8 10 4 6');
         UIL.main.calc();
     }.bind(this);
 
@@ -150,17 +150,17 @@ UIL.List = function(obj){
 
     this.f[9] = function(e){
         this.c[5].style.color = '#FFF';
-        UIL.setSVG(this.c[3], 'fill', UIL.SELECT );
+        this.setSvg(3, 'fill', UIL.SELECT );
     }.bind(this);
 
     this.f[10] = function(e){
         this.c[5].style.color = '#CCC';
-        UIL.setSVG(this.c[3], 'fill', UIL.bgcolor(UIL.COLOR) );
+        this.setSvg(3, 'fill', UIL.bgcolor(UIL.COLOR) );
     }.bind(this);
 
     this.f[11] = function(e){
         this.c[5].style.color = '#CCC';
-        UIL.setSVG(this.c[3], 'fill', UIL.SELECTDOWN );
+        this.setSvg(3, 'fill', UIL.SELECTDOWN );
     }.bind(this);
 
     this.c[3].onclick = this.f[0];
@@ -180,7 +180,7 @@ UIL.List = function(obj){
 
 UIL.List.prototype = Object.create( UIL.Proto.prototype );
 UIL.List.prototype.constructor = UIL.List;
-UIL.List.prototype.clear = function(){
+/*UIL.List.prototype.clear = function(){
    
     while (this.listIn.firstChild) {
        this.listIn.removeChild(this.listIn.firstChild);
@@ -189,24 +189,24 @@ UIL.List.prototype.clear = function(){
        this.c[2].removeChild(this.c[2].firstChild);
     }
     UIL.Proto.prototype.clear.call( this );
-}
+}*/
 
 UIL.List.prototype.rSize = function(){
     UIL.Proto.prototype.rSize.call( this );
-    UIL.setSVG(this.c[3], 'width', UIL.BW);
-    UIL.setDOM(this.c[3], 'width', UIL.BW);
-    UIL.setDOM(this.c[3], 'left', UIL.AW);
+    this.setSvg(3, 'width', this.sb);
+    this.setDom(3, 'width', this.sb);
+    this.setDom(3, 'left', this.sa);
 
-    UIL.setDOM(this.c[4], 'left', UIL.AW+UIL.BW-17);
+    this.setDom(4, 'left', this.sa+this.sb-17);
 
-    UIL.setDOM(this.c[5], 'left', UIL.AW);
-    UIL.setDOM(this.c[5], 'width', UIL.BW);
+    this.setDom(5, 'left', this.sa);
+    this.setDom(5, 'width', this.sb);
 
-    UIL.setDOM(this.c[2], 'left', UIL.AW-20);
-    UIL.setDOM(this.c[2], 'width', UIL.BW);
+    this.setDom(2, 'left', this.sa-20);
+    this.setDom(2, 'width', this.sb);
 
-    this.w = UIL.BW;
-    if(this.max>90) this.w = UIL.BW-20;
+    this.w = this.sb;
+    if(this.max>90) this.w = this.sb-20;
     for(var i=0; i<this.length; i++){
         UIL.setDOM(this.listIn.children[i], 'width', this.w);
     }

@@ -29,6 +29,7 @@ body { font-family:'Open Sans', sans-serif; background-color:#111; background-im
 <div id='debug'></div>
 
 <script>
+var display = false;
 var list = ['item-0', 'item-1', 'item-2', 'item-3', 'item-4', 'item-5', 'item-6', 'item-7', 'item-8', 'item-9', 'item-10', 'item-11', 'item-12'];
 var list2 = ['item-0', 'item-1', 'item-2'];
 
@@ -41,24 +42,40 @@ var callbackSize = function(v){ UIL.sizer(v); }
 
 var ui = new UIL.Gui('top:145px; left:50%;', 300, true);
 
-ui.add('title', {name:'Title'});
-ui.add('bool', {name:'bool', callback:callback});
-ui.add('color', {name:'color', callback:callback, type:'html', value:0xffffff});
-ui.add('color',  { name:'color', callback:callback, type:'html', value:[0,1,1,1]});
-ui.add('slide',  { name:'slide', callback:callback, min:-100, max:100, value:0, precision:0 });
-ui.add('slide',  { name:'slide', callback:callback, min:-1, max:1, value:0, step:0.01, precision:2 });
-ui.add('string', { name:'string', callback:callback, value:'welcome to uil'});
-ui.add('list',   { name:'list', callback:callback, list:list});
-ui.add('list',   { name:'list', callback:callback, list:list2});
-ui.add('number', { name:'number', callback:callback, value:20});
-ui.add('number', { name:'vector2', callback:callback, value:[0,0] });
-ui.add('number', { name:'vector3', callback:callback, value:[0,0,0] });
-ui.add('number', { name:'vector4', callback:callback, value:[0,0,0,0], step:1, precision:0 })
-ui.add('button', { name:'button', callback:callbackButton });
-
-var s = new UIL.Slide({target:document.body, callback:callbackSize, name:'ui size', min:100, max:400, value:200, step:10, color:'no'})
+var s = new UIL.Slide({target:document.body, callback:callbackSize, name:'ui size', min:100, max:400, value:300, step:10, color:'no', size:200});
 s.c[0].style.top = '40px';
+s.c[0].style.left = '-60px';
+var b = new UIL.Button({target:document.body, callback:populate, name:'populate', color:'no', size:200});
+b.setDom(0,'top', 40);
+b.setDom(0,'left', -60);
 
+
+populate();
+
+function populate(){
+    if(!display){
+        ui.add('title',  { name:'Title', color:'N'});
+        ui.add('bool',   { name:'bool', callback:callback});
+        ui.add('color',  { name:'color', callback:callback, type:'html', value:0xffffff});
+        ui.add('color',  { name:'color', callback:callback, type:'html', value:[0,1,1,1]});
+        ui.add('slide',  { name:'slide', callback:callback, min:-100, max:100, value:0, precision:0 });
+        ui.add('slide',  { name:'slide', callback:callback, min:-1, max:1, value:0, step:0.01, precision:2 });
+        ui.add('string', { name:'string', callback:callback, value:'welcome to uil'});
+        ui.add('list',   { name:'list', callback:callback, list:list});
+        ui.add('list',   { name:'list', callback:callback, list:list2});
+        ui.add('number', { name:'number', callback:callback, value:20});
+        ui.add('number', { name:'vector2', callback:callback, value:[0,0] });
+        ui.add('number', { name:'vector3', callback:callback, value:[0,0,0] });
+        ui.add('number', { name:'vector4', callback:callback, value:[0,0,0,0], step:1, precision:0 });
+        ui.add('button', { name:'button', callback:callbackButton });
+        display = true;
+        b.label('clear');
+    } else {
+        ui.clear();
+        display = false;
+        b.label('populate');
+    }
+}
 </script>
 </body>
 </html>
