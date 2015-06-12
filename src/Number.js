@@ -130,11 +130,11 @@ UIL.Number.prototype = Object.create( UIL.Proto.prototype );
 UIL.Number.prototype.constructor = UIL.Number;
 
 UIL.Number.prototype.rSize = function(){
+    UIL.Proto.prototype.rSize.call( this );
     this.w = ((UIL.BW+5)/(this.length))-5;
     var i = this.length;
     while(i--){
         this.c[2+i].style.width = this.w+'px';
         this.c[2+i].style.left = (UIL.AW+(this.w*i)+(5*i))+'px';
     }
-    UIL.Proto.prototype.rSize.call( this );
 }

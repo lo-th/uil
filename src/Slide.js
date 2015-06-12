@@ -104,18 +104,15 @@ UIL.Slide.prototype = Object.create( UIL.Proto.prototype );
 UIL.Slide.prototype.constructor = UIL.Slide;
 
 UIL.Slide.prototype.rSize = function(){
+    UIL.Proto.prototype.rSize.call( this );
     this.width = UIL.BW-40;
     this.w = this.width-8;
-    UIL.setSVG(this.c[3], 'width',this.width);
-    //UIL.setSVG(this.c[4], 'width',this.width);
-    UIL.setDOM(this.c[3], 'left', UIL.AW);
-    UIL.setDOM(this.c[4], 'left', UIL.AW);
-    UIL.setDOM(this.c[3], 'width', this.width);
-    UIL.setDOM(this.c[4], 'width', this.width);
-
     UIL.setDOM(this.c[2], 'left', UIL.WIDTH-50);
-
+    UIL.setSVG(this.c[3], 'width',this.width);
+    UIL.setDOM(this.c[3], 'left', UIL.AW);
+    UIL.setDOM(this.c[3], 'width', this.width);
+    UIL.setDOM(this.c[4], 'left', UIL.AW);
+    UIL.setDOM(this.c[4], 'width', this.width);
+    
     this.f[5](false);
-
-    UIL.Proto.prototype.rSize.call( this );
 };

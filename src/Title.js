@@ -30,8 +30,6 @@ UIL.Title.prototype.constructor = UIL.Title;
 
 UIL.Title.prototype.rSize = function(){
     UIL.Proto.prototype.rSize.call( this );
-
     UIL.setDOM(this.c[1], 'width', UIL.WIDTH-50);
     UIL.setDOM(this.c[2], 'left', UIL.WIDTH-50);
-    
 };

@@ -192,6 +192,7 @@ UIL.List.prototype.clear = function(){
 }
 
 UIL.List.prototype.rSize = function(){
+    UIL.Proto.prototype.rSize.call( this );
     UIL.setSVG(this.c[3], 'width', UIL.BW);
     UIL.setDOM(this.c[3], 'width', UIL.BW);
     UIL.setDOM(this.c[3], 'left', UIL.AW);
@@ -204,25 +205,9 @@ UIL.List.prototype.rSize = function(){
     UIL.setDOM(this.c[2], 'left', UIL.AW-20);
     UIL.setDOM(this.c[2], 'width', UIL.BW);
 
-
     this.w = UIL.BW;
     if(this.max>90) this.w = UIL.BW-20;
     for(var i=0; i<this.length; i++){
         UIL.setDOM(this.listIn.children[i], 'width', this.w);
     }
-    
-    /*this.width = UIL.BW-40;
-    this.w = this.width-8;
-    
-    //UIL.setSVG(this.c[4], 'width',this.width);
-    
-    UIL.setDOM(this.c[4], 'left', UIL.AW);
-    
-    UIL.setDOM(this.c[4], 'width', this.width);
-
-    UIL.setDOM(this.c[2], 'left', UIL.WIDTH-50);
-
-    this.f[5](false);*/
-
-    UIL.Proto.prototype.rSize.call( this );
 };

@@ -45,10 +45,10 @@ UIL.Button.prototype = Object.create( UIL.Proto.prototype );
 UIL.Button.prototype.constructor = UIL.Button;
 
 UIL.Button.prototype.rSize = function(){
+    UIL.Proto.prototype.rSize.call( this );
     UIL.setSVG(this.c[2], 'width',UIL.BW);
     UIL.setDOM(this.c[2], 'width', UIL.BW);
     UIL.setDOM(this.c[2], 'left', UIL.AW);
     UIL.setDOM(this.c[3], 'width', UIL.BW);
-    UIL.setDOM(this.c[3], 'left', UIL.AW);
-    UIL.Proto.prototype.rSize.call( this );
+    UIL.setDOM(this.c[3], 'left', UIL.AW);  
 };

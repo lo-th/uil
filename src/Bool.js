@@ -32,7 +32,7 @@ UIL.Bool.prototype = Object.create( UIL.Proto.prototype );
 UIL.Bool.prototype.constructor = UIL.Bool;
 
 UIL.Bool.prototype.rSize = function(){
+    UIL.Proto.prototype.rSize.call( this );
     UIL.setDOM(this.c[2], 'left', UIL.AW);
     UIL.setDOM(this.c[3], 'left', UIL.AW);
-    UIL.Proto.prototype.rSize.call( this );
 };

@@ -4,6 +4,8 @@ UIL.Color = function(obj){
 
     this.type = obj.type || 'array';
     this.width = UIL.BW;
+    this.oldWidth = 0;
+   
     this.wheelWidth = this.width*0.1;
     this.decal = 22;
     this.radius = (this.width - this.wheelWidth) * 0.5 - 1;
@@ -26,8 +28,8 @@ UIL.Color = function(obj){
     this.ctxMask.translate(this.mid, this.mid);
     this.ctxOverlay.translate(this.mid, this.mid);
 
-    this.drawCircle();
-    this.drawMask();
+    //this.drawCircle();
+    //this.drawMask();
 
     this.hsl = null;
     this.value = '#ffffff';
@@ -97,6 +99,7 @@ UIL.Color = function(obj){
 
     //show
     this.f[5] = function(){
+        if(this.oldWidth!==this.width) this.f[6]();
         this.isShow = true;
         this.h = this.width+30;// 194;
         this.c[0].style.height = this.h+'px';
@@ -106,6 +109,13 @@ UIL.Color = function(obj){
         this.c[6].onmousedown = this.f[1];
         this.c[6].onmouseout = this.f[4];
         UIL.main.calc();
+    }.bind(this);
+
+    // redraw
+    this.f[6] = function(){
+        this.oldWidth = this.width;
+        this.drawCircle();
+        this.drawMask();
     }.bind(this);
 
     this.c[2].onclick = this.f[0];
@@ -244,6 +254,7 @@ UIL.Color.prototype.clear = function(){
 };
 
 UIL.Color.prototype.rSize = function(){
+    UIL.Proto.prototype.rSize.call( this );
     this.width = UIL.BW;
     this.wheelWidth = this.width*0.1;
     this.decal = 22;
@@ -280,10 +291,8 @@ UIL.Color.prototype.rSize = function(){
     this.ctxMask.translate(this.mid, this.mid);
     this.ctxOverlay.translate(this.mid, this.mid);
 
-    this.drawCircle();
-    this.drawMask();
-
-    UIL.Proto.prototype.rSize.call( this );
+    //this.drawCircle();
+    //this.drawMask();
 };
 
 //-----------------------------------------

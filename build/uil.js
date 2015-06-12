@@ -502,10 +502,8 @@ UIL.Title.prototype.constructor = UIL.Title;
 
 UIL.Title.prototype.rSize = function(){
     UIL.Proto.prototype.rSize.call( this );
-
     UIL.setDOM(this.c[1], 'width', UIL.WIDTH-50);
     UIL.setDOM(this.c[2], 'left', UIL.WIDTH-50);
-    
 };
 UIL.String = function(obj){
 
@@ -534,9 +532,9 @@ UIL.String.prototype = Object.create( UIL.Proto.prototype );
 UIL.String.prototype.constructor = UIL.String;
 
 UIL.String.prototype.rSize = function(){
+    UIL.Proto.prototype.rSize.call( this );
     UIL.setDOM(this.c[2], 'width', UIL.BW);
     UIL.setDOM(this.c[2], 'left', UIL.AW);
-    UIL.Proto.prototype.rSize.call( this );
 }
 UIL.Number = function(obj){
 
@@ -670,13 +668,13 @@ UIL.Number.prototype = Object.create( UIL.Proto.prototype );
 UIL.Number.prototype.constructor = UIL.Number;
 
 UIL.Number.prototype.rSize = function(){
+    UIL.Proto.prototype.rSize.call( this );
     this.w = ((UIL.BW+5)/(this.length))-5;
     var i = this.length;
     while(i--){
         this.c[2+i].style.width = this.w+'px';
         this.c[2+i].style.left = (UIL.AW+(this.w*i)+(5*i))+'px';
     }
-    UIL.Proto.prototype.rSize.call( this );
 }
 UIL.Color = function(obj){
     
@@ -684,6 +682,8 @@ UIL.Color = function(obj){
 
     this.type = obj.type || 'array';
     this.width = UIL.BW;
+    this.oldWidth = 0;
+   
     this.wheelWidth = this.width*0.1;
     this.decal = 22;
     this.radius = (this.width - this.wheelWidth) * 0.5 - 1;
@@ -706,8 +706,8 @@ UIL.Color = function(obj){
     this.ctxMask.translate(this.mid, this.mid);
     this.ctxOverlay.translate(this.mid, this.mid);
 
-    this.drawCircle();
-    this.drawMask();
+    //this.drawCircle();
+    //this.drawMask();
 
     this.hsl = null;
     this.value = '#ffffff';
@@ -777,6 +777,7 @@ UIL.Color = function(obj){
 
     //show
     this.f[5] = function(){
+        if(this.oldWidth!==this.width) this.f[6]();
         this.isShow = true;
         this.h = this.width+30;// 194;
         this.c[0].style.height = this.h+'px';
@@ -786,6 +787,13 @@ UIL.Color = function(obj){
         this.c[6].onmousedown = this.f[1];
         this.c[6].onmouseout = this.f[4];
         UIL.main.calc();
+    }.bind(this);
+
+    // redraw
+    this.f[6] = function(){
+        this.oldWidth = this.width;
+        this.drawCircle();
+        this.drawMask();
     }.bind(this);
 
     this.c[2].onclick = this.f[0];
@@ -924,6 +932,7 @@ UIL.Color.prototype.clear = function(){
 };
 
 UIL.Color.prototype.rSize = function(){
+    UIL.Proto.prototype.rSize.call( this );
     this.width = UIL.BW;
     this.wheelWidth = this.width*0.1;
     this.decal = 22;
@@ -960,10 +969,8 @@ UIL.Color.prototype.rSize = function(){
     this.ctxMask.translate(this.mid, this.mid);
     this.ctxOverlay.translate(this.mid, this.mid);
 
-    this.drawCircle();
-    this.drawMask();
-
-    UIL.Proto.prototype.rSize.call( this );
+    //this.drawCircle();
+    //this.drawMask();
 };
 
 //-----------------------------------------
@@ -1127,20 +1134,17 @@ UIL.Slide.prototype = Object.create( UIL.Proto.prototype );
 UIL.Slide.prototype.constructor = UIL.Slide;
 
 UIL.Slide.prototype.rSize = function(){
+    UIL.Proto.prototype.rSize.call( this );
     this.width = UIL.BW-40;
     this.w = this.width-8;
-    UIL.setSVG(this.c[3], 'width',this.width);
-    //UIL.setSVG(this.c[4], 'width',this.width);
-    UIL.setDOM(this.c[3], 'left', UIL.AW);
-    UIL.setDOM(this.c[4], 'left', UIL.AW);
-    UIL.setDOM(this.c[3], 'width', this.width);
-    UIL.setDOM(this.c[4], 'width', this.width);
-
     UIL.setDOM(this.c[2], 'left', UIL.WIDTH-50);
-
+    UIL.setSVG(this.c[3], 'width',this.width);
+    UIL.setDOM(this.c[3], 'left', UIL.AW);
+    UIL.setDOM(this.c[3], 'width', this.width);
+    UIL.setDOM(this.c[4], 'left', UIL.AW);
+    UIL.setDOM(this.c[4], 'width', this.width);
+    
     this.f[5](false);
-
-    UIL.Proto.prototype.rSize.call( this );
 };
 UIL.List = function(obj){
 
@@ -1336,6 +1340,7 @@ UIL.List.prototype.clear = function(){
 }
 
 UIL.List.prototype.rSize = function(){
+    UIL.Proto.prototype.rSize.call( this );
     UIL.setSVG(this.c[3], 'width', UIL.BW);
     UIL.setDOM(this.c[3], 'width', UIL.BW);
     UIL.setDOM(this.c[3], 'left', UIL.AW);
@@ -1348,27 +1353,11 @@ UIL.List.prototype.rSize = function(){
     UIL.setDOM(this.c[2], 'left', UIL.AW-20);
     UIL.setDOM(this.c[2], 'width', UIL.BW);
 
-
     this.w = UIL.BW;
     if(this.max>90) this.w = UIL.BW-20;
     for(var i=0; i<this.length; i++){
         UIL.setDOM(this.listIn.children[i], 'width', this.w);
     }
-    
-    /*this.width = UIL.BW-40;
-    this.w = this.width-8;
-    
-    //UIL.setSVG(this.c[4], 'width',this.width);
-    
-    UIL.setDOM(this.c[4], 'left', UIL.AW);
-    
-    UIL.setDOM(this.c[4], 'width', this.width);
-
-    UIL.setDOM(this.c[2], 'left', UIL.WIDTH-50);
-
-    this.f[5](false);*/
-
-    UIL.Proto.prototype.rSize.call( this );
 };
 UIL.Bool = function(obj){
 
@@ -1404,9 +1393,9 @@ UIL.Bool.prototype = Object.create( UIL.Proto.prototype );
 UIL.Bool.prototype.constructor = UIL.Bool;
 
 UIL.Bool.prototype.rSize = function(){
+    UIL.Proto.prototype.rSize.call( this );
     UIL.setDOM(this.c[2], 'left', UIL.AW);
     UIL.setDOM(this.c[3], 'left', UIL.AW);
-    UIL.Proto.prototype.rSize.call( this );
 };
 UIL.Button = function(obj){
 
@@ -1455,10 +1444,10 @@ UIL.Button.prototype = Object.create( UIL.Proto.prototype );
 UIL.Button.prototype.constructor = UIL.Button;
 
 UIL.Button.prototype.rSize = function(){
+    UIL.Proto.prototype.rSize.call( this );
     UIL.setSVG(this.c[2], 'width',UIL.BW);
     UIL.setDOM(this.c[2], 'width', UIL.BW);
     UIL.setDOM(this.c[2], 'left', UIL.AW);
     UIL.setDOM(this.c[3], 'width', UIL.BW);
-    UIL.setDOM(this.c[3], 'left', UIL.AW);
-    UIL.Proto.prototype.rSize.call( this );
+    UIL.setDOM(this.c[3], 'left', UIL.AW);  
 };
