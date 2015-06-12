@@ -116,12 +116,15 @@ UIL.Color = function(obj){
         this.oldWidth = this.width;
         this.drawCircle();
         this.drawMask();
+        this.drawMarkers();
     }.bind(this);
 
     this.c[2].onclick = this.f[0];
     this.setColor(this.value);
 
     this.init();
+
+
 }
 
 UIL.Color.prototype = Object.create( UIL.Proto.prototype );
@@ -291,8 +294,12 @@ UIL.Color.prototype.rSize = function(){
     this.ctxMask.translate(this.mid, this.mid);
     this.ctxOverlay.translate(this.mid, this.mid);
 
-    //this.drawCircle();
-    //this.drawMask();
+    if(this.isShow){ 
+        this.f[6]();
+        this.h = this.width+30;
+        UIL.setDOM(this.c[0], 'height', this.h);
+        UIL.main.calc();
+    }
 };
 
 //-----------------------------------------
