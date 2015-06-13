@@ -18,7 +18,6 @@ UIL.Proto = function(obj){
     this.f = [];
 
     this.c[0] = UIL.DOM('UIL base');
-
     this.c[1] = UIL.DOM('UIL text');
     this.c[1].innerHTML = this.txt;
 }
