@@ -49,11 +49,11 @@ var UIL = UIL || ( function () {
             UIL.CC('input', 'border:solid 1px rgba(0,0,0,0.2); background:rgba(0,0,0,0.2); transition: 0.1s ease-out;', true);
             UIL.CC('input:focus', 'border: solid 1px rgba(0,0,0,0); background:rgba(0,0,0,0.6);', true);
 
-            UIL.CC('UIL.list', 'box-sizing:content-box; border:20px groove transparent; border-bottom:10px groove transparent; left:80px; top:0px; width:190px; height:90px; overflow:hidden; cursor:s-resize; pointer-events:auto; display:none;');
+            UIL.CC('UIL.list', 'box-sizing:content-box; border:20px solid transparent; border-bottom:10px solid transparent; left:80px; top:0px; width:190px; height:90px; overflow:hidden; cursor:s-resize; pointer-events:auto; display:none;');
             UIL.CC('UIL.list-in', 'left:0; top:0; width:100%; background:rgba(0,0,0,0.2); ');
             UIL.CC('UIL.listItem', 'position:relative; height:18px; background:rgba(0,0,0,0.2); border-bottom:1px solid rgba(0,0,0,0.2); pointer-events:auto; cursor:pointer;'+UIL.txt1);
             UIL.CC('UIL.listItem:hover', 'background:'+UIL.SELECT+'; color:#FFFFFF;')
-            UIL.CC('UIL.list-sel', 'width:10px; height:10px; right:5px; background:#666; margin-top:5px;');
+            //UIL.CC('UIL.list-sel', 'width:10px; height:10px; right:5px; background:#666; margin-top:5px;');
 
             UIL.CC('UIL.scroll-bg', 'cursor:w-resize; pointer-events:auto; background:rgba(256,0,0,0.2);');
             UIL.CC('UIL.svgbox', 'left:100px; top:1px; width:190px; height:17px; top:1px; pointer-events:auto; cursor:pointer; ');
@@ -802,7 +802,7 @@ UIL.Color = function(obj){
     this.c[2] = UIL.DOM('UIL svgbox', 'rect', '',  { width:this.sb, height:17, fill:'#000', 'stroke-width':1, stroke:UIL.SVGC });
     this.c[3] = UIL.DOM('UIL text');
     
-    this.c[4] = UIL.DOM('UIL', 'rect', 'left:'+ this.sa+'px;  top:'+this.decal+'px; width:'+this.width+'px; height:'+this.width+'px;',  {x:(this.mid - this.square), y:(this.mid - this.square), width:(this.square * 2 - 1), height:(this.square * 2 - 1), fill:'#000' });
+    this.c[4] = UIL.DOM('UIL', 'rect', 'left:'+ this.sa+'px;  top:'+this.decal+'px; width:'+this.width+'px; height:'+this.width+'px;',  { x:(this.mid - this.square), y:(this.mid - this.square), width:(this.square * 2 - 1), height:(this.square * 2 - 1), fill:'#000' });
     this.c[5] = UIL.DOM('UIL', 'canvas', 'left:'+ this.sa+'px;  top:'+this.decal+'px;  display:none;');
     this.c[6] = UIL.DOM('UIL', 'canvas', 'left:'+ this.sa+'px;  top:'+this.decal+'px;  pointer-events:auto; cursor:pointer; display:none;');
 
@@ -1158,7 +1158,7 @@ UIL.Slide = function(obj){
     this.c[2] = UIL.DOM('UIL text', 'div', 'text-align:right; width:40px; padding:0px 5px;');
 
     this.c[3] = UIL.DOM('UIL svgbox', 'rect', 'width:'+this.width+'px; height:'+this.height+'px; cursor:w-resize;', { width:this.width, height:this.height, fill:UIL.SVGB, 'stroke-width':1, stroke:UIL.SVGC });
-    this.c[4] = UIL.DOM('UIL svgbox', 'rect', 'width:'+this.width+'px; height:'+this.height+'px; pointer-events:none;', {x:4, y:4, width:this.width-8, height:this.height-8, fill:'#CCC', 'stroke-width':1, stroke:UIL.SVGC });
+    this.c[4] = UIL.DOM('UIL svgbox', 'rect', 'width:'+this.width+'px; height:'+this.height+'px; pointer-events:none;', { x:4, y:4, width:this.width-8, height:this.height-8, fill:'#CCC', 'stroke-width':1, stroke:UIL.SVGC });
 
     // mouseOver
     this.f[0] = function(e){
@@ -1240,9 +1240,9 @@ UIL.List = function(obj){
 
     this.c[2] = UIL.DOM('UIL list');
     this.c[3] = UIL.DOM('UIL svgbox', 'rect', '', {width:this.sb, height:17, fill:UIL.bgcolor(UIL.COLOR), 'stroke-width':1, stroke:UIL.SVGC  });
-    //this.c[4] = UIL.DOM('UIL', 'path', '',{x:160, 'd':'M 6 4 L 10 8 6 12', 'stroke-width':2, stroke:'#e2e2e2', fill:'none', 'stroke-linecap':'butt' }, this.c[3] );
     this.c[4] = UIL.DOM('UIL', 'path','position:absolute; width:16px; left:'+(this.sa+this.sb-17)+'px; top:1px; pointer-events:none;',{ width:16, height:16, 'd':'M 6 4 L 10 8 6 12', 'stroke-width':2, stroke:'#e2e2e2', fill:'none', 'stroke-linecap':'butt' } );
     this.c[5] = UIL.DOM('UIL text', 'div', 'text-align:center;');
+    this.c[6] = UIL.DOM('UIL svgbox', 'rect', 'top:20px; height:90; pointer-events:none;', { x:this.sb-15, y:0, width:10, height:16, fill:'#666', 'stroke-width':1, stroke:UIL.SVGC  });
 
 
     this.list = obj.list || [];
@@ -1268,11 +1268,8 @@ UIL.List = function(obj){
     }
 
     this.listIn = UIL.DOM('UIL list-in');
-    this.listsel = UIL.DOM('UIL list-sel');
     this.listIn.name = 'list';
-    this.listsel.name = 'list';
     this.c[2].appendChild(this.listIn);
-    this.c[2].appendChild(this.listsel);
 
     // populate list
     var item, n, l = this.sb;
@@ -1310,7 +1307,7 @@ UIL.List = function(obj){
         this.h = 120;
         if(!this.scroll){
             this.h = 30+this.max;
-            this.listsel.style.display = 'none';
+            this.c[6].style.display = 'none';
             this.c[2].onmousemove = null;
             this.c[2].onmousewheel = null; 
         }
@@ -1332,7 +1329,7 @@ UIL.List = function(obj){
             this.down = true;
             this.f[4](e);
             this.listIn.style.background = 'rgba(0,0,0,0.6)';
-            this.listsel.style.backgroundColor = '#AAA';
+            this.setSvg(6, 'fill', '#AAA');
             e.preventDefault();
         }
     }.bind(this);
@@ -1361,7 +1358,7 @@ UIL.List = function(obj){
     this.f[6] = function(e){
         this.down = false;
         this.listIn.style.background = 'rgba(0,0,0,0.2)';
-        this.listsel.style.backgroundColor = '#666'
+        this.setSvg(6, 'fill', '#666');
     }.bind(this);
 
     //onmousewheel
@@ -1381,7 +1378,7 @@ UIL.List = function(obj){
     this.f[8] = function(y){
         if(y !== undefined) this.py = y;
         this.listIn.style.top = -this.py+'px';
-        this.listsel.style.top = ((this.py*70)/this.range)+'px';
+        this.setSvg(6, 'y', ((this.py*70)/this.range)+2 );
     }.bind(this);
 
     this.f[9] = function(e){
@@ -1416,16 +1413,6 @@ UIL.List = function(obj){
 
 UIL.List.prototype = Object.create( UIL.Proto.prototype );
 UIL.List.prototype.constructor = UIL.List;
-/*UIL.List.prototype.clear = function(){
-   
-    while (this.listIn.firstChild) {
-       this.listIn.removeChild(this.listIn.firstChild);
-    }
-    while (this.c[2].firstChild) {
-       this.c[2].removeChild(this.c[2].firstChild);
-    }
-    UIL.Proto.prototype.clear.call( this );
-}*/
 
 UIL.List.prototype.rSize = function(){
     UIL.Proto.prototype.rSize.call( this );
@@ -1440,6 +1427,10 @@ UIL.List.prototype.rSize = function(){
 
     this.setDom(2, 'left', this.sa-20);
     this.setDom(2, 'width', this.sb);
+
+    this.setDom(6, 'left', this.sa);
+    this.setDom(6, 'width', this.sb);
+    this.setSvg(6, 'x', this.sb-15);
 
     this.w = this.sb;
     if(this.max>90) this.w = this.sb-20;
@@ -1490,7 +1481,7 @@ UIL.Button = function(obj){
 
     this.value = obj.value || false;
 
-    this.c[2] = UIL.DOM('UIL svgbox', 'rect', '', {width:this.sb, height:17, fill:UIL.bgcolor(UIL.COLOR), 'stroke-width':1, stroke:UIL.SVGC  });
+    this.c[2] = UIL.DOM('UIL svgbox', 'rect', '', { width:this.sb, height:17, fill:UIL.bgcolor(UIL.COLOR), 'stroke-width':1, stroke:UIL.SVGC  });
     this.c[3] = UIL.DOM('UIL text', 'div', 'text-align:center;');
 
     this.c[1].innerHTML = '';
