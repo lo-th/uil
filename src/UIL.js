@@ -16,9 +16,9 @@ var UIL = UIL || ( function () {
         REVISION: '0.6',
         DEF:false,
         events:[ 'onkeyup', 'onkeydown', 'onclick', 'onchange', 'onmouseover', 'onmouseout', 'onmousemove', 'onmousedown', 'onmouseup', 'onmousewheel' ],
-        WIDTH:0,
-        BW:0,
-        AW:0, 
+        WIDTH:300,
+        BW:190,
+        AW:100, 
         svgns:"http://www.w3.org/2000/svg",
         sizer:function(w){
             this.WIDTH = w.toFixed(0);
@@ -36,13 +36,13 @@ var UIL = UIL || ( function () {
             UIL.SVGC = 'rgba(120,120,120,0.6)';
             UIL.txt1 = 'font-family:"Open Sans", sans-serif; font-size:11px; color:#cccccc; outline:0; padding:0px 10px; left:0; top:1px; height:17px; width:100px; overflow:hidden;';
 
-            UIL.CC('UIL', 'position:absolute; pointer-events:none; box-sizing:border-box; -o-user-select:none; -ms-user-select:none; -khtml-user-select:none; -webkit-user-select:none; -moz-user-select:none;');
+            UIL.CC('UIL', 'position:absolute; pointer-events:none; box-sizing:border-box; -o-user-select:none; -ms-user-select:none; -khtml-user-select:none; -webkit-user-select:none; -moz-user-select:none; margin:0; padding:0; ');
 
-            UIL.CC('UIL.content', 'width:300px; margin-left:0px; overflow:hidden; background:none;');
+            UIL.CC('UIL.content', 'width:300px; overflow:hidden; background:none;');
             UIL.CC('UIL.mask', 'width:400px; height:100%; margin-left:-50px; pointer-events:auto; cursor:col-resize; background:none; display:none;');
             UIL.CC('UIL.inner', 'width:300px; top:0; left:0; height:auto; overflow:hidden; background:none;');
 
-            UIL.CC('UIL.base', 'position:relative; transition:height, 0.1s ease-out; width:300px; height:20px; left:0; background:rgba(40,40,40,0.5); border-bottom:1px groove rgba(0,0,0,0.2); overflow:hidden;');
+            UIL.CC('UIL.base', 'position:relative; transition:height, 0.1s ease-out; height:20px; border-bottom:1px groove rgba(0,0,0,0.2); overflow:hidden;');
 
             UIL.CC('UIL.text', UIL.txt1);
 
@@ -53,10 +53,9 @@ var UIL = UIL || ( function () {
             UIL.CC('UIL.list-in', 'left:0; top:0; width:100%; background:rgba(0,0,0,0.2); ');
             UIL.CC('UIL.listItem', 'position:relative; height:18px; background:rgba(0,0,0,0.2); border-bottom:1px solid rgba(0,0,0,0.2); pointer-events:auto; cursor:pointer;'+UIL.txt1);
             UIL.CC('UIL.listItem:hover', 'background:'+UIL.SELECT+'; color:#FFFFFF;')
-            //UIL.CC('UIL.list-sel', 'width:10px; height:10px; right:5px; background:#666; margin-top:5px;');
 
             UIL.CC('UIL.scroll-bg', 'cursor:w-resize; pointer-events:auto; background:rgba(256,0,0,0.2);');
-            UIL.CC('UIL.svgbox', 'left:100px; top:1px; width:190px; height:17px; top:1px; pointer-events:auto; cursor:pointer; ');
+            UIL.CC('UIL.svgbox', 'left:100px; top:1px; width:190px; height:17px; pointer-events:auto; cursor:pointer; font-family:"Open Sans", sans-serif; font-size:11px; text-align:center;');
 
             UIL.DEF = true;
         },
@@ -93,20 +92,16 @@ var UIL = UIL || ( function () {
         DOM:function(cc, type, css, obj, dom){ 
             type = type || 'div';
             if(type=='rect' || type=='path' || type=='polygon' || type=='text'){
-                if(dom==undefined){ 
-                    dom = document.createElementNS( this.svgns, 'svg' );
-                }
+                if(dom==undefined) dom = document.createElementNS( this.svgns, 'svg' );
                 var g = document.createElementNS( this.svgns, type );
-                if(type=='text'){ 
-                    var textNode = document.createTextNode('YOOOOO');
-                    g.appendChild(textNode);
-                }
-                dom.appendChild(g);
-                
+
                 for(var e in obj){
-                    //if(e=='width' || e=='height') dom.setAttribute( e, obj[e] );
-                    g.setAttribute( e, obj[e] );
+                    if(e=='txt') g.textContent = obj[e];
+                    else g.setAttributeNS(null, e, obj[e] );
                 }
+
+                dom.appendChild(g);
+
                 if(cc) dom.setAttribute('class', cc);
             } else {
                 if(dom==undefined) dom = document.createElement(type);
@@ -134,7 +129,7 @@ var UIL = UIL || ( function () {
 
 UIL.Gui = function(css, w, center){
     
-    if(!UIL.DEF)UIL.classDefine();
+    //if(!UIL.DEF)UIL.classDefine();
 
     UIL.sizer(w || 300);
     this.isCenter = center || false;
@@ -362,7 +357,7 @@ UIL.Gui.prototype = {
     }
 }
 
-
+UIL.classDefine();
 // UMD (Universal Module Definition)
 /*( function ( root ) {
     if ( typeof define === 'function' && define.amd ) {// AMD

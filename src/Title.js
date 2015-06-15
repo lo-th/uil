@@ -17,8 +17,8 @@ UIL.Title = function(obj){
     var idt = id || 0;
     if(id<10) idt = '0'+id;
 
-    this.c[1].innerHTML = this.txt.substring(0,1).toUpperCase() + this.txt.substring(1).replace("-", " ");
-    this.c[2].innerHTML = prefix.toUpperCase()+' '+idt;
+    this.c[1].textContent = this.txt.substring(0,1).toUpperCase() + this.txt.substring(1).replace("-", " ");
+    this.c[2].textContent = prefix.toUpperCase()+' '+idt;
 
     this.init();
 }

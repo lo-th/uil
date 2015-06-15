@@ -31,17 +31,15 @@ var content1 = document.getElementById('content1');
 var content2 = document.getElementById('content2');
 var content3 = document.getElementById('content3');
 var content4 = document.getElementById('content4');
-function addList(id, name, list){
-    var callback = function(v){  }.bind(this);
-    var s = new UIL.List(content, name, callback, this.nodes[id][name], list);
-};
+
+
 function addSlide(id, name, min, max, precision){
     var callback = function(v){  }.bind(this);
     var s;
-    if(id ==0 )  s = new UIL.List(content1, name, callback, 'cool', list);
-    if(id ==1 )  s = new UIL.List(content2, name, callback, 'cool', list);
-    if(id ==2 )  s = new UIL.Slide(content3, name, callback, 0, min, max, precision);
-    if(id ==3 )  s = new UIL.Slide(content4, name, callback, 0, min, max, precision);
+    if(id ==0 )  s = new UIL.List({target:content1, name:name, callback:callback, value:'cool', list:list, size:200});
+    if(id ==1 )  s = new UIL.List({target:content2, name:name, callback:callback, value:'cool', list:list, size:200});
+    if(id ==2 )  s = new UIL.Slide({target:content3, name:name, callback:callback, value:0, min:min, max:max, precision:precision, size:200});
+    if(id ==3 )  s = new UIL.Slide({target:content4, name:name, callback:callback, value:0, min:min, max:max, precision:precision, size:200});
     return s
 };
 

@@ -26,10 +26,15 @@ UIL.List = function(obj){
     this.py = 0;
     this.scroll = false;
 
+
+
     if(this.max>90){ 
         this.w = this.sb-20;
         this.scroll = true;
     }
+
+
+    //console.log(this.scroll)
 
     this.listIn = UIL.DOM('UIL list-in');
     this.listIn.name = 'list';
@@ -40,12 +45,12 @@ UIL.List = function(obj){
     for(var i=0; i<this.length; i++){
         n = this.list[i];
         item = UIL.DOM('UIL listItem', 'div', 'width:'+this.w+'px; height:18px;');
-        item.innerHTML = n;
+        item.textContent = n;
         item.name = n;
         this.listIn.appendChild(item);
     }
 
-    this.c[5].innerHTML = this.value;
+    this.c[5].textContent = this.value;
     this.c[2].name = 'list';
 
     // click top
@@ -61,7 +66,7 @@ UIL.List = function(obj){
         this.c[0].style.height = this.h+'px';
         this.c[2].style.display = 'none';
         this.setSvg(4, 'd','M 6 4 L 10 8 6 12');
-        UIL.main.calc();
+        if(UIL.main)UIL.main.calc();
     }.bind(this);
 
     // open
@@ -78,7 +83,7 @@ UIL.List = function(obj){
         this.c[0].style.height = this.h+'px';
         this.c[2].style.display = 'block';
         this.setSvg(4, 'd','M 12 6 L 8 10 4 6');
-        UIL.main.calc();
+        if(UIL.main)UIL.main.calc();
     }.bind(this);
 
     // mousedown
@@ -86,10 +91,10 @@ UIL.List = function(obj){
         var name = e.target.name;
         if(name!=='list' && name!==undefined ){
             this.value = e.target.name;
-            this.c[5].innerHTML = this.value;
+            this.c[5].textContent = this.value;
             this.callback(this.value);
             this.f[1]();
-        }else if (name=='list'){
+        }else if (name=='list' && this.scroll){
             this.down = true;
             this.f[4](e);
             this.listIn.style.background = 'rgba(0,0,0,0.6)';
@@ -112,7 +117,7 @@ UIL.List = function(obj){
 
     // mouseout
     this.f[5] = function(e){
-        UIL.main.lockwheel = false;
+        if(UIL.main)UIL.main.lockwheel = false;
         this.f[6]();
         var name = e.relatedTarget.name;
         if(name==undefined)this.f[1]();
@@ -127,7 +132,8 @@ UIL.List = function(obj){
 
     //onmousewheel
     this.f[7] = function(e){
-        UIL.main.lockwheel = true;
+        if(!this.scroll)return;
+        if(UIL.main)UIL.main.lockwheel = true;
         var delta = 0;
         if(e.wheelDeltaY) delta= -e.wheelDeltaY*0.04;
         else if(e.wheelDelta) delta= -e.wheelDelta*0.2;
@@ -140,6 +146,7 @@ UIL.List = function(obj){
 
     //update position
     this.f[8] = function(y){
+        if(!this.scroll)return;
         if(y !== undefined) this.py = y;
         this.listIn.style.top = -this.py+'px';
         this.setSvg(6, 'y', ((this.py*70)/this.range)+2 );
@@ -152,7 +159,7 @@ UIL.List = function(obj){
 
     this.f[10] = function(e){
         this.c[5].style.color = '#CCC';
-        this.setSvg(3, 'fill', UIL.bgcolor(UIL.COLOR) );
+        this.setSvg(3, 'fill', UIL.bgcolor(UIL.COLOR));
     }.bind(this);
 
     this.f[11] = function(e){
@@ -160,13 +167,14 @@ UIL.List = function(obj){
         this.setSvg(3, 'fill', UIL.SELECTDOWN );
     }.bind(this);
 
-    this.c[3].onclick = this.f[0];
+    
     this.c[2].onmousedown = this.f[3];
     this.c[2].onmousemove = this.f[4];
     this.c[2].onmouseout = this.f[5];
     this.c[2].onmouseup = this.f[6];
     this.c[2].onmousewheel = this.f[7]; 
 
+    this.c[3].onclick = this.f[0];
     this.c[3].onmouseover = this.f[9];
     this.c[3].onmouseout = this.f[10];
     this.c[3].onmouseup = this.f[10];

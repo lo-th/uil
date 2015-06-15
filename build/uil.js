@@ -16,9 +16,9 @@ var UIL = UIL || ( function () {
         REVISION: '0.6',
         DEF:false,
         events:[ 'onkeyup', 'onkeydown', 'onclick', 'onchange', 'onmouseover', 'onmouseout', 'onmousemove', 'onmousedown', 'onmouseup', 'onmousewheel' ],
-        WIDTH:0,
-        BW:0,
-        AW:0, 
+        WIDTH:300,
+        BW:190,
+        AW:100, 
         svgns:"http://www.w3.org/2000/svg",
         sizer:function(w){
             this.WIDTH = w.toFixed(0);
@@ -36,13 +36,13 @@ var UIL = UIL || ( function () {
             UIL.SVGC = 'rgba(120,120,120,0.6)';
             UIL.txt1 = 'font-family:"Open Sans", sans-serif; font-size:11px; color:#cccccc; outline:0; padding:0px 10px; left:0; top:1px; height:17px; width:100px; overflow:hidden;';
 
-            UIL.CC('UIL', 'position:absolute; pointer-events:none; box-sizing:border-box; -o-user-select:none; -ms-user-select:none; -khtml-user-select:none; -webkit-user-select:none; -moz-user-select:none;');
+            UIL.CC('UIL', 'position:absolute; pointer-events:none; box-sizing:border-box; -o-user-select:none; -ms-user-select:none; -khtml-user-select:none; -webkit-user-select:none; -moz-user-select:none; margin:0; padding:0; ');
 
-            UIL.CC('UIL.content', 'width:300px; margin-left:0px; overflow:hidden; background:none;');
+            UIL.CC('UIL.content', 'width:300px; overflow:hidden; background:none;');
             UIL.CC('UIL.mask', 'width:400px; height:100%; margin-left:-50px; pointer-events:auto; cursor:col-resize; background:none; display:none;');
             UIL.CC('UIL.inner', 'width:300px; top:0; left:0; height:auto; overflow:hidden; background:none;');
 
-            UIL.CC('UIL.base', 'position:relative; transition:height, 0.1s ease-out; width:300px; height:20px; left:0; background:rgba(40,40,40,0.5); border-bottom:1px groove rgba(0,0,0,0.2); overflow:hidden;');
+            UIL.CC('UIL.base', 'position:relative; transition:height, 0.1s ease-out; height:20px; border-bottom:1px groove rgba(0,0,0,0.2); overflow:hidden;');
 
             UIL.CC('UIL.text', UIL.txt1);
 
@@ -53,10 +53,9 @@ var UIL = UIL || ( function () {
             UIL.CC('UIL.list-in', 'left:0; top:0; width:100%; background:rgba(0,0,0,0.2); ');
             UIL.CC('UIL.listItem', 'position:relative; height:18px; background:rgba(0,0,0,0.2); border-bottom:1px solid rgba(0,0,0,0.2); pointer-events:auto; cursor:pointer;'+UIL.txt1);
             UIL.CC('UIL.listItem:hover', 'background:'+UIL.SELECT+'; color:#FFFFFF;')
-            //UIL.CC('UIL.list-sel', 'width:10px; height:10px; right:5px; background:#666; margin-top:5px;');
 
             UIL.CC('UIL.scroll-bg', 'cursor:w-resize; pointer-events:auto; background:rgba(256,0,0,0.2);');
-            UIL.CC('UIL.svgbox', 'left:100px; top:1px; width:190px; height:17px; top:1px; pointer-events:auto; cursor:pointer; ');
+            UIL.CC('UIL.svgbox', 'left:100px; top:1px; width:190px; height:17px; pointer-events:auto; cursor:pointer; font-family:"Open Sans", sans-serif; font-size:11px; text-align:center;');
 
             UIL.DEF = true;
         },
@@ -93,20 +92,16 @@ var UIL = UIL || ( function () {
         DOM:function(cc, type, css, obj, dom){ 
             type = type || 'div';
             if(type=='rect' || type=='path' || type=='polygon' || type=='text'){
-                if(dom==undefined){ 
-                    dom = document.createElementNS( this.svgns, 'svg' );
-                }
+                if(dom==undefined) dom = document.createElementNS( this.svgns, 'svg' );
                 var g = document.createElementNS( this.svgns, type );
-                if(type=='text'){ 
-                    var textNode = document.createTextNode('YOOOOO');
-                    g.appendChild(textNode);
-                }
-                dom.appendChild(g);
-                
+
                 for(var e in obj){
-                    //if(e=='width' || e=='height') dom.setAttribute( e, obj[e] );
-                    g.setAttribute( e, obj[e] );
+                    if(e=='txt') g.textContent = obj[e];
+                    else g.setAttributeNS(null, e, obj[e] );
                 }
+
+                dom.appendChild(g);
+
                 if(cc) dom.setAttribute('class', cc);
             } else {
                 if(dom==undefined) dom = document.createElement(type);
@@ -134,7 +129,7 @@ var UIL = UIL || ( function () {
 
 UIL.Gui = function(css, w, center){
     
-    if(!UIL.DEF)UIL.classDefine();
+    //if(!UIL.DEF)UIL.classDefine();
 
     UIL.sizer(w || 300);
     this.isCenter = center || false;
@@ -362,7 +357,7 @@ UIL.Gui.prototype = {
     }
 }
 
-
+UIL.classDefine();
 // UMD (Universal Module Definition)
 /*( function ( root ) {
     if ( typeof define === 'function' && define.amd ) {// AMD
@@ -380,7 +375,6 @@ UIL.Proto = function(obj){
     // define obj size
     this.setSize(obj.size);
     
-
     this.h = 20;
     if(obj.color) UIL.COLOR = obj.color;
     this.color = UIL.COLOR;
@@ -394,7 +388,7 @@ UIL.Proto = function(obj){
 
     this.c[0] = UIL.DOM('UIL base');
     this.c[1] = UIL.DOM('UIL text');
-    this.c[1].innerHTML = this.txt;
+    this.c[1].textContent = this.txt;
 }
 
 UIL.Proto.prototype = {
@@ -594,8 +588,8 @@ UIL.Title = function(obj){
     var idt = id || 0;
     if(id<10) idt = '0'+id;
 
-    this.c[1].innerHTML = this.txt.substring(0,1).toUpperCase() + this.txt.substring(1).replace("-", " ");
-    this.c[2].innerHTML = prefix.toUpperCase()+' '+idt;
+    this.c[1].textContent = this.txt.substring(0,1).toUpperCase() + this.txt.substring(1).replace("-", " ");
+    this.c[2].textContent = prefix.toUpperCase()+' '+idt;
 
     this.init();
 }
@@ -924,7 +918,7 @@ UIL.Color.prototype.updateDisplay = function(){
     
     this.value = this.bcolor;
     this.setSvg(2, 'fill', this.bcolor);
-    this.c[3].innerHTML = UIL.hexFormat(this.value);
+    this.c[3].textContent = UIL.hexFormat(this.value);
 
     
     var cc = this.invert ? '#fff' : '#000';
@@ -1262,10 +1256,15 @@ UIL.List = function(obj){
     this.py = 0;
     this.scroll = false;
 
+
+
     if(this.max>90){ 
         this.w = this.sb-20;
         this.scroll = true;
     }
+
+
+    //console.log(this.scroll)
 
     this.listIn = UIL.DOM('UIL list-in');
     this.listIn.name = 'list';
@@ -1276,12 +1275,12 @@ UIL.List = function(obj){
     for(var i=0; i<this.length; i++){
         n = this.list[i];
         item = UIL.DOM('UIL listItem', 'div', 'width:'+this.w+'px; height:18px;');
-        item.innerHTML = n;
+        item.textContent = n;
         item.name = n;
         this.listIn.appendChild(item);
     }
 
-    this.c[5].innerHTML = this.value;
+    this.c[5].textContent = this.value;
     this.c[2].name = 'list';
 
     // click top
@@ -1297,7 +1296,7 @@ UIL.List = function(obj){
         this.c[0].style.height = this.h+'px';
         this.c[2].style.display = 'none';
         this.setSvg(4, 'd','M 6 4 L 10 8 6 12');
-        UIL.main.calc();
+        if(UIL.main)UIL.main.calc();
     }.bind(this);
 
     // open
@@ -1314,7 +1313,7 @@ UIL.List = function(obj){
         this.c[0].style.height = this.h+'px';
         this.c[2].style.display = 'block';
         this.setSvg(4, 'd','M 12 6 L 8 10 4 6');
-        UIL.main.calc();
+        if(UIL.main)UIL.main.calc();
     }.bind(this);
 
     // mousedown
@@ -1322,10 +1321,10 @@ UIL.List = function(obj){
         var name = e.target.name;
         if(name!=='list' && name!==undefined ){
             this.value = e.target.name;
-            this.c[5].innerHTML = this.value;
+            this.c[5].textContent = this.value;
             this.callback(this.value);
             this.f[1]();
-        }else if (name=='list'){
+        }else if (name=='list' && this.scroll){
             this.down = true;
             this.f[4](e);
             this.listIn.style.background = 'rgba(0,0,0,0.6)';
@@ -1348,7 +1347,7 @@ UIL.List = function(obj){
 
     // mouseout
     this.f[5] = function(e){
-        UIL.main.lockwheel = false;
+        if(UIL.main)UIL.main.lockwheel = false;
         this.f[6]();
         var name = e.relatedTarget.name;
         if(name==undefined)this.f[1]();
@@ -1363,7 +1362,8 @@ UIL.List = function(obj){
 
     //onmousewheel
     this.f[7] = function(e){
-        UIL.main.lockwheel = true;
+        if(!this.scroll)return;
+        if(UIL.main)UIL.main.lockwheel = true;
         var delta = 0;
         if(e.wheelDeltaY) delta= -e.wheelDeltaY*0.04;
         else if(e.wheelDelta) delta= -e.wheelDelta*0.2;
@@ -1376,6 +1376,7 @@ UIL.List = function(obj){
 
     //update position
     this.f[8] = function(y){
+        if(!this.scroll)return;
         if(y !== undefined) this.py = y;
         this.listIn.style.top = -this.py+'px';
         this.setSvg(6, 'y', ((this.py*70)/this.range)+2 );
@@ -1388,7 +1389,7 @@ UIL.List = function(obj){
 
     this.f[10] = function(e){
         this.c[5].style.color = '#CCC';
-        this.setSvg(3, 'fill', UIL.bgcolor(UIL.COLOR) );
+        this.setSvg(3, 'fill', UIL.bgcolor(UIL.COLOR));
     }.bind(this);
 
     this.f[11] = function(e){
@@ -1396,13 +1397,14 @@ UIL.List = function(obj){
         this.setSvg(3, 'fill', UIL.SELECTDOWN );
     }.bind(this);
 
-    this.c[3].onclick = this.f[0];
+    
     this.c[2].onmousedown = this.f[3];
     this.c[2].onmousemove = this.f[4];
     this.c[2].onmouseout = this.f[5];
     this.c[2].onmouseup = this.f[6];
     this.c[2].onmousewheel = this.f[7]; 
 
+    this.c[3].onclick = this.f[0];
     this.c[3].onmouseover = this.f[9];
     this.c[3].onmouseout = this.f[10];
     this.c[3].onmouseup = this.f[10];
@@ -1482,35 +1484,40 @@ UIL.Button = function(obj){
     this.value = obj.value || false;
 
     this.c[2] = UIL.DOM('UIL svgbox', 'rect', '', { width:this.sb, height:17, fill:UIL.bgcolor(UIL.COLOR), 'stroke-width':1, stroke:UIL.SVGC  });
-    this.c[3] = UIL.DOM('UIL text', 'div', 'text-align:center;');
 
-    this.c[1].innerHTML = '';
-    this.c[3].innerHTML = this.txt;
+    UIL.DOM(null, 'text', '', { x:(this.sb*0.5), y:12,  width:this.sb, height:17, txt:this.txt, fill:'#CCCCCC', 'text-anchor':'middle' }, this.c[2] );
+
+    //this.c[3] = UIL.DOM('UIL text', 'div', 'text-align:center;');
+
+    this.c[1].textContent = '';
+    //this.c[3].innerHTML = this.txt;
 
     this.f[0] = function(e){
         this.callback( this.value );
     }.bind(this);
 
     this.f[1] = function(e){
-        this.c[3].style.color = '#FFF';
-        UIL.setSVG(this.c[2], 'fill', UIL.SELECT );
+       // this.c[3].style.color = '#FFF';
+        this.setSvg(2, 'fill', '#FFFFFF', 1 );
+        this.setSvg(2, 'fill', UIL.SELECT );
     }.bind(this);
 
     this.f[2] = function(e){
-        this.c[3].style.color = '#CCC';
-        UIL.setSVG(this.c[2], 'fill', UIL.bgcolor(UIL.COLOR) );
+        //this.c[3].style.color = '#CCC';
+        this.setSvg(2, 'fill', '#CCCCCC', 1 );
+        this.setSvg(2, 'fill', UIL.bgcolor(UIL.COLOR) );
     }.bind(this);
 
     this.f[3] = function(e){
-        this.c[3].style.color = '#CCC';
-        UIL.setSVG(this.c[2], 'fill', UIL.SELECTDOWN );
+        //this.c[3].style.color = '#CCC';
+        this.setSvg(2, 'fill', UIL.SELECTDOWN );
     }.bind(this);
 
-    this.c[2].onclick = this.f[0];
+    this.c[2].onmousedown = this.f[3];
     this.c[2].onmouseover = this.f[1];
     this.c[2].onmouseout = this.f[2];
     this.c[2].onmouseup = this.f[1];
-    this.c[2].onmousedown = this.f[3];
+    this.c[2].onclick = this.f[0];
 
     this.init();
 }
@@ -1519,14 +1526,17 @@ UIL.Button.prototype = Object.create( UIL.Proto.prototype );
 UIL.Button.prototype.constructor = UIL.Button;
 
 UIL.Button.prototype.label = function(string){
-    this.c[3].innerHTML = string;
+    this.c[2].childNodes[1].textContent = string;
+   // this.c[3].innerHTML = string;
 }
 
 UIL.Button.prototype.rSize = function(){
     UIL.Proto.prototype.rSize.call( this );
-    this.setSvg(2, 'width', this.sb);
+    this.setSvg(2, 'width', this.sb, 0);
+    this.setSvg(2, 'width', this.sb, 1);
+    this.setSvg(2, 'x', this.sb*0.5, 1);
     this.setDom(2, 'width', this.sb);
     this.setDom(2, 'left', this.sa);
-    this.setDom(3, 'width', this.sb);
-    this.setDom(3, 'left', this.sa);
+    //this.setDom(3, 'width', this.sb);
+   // this.setDom(3, 'left', this.sa);
 };

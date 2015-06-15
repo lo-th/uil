@@ -5,7 +5,6 @@ UIL.Proto = function(obj){
     // define obj size
     this.setSize(obj.size);
     
-
     this.h = 20;
     if(obj.color) UIL.COLOR = obj.color;
     this.color = UIL.COLOR;
@@ -19,7 +18,7 @@ UIL.Proto = function(obj){
 
     this.c[0] = UIL.DOM('UIL base');
     this.c[1] = UIL.DOM('UIL text');
-    this.c[1].innerHTML = this.txt;
+    this.c[1].textContent = this.txt;
 }
 
 UIL.Proto.prototype = {
