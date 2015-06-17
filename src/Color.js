@@ -138,7 +138,7 @@ UIL.Color.prototype.updateDisplay = function(){
     
     this.value = this.bcolor;
     this.setSvg(2, 'fill', this.bcolor);
-    this.c[3].textContent = UIL.hexFormat(this.value);
+    this.c[3].textContent = UIL.hexFormat(this.bcolor);//this.value);
 
     
     var cc = this.invert ? '#fff' : '#000';

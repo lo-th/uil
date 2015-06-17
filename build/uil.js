@@ -602,7 +602,7 @@ UIL.Title.prototype.constructor = UIL.Title;
 UIL.Title.prototype.rSize = function(){
     UIL.Proto.prototype.rSize.call( this );
     this.setDom(1, 'width', this.size-50);
-    this.setDom(2, 'left', this.size-50);
+    this.setDom(2, 'left', this.size-(50+26));
 };
 UIL.String = function(obj){
 
@@ -918,7 +918,7 @@ UIL.Color.prototype.updateDisplay = function(){
     
     this.value = this.bcolor;
     this.setSvg(2, 'fill', this.bcolor);
-    this.c[3].textContent = UIL.hexFormat(this.value);
+    this.c[3].textContent = UIL.hexFormat(this.bcolor);//this.value);
 
     
     var cc = this.invert ? '#fff' : '#000';
