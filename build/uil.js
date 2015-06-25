@@ -71,7 +71,9 @@ var UIL = UIL || ( function () {
                     case 'no': case 'NO': a=0; break;
                 }
             }
-            return 'rgba('+r+','+g+','+b+','+a+')';
+            var color = 'rgba('+r+','+g+','+b+','+a+')';
+            if(a==0) color = 'none';
+            return color;
         },
         /*canvasURL:function(obj){
             var canvas = document.createElement( 'canvas' );
