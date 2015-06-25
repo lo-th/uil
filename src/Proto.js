@@ -4,6 +4,11 @@ UIL.Proto = function(obj){
 
     // define obj size
     this.setSize(obj.size);
+
+    this.solo = obj.solo || false;
+    //this.fixe = obj.fixe || false;
+
+
     
     this.h = 20;
     if(obj.color) UIL.COLOR = obj.color;
@@ -19,6 +24,15 @@ UIL.Proto = function(obj){
     this.c[0] = UIL.DOM('UIL base');
     this.c[1] = UIL.DOM('UIL text');
     this.c[1].textContent = this.txt;
+
+    //if(this.fixe) this.c[0].style.position = 'absolute';
+
+    if(obj.pos){
+        this.c[0].style.position = 'absolute';
+        for(var p in obj.pos){
+            this.c[0].style[p] = obj.pos[p];
+        }
+    }
 }
 
 UIL.Proto.prototype = {

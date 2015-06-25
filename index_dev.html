@@ -58,7 +58,9 @@ s.c[0].style.left = '-60px';
 var b = new UIL.Button({target:document.body, callback:populate, name:'populate', color:'no', size:200});
 b.setDom(0,'top', 40);
 b.setDom(0,'left', -60);
-
+var b2 = new UIL.Number({target:document.body, callback:callbackSize, name:'ui size', min:100, max:400, value:300, step:10, color:'no', size:200, solo:true});
+b2.setDom(0,'top', 40);
+b2.setDom(0,'left', -60);
 
 populate();
 

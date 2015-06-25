@@ -39,6 +39,7 @@ var UIL = UIL || ( function () {
             UIL.CC('UIL', 'position:absolute; pointer-events:none; box-sizing:border-box; -o-user-select:none; -ms-user-select:none; -khtml-user-select:none; -webkit-user-select:none; -moz-user-select:none; margin:0; padding:0; ');
 
             UIL.CC('UIL.content', 'width:300px; overflow:hidden; background:none;');
+            //UIL.CC('UIL.mask', 'width:400px; height:100%; margin-left:-50px; pointer-events:auto; cursor:col-resize; background:rgba(0,255,0,0.2); display:none;');
             UIL.CC('UIL.mask', 'width:400px; height:100%; margin-left:-50px; pointer-events:auto; cursor:col-resize; background:none; display:none;');
             UIL.CC('UIL.inner', 'width:300px; top:0; left:0; height:auto; overflow:hidden; background:none;');
 
@@ -128,10 +129,14 @@ var UIL = UIL || ( function () {
 
 
 UIL.Gui = function(css, w, center){
+
+    UIL.sizer(w || 300);
+
+    UIL.main = this;
     
     //if(!UIL.DEF)UIL.classDefine();
 
-    UIL.sizer(w || 300);
+    
     this.isCenter = center || false;
     this.lockwheel = false;
 
@@ -161,7 +166,7 @@ UIL.Gui = function(css, w, center){
     UIL.DOM(null, 'rect', '', {width:300, height:1, x:0, fill:'#666' }, this.scroll);
     this.content.appendChild(this.scroll);  
 
-    UIL.main = this;
+    
 
     this.changeWidth();
 
@@ -374,6 +379,11 @@ UIL.Proto = function(obj){
 
     // define obj size
     this.setSize(obj.size);
+
+    this.solo = obj.solo || false;
+    //this.fixe = obj.fixe || false;
+
+
     
     this.h = 20;
     if(obj.color) UIL.COLOR = obj.color;
@@ -389,6 +399,15 @@ UIL.Proto = function(obj){
     this.c[0] = UIL.DOM('UIL base');
     this.c[1] = UIL.DOM('UIL text');
     this.c[1].textContent = this.txt;
+
+    //if(this.fixe) this.c[0].style.position = 'absolute';
+
+    if(obj.pos){
+        this.c[0].style.position = 'absolute';
+        for(var p in obj.pos){
+            this.c[0].style[p] = obj.pos[p];
+        }
+    }
 }
 
 UIL.Proto.prototype = {
@@ -573,16 +592,19 @@ UIL.Title = function(obj){
     
     UIL.Proto.call( this, obj );
 
-    this.h = 31;
-    this.color = obj.prefix || 'N';
+    this.h = obj.height || 31;
+    //this.color = obj.color || 'N';
 
     var id = obj.id || 0;
     var prefix = obj.prefix || '';
 
-    this.c[2] = UIL.DOM('UIL text', 'div', 'text-align:right; width:40px; padding:0px 5px; top:8px;');
+    this.c[2] = UIL.DOM('UIL text', 'div', 'text-align:right; width:40px; padding:0px 5px;');
 
-    this.setDom(0, 'height', this.h);
-    this.setDom(1, 'top', 8);
+    if(this.h==31){
+        this.setDom(0, 'height', this.h);
+        this.setDom(1, 'top', 8);
+        this.setDom(2, 'top', 8);
+    }
     
 
     var idt = id || 0;
@@ -603,6 +625,14 @@ UIL.Title.prototype.rSize = function(){
     UIL.Proto.prototype.rSize.call( this );
     this.setDom(1, 'width', this.size-50);
     this.setDom(2, 'left', this.size-(50+26));
+};
+
+UIL.Title.prototype.text = function(txt){
+    this.c[1].textContent = txt;
+};
+
+UIL.Title.prototype.text2 = function(txt){
+    this.c[2].textContent = txt;
 };
 UIL.String = function(obj){
 
@@ -647,7 +677,9 @@ UIL.Number = function(obj){
     this.isAngle = false;
     this.isVector = false;
 
-    this.mask = UIL.main.mask;
+    
+    if(this.solo) this.mask = null;
+    else this.mask = UIL.main.mask;
 
     if(obj.value){
         if(!isNaN(obj.value)){ this.value = [obj.value];}
@@ -678,6 +710,11 @@ UIL.Number = function(obj){
         this.c[2+i] = UIL.DOM('UIL text', 'input', 'pointer-events:auto; padding:0px 5px; padding-bottom:2px; width:'+this.w+'px; left:'+(UIL.AW+(this.w*i)+(5*i))+'px;');
         this.c[2+i].name = i;
         this.c[2+i].value = this.value[i];
+    }
+
+    if(this.mask==null){
+        this.c[2+this.length] = UIL.DOM('UIL mask', 'div');
+        this.mask = this.c[2+this.length];
     }
 
     // key
@@ -1416,6 +1453,10 @@ UIL.List = function(obj){
 UIL.List.prototype = Object.create( UIL.Proto.prototype );
 UIL.List.prototype.constructor = UIL.List;
 
+UIL.List.prototype.text = function(txt){
+    this.c[5].textContent = txt;
+}
+
 UIL.List.prototype.rSize = function(){
     UIL.Proto.prototype.rSize.call( this );
     this.setSvg(3, 'width', this.sb);
@@ -1485,31 +1526,31 @@ UIL.Button = function(obj){
 
     this.c[2] = UIL.DOM('UIL svgbox', 'rect', '', { width:this.sb, height:17, fill:UIL.bgcolor(UIL.COLOR), 'stroke-width':1, stroke:UIL.SVGC  });
 
-    UIL.DOM(null, 'text', '', { x:(this.sb*0.5), y:12,  width:this.sb, height:17, txt:this.txt, fill:'#CCCCCC', 'text-anchor':'middle' }, this.c[2] );
+    //UIL.DOM(null, 'text', '', { x:(this.sb*0.5), y:12,  width:this.sb, height:17, txt:this.txt, fill:'#CCCCCC', 'text-anchor':'middle' }, this.c[2] );
 
-    //this.c[3] = UIL.DOM('UIL text', 'div', 'text-align:center;');
+    this.c[3] = UIL.DOM('UIL text', 'div', 'text-align:center;');
 
     this.c[1].textContent = '';
-    //this.c[3].innerHTML = this.txt;
+    this.c[3].innerHTML = this.txt;
 
     this.f[0] = function(e){
         this.callback( this.value );
     }.bind(this);
 
     this.f[1] = function(e){
-       // this.c[3].style.color = '#FFF';
-        this.setSvg(2, 'fill', '#FFFFFF', 1 );
+        this.c[3].style.color = '#FFF';
+        //this.setSvg(2, 'fill', '#FFFFFF', 1 );
         this.setSvg(2, 'fill', UIL.SELECT );
     }.bind(this);
 
     this.f[2] = function(e){
-        //this.c[3].style.color = '#CCC';
-        this.setSvg(2, 'fill', '#CCCCCC', 1 );
+        this.c[3].style.color = '#CCC';
+        //this.setSvg(2, 'fill', '#CCCCCC', 1 );
         this.setSvg(2, 'fill', UIL.bgcolor(UIL.COLOR) );
     }.bind(this);
 
     this.f[3] = function(e){
-        //this.c[3].style.color = '#CCC';
+        this.c[3].style.color = '#CCC';
         this.setSvg(2, 'fill', UIL.SELECTDOWN );
     }.bind(this);
 
@@ -1526,17 +1567,22 @@ UIL.Button.prototype = Object.create( UIL.Proto.prototype );
 UIL.Button.prototype.constructor = UIL.Button;
 
 UIL.Button.prototype.label = function(string){
-    this.c[2].childNodes[1].textContent = string;
-   // this.c[3].innerHTML = string;
+    this.c[3].textContent = string;
+    //this.c[2].childNodes[1].textContent = string;
+}
+
+UIL.Button.prototype.icon = function(string){
+    this.c[3].style.padding = '0px 0px';
+    this.c[3].innerHTML = string;
 }
 
 UIL.Button.prototype.rSize = function(){
     UIL.Proto.prototype.rSize.call( this );
     this.setSvg(2, 'width', this.sb, 0);
-    this.setSvg(2, 'width', this.sb, 1);
-    this.setSvg(2, 'x', this.sb*0.5, 1);
+    //this.setSvg(2, 'width', this.sb, 1);
+    //this.setSvg(2, 'x', this.sb*0.5, 1);
     this.setDom(2, 'width', this.sb);
     this.setDom(2, 'left', this.sa);
-    //this.setDom(3, 'width', this.sb);
-   // this.setDom(3, 'left', this.sa);
+    this.setDom(3, 'width', this.sb);
+    this.setDom(3, 'left', this.sa);
 };

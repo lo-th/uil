@@ -10,7 +10,9 @@ UIL.Number = function(obj){
     this.isAngle = false;
     this.isVector = false;
 
-    this.mask = UIL.main.mask;
+    
+    if(this.solo) this.mask = null;
+    else this.mask = UIL.main.mask;
 
     if(obj.value){
         if(!isNaN(obj.value)){ this.value = [obj.value];}
@@ -41,6 +43,11 @@ UIL.Number = function(obj){
         this.c[2+i] = UIL.DOM('UIL text', 'input', 'pointer-events:auto; padding:0px 5px; padding-bottom:2px; width:'+this.w+'px; left:'+(UIL.AW+(this.w*i)+(5*i))+'px;');
         this.c[2+i].name = i;
         this.c[2+i].value = this.value[i];
+    }
+
+    if(this.mask==null){
+        this.c[2+this.length] = UIL.DOM('UIL mask', 'div');
+        this.mask = this.c[2+this.length];
     }
 
     // key

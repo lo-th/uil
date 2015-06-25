@@ -39,6 +39,7 @@ var UIL = UIL || ( function () {
             UIL.CC('UIL', 'position:absolute; pointer-events:none; box-sizing:border-box; -o-user-select:none; -ms-user-select:none; -khtml-user-select:none; -webkit-user-select:none; -moz-user-select:none; margin:0; padding:0; ');
 
             UIL.CC('UIL.content', 'width:300px; overflow:hidden; background:none;');
+            //UIL.CC('UIL.mask', 'width:400px; height:100%; margin-left:-50px; pointer-events:auto; cursor:col-resize; background:rgba(0,255,0,0.2); display:none;');
             UIL.CC('UIL.mask', 'width:400px; height:100%; margin-left:-50px; pointer-events:auto; cursor:col-resize; background:none; display:none;');
             UIL.CC('UIL.inner', 'width:300px; top:0; left:0; height:auto; overflow:hidden; background:none;');
 
@@ -128,10 +129,14 @@ var UIL = UIL || ( function () {
 
 
 UIL.Gui = function(css, w, center){
+
+    UIL.sizer(w || 300);
+
+    UIL.main = this;
     
     //if(!UIL.DEF)UIL.classDefine();
 
-    UIL.sizer(w || 300);
+    
     this.isCenter = center || false;
     this.lockwheel = false;
 
@@ -161,7 +166,7 @@ UIL.Gui = function(css, w, center){
     UIL.DOM(null, 'rect', '', {width:300, height:1, x:0, fill:'#666' }, this.scroll);
     this.content.appendChild(this.scroll);  
 
-    UIL.main = this;
+    
 
     this.changeWidth();
 

@@ -186,6 +186,10 @@ UIL.List = function(obj){
 UIL.List.prototype = Object.create( UIL.Proto.prototype );
 UIL.List.prototype.constructor = UIL.List;
 
+UIL.List.prototype.text = function(txt){
+    this.c[5].textContent = txt;
+}
+
 UIL.List.prototype.rSize = function(){
     UIL.Proto.prototype.rSize.call( this );
     this.setSvg(3, 'width', this.sb);
