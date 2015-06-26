@@ -9,9 +9,13 @@
 *{ margin: 0; padding: 0; border: 0; -o-user-select:none; -ms-user-select:none; -khtml-user-select:none; -webkit-user-select:none; -moz-user-select:none; } 
 html{ overflow:hidden; width:100%; height:100%; }
 body { font-family:'Open Sans', sans-serif; background-color:#111; background-image:url(images/orion.png); font-size:12px; color:#fff;}
-#bg{position:absolute; top:0; left:0; width:100%; height:100%;   
-    background:linear-gradient( 75deg, #111 20%, rgba(17,17,17,0.3) 50%, #111 80% ), linear-gradient( -15deg, #111 30%, rgba(17,17,17,0) 90% );
-    background:-webkit-linear-gradient( 15deg, #111 20%, rgba(17,17,17,0.3) 50%, #111 80% ), -webkit-linear-gradient( 105deg, #111 30%, rgba(17,17,17,0) 90% );
+#bg{
+    position:absolute; top:0; left:0; bottom:0; right:0;   
+    background: url(images/bg.png) no-repeat center center fixed; 
+    -webkit-background-size: cover;
+    -moz-background-size: cover;
+    -o-background-size: cover;
+    background-size: cover;
 }
 #version { position:absolute; top:98px; left:50%; width:65px; height:10px; pointer-events:none; text-align:right;  font-size:16px;}
 #debug { position:absolute; top:10px; left:10px; width:300px; pointer-events:none;}
@@ -43,15 +47,10 @@ var callbackButton = function(){ debug.innerHTML = "i'm a button !!" ; }
 var callbackSize = function(v){ timer = setTimeout( UIL.sizer(v), 1000); }
 
 var ui = new UIL.Gui('top:145px; left:50%;', 300, true);
-//var ui = new UIL.Group('top:145px; left:50%;', 300, true);
 
-var s = new UIL.Slide({target:document.body, callback:callbackSize, name:'ui size', min:100, max:400, value:300, step:10, color:'no', size:200});
-s.c[0].style.top = '40px';
-s.c[0].style.left = '-60px';
-var b = new UIL.Button({target:document.body, callback:populate, name:'populate', color:'no', size:200});
-b.setDom(0,'top', 40);
-b.setDom(0,'left', -60);
-
+// single UI element
+var s = new UIL.Slide({target:document.body, callback:callbackSize, name:'ui size', min:100, max:400, value:300, step:10, color:'no', size:100, pos:{left:'10px', top:'40px' }, simple:true });
+var b = new UIL.Button({target:document.body, callback:populate, name:'populate', color:'no', size:100, pos:{left:'10px', top:'60px'}, simple:true });
 
 populate();
 

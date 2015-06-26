@@ -59,8 +59,6 @@ UIL.Button.prototype.icon = function(string){
 UIL.Button.prototype.rSize = function(){
     UIL.Proto.prototype.rSize.call( this );
     this.setSvg(2, 'width', this.sb, 0);
-    //this.setSvg(2, 'width', this.sb, 1);
-    //this.setSvg(2, 'x', this.sb*0.5, 1);
     this.setDom(2, 'width', this.sb);
     this.setDom(2, 'left', this.sa);
     this.setDom(3, 'width', this.sb);

@@ -26,6 +26,11 @@ UIL.List = function(obj){
     this.py = 0;
     this.scroll = false;
 
+    // list up or sown
+    this.side = obj.side || 'down';
+
+    // force full list 
+    this.full = obj.full || false;
 
 
     if(this.max>90){ 

@@ -13,7 +13,7 @@ var UIL = UIL || ( function () {
 
     return {
         main:null,
-        REVISION: '0.6',
+        REVISION: '0.7',
         DEF:false,
         events:[ 'onkeyup', 'onkeydown', 'onclick', 'onchange', 'onmouseover', 'onmouseout', 'onmousemove', 'onmousedown', 'onmouseup', 'onmousewheel' ],
         WIDTH:300,
@@ -43,7 +43,7 @@ var UIL = UIL || ( function () {
             UIL.CC('UIL.mask', 'width:400px; height:100%; margin-left:-50px; pointer-events:auto; cursor:col-resize; background:none; display:none;');
             UIL.CC('UIL.inner', 'width:300px; top:0; left:0; height:auto; overflow:hidden; background:none;');
 
-            UIL.CC('UIL.base', 'position:relative; transition:height, 0.1s ease-out; height:20px; border-bottom:1px groove rgba(0,0,0,0.2); overflow:hidden;');
+            UIL.CC('UIL.base', 'position:relative; transition:height, 0.1s ease-out; height:20px; overflow:hidden;');
 
             UIL.CC('UIL.text', UIL.txt1);
 
@@ -94,7 +94,7 @@ var UIL = UIL || ( function () {
 
         DOM:function(cc, type, css, obj, dom){ 
             type = type || 'div';
-            if(type=='rect' || type=='path' || type=='polygon' || type=='text'){
+            if(type=='rect' || type=='path' || type=='polygon' || type=='text' || type=='pattern' || type=='defs' || type=='g' || type=='line'){
                 if(dom==undefined) dom = document.createElementNS( this.svgns, 'svg' );
                 var g = document.createElementNS( this.svgns, type );
 
@@ -281,7 +281,6 @@ UIL.Gui.prototype = {
         }
         this.uis.push(n);
         this.calc();
-
         return n;
     },
     resize:function(e){
@@ -361,10 +360,15 @@ UIL.Gui.prototype = {
             this.uis[i].setSize();
             this.uis[i].rSize();
         }
+    },
+    liner:function(color){
+        var l = UIL.DOM('UIL', 'line', 'width:100%; height:1px; bottom:0px;', {x1:0, y1:0, x2:'100%', y2:0, stroke:color || 'rgba(0,0,0,0.5)', 'stroke-width':1, 'stroke-linecap':'butt'} );
+        return l;
     }
 }
 
 UIL.classDefine();
+
 // UMD (Universal Module Definition)
 /*( function ( root ) {
     if ( typeof define === 'function' && define.amd ) {// AMD

@@ -2,15 +2,20 @@ UIL.Proto = function(obj){
 
     obj = obj || {};
 
+    // only most simple 
+    this.mono = false;
+
+    // no title 
+    this.simple = obj.simple || false;
+
+    // bottom line
+    this.liner = null;
+
     // define obj size
     this.setSize(obj.size);
 
-    this.solo = obj.solo || false;
-    //this.fixe = obj.fixe || false;
-
-
-    
     this.h = 20;
+    
     if(obj.color) UIL.COLOR = obj.color;
     this.color = UIL.COLOR;
 
@@ -22,15 +27,20 @@ UIL.Proto = function(obj){
     this.f = [];
 
     this.c[0] = UIL.DOM('UIL base');
-    this.c[1] = UIL.DOM('UIL text');
-    this.c[1].textContent = this.txt;
 
-    //if(this.fixe) this.c[0].style.position = 'absolute';
+    this.c[1] = UIL.DOM('UIL text');
+    if(!this.simple) this.c[1].textContent = this.txt;
 
     if(obj.pos){
         this.c[0].style.position = 'absolute';
         for(var p in obj.pos){
             this.c[0].style[p] = obj.pos[p];
+        }
+        this.mono = true;
+    } else {
+        if(UIL.main){
+            this.liner = UIL.main.liner();
+            this.c[0].appendChild( this.liner );
         }
     }
 }
@@ -51,8 +61,13 @@ UIL.Proto.prototype = {
     },
     setSize:function(sx){
         this.size = sx || UIL.WIDTH;
-        this.sa = (this.size/3).toFixed(0)*1;
-        this.sb = ((this.sa*2)-10).toFixed(0)*1;
+        if(this.simple){
+            this.sa = 1;
+            this.sb = sx-2;
+        }else{
+            this.sa = (this.size/3).toFixed(0)*1;
+            this.sb = ((this.sa*2)-10).toFixed(0)*1;
+        }
     },
     setDom:function(id, type, value){
         this.c[id].style[type] = value+'px';
@@ -64,7 +79,11 @@ UIL.Proto.prototype = {
         var ev = UIL.events;
         var i = this.c.length, j;
         while(i--){
-            if(i==0){ 
+            if(i==0){
+                if(this.liner!==null){ 
+                    this.c[0].removeChild( this.liner );
+                    this.liner = null;
+                }
                 if(this.target!==null) this.target.removeChild(this.c[0]);
                 else UIL.main.inner.removeChild(this.c[0]);
             } else {
@@ -118,6 +137,6 @@ UIL.Proto.prototype = {
     },
     rSize:function(){
         this.c[0].style.width = this.size+'px';
-        this.c[1].style.width = this.sa+'px';
+        if(!this.simple)this.c[1].style.width = this.sa+'px';
     }
 }

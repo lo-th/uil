@@ -11,7 +11,7 @@ UIL.Number = function(obj){
     this.isVector = false;
 
     
-    if(this.solo) this.mask = null;
+    if(this.mono) this.mask = null;
     else this.mask = UIL.main.mask;
 
     if(obj.value){

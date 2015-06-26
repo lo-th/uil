@@ -13,7 +13,7 @@ var UIL = UIL || ( function () {
 
     return {
         main:null,
-        REVISION: '0.6',
+        REVISION: '0.7',
         DEF:false,
         events:[ 'onkeyup', 'onkeydown', 'onclick', 'onchange', 'onmouseover', 'onmouseout', 'onmousemove', 'onmousedown', 'onmouseup', 'onmousewheel' ],
         WIDTH:300,
@@ -43,7 +43,7 @@ var UIL = UIL || ( function () {
             UIL.CC('UIL.mask', 'width:400px; height:100%; margin-left:-50px; pointer-events:auto; cursor:col-resize; background:none; display:none;');
             UIL.CC('UIL.inner', 'width:300px; top:0; left:0; height:auto; overflow:hidden; background:none;');
 
-            UIL.CC('UIL.base', 'position:relative; transition:height, 0.1s ease-out; height:20px; border-bottom:1px groove rgba(0,0,0,0.2); overflow:hidden;');
+            UIL.CC('UIL.base', 'position:relative; transition:height, 0.1s ease-out; height:20px; overflow:hidden;');
 
             UIL.CC('UIL.text', UIL.txt1);
 
@@ -94,7 +94,7 @@ var UIL = UIL || ( function () {
 
         DOM:function(cc, type, css, obj, dom){ 
             type = type || 'div';
-            if(type=='rect' || type=='path' || type=='polygon' || type=='text'){
+            if(type=='rect' || type=='path' || type=='polygon' || type=='text' || type=='pattern' || type=='defs' || type=='g' || type=='line'){
                 if(dom==undefined) dom = document.createElementNS( this.svgns, 'svg' );
                 var g = document.createElementNS( this.svgns, type );
 
@@ -281,7 +281,6 @@ UIL.Gui.prototype = {
         }
         this.uis.push(n);
         this.calc();
-
         return n;
     },
     resize:function(e){
@@ -361,10 +360,15 @@ UIL.Gui.prototype = {
             this.uis[i].setSize();
             this.uis[i].rSize();
         }
+    },
+    liner:function(color){
+        var l = UIL.DOM('UIL', 'line', 'width:100%; height:1px; bottom:0px;', {x1:0, y1:0, x2:'100%', y2:0, stroke:color || 'rgba(0,0,0,0.5)', 'stroke-width':1, 'stroke-linecap':'butt'} );
+        return l;
     }
 }
 
 UIL.classDefine();
+
 // UMD (Universal Module Definition)
 /*( function ( root ) {
     if ( typeof define === 'function' && define.amd ) {// AMD
@@ -379,15 +383,20 @@ UIL.Proto = function(obj){
 
     obj = obj || {};
 
+    // only most simple 
+    this.mono = false;
+
+    // no title 
+    this.simple = obj.simple || false;
+
+    // bottom line
+    this.liner = null;
+
     // define obj size
     this.setSize(obj.size);
 
-    this.solo = obj.solo || false;
-    //this.fixe = obj.fixe || false;
-
-
-    
     this.h = 20;
+    
     if(obj.color) UIL.COLOR = obj.color;
     this.color = UIL.COLOR;
 
@@ -399,15 +408,20 @@ UIL.Proto = function(obj){
     this.f = [];
 
     this.c[0] = UIL.DOM('UIL base');
-    this.c[1] = UIL.DOM('UIL text');
-    this.c[1].textContent = this.txt;
 
-    //if(this.fixe) this.c[0].style.position = 'absolute';
+    this.c[1] = UIL.DOM('UIL text');
+    if(!this.simple) this.c[1].textContent = this.txt;
 
     if(obj.pos){
         this.c[0].style.position = 'absolute';
         for(var p in obj.pos){
             this.c[0].style[p] = obj.pos[p];
+        }
+        this.mono = true;
+    } else {
+        if(UIL.main){
+            this.liner = UIL.main.liner();
+            this.c[0].appendChild( this.liner );
         }
     }
 }
@@ -428,8 +442,13 @@ UIL.Proto.prototype = {
     },
     setSize:function(sx){
         this.size = sx || UIL.WIDTH;
-        this.sa = (this.size/3).toFixed(0)*1;
-        this.sb = ((this.sa*2)-10).toFixed(0)*1;
+        if(this.simple){
+            this.sa = 1;
+            this.sb = sx-2;
+        }else{
+            this.sa = (this.size/3).toFixed(0)*1;
+            this.sb = ((this.sa*2)-10).toFixed(0)*1;
+        }
     },
     setDom:function(id, type, value){
         this.c[id].style[type] = value+'px';
@@ -441,7 +460,11 @@ UIL.Proto.prototype = {
         var ev = UIL.events;
         var i = this.c.length, j;
         while(i--){
-            if(i==0){ 
+            if(i==0){
+                if(this.liner!==null){ 
+                    this.c[0].removeChild( this.liner );
+                    this.liner = null;
+                }
                 if(this.target!==null) this.target.removeChild(this.c[0]);
                 else UIL.main.inner.removeChild(this.c[0]);
             } else {
@@ -495,7 +518,7 @@ UIL.Proto.prototype = {
     },
     rSize:function(){
         this.c[0].style.width = this.size+'px';
-        this.c[1].style.width = this.sa+'px';
+        if(!this.simple)this.c[1].style.width = this.sa+'px';
     }
 }
 UIL.Group = function(obj){
@@ -680,7 +703,7 @@ UIL.Number = function(obj){
     this.isVector = false;
 
     
-    if(this.solo) this.mask = null;
+    if(this.mono) this.mask = null;
     else this.mask = UIL.main.mask;
 
     if(obj.value){
@@ -1189,7 +1212,6 @@ UIL.Slide = function(obj){
 
     //this.c[2] = UIL.DOM('UIL text-m');
     this.c[2] = UIL.DOM('UIL text', 'div', 'text-align:right; width:40px; padding:0px 5px;');
-
     this.c[3] = UIL.DOM('UIL svgbox', 'rect', 'width:'+this.width+'px; height:'+this.height+'px; cursor:w-resize;', { width:this.width, height:this.height, fill:UIL.SVGB, 'stroke-width':1, stroke:UIL.SVGC });
     this.c[4] = UIL.DOM('UIL svgbox', 'rect', 'width:'+this.width+'px; height:'+this.height+'px; pointer-events:none;', { x:4, y:4, width:this.width-8, height:this.height-8, fill:'#CCC', 'stroke-width':1, stroke:UIL.SVGC });
 
@@ -1295,6 +1317,11 @@ UIL.List = function(obj){
     this.py = 0;
     this.scroll = false;
 
+    // list up or sown
+    this.side = obj.side || 'down';
+
+    // force full list 
+    this.full = obj.full || false;
 
 
     if(this.max>90){ 
@@ -1581,8 +1608,6 @@ UIL.Button.prototype.icon = function(string){
 UIL.Button.prototype.rSize = function(){
     UIL.Proto.prototype.rSize.call( this );
     this.setSvg(2, 'width', this.sb, 0);
-    //this.setSvg(2, 'width', this.sb, 1);
-    //this.setSvg(2, 'x', this.sb*0.5, 1);
     this.setDom(2, 'width', this.sb);
     this.setDom(2, 'left', this.sa);
     this.setDom(3, 'width', this.sb);
