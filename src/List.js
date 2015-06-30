@@ -26,7 +26,7 @@ UIL.List = function(obj){
     this.py = 0;
     this.scroll = false;
 
-    // list up or sown
+    // list up or down
     this.side = obj.side || 'down';
 
     // force full list 

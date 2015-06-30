@@ -17,6 +17,7 @@ body { font-family:'Open Sans', sans-serif; background-color:#111; background-im
     -o-background-size: cover;
     background-size: cover;
 }
+
 #version { position:absolute; top:98px; left:50%; width:65px; height:10px; pointer-events:none; text-align:right;  font-size:16px;}
 #debug { position:absolute; top:10px; left:10px; width:300px; pointer-events:none;}
 #logo{position:absolute; left:50%; margin-left:-128px;  margin-top:-60px; transform: scale(0.5,0.5);}
@@ -26,8 +27,11 @@ body { font-family:'Open Sans', sans-serif; background-color:#111; background-im
 
 <body>
 <div id='bg'></div>
+
+<svg xmlns='http://www.w3.org/2000/svg' version='1.1' xmlns:xlink='http://www.w3.org/1999/xlink' preserveAspectRatio='none' x='0px' y='0px' width='256px' height='256px' viewBox='0 0 256 256' id='logo'><path id='logoin' fill='#FFFFFF' stroke='none' d='M 183 52 L 170 52 170 167.05 Q 170 184.4 157.75 196.65 145.4 209 128 209 110.6 209 98.35 196.65 86 184.4 86 167.05 L 86 52 73 52 73 167.05 Q 73 189.8 89.15 205.85 105.2 222 128 222 150.75 222 166.95 205.85 183 189.8 183 167.05 L 183 52 M 111 52 L 98 52 98 167.05 Q 98 179.4 106.85 188.15 115.6 197 128 197 140.45 197 149.25 188.15 158 179.4 158 167.05 L 158 52 145 52 145 167.05 Q 145 174 140.05 179 135.05 184 128 184 121 184 116 179 111 174 111 167.05 L 111 52 Z'/></svg>
+
 <a href="https://github.com/lo-th/uil"><img style="position: absolute; top: 0; right: 0; border: 0;" src="images/ribbon.png"></a>
-<img id='logo' src='images/uil.svg'>
+
 <div id='content'></div>
 <div id='version'>2</div>
 <div id='debug'></div>
@@ -45,12 +49,14 @@ var debug = document.getElementById('debug');
 var callback = function(v){ debug.innerHTML = v; }
 var callbackButton = function(){ debug.innerHTML = "i'm a button !!" ; }
 var callbackSize = function(v){ timer = setTimeout( UIL.sizer(v), 1000); }
+var callbackLogo = function(v){ document.getElementById('logoin').setAttributeNS(null, 'fill', UIL.hexToHtml(v)); document.getElementById('version').style.color = UIL.hexToHtml(v);  }
 
 var ui = new UIL.Gui('top:145px; left:50%;', 300, true);
 
 // single UI element
 var s = new UIL.Slide({target:document.body, callback:callbackSize, name:'ui size', min:100, max:400, value:300, step:10, color:'no', size:100, pos:{left:'10px', top:'40px' }, simple:true });
 var b = new UIL.Button({target:document.body, callback:populate, name:'populate', color:'no', size:100, pos:{left:'10px', top:'60px'}, simple:true });
+var c = new UIL.Color({target:document.body, callback:callbackLogo, name:' ', color:'no', size:100, pos:{left:'10px', top:'auto', bottom:'10px' }, simple:true, side:'up', type:'html' });
 
 populate();
 

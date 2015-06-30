@@ -664,11 +664,13 @@ UIL.String = function(obj){
     UIL.Proto.call( this, obj );
 
     this.value = obj.value || '';
+    this.allway = obj.allway || false;
 
     this.c[2] = UIL.DOM('UIL text', 'input', 'pointer-events:auto; padding:0px 5px; padding-bottom:2px;' );
+    this.c[2].name = 'input';
 
     this.f[0] = function(e){
-        if (!e) e = window.event;
+        //if(this.allway) this.callback( e.target.value );
         if ( e.keyCode === 13 ){ 
             this.callback( e.target.value );
             e.target.blur();
@@ -676,8 +678,14 @@ UIL.String = function(obj){
         e.stopPropagation();
     }.bind(this);
 
+    this.f[1] = function(e){
+        if(this.allway) this.callback( e.target.value );
+        e.stopPropagation();
+    }.bind(this);
+
     this.c[2].value = this.value;
     this.c[2].onkeydown = this.f[0];
+    this.c[2].onkeyup = this.f[1];
 
     this.init();
 }
@@ -847,9 +855,15 @@ UIL.Color = function(obj){
     this.type = obj.type || 'array';
     this.width = this.sb;
     this.oldWidth = 0;
+
+    // color up or down
+    this.side = obj.side || 'down';
+    this.holdTop = 0;
+    this.holdBottom = 0;
    
     this.wheelWidth = this.width*0.1;
     this.decal = 22;
+    
     this.radius = (this.width - this.wheelWidth) * 0.5 - 1;
     this.square = Math.floor((this.radius - this.wheelWidth * 0.5) * 0.7) - 1;
     this.mid = Math.floor(this.width * 0.5 );
@@ -857,10 +871,20 @@ UIL.Color = function(obj){
 
     this.c[2] = UIL.DOM('UIL svgbox', 'rect', '',  { width:this.sb, height:17, fill:'#000', 'stroke-width':1, stroke:UIL.SVGC });
     this.c[3] = UIL.DOM('UIL text');
-    
+
+    if(this.side=='up'){
+        this.decal = 5;
+        this.c[3].style.top = 'auto';
+        this.c[2].style.top = 'auto';
+        this.c[3].style.bottom = '2px';
+        this.c[2].style.bottom = '2px';
+    }
+
     this.c[4] = UIL.DOM('UIL', 'rect', 'left:'+ this.sa+'px;  top:'+this.decal+'px; width:'+this.width+'px; height:'+this.width+'px;',  { x:(this.mid - this.square), y:(this.mid - this.square), width:(this.square * 2 - 1), height:(this.square * 2 - 1), fill:'#000' });
-    this.c[5] = UIL.DOM('UIL', 'canvas', 'left:'+ this.sa+'px;  top:'+this.decal+'px;  display:none;');
-    this.c[6] = UIL.DOM('UIL', 'canvas', 'left:'+ this.sa+'px;  top:'+this.decal+'px;  pointer-events:auto; cursor:pointer; display:none;');
+    this.c[5] = UIL.DOM('UIL', 'canvas', 'left:'+ this.sa+'px;  top:'+this.decal+'px; display:none;');
+    this.c[6] = UIL.DOM('UIL', 'canvas', 'left:'+ this.sa+'px;  top:'+this.decal+'px; pointer-events:auto; cursor:pointer; display:none;');
+
+    if(this.side=='up') this.c[6].style.pointerEvents = 'none';
 
     this.c[5].width = this.c[5].height = this.width;
     this.c[6].width = this.c[6].height = this.width;
@@ -922,7 +946,6 @@ UIL.Color = function(obj){
     this.f[3] = function(e){
         this.c[6].onmouseup = null;
         this.c[6].onmousemove = null;
-        
         this.down = false;
     }.bind(this);
 
@@ -930,6 +953,10 @@ UIL.Color = function(obj){
     this.f[4] = function(){
         this.isShow = false;
         this.h = 20;
+        if(this.side=='up'){ 
+            if(!isNaN(this.holdTop)) this.c[0].style.top = (this.holdTop)+'px';
+            this.c[6].style.pointerEvents = 'none';
+        }
         this.c[0].style.height = this.h+'px';
         this.c[4].style.display = 'none';
         this.c[5].style.display = 'none';
@@ -945,6 +972,14 @@ UIL.Color = function(obj){
         this.isShow = true;
         this.h = this.width+30;// 194;
         this.c[0].style.height = this.h+'px';
+
+        console.log(this.c[0].style.top.substring(0,this.c[0].style.top.length-2))
+        if(this.side=='up'){ 
+            this.holdTop = this.c[0].style.top.substring(0,this.c[0].style.top.length-2) * 1 || 'auto';
+        
+            if(!isNaN(this.holdTop)) this.c[0].style.top = (this.holdTop-(this.h-20))+'px';
+            setTimeout(function(){this.c[6].style.pointerEvents = 'auto';}.bind(this), 100);
+        }
         this.c[4].style.display = 'block';
         this.c[5].style.display = 'block';
         this.c[6].style.display = 'block';
@@ -1100,7 +1135,9 @@ UIL.Color.prototype.rSize = function(){
     UIL.Proto.prototype.rSize.call( this );
     this.width = this.sb;
     this.wheelWidth = this.width*0.1;
+
     this.decal = 22;
+    if(this.side=='up') this.decal = 5;
     this.radius = (this.width - this.wheelWidth) * 0.5 - 1;
     this.square = Math.floor((this.radius - this.wheelWidth * 0.5) * 0.7) - 1;
     this.mid = Math.floor(this.width * 0.5 );
@@ -1144,8 +1181,14 @@ UIL.Color.prototype.rSize = function(){
 
 //-----------------------------------------
 // COLOR FUNCTION
+UIL.hexToHtml = function(v){ 
+    return "#" + ("000000" + v.toString(16)).substr(-6);
+};
 
-UIL.numFormat = function(v){ return "#"+v.toString(16); };
+UIL.numFormat = function(v){ 
+    return "#" + ("000000" + v.toString(16)).substr(-6);
+    //return "#"+v.toString(16);
+};
 UIL.hexFormat = function(v){ return v.toUpperCase().replace("#", "0x"); };
 
 UIL.pack = function(rgb){
@@ -1317,7 +1360,7 @@ UIL.List = function(obj){
     this.py = 0;
     this.scroll = false;
 
-    // list up or sown
+    // list up or down
     this.side = obj.side || 'down';
 
     // force full list 
