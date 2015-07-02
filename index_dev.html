@@ -58,6 +58,7 @@ var s = new UIL.Slide({target:document.body, callback:callbackSize, name:'ui siz
 var b = new UIL.Button({target:document.body, callback:populate, name:'populate', color:'no', size:100, pos:{left:'10px', top:'60px'}, simple:true });
 var h = new UIL.String({target:document.body, callback:null, name:' ', value:'YOO', color:'no', size:60, pos:{left:'10px', top:'90px' }, simple:true });
 var c = new UIL.Color({target:document.body, callback:callbackLogo, name:' ', color:'no', size:100, pos:{left:'10px', top:'auto', bottom:'10px' }, simple:true, side:'up', type:'html' });
+var c = new UIL.List({target:document.body, callback:null, name:' ', color:'no', size:100, list:list, pos:{left:'120px', top:'auto', bottom:'10px' }, simple:true, side:'up', full:true });
 populate();
 
 function populate(){

@@ -59,6 +59,10 @@ UIL.Proto.prototype = {
         }
         this.rSize();
     },
+    setCallBack:function(callback){
+        if(this.callback) this.callback = null;
+        this.callback = callback;
+    },
     setSize:function(sx){
         this.size = sx || UIL.WIDTH;
         if(this.simple){

@@ -4,9 +4,9 @@ UIL.List = function(obj){
 
     this.c[2] = UIL.DOM('UIL list');
     this.c[3] = UIL.DOM('UIL svgbox', 'rect', '', {width:this.sb, height:17, fill:UIL.bgcolor(UIL.COLOR), 'stroke-width':1, stroke:UIL.SVGC  });
-    this.c[4] = UIL.DOM('UIL', 'path','position:absolute; width:16px; left:'+(this.sa+this.sb-17)+'px; top:1px; pointer-events:none;',{ width:16, height:16, 'd':'M 6 4 L 10 8 6 12', 'stroke-width':2, stroke:'#e2e2e2', fill:'none', 'stroke-linecap':'butt' } );
+    this.c[4] = UIL.DOM('UIL', 'path','position:absolute; width:16px; height:16px; left:'+(this.sa+this.sb-17)+'px; top:1px; pointer-events:none;',{ width:16, height:16, 'd':'M 6 4 L 10 8 6 12', 'stroke-width':2, stroke:'#e2e2e2', fill:'none', 'stroke-linecap':'butt' } );
     this.c[5] = UIL.DOM('UIL text', 'div', 'text-align:center;');
-    this.c[6] = UIL.DOM('UIL svgbox', 'rect', 'top:20px; height:90; pointer-events:none;', { x:this.sb-15, y:0, width:10, height:16, fill:'#666', 'stroke-width':1, stroke:UIL.SVGC  });
+    this.c[6] = UIL.DOM('UIL svgbox', 'rect', 'top:20px; height:90px; pointer-events:none;', { x:this.sb-15, y:0, width:10, height:16, fill:'#666', 'stroke-width':1, stroke:UIL.SVGC  });
 
 
     this.list = obj.list || [];
@@ -16,33 +16,52 @@ UIL.List = function(obj){
     }else{
         this.value = this.list[0];
     }
-    
+
     this.show = false;
+    this.maxItem = 5;
     this.length = this.list.length;
-    this.max = this.length*18;
+
+    // force full list 
+    this.full = obj.full || false;
+    if(this.full) this.maxItem = this.length;
+    
+    
+    this.maxHeight = this.maxItem * 18;
+    this.max = this.length * 18;
     this.w = this.sb;
     this.down = false;
-    this.range = this.max - 90;
+    this.range = this.max - this.maxHeight;
     this.py = 0;
     this.scroll = false;
 
     // list up or down
     this.side = obj.side || 'down';
-
-    // force full list 
-    this.full = obj.full || false;
+    this.holdTop = 0;
 
 
-    if(this.max>90){ 
+    if(this.side=='up'){
+
+        this.c[2].style.top = 'auto';
+        this.c[3].style.top = 'auto';
+        this.c[4].style.top = 'auto';
+        this.c[5].style.top = 'auto';
+        this.c[2].style.bottom = '10px';
+        this.c[3].style.bottom = '2px';
+        this.c[4].style.bottom = '2px';
+        this.c[5].style.bottom = '2px';
+    }
+
+    
+
+
+    if(this.max>this.maxHeight){ 
         this.w = this.sb-20;
         this.scroll = true;
     }
 
-
-    //console.log(this.scroll)
-
     this.listIn = UIL.DOM('UIL list-in');
     this.listIn.name = 'list';
+    this.c[2].style.height = this.maxHeight + 'px';
     this.c[2].appendChild(this.listIn);
 
     // populate list
@@ -78,7 +97,7 @@ UIL.List = function(obj){
     this.f[2] = function(e){
         this.f[8](0);
         this.show = true;
-        this.h = 120;
+        this.h = this.maxHeight+30; //120;
         if(!this.scroll){
             this.h = 30+this.max;
             this.c[6].style.display = 'none';
@@ -87,7 +106,8 @@ UIL.List = function(obj){
         }
         this.c[0].style.height = this.h+'px';
         this.c[2].style.display = 'block';
-        this.setSvg(4, 'd','M 12 6 L 8 10 4 6');
+        if(this.side=='up')this.setSvg(4, 'd','M 12 10 L 8 6 4 10');
+        else this.setSvg(4, 'd','M 12 6 L 8 10 4 6');
         if(UIL.main)UIL.main.calc();
     }.bind(this);
 
@@ -214,7 +234,7 @@ UIL.List.prototype.rSize = function(){
     this.setSvg(6, 'x', this.sb-15);
 
     this.w = this.sb;
-    if(this.max>90) this.w = this.sb-20;
+    if(this.max>this.maxHeight) this.w = this.sb-20;
     for(var i=0; i<this.length; i++){
         UIL.setDOM(this.listIn.children[i], 'width', this.w);
     }
