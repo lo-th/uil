@@ -13,6 +13,7 @@ var Crea = ( function () {
     var head = doc.getElementsByTagName('head')[0];
     var DOM_SIZE = [ 'height', 'width', 'top', 'left', 'bottom', 'right', 'margin-left', 'margin-right', 'margin-top', 'margin-bottom'];
     var SVG_TYPE = [ 'rect', 'circle', 'path', 'polygon', 'text', 'pattern', 'defs', 'g', 'line', 'foreignObject', 'linearGradient', 'stop', 'animate', 'radialGradient' ];
+    var SVG_TYPE_G = [ 'rect', 'circle', 'path', 'polygon', 'text', 'g', 'line', 'foreignObject', 'linearGradient', 'radialGradient' ];
     var svgns = "http://www.w3.org/2000/svg";
         
 
@@ -48,10 +49,12 @@ var Crea = ( function () {
 
         if( SVG_TYPE.indexOf(type) !== -1 ){
 
-            if( dom === undefined ) dom = doc.createElementNS( svgns, 'svg' );
+            if( dom === undefined ){ 
+                dom = doc.createElementNS( svgns, 'svg' );
+            }
 
             var g = doc.createElementNS( svgns, type );
-            g.setAttributeNS( null, 'pointer-events', 'none' );
+            if( SVG_TYPE_G.indexOf(type) !== -1 && id === undefined ) g.setAttributeNS( null, 'pointer-events', 'none' );
 
             for(var e in obj){
 

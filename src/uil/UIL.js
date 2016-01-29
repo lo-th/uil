@@ -35,6 +35,7 @@ var UIL = UIL || ( function () {
         classDefine:function(){
             UIL.COLOR = 'N';
             UIL.SELECT = '#035fcf';
+            UIL.MOVING = '#03afff';
             UIL.SELECTDOWN = '#024699';
             UIL.SVGB = 'rgba(0,0,0,0.2)';
             UIL.SVGC = 'rgba(120,120,120,0.6)';
@@ -60,7 +61,7 @@ var UIL = UIL || ( function () {
 
             UIL.CC('UIL.scroll-bg', 'cursor:w-resize; pointer-events:auto; background:rgba(256,0,0,0.2);');
             //UIL.CC('UIL.svgbox', 'left:100px; top:1px; width:190px; height:17px; pointer-events:auto; cursor:pointer; font-family:"Open Sans", sans-serif; font-size:11px; text-align:center;');
-            UIL.CC('UIL.svgbox', 'left:100px; top:1px; width:190px; height:17px; pointer-events:auto; cursor:pointer; font-family:"Lucida Console", Monaco, monospace; font-size:12px; text-align:center;');
+            UIL.CC('UIL.svgbox', 'left:100px; top:1px; width:190px; height:17px; pointer-events:auto; cursor:pointer; font-family:"Lucida Console", Monaco, monospace; font-size:11px; text-align:center;');
 
             UIL.DEF = true;
         },
