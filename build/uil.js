@@ -1,6 +1,107 @@
 /**   _   _____ _   _   
 *    | | |_   _| |_| |
 *    | |_ _| | |  _  |
+*    |___|_|_| |_| |_| 2016
+*    @author lo.th / https://github.com/lo-th
+*/
+
+'use strict';
+
+var Crea = ( function () {
+
+    var doc = document;
+    var head = doc.getElementsByTagName('head')[0];
+    var DOM_SIZE = [ 'height', 'width', 'top', 'left', 'bottom', 'right', 'margin-left', 'margin-right', 'margin-top', 'margin-bottom'];
+    var SVG_TYPE = [ 'rect', 'circle', 'path', 'polygon', 'text', 'pattern', 'defs', 'g', 'line', 'foreignObject', 'linearGradient', 'stop', 'animate', 'radialGradient' ];
+    var svgns = "http://www.w3.org/2000/svg";
+        
+
+    Crea = function () {};
+
+    Crea.setSvg = function( dom, type, value, id ){
+
+        dom.childNodes[ id || 0 ].setAttributeNS( null, type, value );
+
+    };
+
+    Crea.setDom = function( dom, type, value ){
+
+        var ext = DOM_SIZE.indexOf(type) !== -1 ? 'px' : '';
+        dom.style[type] = value + ext;
+
+    };
+
+    Crea.clearDom = function( dom ){
+
+        while ( dom.children.length ){
+
+            if( dom.lastChild.children ) while ( dom.lastChild.children.length ) dom.lastChild.removeChild( dom.lastChild.lastChild );
+            dom.removeChild( dom.lastChild );
+
+        }
+
+    };
+
+    Crea.dom = function ( Class, type, css, obj, dom, id ) {
+
+        type = type || 'div';
+
+        if( SVG_TYPE.indexOf(type) !== -1 ){
+
+            if( dom === undefined ) dom = doc.createElementNS( svgns, 'svg' );
+
+            var g = doc.createElementNS( svgns, type );
+            g.setAttributeNS( null, 'pointer-events', 'none' );
+
+            for(var e in obj){
+
+                if(e === 'txt' ) g.textContent = obj[e];
+                else g.setAttributeNS( null, e, obj[e] );
+
+            }
+
+            if( id === undefined ) dom.appendChild( g );
+            else dom.childNodes[ id || 0 ].appendChild( g );
+
+            
+        } else {
+
+            if( dom === undefined ) dom = doc.createElement( type );
+        }
+
+
+        if( Class ) dom.setAttribute( 'class', Class );
+        if( css ) dom.style.cssText = css; 
+
+        if( id === undefined ) return dom;
+        else return dom.childNodes[ id || 0 ];
+    };
+
+    Crea.cc = function ( name, rules, noAdd ) {
+
+        var adds = noAdd === undefined ? '.' : '';
+        
+        if( name === '*' ) adds = '';
+
+        var style = doc.createElement( 'style' );
+        style.setAttribute( 'type', 'text/css' );
+        style.setAttribute( 'id', name );
+
+        head.appendChild(style);
+
+        if( !(style.sheet || {} ).insertRule ) ( style.styleSheet || style.sheet ).addRule(adds+name, rules);
+        else style.sheet.insertRule( adds + name + "{" + rules + "}" , 0 );
+
+    };
+
+
+
+    return Crea;
+
+})();
+/**   _   _____ _   _   
+*    | | |_   _| |_| |
+*    | |_ _| | |  _  |
 *    |___|_|_| |_| |_| 2015
 *    @author lo.th / http://lo-th.github.io/labs/
 */
@@ -9,17 +110,19 @@
 
 var UIL = UIL || ( function () {
 
-    
-
     return {
         main:null,
-        REVISION: '0.7',
+        REVISION: '0.8',
         DEF:false,
-        events:[ 'onkeyup', 'onkeydown', 'onclick', 'onchange', 'onmouseover', 'onmouseout', 'onmousemove', 'onmousedown', 'onmouseup', 'onmousewheel' ],
         WIDTH:300,
         BW:190,
-        AW:100, 
-        svgns:"http://www.w3.org/2000/svg",
+        AW:100,
+
+        DOM: Crea.dom,
+        CC: Crea.cc,
+        setDom : Crea.setDom,
+        setSvg : Crea.setSvg,
+
         sizer:function(w){
             this.WIDTH = w.toFixed(0);
             var s = this.WIDTH/3;
@@ -34,13 +137,11 @@ var UIL = UIL || ( function () {
             UIL.SELECTDOWN = '#024699';
             UIL.SVGB = 'rgba(0,0,0,0.2)';
             UIL.SVGC = 'rgba(120,120,120,0.6)';
-            UIL.txt1 = 'font-family:"Open Sans", sans-serif; font-size:11px; color:#cccccc; outline:0; padding:0px 10px; left:0; top:1px; height:17px; width:100px; overflow:hidden;';
+            UIL.txt1 = 'font-family:"Lucida Console", Monaco, monospace; font-size:11px; color:#cccccc; background:none; padding:3px 10px; left:0; top:0px; height:17px; width:100px; overflow:hidden;';
 
             UIL.CC('UIL', 'position:absolute; pointer-events:none; box-sizing:border-box; -o-user-select:none; -ms-user-select:none; -khtml-user-select:none; -webkit-user-select:none; -moz-user-select:none; margin:0; padding:0; ');
 
             UIL.CC('UIL.content', 'width:300px; overflow:hidden; background:none;');
-            //UIL.CC('UIL.mask', 'width:400px; height:100%; margin-left:-50px; pointer-events:auto; cursor:col-resize; background:rgba(0,255,0,0.2); display:none;');
-            UIL.CC('UIL.mask', 'width:400px; height:100%; margin-left:-50px; pointer-events:auto; cursor:col-resize; background:none; display:none;');
             UIL.CC('UIL.inner', 'width:300px; top:0; left:0; height:auto; overflow:hidden; background:none;');
 
             UIL.CC('UIL.base', 'position:relative; transition:height, 0.1s ease-out; height:20px; overflow:hidden;');
@@ -56,10 +157,12 @@ var UIL = UIL || ( function () {
             UIL.CC('UIL.listItem:hover', 'background:'+UIL.SELECT+'; color:#FFFFFF;')
 
             UIL.CC('UIL.scroll-bg', 'cursor:w-resize; pointer-events:auto; background:rgba(256,0,0,0.2);');
-            UIL.CC('UIL.svgbox', 'left:100px; top:1px; width:190px; height:17px; pointer-events:auto; cursor:pointer; font-family:"Open Sans", sans-serif; font-size:11px; text-align:center;');
+            //UIL.CC('UIL.svgbox', 'left:100px; top:1px; width:190px; height:17px; pointer-events:auto; cursor:pointer; font-family:"Open Sans", sans-serif; font-size:11px; text-align:center;');
+            UIL.CC('UIL.svgbox', 'left:100px; top:1px; width:190px; height:17px; pointer-events:auto; cursor:pointer; font-family:"Lucida Console", Monaco, monospace; font-size:12px; text-align:center;');
 
             UIL.DEF = true;
         },
+
         bgcolor: function(p, a){
             var r=48, g=48, b=48;
             a = a || 0.66;
@@ -75,61 +178,24 @@ var UIL = UIL || ( function () {
             if(a==0) color = 'none';
             return color;
         },
-        /*canvasURL:function(obj){
-            var canvas = document.createElement( 'canvas' );
-            canvas.width = obj.w || 20;
-            canvas.height = obj.h || 20;
-
-            var context = canvas.getContext( '2d' );
-            context.fillStyle = '#444';
-            context.fillRect( 0, 0, 20, 20 );
-            return canvas.toDataURL();
-        },*/
-        setSVG:function(dom, type, value, id){
-            dom.childNodes[id || 0].setAttributeNS(null, type, value );
-        },
-        setDOM:function(dom, type, value){
-            dom.style[type] = value+'px';
-        },
-
-        DOM:function(cc, type, css, obj, dom){ 
-            type = type || 'div';
-            if(type=='rect' || type=='path' || type=='polygon' || type=='text' || type=='pattern' || type=='defs' || type=='g' || type=='line'){
-                if(dom==undefined) dom = document.createElementNS( this.svgns, 'svg' );
-                var g = document.createElementNS( this.svgns, type );
-
-                for(var e in obj){
-                    if(e=='txt') g.textContent = obj[e];
-                    else g.setAttributeNS(null, e, obj[e] );
-                }
-
-                dom.appendChild(g);
-
-                if(cc) dom.setAttribute('class', cc);
-            } else {
-                if(dom==undefined) dom = document.createElement(type);
-                if(cc) dom.className = cc;
-            }
-            
-            if(css) dom.style.cssText = css; 
-            return dom;
-            //else return g;
-        },
-        CC:function(name,rules,noAdd){
-            var adds = '.';
-            if(noAdd)adds='';
-            if(name == '*') adds = '';
-            var style = document.createElement('style');
-            style.type = 'text/css';
-            document.getElementsByTagName('head')[0].appendChild(style);
-            if(!(style.sheet||{}).insertRule) (style.styleSheet || style.sheet).addRule(adds+name, rules);
-            else style.sheet.insertRule(adds+name+"{"+rules+"}",0);
-        }
+        
     };
 
 })();
 
 
+UIL.classDefine();
+
+// UMD (Universal Module Definition)
+/*( function ( root ) {
+    if ( typeof define === 'function' && define.amd ) {// AMD
+        define( [], function () { return UIL; } );
+    } else if ( typeof exports === 'object' ) { // Node.js
+        module.exports = UIL;
+    } else {// Global variable
+        root.UIL = UIL;
+    }
+})(this);*/
 UIL.Gui = function(css, w, center){
 
     UIL.sizer(w || 300);
@@ -149,9 +215,6 @@ UIL.Gui = function(css, w, center){
 
     this.top = parseFloat(this.content.style.top.substring(0,this.content.style.top.length-2));
 
-    this.mask = UIL.DOM('UIL mask', 'div', css);
-    document.body.appendChild(this.mask);
-
     this.inner = UIL.DOM('UIL inner');
     this.content.appendChild(this.inner);
     
@@ -166,33 +229,58 @@ UIL.Gui = function(css, w, center){
     this.scroll = UIL.DOM(null, 'rect', 'position:absolute; width:100%; height:100%; pointer-events:none;', {width:1, height:20, x:UIL.WIDTH-1, fill:'#666' });
     UIL.DOM(null, 'rect', '', {width:1, height:20, x:0, fill:'#666' }, this.scroll);
     UIL.DOM(null, 'rect', '', {width:300, height:1, x:0, fill:'#666' }, this.scroll);
-    this.content.appendChild(this.scroll);  
-
-    
+    this.content.appendChild( this.scroll );
 
     this.changeWidth();
 
-    this.down = false;
+    this.isDown = false;
+    this.isScroll = false;
 
-    this.f = [];
+    this.content.addEventListener( 'mousedown', this, false );
+    this.content.addEventListener( 'mousemove', this, false );
+    this.content.addEventListener( 'mouseout',  this, false );
+    this.content.addEventListener( 'mouseup',   this, false );
+    this.content.addEventListener( 'mouseover', this, false );
+    this.content.addEventListener( 'mousewheel', this, false );
+    
+    window.addEventListener("resize", function(e){this.resize(e)}.bind(this), false );
+    this.resize();
+}
 
-    // onmousedown
-    this.f[0] = function(e){
+UIL.Gui.prototype = {
+    constructor: UIL.Gui,
+
+    handleEvent : function( e ) {
+
+        switch( e.type ) {
+            case 'mousedown': this.down( e ); break;
+            case 'mousemove': this.move( e ); break;
+            case 'mouseup': this.out( e ); break;
+            case 'mouseout': this.out( e ); break;
+            case 'mouseover': this.over( e ); break;
+            case 'mousewheel': this.wheel( e ); break;
+        }
+
+    },
+
+    ////
+
+    down: function( e ){
         if(e.target.name){
             if(e.target.name=='move'){
-                this.down = true;
-                this.f[1](e);
-                UIL.setSVG(this.scroll, 'fill','#FFF');
-                UIL.setSVG(this.scroll, 'fill','#FFF',1);
-                UIL.setSVG(this.scroll, 'fill','#FFF',2);
+                this.isDown = true;
+                this.move( e );
+                UIL.setSvg(this.scroll, 'fill','#FFF');
+                UIL.setSvg(this.scroll, 'fill','#FFF',1);
+                UIL.setSvg(this.scroll, 'fill','#FFF',2);
                 e.preventDefault();
             }
         }
-    }.bind(this);
+    },
 
-    // mousemove
-    this.f[1] = function(e){
-        if(!this.down) return;
+    move: function( e ){
+
+        if(!this.isDown) return;
         var rect = this.content.getBoundingClientRect();
         var y = (e.clientY-rect.top)-(this.zone*0.5);
 
@@ -200,66 +288,62 @@ UIL.Gui = function(css, w, center){
         if(y>this.zone) y = this.zone;
         this.py = ((y/this.zone)*this.range);
 
-        this.f[5]();
+        this.update();
 
-    }.bind(this);
+    },
 
-    // mouseup
-    this.f[2] = function(e){
-        this.down = false;
-        UIL.setSVG(this.scroll, 'fill','#666');
-        UIL.setSVG(this.scroll, 'fill','#666',1);
-        UIL.setSVG(this.scroll, 'fill','#666',2);
-    }.bind(this);
+    out: function( e ){
 
-    // over
-    this.f[3] = function(e){
-        UIL.setSVG(this.scroll, 'fill','#AAA');
-        UIL.setSVG(this.scroll, 'fill','#AAA',1);
-        UIL.setSVG(this.scroll, 'fill','#AAA',2);
-    }.bind(this);
+        this.isDown = false;
+        UIL.setSvg(this.scroll, 'fill','#666');
+        UIL.setSvg(this.scroll, 'fill','#666',1);
+        UIL.setSvg(this.scroll, 'fill','#666',2);
 
-    //onmousewheel
-    this.f[4] = function(e){
+    },
+
+    over: function( e ){
+
+        UIL.setSvg(this.scroll, 'fill','#AAA');
+        UIL.setSvg(this.scroll, 'fill','#AAA',1);
+        UIL.setSvg(this.scroll, 'fill','#AAA',2);
+
+    },
+
+    wheel: function ( e ){
+
         if(this.lockwheel) return;
+        if(!this.isScroll) return;
         var delta = 0;
         if(e.wheelDeltaY) delta= -e.wheelDeltaY*0.04;
         else if(e.wheelDelta) delta= -e.wheelDelta*0.2;
         else if(e.detail) delta=e.detail*4.0;
-        this.py+=delta;
-        if(this.py<0) this.py=0;
-        if(this.py>this.range) this.py=this.range;
+        this.py += delta;
+        if(this.py < 0) this.py = 0;
+        if(this.py > this.range) this.py = this.range;
 
-        this.f[5]();
+        this.update();
 
-    }.bind(this);
+    },
 
-    //update position
-    this.f[5] = function(y){
-        if(y !== undefined) this.py = y;
+    ////
+
+    update: function ( y ){
+
+        this.py = y === undefined ? this.py : y;
+
         this.inner.style.top = -this.py+'px';
         var ty = ((this.py*(this.height-this.sh))/this.range) || 0;
-        UIL.setSVG(this.scroll, 'y', ty);
-        UIL.setSVG(this.scroll, 'y', ty,1);
+        UIL.setSvg(this.scroll, 'y', ty);
+        UIL.setSvg(this.scroll, 'y', ty,1);
 
-        if(this.py==0) UIL.setSVG(this.scroll, 'y',0, 2);
-        else if(this.py==this.max) UIL.setSVG(this.scroll, 'y',this.height-1, 2);
-        else UIL.setSVG(this.scroll, 'y',-1, 2);
-    }.bind(this);
+        if(this.py==0) UIL.setSvg(this.scroll, 'y',0, 2);
+        else if(this.py==this.max) UIL.setSvg(this.scroll, 'y',this.height-1, 2);
+        else UIL.setSvg(this.scroll, 'y',-1, 2);
 
-    this.content.onmousedown = this.f[0];
-    this.content.onmousemove = this.f[1];
-    this.content.onmouseout = this.f[2];
-    this.content.onmouseup = this.f[2];
-    this.content.onmouseover = this.f[3];
-    
+    },
 
-    window.addEventListener("resize", function(e){this.resize(e)}.bind(this), false );
-    this.resize();
-}
+    ////
 
-UIL.Gui.prototype = {
-    constructor: UIL.Gui,
     show:function(){
         this.content.style.display = 'block';
     },
@@ -288,7 +372,7 @@ UIL.Gui.prototype = {
         this.content.style.height = this.height+'px';
         this.zone = this.height-40;
         this.calc();
-        this.f[5](0);
+        this.update( 0 );
     },
     remove: function ( n ) { 
         var i = this.uis.indexOf( n ); 
@@ -298,7 +382,7 @@ UIL.Gui.prototype = {
         }
     },
     clear:function(){
-        this.f[5](0);
+        this.update( 0 );
         var i = this.uis.length;
         while(i--){
             this.uis[i].clear();
@@ -308,31 +392,35 @@ UIL.Gui.prototype = {
         this.calc();
     },
     showScroll:function(h){
+
+        this.isScroll = true;
+
         this.min = 0;
         this.max = h-this.height;
         this.range = this.max - this.min;
         this.sh =(this.height-40)-(this.max*100)/(this.height-40);
         if(this.sh<20)this.sh=20;
 
-        UIL.setSVG(this.scroll, 'height',this.sh);
-        UIL.setSVG(this.scroll, 'height',this.sh, 1);
+        UIL.setSvg(this.scroll, 'height',this.sh);
+        UIL.setSvg(this.scroll, 'height',this.sh, 1);
 
         this.scroll.style.display = 'block';
         this.scrollBG.style.display = 'block';
         this.scrollBG2.style.display = 'block';
 
-        this.content.onmousewheel = this.f[4];
-
-        this.f[5](0);
+        this.update( 0 );
     },
+
     hideScroll:function(){
-        this.f[5](0);
+
+        this.isScroll = false;
+        this.update( 0 );
         this.scroll.style.display = 'none';
         this.scrollBG.style.display = 'none';
         this.scrollBG2.style.display = 'none';
 
-        this.content.onmousewheel = null;
     },
+
     calc:function(){
         var total = 0;
         var i = this.uis.length;
@@ -341,19 +429,16 @@ UIL.Gui.prototype = {
         else this.hideScroll();
     },
     changeWidth:function(){
-        UIL.setDOM(this.content, 'width', UIL.WIDTH);
+        UIL.setDom(this.content, 'width', UIL.WIDTH);
         var decal = 0;
         if(this.isCenter){
             decal = -UIL.WIDTH*0.5; 
-            UIL.setDOM(this.content, 'margin-left', decal);
+            UIL.setDom(this.content, 'margin-left', decal);
         }
 
-        UIL.setDOM(this.mask, 'margin-left', decal-50);
-        UIL.setDOM(this.mask, 'width', UIL.WIDTH+100);
-
-        UIL.setDOM(this.inner, 'width', UIL.WIDTH);
-        UIL.setSVG(this.scroll, 'x',UIL.WIDTH-1,0);
-        UIL.setSVG(this.scroll, 'width',UIL.WIDTH,2);
+        UIL.setDom(this.inner, 'width', UIL.WIDTH);
+        UIL.setSvg(this.scroll, 'x',UIL.WIDTH-1,0);
+        UIL.setSvg(this.scroll, 'width',UIL.WIDTH,2);
         var i = this.uis.length;
 
         while(i--){
@@ -365,20 +450,7 @@ UIL.Gui.prototype = {
         var l = UIL.DOM('UIL', 'line', 'width:100%; height:1px; bottom:0px;', {x1:0, y1:0, x2:'100%', y2:0, stroke:color || 'rgba(0,0,0,0.5)', 'stroke-width':1, 'stroke-linecap':'butt'} );
         return l;
     }
-}
-
-UIL.classDefine();
-
-// UMD (Universal Module Definition)
-/*( function ( root ) {
-    if ( typeof define === 'function' && define.amd ) {// AMD
-        define( [], function () { return UIL; } );
-    } else if ( typeof exports === 'object' ) { // Node.js
-        module.exports = UIL;
-    } else {// Global variable
-        root.UIL = UIL;
-    }
-})(this);*/
+};
 UIL.Proto = function(obj){
 
     obj = obj || {};
@@ -405,11 +477,11 @@ UIL.Proto = function(obj){
     this.callback = obj.callback || function(){};
 
     this.c = [];
-    this.f = [];
+    //this.f = [];
 
     this.c[0] = UIL.DOM('UIL base');
-
     this.c[1] = UIL.DOM('UIL text');
+
     if(!this.simple) this.c[1].textContent = this.txt;
 
     if(obj.pos){
@@ -427,19 +499,24 @@ UIL.Proto = function(obj){
 }
 
 UIL.Proto.prototype = {
+
     constructor: UIL.Proto,
 
-    init:function(){
+    init: function (){
         this.c[0].style.background = UIL.bgcolor(this.color);
-        for(var i = 0; i<this.c.length; i++){
-            if(i==0){ 
-                if(this.target!==null) this.target.appendChild(this.c[0]);
-                else UIL.main.inner.appendChild(this.c[0]);
+        for( var i = 0; i < this.c.length; i++ ){
+            if( i === 0 ){ 
+                if(this.target !== null ) this.target.appendChild( this.c[0] );
+                else UIL.main.inner.appendChild( this.c[0] );
             }
             else this.c[0].appendChild(this.c[i]);
         }
+
         this.rSize();
+        this.addEvent();
+
     },
+
     setCallBack:function(callback){
         if(this.callback) this.callback = null;
         this.callback = callback;
@@ -454,13 +531,19 @@ UIL.Proto.prototype = {
             this.sb = ((this.sa*2)-10).toFixed(0)*1;
         }
     },
-    setDom:function(id, type, value){
+    /*setDom:function(id, type, value){
         this.c[id].style[type] = value+'px';
     },
     setSvg:function(domId, type, value, id){
         this.c[domId].childNodes[id || 0].setAttributeNS(null, type, value );
-    },
+    },*/
+
+    
+
     clear:function(){
+        
+        this.clearEvent();
+
         var ev = UIL.events;
         var i = this.c.length, j;
         while(i--){
@@ -472,38 +555,38 @@ UIL.Proto.prototype = {
                 if(this.target!==null) this.target.removeChild(this.c[0]);
                 else UIL.main.inner.removeChild(this.c[0]);
             } else {
-                j = ev.length;
-                while(j--){ if(this.c[i][ev[j]]!==null) this.c[i][ev[j]] = null; }
-                if(this.c[i].children) this.clearDOM(this.c[i]);
-                this.c[0].removeChild(this.c[i]);
+                //j = ev.length;
+                //while(j--){ if(this.c[i][ev[j]]!==null) this.c[i][ev[j]] = null; }
+                if( this.c[i].children ) this.clearDOM( this.c[i] );
+                this.c[0].removeChild( this.c[i] );
             }
             this.c[i] = null;
         }
 
         this.c = null;
-        if(this.f){
+        /*if(this.f){
             i = this.f.length;
             while(i--) this.f[i] = null;
             this.f = null
-        }
-        if(this.callback)this.callback = null;
-        if(this.value)this.value = null;
+        }*/
+        if(this.callback) this.callback = null;
+        if(this.value) this.value = null;
     },
+
     clearDOM:function(dom){
         while ( dom.children.length ){
             if(dom.lastChild.children) while ( dom.lastChild.children.length ) dom.lastChild.removeChild( dom.lastChild.lastChild );
             dom.removeChild( dom.lastChild );
         }
     },
+
     setTypeNumber:function( obj ){
 
-        this.min = -Infinity;
-        this.max = Infinity;
+        this.min = obj.min === undefined ? -Infinity : obj.min;
+        this.max = obj.max === undefined ?  Infinity : obj.max;
+        this.step = obj.step === undefined ?  0.01 : obj.step;
+        this.precision = obj.precision === undefined ? 2 : obj.precision;
 
-        this.precision = 2;
-        if(obj.precision !== undefined ) this.precision = obj.precision;
-        //this.prev = null;
-        this.step = 0.01;
         switch(this.precision){
             case 0:  this.step = 1; break;
             case 1:  this.step = 0.1; break;
@@ -511,67 +594,117 @@ UIL.Proto.prototype = {
             case 3:  this.step = 0.001; break;
             case 4:  this.step = 0.0001; break;
         }
-
-        if(obj.min !== undefined ) this.min = obj.min;
-        if(obj.max !== undefined ) this.max = obj.max;
-        if(obj.step !== undefined ) this.step = obj.step;
         
     },
-    numValue:function(n){
+
+    numValue:function( n ){
+
         return Math.min( this.max, Math.max( this.min, n ) ).toFixed( this.precision )*1;
+
     },
+
     rSize:function(){
+
         this.c[0].style.width = this.size+'px';
-        if(!this.simple)this.c[1].style.width = this.sa+'px';
+        if( !this.simple ) this.c[1].style.width = this.sa+'px';
+    
+    },
+
+    // EVENTS DISPATCH
+
+    addEvent: function(){
+
+        var i = this.c.length, j, c;
+        while( i-- ){
+            c = this.c[i];
+            if( c.events !== undefined ){
+                j = c.events.length;
+                while( j-- ) c.addEventListener( c.events[j], this, false );
+            }
+        }
+
+    },
+
+    clearEvent: function(){
+
+        var i = this.c.length, j, c;
+        while( i-- ){
+            c = this.c[i];
+            if( c.events !== undefined ){
+                j = c.events.length;
+                while( j-- ) c.removeEventListener( c.events[j], this, false );
+            }
+        }
+
+    },
+
+    handleEvent: function( e ) {
+        
     }
 }
-UIL.Group = function(obj){
+UIL.Group = function( o ){
 
-    UIL.Proto.call( this, obj );
+    UIL.Proto.call( this, o );
 
     this.h = 25;
 
-    this.isOpen = false;
+    this.isOpen = o.open || false;
 
     this.c[2] = UIL.DOM('UIL', 'div', 'top:25px; overflow:hidden;');
     this.c[3] = UIL.DOM('UIL', 'path','position:absolute; width:16px; left:'+(this.sa+this.sb-17)+'px; top:4px; pointer-events:none;',{ width:16, height:16, 'd':'M 6 4 L 10 8 6 12', 'stroke-width':2, stroke:'#e2e2e2', fill:'none', 'stroke-linecap':'butt' } );
 
-    this.setDom(0, 'height', this.h);
-    this.setDom(1, 'height', this.h);
-    this.setDom(1, 'top', 0);
+    this.c[0].style.height = this.h + 'px';
+    this.c[1].style.height = this.h + 'px';
+    this.c[1].style.top = 4 + 'px';
     this.c[1].style.pointerEvents = 'auto';
     this.c[1].style.cursor = 'pointer';
     this.c[1].name = 'group';
-    
-    this.setDom(1, 'top', 4);
 
     this.uis = [];
 
-    this.f[0] = function(){
-        if(this.isOpen) this.close();
-        else this.open();
-        UIL.main.calc();
-    }.bind(this);
-
-    this.c[1].onclick = this.f[0];
+    this.c[1].events = [ 'click' ];
 
     this.init();
-}
+
+    if( this.isOpen ) this.open();
+    if( UIL.main ) UIL.main.calc();
+
+};
 
 UIL.Group.prototype = Object.create( UIL.Proto.prototype );
 UIL.Group.prototype.constructor = UIL.Group;
 
+UIL.Group.prototype.handleEvent = function( e ) {
+
+    switch( e.type ) {
+        case 'click': this.click( e ); break;
+    }
+
+};
+
+UIL.Group.prototype.click = function( e ){
+
+    if( this.isOpen ) this.close();
+    else this.open();
+    if( UIL.main ) UIL.main.calc();
+
+};
+
 UIL.Group.prototype.rSize = function(){
+
     UIL.Proto.prototype.rSize.call( this );
-    this.setDom(3, 'left', this.sa+this.sb-17);
-    this.setDom(1, 'width', this.size);
-    this.setDom(2, 'width', this.size);
+
+    this.c[3].style.left = ( this.sa + this.sb - 17 ) + 'px';
+    this.c[1].style.width = this.size + 'px';
+    this.c[2].style.width = this.size + 'px';
+
     var i = this.uis.length;
     while(i--){
         this.uis[i].setSize();
         this.uis[i].rSize();
     }
     this.calc();
+
 };
 
 UIL.Group.prototype.add = function(type, obj){
@@ -580,35 +713,45 @@ UIL.Group.prototype.add = function(type, obj){
 };
 
 UIL.Group.prototype.calc = function(){
-    if(!this.isOpen) return;
+
+    if( !this.isOpen ) return;
     this.h = 25;
     var i = this.uis.length;
-    while(i--) this.h+=this.uis[i].h;
+    while(i--) this.h += this.uis[i].h;
 
-    this.setDom(2, 'height', this.h-25);
-    this.setDom(0, 'height', this.h);
+    this.c[2].style.height = ( this.h - 25 ) + 'px';
+    this.c[0].style.height = this.h + 'px';
+
 };
 
 UIL.Group.prototype.open = function(){
+
     this.isOpen = true;
-    this.setSvg(3, 'd','M 12 6 L 8 10 4 6');
+    UIL.setSvg( this.c[3], 'd','M 12 6 L 8 10 4 6');
     this.calc();
-}
+
+};
 
 UIL.Group.prototype.close = function(){
+
     this.isOpen = false;
-    this.setSvg(3, 'd','M 6 4 L 10 8 6 12');
+    UIL.setSvg( this.c[3], 'd','M 6 4 L 10 8 6 12');
     this.h = 25;
-    this.setDom(2, 'height', 0);
-    this.setDom(0, 'height', this.h);
-}
+
+    this.c[2].style.height = 0 + 'px';
+    this.c[0].style.height = this.h + 'px';
+
+};
 
 UIL.Group.prototype.clear = function(){
+
     this.clearGroup();
     UIL.Proto.prototype.clear.call( this );
-}
+
+};
 
 UIL.Group.prototype.clearGroup = function(){
+
     var i = this.uis.length;
     while(i--){
         this.uis[i].clear();
@@ -616,26 +759,27 @@ UIL.Group.prototype.clearGroup = function(){
     }
     this.uis = [];
     this.calc();
+
 };
-UIL.Title = function(obj){
+UIL.Title = function( o ){
     
-    UIL.Proto.call( this, obj );
+    UIL.Proto.call( this, o );
 
-    this.h = obj.height || 31;
-    //this.color = obj.color || 'N';
+    this.h = o.height || 31;
 
-    var id = obj.id || 0;
-    var prefix = obj.prefix || '';
+    var id = o.id || 0;
+    var prefix = o.prefix || '';
 
-    this.c[2] = UIL.DOM('UIL text', 'div', 'text-align:right; width:40px; padding:0px 5px;');
+    this.c[2] = UIL.DOM( 'UIL text', 'div', 'text-align:right; width:40px; padding:3px 5px;');
 
-    if(this.h==31){
-        this.setDom(0, 'height', this.h);
-        this.setDom(1, 'top', 8);
-        this.setDom(2, 'top', 8);
+    if( this.h === 31 ){
+
+        this.c[0].style.height = this.h + 'px';
+        this.c[1].style.top = 8 + 'px';
+        this.c[2].style.top = 8 + 'px';
+
     }
     
-
     var idt = id || 0;
     if(id<10) idt = '0'+id;
 
@@ -643,198 +787,133 @@ UIL.Title = function(obj){
     this.c[2].textContent = prefix.toUpperCase()+' '+idt;
 
     this.init();
-}
 
+};
 
 UIL.Title.prototype = Object.create( UIL.Proto.prototype );
 UIL.Title.prototype.constructor = UIL.Title;
 
 
 UIL.Title.prototype.rSize = function(){
+
     UIL.Proto.prototype.rSize.call( this );
-    this.setDom(1, 'width', this.size-50);
-    this.setDom(2, 'left', this.size-(50+26));
+    this.c[2].style.left = this.size-(50+26) + 'px';
+    this.c[1].style.width = this.size-50 + 'px';
+
 };
 
 UIL.Title.prototype.text = function(txt){
+
     this.c[1].textContent = txt;
+
 };
 
 UIL.Title.prototype.text2 = function(txt){
+
     this.c[2].textContent = txt;
+
 };
-UIL.String = function(obj){
+UIL.String = function( o ){
 
-    UIL.Proto.call( this, obj );
+    UIL.Proto.call( this, o );
 
-    this.value = obj.value || '';
-    this.allway = obj.allway || false;
+    this.value = o.value || '';
+    this.allway = o.allway || false;
 
-    this.c[2] = UIL.DOM('UIL text', 'input', 'pointer-events:auto; padding:0px 5px; padding-bottom:2px;' );
+    this.c[2] = UIL.DOM( 'UIL text', 'input', 'pointer-events:auto; padding:0px 5px; padding-bottom:2px;' );
     this.c[2].name = 'input';
-
-    this.f[0] = function(e){
-        //if(this.allway) this.callback( e.target.value );
-        if ( e.keyCode === 13 ){ 
-            this.callback( e.target.value );
-            e.target.blur();
-        }
-        e.stopPropagation();
-    }.bind(this);
-
-    this.f[1] = function(e){
-        if(this.allway) this.callback( e.target.value );
-        e.stopPropagation();
-    }.bind(this);
-
     this.c[2].value = this.value;
-    this.c[2].onkeydown = this.f[0];
-    this.c[2].onkeyup = this.f[1];
+
+    this.c[2].events = [ 'keydown', 'keyup' ];
 
     this.init();
-}
+
+};
 
 UIL.String.prototype = Object.create( UIL.Proto.prototype );
 UIL.String.prototype.constructor = UIL.String;
 
+UIL.String.prototype.handleEvent = function( e ) {
+
+    switch( e.type ) {
+        case 'keydown': this.keydown( e ); break;
+        case 'keyup': this.keyup( e ); break;
+    }
+
+};
+
+UIL.String.prototype.keydown = function( e ){
+
+    if( e.keyCode === 13 ){ 
+        this.value = e.target.value;
+        this.callback( this.value );
+        e.target.blur();
+    }
+    e.stopPropagation();
+
+};
+
+UIL.String.prototype.keyup = function( e ){
+
+    if( this.allway ) this.callback( this.value );
+    e.stopPropagation();
+
+};
+
 UIL.String.prototype.rSize = function(){
+
     UIL.Proto.prototype.rSize.call( this );
-    this.setDom(2, 'width', this.sb);
-    this.setDom(2, 'left', this.sa);
-}
-UIL.Number = function(obj){
+    this.c[2].style.left = this.sa + 'px';
+    this.c[2].style.width = this.sb + 'px';
 
-    UIL.Proto.call( this, obj );
+};
+UIL.Number = function( o ){
 
-    this.setTypeNumber(obj);
+    UIL.Proto.call( this, o );
 
+    this.setTypeNumber( o );
+
+    this.allway = o.allway || false;
     this.value = [0];
     this.toRad = 1;
     this.isNumber = true;
     this.isAngle = false;
     this.isVector = false;
 
-    
-    if(this.mono) this.mask = null;
-    else this.mask = UIL.main.mask;
+    this.isSelect = false;
 
-    if(obj.value){
-        if(!isNaN(obj.value)){ this.value = [obj.value];}
-        else if(obj.value instanceof Array){ this.value = obj.value; this.isNumber=false;}
-        else if(obj.value instanceof Object){ 
+    if(o.value){
+        if(!isNaN(o.value)){ this.value = [o.value];}
+        else if(o.value instanceof Array ){ this.value = o.value; this.isNumber=false;}
+        else if(o.value instanceof Object ){ 
             this.value = [];
-            if(obj.value.x) this.value[0] = obj.value.x;
-            if(obj.value.y) this.value[1] = obj.value.y;
-            if(obj.value.z) this.value[2] = obj.value.z;
-            if(obj.value.w) this.value[3] = obj.value.w;
+            if(o.value.x) this.value[0] = o.value.x;
+            if(o.value.y) this.value[1] = o.value.y;
+            if(o.value.z) this.value[2] = o.value.z;
+            if(o.value.w) this.value[3] = o.value.w;
             this.isVector=true;
         }
     }
 
     this.length = this.value.length;
 
-    if(obj.isAngle){
+    if(o.isAngle){
         this.isAngle = true;
         this.toRad = Math.PI/180;
     }
 
     this.w = ((UIL.BW+5)/(this.length))-5;
-    this.current = null;
+    this.current = undefined;
 
     var i = this.length;
     while(i--){
         if(this.isAngle) this.value[i] = (this.value[i] * 180 / Math.PI).toFixed( this.precision );
-        this.c[2+i] = UIL.DOM('UIL text', 'input', 'pointer-events:auto; padding:0px 5px; padding-bottom:2px; width:'+this.w+'px; left:'+(UIL.AW+(this.w*i)+(5*i))+'px;');
+        //this.c[2+i] = UIL.DOM('UIL text', 'input', 'pointer-events:auto; padding:0px 5px; padding-bottom:2px; width:'+this.w+'px; left:'+(UIL.AW+(this.w*i)+(5*i))+'px;');
+        this.c[2+i] = UIL.DOM('UIL text', 'input', 'pointer-events:auto; cursor:move; padding:3px 5px; width:'+this.w+'px; left:'+(UIL.AW+(this.w*i)+(5*i))+'px;');
         this.c[2+i].name = i;
         this.c[2+i].value = this.value[i];
-    }
+        this.c[2+i].events = [ 'click', 'keydown', 'keyup', 'mousedown', 'blur' ];
 
-    if(this.mask==null){
-        this.c[2+this.length] = UIL.DOM('UIL mask', 'div');
-        this.mask = this.c[2+this.length];
-    }
-
-    // key
-    this.f[0] = function(e){
-        if (!e) e = window.event;
-        //e.stopPropagation();
-        if ( e.keyCode === 13 ){
-            this.current = parseFloat(e.target.name);
-            this.f[4](this.current);
-            this.f[5]();
-            e.target.blur();
-        }
-    }.bind(this);
-
-    // mouseDown
-    this.f[1] = function(e){
-        //if (!e) e = window.event;
-        this.current = parseFloat(e.target.name);
-        if(this.current == undefined) return;
-
-        e.preventDefault();
-
-        this.prev = { x:e.clientX, y:e.clientY, d:0, id:(this.current+2)};
-        if(this.isNumber) this.prev.v = parseFloat(this.value);
-        else this.prev.v = parseFloat(this.value[this.current]);
-
-        this.mask.style.display = 'block';
-        this.mask.onmousemove = this.f[2];
-        this.mask.onmouseup = this.f[3];
-        this.mask.onmouseout = this.f[3];
-
-    }.bind(this);
-
-    // mouseMove
-    this.f[2] = function(e){
-       // if (!e) e = window.event;
-        this.prev.d += ( e.clientX - this.prev.x ) - ( e.clientY - this.prev.y );
-        var n = this.prev.v + ( this.prev.d * this.step);
-
-        this.value[this.current] = this.numValue(n);
-        this.c[this.prev.id].value = this.value[this.current];
-
-        this.f[5]();
-
-        this.prev.x = e.clientX;
-        this.prev.y = e.clientY;
-    }.bind(this);
-
-    // mouseUp, mouseOut
-    this.f[3] = function(e){
-        //if (!e) e = window.event;
-
-        this.mask.style.display = 'none';
-        this.mask.onmousemove = null;
-        this.mask.onmouseup = null;
-        this.mask.onmouseout = null;
-
-        if ( Math.abs( this.prev.d ) < 2 ) {
-            this.c[this.prev.id].focus();
-            this.c[this.prev.id].select();
-        }
-    }.bind(this);
-
-    // test value
-    this.f[4] = function(n){
-        if(!isNaN(this.c[2+n].value)) this.value[n] = this.c[2+n].value;
-        else this.c[2+n].value = this.value[n];
-    }.bind(this);
-
-    // export
-    this.f[5] = function(){
-        var ar = [];
-        var i = this.length;
-        while(i--) ar[i]=this.value[i]*this.toRad;
-
-        if(this.isNumber) this.callback( ar[0] );
-        else this.callback( ar );
-
-    }.bind(this);
-
-    for(i=0; i<this.length; i++){
-        this.c[2+i].onkeydown = this.f[0];
-        this.c[2+i].onmousedown = this.f[1];
     }
 
     this.init();
@@ -843,25 +922,153 @@ UIL.Number = function(obj){
 UIL.Number.prototype = Object.create( UIL.Proto.prototype );
 UIL.Number.prototype.constructor = UIL.Number;
 
+UIL.Number.prototype.handleEvent = function( e ) {
+
+    switch( e.type ) {
+        case 'click': this.click( e ); break;
+        case 'mousedown': this.down( e ); break;
+        case 'keydown': this.keydown( e ); break;
+        case 'keyup': this.keyup( e ); break;
+        case 'blur': this.blur( e ); break;
+
+        // document
+        case 'mouseup': this.out( e ); break;
+        case 'mousemove': this.move( e ); break;
+
+    }
+
+};
+
+UIL.Number.prototype.keydown = function( e ){
+
+    if( e.keyCode === 13 ){
+        this.testValue( parseFloat(e.target.name) );
+        this.validate();
+        e.target.blur();
+    }
+    e.stopPropagation();
+
+};
+
+UIL.Number.prototype.keyup = function( e ){
+
+    if( this.allway ){ 
+        this.testValue( parseFloat(e.target.name) );
+        this.validate();
+    }
+    e.stopPropagation();
+
+};
+
+UIL.Number.prototype.blur = function( e ){
+
+    this.isSelect = false;
+    e.target.style.cursor = 'move';
+
+};
+
+UIL.Number.prototype.click = function( e ){
+
+    document.removeEventListener( 'mouseup', this, false );
+    document.removeEventListener( 'mousemove', this, false );
+
+    e.preventDefault();
+
+    e.target.focus();
+    e.target.style.cursor = 'auto';
+    
+
+    this.isSelect = true;
+
+};
+
+UIL.Number.prototype.down = function( e ){
+
+    if(this.isSelect) return;
+
+    e.preventDefault();
+   
+    e.target.style.border = '1px solid rgba(255,255,255,0.2)';
+    this.current = parseFloat(e.target.name);
+
+    this.prev = { x:e.clientX, y:e.clientY, d:0, id:(this.current+2)};
+    if( this.isNumber ) this.prev.v = parseFloat(this.value);
+    else this.prev.v = parseFloat( this.value[this.current] );
+
+    document.addEventListener( 'mouseup', this, false );
+    document.addEventListener( 'mousemove', this, false );
+
+};
+
+////
+
+UIL.Number.prototype.out = function( e ){
+
+    if(this.current !== undefined){ 
+        this.c[2+this.current].style.border = 'none';
+        //this.c[2+this.current].style.cursor = 'move';
+    }
+    document.removeEventListener( 'mouseup', this, false );
+    document.removeEventListener( 'mousemove', this, false );
+
+};
+
+UIL.Number.prototype.move = function( e ){
+
+    if( this.current === undefined ) return;
+
+    this.prev.d += ( e.clientX - this.prev.x ) - ( e.clientY - this.prev.y );
+    var n = this.prev.v + ( this.prev.d * this.step);
+
+    this.value[this.current] = this.numValue(n);
+    this.c[2+this.current].value = this.value[this.current];
+
+    this.validate();
+
+    this.prev.x = e.clientX;
+    this.prev.y = e.clientY;
+
+};
+
+/////
+
+UIL.Number.prototype.testValue = function( n ){
+
+    if(!isNaN( this.c[2+n].value )) this.value[n] = this.c[2+n].value;
+    else this.c[2+n].value = this.value[n];
+
+};
+
+UIL.Number.prototype.validate = function(){
+
+    var ar = [];
+    var i = this.length;
+    while(i--) ar[i] = this.value[i]*this.toRad;
+
+    if( this.isNumber ) this.callback( ar[0] );
+    else this.callback( ar );
+
+};
+
 UIL.Number.prototype.rSize = function(){
     UIL.Proto.prototype.rSize.call( this );
     this.w = ((this.sb+5)/(this.length))-5;
     var i = this.length;
     while(i--){
-        this.setDom(2+i, 'left', this.sa+(this.w*i)+(5*i));
-        this.setDom(2+i, 'width', this.w );
+        this.c[2+i].style.left = (this.sa+(this.w*i)+(5*i)) + 'px';
+        this.c[2+i].style.width = this.w + 'px';
     }
 }
-UIL.Color = function(obj){
+UIL.Color = function( o ){
     
-    UIL.Proto.call( this, obj );
+    UIL.Proto.call( this, o );
 
-    this.type = obj.type || 'array';
+    this.type = o.type || 'array';
     this.width = this.sb;
     this.oldWidth = 0;
 
     // color up or down
-    this.side = obj.side || 'down';
+    this.side = o.side || 'down';
     this.holdTop = 0;
     
     this.wheelWidth = this.width*0.1;
@@ -887,7 +1094,7 @@ UIL.Color = function(obj){
     this.c[5] = UIL.DOM('UIL', 'canvas', 'left:'+ this.sa+'px;  top:'+this.decal+'px; display:none;');
     this.c[6] = UIL.DOM('UIL', 'canvas', 'left:'+ this.sa+'px;  top:'+this.decal+'px; pointer-events:auto; cursor:pointer; display:none;');
 
-    if(this.side=='up') this.c[6].style.pointerEvents = 'none';
+    if(this.side === 'up') this.c[6].style.pointerEvents = 'none';
 
     this.c[5].width = this.c[5].height = this.width;
     this.c[6].width = this.c[6].height = this.width;
@@ -897,73 +1104,92 @@ UIL.Color = function(obj){
     this.ctxMask.translate(this.mid, this.mid);
     this.ctxOverlay.translate(this.mid, this.mid);
 
-    //this.drawCircle();
-    //this.drawMask();
-
     this.hsl = null;
     this.value = '#ffffff';
-    if(obj.value){
-        if(obj.value instanceof Array) this.value = UIL.pack(obj.value);
-        else if(!isNaN(obj.value)) this.value = UIL.numFormat(obj.value);
-        else this.value = obj.value;
+    if( o.value ){
+        if(o.value instanceof Array) this.value = UIL.pack(o.value);
+        else if(!isNaN(o.value)) this.value = UIL.numFormat(o.value);
+        else this.value = o.value;
     }
     this.bcolor = null;
-    this.down = false;
+    this.isDown = false;
     this.isShow = false;
 
-    // click
-    this.f[0] = function(e){
-        if(!this.isShow) this.show();
-        else this.hide();
-        //if(!this.isShow)this.f[5]();
-        //else this.f[4]();
-    }.bind(this);
+    this.c[2].events = [ 'click' ];
+    this.c[6].events = [ 'mousedown', 'mousemove', 'mouseup', 'mouseout' ];
 
-    // mouseDown
-    this.f[1] = function(e){
-        if(!this.down){
-            this.down = true;
-            this.c[6].onmousemove = this.f[2];
-            this.c[6].onmouseup = this.f[3];
-        }
-        this.offset = this.c[6].getBoundingClientRect();
-        var pos = this.widgetCoords(e);
-        this.circleDrag = Math.max(Math.abs(pos.x), Math.abs(pos.y)) > (this.square + 2);
-        this.f[2](e);
-        return false;
-    }.bind(this);
-
-    //mouseMove
-    this.f[2] = function(e){
-        var pos = this.widgetCoords(e);
-        if (this.circleDrag) {
-            var hue = Math.atan2(pos.x, -pos.y) / 6.28;
-            this.setHSL([(hue + 1) % 1, this.hsl[1], this.hsl[2]]);
-        } else {
-            var sat = Math.max(0, Math.min(1, -(pos.x / this.square * 0.5) + .5));
-            var lum = Math.max(0, Math.min(1, -(pos.y / this.square * 0.5) + .5));
-            this.setHSL([this.hsl[0], sat, lum]);
-        }
-        return false;
-    }.bind(this);
-
-    //mouseUp
-    this.f[3] = function(e){
-        this.c[6].onmouseup = null;
-        this.c[6].onmousemove = null;
-        this.down = false;
-    }.bind(this);
-
-    this.c[2].onclick = this.f[0];
-    this.setColor(this.value);
+    this.setColor( this.value );
 
     this.init();
-}
+
+};
 
 UIL.Color.prototype = Object.create( UIL.Proto.prototype );
 UIL.Color.prototype.constructor = UIL.Color;
 
+UIL.Color.prototype.handleEvent = function( e ) {
 
+    switch( e.type ) {
+        case 'click': this.click(e); break;
+        case 'mousedown': this.down(e); break;
+        case 'mousemove': this.move(e); break;
+        case 'mouseup': this.up(e); break;
+        case 'mouseout': this.out(e); break;
+    }
+
+};
+
+/////
+
+UIL.Color.prototype.click = function( e ){
+
+    if( !this.isShow ) this.show();
+    else this.hide();
+
+};
+
+UIL.Color.prototype.up = function( e ){
+
+    this.isDown = false;
+
+};
+
+UIL.Color.prototype.out = function( e ){
+
+    this.hide();
+
+};
+
+UIL.Color.prototype.down = function( e ){
+
+    if(!this.isShow) return;
+    this.isDown = true;
+    this.move( e );
+    return false;
+
+};
+
+UIL.Color.prototype.move = function( e ){
+
+    if(!this.isDown) return;
+
+    this.offset = this.c[6].getBoundingClientRect();
+    var pos = { x: e.pageX - this.offset.left - this.mid, y: e.pageY - this.offset.top - this.mid };
+    this.circleDrag = Math.max(Math.abs(pos.x), Math.abs(pos.y)) > (this.square + 2);
+
+    if ( this.circleDrag ) {
+        var hue = Math.atan2(pos.x, -pos.y) / 6.28;
+        this.setHSL([(hue + 1) % 1, this.hsl[1], this.hsl[2]]);
+    } else {
+        var sat = Math.max(0, Math.min(1, -( pos.x / this.square * 0.5) + .5) );
+        var lum = Math.max(0, Math.min(1, -( pos.y / this.square * 0.5) + .5) );
+        this.setHSL([this.hsl[0], sat, lum]);
+    }
+
+};
+
+
+//////
 
 UIL.Color.prototype.redraw = function(){
     this.oldWidth = this.width;
@@ -975,7 +1201,7 @@ UIL.Color.prototype.redraw = function(){
 UIL.Color.prototype.show = function(){
     if(this.oldWidth!==this.width) this.redraw();
     this.isShow = true;
-    this.h = this.width+30;// 194;
+    this.h = this.width + 30;
     this.c[0].style.height = this.h+'px';
 
     if(this.side=='up'){ 
@@ -987,8 +1213,6 @@ UIL.Color.prototype.show = function(){
     this.c[4].style.display = 'block';
     this.c[5].style.display = 'block';
     this.c[6].style.display = 'block';
-    this.c[6].onmousedown = this.f[1];
-    this.c[6].onmouseout = function(){this.hide()}.bind(this);
     if(UIL.main) UIL.main.calc();
 };
 
@@ -1003,19 +1227,19 @@ UIL.Color.prototype.hide = function(){
     this.c[4].style.display = 'none';
     this.c[5].style.display = 'none';
     this.c[6].style.display = 'none';
-    this.c[6].onmousedown = null;
-    this.c[6].onmouseout = null;
-    if(UIL.main)UIL.main.calc();
+    //this.c[6].onmousedown = null;
+    //this.c[6].onmouseout = null;
+    if( UIL.main ) UIL.main.calc();
 };
 
 UIL.Color.prototype.updateDisplay = function(){
     this.invert = (this.rgb[0] * 0.3 + this.rgb[1] * .59 + this.rgb[2] * .11) <= 0.6;
 
-    this.setSvg(4, 'fill',UIL.pack(UIL.HSLToRGB([this.hsl[0], 1, 0.5])));
+    UIL.setSvg( this.c[4], 'fill',UIL.pack(UIL.HSLToRGB([this.hsl[0], 1, 0.5])));
     this.drawMarkers();
     
     this.value = this.bcolor;
-    this.setSvg(2, 'fill', this.bcolor);
+    UIL.setSvg( this.c[2], 'fill', this.bcolor);
     this.c[3].textContent = UIL.hexFormat(this.bcolor);//this.value);
 
     
@@ -1023,11 +1247,13 @@ UIL.Color.prototype.updateDisplay = function(){
     
     this.c[3].style.color = cc;
 
-    if(this.type=='array')this.callback( this.rgb );
-    if(this.type=='html')this.callback( this.value );
-    if(this.type=='hex')this.callback( this.value );
+    if( this.type === 'array' ) this.callback( this.rgb );
+    if( this.type === 'html' )this.callback( this.value );
+    if( this.type === 'hex' )this.callback( this.value );
 };
-UIL.Color.prototype.setColor = function(color){
+
+UIL.Color.prototype.setColor = function( color ){
+
     var unpack = UIL.unpack(color);
     if (this.bcolor != color && unpack) {
         this.bcolor = color;
@@ -1036,14 +1262,19 @@ UIL.Color.prototype.setColor = function(color){
         this.updateDisplay();
     }
     return this;
+
 };
-UIL.Color.prototype.setHSL = function(hsl){
+
+UIL.Color.prototype.setHSL = function( hsl ){
+
     this.hsl = hsl;
     this.rgb = UIL.HSLToRGB(hsl);
     this.bcolor = UIL.pack(this.rgb);
     this.updateDisplay();
     return this;
+
 };
+
 UIL.Color.prototype.calculateMask = function(sizex, sizey, outputPixel){
     var isx = 1 / sizex, isy = 1 / sizey;
     for (var y = 0; y <= sizey; ++y) {
@@ -1056,6 +1287,7 @@ UIL.Color.prototype.calculateMask = function(sizex, sizey, outputPixel){
         }
     }
 };
+
 UIL.Color.prototype.drawMask = function(){
     var size = this.square * 2, sq = this.square;
     var sz = Math.floor(size / 2);
@@ -1073,6 +1305,7 @@ UIL.Color.prototype.drawMask = function(){
     ctx.putImageData(frame, 0, 0);
     this.ctxMask.drawImage(buffer, 0, 0, sz + 1, sz + 1, -sq, -sq, sq * 2, sq * 2);
 };
+
 UIL.Color.prototype.drawCircle = function(){
     var n = 24,r = this.radius, w = this.wheelWidth, nudge = 8 / r / n * Math.PI, m = this.ctxMask, a1 = 0, color1, d1;
     var ym, am, tan, xm, color2, d2, a2, ar;
@@ -1103,8 +1336,10 @@ UIL.Color.prototype.drawCircle = function(){
     }
     m.restore();
 };
+
 UIL.Color.prototype.drawMarkers = function(){
-    var m=this.markerSize, ra=this.radius, sz = this.width, lw = Math.ceil(m/ 4), r = m - lw + 1, c1 = this.invert ? '#fff' : '#000', c2 = this.invert ? '#000' : '#fff';
+
+    var m = this.markerSize, ra=this.radius, sz = this.width, lw = Math.ceil(m/ 4), r = m - lw + 1, c1 = this.invert ? '#fff' : '#000', c2 = this.invert ? '#000' : '#fff';
     var angle = this.hsl[0] * 6.28;
     var ar = [Math.sin(angle) * ra, -Math.cos(angle) * ra, 2 * this.square * (.5 - this.hsl[1]), 2 * this.square * (.5 - this.hsl[2]) ];
   
@@ -1125,60 +1360,55 @@ UIL.Color.prototype.drawMarkers = function(){
         this.ctxOverlay.stroke();
     }
 };
-UIL.Color.prototype.widgetCoords = function(e){
-    return { x: e.pageX - this.offset.left - this.mid, y: e.pageY - this.offset.top - this.mid };
-};
-/*UIL.Color.prototype.clear = function(){
-    if(this.isShow) this.f[4]();
-    UIL.Proto.prototype.clear.call( this );
-};*/
 
 UIL.Color.prototype.rSize = function(){
+
     UIL.Proto.prototype.rSize.call( this );
+
     this.width = this.sb;
     this.wheelWidth = this.width*0.1;
 
     this.decal = 22;
-    if(this.side=='up') this.decal = 5;
+    if( this.side === 'up' ) this.decal = 5;
     this.radius = (this.width - this.wheelWidth) * 0.5 - 1;
     this.square = Math.floor((this.radius - this.wheelWidth * 0.5) * 0.7) - 1;
     this.mid = Math.floor(this.width * 0.5 );
     this.markerSize = this.wheelWidth * 0.3;
 
-    this.setSvg(2, 'width',this.sb);
-    this.setDom(2, 'width', this.sb);
-    this.setDom(2, 'left', this.sa);
-    this.setDom(3, 'width', this.sb);
-    this.setDom(3, 'left', this.sa);
+    this.c[2].style.width = this.sb + 'px';
+    this.c[2].style.left = this.sa + 'px';
 
-    this.setDom(4, 'left', this.sa);
-    this.setDom(4, 'width', this.width);
-    this.setDom(4, 'height', this.width);
-    this.setDom(5, 'left', this.sa);
-    this.setDom(6, 'left', this.sa);
+    this.c[3].style.width = this.sb + 'px';
+    this.c[3].style.left = this.sa + 'px';
 
-    this.setSvg(4, 'width',this.square * 2 - 1);
-    this.setSvg(4, 'height',this.square * 2 - 1);
-    this.setSvg(4, 'x',this.mid - this.square);
-    this.setSvg(4, 'y',this.mid - this.square);
+    this.c[4].style.width = this.width + 'px';
+    this.c[4].style.height = this.width + 'px';
+    this.c[4].style.left = this.sa + 'px';
 
     this.c[5].width = this.c[5].height = this.width;
-    this.c[6].width = this.c[6].height = this.width;
+    this.c[5].style.left = this.sa + 'px';
 
-    this.c[5].style.left = this.sa+'px';
-    this.c[6].style.left = this.sa+'px';
-    this.c[5].style.top = this.decal+'px';
-    this.c[6].style.top = this.decal+'px';
+    this.c[6].width = this.c[6].height = this.width;
+    this.c[6].style.left = this.sa + 'px';
+    this.c[5].style.top = this.decal + 'px';
+    this.c[6].style.top = this.decal + 'px';
+
+    UIL.setSvg( this.c[2], 'width',this.sb);
+    UIL.setSvg( this.c[4], 'width',this.square * 2 - 1);
+    UIL.setSvg( this.c[4], 'height',this.square * 2 - 1);
+    UIL.setSvg( this.c[4], 'x',this.mid - this.square);
+    UIL.setSvg( this.c[4], 'y',this.mid - this.square);
 
     this.ctxMask.translate(this.mid, this.mid);
     this.ctxOverlay.translate(this.mid, this.mid);
 
-    if(this.isShow){ 
+    if( this.isShow ){ 
         this.redraw();
         this.h = this.width+30;
-        this.setDom(0, 'height', this.h);
-        if(UIL.main)UIL.main.calc();
+        this.c[0].height = this.h + 'px';
+        if( UIL.main ) UIL.main.calc();
     }
+
 };
 
 //-----------------------------------------
@@ -1242,101 +1472,119 @@ UIL.RGBtoHSL = function(rgb){
     }
     return [h, s, l];
 };
-UIL.Slide = function(obj){
+UIL.Slide = function( o ){
 
-    UIL.Proto.call( this, obj );
+    UIL.Proto.call( this, o );
 
-    this.setTypeNumber(obj)
+    this.setTypeNumber( o );
 
     this.range = this.max - this.min;
-    this.width = UIL.BW-40;
-    this.w = this.width-8;
+    this.width = UIL.BW - 40;
+    this.w = this.width - 8;
     this.height = 17;
-    this.value = obj.value || 0;
-    this.down = false;
+    this.value = o.value || 0;
+    this.isDown = false;
 
-    //this.c[2] = UIL.DOM('UIL text-m');
-    this.c[2] = UIL.DOM('UIL text', 'div', 'text-align:right; width:40px; padding:0px 5px;');
+    this.c[2] = UIL.DOM('UIL text', 'div', 'text-align:right; width:40px; padding:3px 5px;');
     this.c[3] = UIL.DOM('UIL svgbox', 'rect', 'width:'+this.width+'px; height:'+this.height+'px; cursor:w-resize;', { width:this.width, height:this.height, fill:UIL.SVGB, 'stroke-width':1, stroke:UIL.SVGC });
     this.c[4] = UIL.DOM('UIL svgbox', 'rect', 'width:'+this.width+'px; height:'+this.height+'px; pointer-events:none;', { x:4, y:4, width:this.width-8, height:this.height-8, fill:'#CCC', 'stroke-width':1, stroke:UIL.SVGC });
 
-    // mouseOver
-    this.f[0] = function(e){
-        this.setSvg(3, 'fill','rgba(0,0,0,0.6)');
-        this.setSvg(4, 'fill', UIL.SELECT );
-    }.bind(this);
-
-    // mouseOut
-    this.f[1] = function(e){
-        this.down = false;
-        this.setSvg(3, 'fill','rgba(0,0,0,0.2)');
-        this.setSvg(4, 'fill','#CCC');
-    }.bind(this);
-
-    // mouseUp
-    this.f[2] = function(e){
-        this.down = false;
-    }.bind(this);
-
-    // mouseDown
-    this.f[3] = function(e){
-        this.down = true;
-        this.prev = { x:e.clientX, d:0, v:parseFloat(this.value)};
-        this.f[4](e);
-    }.bind(this);
-
-    // mouseMove
-    this.f[4] = function(e){
-        if(this.down){
-            e.preventDefault(); 
-            var rect = this.c[3].getBoundingClientRect();
-            var n = ((((e.clientX-rect.left-4)/this.w)*this.range+this.min)-this.prev.v);
-            if(n > this.step || n < this.step){ 
-                n = (n/this.step).toFixed(0)*1;
-                this.value = this.numValue(this.prev.v+(n*this.step));
-                this.f[5](true);
-                this.prev.v = this.value;
-            }
-        }
-    }.bind(this);
-
-    // update
-    this.f[5] = function(up){
-        var ww = (this.w * ((this.value-this.min)/this.range));
-        this.setSvg(4, 'width', ww );
-        this.c[2].innerHTML = this.value;
-        if(up) this.callback(this.value); 
-    }.bind(this);
-
-    this.c[3].onmouseover = this.f[0];
-    this.c[3].onmouseout = this.f[1];
-    this.c[3].onmouseup = this.f[2];
-    this.c[3].onmousedown = this.f[3];
-    this.c[3].onmousemove = this.f[4];
-    this.f[5](false);
+    this.c[3].events = [ 'mouseover', 'mousedown', 'mouseup', 'mouseout', 'mousemove' ];
 
     this.init();
+
 };
 
 UIL.Slide.prototype = Object.create( UIL.Proto.prototype );
 UIL.Slide.prototype.constructor = UIL.Slide;
 
-UIL.Slide.prototype.rSize = function(){
-    UIL.Proto.prototype.rSize.call( this );
-    this.width = this.sb-40;
-    this.w = this.width-8;
-    this.setDom(2, 'left', this.size-50);
-    this.setSvg(3, 'width',this.width);
-    this.setDom(3, 'left', this.sa);
-    this.setDom(3, 'width', this.width);
-    this.setDom(4, 'left', this.sa);
-    this.setDom(4, 'width', this.width);
-    
-    this.f[5](false);
-};
-UIL.List = function(obj){
+UIL.Slide.prototype.handleEvent = function( e ) {
 
-    UIL.Proto.call( this, obj );
+    switch( e.type ) {
+        case 'mouseover': this.over( e ); break;
+        case 'mousedown': this.down( e ); break;
+        case 'mouseup': this.up( e ); break;
+        case 'mouseout': this.out( e ); break;
+        case 'mousemove': this.move( e ); break;
+    }
+
+};
+
+UIL.Slide.prototype.over = function( e ){
+
+    UIL.setSvg( this.c[3], 'fill','rgba(0,0,0,0.6)');
+    UIL.setSvg( this.c[4], 'fill', UIL.SELECT );
+
+};
+
+UIL.Slide.prototype.out = function( e ){
+
+    this.isDown = false;
+    UIL.setSvg( this.c[3], 'fill','rgba(0,0,0,0.2)');
+    UIL.setSvg( this.c[4], 'fill','#CCC');
+
+};
+
+UIL.Slide.prototype.up = function( e ){
+
+    this.isDown = false;
+
+};
+
+UIL.Slide.prototype.down = function( e ){
+
+    this.isDown = true;
+    this.prev = { x:e.clientX, d:0, v:parseFloat(this.value) };
+    this.move( e );
+
+};
+
+UIL.Slide.prototype.move = function( e ){
+
+    if( this.isDown ){
+        e.preventDefault(); 
+        var rect = this.c[3].getBoundingClientRect();
+        var n = (((( e.clientX - rect.left - 4 ) / this.w) * this.range + this.min )-this.prev.v);
+        if(n > this.step || n < this.step){ 
+            n = ~~(n/this.step);//.toFixed(0)*1;
+            this.value = this.numValue( this.prev.v + ( n * this.step ) );
+            this.updatePos( true );
+            this.prev.v = this.value;
+        }
+    }
+
+};
+
+UIL.Slide.prototype.updatePos = function( up ){
+
+    var ww = (this.w * ((this.value-this.min)/this.range));
+    UIL.setSvg( this.c[4], 'width', ww );
+    this.c[2].innerHTML = this.value;
+    if( up ) this.callback(this.value);
+
+};
+
+UIL.Slide.prototype.rSize = function(){
+
+    UIL.Proto.prototype.rSize.call( this );
+
+    this.width = this.sb - 40;
+    this.w = this.width - 8;
+
+    this.c[2].style.left = this.size - 50 + 'px';
+    this.c[3].style.left = this.sa + 'px';
+    this.c[3].style.width = this.width + 'px';
+    this.c[4].style.left = this.sa + 'px';
+    this.c[4].style.width = this.width + 'px';
+
+    UIL.setSvg( this.c[3], 'width', this.width );
+    
+    this.updatePos();
+
+};
+UIL.List = function( o ){
+
+    UIL.Proto.call( this, o );
 
     this.c[2] = UIL.DOM('UIL list');
     this.c[3] = UIL.DOM('UIL svgbox', 'rect', '', {width:this.sb, height:17, fill:UIL.bgcolor(UIL.COLOR), 'stroke-width':1, stroke:UIL.SVGC  });
@@ -1344,38 +1592,42 @@ UIL.List = function(obj){
     this.c[5] = UIL.DOM('UIL text', 'div', 'text-align:center;');
     this.c[6] = UIL.DOM('UIL svgbox', 'rect', 'top:20px; height:90px; pointer-events:none;', { x:this.sb-15, y:0, width:10, height:16, fill:'#666', 'stroke-width':1, stroke:UIL.SVGC  });
 
+    this.c[2].name = 'list';
+    this.c[3].name = 'title';
 
-    this.list = obj.list || [];
-    if(obj.value){
-        if(!isNaN(obj.value)) this.value = this.list[obj.value];
-        else this.value = obj.value;
+    this.c[2].events = [ 'mousedown', 'mousemove', 'mouseup', 'mouseout', 'mousewheel' ];
+    this.c[3].events = [ 'click', 'mousedown', 'mouseover', 'mouseout', 'mouseup' ];
+
+    this.list = o.list || [];
+    if(o.value){
+        if(!isNaN(o.value)) this.value = this.list[o.value];
+        else this.value = o.value;
     }else{
         this.value = this.list[0];
     }
 
     this.show = false;
-    this.maxItem = 5;
+    this.maxItem = o.maxItem || 5;
     this.length = this.list.length;
 
     // force full list 
-    this.full = obj.full || false;
+    this.full = o.full || false;
     if(this.full) this.maxItem = this.length;
-    
     
     this.maxHeight = this.maxItem * 18;
     this.max = this.length * 18;
     this.w = this.sb;
-    this.down = false;
+    this.isDown = false;
     this.range = this.max - this.maxHeight;
     this.py = 0;
     this.scroll = false;
 
     // list up or down
-    this.side = obj.side || 'down';
+    this.side = o.side || 'down';
     this.holdTop = 0;
 
 
-    if(this.side=='up'){
+    if( this.side === 'up' ){
 
         this.c[2].style.top = 'auto';
         this.c[3].style.top = 'auto';
@@ -1385,12 +1637,10 @@ UIL.List = function(obj){
         this.c[3].style.bottom = '2px';
         this.c[4].style.bottom = '2px';
         this.c[5].style.bottom = '2px';
+
     }
 
-    
-
-
-    if(this.max>this.maxHeight){ 
+    if( this.max > this.maxHeight ){ 
         this.w = this.sb-20;
         this.scroll = true;
     }
@@ -1402,7 +1652,7 @@ UIL.List = function(obj){
 
     // populate list
     var item, n, l = this.sb;
-    for(var i=0; i<this.length; i++){
+    for( var i=0; i<this.length; i++ ){
         n = this.list[i];
         item = UIL.DOM('UIL listItem', 'div', 'width:'+this.w+'px; height:18px;');
         item.textContent = n;
@@ -1411,270 +1661,341 @@ UIL.List = function(obj){
     }
 
     this.c[5].textContent = this.value;
-    this.c[2].name = 'list';
-
-    // click top
-    this.f[0] = function(e){
-        if(this.show) this.f[1]();
-        else this.f[2]();
-    }.bind(this);
-
-    // close
-    this.f[1] = function(e){
-        this.show = false;
-        this.h = 20;
-        this.c[0].style.height = this.h+'px';
-        this.c[2].style.display = 'none';
-        this.setSvg(4, 'd','M 6 4 L 10 8 6 12');
-        if(UIL.main)UIL.main.calc();
-    }.bind(this);
-
-    // open
-    this.f[2] = function(e){
-        this.f[8](0);
-        this.show = true;
-        this.h = this.maxHeight+30; //120;
-        if(!this.scroll){
-            this.h = 30+this.max;
-            this.c[6].style.display = 'none';
-            this.c[2].onmousemove = null;
-            this.c[2].onmousewheel = null; 
-        }
-        this.c[0].style.height = this.h+'px';
-        this.c[2].style.display = 'block';
-        if(this.side=='up')this.setSvg(4, 'd','M 12 10 L 8 6 4 10');
-        else this.setSvg(4, 'd','M 12 6 L 8 10 4 6');
-        if(UIL.main)UIL.main.calc();
-    }.bind(this);
-
-    // mousedown
-    this.f[3] = function(e){
-        var name = e.target.name;
-        if(name!=='list' && name!==undefined ){
-            this.value = e.target.name;
-            this.c[5].textContent = this.value;
-            this.callback(this.value);
-            this.f[1]();
-        }else if (name=='list' && this.scroll){
-            this.down = true;
-            this.f[4](e);
-            this.listIn.style.background = 'rgba(0,0,0,0.6)';
-            this.setSvg(6, 'fill', '#AAA');
-            e.preventDefault();
-        }
-    }.bind(this);
-
-    // mousemove
-    this.f[4] = function(e){
-       if(this.down){
-            var rect =this.c[2].getBoundingClientRect();
-            var y = e.clientY-rect.top;
-            if(y<30) y = 30;
-            if(y>100) y = 100;
-            this.py = (((y-30)/70)*this.range).toFixed(0);
-            this.f[8]();
-        }
-    }.bind(this);
-
-    // mouseout
-    this.f[5] = function(e){
-        if(UIL.main)UIL.main.lockwheel = false;
-        this.f[6]();
-        var name = e.relatedTarget.name;
-        if(name==undefined)this.f[1]();
-    }.bind(this);
-
-    // mouseup
-    this.f[6] = function(e){
-        this.down = false;
-        this.listIn.style.background = 'rgba(0,0,0,0.2)';
-        this.setSvg(6, 'fill', '#666');
-    }.bind(this);
-
-    //onmousewheel
-    this.f[7] = function(e){
-        if(!this.scroll)return;
-        if(UIL.main)UIL.main.lockwheel = true;
-        var delta = 0;
-        if(e.wheelDeltaY) delta= -e.wheelDeltaY*0.04;
-        else if(e.wheelDelta) delta= -e.wheelDelta*0.2;
-        else if(e.detail) delta=e.detail*4.0;
-        this.py+=delta;
-        if(this.py<0) this.py=0;
-        if(this.py>this.range) this.py=this.range;
-        this.f[8]();
-    }.bind(this);
-
-    //update position
-    this.f[8] = function(y){
-        if(!this.scroll)return;
-        if(y !== undefined) this.py = y;
-        this.listIn.style.top = -this.py+'px';
-        this.setSvg(6, 'y', ((this.py*70)/this.range)+2 );
-    }.bind(this);
-
-    this.f[9] = function(e){
-        this.c[5].style.color = '#FFF';
-        this.setSvg(3, 'fill', UIL.SELECT );
-    }.bind(this);
-
-    this.f[10] = function(e){
-        this.c[5].style.color = '#CCC';
-        this.setSvg(3, 'fill', UIL.bgcolor(UIL.COLOR));
-    }.bind(this);
-
-    this.f[11] = function(e){
-        this.c[5].style.color = '#CCC';
-        this.setSvg(3, 'fill', UIL.SELECTDOWN );
-    }.bind(this);
-
     
-    this.c[2].onmousedown = this.f[3];
-    this.c[2].onmousemove = this.f[4];
-    this.c[2].onmouseout = this.f[5];
-    this.c[2].onmouseup = this.f[6];
-    this.c[2].onmousewheel = this.f[7]; 
-
-    this.c[3].onclick = this.f[0];
-    this.c[3].onmouseover = this.f[9];
-    this.c[3].onmouseout = this.f[10];
-    this.c[3].onmouseup = this.f[10];
-    this.c[3].onmousedown = this.f[11];
 
     this.init();
+
 }
 
 UIL.List.prototype = Object.create( UIL.Proto.prototype );
 UIL.List.prototype.constructor = UIL.List;
 
-UIL.List.prototype.text = function(txt){
-    this.c[5].textContent = txt;
+UIL.List.prototype.handleEvent = function( e ) {
+
+    var name = e.target.name || '';
+    switch( e.type ) {
+        case 'click': this.click(e); break;
+        case 'mouseover': this.over(e); break;
+        case 'mousedown': if(name === 'title') this.down(e); else this.listdown(e); break;
+        case 'mouseup': if(name === 'title') this.out(e); else this.listup(e); break;
+        case 'mouseout': if(name === 'title') this.out(e); else this.listout(e); break;
+        case 'mousemove': this.listmove(e); break;
+        case 'mousewheel': this.listwheel(e); break;
+    }
+
 }
 
+// -----
+
+UIL.List.prototype.click = function( e ){
+
+    if( this.show ) this.listHide();
+    else this.listShow();
+
+};
+
+UIL.List.prototype.down = function( e ){
+
+    this.c[5].style.color = '#CCC';
+    UIL.setSvg( this.c[3], 'fill', UIL.SELECTDOWN );
+
+};
+
+UIL.List.prototype.over = function( e ){
+
+    this.c[5].style.color = '#FFF';
+    UIL.setSvg( this.c[3], 'fill', UIL.SELECT );
+
+};
+
+UIL.List.prototype.out = function( e ){
+
+    this.c[5].style.color = '#CCC';
+    UIL.setSvg( this.c[3], 'fill', UIL.bgcolor(UIL.COLOR) );
+
+};
+
+// ----- LIST
+
+UIL.List.prototype.listdown = function( e ){
+
+    var name = e.target.name;
+    if( name !== 'list' && name !== undefined ){
+        this.value = e.target.name;
+        this.c[5].textContent = this.value;
+        this.callback( this.value );
+        this.listHide();
+    } else if ( name ==='list' && this.scroll ){
+        this.isDown = true;
+        this.listmove( e );
+        this.listIn.style.background = 'rgba(0,0,0,0.6)';
+        UIL.setSvg( this.c[6], 'fill', '#AAA');
+        e.preventDefault();
+    }
+
+};
+
+UIL.List.prototype.listmove = function( e ){
+
+    if( this.isDown ){
+        var rect = this.c[2].getBoundingClientRect();
+        var y = e.clientY - rect.top;
+        if( y < 30 ) y = 30;
+        if( y > 100 ) y = 100;
+        this.py = ~~(((y-30)/70)*this.range);//.toFixed(0);
+
+        this.listPos();
+    }
+
+};
+
+UIL.List.prototype.listup = function( e ){
+
+    this.isDown = false;
+    this.listIn.style.background = 'rgba(0,0,0,0.2)';
+    UIL.setSvg( this.c[6], 'fill', '#666' );
+
+};
+
+UIL.List.prototype.listout = function( e ){
+
+    if( UIL.main ) UIL.main.lockwheel = false;
+    this.listup();
+    var name = e.relatedTarget.name;
+    if( name === undefined ) this.listHide();
+
+};
+
+UIL.List.prototype.listwheel = function( e ){
+
+    if( !this.scroll ) return;
+    if( UIL.main ) UIL.main.lockwheel = true;
+    var delta = 0;
+    if( e.wheelDeltaY ) delta = -e.wheelDeltaY*0.04;
+    else if( e.wheelDelta ) delta = -e.wheelDelta*0.2;
+    else if( e.detail ) delta = e.detail*4.0;
+
+    this.py += delta;
+
+    if( this.py < 0 ) this.py=0;
+    if(this.py > this.range ) this.py = this.range;
+
+    this.listPos();
+
+};
+
+
+// ----- LIST
+
+UIL.List.prototype.listPos = function( y ){
+
+    if( !this.scroll ) return;
+    this.py = y === undefined ? this.py : y;
+    this.listIn.style.top = -this.py+'px';
+    UIL.setSvg( this.c[6], 'y', ((this.py*70)/this.range)+2 );
+
+};
+
+UIL.List.prototype.listShow = function(){
+
+    this.listPos( 0 );
+    this.show = true;
+    this.h = this.maxHeight + 30;
+    if( !this.scroll ){
+        this.h = 30 + this.max;
+        this.c[6].style.display = 'none';
+        this.c[2].removeEventListener( 'mousewheel', this, false );
+        this.c[2].removeEventListener( 'mousemove',  this, false ); 
+    }
+    this.c[0].style.height = this.h+'px';
+    this.c[2].style.display = 'block';
+    if( this.side === 'up' ) UIL.setSvg( this.c[4], 'd','M 12 10 L 8 6 4 10');
+    else UIL.setSvg( this.c[4], 'd','M 12 6 L 8 10 4 6');
+
+    if(UIL.main) UIL.main.calc();
+
+};
+
+UIL.List.prototype.listHide = function(){
+
+    this.show = false;
+    this.h = 20;
+    this.c[0].style.height = this.h + 'px';
+    this.c[2].style.display = 'none';
+    UIL.setSvg( this.c[4], 'd','M 6 4 L 10 8 6 12');
+
+    if( UIL.main ) UIL.main.calc();
+
+};
+
+// -----
+
+UIL.List.prototype.text = function( txt ){
+
+    this.c[5].textContent = txt;
+
+};
+
 UIL.List.prototype.rSize = function(){
+
     UIL.Proto.prototype.rSize.call( this );
-    this.setSvg(3, 'width', this.sb);
-    this.setDom(3, 'width', this.sb);
-    this.setDom(3, 'left', this.sa);
 
-    this.setDom(4, 'left', this.sa+this.sb-17);
+    this.c[2].style.width = this.sb+'px';
+    this.c[2].style.left = this.sa - 20 +'px';
 
-    this.setDom(5, 'left', this.sa);
-    this.setDom(5, 'width', this.sb);
+    this.c[3].style.width = this.sb+'px';
+    this.c[3].style.left = this.sa+'px';
 
-    this.setDom(2, 'left', this.sa-20);
-    this.setDom(2, 'width', this.sb);
+    this.c[4].style.left = this.sa + this.sb - 17 +'px';
 
-    this.setDom(6, 'left', this.sa);
-    this.setDom(6, 'width', this.sb);
-    this.setSvg(6, 'x', this.sb-15);
+    this.c[5].style.width = this.sb+'px';
+    this.c[5].style.left = this.sa+'px';
+
+    this.c[6].style.width = this.sb+'px';
+    this.c[6].style.left = this.sa+'px';
+
+    UIL.setSvg( this.c[3], 'width', this.sb );
+    UIL.setSvg( this.c[6], 'x', this.sb-15 );
 
     this.w = this.sb;
-    if(this.max>this.maxHeight) this.w = this.sb-20;
-    for(var i=0; i<this.length; i++){
-        UIL.setDOM(this.listIn.children[i], 'width', this.w);
-    }
+    if(this.max > this.maxHeight) this.w = this.sb-20;
+    var i = this.length;
+    while(i--) this.listIn.children[i].style.width = this.w + 'px';
+
 };
-UIL.Bool = function(obj){
+UIL.Bool = function( o ){
 
-    UIL.Proto.call( this, obj );
+    UIL.Proto.call( this, o );
 
-    this.value = obj.value || false;
+    this.value = o.value || false;
 
     this.c[2] = UIL.DOM('UIL svgbox', 'rect', 'width:17px;', {width:17, height:17, fill:UIL.SVGB, 'stroke-width':1, stroke:UIL.SVGC });
     this.c[3] = UIL.DOM('UIL svgbox', 'path','width:17px; pointer-events:none;',{ width:17, height:17, d:'M 4 9 L 6 12 14 4', 'stroke-width':2, stroke:'#e2e2e2', fill:'none', 'stroke-linecap':'butt' });
 
     if(!this.value) this.c[3].style.display = 'none';
 
-    this.f[0] = function(e){
-        if(this.value){
-            this.value = false;
-            this.c[3].style.display = 'none';
-            UIL.setSVG(this.c[2], 'fill','rgba(0,0,0,0.2)');
-        } else {
-            this.value = true;
-            this.c[3].style.display = 'block';
-            UIL.setSVG(this.c[2], 'fill','rgba(0,0,0,0.4)');
-        }
-        this.callback( this.value );
-    }.bind(this);
-
-    this.c[2].onclick = this.f[0];
+    this.c[2].events = [ 'click' ];
 
     this.init();
-}
+
+};
 
 UIL.Bool.prototype = Object.create( UIL.Proto.prototype );
 UIL.Bool.prototype.constructor = UIL.Bool;
 
-UIL.Bool.prototype.rSize = function(){
-    UIL.Proto.prototype.rSize.call( this );
-    this.setDom(2, 'left', this.sa);
-    this.setDom(3, 'left', this.sa);
+UIL.Bool.prototype.click = function( e ){
+
+    if(this.value){
+        this.value = false;
+        this.c[3].style.display = 'none';
+        UIL.setSvg( this.c[2], 'fill', 'rgba(0,0,0,0.2)' );
+    } else {
+        this.value = true;
+        this.c[3].style.display = 'block';
+        UIL.setSvg( this.c[2], 'fill', 'rgba(0,0,0,0.4)' );
+    }
+
+    this.callback( this.value );
+
 };
-UIL.Button = function(obj){
 
-    UIL.Proto.call( this, obj );
+UIL.Bool.prototype.handleEvent = function( e ) {
 
-    this.value = obj.value || false;
+    switch( e.type ) {
+        case 'click': this.click(e); break;
+    }
+
+}
+
+UIL.Bool.prototype.rSize = function(){
+
+    UIL.Proto.prototype.rSize.call( this );
+    this.c[2].style.left = this.sa + 'px';
+    this.c[3].style.left = this.sa + 'px';
+
+};
+UIL.Button = function( o ){
+
+    UIL.Proto.call( this, o );
+
+    this.value = o.value || false;
 
     this.c[2] = UIL.DOM('UIL svgbox', 'rect', '', { width:this.sb, height:17, fill:UIL.bgcolor(UIL.COLOR), 'stroke-width':1, stroke:UIL.SVGC  });
-
-    //UIL.DOM(null, 'text', '', { x:(this.sb*0.5), y:12,  width:this.sb, height:17, txt:this.txt, fill:'#CCCCCC', 'text-anchor':'middle' }, this.c[2] );
-
     this.c[3] = UIL.DOM('UIL text', 'div', 'text-align:center;');
+
+    this.c[2].events = [ 'click', 'mouseover', 'mousedown', 'mouseup', 'mouseout' ];
 
     this.c[1].textContent = '';
     this.c[3].innerHTML = this.txt;
 
-    this.f[0] = function(e){
-        this.callback( this.value );
-    }.bind(this);
-
-    this.f[1] = function(e){
-        this.c[3].style.color = '#FFF';
-        //this.setSvg(2, 'fill', '#FFFFFF', 1 );
-        this.setSvg(2, 'fill', UIL.SELECT );
-    }.bind(this);
-
-    this.f[2] = function(e){
-        this.c[3].style.color = '#CCC';
-        //this.setSvg(2, 'fill', '#CCCCCC', 1 );
-        this.setSvg(2, 'fill', UIL.bgcolor(UIL.COLOR) );
-    }.bind(this);
-
-    this.f[3] = function(e){
-        this.c[3].style.color = '#CCC';
-        this.setSvg(2, 'fill', UIL.SELECTDOWN );
-    }.bind(this);
-
-    this.c[2].onmousedown = this.f[3];
-    this.c[2].onmouseover = this.f[1];
-    this.c[2].onmouseout = this.f[2];
-    this.c[2].onmouseup = this.f[1];
-    this.c[2].onclick = this.f[0];
-
     this.init();
-}
+
+};
 
 UIL.Button.prototype = Object.create( UIL.Proto.prototype );
 UIL.Button.prototype.constructor = UIL.Button;
 
-UIL.Button.prototype.label = function(string){
-    this.c[3].textContent = string;
-    //this.c[2].childNodes[1].textContent = string;
+UIL.Button.prototype.handleEvent = function( e ) {
+
+    switch( e.type ) {
+        case 'click': this.click(e); break;
+        case 'mouseover': this.over(e); break;
+        case 'mousedown': this.down(e); break;
+        case 'mouseup': this.out(e); break;
+        case 'mouseout': this.out(e); break;
+    }
+
 }
 
-UIL.Button.prototype.icon = function(string){
+UIL.Button.prototype.click = function( e ){
+
+    this.callback( this.value );
+
+};
+
+UIL.Button.prototype.over = function( e ){
+
+    this.c[3].style.color = '#FFF';
+    UIL.setSvg(this.c[2], 'fill', UIL.SELECT );
+
+};
+
+UIL.Button.prototype.out = function( e ){
+
+    this.c[3].style.color = '#CCC';
+    UIL.setSvg(this.c[2], 'fill', UIL.bgcolor(UIL.COLOR) );
+
+};
+
+UIL.Button.prototype.down = function( e ){
+
+    this.c[3].style.color = '#CCC';
+    UIL.setSvg(this.c[2], 'fill', UIL.SELECTDOWN );
+
+};
+
+UIL.Button.prototype.label = function( string ){
+
+    this.c[3].textContent = string;
+
+};
+
+UIL.Button.prototype.icon = function( string ){
+
     this.c[3].style.padding = '0px 0px';
     this.c[3].innerHTML = string;
-}
+
+};
 
 UIL.Button.prototype.rSize = function(){
+
     UIL.Proto.prototype.rSize.call( this );
-    this.setSvg(2, 'width', this.sb, 0);
-    this.setDom(2, 'width', this.sb);
-    this.setDom(2, 'left', this.sa);
-    this.setDom(3, 'width', this.sb);
-    this.setDom(3, 'left', this.sa);
+
+    this.c[2].style.left = this.sa + 'px';
+    this.c[3].style.left = this.sa + 'px';
+    this.c[2].style.width = this.sb + 'px';
+    this.c[3].style.width = this.sb + 'px';
+
+    UIL.setSvg( this.c[2], 'width', this.sb, 0 );
+
 };
