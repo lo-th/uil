@@ -7,6 +7,8 @@
 
 'use strict';
 
+//var Crea;
+
 var UIL = UIL || ( function () {
 
     return {
@@ -36,6 +38,7 @@ var UIL = UIL || ( function () {
             UIL.SELECTDOWN = '#024699';
             UIL.SVGB = 'rgba(0,0,0,0.2)';
             UIL.SVGC = 'rgba(120,120,120,0.6)';
+            //UIL.txt1 = 'font-family:"Open Sans", sans-serif; font-size:11px; color:#cccccc; outline:0; padding:0px 10px; left:0; top:1px; height:17px; width:100px; overflow:hidden;';
             UIL.txt1 = 'font-family:"Lucida Console", Monaco, monospace; font-size:11px; color:#cccccc; background:none; padding:3px 10px; left:0; top:0px; height:17px; width:100px; overflow:hidden;';
 
             UIL.CC('UIL', 'position:absolute; pointer-events:none; box-sizing:border-box; -o-user-select:none; -ms-user-select:none; -khtml-user-select:none; -webkit-user-select:none; -moz-user-select:none; margin:0; padding:0; ');
@@ -76,8 +79,7 @@ var UIL = UIL || ( function () {
             var color = 'rgba('+r+','+g+','+b+','+a+')';
             if(a==0) color = 'none';
             return color;
-        },
-        
+        }
     };
 
 })();

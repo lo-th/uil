@@ -15,7 +15,8 @@ UIL.Slide = function( o ){
     this.c[3] = UIL.DOM('UIL svgbox', 'rect', 'width:'+this.width+'px; height:'+this.height+'px; cursor:w-resize;', { width:this.width, height:this.height, fill:UIL.SVGB, 'stroke-width':1, stroke:UIL.SVGC });
     this.c[4] = UIL.DOM('UIL svgbox', 'rect', 'width:'+this.width+'px; height:'+this.height+'px; pointer-events:none;', { x:4, y:4, width:this.width-8, height:this.height-8, fill:'#CCC', 'stroke-width':1, stroke:UIL.SVGC });
 
-    this.c[3].events = [ 'mouseover', 'mousedown', 'mouseup', 'mouseout', 'mousemove' ];
+    //this.c[3].events = [ 'mouseover', 'mousedown', 'mouseup', 'mouseout', 'mousemove' ];
+    this.c[3].events = [ 'mouseover', 'mousedown', 'mouseout' ];
 
     this.init();
 
@@ -29,8 +30,9 @@ UIL.Slide.prototype.handleEvent = function( e ) {
     switch( e.type ) {
         case 'mouseover': this.over( e ); break;
         case 'mousedown': this.down( e ); break;
-        case 'mouseup': this.up( e ); break;
         case 'mouseout': this.out( e ); break;
+
+        case 'mouseup': this.up( e ); break;
         case 'mousemove': this.move( e ); break;
     }
 
@@ -45,7 +47,7 @@ UIL.Slide.prototype.over = function( e ){
 
 UIL.Slide.prototype.out = function( e ){
 
-    this.isDown = false;
+    if(this.isDown) return;
     UIL.setSvg( this.c[3], 'fill','rgba(0,0,0,0.2)');
     UIL.setSvg( this.c[4], 'fill','#CCC');
 
@@ -54,6 +56,11 @@ UIL.Slide.prototype.out = function( e ){
 UIL.Slide.prototype.up = function( e ){
 
     this.isDown = false;
+    document.removeEventListener( 'mouseup', this, false );
+    document.removeEventListener( 'mousemove', this, false );
+
+    UIL.setSvg( this.c[3], 'fill','rgba(0,0,0,0.2)');
+    UIL.setSvg( this.c[4], 'fill','#CCC');
 
 };
 
@@ -62,6 +69,9 @@ UIL.Slide.prototype.down = function( e ){
     this.isDown = true;
     this.prev = { x:e.clientX, d:0, v:parseFloat(this.value) };
     this.move( e );
+
+    document.addEventListener( 'mouseup', this, false );
+    document.addEventListener( 'mousemove', this, false );
 
 };
 

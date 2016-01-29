@@ -78,41 +78,41 @@ UIL.Proto.prototype = {
             this.sb = ((this.sa*2)-10).toFixed(0)*1;
         }
     },
-    /*setDom:function(id, type, value){
-        this.c[id].style[type] = value+'px';
-    },
-    setSvg:function(domId, type, value, id){
-        this.c[domId].childNodes[id || 0].setAttributeNS(null, type, value );
-    },*/
-
     
-
     clear:function(){
+
+        //console.log(event.this);
         
         this.clearEvent();
 
-        
         var i = this.c.length;
         while(i--){
-            if( i === 0 ){
-                if( this.liner!==null ){ 
+            if(i==0){
+                if(this.liner!==null){ 
                     this.c[0].removeChild( this.liner );
                     this.liner = null;
                 }
+                
             } else {
                 if( this.c[i].children ) this.clearDOM( this.c[i] );
                 this.c[0].removeChild( this.c[i] );
+                this.c[i] = null;
             }
-            //this.c[i] = null;
         }
 
         if( this.target !== null ) this.target.removeChild(this.c[0]);
         else UIL.main.inner.removeChild(this.c[0]);
 
-        this.c = [];
+        this.c[0] = null;
+        this.handleEvent = null;
 
+        
+
+        this.c = null;
         if(this.callback) this.callback = null;
         if(this.value) this.value = null;
+
+        //this = null;
     },
 
     clearDOM:function(dom){

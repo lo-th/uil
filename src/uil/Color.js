@@ -18,7 +18,7 @@ UIL.Color = function( o ){
     this.mid = Math.floor(this.width * 0.5 );
     this.markerSize = this.wheelWidth * 0.3;
 
-    this.c[2] = UIL.DOM('UIL svgbox', 'rect', '',  { width:this.sb, height:17, fill:'#000', 'stroke-width':1, stroke:UIL.SVGC });
+    this.c[2] = UIL.DOM('UIL svgbox', 'rect', '',  { width:'100%', height:17, fill:'#000', 'stroke-width':1, stroke:UIL.SVGC });
     this.c[3] = UIL.DOM('UIL text');
 
     if(this.side=='up'){
@@ -332,7 +332,7 @@ UIL.Color.prototype.rSize = function(){
     this.c[5].style.top = this.decal + 'px';
     this.c[6].style.top = this.decal + 'px';
 
-    UIL.setSvg( this.c[2], 'width',this.sb);
+    //UIL.setSvg( this.c[2], 'width',this.sb);
     UIL.setSvg( this.c[4], 'width',this.square * 2 - 1);
     UIL.setSvg( this.c[4], 'height',this.square * 2 - 1);
     UIL.setSvg( this.c[4], 'x',this.mid - this.square);

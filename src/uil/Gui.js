@@ -188,6 +188,7 @@ UIL.Gui.prototype = {
         var i = this.uis.length;
         while(i--){
             this.uis[i].clear();
+            this.uis[i] = null;
             this.uis.pop();
         }
         this.uis = [];

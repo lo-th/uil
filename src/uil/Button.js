@@ -4,7 +4,7 @@ UIL.Button = function( o ){
 
     this.value = o.value || false;
 
-    this.c[2] = UIL.DOM('UIL svgbox', 'rect', '', { width:this.sb, height:17, fill:UIL.bgcolor(UIL.COLOR), 'stroke-width':1, stroke:UIL.SVGC  });
+    this.c[2] = UIL.DOM('UIL svgbox', 'rect', '', { width:'100%', height:17, fill:UIL.bgcolor(UIL.COLOR), 'stroke-width':1, stroke:UIL.SVGC  });
     this.c[3] = UIL.DOM('UIL text', 'div', 'text-align:center;');
 
     this.c[2].events = [ 'click', 'mouseover', 'mousedown', 'mouseup', 'mouseout' ];
@@ -22,14 +22,14 @@ UIL.Button.prototype.constructor = UIL.Button;
 UIL.Button.prototype.handleEvent = function( e ) {
 
     switch( e.type ) {
-        case 'click': this.click(e); break;
-        case 'mouseover': this.over(e); break;
-        case 'mousedown': this.down(e); break;
-        case 'mouseup': this.out(e); break;
-        case 'mouseout': this.out(e); break;
+        case 'click': this.click( e ); break;
+        case 'mouseover': this.over( e ); break;
+        case 'mousedown': this.down( e ); break;
+        case 'mouseup': this.out( e ); break;
+        case 'mouseout': this.out( e ); break;
     }
 
-}
+};
 
 UIL.Button.prototype.click = function( e ){
 
@@ -80,6 +80,6 @@ UIL.Button.prototype.rSize = function(){
     this.c[2].style.width = this.sb + 'px';
     this.c[3].style.width = this.sb + 'px';
 
-    UIL.setSvg( this.c[2], 'width', this.sb, 0 );
+    //UIL.setSvg( this.c[2], 'width', this.sb, 0 );
 
 };

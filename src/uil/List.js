@@ -3,7 +3,7 @@ UIL.List = function( o ){
     UIL.Proto.call( this, o );
 
     this.c[2] = UIL.DOM('UIL list');
-    this.c[3] = UIL.DOM('UIL svgbox', 'rect', '', {width:this.sb, height:17, fill:UIL.bgcolor(UIL.COLOR), 'stroke-width':1, stroke:UIL.SVGC  });
+    this.c[3] = UIL.DOM('UIL svgbox', 'rect', '', {width:'100%', height:17, fill:UIL.bgcolor(UIL.COLOR), 'stroke-width':1, stroke:UIL.SVGC  });
     this.c[4] = UIL.DOM('UIL', 'path','position:absolute; width:16px; height:16px; left:'+(this.sa+this.sb-17)+'px; top:1px; pointer-events:none;',{ width:16, height:16, 'd':'M 6 4 L 10 8 6 12', 'stroke-width':2, stroke:'#e2e2e2', fill:'none', 'stroke-linecap':'butt' } );
     this.c[5] = UIL.DOM('UIL text', 'div', 'text-align:center;');
     this.c[6] = UIL.DOM('UIL svgbox', 'rect', 'top:20px; height:90px; pointer-events:none;', { x:this.sb-15, y:0, width:10, height:16, fill:'#666', 'stroke-width':1, stroke:UIL.SVGC  });
@@ -270,7 +270,7 @@ UIL.List.prototype.rSize = function(){
     this.c[6].style.width = this.sb+'px';
     this.c[6].style.left = this.sa+'px';
 
-    UIL.setSvg( this.c[3], 'width', this.sb );
+   // UIL.setSvg( this.c[3], 'width', this.sb );
     UIL.setSvg( this.c[6], 'x', this.sb-15 );
 
     this.w = this.sb;
