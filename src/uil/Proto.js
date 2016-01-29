@@ -91,31 +91,26 @@ UIL.Proto.prototype = {
         
         this.clearEvent();
 
-        var ev = UIL.events;
-        var i = this.c.length, j;
+        
+        var i = this.c.length;
         while(i--){
-            if(i==0){
-                if(this.liner!==null){ 
+            if( i === 0 ){
+                if( this.liner!==null ){ 
                     this.c[0].removeChild( this.liner );
                     this.liner = null;
                 }
-                if(this.target!==null) this.target.removeChild(this.c[0]);
-                else UIL.main.inner.removeChild(this.c[0]);
             } else {
-                //j = ev.length;
-                //while(j--){ if(this.c[i][ev[j]]!==null) this.c[i][ev[j]] = null; }
                 if( this.c[i].children ) this.clearDOM( this.c[i] );
                 this.c[0].removeChild( this.c[i] );
             }
-            this.c[i] = null;
+            //this.c[i] = null;
         }
 
-        this.c = null;
-        /*if(this.f){
-            i = this.f.length;
-            while(i--) this.f[i] = null;
-            this.f = null
-        }*/
+        if( this.target !== null ) this.target.removeChild(this.c[0]);
+        else UIL.main.inner.removeChild(this.c[0]);
+
+        this.c = [];
+
         if(this.callback) this.callback = null;
         if(this.value) this.value = null;
     },
