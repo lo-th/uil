@@ -4,12 +4,14 @@ UIL.List = function( o ){
 
     this.c[2] = UIL.DOM('UIL list');
     this.c[3] = UIL.DOM('UIL svgbox', 'rect', '', {width:'100%', height:17, fill:UIL.bgcolor(UIL.COLOR), 'stroke-width':1, stroke:UIL.SVGC  });
-    this.c[4] = UIL.DOM('UIL', 'path','position:absolute; width:16px; height:16px; left:'+(this.sa+this.sb-17)+'px; top:1px; pointer-events:none;',{ width:16, height:16, 'd':'M 6 4 L 10 8 6 12', 'stroke-width':2, stroke:'#e2e2e2', fill:'none', 'stroke-linecap':'butt' } );
+    this.c[4] = UIL.DOM('UIL', 'path','position:absolute; width:16px; height:16px; left:'+(this.sa+this.sb-17)+'px; top:1px; pointer-events:none;',{ width:16, height:16, 'd':'M 6 4 L 10 8 6 12', 'stroke-width':2, stroke:this.fontColor, fill:'none', 'stroke-linecap':'butt' } );
     this.c[5] = UIL.DOM('UIL text', 'div', 'text-align:center; padding:4px 10px; ');
     this.c[6] = UIL.DOM('UIL svgbox', 'rect', 'top:20px; height:90px; pointer-events:none;', { x:this.sb-15, y:0, width:10, height:16, fill:'#666', 'stroke-width':1, stroke:UIL.SVGC  });
 
     this.c[2].name = 'list';
     this.c[3].name = 'title';
+
+    this.c[5].style.color = this.fontColor;
 
     this.c[2].events = [ 'mousedown', 'mousemove', 'mouseup', 'mouseout', 'mousewheel' ];
     this.c[3].events = [ 'click', 'mousedown', 'mouseover', 'mouseout', 'mouseup' ];
@@ -72,6 +74,7 @@ UIL.List = function( o ){
         n = this.list[i];
         item = UIL.DOM('UIL listItem', 'div', 'width:'+this.w+'px; height:18px;');
         item.textContent = n;
+        item.style.color = this.fontColor;
         item.name = n;
         this.listIn.appendChild(item);
     }
@@ -108,7 +111,7 @@ UIL.List.prototype.mode = function( mode ){
 
     switch(mode){
         case 0: // base
-            this.c[5].style.color = '#CCC';
+            this.c[5].style.color = this.fontColor;
             //this.c[3].style.background = UIL.bgcolor(UIL.COLOR);
             UIL.setSvg(this.c[3], 'fill', UIL.bgcolor(UIL.COLOR) );
         break;
@@ -118,7 +121,7 @@ UIL.List.prototype.mode = function( mode ){
             UIL.setSvg(this.c[3], 'fill', UIL.SELECT );
         break;
         case 2: // edit / down
-            this.c[5].style.color = '#CCC';
+            this.c[5].style.color = this.fontColor;
             //this.c[3].style.background = UIL.SELECTDOWN;
             UIL.setSvg(this.c[3], 'fill', UIL.SELECTDOWN );
         break;

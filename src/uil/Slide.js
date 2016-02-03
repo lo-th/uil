@@ -16,6 +16,8 @@ UIL.Slide = function( o ){
     this.c[3] = UIL.DOM('UIL svgbox', 'rect', 'width:'+this.width+'px; height:'+this.height+'px; cursor:w-resize;', { width:'100%', height:this.height, fill:UIL.SVGB, 'stroke-width':1, stroke:UIL.SVGC });
     this.c[4] = UIL.DOM('UIL svgbox', 'rect', 'width:'+this.width+'px; height:'+this.height+'px; pointer-events:none;', { x:4, y:4, width:this.width-8, height:this.height-8, fill:'#CCC' });
 
+    this.c[2].style.color = this.fontColor;
+    
     // pattern test
     UIL.DOM( null, 'defs', null, {}, this.c[3] );
     UIL.DOM( null, 'pattern', null, {id:'sripe', x:0, y:0, width:10, height:10, patternUnits:'userSpaceOnUse' }, this.c[3], 1 );

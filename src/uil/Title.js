@@ -8,6 +8,7 @@ UIL.Title = function( o ){
     var prefix = o.prefix || '';
 
     this.c[2] = UIL.DOM( 'UIL text', 'div', 'text-align:right; width:40px; padding:3px 5px;');
+    this.c[2].style.color = this.fontColor;
 
     if( this.h === 31 ){
 
@@ -34,8 +35,8 @@ UIL.Title.prototype.constructor = UIL.Title;
 UIL.Title.prototype.rSize = function(){
 
     UIL.Proto.prototype.rSize.call( this );
-    this.c[2].style.left = this.size-(50+26) + 'px';
     this.c[1].style.width = this.size-50 + 'px';
+    this.c[2].style.left = this.size-(50+26) + 'px';
 
 };
 

@@ -65,22 +65,22 @@ populate();
 
 function populate(){
     if(!display){
-        ui.add('title',  { name:'Title', color:'N'});
-        ui.add('bool',   { name:'bool', callback:callback});
-        ui.add('color',  { name:'color', callback:callback, type:'html', value:0x000000});
+        ui.add('title',  { name:'Title', color:'N', fontColor:'#D4B87B'});
+        ui.add('bool',   { name:'bool', callback:callback, fontColor:'#D4B87B'});
+        ui.add('color',  { name:'color', callback:callback, type:'html', value:0x000000, fontColor:'#D4B87B'});
         ui.add('color',  { name:'color', callback:callback, type:'html', value:[0,1,1,1]});
-        ui.add('slide',  { name:'slide', callback:callback, min:-100, max:100, value:0, precision:0 });
+        ui.add('slide',  { name:'slide', callback:callback, min:-100, max:100, value:0, precision:0, fontColor:'#D4B87B' });
         ui.add('slide',  { name:'slide', callback:callback, min:-1, max:1, value:0, step:0.01, precision:2 });
-        ui.add('string', { name:'string', callback:callback, value:'welcome to uil'});
-        ui.add('list',   { name:'list', callback:callback, list:list});
+        ui.add('string', { name:'string', callback:callback, value:'welcome to uil', fontColor:'#D4B87B'});
+        ui.add('list',   { name:'list', callback:callback, list:list, fontColor:'#D4B87B'});
         ui.add('list',   { name:'list', callback:callback, list:list2});
         ui.add('number', { name:'number', callback:callback, value:20});
-        ui.add('number', { name:'vector2', callback:callback, value:[0,0] });
+        ui.add('number', { name:'vector2', callback:callback, value:[0,0], fontColor:'#D4B87B' });
         ui.add('number', { name:'vector3', callback:callback, value:[0,0,0] });
         ui.add('number', { name:'vector4', callback:callback, value:[0,0,0,0], step:1, precision:0 });
-        ui.add('button', { name:'button', callback:callbackButton });
+        ui.add('button', { name:'button', callback:callbackButton, fontColor:'#D4B87B' });
 
-        gr0 = ui.add('group', { name:'Group' });
+        gr0 = ui.add('group', { name:'Group', fontColor:'#D4B87B' });
         gr0.add('slide',  { name:'slide', callback:callback, min:-100, max:100, value:0, precision:0 });
         gr0.add('slide',  { name:'slide', callback:callback, min:-100, max:100, value:0, precision:0 });
         gr0.add('slide',  { name:'slide', callback:callback, min:-100, max:100, value:0, precision:0 });

@@ -43,6 +43,7 @@ UIL.Number = function( o ){
         this.c[2+i] = UIL.DOM('UIL text', 'input', 'pointer-events:auto; cursor:move; padding:3px 5px; width:'+this.w+'px; left:'+(UIL.AW+(this.w*i)+(5*i))+'px;');
         this.c[2+i].name = i;
         this.c[2+i].value = this.value[i];
+        this.c[2+i].style.color = this.fontColor;
         this.c[2+i].events = [ 'click', 'keydown', 'keyup', 'mousedown', 'blur' ];
 
     }

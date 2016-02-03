@@ -8,8 +8,9 @@ UIL.String = function( o ){
     this.c[2] = UIL.DOM( 'UIL text', 'input', 'pointer-events:auto; padding:3px 5px; ' );
     this.c[2].name = 'input';
     this.c[2].value = this.value;
+    this.c[2].style.color = this.fontColor;
 
-    this.c[2].events = [ 'keydown', 'keyup' ];
+    this.c[2].events = [ 'click', 'keydown', 'keyup' ];
 
     this.init();
 
@@ -20,13 +21,21 @@ UIL.String.prototype.constructor = UIL.String;
 
 UIL.String.prototype.handleEvent = function( e ) {
 
-    e.preventDefault();
-    e.stopPropagation();
+    //e.preventDefault();
+    //e.stopPropagation();
 
     switch( e.type ) {
+        case 'click': this.click( e ); break;
         case 'keydown': this.keydown( e ); break;
         case 'keyup': this.keyup( e ); break;
     }
+
+};
+
+UIL.String.prototype.click = function( e ){
+
+    e.target.focus();
+    e.target.style.cursor = 'auto';
 
 };
 

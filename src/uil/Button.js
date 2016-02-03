@@ -6,6 +6,7 @@ UIL.Button = function( o ){
 
     this.c[2] = UIL.DOM('UIL svgbox', 'rect', '', { width:'100%', height:17, fill:UIL.bgcolor(UIL.COLOR), 'stroke-width':1, stroke:UIL.SVGC  });
     this.c[3] = UIL.DOM('UIL text', 'div', 'text-align:center; padding:4px 10px');// border:1px solid rgba(120,120,120,0.6);');
+    this.c[3].style.color = this.fontColor;
 
     this.c[2].events = [ 'click', 'mouseover', 'mousedown', 'mouseup', 'mouseout' ];
 
@@ -38,7 +39,7 @@ UIL.Button.prototype.mode = function( mode ){
 
     switch(mode){
         case 0: // base
-            this.c[3].style.color = '#CCC';
+            this.c[3].style.color = this.fontColor;
             //this.c[3].style.background = UIL.bgcolor(UIL.COLOR);
             UIL.setSvg(this.c[2], 'fill', UIL.bgcolor(UIL.COLOR) );
         break;
@@ -48,7 +49,7 @@ UIL.Button.prototype.mode = function( mode ){
             UIL.setSvg(this.c[2], 'fill', UIL.SELECT );
         break;
         case 2: // edit / down
-            this.c[3].style.color = '#CCC';
+            this.c[3].style.color = this.fontColor;
             //this.c[3].style.background = UIL.SELECTDOWN;
             UIL.setSvg(this.c[2], 'fill', UIL.SELECTDOWN );
         break;

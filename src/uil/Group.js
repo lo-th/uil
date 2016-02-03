@@ -7,7 +7,7 @@ UIL.Group = function( o ){
     this.isOpen = o.open || false;
 
     this.c[2] = UIL.DOM('UIL', 'div', 'top:25px; overflow:hidden;');
-    this.c[3] = UIL.DOM('UIL', 'path','position:absolute; width:16px; left:'+(this.sa+this.sb-17)+'px; top:4px; pointer-events:none;',{ width:16, height:16, 'd':'M 6 4 L 10 8 6 12', 'stroke-width':2, stroke:'#e2e2e2', fill:'none', 'stroke-linecap':'butt' } );
+    this.c[3] = UIL.DOM('UIL', 'path','position:absolute; width:16px; left:'+(this.sa+this.sb-17)+'px; top:4px; pointer-events:none;',{ width:16, height:16, 'd':'M 6 4 L 10 8 6 12', 'stroke-width':2, stroke:this.fontColor, fill:'none', 'stroke-linecap':'butt' } );
 
     this.c[0].style.height = this.h + 'px';
     this.c[1].style.height = this.h + 'px';
