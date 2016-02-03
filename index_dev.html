@@ -65,8 +65,8 @@ populate();
 
 function populate(){
     if(!display){
-        ui.add('title',  { name:'Title', color:'N', fontColor:'#D4B87B'});
-        ui.add('bool',   { name:'bool', callback:callback, fontColor:'#D4B87B'});
+        ui.add('title',  { name:'Title', color:'N', titleColor:'#D4B87B'});
+        ui.add('bool',   { name:'bool', callback:callback, titleColor:'#D4B87B'});
         ui.add('color',  { name:'color', callback:callback, type:'html', value:0x000000, fontColor:'#D4B87B'});
         ui.add('color',  { name:'color', callback:callback, type:'html', value:[0,1,1,1]});
         ui.add('slide',  { name:'slide', callback:callback, min:-100, max:100, value:0, precision:0, fontColor:'#D4B87B' });

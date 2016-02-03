@@ -20,6 +20,7 @@ UIL.Proto = function( o ){
     this.color = UIL.COLOR;
 
     this.fontColor = o.fontColor === undefined ? '#cccccc' : o.fontColor;
+    this.titleColor = o.titleColor === undefined ? '#cccccc' : o.titleColor;
 
     this.txt = o.name || 'Proto';
     this.target = o.target || null;
@@ -33,7 +34,7 @@ UIL.Proto = function( o ){
 
     if(!this.simple){ 
         this.c[1].textContent = this.txt;
-        this.c[1].style.color = o.fontColor;
+        this.c[1].style.color = this.titleColor;
     }
 
     if(o.pos){
