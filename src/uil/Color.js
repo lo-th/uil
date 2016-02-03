@@ -19,9 +19,9 @@ UIL.Color = function( o ){
     this.markerSize = this.wheelWidth * 0.3;
 
     this.c[2] = UIL.DOM('UIL svgbox', 'rect', '',  { width:'100%', height:17, fill:'#000', 'stroke-width':1, stroke:UIL.SVGC });
-    this.c[3] = UIL.DOM('UIL text');
+    this.c[3] = UIL.DOM('UIL text', 'div', 'padding:4px 10px');
 
-    if(this.side=='up'){
+    if(this.side === 'up'){
         this.decal = 5;
         this.c[3].style.top = 'auto';
         this.c[2].style.top = 'auto';
@@ -45,7 +45,7 @@ UIL.Color = function( o ){
 
     this.hsl = null;
     this.value = '#ffffff';
-    if( o.value ){
+    if( o.value !== undefined ){
         if(o.value instanceof Array) this.value = UIL.pack(o.value);
         else if(!isNaN(o.value)) this.value = UIL.numFormat(o.value);
         else this.value = o.value;
@@ -67,6 +67,9 @@ UIL.Color.prototype = Object.create( UIL.Proto.prototype );
 UIL.Color.prototype.constructor = UIL.Color;
 
 UIL.Color.prototype.handleEvent = function( e ) {
+
+    e.preventDefault();
+    e.stopPropagation();
 
     switch( e.type ) {
         case 'click': this.click(e); break;

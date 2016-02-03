@@ -5,7 +5,7 @@ UIL.String = function( o ){
     this.value = o.value || '';
     this.allway = o.allway || false;
 
-    this.c[2] = UIL.DOM( 'UIL text', 'input', 'pointer-events:auto; padding:0px 5px; padding-bottom:2px;' );
+    this.c[2] = UIL.DOM( 'UIL text', 'input', 'pointer-events:auto; padding:3px 5px; ' );
     this.c[2].name = 'input';
     this.c[2].value = this.value;
 
@@ -19,6 +19,9 @@ UIL.String.prototype = Object.create( UIL.Proto.prototype );
 UIL.String.prototype.constructor = UIL.String;
 
 UIL.String.prototype.handleEvent = function( e ) {
+
+    e.preventDefault();
+    e.stopPropagation();
 
     switch( e.type ) {
         case 'keydown': this.keydown( e ); break;
@@ -34,15 +37,13 @@ UIL.String.prototype.keydown = function( e ){
         this.callback( this.value );
         e.target.blur();
     }
-    e.stopPropagation();
 
 };
 
 UIL.String.prototype.keyup = function( e ){
 
     if( this.allway ) this.callback( this.value );
-    e.stopPropagation();
-
+    
 };
 
 UIL.String.prototype.rSize = function(){

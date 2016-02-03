@@ -1,27 +1,27 @@
-UIL.Proto = function(obj){
+UIL.Proto = function( o ){
 
-    obj = obj || {};
+    o = o || {};
 
     // only most simple 
     this.mono = false;
 
     // no title 
-    this.simple = obj.simple || false;
+    this.simple = o.simple || false;
 
     // bottom line
     this.liner = null;
 
     // define obj size
-    this.setSize(obj.size);
+    this.setSize(o.size);
 
     this.h = 20;
     
-    if(obj.color) UIL.COLOR = obj.color;
+    if(o.color) UIL.COLOR = o.color;
     this.color = UIL.COLOR;
 
-    this.txt = obj.name || 'Proto';
-    this.target = obj.target || null;
-    this.callback = obj.callback || function(){};
+    this.txt = o.name || 'Proto';
+    this.target = o.target || null;
+    this.callback = o.callback || function(){};
 
     this.c = [];
     //this.f = [];
@@ -31,10 +31,10 @@ UIL.Proto = function(obj){
 
     if(!this.simple) this.c[1].textContent = this.txt;
 
-    if(obj.pos){
+    if(o.pos){
         this.c[0].style.position = 'absolute';
-        for(var p in obj.pos){
-            this.c[0].style[p] = obj.pos[p];
+        for(var p in o.pos){
+            this.c[0].style[p] = o.pos[p];
         }
         this.mono = true;
     } else {
@@ -60,6 +60,7 @@ UIL.Proto.prototype = {
         }
 
         this.rSize();
+        
         this.addEvent();
 
     },
@@ -68,15 +69,18 @@ UIL.Proto.prototype = {
         if(this.callback) this.callback = null;
         this.callback = callback;
     },
+
     setSize:function(sx){
+
         this.size = sx || UIL.WIDTH;
-        if(this.simple){
+        if( this.simple ){
             this.sa = 1;
             this.sb = sx-2;
         }else{
             this.sa = (this.size/3).toFixed(0)*1;
             this.sb = ((this.sa*2)-10).toFixed(0)*1;
         }
+
     },
     
     clear:function(){

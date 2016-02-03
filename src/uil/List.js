@@ -5,7 +5,7 @@ UIL.List = function( o ){
     this.c[2] = UIL.DOM('UIL list');
     this.c[3] = UIL.DOM('UIL svgbox', 'rect', '', {width:'100%', height:17, fill:UIL.bgcolor(UIL.COLOR), 'stroke-width':1, stroke:UIL.SVGC  });
     this.c[4] = UIL.DOM('UIL', 'path','position:absolute; width:16px; height:16px; left:'+(this.sa+this.sb-17)+'px; top:1px; pointer-events:none;',{ width:16, height:16, 'd':'M 6 4 L 10 8 6 12', 'stroke-width':2, stroke:'#e2e2e2', fill:'none', 'stroke-linecap':'butt' } );
-    this.c[5] = UIL.DOM('UIL text', 'div', 'text-align:center;');
+    this.c[5] = UIL.DOM('UIL text', 'div', 'text-align:center; padding:4px 10px; ');
     this.c[6] = UIL.DOM('UIL svgbox', 'rect', 'top:20px; height:90px; pointer-events:none;', { x:this.sb-15, y:0, width:10, height:16, fill:'#666', 'stroke-width':1, stroke:UIL.SVGC  });
 
     this.c[2].name = 'list';
@@ -88,17 +88,42 @@ UIL.List.prototype.constructor = UIL.List;
 
 UIL.List.prototype.handleEvent = function( e ) {
 
+    e.preventDefault();
+    e.stopPropagation();
+
     var name = e.target.name || '';
     switch( e.type ) {
         case 'click': this.click(e); break;
-        case 'mouseover': this.over(e); break;
-        case 'mousedown': if(name === 'title') this.down(e); else this.listdown(e); break;
-        case 'mouseup': if(name === 'title') this.out(e); else this.listup(e); break;
-        case 'mouseout': if(name === 'title') this.out(e); else this.listout(e); break;
+        case 'mouseover': this.mode(1); break;
+        case 'mousedown': if(name === 'title') this.mode(2); else this.listdown(e); break;
+        case 'mouseup': if(name === 'title') this.mode(0); else this.listup(e); break;
+        case 'mouseout': if(name === 'title') this.mode(0); else this.listout(e); break;
         case 'mousemove': this.listmove(e); break;
         case 'mousewheel': this.listwheel(e); break;
     }
 
+}
+
+UIL.List.prototype.mode = function( mode ){
+
+    switch(mode){
+        case 0: // base
+            this.c[5].style.color = '#CCC';
+            //this.c[3].style.background = UIL.bgcolor(UIL.COLOR);
+            UIL.setSvg(this.c[3], 'fill', UIL.bgcolor(UIL.COLOR) );
+        break;
+        case 1: // over
+            this.c[5].style.color = '#FFF';
+            //this.c[3].style.background = UIL.SELECT;
+            UIL.setSvg(this.c[3], 'fill', UIL.SELECT );
+        break;
+        case 2: // edit / down
+            this.c[5].style.color = '#CCC';
+            //this.c[3].style.background = UIL.SELECTDOWN;
+            UIL.setSvg(this.c[3], 'fill', UIL.SELECTDOWN );
+        break;
+
+    }
 }
 
 // -----
@@ -107,27 +132,6 @@ UIL.List.prototype.click = function( e ){
 
     if( this.show ) this.listHide();
     else this.listShow();
-
-};
-
-UIL.List.prototype.down = function( e ){
-
-    this.c[5].style.color = '#CCC';
-    UIL.setSvg( this.c[3], 'fill', UIL.SELECTDOWN );
-
-};
-
-UIL.List.prototype.over = function( e ){
-
-    this.c[5].style.color = '#FFF';
-    UIL.setSvg( this.c[3], 'fill', UIL.SELECT );
-
-};
-
-UIL.List.prototype.out = function( e ){
-
-    this.c[5].style.color = '#CCC';
-    UIL.setSvg( this.c[3], 'fill', UIL.bgcolor(UIL.COLOR) );
 
 };
 
@@ -160,7 +164,7 @@ UIL.List.prototype.listmove = function( e ){
         if( y > 100 ) y = 100;
         this.py = ~~(((y-30)/70)*this.range);//.toFixed(0);
 
-        this.listPos();
+        this.update();
     }
 
 };
@@ -196,14 +200,14 @@ UIL.List.prototype.listwheel = function( e ){
     if( this.py < 0 ) this.py=0;
     if(this.py > this.range ) this.py = this.range;
 
-    this.listPos();
+    this.update();
 
 };
 
 
 // ----- LIST
 
-UIL.List.prototype.listPos = function( y ){
+UIL.List.prototype.update = function( y ){
 
     if( !this.scroll ) return;
     this.py = y === undefined ? this.py : y;
@@ -214,7 +218,7 @@ UIL.List.prototype.listPos = function( y ){
 
 UIL.List.prototype.listShow = function(){
 
-    this.listPos( 0 );
+    this.update( 0 );
     this.show = true;
     this.h = this.maxHeight + 30;
     if( !this.scroll ){

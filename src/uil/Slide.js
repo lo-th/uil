@@ -13,8 +13,8 @@ UIL.Slide = function( o ){
     this.isOver = false;
 
     this.c[2] = UIL.DOM('UIL text', 'div', 'text-align:right; width:40px; padding:3px 5px;');
-    this.c[3] = UIL.DOM('UIL svgbox', 'rect', 'width:'+this.width+'px; height:'+this.height+'px; cursor:w-resize;', { width:this.width, height:this.height, fill:UIL.SVGB, 'stroke-width':1, stroke:UIL.SVGC });
-    this.c[4] = UIL.DOM('UIL svgbox', 'rect', 'width:'+this.width+'px; height:'+this.height+'px; pointer-events:none;', { x:4, y:4, width:this.width-8, height:this.height-8, fill:'#CCC', 'stroke-width':1, stroke:UIL.SVGC });
+    this.c[3] = UIL.DOM('UIL svgbox', 'rect', 'width:'+this.width+'px; height:'+this.height+'px; cursor:w-resize;', { width:'100%', height:this.height, fill:UIL.SVGB, 'stroke-width':1, stroke:UIL.SVGC });
+    this.c[4] = UIL.DOM('UIL svgbox', 'rect', 'width:'+this.width+'px; height:'+this.height+'px; pointer-events:none;', { x:4, y:4, width:this.width-8, height:this.height-8, fill:'#CCC' });
 
     // pattern test
     UIL.DOM( null, 'defs', null, {}, this.c[3] );
@@ -34,6 +34,9 @@ UIL.Slide.prototype = Object.create( UIL.Proto.prototype );
 UIL.Slide.prototype.constructor = UIL.Slide;
 
 UIL.Slide.prototype.handleEvent = function( e ) {
+
+    e.preventDefault();
+    e.stopPropagation();
 
     switch( e.type ) {
         case 'mouseover': this.over( e ); break;
@@ -111,16 +114,16 @@ UIL.Slide.prototype.move = function( e ){
         var rect = this.c[3].getBoundingClientRect();
         var n = (((( e.clientX - rect.left - 4 ) / this.w ) * this.range + this.min )-this.prev.v);
         if(n > this.step || n < this.step){ 
-            n = ~~(n/this.step);//.toFixed(0)*1;
+            n = ~~ ( n / this.step );
             this.value = this.numValue( this.prev.v + ( n * this.step ) );
-            this.updatePos( true );
+            this.update( true );
             this.prev.v = this.value;
         }
     }
 
 };
 
-UIL.Slide.prototype.updatePos = function( up ){
+UIL.Slide.prototype.update = function( up ){
 
     var ww = (this.w * ((this.value-this.min)/this.range));
     UIL.setSvg( this.c[4], 'width', ww );
@@ -141,9 +144,7 @@ UIL.Slide.prototype.rSize = function(){
     this.c[3].style.width = this.width + 'px';
     this.c[4].style.left = this.sa + 'px';
     this.c[4].style.width = this.width + 'px';
-
-    UIL.setSvg( this.c[3], 'width', this.width );
     
-    this.updatePos();
+    this.update();
 
 };

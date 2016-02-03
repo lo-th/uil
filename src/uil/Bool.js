@@ -18,6 +18,17 @@ UIL.Bool = function( o ){
 UIL.Bool.prototype = Object.create( UIL.Proto.prototype );
 UIL.Bool.prototype.constructor = UIL.Bool;
 
+UIL.Bool.prototype.handleEvent = function( e ) {
+
+    e.preventDefault();
+    e.stopPropagation();
+
+    switch( e.type ) {
+        case 'click': this.click(e); break;
+    }
+
+};
+
 UIL.Bool.prototype.click = function( e ){
 
     if(this.value){
@@ -34,13 +45,7 @@ UIL.Bool.prototype.click = function( e ){
 
 };
 
-UIL.Bool.prototype.handleEvent = function( e ) {
 
-    switch( e.type ) {
-        case 'click': this.click(e); break;
-    }
-
-}
 
 UIL.Bool.prototype.rSize = function(){
 

@@ -32,6 +32,9 @@ UIL.Group.prototype.constructor = UIL.Group;
 
 UIL.Group.prototype.handleEvent = function( e ) {
 
+    e.preventDefault();
+    e.stopPropagation();
+
     switch( e.type ) {
         case 'click': this.click( e ); break;
     }

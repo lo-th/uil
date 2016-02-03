@@ -7,7 +7,7 @@
 
 'use strict';
 
-var Crea = ( function () {
+var Crea = Crea || ( function () {
 
     var doc = document;
     var head = doc.getElementsByTagName('head')[0];

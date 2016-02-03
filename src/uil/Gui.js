@@ -54,6 +54,9 @@ UIL.Gui.prototype = {
 
     handleEvent : function( e ) {
 
+        e.preventDefault();
+        //e.stopPropagation();
+
         switch( e.type ) {
             case 'mousedown': this.down( e ); break;
             case 'mousemove': this.move( e ); break;

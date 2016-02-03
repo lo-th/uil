@@ -55,6 +55,9 @@ UIL.Number.prototype.constructor = UIL.Number;
 
 UIL.Number.prototype.handleEvent = function( e ) {
 
+    e.preventDefault();
+    e.stopPropagation();
+
     switch( e.type ) {
         case 'click': this.click( e ); break;
         case 'mousedown': this.down( e ); break;
@@ -77,7 +80,6 @@ UIL.Number.prototype.keydown = function( e ){
         this.validate();
         e.target.blur();
     }
-    e.stopPropagation();
 
 };
 
@@ -87,7 +89,6 @@ UIL.Number.prototype.keyup = function( e ){
         this.testValue( parseFloat(e.target.name) );
         this.validate();
     }
-    e.stopPropagation();
 
 };
 
@@ -103,8 +104,6 @@ UIL.Number.prototype.click = function( e ){
     document.removeEventListener( 'mouseup', this, false );
     document.removeEventListener( 'mousemove', this, false );
 
-    e.preventDefault();
-
     e.target.focus();
     e.target.style.cursor = 'auto';
     
@@ -116,8 +115,6 @@ UIL.Number.prototype.click = function( e ){
 UIL.Number.prototype.down = function( e ){
 
     if(this.isSelect) return;
-
-    e.preventDefault();
    
     e.target.style.border = '1px solid rgba(255,255,255,0.2)';
     this.current = parseFloat(e.target.name);
@@ -139,6 +136,7 @@ UIL.Number.prototype.out = function( e ){
         this.c[2+this.current].style.border = 'none';
         //this.c[2+this.current].style.cursor = 'move';
     }
+
     document.removeEventListener( 'mouseup', this, false );
     document.removeEventListener( 'mousemove', this, false );
 
@@ -182,6 +180,7 @@ UIL.Number.prototype.validate = function(){
 };
 
 UIL.Number.prototype.rSize = function(){
+
     UIL.Proto.prototype.rSize.call( this );
     this.w = ((this.sb+5)/(this.length))-5;
     var i = this.length;
@@ -189,4 +188,5 @@ UIL.Number.prototype.rSize = function(){
         this.c[2+i].style.left = (this.sa+(this.w*i)+(5*i)) + 'px';
         this.c[2+i].style.width = this.w + 'px';
     }
-}
+
+};
