@@ -28,6 +28,8 @@ body { font-family: "Lucida Console", Monaco, monospace; background-color:#16161
 <script type="text/javascript" src="src/uil/String.js"></script>
 <script type="text/javascript" src="src/uil/Title.js"></script>
 <script type="text/javascript" src="src/uil/Button.js"></script>
+<script type="text/javascript" src="src/uil/Circular.js"></script>
+<script type="text/javascript" src="src/uil/Knob.js"></script>
 
 </head>
 
@@ -70,7 +72,7 @@ function populate(){
         ui.add('color',  { name:'color', callback:callback, type:'html', value:0x000000, fontColor:'#D4B87B'});
         ui.add('color',  { name:'color', callback:callback, type:'html', value:[0,1,1,1]});
         ui.add('slide',  { name:'slide', callback:callback, min:-100, max:100, value:0, precision:0, fontColor:'#D4B87B' });
-        ui.add('slide',  { name:'slide', callback:callback, min:-1, max:1, value:0, step:0.01, precision:2 });
+        ui.add('slide',  { name:'slide', callback:callback, min:-1, max:1, value:0, step:0.01, precision:2, height:30 });
         ui.add('string', { name:'string', callback:callback, value:'welcome to uil', fontColor:'#D4B87B'});
         ui.add('list',   { name:'list', callback:callback, list:list, fontColor:'#D4B87B'});
         ui.add('list',   { name:'list', callback:callback, list:list2});
@@ -86,6 +88,8 @@ function populate(){
         gr0.add('slide',  { name:'slide', callback:callback, min:-100, max:100, value:0, precision:0 });
         gr0.add('slide',  { name:'slide', callback:callback, min:-100, max:100, value:0, precision:0 });
         gr0.add('slide',  { name:'slide', callback:callback, min:-100, max:100, value:0, precision:0 });
+
+        ui.add('circular', { name:'circular', callback:callback, radius:40, min:0, max:100, value:0.5, precision:2 , fontColor:'#D4B87B' });
         //gr0.open();
 
         display = true;

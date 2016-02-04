@@ -11,5 +11,7 @@
     "src/uil/Slide.js",
     "src/uil/List.js",
     "src/uil/Bool.js",
-    "src/uil/Button.js"
+    "src/uil/Button.js",
+    "src/uil/Circular.js",
+    "src/uil/Knob.js"
 ]

@@ -170,6 +170,8 @@ UIL.Gui.prototype = {
             case 'bool':   n = new UIL.Bool(o);   break;
             case 'list':   n = new UIL.List(o);   break;
             case 'group':  n = new UIL.Group(o);  break;
+            case 'knob':   n = new UIL.Knob(o);   break;
+            case 'circular':n = new UIL.Circular(o);   break;
         }
         this.uis.push(n);
         this.calc();

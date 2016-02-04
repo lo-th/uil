@@ -12,7 +12,7 @@ UIL.Proto = function( o ){
     this.liner = null;
 
     // define obj size
-    this.setSize(o.size);
+    this.setSize( o.size );
 
     this.h = 20;
     
@@ -58,6 +58,8 @@ UIL.Proto.prototype = {
     constructor: UIL.Proto,
 
     init: function (){
+
+        this.c[0].style.height = this.h + 'px';
 
         this.c[0].style.background = UIL.bgcolor(this.color);
         for( var i = 0; i < this.c.length; i++ ){

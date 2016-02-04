@@ -7,16 +7,20 @@ UIL.Slide = function( o ){
     this.range = this.max - this.min;
     this.width = UIL.BW - 40;
     this.w = this.width - 8;
-    this.height = 17;
+    this.h = o.height || 20;
+
+    this.height = this.h - 3;
     this.value = o.value || 0;
     this.isDown = false;
     this.isOver = false;
 
-    this.c[2] = UIL.DOM('UIL text', 'div', 'text-align:right; width:40px; padding:3px 5px;');
-    this.c[3] = UIL.DOM('UIL svgbox', 'rect', 'width:'+this.width+'px; height:'+this.height+'px; cursor:w-resize;', { width:'100%', height:this.height, fill:UIL.SVGB, 'stroke-width':1, stroke:UIL.SVGC });
-    this.c[4] = UIL.DOM('UIL svgbox', 'rect', 'width:'+this.width+'px; height:'+this.height+'px; pointer-events:none;', { x:4, y:4, width:this.width-8, height:this.height-8, fill:'#CCC' });
+    var ty = (o.height * 0.5) - 10;
 
-    this.c[2].style.color = this.fontColor;
+    if(this.c[1]!==undefined) this.c[1].style.top = ty+'px';
+
+    this.c[2] = UIL.DOM('UIL text', 'div', 'top:'+ty+'px; text-align:right; width:40px; padding:3px 5px; color:'+ this.fontColor );
+    this.c[3] = UIL.DOM('UIL svgbox', 'rect', 'width:'+this.width+'px; height:'+this.height+'px; cursor:w-resize;', { width:'100%', height:this.height, fill:UIL.SVGB, 'stroke-width':1, stroke:UIL.SVGC });
+    this.c[4] = UIL.DOM('UIL svgbox', 'rect', 'width:'+this.width+'px; height:'+this.height+'px; pointer-events:none;', { x:4, y:4, width:this.width-8, height:this.height-8, fill: this.fontColor });
     
     // pattern test
     UIL.DOM( null, 'defs', null, {}, this.c[3] );
@@ -29,6 +33,8 @@ UIL.Slide = function( o ){
     this.c[3].events = [ 'mouseover', 'mousedown', 'mouseout' ];
 
     this.init();
+
+    //if(UIL.main) UIL.main.calc();
 
 };
 
@@ -56,7 +62,7 @@ UIL.Slide.prototype.mode = function( mode ){
     switch(mode){
         case 0: // base
             UIL.setSvg( this.c[3], 'fill','rgba(0,0,0,0.2)');
-            UIL.setSvg( this.c[4], 'fill','#CCC');
+            UIL.setSvg( this.c[4], 'fill', this.fontColor );
         break;
         case 1: // over
             UIL.setSvg( this.c[3], 'fill','rgba(0,0,0,0.6)');
@@ -129,7 +135,7 @@ UIL.Slide.prototype.update = function( up ){
 
     var ww = (this.w * ((this.value-this.min)/this.range));
     UIL.setSvg( this.c[4], 'width', ww );
-    this.c[2].innerHTML = this.value;
+    this.c[2].textContent = this.value;
     if( up ) this.callback(this.value);
 
 };

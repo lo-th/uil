@@ -13,7 +13,7 @@ UIL.Number = function( o ){
 
     this.isSelect = false;
 
-    if(o.value){
+    if(o.value !== undefined){
         if(!isNaN(o.value)){ this.value = [o.value];}
         else if(o.value instanceof Array ){ this.value = o.value; this.isNumber=false;}
         else if(o.value instanceof Object ){ 
