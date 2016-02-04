@@ -97,6 +97,15 @@ var Crea = Crea || ( function () {
 
     };
 
+    Crea.Svg = function ( ){
+
+    };
+
+    Crea.Svg.prototype = {
+        constructor: Crea.svg,
+
+    };
+
 
 
     return Crea;
@@ -123,7 +132,7 @@ var UIL = UIL || ( function () {
         BW:190,
         AW:100,
 
-        TXT:'font-family:"Lucida Console", Monaco, monospace; font-size:11px; color:#cccccc; background:none; padding:3px 10px; left:0; top:0px; height:17px; width:100px; overflow:hidden;',
+        TXT:'font-family:"Lucida Console", Monaco, monospace; font-size:11px; color:#cccccc; background:none; padding:3px 10px; left:0; top:0px; height:17px; width:100px; overflow:hidden; white-space: nowrap;',
 
         DOM: Crea.dom,
         CC: Crea.cc,
@@ -147,8 +156,8 @@ var UIL = UIL || ( function () {
             UIL.SVGC = 'rgba(120,120,120,0.6)';
             //UIL.txt1 = 'font-family:"Open Sans", sans-serif; font-size:11px; color:#cccccc; outline:0; padding:0px 10px; left:0; top:1px; height:17px; width:100px; overflow:hidden;';
             //UIL.txt1 = 'font-family:"Lucida Console", Monaco, monospace; font-size:11px; color:#cccccc; background:none; padding:3px 10px; left:0; top:0px; height:17px; width:100px; overflow:hidden;';
-
-            UIL.CC('UIL', 'position:absolute; pointer-events:none; box-sizing:border-box; -o-user-select:none; -ms-user-select:none; -khtml-user-select:none; -webkit-user-select:none; -moz-user-select:none; margin:0; padding:0; ');
+            UIL.CC('UIL', 'position:absolute; pointer-events:none; box-sizing:border-box; margin:0; padding:0; ');
+            //UIL.CC('UIL', 'position:absolute; pointer-events:none; box-sizing:border-box; -o-user-select:none; -ms-user-select:none; -khtml-user-select:none; -webkit-user-select:none; -moz-user-select:none; margin:0; padding:0; ');
 
             UIL.CC('UIL.content', 'width:300px; overflow:hidden; background:none;');
             UIL.CC('UIL.inner', 'width:300px; top:0; left:0; height:auto; overflow:hidden; background:none;');
@@ -157,17 +166,12 @@ var UIL = UIL || ( function () {
 
             UIL.CC('UIL.text', UIL.TXT);
 
-            UIL.CC('input', 'border:solid 1px rgba(0,0,0,0.2); background:rgba(0,0,0,0.2); transition: 0.1s ease-out;', true);
-            UIL.CC('input:focus', 'border: solid 1px rgba(0,0,0,0); background:rgba(0,0,0,0.6);', true);
-
             UIL.CC('UIL.list', 'box-sizing:content-box; border:20px solid transparent; border-bottom:10px solid transparent; left:80px; top:0px; width:190px; height:90px; overflow:hidden; cursor:s-resize; pointer-events:auto; display:none;');
             UIL.CC('UIL.list-in', 'left:0; top:0; width:100%; background:rgba(0,0,0,0.2); ');
             UIL.CC('UIL.listItem', 'position:relative; height:18px; background:rgba(0,0,0,0.2); border-bottom:1px solid rgba(0,0,0,0.2); pointer-events:auto; cursor:pointer;'+UIL.TXT);
             UIL.CC('UIL.listItem:hover', 'background:'+UIL.SELECT+'; color:#FFFFFF;')
 
             UIL.CC('UIL.scroll-bg', 'cursor:w-resize; pointer-events:auto; background:rgba(256,0,0,0.2);');
-            //UIL.CC('UIL.svgbox', 'left:100px; top:1px; width:190px; height:17px; pointer-events:auto; cursor:pointer; font-family:"Open Sans", sans-serif; font-size:11px; text-align:center;');
-            //UIL.CC('UIL.svgbox', 'left:100px; top:1px; width:190px; height:17px; pointer-events:auto; cursor:pointer; font-family:"Lucida Console", Monaco, monospace; font-size:11px; text-align:center;');
             UIL.CC('UIL.svgbox', 'left:100px; top:1px; width:190px; height:17px; pointer-events:auto; cursor:pointer;');
 
             UIL.DEF = true;
@@ -261,7 +265,7 @@ UIL.Gui.prototype = {
 
     handleEvent : function( e ) {
 
-        e.preventDefault();
+       // e.preventDefault();
         //e.stopPropagation();
 
         switch( e.type ) {
@@ -362,23 +366,27 @@ UIL.Gui.prototype = {
     hide:function(){
         this.content.style.display = 'none';
     },
-    add:function(type, obj){
+
+    add:function( type, o ){
+        
+        o.isUI = true;
         var n;
         switch(type){
-            case 'button': n = new UIL.Button(obj); break;
-            case 'string': n = new UIL.String(obj); break;
-            case 'number': n = new UIL.Number(obj); break;
-            case 'title':  n = new UIL.Title(obj);  break;
-            case 'color':  n = new UIL.Color(obj);  break;
-            case 'slide':  n = new UIL.Slide(obj);  break;
-            case 'bool':   n = new UIL.Bool(obj);   break;
-            case 'list':   n = new UIL.List(obj);   break;
-            case 'group':  n = new UIL.Group(obj);  break;
+            case 'button': n = new UIL.Button(o); break;
+            case 'string': n = new UIL.String(o); break;
+            case 'number': n = new UIL.Number(o); break;
+            case 'title':  n = new UIL.Title(o);  break;
+            case 'color':  n = new UIL.Color(o);  break;
+            case 'slide':  n = new UIL.Slide(o);  break;
+            case 'bool':   n = new UIL.Bool(o);   break;
+            case 'list':   n = new UIL.List(o);   break;
+            case 'group':  n = new UIL.Group(o);  break;
         }
         this.uis.push(n);
         this.calc();
         return n;
     },
+
     resize:function(e){
         this.height = window.innerHeight-this.top-5;
         this.content.style.height = this.height+'px';
@@ -492,13 +500,15 @@ UIL.Proto = function( o ){
     this.target = o.target || null;
     this.callback = o.callback || function(){};
 
+    // elements
+
     this.c = [];
-    //this.f = [];
 
     this.c[0] = UIL.DOM('UIL base');
-    this.c[1] = UIL.DOM('UIL text');
+    
 
     if(!this.simple){ 
+        this.c[1] = UIL.DOM('UIL text');
         this.c[1].textContent = this.txt;
         this.c[1].style.color = this.titleColor;
     }
@@ -522,13 +532,16 @@ UIL.Proto.prototype = {
     constructor: UIL.Proto,
 
     init: function (){
+
         this.c[0].style.background = UIL.bgcolor(this.color);
         for( var i = 0; i < this.c.length; i++ ){
             if( i === 0 ){ 
                 if(this.target !== null ) this.target.appendChild( this.c[0] );
                 else UIL.main.inner.appendChild( this.c[0] );
             }
-            else this.c[0].appendChild(this.c[i]);
+            else {
+                if( this.c[i] !== undefined ) this.c[0].appendChild(this.c[i]);
+            }
         }
 
         this.rSize();
@@ -564,15 +577,17 @@ UIL.Proto.prototype = {
         var i = this.c.length;
         while(i--){
             if(i==0){
-                if(this.liner!==null){ 
+                if( this.liner !== null ){ 
                     this.c[0].removeChild( this.liner );
                     this.liner = null;
                 }
                 
             } else {
-                if( this.c[i].children ) this.clearDOM( this.c[i] );
-                this.c[0].removeChild( this.c[i] );
-                this.c[i] = null;
+                if( this.c[i] !== undefined ){
+                    if( this.c[i].children ) this.clearDOM( this.c[i] );
+                    this.c[0].removeChild( this.c[i] );
+                    this.c[i] = null;
+                }
             }
         }
 
@@ -635,9 +650,11 @@ UIL.Proto.prototype = {
         var i = this.c.length, j, c;
         while( i-- ){
             c = this.c[i];
-            if( c.events !== undefined ){
-                j = c.events.length;
-                while( j-- ) c.addEventListener( c.events[j], this, false );
+            if( c !== undefined ){
+                if( c.events !== undefined ){
+                    j = c.events.length;
+                    while( j-- ) c.addEventListener( c.events[j], this, false );
+                }
             }
         }
 
@@ -648,9 +665,11 @@ UIL.Proto.prototype = {
         var i = this.c.length, j, c;
         while( i-- ){
             c = this.c[i];
-            if( c.events !== undefined ){
-                j = c.events.length;
-                while( j-- ) c.removeEventListener( c.events[j], this, false );
+            if( c !== undefined ){
+                if( c.events !== undefined ){
+                    j = c.events.length;
+                    while( j-- ) c.removeEventListener( c.events[j], this, false );
+                }
             }
         }
 
@@ -842,10 +861,12 @@ UIL.String = function( o ){
     this.value = o.value || '';
     this.allway = o.allway || false;
 
-    this.c[2] = UIL.DOM( 'UIL text', 'input', 'pointer-events:auto; padding:3px 5px; ' );
-    this.c[2].name = 'input';
-    this.c[2].value = this.value;
+    this.c[2] = UIL.DOM( 'UIL text', 'div', 'pointer-events:auto; padding:3px 5px; ' );
+    //this.c[2].name = 'input';
+    //this.c[2].value = this.value;
     this.c[2].style.color = this.fontColor;
+    this.c[2].contentEditable = true;
+    this.c[2].textContent = this.value;
 
     this.c[2].events = [ 'click', 'keydown', 'keyup' ];
 
@@ -870,16 +891,20 @@ UIL.String.prototype.handleEvent = function( e ) {
 };
 
 UIL.String.prototype.click = function( e ){
-
+//e.preventDefault();
+//if(this.select) return;
     e.target.focus();
     e.target.style.cursor = 'auto';
+  //  this.select = true;
+   // console.log('select')
 
 };
 
 UIL.String.prototype.keydown = function( e ){
 
     if( e.keyCode === 13 ){ 
-        this.value = e.target.value;
+        e.preventDefault();
+        this.value = e.target.textContent;//e.target.value;
         this.callback( this.value );
         e.target.blur();
     }
@@ -941,10 +966,12 @@ UIL.Number = function( o ){
     while(i--){
         if(this.isAngle) this.value[i] = (this.value[i] * 180 / Math.PI).toFixed( this.precision );
         //this.c[2+i] = UIL.DOM('UIL text', 'input', 'pointer-events:auto; padding:0px 5px; padding-bottom:2px; width:'+this.w+'px; left:'+(UIL.AW+(this.w*i)+(5*i))+'px;');
-        this.c[2+i] = UIL.DOM('UIL text', 'input', 'pointer-events:auto; cursor:move; padding:3px 5px; width:'+this.w+'px; left:'+(UIL.AW+(this.w*i)+(5*i))+'px;');
+        this.c[2+i] = UIL.DOM('UIL text', 'div', 'pointer-events:auto; cursor:move; padding:3px 5px; width:'+this.w+'px; left:'+(UIL.AW+(this.w*i)+(5*i))+'px;');
         this.c[2+i].name = i;
-        this.c[2+i].value = this.value[i];
+       // this.c[2+i].value = this.value[i];
+        this.c[2+i].textContent = this.value[i];
         this.c[2+i].style.color = this.fontColor;
+        this.c[2+i].contentEditable = true;
         this.c[2+i].events = [ 'click', 'keydown', 'keyup', 'mousedown', 'blur' ];
 
     }
@@ -957,8 +984,8 @@ UIL.Number.prototype.constructor = UIL.Number;
 
 UIL.Number.prototype.handleEvent = function( e ) {
 
-    e.preventDefault();
-    e.stopPropagation();
+    //e.preventDefault();
+    //e.stopPropagation();
 
     switch( e.type ) {
         case 'click': this.click( e ); break;
@@ -978,6 +1005,7 @@ UIL.Number.prototype.handleEvent = function( e ) {
 UIL.Number.prototype.keydown = function( e ){
 
     if( e.keyCode === 13 ){
+        e.preventDefault();
         this.testValue( parseFloat(e.target.name) );
         this.validate();
         e.target.blur();
@@ -1034,6 +1062,7 @@ UIL.Number.prototype.down = function( e ){
 
 UIL.Number.prototype.out = function( e ){
 
+    e.preventDefault();
     if(this.current !== undefined){ 
         this.c[2+this.current].style.border = 'none';
         //this.c[2+this.current].style.cursor = 'move';
@@ -1046,13 +1075,17 @@ UIL.Number.prototype.out = function( e ){
 
 UIL.Number.prototype.move = function( e ){
 
+    e.preventDefault();
+
     if( this.current === undefined ) return;
 
     this.prev.d += ( e.clientX - this.prev.x ) - ( e.clientY - this.prev.y );
     var n = this.prev.v + ( this.prev.d * this.step);
 
     this.value[this.current] = this.numValue(n);
-    this.c[2+this.current].value = this.value[this.current];
+    //this.c[2+this.current].value = this.value[this.current];
+
+    this.c[2+this.current].textContent = this.value[this.current];
 
     this.validate();
 
@@ -1065,8 +1098,12 @@ UIL.Number.prototype.move = function( e ){
 
 UIL.Number.prototype.testValue = function( n ){
 
-    if(!isNaN( this.c[2+n].value )) this.value[n] = this.c[2+n].value;
-    else this.c[2+n].value = this.value[n];
+    
+
+    if(!isNaN( this.c[2+n].textContent )) this.value[n] = this.c[2+n].textContent;
+    else this.c[2+n].textContent = this.value[n];
+  //  if(!isNaN( this.c[2+n].value )) this.value[n] = this.c[2+n].value;
+    //else this.c[2+n].value = this.value[n];
 
 };
 
@@ -2018,7 +2055,7 @@ UIL.Button = function( o ){
 
     this.c[2].events = [ 'click', 'mouseover', 'mousedown', 'mouseup', 'mouseout' ];
 
-    this.c[1].textContent = '';
+    if( this.c[1] !== undefined ) this.c[1].textContent = '';
     this.c[3].innerHTML = this.txt;
 
     this.init();

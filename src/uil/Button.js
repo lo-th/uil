@@ -10,7 +10,7 @@ UIL.Button = function( o ){
 
     this.c[2].events = [ 'click', 'mouseover', 'mousedown', 'mouseup', 'mouseout' ];
 
-    this.c[1].textContent = '';
+    if( this.c[1] !== undefined ) this.c[1].textContent = '';
     this.c[3].innerHTML = this.txt;
 
     this.init();

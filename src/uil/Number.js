@@ -40,10 +40,12 @@ UIL.Number = function( o ){
     while(i--){
         if(this.isAngle) this.value[i] = (this.value[i] * 180 / Math.PI).toFixed( this.precision );
         //this.c[2+i] = UIL.DOM('UIL text', 'input', 'pointer-events:auto; padding:0px 5px; padding-bottom:2px; width:'+this.w+'px; left:'+(UIL.AW+(this.w*i)+(5*i))+'px;');
-        this.c[2+i] = UIL.DOM('UIL text', 'input', 'pointer-events:auto; cursor:move; padding:3px 5px; width:'+this.w+'px; left:'+(UIL.AW+(this.w*i)+(5*i))+'px;');
+        this.c[2+i] = UIL.DOM('UIL text', 'div', 'pointer-events:auto; cursor:move; padding:3px 5px; width:'+this.w+'px; left:'+(UIL.AW+(this.w*i)+(5*i))+'px;');
         this.c[2+i].name = i;
-        this.c[2+i].value = this.value[i];
+       // this.c[2+i].value = this.value[i];
+        this.c[2+i].textContent = this.value[i];
         this.c[2+i].style.color = this.fontColor;
+        this.c[2+i].contentEditable = true;
         this.c[2+i].events = [ 'click', 'keydown', 'keyup', 'mousedown', 'blur' ];
 
     }
@@ -56,8 +58,8 @@ UIL.Number.prototype.constructor = UIL.Number;
 
 UIL.Number.prototype.handleEvent = function( e ) {
 
-    e.preventDefault();
-    e.stopPropagation();
+    //e.preventDefault();
+    //e.stopPropagation();
 
     switch( e.type ) {
         case 'click': this.click( e ); break;
@@ -77,6 +79,7 @@ UIL.Number.prototype.handleEvent = function( e ) {
 UIL.Number.prototype.keydown = function( e ){
 
     if( e.keyCode === 13 ){
+        e.preventDefault();
         this.testValue( parseFloat(e.target.name) );
         this.validate();
         e.target.blur();
@@ -133,6 +136,7 @@ UIL.Number.prototype.down = function( e ){
 
 UIL.Number.prototype.out = function( e ){
 
+    e.preventDefault();
     if(this.current !== undefined){ 
         this.c[2+this.current].style.border = 'none';
         //this.c[2+this.current].style.cursor = 'move';
@@ -145,13 +149,17 @@ UIL.Number.prototype.out = function( e ){
 
 UIL.Number.prototype.move = function( e ){
 
+    e.preventDefault();
+
     if( this.current === undefined ) return;
 
     this.prev.d += ( e.clientX - this.prev.x ) - ( e.clientY - this.prev.y );
     var n = this.prev.v + ( this.prev.d * this.step);
 
     this.value[this.current] = this.numValue(n);
-    this.c[2+this.current].value = this.value[this.current];
+    //this.c[2+this.current].value = this.value[this.current];
+
+    this.c[2+this.current].textContent = this.value[this.current];
 
     this.validate();
 
@@ -164,8 +172,12 @@ UIL.Number.prototype.move = function( e ){
 
 UIL.Number.prototype.testValue = function( n ){
 
-    if(!isNaN( this.c[2+n].value )) this.value[n] = this.c[2+n].value;
-    else this.c[2+n].value = this.value[n];
+    
+
+    if(!isNaN( this.c[2+n].textContent )) this.value[n] = this.c[2+n].textContent;
+    else this.c[2+n].textContent = this.value[n];
+  //  if(!isNaN( this.c[2+n].value )) this.value[n] = this.c[2+n].value;
+    //else this.c[2+n].value = this.value[n];
 
 };
 

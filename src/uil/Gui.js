@@ -54,7 +54,7 @@ UIL.Gui.prototype = {
 
     handleEvent : function( e ) {
 
-        e.preventDefault();
+       // e.preventDefault();
         //e.stopPropagation();
 
         switch( e.type ) {
@@ -155,23 +155,27 @@ UIL.Gui.prototype = {
     hide:function(){
         this.content.style.display = 'none';
     },
-    add:function(type, obj){
+
+    add:function( type, o ){
+        
+        o.isUI = true;
         var n;
         switch(type){
-            case 'button': n = new UIL.Button(obj); break;
-            case 'string': n = new UIL.String(obj); break;
-            case 'number': n = new UIL.Number(obj); break;
-            case 'title':  n = new UIL.Title(obj);  break;
-            case 'color':  n = new UIL.Color(obj);  break;
-            case 'slide':  n = new UIL.Slide(obj);  break;
-            case 'bool':   n = new UIL.Bool(obj);   break;
-            case 'list':   n = new UIL.List(obj);   break;
-            case 'group':  n = new UIL.Group(obj);  break;
+            case 'button': n = new UIL.Button(o); break;
+            case 'string': n = new UIL.String(o); break;
+            case 'number': n = new UIL.Number(o); break;
+            case 'title':  n = new UIL.Title(o);  break;
+            case 'color':  n = new UIL.Color(o);  break;
+            case 'slide':  n = new UIL.Slide(o);  break;
+            case 'bool':   n = new UIL.Bool(o);   break;
+            case 'list':   n = new UIL.List(o);   break;
+            case 'group':  n = new UIL.Group(o);  break;
         }
         this.uis.push(n);
         this.calc();
         return n;
     },
+
     resize:function(e){
         this.height = window.innerHeight-this.top-5;
         this.content.style.height = this.height+'px';

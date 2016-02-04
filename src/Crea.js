@@ -97,6 +97,15 @@ var Crea = Crea || ( function () {
 
     };
 
+    Crea.Svg = function ( ){
+
+    };
+
+    Crea.Svg.prototype = {
+        constructor: Crea.svg,
+
+    };
+
 
 
     return Crea;

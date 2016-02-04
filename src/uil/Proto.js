@@ -26,13 +26,15 @@ UIL.Proto = function( o ){
     this.target = o.target || null;
     this.callback = o.callback || function(){};
 
+    // elements
+
     this.c = [];
-    //this.f = [];
 
     this.c[0] = UIL.DOM('UIL base');
-    this.c[1] = UIL.DOM('UIL text');
+    
 
     if(!this.simple){ 
+        this.c[1] = UIL.DOM('UIL text');
         this.c[1].textContent = this.txt;
         this.c[1].style.color = this.titleColor;
     }
@@ -56,13 +58,16 @@ UIL.Proto.prototype = {
     constructor: UIL.Proto,
 
     init: function (){
+
         this.c[0].style.background = UIL.bgcolor(this.color);
         for( var i = 0; i < this.c.length; i++ ){
             if( i === 0 ){ 
                 if(this.target !== null ) this.target.appendChild( this.c[0] );
                 else UIL.main.inner.appendChild( this.c[0] );
             }
-            else this.c[0].appendChild(this.c[i]);
+            else {
+                if( this.c[i] !== undefined ) this.c[0].appendChild(this.c[i]);
+            }
         }
 
         this.rSize();
@@ -98,15 +103,17 @@ UIL.Proto.prototype = {
         var i = this.c.length;
         while(i--){
             if(i==0){
-                if(this.liner!==null){ 
+                if( this.liner !== null ){ 
                     this.c[0].removeChild( this.liner );
                     this.liner = null;
                 }
                 
             } else {
-                if( this.c[i].children ) this.clearDOM( this.c[i] );
-                this.c[0].removeChild( this.c[i] );
-                this.c[i] = null;
+                if( this.c[i] !== undefined ){
+                    if( this.c[i].children ) this.clearDOM( this.c[i] );
+                    this.c[0].removeChild( this.c[i] );
+                    this.c[i] = null;
+                }
             }
         }
 
@@ -169,9 +176,11 @@ UIL.Proto.prototype = {
         var i = this.c.length, j, c;
         while( i-- ){
             c = this.c[i];
-            if( c.events !== undefined ){
-                j = c.events.length;
-                while( j-- ) c.addEventListener( c.events[j], this, false );
+            if( c !== undefined ){
+                if( c.events !== undefined ){
+                    j = c.events.length;
+                    while( j-- ) c.addEventListener( c.events[j], this, false );
+                }
             }
         }
 
@@ -182,9 +191,11 @@ UIL.Proto.prototype = {
         var i = this.c.length, j, c;
         while( i-- ){
             c = this.c[i];
-            if( c.events !== undefined ){
-                j = c.events.length;
-                while( j-- ) c.removeEventListener( c.events[j], this, false );
+            if( c !== undefined ){
+                if( c.events !== undefined ){
+                    j = c.events.length;
+                    while( j-- ) c.removeEventListener( c.events[j], this, false );
+                }
             }
         }
 
