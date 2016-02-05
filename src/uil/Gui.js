@@ -1,8 +1,10 @@
-UIL.Gui = function(css, w, center){
+UIL.Gui = function(css, w, center, color){
 
     UIL.sizer(w || 300);
 
     UIL.main = this;
+
+    this.color = color || UIL.COLOR;
     
     //if(!UIL.DEF)UIL.classDefine();
 
@@ -10,28 +12,33 @@ UIL.Gui = function(css, w, center){
     this.isCenter = center || false;
     this.lockwheel = false;
 
+    this.isOpen = true;
+
     this.uis = [];
 
     this.content = UIL.DOM('UIL content', 'div', css);
-    document.body.appendChild(this.content);
+    document.body.appendChild( this.content );
 
-    this.top = parseFloat(this.content.style.top.substring(0,this.content.style.top.length-2));
+    //this.top = parseFloat(this.content.style.top.substring(0,this.content.style.top.length-2));
 
     this.inner = UIL.DOM('UIL inner');
     this.content.appendChild(this.inner);
-    
-    this.scrollBG = UIL.DOM('UIL scroll-bg', 'div', 'right:0; top:0; width:10px; height:100%; cursor:s-resize; display:none; background:none; ');
-    this.content.appendChild(this.scrollBG);
-    this.scrollBG.name = 'move';
+    this.inner.name = 'inner';
 
-    this.scrollBG2 = UIL.DOM('UIL scroll-bg', 'div', 'left:0; top:0; width:'+UIL.AW+'px; height:100%; cursor:s-resize; display:none; background:none;');
-    this.content.appendChild(this.scrollBG2);
-    this.scrollBG2.name = 'move';
     
-    this.scroll = UIL.DOM(null, 'rect', 'position:absolute; width:100%; height:100%; pointer-events:none;', {width:1, height:20, x:UIL.WIDTH-1, fill:'#666' });
-    UIL.DOM(null, 'rect', '', {width:1, height:20, x:0, fill:'#666' }, this.scroll);
-    UIL.DOM(null, 'rect', '', {width:300, height:1, x:0, fill:'#666' }, this.scroll);
-    this.content.appendChild( this.scroll );
+    
+    this.scrollBG = UIL.DOM('UIL scroll-bg', 'div', 'right:0; top:0; width:10px; height:10px; cursor:s-resize; display:none; ');
+    this.content.appendChild(this.scrollBG);
+    this.scrollBG.name = 'scroll';
+
+    this.scroll = UIL.DOM('UIL scroll', 'div', 'left:3px; top:0; width:4px; height:10px;  ');
+    this.scrollBG.appendChild( this.scroll );
+
+    this.bottom = UIL.DOM('UIL bottom');
+    this.content.appendChild(this.bottom);
+    this.bottom.textContent = 'close';
+    this.bottom.name = 'bottom';
+    this.bottom.style.background = UIL.bgcolor( this.color );
 
     this.changeWidth();
 
@@ -43,9 +50,10 @@ UIL.Gui = function(css, w, center){
     this.content.addEventListener( 'mouseout',  this, false );
     this.content.addEventListener( 'mouseup',   this, false );
     this.content.addEventListener( 'mouseover', this, false );
-    this.content.addEventListener( 'mousewheel', this, false );
+    //this.content.addEventListener( 'mousewheel', this, false );
     
     window.addEventListener("resize", function(e){this.resize(e)}.bind(this), false );
+
     this.resize();
 }
 
@@ -59,26 +67,40 @@ UIL.Gui.prototype = {
 
         switch( e.type ) {
             case 'mousedown': this.down( e ); break;
-            case 'mousemove': this.move( e ); break;
-            case 'mouseup': this.out( e ); break;
             case 'mouseout': this.out( e ); break;
             case 'mouseover': this.over( e ); break;
-            case 'mousewheel': this.wheel( e ); break;
+
+            //case 'mousewheel': this.wheel( e ); break;
+
+            case 'mouseup': this.up( e ); break;
+            case 'mousemove': this.move( e ); break;
         }
 
     },
+
+    
 
     ////
 
     down: function( e ){
         if(e.target.name){
-            if(e.target.name=='move'){
+            if(e.target.name === 'scroll'){
                 this.isDown = true;
                 this.move( e );
-                UIL.setSvg(this.scroll, 'fill','#FFF');
-                UIL.setSvg(this.scroll, 'fill','#FFF',1);
-                UIL.setSvg(this.scroll, 'fill','#FFF',2);
-                e.preventDefault();
+                //UIL.setSvg(this.scroll, 'fill','#FFF');
+
+                this.scroll.style.background = 'rgba(255,255,255,0.75)';
+
+                document.addEventListener( 'mouseup', this, false );
+                document.addEventListener( 'mousemove', this, false );
+
+            }
+            if(e.target.name === 'bottom'){
+                this.isOpen = this.isOpen ? false : true;
+
+                this.show();
+                //this.calc();
+
             }
         }
     },
@@ -86,35 +108,45 @@ UIL.Gui.prototype = {
     move: function( e ){
 
         if(!this.isDown) return;
-        var rect = this.content.getBoundingClientRect();
-        var y = (e.clientY-rect.top)-(this.zone*0.5);
+
+        this.scroll.style.background = 'rgba(255,255,255,0.75)';
+
+
+        //var rect = this.content.getBoundingClientRect();
+        var y = (e.clientY-this.top)-(this.sh*0.5);
 
         if(y<0) y = 0;
-        if(y>this.zone) y = this.zone;
-        this.py = ((y/this.zone)*this.range);
+        if(y>this.maxView-this.sh ) y = this.maxView-this.sh;
+
+        this.py = y;
 
         this.update();
 
     },
 
     out: function( e ){
+    },
+
+    up: function( e ){
 
         this.isDown = false;
-        UIL.setSvg(this.scroll, 'fill','#666');
-        UIL.setSvg(this.scroll, 'fill','#666',1);
-        UIL.setSvg(this.scroll, 'fill','#666',2);
+        this.scroll.style.background = 'rgba(255,255,255,0.2)';
+       // UIL.setSvg(this.scroll, 'fill','#666');
+        document.removeEventListener( 'mouseup', this, false );
+        document.removeEventListener( 'mousemove', this, false );
 
     },
 
     over: function( e ){
-
-        UIL.setSvg(this.scroll, 'fill','#AAA');
-        UIL.setSvg(this.scroll, 'fill','#AAA',1);
-        UIL.setSvg(this.scroll, 'fill','#AAA',2);
+        if(e.target.name){
+            if(e.target.name === 'scroll'){
+                this.scroll.style.background = 'rgba(255,255,255,0.5)';
+            }
+        }
 
     },
 
-    wheel: function ( e ){
+    /*wheel: function ( e ){
 
         if(this.lockwheel) return;
         if(!this.isScroll) return;
@@ -128,7 +160,7 @@ UIL.Gui.prototype = {
 
         this.update();
 
-    },
+    },*/
 
     ////
 
@@ -136,25 +168,15 @@ UIL.Gui.prototype = {
 
         this.py = y === undefined ? this.py : y;
 
-        this.inner.style.top = -this.py+'px';
-        var ty = ((this.py*(this.height-this.sh))/this.range) || 0;
-        UIL.setSvg(this.scroll, 'y', ty);
-        UIL.setSvg(this.scroll, 'y', ty,1);
+        this.inner.style.top = -(this.py/this.ratio)+'px';
 
-        if(this.py==0) UIL.setSvg(this.scroll, 'y',0, 2);
-        else if(this.py==this.max) UIL.setSvg(this.scroll, 'y',this.height-1, 2);
-        else UIL.setSvg(this.scroll, 'y',-1, 2);
+        this.scroll.style.top = this.py + 'px';
 
     },
 
     ////
 
-    show:function(){
-        this.content.style.display = 'block';
-    },
-    hide:function(){
-        this.content.style.display = 'none';
-    },
+
 
     add:function( type, o ){
         
@@ -179,20 +201,24 @@ UIL.Gui.prototype = {
     },
 
     resize:function(e){
-        this.height = window.innerHeight-this.top-5;
-        this.content.style.height = this.height+'px';
-        this.zone = this.height-40;
+
         this.calc();
-        this.update( 0 );
+        this.testHeight();
+
     },
+
     remove: function ( n ) { 
+
         var i = this.uis.indexOf( n ); 
         if ( i !== -1 ) { 
             this.uis[i].clear();
             this.uis.splice( i, 1 ); 
         }
+
     },
+
     clear:function(){
+
         this.update( 0 );
         var i = this.uis.length;
         while(i--){
@@ -202,23 +228,25 @@ UIL.Gui.prototype = {
         }
         this.uis = [];
         this.calc();
+
     },
+
     showScroll:function(h){
 
         this.isScroll = true;
 
-        this.min = 0;
-        this.max = h-this.height;
-        this.range = this.max - this.min;
-        this.sh =(this.height-40)-(this.max*100)/(this.height-40);
-        if(this.sh<20)this.sh=20;
+        this.total = this.height-20;
+        this.maxView = this.maxHeight-20;
 
-        UIL.setSvg(this.scroll, 'height',this.sh);
-        UIL.setSvg(this.scroll, 'height',this.sh, 1);
+        this.ratio = this.maxView / this.total;
+        this.sh = this.maxView * this.ratio;
 
-        this.scroll.style.display = 'block';
+        if(this.sh<20) this.sh = 20;
+
         this.scrollBG.style.display = 'block';
-        this.scrollBG2.style.display = 'block';
+
+        this.scrollBG.style.height = this.maxView + 'px';
+        this.scroll.style.height = this.sh + 'px';
 
         this.update( 0 );
     },
@@ -227,39 +255,88 @@ UIL.Gui.prototype = {
 
         this.isScroll = false;
         this.update( 0 );
-        this.scroll.style.display = 'none';
         this.scrollBG.style.display = 'none';
-        this.scrollBG2.style.display = 'none';
 
     },
 
-    calc:function(){
-        var total = 0;
-        var i = this.uis.length;
-        while(i--) total+=this.uis[i].h;
-        if(total>this.height) this.showScroll(total);
-        else this.hideScroll();
-    },
-    changeWidth:function(){
-        UIL.setDom(this.content, 'width', UIL.WIDTH);
-        var decal = 0;
-        if(this.isCenter){
-            decal = -UIL.WIDTH*0.5; 
-            UIL.setDom(this.content, 'margin-left', decal);
+    calc:function(ny) {
+
+        if( ny !== undefined ){
+            this.height += ny;
+            this.content.style.height = this.height+'px';
+        } else {
+
+            var total = this.inner.offsetHeight;
+            this.height = total+20;
+            this.content.style.height = this.height+'px';
+
+            if(  this.bottom.textContent !== 'close' ) this.bottom.textContent = 'close';
         }
 
-        UIL.setDom(this.inner, 'width', UIL.WIDTH);
-        UIL.setSvg(this.scroll, 'x',UIL.WIDTH-1,0);
-        UIL.setSvg(this.scroll, 'width',UIL.WIDTH,2);
-        var i = this.uis.length;
+        this.tmp = setTimeout( this.testHeight.bind(this), 10);
 
+    },
+
+    testHeight:function(){
+
+        
+
+        if(this.tmp) clearTimeout(this.tmp);
+
+        this.top = this.content.getBoundingClientRect().top;
+        this.maxHeight = window.innerHeight - this.top - 10;
+
+        if(this.height>this.maxHeight){
+
+            this.content.style.height = this.maxHeight+'px';
+            this.bottom.style.background = UIL.bgcolor( this.color, 1 );
+            this.showScroll();
+
+        }else{
+            this.hideScroll();
+            this.bottom.style.background = UIL.bgcolor( this.color );
+        }
+    },
+
+    changeWidth:function() {
+
+        this.content.style.width = UIL.WIDTH + 'px';
+
+        if( this.isCenter ) this.content.style.marginLeft = -(~~ (UIL.WIDTH*0.5)) + 'px';
+
+        var i = this.uis.length;
         while(i--){
             this.uis[i].setSize();
             this.uis[i].rSize();
         }
+
+        this.calc()
+
     },
-    liner:function(color){
-        var l = UIL.DOM('UIL', 'line', 'width:100%; height:1px; bottom:0px;', {x1:0, y1:0, x2:'100%', y2:0, stroke:color || 'rgba(0,0,0,0.5)', 'stroke-width':1, 'stroke-linecap':'butt'} );
+
+    show:function(){
+
+        if( this.isOpen ){
+            this.inner.style.display = 'block';
+            this.calc();
+        }else{
+            this.content.style.height = '20px';
+            this.tmp = setTimeout( this.endHide.bind(this), 100 );
+        }
+        
+    },
+
+    endHide: function(){
+
+        if( this.tmp ) clearTimeout(this.tmp);
+        this.inner.style.display = 'none'; 
+        this.bottom.textContent = 'open';
+
+    },
+
+    /*liner:function(color){
+        var l = UIL.DOM('UIL', 'line', 'width:100%; height:1px; bottom:0px;', {x1:0, y1:0, x2:'100%', y2:0, stroke:'#FF0', 'stroke-width':1, 'stroke-linecap':'butt'} );
+        //var l = UIL.DOM('UIL', 'line', 'width:100%; height:1px; bottom:0px;', {x1:0, y1:0, x2:'100%', y2:0, stroke:color || 'rgba(0,0,0,0.5)', 'stroke-width':1, 'stroke-linecap':'butt'} );
         return l;
-    }
+    }*/
 };

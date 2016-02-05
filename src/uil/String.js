@@ -2,6 +2,7 @@ UIL.String = function( o ){
 
     UIL.Proto.call( this, o );
 
+    this.type = 'string';
     this.value = o.value || '';
     this.allway = o.allway || false;
 

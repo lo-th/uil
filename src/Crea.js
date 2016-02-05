@@ -12,7 +12,7 @@ var Crea = Crea || ( function () {
     var doc = document;
     var head = doc.getElementsByTagName('head')[0];
     var DOM_SIZE = [ 'height', 'width', 'top', 'left', 'bottom', 'right', 'margin-left', 'margin-right', 'margin-top', 'margin-bottom'];
-    var SVG_TYPE = [ 'rect', 'circle', 'path', 'polygon', 'text', 'pattern', 'defs', 'g', 'line', 'foreignObject', 'linearGradient', 'stop', 'animate', 'radialGradient' ];
+    var SVG_TYPE = [ 'rect', 'circle', 'path', 'polygon', 'text', 'pattern', 'defs', 'g', 'transform',, 'line', 'foreignObject', 'linearGradient', 'stop', 'animate', 'radialGradient' ];
     var SVG_TYPE_G = [ 'rect', 'circle', 'path', 'polygon', 'text', 'g', 'line', 'foreignObject', 'linearGradient', 'radialGradient' ];
     var svgns = "http://www.w3.org/2000/svg";
         
@@ -21,7 +21,8 @@ var Crea = Crea || ( function () {
 
     Crea.setSvg = function( dom, type, value, id ){
 
-        dom.childNodes[ id || 0 ].setAttributeNS( null, type, value );
+        if( id === -1 ) dom.setAttributeNS( null, type, value );
+        else dom.childNodes[ id || 0 ].setAttributeNS( null, type, value );
 
     };
 

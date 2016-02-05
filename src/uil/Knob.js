@@ -2,6 +2,7 @@ UIL.Knob = function( o ){
 
     UIL.Proto.call( this, o );
 
+    this.type = 'knob';
     this.setTypeNumber( o );
 
     this.range = this.max - this.min;
@@ -9,32 +10,51 @@ UIL.Knob = function( o ){
     this.value = o.value || 0;
 
     this.radius = o.radius || 15;
+    
+    this.size = (this.radius*2)+20;
+
+    if(o.size !== undefined){
+        this.size = o.size;
+        this.radius = ~~ (this.size-20)*0.5;
+    }
+
     this.w = this.radius*2;
     this.height = this.radius*2;
-    this.h = (this.radius*2) + 22;
+    this.h = this.height + 40;
+
+    this.twoPi = Math.PI * 2;
+    this.mPI = Math.PI * 0.8;
+    this.toDeg = 180 / Math.PI;
+
+    this.top = 0;
+
+    this.c[0].style.width = this.size +'px';
+
+    if(this.c[1] !== undefined) {
+
+        this.c[1].style.width = this.size +'px';
+        this.c[1].style.textAlign = 'center';
+        this.top = 20;
+
+    }
 
     this.percent = 0;
 
-    this.mPI = Math.PI*0.8;
+    this.c[2] = UIL.DOM('UIL text', 'div', 'top:'+(this.height+20)+'px; text-align:center; width:'+this.size+'px; padding:3px 5px; color:'+ this.fontColor );
 
-    //this.c[2] = UIL.DOM( 'UIL text', 'div', 'pointer-events:auto; padding:3px 5px; outlineStyle:none; webkitAppearance:none;' );
-    //this.c[2].name = 'input';
-    //this.c[2].value = this.value;
-    //this.c[2].style.color = this.fontColor;
-    //this.c[2].contentEditable = true;
-    //this.c[2].textContent = this.value;
-    this.c[2] = UIL.DOM('UIL text', 'div', 'top:'+(this.height+2)+'px; text-align:center; width:40px; padding:3px 5px; color:'+ this.fontColor );
+    this.c[3] = UIL.DOM('UIL svgbox', 'circle', 'left:10px; top:'+this.top+'px; width:'+this.w+'px; height:'+this.height+'px; cursor:pointer;', { cx:this.radius, cy:this.radius, r:this.radius-4, fill:'rgba(0,0,0,0.3)' });
+    this.c[4] = UIL.DOM('UIL svgbox', 'path', 'left:10px; top:'+this.top+'px; width:'+this.w+'px; height:'+this.height+'px; pointer-events:none;', { d:this.makeGrad(), 'stroke-width':1, stroke:UIL.SVGC });
+    this.c[5] = UIL.DOM('UIL svgbox', 'circle', 'left:10px; top:'+this.top+'px; width:'+this.w+'px; height:'+this.height+'px; pointer-events:none;', { cx:this.radius, cy:this.radius, r:this.radius*0.7, fill:UIL.bgcolor(UIL.COLOR, 1), 'stroke-width':1, stroke:UIL.SVGC });
 
-    this.c[3] = UIL.DOM('UIL svgbox', 'circle', 'width:'+this.w+'px; height:'+this.height+'px; cursor:pointer;', { cx:this.radius, cy:this.radius, r:this.radius, fill:'rgba(0,0,0,0.3)' });
-    this.c[4] = UIL.DOM('UIL svgbox', 'path', 'width:'+this.w+'px; height:'+this.height+'px; pointer-events:none;', { d:this.makePath(), fill:this.fontColor });
-    this.c[5] = UIL.DOM('UIL svgbox', 'circle', 'width:'+this.w+'px; height:'+this.height+'px; pointer-events:none;', { cx:this.radius, cy:this.radius, r:this.radius*0.5, fill:UIL.bgcolor(UIL.COLOR, 1) });
-    
+    UIL.DOM( null, 'circle', null, { cx:this.radius, cy:this.radius*0.5, r:3, fill:this.fontColor }, this.c[5] );
+
     this.c[3].events = [ 'mouseover', 'mousedown', 'mouseout' ];
-    //this.c[2].events = [ 'click', 'keydown', 'keyup' ];
+
+    this.r = 0;
 
     this.init();
 
-    //if(UIL.main) UIL.main.calc();
+    this.update();
 
 };
 
@@ -43,9 +63,8 @@ UIL.Knob.prototype.constructor = UIL.Knob;
 
 UIL.Knob.prototype.handleEvent = function( e ) {
 
-    //e.preventDefault();
-    //e.stopPropagation();
-
+    e.preventDefault();
+    
     switch( e.type ) {
         case 'mouseover': this.over( e ); break;
         case 'mousedown': this.down( e ); break;
@@ -62,15 +81,15 @@ UIL.Knob.prototype.mode = function( mode ){
     switch(mode){
         case 0: // base
             UIL.setSvg( this.c[3], 'fill','rgba(0,0,0,0.2)');
-            UIL.setSvg( this.c[4], 'fill', this.fontColor );
+            UIL.setSvg( this.c[5], 'fill', this.fontColor, 1 );
         break;
         case 1: // over
             UIL.setSvg( this.c[3], 'fill','rgba(0,0,0,0.6)');
-            UIL.setSvg( this.c[4], 'fill', UIL.SELECT );
+            UIL.setSvg( this.c[5], 'fill', UIL.SELECT, 1 );
         break;
         case 2: // edit
             UIL.setSvg( this.c[3], 'fill','rgba(0,0,0,0.2)');
-            UIL.setSvg( this.c[4], 'fill', UIL.MOVING );
+            UIL.setSvg( this.c[5], 'fill', UIL.MOVING, 1 );
         break;
 
     }
@@ -118,7 +137,6 @@ UIL.Knob.prototype.down = function( e ){
 
     this.isDown = true;
     this.oldr = null;
-    //this.prev = { x:e.clientX, d:0, v:parseFloat(this.value), r:this.r  };
     this.move( e );
     this.mode(2);
 
@@ -130,66 +148,85 @@ UIL.Knob.prototype.down = function( e ){
 UIL.Knob.prototype.move = function( e ){
 
     if( this.isDown ){
+
         e.preventDefault(); 
         var rect = this.c[3].getBoundingClientRect();
-        //var x = e.clientX - (rect.left + this.radius);
-        //var y = e.clientY - (rect.top + this.radius);
-
         var x = this.radius - (e.clientX - rect.left);
         var y = this.radius - (e.clientY - rect.top);
-        this.r = Math.atan2(y, x) - Math.PI*0.5;
+        this.r = Math.atan2( x, y ) *-1;//- Math.PI*0.5;
 
-        var range = Math.PI*2;
-        this.r = (((this.r%range)+range)%range);
+        if (this.r > this.mPI) this.r = this.mPI;
+        if (this.r < -this.mPI) this.r = -this.mPI
 
-        if(this.oldr!==null) this.r = Math.abs(this.r - this.oldr) > Math.PI ? this.oldr : this.r;
+        var range = this.mPI - -this.mPI;//this.twoPi;
+        //this.r = (((this.r%range)+range)%range);
+
+        if( this.oldr!==null ) this.r = Math.abs(this.r - this.oldr) > Math.PI ? this.oldr : this.r;
 
         var steps = 1/range;
-        var value = (this.r)*steps;
+        //var value = (this.r)*steps;
+        var value = (this.r- -this.mPI)*steps;
 
         this.value = this.numValue( (this.range*value)+this.min );
 
-        this.oldr = this.r;
-
         this.update( true );
+
+        this.oldr = this.r;
     }
 
 };
 
-UIL.Knob.prototype.makePath = function(){
+UIL.Knob.prototype.makeGrad = function(){
 
+    var d = '';
+
+    var startangle = Math.PI+this.mPI;
+    var endangle = Math.PI-this.mPI;
+    var step = (startangle-endangle)/this.radius;
+
+    var p90 = Math.PI*0.5;
+    var angle = [this.mPI-p90, -this.mPI-p90, 0, Math.PI, Math.PI+p90];
     var r = this.radius;
-    var unit = ( Math.PI * 2 );  
-    var start = 0;
-    var end = this.percent * unit - 0.001;
-    var x1 = r + r * Math.sin(start);
-    var y1 = r - r * Math.cos(start);
-    var x2 = r + r * Math.sin(end);
-    var y2 = r - r * Math.cos(end);
-    var big = end - start > Math.PI ? 1 : 0;
-    return "M " + r + "," + r + " L " + x1 + "," + y1 + " A " + r + "," + r + " 0 " + big + " 1 " + x2 + "," + y2 + " Z";
+
+    var a, x, y, x2, y2;
+
+    for ( var i = 0; i <= this.radius; ++i ) {
+        a = startangle-(step*i);
+        x = r + Math.sin(a)*r;
+        y = r + Math.cos(a)*r;
+        x2 = r + Math.sin(a)*(r-3);
+        y2 = r + Math.cos(a)*(r-3);
+        d += 'M' + x + ' ' + y + ' L' + x2 + ' '+y2 + ' ';
+
+    }
+
+    
+    return d;
 
 };
 
 UIL.Knob.prototype.update = function( up ){
 
     this.c[2].textContent = this.value;
-
     this.percent = (this.value - this.min) / this.range;
 
-    UIL.setSvg( this.c[4], 'd', this.makePath() );
+    var range = this.mPI - -this.mPI;
+    this.rr = ( (this.percent*range) - (this.mPI)) * this.toDeg;
+    UIL.setSvg( this.c[5], 'transform', 'rotate('+this.rr+' '+this.radius+' '+this.radius+')', 1 );
+
+    //UIL.setSvg( this.c[4], 'd', this.makePath() );
     if( up ) this.callback(this.value);
     
 };
 
-UIL.Knob.prototype.rSize = function(){
+/*UIL.Knob.prototype.rSize = function(){
 
     UIL.Proto.prototype.rSize.call( this );
 
-    this.c[2].style.left = (this.sa+(this.radius-20)) + 'px';
-    this.c[3].style.left = this.sa + 'px';
-    //this.c[2].style.width = this.sb + 'px';
+    //this.c[3].style.left = 10 + 'px';
+    //this.c[4].style.left = 10 + 'px';
+    //this.c[5].style.left = 10 + 'px';
 
-    this.update();
+    //this.update();
 
-};
+};*/

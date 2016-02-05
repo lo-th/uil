@@ -13,13 +13,14 @@ var UIL = UIL || ( function () {
 
     return {
         main:null,
-        REVISION: '0.8',
+        REVISION: '0.9',
         DEF:false,
         WIDTH:300,
         BW:190,
         AW:100,
 
-        TXT:'font-family:"Lucida Console", Monaco, monospace; font-size:11px; color:#cccccc; background:none; padding:3px 10px; left:0; top:0px; height:17px; width:100px; overflow:hidden; white-space: nowrap;',
+        UNS:'-o-user-select:none; -ms-user-select:none; -khtml-user-select:none; -webkit-user-select:none; -moz-user-select:none;',
+        TXT:'font-family:"Lucida Console", Monaco, monospace; font-size:11px; color:#cccccc; background:none; padding:3px 10px; left:0; top:0; height:17px; width:100px; overflow:hidden; white-space: nowrap;',
 
         DOM: Crea.dom,
         CC: Crea.cc,
@@ -27,13 +28,16 @@ var UIL = UIL || ( function () {
         setSvg : Crea.setSvg,
 
         sizer:function(w){
-            this.WIDTH = w.toFixed(0);
+
+            this.WIDTH = ~~ w;
             var s = this.WIDTH/3;
-            this.BW = (s*2)-10;
-            this.AW = s;
+            this.BW = ~~ ((s*2)-10);
+            this.AW = ~~ s;
 
             if(this.main) this.main.changeWidth();
+
         },
+
         classDefine:function(){
             UIL.COLOR = 'N';
             UIL.SELECT = '#035fcf';
@@ -43,13 +47,14 @@ var UIL = UIL || ( function () {
             UIL.SVGC = 'rgba(120,120,120,0.6)';
             //UIL.txt1 = 'font-family:"Open Sans", sans-serif; font-size:11px; color:#cccccc; outline:0; padding:0px 10px; left:0; top:1px; height:17px; width:100px; overflow:hidden;';
             //UIL.txt1 = 'font-family:"Lucida Console", Monaco, monospace; font-size:11px; color:#cccccc; background:none; padding:3px 10px; left:0; top:0px; height:17px; width:100px; overflow:hidden;';
-            UIL.CC('UIL', 'position:absolute; pointer-events:none; box-sizing:border-box; margin:0; padding:0; ');
+            UIL.CC('UIL', UIL.UNS+' position:absolute; pointer-events:none; box-sizing:border-box; margin:0; padding:0; border:none; ');
             //UIL.CC('UIL', 'position:absolute; pointer-events:none; box-sizing:border-box; -o-user-select:none; -ms-user-select:none; -khtml-user-select:none; -webkit-user-select:none; -moz-user-select:none; margin:0; padding:0; ');
 
-            UIL.CC('UIL.content', 'width:300px; overflow:hidden; background:none;');
-            UIL.CC('UIL.inner', 'width:300px; top:0; left:0; height:auto; overflow:hidden; background:none;');
+            UIL.CC('UIL.content', ' display:block; width:300px; height:auto; top:0; left:0;  overflow:hidden; background:none; transition:height, 0.1s ease-out;');
+            UIL.CC('UIL.inner', 'width:100%; top:0; left:0; height:auto; overflow:hidden; background:none; ');
+            UIL.CC('UIL.bottom', UIL.TXT+'width:100%; top:auto; bottom:0; left:0; height:20px; overflow:hidden; background:none; text-align:center; padding:5px 10px; pointer-events:auto; cursor:pointer;' );
 
-            UIL.CC('UIL.base', 'position:relative; transition:height, 0.1s ease-out; height:20px; overflow:hidden;');
+            UIL.CC('UIL.base', 'position:relative; height:20px; overflow:hidden; float: left');
 
             UIL.CC('UIL.text', UIL.TXT);
 
@@ -58,7 +63,8 @@ var UIL = UIL || ( function () {
             UIL.CC('UIL.listItem', 'position:relative; height:18px; background:rgba(0,0,0,0.2); border-bottom:1px solid rgba(0,0,0,0.2); pointer-events:auto; cursor:pointer;'+UIL.TXT);
             UIL.CC('UIL.listItem:hover', 'background:'+UIL.SELECT+'; color:#FFFFFF;')
 
-            UIL.CC('UIL.scroll-bg', 'cursor:w-resize; pointer-events:auto; background:rgba(256,0,0,0.2);');
+            UIL.CC('UIL.scroll-bg', 'cursor:w-resize; pointer-events:auto; background-image:linear-gradient(to right,  rgba(255,255,255,0),  rgba(255,255,255,0.3));');
+            UIL.CC('UIL.scroll', ' background:rgba(255,255,255,0.2);');
             UIL.CC('UIL.svgbox', 'left:100px; top:1px; width:190px; height:17px; pointer-events:auto; cursor:pointer;');
 
             UIL.DEF = true;
@@ -76,7 +82,7 @@ var UIL = UIL || ( function () {
                 }
             }
             var color = 'rgba('+r+','+g+','+b+','+a+')';
-            if(a==0) color = 'none';
+            if(a === 0) color = 'none';
             return color;
         }
     };

@@ -2,6 +2,8 @@ UIL.List = function( o ){
 
     UIL.Proto.call( this, o );
 
+    this.type = 'list';
+
     this.c[2] = UIL.DOM('UIL list');
     this.c[3] = UIL.DOM('UIL svgbox', 'rect', '', {width:'100%', height:17, fill:UIL.bgcolor(UIL.COLOR), 'stroke-width':1, stroke:UIL.SVGC  });
     this.c[4] = UIL.DOM('UIL', 'path','position:absolute; width:16px; height:16px; left:'+(this.sa+this.sb-17)+'px; top:1px; pointer-events:none;',{ width:16, height:16, 'd':'M 6 4 L 10 8 6 12', 'stroke-width':2, stroke:this.fontColor, fill:'none', 'stroke-linecap':'butt' } );
@@ -235,11 +237,13 @@ UIL.List.prototype.listShow = function(){
     if( this.side === 'up' ) UIL.setSvg( this.c[4], 'd','M 12 10 L 8 6 4 10');
     else UIL.setSvg( this.c[4], 'd','M 12 6 L 8 10 4 6');
 
-    if(UIL.main) UIL.main.calc();
+    if(UIL.main) UIL.main.calc(this.h-20);
 
 };
 
 UIL.List.prototype.listHide = function(){
+
+    if( UIL.main ) UIL.main.calc(-(this.h-20));
 
     this.show = false;
     this.h = 20;
@@ -247,7 +251,7 @@ UIL.List.prototype.listHide = function(){
     this.c[2].style.display = 'none';
     UIL.setSvg( this.c[4], 'd','M 6 4 L 10 8 6 12');
 
-    if( UIL.main ) UIL.main.calc();
+    
 
 };
 

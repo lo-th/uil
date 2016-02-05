@@ -2,14 +2,16 @@ UIL.Proto = function( o ){
 
     o = o || {};
 
+    this.type = '';
+
+    // if is on ui pannel
+    this.isUI = o.isUI || false;
+
     // only most simple 
     this.mono = false;
 
     // no title 
     this.simple = o.simple || false;
-
-    // bottom line
-    this.liner = null;
 
     // define obj size
     this.setSize( o.size );
@@ -31,6 +33,8 @@ UIL.Proto = function( o ){
     this.c = [];
 
     this.c[0] = UIL.DOM('UIL base');
+
+    if(this.isUI) this.c[0].style.marginBottom = '1px';
     
 
     if(!this.simple){ 
@@ -45,12 +49,12 @@ UIL.Proto = function( o ){
             this.c[0].style[p] = o.pos[p];
         }
         this.mono = true;
-    } else {
+    }/* else {
         if(UIL.main){
             this.liner = UIL.main.liner();
             this.c[0].appendChild( this.liner );
         }
-    }
+    }*/
 }
 
 UIL.Proto.prototype = {
@@ -60,8 +64,10 @@ UIL.Proto.prototype = {
     init: function (){
 
         this.c[0].style.height = this.h + 'px';
-
         this.c[0].style.background = UIL.bgcolor(this.color);
+
+        if(this.type==='list' || this.type==='group' || this.type==='color') this.c[0].style.transition = 'height, 0.1s ease-out';
+
         for( var i = 0; i < this.c.length; i++ ){
             if( i === 0 ){ 
                 if(this.target !== null ) this.target.appendChild( this.c[0] );
@@ -85,13 +91,15 @@ UIL.Proto.prototype = {
 
     setSize:function(sx){
 
+        if(this.type === 'circular' || this.type === 'knob' ) return;
+
         this.size = sx || UIL.WIDTH;
         if( this.simple ){
             this.sa = 1;
             this.sb = sx-2;
         }else{
-            this.sa = (this.size/3).toFixed(0)*1;
-            this.sb = ((this.sa*2)-10).toFixed(0)*1;
+            this.sa = ~~ (this.size/3);
+            this.sb = ~~ ((this.sa*2)-10);
         }
 
     },
@@ -104,13 +112,14 @@ UIL.Proto.prototype = {
 
         var i = this.c.length;
         while(i--){
-            if(i==0){
-                if( this.liner !== null ){ 
+            //if(i==0){
+                /*if( this.liner !== null ){ 
                     this.c[0].removeChild( this.liner );
                     this.liner = null;
-                }
+                }*/
                 
-            } else {
+            //} else {
+            if(i !== 0){
                 if( this.c[i] !== undefined ){
                     if( this.c[i].children ) this.clearDOM( this.c[i] );
                     this.c[0].removeChild( this.c[i] );
@@ -119,8 +128,8 @@ UIL.Proto.prototype = {
             }
         }
 
-        if( this.target !== null ) this.target.removeChild(this.c[0]);
-        else UIL.main.inner.removeChild(this.c[0]);
+        if( this.target !== null ) this.target.removeChild( this.c[0] );
+        else UIL.main.inner.removeChild( this.c[0] );
 
         this.c[0] = null;
         this.handleEvent = null;
@@ -166,12 +175,16 @@ UIL.Proto.prototype = {
 
     rSize:function(){
 
+        if(this.type === 'circular' || this.type === 'knob' ) return;
+
         this.c[0].style.width = this.size+'px';
         if( !this.simple ) this.c[1].style.width = this.sa+'px';
     
     },
 
-    // EVENTS DISPATCH
+    // ----------------------
+    //   EVENTS DISPATCH
+    // ----------------------
 
     addEvent: function(){
 

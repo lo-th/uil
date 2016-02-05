@@ -2,6 +2,8 @@ UIL.Number = function( o ){
 
     UIL.Proto.call( this, o );
 
+    this.type = 'number';
+
     this.setTypeNumber( o );
 
     this.allway = o.allway || false;

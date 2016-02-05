@@ -2,6 +2,7 @@ UIL.Circular = function( o ){
 
     UIL.Proto.call( this, o );
 
+    this.type = 'circular';
     this.setTypeNumber( o );
 
     this.range = this.max - this.min;
@@ -9,24 +10,46 @@ UIL.Circular = function( o ){
     this.value = o.value || 0;
 
     this.radius = o.radius || 15;
+    
+    this.size = (this.radius*2)+20;
+
+    if(o.size !== undefined){
+        this.size = o.size;
+        this.radius = ~~ (this.size-20)*0.5;
+    }
+
     this.w = this.radius*2;
     this.height = this.radius*2;
-    this.h = (this.radius*2) + 22;
+    this.h = this.height + 40;
 
     this.twoPi = Math.PI * 2;
 
+    this.top = 0;
+
+    this.c[0].style.width = this.size +'px';
+
+    if(this.c[1] !== undefined) {
+
+        this.c[1].style.width = this.size +'px';
+        this.c[1].style.textAlign = 'center';
+        this.top = 20;
+
+    }
+
     this.percent = 0;
 
-    this.c[2] = UIL.DOM('UIL text', 'div', 'top:'+(this.height+2)+'px; text-align:center; width:40px; padding:3px 5px; color:'+ this.fontColor );
+    this.c[2] = UIL.DOM('UIL text', 'div', 'top:'+(this.height+20)+'px; text-align:center; width:'+this.size+'px; padding:3px 5px; color:'+ this.fontColor );
 
-    this.c[3] = UIL.DOM('UIL svgbox', 'circle', 'width:'+this.w+'px; height:'+this.height+'px; cursor:pointer;', { cx:this.radius, cy:this.radius, r:this.radius, fill:'rgba(0,0,0,0.3)' });
-    this.c[4] = UIL.DOM('UIL svgbox', 'path', 'width:'+this.w+'px; height:'+this.height+'px; pointer-events:none;', { d:this.makePath(), fill:this.fontColor });
-    this.c[5] = UIL.DOM('UIL svgbox', 'circle', 'width:'+this.w+'px; height:'+this.height+'px; pointer-events:none;', { cx:this.radius, cy:this.radius, r:this.radius*0.5, fill:UIL.bgcolor(UIL.COLOR, 1), 'stroke-width':1, stroke:UIL.SVGC });
-    this.c[6] = UIL.DOM('UIL svgbox', 'circle', 'width:'+this.w+'px; height:'+this.height+'px; pointer-events:none;', { cx:this.radius, cy:this.radius, r:this.radius, fill:'none', 'stroke-width':1, stroke:UIL.SVGC });
+    this.c[3] = UIL.DOM('UIL svgbox', 'circle', 'left:10px; top:'+this.top+'px; width:'+this.w+'px; height:'+this.height+'px; cursor:pointer;', { cx:this.radius, cy:this.radius, r:this.radius, fill:'rgba(0,0,0,0.3)' });
+    this.c[4] = UIL.DOM('UIL svgbox', 'path', 'left:10px; top:'+this.top+'px; width:'+this.w+'px; height:'+this.height+'px; pointer-events:none;', { d:this.makePath(), fill:this.fontColor });
+    this.c[5] = UIL.DOM('UIL svgbox', 'circle', 'left:10px; top:'+this.top+'px; width:'+this.w+'px; height:'+this.height+'px; pointer-events:none;', { cx:this.radius, cy:this.radius, r:this.radius*0.5, fill:UIL.bgcolor(UIL.COLOR, 1), 'stroke-width':1, stroke:UIL.SVGC });
+    //this.c[6] = UIL.DOM('UIL svgbox', 'circle', 'left:10px; top:'+this.top+'px; width:'+this.w+'px; height:'+this.height+'px; pointer-events:none;', { cx:this.radius, cy:this.radius, r:this.radius, fill:'none', 'stroke-width':1, stroke:UIL.SVGC });
 
     this.c[3].events = [ 'mouseover', 'mousedown', 'mouseout' ];
 
     this.init();
+
+    this.update();
 
 };
 
@@ -36,7 +59,6 @@ UIL.Circular.prototype.constructor = UIL.Circular;
 UIL.Circular.prototype.handleEvent = function( e ) {
 
     e.preventDefault();
-    //e.stopPropagation();
 
     switch( e.type ) {
         case 'mouseover': this.over( e ); break;
@@ -110,7 +132,6 @@ UIL.Circular.prototype.down = function( e ){
 
     this.isDown = true;
     this.oldr = null;
-    //this.prev = { x:e.clientX, d:0, v:parseFloat(this.value), r:this.r  };
     this.move( e );
     this.mode(2);
 
@@ -139,8 +160,6 @@ UIL.Circular.prototype.move = function( e ){
 
         this.value = this.numValue( (this.range*value)+this.min );
 
-        
-
         this.update( true );
 
         this.oldr = this.r;
@@ -166,25 +185,16 @@ UIL.Circular.prototype.makePath = function(){
 UIL.Circular.prototype.update = function( up ){
 
     this.c[2].textContent = this.value;
-
     this.percent = (this.value - this.min) / this.range;
-
     UIL.setSvg( this.c[4], 'd', this.makePath() );
     if( up ) this.callback(this.value);
     
 };
 
-UIL.Circular.prototype.rSize = function(){
+/*UIL.Circular.prototype.rSize = function(){
 
     UIL.Proto.prototype.rSize.call( this );
 
-    this.c[2].style.left = (this.sa+(this.radius-20)) + 'px';
-    this.c[3].style.left = this.sa + 'px';
-    this.c[4].style.left = this.sa + 'px';
-    this.c[5].style.left = this.sa + 'px';
-    this.c[6].style.left = this.sa + 'px';
-    //this.c[2].style.width = this.sb + 'px';
+    //this.update();
 
-    this.update();
-
-};
+};*/

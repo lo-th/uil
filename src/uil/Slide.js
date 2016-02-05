@@ -2,6 +2,8 @@ UIL.Slide = function( o ){
 
     UIL.Proto.call( this, o );
 
+    this.type = 'slide';
+
     this.setTypeNumber( o );
 
     this.range = this.max - this.min;

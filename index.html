@@ -82,6 +82,16 @@ function populate(){
         gr0.add('slide',  { name:'slide', callback:callback, min:-100, max:100, value:0, precision:0 });
         gr0.add('slide',  { name:'slide', callback:callback, min:-100, max:100, value:0, precision:0 });
         gr0.add('slide',  { name:'slide', callback:callback, min:-100, max:100, value:0, precision:0 });
+
+        ui.add('circular', { name:'circular', callback:callback, size:75, min:0, max:100, value:25, precision:2 , fontColor:'#D4B87B' });
+        ui.add('circular', { name:'circular', callback:callback, size:75, min:0, max:100, value:50, precision:2 , fontColor:'#D4B87B' });
+        ui.add('circular', { name:'circular', callback:callback, size:75, min:0, max:100, value:75, precision:2 , fontColor:'#D4B87B' });
+        ui.add('circular', { name:'circular', callback:callback, size:75, min:0, max:100, value:100, precision:2 , fontColor:'#D4B87B' });
+
+        ui.add('knob', { name:'knob', callback:callback, size:75, min:0, max:100, value:25, precision:2 , fontColor:'#D4B87B' });
+        ui.add('knob', { name:'knob', callback:callback, size:75, min:0, max:100, value:50, precision:2 , fontColor:'#D4B87B' });
+        ui.add('knob', { name:'knob', callback:callback, size:75, min:0, max:100, value:75, precision:2 , fontColor:'#D4B87B' });
+        ui.add('knob', { name:'knob', callback:callback, size:75, min:0, max:100, value:100, precision:2 , fontColor:'#D4B87B' });
         //gr0.open();
 
         display = true;

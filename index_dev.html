@@ -5,7 +5,7 @@
 <title>Uil dev</title>
 <link rel="shortcut icon" href="favicon.ico">
 <style>
-*{ margin: 0; padding: 0; border: 0; -o-user-select:none; -ms-user-select:none; -khtml-user-select:none; -webkit-user-select:none; -moz-user-select:none; } 
+/**{ margin: 0; padding: 0; border: 0; -o-user-select:none; -ms-user-select:none; -khtml-user-select:none; -webkit-user-select:none; -moz-user-select:none; } */
 html{ overflow:hidden; width:100%; height:100%; }
 body { font-family: "Lucida Console", Monaco, monospace; background-color:#161616; font-size:11px; color:#fff;}
 
@@ -47,10 +47,10 @@ var list2 = ['item-0', 'item-1', 'item-2'];
 document.getElementById('version').innerHTML = 'il '+ UIL.REVISION;
 
 var debug = document.getElementById('debug');
-var callback = function(v){ debug.innerHTML = v; }
+var callback = function( v ){ debug.innerHTML = v; }
 var callbackButton = function(){ debug.innerHTML = "i'm a button !!" ; }
-var callbackSize = function(v){ timer = setTimeout( UIL.sizer(v), 1000); }
-var callbackLogo = function(v){ document.getElementById('logoin').setAttributeNS(null, 'fill', UIL.hexToHtml(v)); document.getElementById('version').style.color = UIL.hexToHtml(v);  }
+var callbackSize = function( v ){ timer = setTimeout( UIL.sizer( v ), 1000); }
+var callbackLogo = function( v ){ document.getElementById('logoin').setAttributeNS(null, 'fill', UIL.hexToHtml(v)); document.getElementById('version').style.color = UIL.hexToHtml(v);  }
 
 
 // single UI element
@@ -62,7 +62,7 @@ var c = new UIL.List({target:document.body, callback:null, name:' ', color:'no',
 var w = new UIL.Number({target:document.body, callback:null, name:' ', color:'no', size:100, pos:{left:'290px', top:'auto', bottom:'10px' }, simple:true });
 
 // in GUI element
-var ui = new UIL.Gui('top:145px; left:50%;', 300, true);
+var ui = new UIL.Gui('top:145px; left:50%;', 300, true, 'N');
 populate();
 
 function populate(){
@@ -89,7 +89,16 @@ function populate(){
         gr0.add('slide',  { name:'slide', callback:callback, min:-100, max:100, value:0, precision:0 });
         gr0.add('slide',  { name:'slide', callback:callback, min:-100, max:100, value:0, precision:0 });
 
-        ui.add('circular', { name:'circular', callback:callback, radius:40, min:0, max:100, value:0.5, precision:2 , fontColor:'#D4B87B' });
+        ui.add('circular', { name:'circular', callback:callback, size:75, min:0, max:100, value:25, precision:2 , fontColor:'#D4B87B' });
+        ui.add('circular', { name:'circular', callback:callback, size:75, min:0, max:100, value:50, precision:2 , fontColor:'#D4B87B' });
+        ui.add('circular', { name:'circular', callback:callback, size:75, min:0, max:100, value:75, precision:2 , fontColor:'#D4B87B' });
+        ui.add('circular', { name:'circular', callback:callback, size:75, min:0, max:100, value:100, precision:2 , fontColor:'#D4B87B' });
+
+        ui.add('knob', { name:'knob', callback:callback, size:75, min:0, max:100, value:25, precision:2 , fontColor:'#D4B87B' });
+        ui.add('knob', { name:'knob', callback:callback, size:75, min:0, max:100, value:50, precision:2 , fontColor:'#D4B87B' });
+        ui.add('knob', { name:'knob', callback:callback, size:75, min:0, max:100, value:75, precision:2 , fontColor:'#D4B87B' });
+        ui.add('knob', { name:'knob', callback:callback, size:75, min:0, max:100, value:100, precision:2 , fontColor:'#D4B87B' });
+
         //gr0.open();
 
         display = true;

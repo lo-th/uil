@@ -2,6 +2,8 @@ UIL.Bool = function( o ){
 
     UIL.Proto.call( this, o );
 
+    this.type = 'bool';
+
     this.value = o.value || false;
 
     this.c[2] = UIL.DOM('UIL svgbox', 'rect', 'width:17px;', {width:17, height:17, fill:UIL.SVGB, 'stroke-width':1, stroke:UIL.SVGC });

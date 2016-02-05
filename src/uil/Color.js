@@ -2,6 +2,8 @@ UIL.Color = function( o ){
     
     UIL.Proto.call( this, o );
 
+    this.type = 'color';
+
     this.type = o.type || 'array';
     this.width = this.sb;
     this.oldWidth = 0;
@@ -141,6 +143,7 @@ UIL.Color.prototype.redraw = function(){
 };
 
 UIL.Color.prototype.show = function(){
+
     if(this.oldWidth!==this.width) this.redraw();
     this.isShow = true;
     this.h = this.width + 30;
@@ -155,10 +158,14 @@ UIL.Color.prototype.show = function(){
     this.c[4].style.display = 'block';
     this.c[5].style.display = 'block';
     this.c[6].style.display = 'block';
-    if(UIL.main) UIL.main.calc();
+
+    if(UIL.main) UIL.main.calc( this.h-20 );
+
 };
 
 UIL.Color.prototype.hide = function(){
+
+    if( UIL.main ) UIL.main.calc( -(this.h-20) );
     this.isShow = false;
     this.h = 20;
     if(this.side=='up'){ 
@@ -171,7 +178,7 @@ UIL.Color.prototype.hide = function(){
     this.c[6].style.display = 'none';
     //this.c[6].onmousedown = null;
     //this.c[6].onmouseout = null;
-    if( UIL.main ) UIL.main.calc();
+    
 };
 
 UIL.Color.prototype.updateDisplay = function(){
