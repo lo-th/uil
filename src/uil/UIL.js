@@ -20,6 +20,7 @@ var UIL = UIL || ( function () {
         AW:100,
 
         UNS:'-o-user-select:none; -ms-user-select:none; -khtml-user-select:none; -webkit-user-select:none; -moz-user-select:none;',
+        US:'-o-user-select:text; -ms-user-select:text; -khtml-user-select:text; -webkit-user-select:text; -moz-user-select:text;',
         TXT:'font-family:"Lucida Console", Monaco, monospace; font-size:11px; color:#cccccc; background:none; padding:3px 10px; left:0; top:0; height:17px; width:100px; overflow:hidden; white-space: nowrap;',
 
         DOM: Crea.dom,
@@ -47,7 +48,7 @@ var UIL = UIL || ( function () {
             UIL.SVGC = 'rgba(120,120,120,0.6)';
             //UIL.txt1 = 'font-family:"Open Sans", sans-serif; font-size:11px; color:#cccccc; outline:0; padding:0px 10px; left:0; top:1px; height:17px; width:100px; overflow:hidden;';
             //UIL.txt1 = 'font-family:"Lucida Console", Monaco, monospace; font-size:11px; color:#cccccc; background:none; padding:3px 10px; left:0; top:0px; height:17px; width:100px; overflow:hidden;';
-            UIL.CC('UIL', UIL.UNS+' position:absolute; pointer-events:none; box-sizing:border-box; margin:0; padding:0; border:none; ');
+            UIL.CC('UIL', UIL.UNS + ' position:absolute; pointer-events:none; box-sizing:border-box; margin:0; padding:0; border:none; ');
             //UIL.CC('UIL', 'position:absolute; pointer-events:none; box-sizing:border-box; -o-user-select:none; -ms-user-select:none; -khtml-user-select:none; -webkit-user-select:none; -moz-user-select:none; margin:0; padding:0; ');
 
             UIL.CC('UIL.content', ' display:block; width:300px; height:auto; top:0; left:0;  overflow:hidden; background:none; transition:height, 0.1s ease-out;');
@@ -57,6 +58,7 @@ var UIL = UIL || ( function () {
             UIL.CC('UIL.base', 'position:relative; height:20px; overflow:hidden; float: left');
 
             UIL.CC('UIL.text', UIL.TXT);
+            UIL.CC('UIL.textSelect', UIL.TXT + UIL.US + 'outlineStyle:none; webkitAppearance:none;' );
 
             UIL.CC('UIL.list', 'box-sizing:content-box; border:20px solid transparent; border-bottom:10px solid transparent; left:80px; top:0px; width:190px; height:90px; overflow:hidden; cursor:s-resize; pointer-events:auto; display:none;');
             UIL.CC('UIL.list-in', 'left:0; top:0; width:100%; background:rgba(0,0,0,0.2); ');

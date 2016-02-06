@@ -11,10 +11,16 @@ var Crea = Crea || ( function () {
 
     var doc = document;
     var head = doc.getElementsByTagName('head')[0];
+
     var DOM_SIZE = [ 'height', 'width', 'top', 'left', 'bottom', 'right', 'margin-left', 'margin-right', 'margin-top', 'margin-bottom'];
     var SVG_TYPE = [ 'rect', 'circle', 'path', 'polygon', 'text', 'pattern', 'defs', 'g', 'transform',, 'line', 'foreignObject', 'linearGradient', 'stop', 'animate', 'radialGradient' ];
     var SVG_TYPE_G = [ 'rect', 'circle', 'path', 'polygon', 'text', 'g', 'line', 'foreignObject', 'linearGradient', 'radialGradient' ];
+
     var svgns = "http://www.w3.org/2000/svg";
+    var htmls = "http://www.w3.org/1999/xhtml";
+
+    //var matrix = document.createElementNS("http://www.w3.org/2000/svg", "svg");//.createSVGMatrix();
+    //console.log(matrix)
         
 
     Crea = function () {};
@@ -44,33 +50,38 @@ var Crea = Crea || ( function () {
 
     };
 
+    // DOM CREATOR
+
     Crea.dom = function ( Class, type, css, obj, dom, id ) {
 
         type = type || 'div';
 
-        if( SVG_TYPE.indexOf(type) !== -1 ){
+        if( SVG_TYPE.indexOf(type) !== -1 ){ // is svg element
 
-            if( dom === undefined ){ 
-                dom = doc.createElementNS( svgns, 'svg' );
-            }
+            // create new svg if not def
+            if( dom === undefined ) dom = doc.createElementNS( svgns, 'svg' );
 
+            // create the element 
             var g = doc.createElementNS( svgns, type );
-            if( SVG_TYPE_G.indexOf(type) !== -1 && id === undefined ) g.setAttributeNS( null, 'pointer-events', 'none' );
 
-            for(var e in obj){
+            // add attributes
+            for(var att in obj){
 
-                if(e === 'txt' ) g.textContent = obj[e];
-                else g.setAttributeNS( null, e, obj[e] );
+                if( att === 'txt' ) g.textContent = obj[ att ];
+                else g.setAttributeNS( null, att, obj[ att ] );
 
             }
+
+            if( SVG_TYPE_G.indexOf(type) !== -1 && id === undefined  ) g.setAttributeNS( null, 'pointer-events', 'none' );
 
             if( id === undefined ) dom.appendChild( g );
             else dom.childNodes[ id || 0 ].appendChild( g );
 
             
-        } else {
+        } else { // is html element
 
-            if( dom === undefined ) dom = doc.createElement( type );
+            if( dom === undefined ) dom = doc.createElementNS( htmls, type );//doc.createElement( type );
+
         }
 
 
@@ -79,7 +90,10 @@ var Crea = Crea || ( function () {
 
         if( id === undefined ) return dom;
         else return dom.childNodes[ id || 0 ];
+
     };
+
+    // ROOT CLASS DEFINITION
 
     Crea.cc = function ( name, rules, noAdd ) {
 
@@ -98,14 +112,16 @@ var Crea = Crea || ( function () {
 
     };
 
-    Crea.Svg = function ( ){
+    /*Crea.Svg = function (){
+
+        this.root = document.createElementNS("http://www.w3.org/2000/svg", "svg");
 
     };
 
     Crea.Svg.prototype = {
         constructor: Crea.svg,
 
-    };
+    };*/
 
 
 
@@ -134,6 +150,7 @@ var UIL = UIL || ( function () {
         AW:100,
 
         UNS:'-o-user-select:none; -ms-user-select:none; -khtml-user-select:none; -webkit-user-select:none; -moz-user-select:none;',
+        US:'-o-user-select:text; -ms-user-select:text; -khtml-user-select:text; -webkit-user-select:text; -moz-user-select:text;',
         TXT:'font-family:"Lucida Console", Monaco, monospace; font-size:11px; color:#cccccc; background:none; padding:3px 10px; left:0; top:0; height:17px; width:100px; overflow:hidden; white-space: nowrap;',
 
         DOM: Crea.dom,
@@ -161,7 +178,7 @@ var UIL = UIL || ( function () {
             UIL.SVGC = 'rgba(120,120,120,0.6)';
             //UIL.txt1 = 'font-family:"Open Sans", sans-serif; font-size:11px; color:#cccccc; outline:0; padding:0px 10px; left:0; top:1px; height:17px; width:100px; overflow:hidden;';
             //UIL.txt1 = 'font-family:"Lucida Console", Monaco, monospace; font-size:11px; color:#cccccc; background:none; padding:3px 10px; left:0; top:0px; height:17px; width:100px; overflow:hidden;';
-            UIL.CC('UIL', UIL.UNS+' position:absolute; pointer-events:none; box-sizing:border-box; margin:0; padding:0; border:none; ');
+            UIL.CC('UIL', UIL.UNS + ' position:absolute; pointer-events:none; box-sizing:border-box; margin:0; padding:0; border:none; ');
             //UIL.CC('UIL', 'position:absolute; pointer-events:none; box-sizing:border-box; -o-user-select:none; -ms-user-select:none; -khtml-user-select:none; -webkit-user-select:none; -moz-user-select:none; margin:0; padding:0; ');
 
             UIL.CC('UIL.content', ' display:block; width:300px; height:auto; top:0; left:0;  overflow:hidden; background:none; transition:height, 0.1s ease-out;');
@@ -171,6 +188,7 @@ var UIL = UIL || ( function () {
             UIL.CC('UIL.base', 'position:relative; height:20px; overflow:hidden; float: left');
 
             UIL.CC('UIL.text', UIL.TXT);
+            UIL.CC('UIL.textSelect', UIL.TXT + UIL.US + 'outlineStyle:none; webkitAppearance:none;' );
 
             UIL.CC('UIL.list', 'box-sizing:content-box; border:20px solid transparent; border-bottom:10px solid transparent; left:80px; top:0px; width:190px; height:90px; overflow:hidden; cursor:s-resize; pointer-events:auto; display:none;');
             UIL.CC('UIL.list-in', 'left:0; top:0; width:100%; background:rgba(0,0,0,0.2); ');
@@ -980,7 +998,7 @@ UIL.String = function( o ){
     this.value = o.value || '';
     this.allway = o.allway || false;
 
-    this.c[2] = UIL.DOM( 'UIL text', 'div', 'pointer-events:auto; padding:3px 5px; outlineStyle:none; webkitAppearance:none;' );
+    this.c[2] = UIL.DOM( 'UIL textSelect', 'div', 'pointer-events:auto; padding:3px 5px;' );
     //this.c[2].name = 'input';
     //this.c[2].value = this.value;
     this.c[2].style.color = this.fontColor;
@@ -1087,7 +1105,7 @@ UIL.Number = function( o ){
     while(i--){
         if(this.isAngle) this.value[i] = (this.value[i] * 180 / Math.PI).toFixed( this.precision );
         //this.c[2+i] = UIL.DOM('UIL text', 'input', 'pointer-events:auto; padding:0px 5px; padding-bottom:2px; width:'+this.w+'px; left:'+(UIL.AW+(this.w*i)+(5*i))+'px;');
-        this.c[2+i] = UIL.DOM('UIL text', 'div', 'pointer-events:auto; cursor:move; padding:3px 5px; width:'+this.w+'px; left:'+(UIL.AW+(this.w*i)+(5*i))+'px;');
+        this.c[2+i] = UIL.DOM('UIL textSelect', 'div', 'pointer-events:auto; cursor:move; padding:3px 5px; width:'+this.w+'px; left:'+(UIL.AW+(this.w*i)+(5*i))+'px;');
         this.c[2+i].name = i;
        // this.c[2+i].value = this.value[i];
         this.c[2+i].textContent = this.value[i];

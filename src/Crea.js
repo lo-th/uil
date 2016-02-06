@@ -11,10 +11,16 @@ var Crea = Crea || ( function () {
 
     var doc = document;
     var head = doc.getElementsByTagName('head')[0];
+
     var DOM_SIZE = [ 'height', 'width', 'top', 'left', 'bottom', 'right', 'margin-left', 'margin-right', 'margin-top', 'margin-bottom'];
     var SVG_TYPE = [ 'rect', 'circle', 'path', 'polygon', 'text', 'pattern', 'defs', 'g', 'transform',, 'line', 'foreignObject', 'linearGradient', 'stop', 'animate', 'radialGradient' ];
     var SVG_TYPE_G = [ 'rect', 'circle', 'path', 'polygon', 'text', 'g', 'line', 'foreignObject', 'linearGradient', 'radialGradient' ];
+
     var svgns = "http://www.w3.org/2000/svg";
+    var htmls = "http://www.w3.org/1999/xhtml";
+
+    //var matrix = document.createElementNS("http://www.w3.org/2000/svg", "svg");//.createSVGMatrix();
+    //console.log(matrix)
         
 
     Crea = function () {};
@@ -44,33 +50,38 @@ var Crea = Crea || ( function () {
 
     };
 
+    // DOM CREATOR
+
     Crea.dom = function ( Class, type, css, obj, dom, id ) {
 
         type = type || 'div';
 
-        if( SVG_TYPE.indexOf(type) !== -1 ){
+        if( SVG_TYPE.indexOf(type) !== -1 ){ // is svg element
 
-            if( dom === undefined ){ 
-                dom = doc.createElementNS( svgns, 'svg' );
-            }
+            // create new svg if not def
+            if( dom === undefined ) dom = doc.createElementNS( svgns, 'svg' );
 
+            // create the element 
             var g = doc.createElementNS( svgns, type );
-            if( SVG_TYPE_G.indexOf(type) !== -1 && id === undefined ) g.setAttributeNS( null, 'pointer-events', 'none' );
 
-            for(var e in obj){
+            // add attributes
+            for(var att in obj){
 
-                if(e === 'txt' ) g.textContent = obj[e];
-                else g.setAttributeNS( null, e, obj[e] );
+                if( att === 'txt' ) g.textContent = obj[ att ];
+                else g.setAttributeNS( null, att, obj[ att ] );
 
             }
+
+            if( SVG_TYPE_G.indexOf(type) !== -1 && id === undefined  ) g.setAttributeNS( null, 'pointer-events', 'none' );
 
             if( id === undefined ) dom.appendChild( g );
             else dom.childNodes[ id || 0 ].appendChild( g );
 
             
-        } else {
+        } else { // is html element
 
-            if( dom === undefined ) dom = doc.createElement( type );
+            if( dom === undefined ) dom = doc.createElementNS( htmls, type );//doc.createElement( type );
+
         }
 
 
@@ -79,7 +90,10 @@ var Crea = Crea || ( function () {
 
         if( id === undefined ) return dom;
         else return dom.childNodes[ id || 0 ];
+
     };
+
+    // ROOT CLASS DEFINITION
 
     Crea.cc = function ( name, rules, noAdd ) {
 
@@ -98,14 +112,16 @@ var Crea = Crea || ( function () {
 
     };
 
-    Crea.Svg = function ( ){
+    /*Crea.Svg = function (){
+
+        this.root = document.createElementNS("http://www.w3.org/2000/svg", "svg");
 
     };
 
     Crea.Svg.prototype = {
         constructor: Crea.svg,
 
-    };
+    };*/
 
 
 
