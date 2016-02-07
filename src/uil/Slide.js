@@ -9,9 +9,11 @@ UIL.Slide = function( o ){
     this.range = this.max - this.min;
     this.width = UIL.BW - 40;
     this.w = this.width - 8;
-    this.h = o.height || 20;
 
-    this.height = this.h - 3;
+    this.h = o.height || 20;
+    this.h = this.h < 11 ? 11 : this.h;
+
+    //this.height = this.h - 3;
     this.value = o.value || 0;
     this.isDown = false;
     this.isOver = false;
@@ -21,8 +23,8 @@ UIL.Slide = function( o ){
     if(this.c[1]!==undefined) this.c[1].style.top = ty+'px';
 
     this.c[2] = UIL.DOM('UIL text', 'div', 'top:'+ty+'px; text-align:right; width:40px; padding:3px 5px; color:'+ this.fontColor );
-    this.c[3] = UIL.DOM('UIL svgbox', 'rect', 'width:'+this.width+'px; height:'+this.height+'px; cursor:w-resize;', { width:'100%', height:this.height, fill:UIL.SVGB, 'stroke-width':1, stroke:UIL.SVGC });
-    this.c[4] = UIL.DOM('UIL svgbox', 'rect', 'width:'+this.width+'px; height:'+this.height+'px; pointer-events:none;', { x:4, y:4, width:this.width-8, height:this.height-8, fill: this.fontColor });
+    this.c[3] = UIL.DOM('UIL svgbox', 'rect', 'width:'+this.width+'px; height:'+(this.h-3)+'px; cursor:w-resize;', { width:'100%', height:this.h-3, fill:UIL.SVGB, 'stroke-width':1, stroke:UIL.SVGC });
+    this.c[4] = UIL.DOM('UIL svgbox', 'rect', 'width:'+this.width+'px; height:'+(this.h-3)+'px; pointer-events:none;', { x:4, y:4, width:this.width-8, height:this.h-10, fill: this.fontColor });
     
     // pattern test
     UIL.DOM( null, 'defs', null, {}, this.c[3] );

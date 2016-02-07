@@ -1,25 +1,19 @@
 UIL.Gui = function(css, w, center, color){
 
-    UIL.sizer(w || 300);
+    UIL.sizer( w || 300 );
 
     UIL.main = this;
 
     this.color = color || UIL.COLOR;
     
-    //if(!UIL.DEF)UIL.classDefine();
-
-    
     this.isCenter = center || false;
     this.lockwheel = false;
-
     this.isOpen = true;
 
     this.uis = [];
 
     this.content = UIL.DOM('UIL content', 'div', css);
     document.body.appendChild( this.content );
-
-    //this.top = parseFloat(this.content.style.top.substring(0,this.content.style.top.length-2));
 
     this.inner = UIL.DOM('UIL inner');
     this.content.appendChild(this.inner);
@@ -31,7 +25,7 @@ UIL.Gui = function(css, w, center, color){
     this.content.appendChild(this.scrollBG);
     this.scrollBG.name = 'scroll';
 
-    this.scroll = UIL.DOM('UIL scroll', 'div', 'left:3px; top:0; width:4px; height:10px;  ');
+    this.scroll = UIL.DOM('UIL scroll', 'div', 'left:4px; top:0; width:3px; height:10px;  ');
     this.scrollBG.appendChild( this.scroll );
 
     this.bottom = UIL.DOM('UIL bottom');
@@ -50,7 +44,7 @@ UIL.Gui = function(css, w, center, color){
     this.content.addEventListener( 'mouseout',  this, false );
     this.content.addEventListener( 'mouseup',   this, false );
     this.content.addEventListener( 'mouseover', this, false );
-    //this.content.addEventListener( 'mousewheel', this, false );
+    this.content.addEventListener( 'mousewheel', this, false );
     
     window.addEventListener("resize", function(e){this.resize(e)}.bind(this), false );
 
@@ -62,15 +56,14 @@ UIL.Gui.prototype = {
 
     handleEvent : function( e ) {
 
-       // e.preventDefault();
+        //e.preventDefault();
         //e.stopPropagation();
 
         switch( e.type ) {
             case 'mousedown': this.down( e ); break;
             case 'mouseout': this.out( e ); break;
             case 'mouseover': this.over( e ); break;
-
-            //case 'mousewheel': this.wheel( e ); break;
+            case 'mousewheel': this.wheel( e ); break;
 
             case 'mouseup': this.up( e ); break;
             case 'mousemove': this.move( e ); break;
@@ -83,26 +76,29 @@ UIL.Gui.prototype = {
     ////
 
     down: function( e ){
-        if(e.target.name){
-            if(e.target.name === 'scroll'){
-                this.isDown = true;
-                this.move( e );
-                //UIL.setSvg(this.scroll, 'fill','#FFF');
 
-                this.scroll.style.background = 'rgba(255,255,255,0.75)';
+        if( !e.target.name ) return;
 
-                document.addEventListener( 'mouseup', this, false );
-                document.addEventListener( 'mousemove', this, false );
+        if(e.target.name === 'scroll'){
+            this.isDown = true;
+            this.move( e );
+            //UIL.setSvg(this.scroll, 'fill','#FFF');
 
-            }
-            if(e.target.name === 'bottom'){
-                this.isOpen = this.isOpen ? false : true;
+            this.scroll.style.background = 'rgba(255,255,255,0.75)';
 
-                this.show();
-                //this.calc();
+            document.addEventListener( 'mouseup', this, false );
+            document.addEventListener( 'mousemove', this, false );
 
-            }
         }
+        if(e.target.name === 'bottom'){
+
+            this.isOpen = this.isOpen ? false : true;
+
+            this.show();
+            //this.calc();
+
+        }
+        
     },
 
     move: function( e ){
@@ -111,72 +107,72 @@ UIL.Gui.prototype = {
 
         this.scroll.style.background = 'rgba(255,255,255,0.75)';
 
-
-        //var rect = this.content.getBoundingClientRect();
-        var y = (e.clientY-this.top)-(this.sh*0.5);
-
-        if(y<0) y = 0;
-        if(y>this.maxView-this.sh ) y = this.maxView-this.sh;
-
-        this.py = y;
-
-        this.update();
+        this.update( (e.clientY-this.top)-(this.sh*0.5) );
 
     },
 
+    
+
     out: function( e ){
+
+        if( !e.target.name ) return;
+
+        if(e.target.name === 'scroll'){
+            this.scroll.style.background = 'rgba(255,255,255,0.2)';
+        }
+
     },
 
     up: function( e ){
 
         this.isDown = false;
         this.scroll.style.background = 'rgba(255,255,255,0.2)';
-       // UIL.setSvg(this.scroll, 'fill','#666');
         document.removeEventListener( 'mouseup', this, false );
         document.removeEventListener( 'mousemove', this, false );
 
     },
 
     over: function( e ){
-        if(e.target.name){
-            if(e.target.name === 'scroll'){
-                this.scroll.style.background = 'rgba(255,255,255,0.5)';
-            }
+
+        if( !e.target.name ) return;
+        if(e.target.name === 'scroll'){
+            this.scroll.style.background = 'rgba(255,255,255,0.5)';
         }
 
     },
 
-    /*wheel: function ( e ){
+    wheel: function ( e ){
 
-        if(this.lockwheel) return;
-        if(!this.isScroll) return;
+        if( !e.target.name ) return;
+        if( e.target.name !== 'scroll') return;
+        if( this.lockwheel ) return;
+
         var delta = 0;
         if(e.wheelDeltaY) delta= -e.wheelDeltaY*0.04;
         else if(e.wheelDelta) delta= -e.wheelDelta*0.2;
         else if(e.detail) delta=e.detail*4.0;
+
         this.py += delta;
-        if(this.py < 0) this.py = 0;
-        if(this.py > this.range) this.py = this.range;
 
-        this.update();
+        this.update(this.py);
 
-    },*/
+    },
 
     ////
 
     update: function ( y ){
 
-        this.py = y === undefined ? this.py : y;
+        y = y < 0 ? 0 :y;
+        y = y > this.range ? this.range : y;
 
-        this.inner.style.top = -(this.py/this.ratio)+'px';
+        this.inner.style.top = -(y/this.ratio)+'px';
+        this.scroll.style.top = y + 'px';
 
-        this.scroll.style.top = this.py + 'px';
+        this.py = y;
 
     },
 
     ////
-
-
 
     add:function( type, o ){
         
@@ -243,6 +239,8 @@ UIL.Gui.prototype = {
 
         if(this.sh<20) this.sh = 20;
 
+        this.range = this.maxView - this.sh;
+
         this.scrollBG.style.display = 'block';
 
         this.scrollBG.style.height = this.maxView + 'px';
@@ -279,8 +277,6 @@ UIL.Gui.prototype = {
 
     testHeight:function(){
 
-        
-
         if(this.tmp) clearTimeout(this.tmp);
 
         this.top = this.content.getBoundingClientRect().top;
@@ -296,6 +292,7 @@ UIL.Gui.prototype = {
             this.hideScroll();
             this.bottom.style.background = UIL.bgcolor( this.color );
         }
+
     },
 
     changeWidth:function() {
@@ -310,7 +307,7 @@ UIL.Gui.prototype = {
             this.uis[i].rSize();
         }
 
-        this.calc()
+        this.calc();
 
     },
 
@@ -332,11 +329,6 @@ UIL.Gui.prototype = {
         this.inner.style.display = 'none'; 
         this.bottom.textContent = 'open';
 
-    },
+    }
 
-    /*liner:function(color){
-        var l = UIL.DOM('UIL', 'line', 'width:100%; height:1px; bottom:0px;', {x1:0, y1:0, x2:'100%', y2:0, stroke:'#FF0', 'stroke-width':1, 'stroke-linecap':'butt'} );
-        //var l = UIL.DOM('UIL', 'line', 'width:100%; height:1px; bottom:0px;', {x1:0, y1:0, x2:'100%', y2:0, stroke:color || 'rgba(0,0,0,0.5)', 'stroke-width':1, 'stroke-linecap':'butt'} );
-        return l;
-    }*/
 };

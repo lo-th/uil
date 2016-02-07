@@ -20,7 +20,7 @@ UIL.Knob = function( o ){
 
     this.w = this.radius*2;
     this.height = this.radius*2;
-    this.h = this.height + 40;
+    this.h = o.height || (this.height + 40);
 
     this.twoPi = Math.PI * 2;
     this.mPI = Math.PI * 0.8;
@@ -29,6 +29,7 @@ UIL.Knob = function( o ){
     this.top = 0;
 
     this.c[0].style.width = this.size +'px';
+
 
     if(this.c[1] !== undefined) {
 

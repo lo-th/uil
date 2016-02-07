@@ -40,6 +40,7 @@ UIL.String.prototype.click = function( e ){
 //if(this.select) return;
     e.target.focus();
     e.target.style.cursor = 'auto';
+    e.target.style.border = '1px solid ' + UIL.BorderSelect;
   //  this.select = true;
    // console.log('select')
 

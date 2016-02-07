@@ -20,7 +20,7 @@ UIL.Circular = function( o ){
 
     this.w = this.radius*2;
     this.height = this.radius*2;
-    this.h = this.height + 40;
+    this.h = o.height || (this.height + 40);
 
     this.twoPi = Math.PI * 2;
 

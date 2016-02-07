@@ -48,7 +48,7 @@ UIL.Number = function( o ){
         this.c[2+i].textContent = this.value[i];
         this.c[2+i].style.color = this.fontColor;
         this.c[2+i].contentEditable = true;
-        this.c[2+i].events = [ 'click', 'keydown', 'keyup', 'mousedown', 'blur' ];
+        this.c[2+i].events = [ 'keydown', 'keyup', 'mousedown', 'blur', 'focus' ]; //'click', 
 
     }
 
@@ -64,14 +64,16 @@ UIL.Number.prototype.handleEvent = function( e ) {
     //e.stopPropagation();
 
     switch( e.type ) {
-        case 'click': this.click( e ); break;
+        //case 'click': this.click( e ); break;
         case 'mousedown': this.down( e ); break;
         case 'keydown': this.keydown( e ); break;
         case 'keyup': this.keyup( e ); break;
+
         case 'blur': this.blur( e ); break;
+        case 'focus': this.focus( e ); break;
 
         // document
-        case 'mouseup': this.out( e ); break;
+        case 'mouseup': this.up( e ); break;
         case 'mousemove': this.move( e ); break;
 
     }
@@ -101,11 +103,21 @@ UIL.Number.prototype.keyup = function( e ){
 UIL.Number.prototype.blur = function( e ){
 
     this.isSelect = false;
+    e.target.style.border = '1px solid rgba(255,255,255,0.1)';
     e.target.style.cursor = 'move';
 
 };
 
-UIL.Number.prototype.click = function( e ){
+UIL.Number.prototype.focus = function( e ){
+
+    this.isSelect = true;
+    this.current = undefined;
+    e.target.style.border = '1px solid ' + UIL.BorderSelect;
+    e.target.style.cursor = 'auto';
+
+};
+
+/*UIL.Number.prototype.click = function( e ){
 
     document.removeEventListener( 'mouseup', this, false );
     document.removeEventListener( 'mousemove', this, false );
@@ -113,15 +125,16 @@ UIL.Number.prototype.click = function( e ){
     e.target.focus();
     e.target.style.cursor = 'auto';
     
-
     this.isSelect = true;
 
-};
+};*/
 
 UIL.Number.prototype.down = function( e ){
 
     if(this.isSelect) return;
-   
+
+    e.preventDefault();
+
     e.target.style.border = '1px solid rgba(255,255,255,0.2)';
     this.current = parseFloat(e.target.name);
 
@@ -136,16 +149,24 @@ UIL.Number.prototype.down = function( e ){
 
 ////
 
-UIL.Number.prototype.out = function( e ){
+UIL.Number.prototype.up = function( e ){
 
     e.preventDefault();
-    if(this.current !== undefined){ 
-        this.c[2+this.current].style.border = 'none';
-        //this.c[2+this.current].style.cursor = 'move';
-    }
 
     document.removeEventListener( 'mouseup', this, false );
     document.removeEventListener( 'mousemove', this, false );
+
+    if(this.current !== undefined){ 
+
+        if( this.current === parseFloat(e.target.name) ) e.target.focus();
+
+        else this.c[2+this.current].style.border = '1px solid rgba(255,255,255,0.1)';
+
+
+        //this.c[2+this.current].style.cursor = 'move';
+    }
+
+    
 
 };
 
