@@ -43,7 +43,6 @@ UIL.Circular = function( o ){
     this.c[3] = UIL.DOM('UIL svgbox', 'circle', 'left:10px; top:'+this.top+'px; width:'+this.w+'px; height:'+this.height+'px; cursor:pointer;', { cx:this.radius, cy:this.radius, r:this.radius, fill:'rgba(0,0,0,0.3)' });
     this.c[4] = UIL.DOM('UIL svgbox', 'path', 'left:10px; top:'+this.top+'px; width:'+this.w+'px; height:'+this.height+'px; pointer-events:none;', { d:this.makePath(), fill:this.fontColor });
     this.c[5] = UIL.DOM('UIL svgbox', 'circle', 'left:10px; top:'+this.top+'px; width:'+this.w+'px; height:'+this.height+'px; pointer-events:none;', { cx:this.radius, cy:this.radius, r:this.radius*0.5, fill:UIL.bgcolor(UIL.COLOR, 1), 'stroke-width':1, stroke:UIL.SVGC });
-    //this.c[6] = UIL.DOM('UIL svgbox', 'circle', 'left:10px; top:'+this.top+'px; width:'+this.w+'px; height:'+this.height+'px; pointer-events:none;', { cx:this.radius, cy:this.radius, r:this.radius, fill:'none', 'stroke-width':1, stroke:UIL.SVGC });
 
     this.c[3].events = [ 'mouseover', 'mousedown', 'mouseout' ];
 
@@ -102,17 +101,6 @@ UIL.Circular.prototype.out = function( e ){
     this.isOver = false;
     if(this.isDown) return;
     this.mode(0);
-
-};
-
-UIL.Circular.prototype.keydown = function( e ){
-
-    if( e.keyCode === 13 ){ 
-        e.preventDefault();
-        this.value = e.target.textContent;//e.target.value;
-        this.callback( this.value );
-        e.target.blur();
-    }
 
 };
 
@@ -190,11 +178,3 @@ UIL.Circular.prototype.update = function( up ){
     if( up ) this.callback(this.value);
     
 };
-
-/*UIL.Circular.prototype.rSize = function(){
-
-    UIL.Proto.prototype.rSize.call( this );
-
-    //this.update();
-
-};*/
