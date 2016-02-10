@@ -270,6 +270,8 @@ UIL.Gui = function(css, w, center, color){
 
     UIL.sizer( w || 300 );
 
+    this.width = UIL.WIDTH;
+
     UIL.main = this;
 
     this.color = color || UIL.COLOR;
@@ -312,7 +314,9 @@ UIL.Gui = function(css, w, center, color){
     this.content.addEventListener( 'mouseout',  this, false );
     this.content.addEventListener( 'mouseup',   this, false );
     this.content.addEventListener( 'mouseover', this, false );
-    this.content.addEventListener( 'mousewheel', this, false );
+    //this.content.addEventListener( 'mousewheel', this, false );
+
+    document.addEventListener( 'mousewheel', this, false );
     
     window.addEventListener("resize", function(e){this.resize(e)}.bind(this), false );
 
@@ -411,9 +415,14 @@ UIL.Gui.prototype = {
 
     wheel: function ( e ){
 
-        if( !e.target.name ) return;
-        if( e.target.name !== 'scroll') return;
         if( this.lockwheel ) return;
+        if( !this.isScroll ) return;
+
+        var x = e.clientX;
+        var px = this.content.getBoundingClientRect().left
+
+        if(x<px) return;
+        if(x>(px+this.width)) return;
 
         var delta = 0;
         if(e.wheelDeltaY) delta= -e.wheelDeltaY*0.04;
@@ -566,7 +575,9 @@ UIL.Gui.prototype = {
 
     changeWidth:function() {
 
-        this.content.style.width = UIL.WIDTH + 'px';
+        this.width = UIL.WIDTH;
+        this.content.style.width = this.width + 'px';
+
 
         if( this.isCenter ) this.content.style.marginLeft = -(~~ (UIL.WIDTH*0.5)) + 'px';
 
