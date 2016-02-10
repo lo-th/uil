@@ -1,8 +1,8 @@
 UIL.Circular = function( o ){
 
     UIL.Proto.call( this, o );
-
     this.type = 'circular';
+    
     this.setTypeNumber( o );
 
     this.range = this.max - this.min;

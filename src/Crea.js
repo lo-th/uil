@@ -14,7 +14,7 @@ var Crea = Crea || ( function () {
 
     var DOM_SIZE = [ 'height', 'width', 'top', 'left', 'bottom', 'right', 'margin-left', 'margin-right', 'margin-top', 'margin-bottom'];
     var SVG_TYPE = [ 'rect', 'circle', 'path', 'polygon', 'text', 'pattern', 'defs', 'g', 'transform',, 'line', 'foreignObject', 'linearGradient', 'stop', 'animate', 'radialGradient' ];
-    var SVG_TYPE_G = [ 'rect', 'circle', 'path', 'polygon', 'text', 'g', 'line', 'foreignObject', 'linearGradient', 'radialGradient' ];
+    //var SVG_TYPE_G = [ 'rect', 'circle', 'path', 'polygon', 'text', 'g', 'line', 'foreignObject' ];
 
     var svgns = "http://www.w3.org/2000/svg";
     var htmls = "http://www.w3.org/1999/xhtml";

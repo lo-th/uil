@@ -190,6 +190,7 @@ UIL.Gui.prototype = {
             case 'group':  n = new UIL.Group(o);  break;
             case 'knob':   n = new UIL.Knob(o);   break;
             case 'circular':n = new UIL.Circular(o);   break;
+            case 'joystick':n = new UIL.Joystick(o);   break;
         }
         this.uis.push(n);
         this.calc();

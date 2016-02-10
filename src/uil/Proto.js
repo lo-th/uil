@@ -178,7 +178,7 @@ UIL.Proto.prototype = {
 
     rSize:function(){
 
-        if(this.type === 'circular' || this.type === 'knob' ) return;
+        if(this.type === 'circular' || this.type === 'knob' || this.type === 'joystick' ) return;
 
         this.c[0].style.width = this.size+'px';
         if( !this.simple ) this.c[1].style.width = this.sa+'px';
