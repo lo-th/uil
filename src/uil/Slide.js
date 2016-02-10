@@ -119,8 +119,6 @@ UIL.Slide.prototype.down = function( e ){
     this.move( e );
     this.mode(2);
 
-    
-
 };
 
 UIL.Slide.prototype.move = function( e ){

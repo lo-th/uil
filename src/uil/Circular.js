@@ -119,12 +119,14 @@ UIL.Circular.prototype.up = function( e ){
 UIL.Circular.prototype.down = function( e ){
 
     this.isDown = true;
+    document.addEventListener( 'mouseup', this, false );
+    document.addEventListener( 'mousemove', this, false );
+
+    this.rect = this.c[3].getBoundingClientRect();
+    this.old = this.value;
     this.oldr = null;
     this.move( e );
     this.mode(2);
-
-    document.addEventListener( 'mouseup', this, false );
-    document.addEventListener( 'mousemove', this, false );
 
 };
 
@@ -132,16 +134,14 @@ UIL.Circular.prototype.move = function( e ){
 
     if( this.isDown ){
 
-        e.preventDefault(); 
-        var rect = this.c[3].getBoundingClientRect();
-        var x = this.radius - (e.clientX - rect.left);
-        var y = this.radius - (e.clientY - rect.top);
+        var x = this.radius - (e.clientX - this.rect.left);
+        var y = this.radius - (e.clientY - this.rect.top);
         this.r = Math.atan2( y, x ) - Math.PI*0.5;
 
         var range = this.twoPi;
         this.r = (((this.r%range)+range)%range);
 
-        if( this.oldr!==null ) this.r = Math.abs(this.r - this.oldr) > Math.PI ? this.oldr : this.r;
+        if( this.oldr !== null ) this.r = Math.abs(this.r - this.oldr) > Math.PI ? this.oldr : this.r;
 
         var steps = 1/range;
         var value = (this.r)*steps;

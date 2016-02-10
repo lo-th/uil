@@ -60,44 +60,18 @@ UIL.Knob = function( o ){
 UIL.Knob.prototype = Object.create( UIL.Circular.prototype );
 UIL.Knob.prototype.constructor = UIL.Knob;
 
-UIL.Knob.prototype.up = function( e ){
-
-    this.isDown = false;
-    document.removeEventListener( 'mouseup', this, false );
-    document.removeEventListener( 'mousemove', this, false );
-
-    if(this.isOver) this.mode(1);
-    else this.mode( 0 );
-    
-
-};
-
-UIL.Knob.prototype.down = function( e ){
-
-    this.isDown = true;
-    this.oldr = null;
-    this.move( e );
-    this.mode( 2 );
-
-    document.addEventListener( 'mouseup', this, false );
-    document.addEventListener( 'mousemove', this, false );
-
-};
-
 UIL.Knob.prototype.move = function( e ){
 
     if( this.isDown ){
 
-        e.preventDefault(); 
-        var rect = this.c[3].getBoundingClientRect();
-        var x = this.radius - (e.clientX - rect.left);
-        var y = this.radius - (e.clientY - rect.top);
-        this.r = Math.atan2( x, y ) *-1;
+        var x = this.radius - (e.clientX - this.rect.left);
+        var y = this.radius - (e.clientY - this.rect.top);
+        this.r = - Math.atan2( x, y );
 
         if (this.r > this.mPI) this.r = this.mPI;
         if (this.r < -this.mPI) this.r = -this.mPI
 
-        if( this.oldr!==null ) this.r = Math.abs(this.r - this.oldr) > Math.PI ? this.oldr : this.r;
+        if( this.oldr !== null ) this.r = Math.abs(this.r - this.oldr) > Math.PI ? this.oldr : this.r;
 
         var steps = 1 / this.cirRange;
         var value = (this.r + this.mPI) * steps;

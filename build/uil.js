@@ -1478,13 +1478,13 @@ UIL.Color.prototype.show = function(){
     this.c[5].style.display = 'block';
     this.c[6].style.display = 'block';
 
-    if(UIL.main) UIL.main.calc( this.h-20 );
+    if( this.isUI ) UIL.main.calc( this.h-20 );
 
 };
 
 UIL.Color.prototype.hide = function(){
 
-    if( UIL.main ) UIL.main.calc( -(this.h-20) );
+    if( this.isUI ) UIL.main.calc( -(this.h-20) );
     this.isShow = false;
     this.h = 20;
     if(this.side=='up'){ 
@@ -1674,7 +1674,7 @@ UIL.Color.prototype.rSize = function(){
         this.redraw();
         this.h = this.width+30;
         this.c[0].height = this.h + 'px';
-        if( UIL.main ) UIL.main.calc();
+        if( this.isUI ) UIL.main.calc();
     }
 
 };
@@ -1861,8 +1861,6 @@ UIL.Slide.prototype.down = function( e ){
     this.old = this.value;
     this.move( e );
     this.mode(2);
-
-    
 
 };
 
@@ -2099,7 +2097,7 @@ UIL.List.prototype.listup = function( e ){
 
 UIL.List.prototype.listout = function( e ){
 
-    if( UIL.main ) UIL.main.lockwheel = false;
+    if( this.isUI ) UIL.main.lockwheel = false;
     this.listup();
     var name = e.relatedTarget.name;
     if( name === undefined ) this.listHide();
@@ -2109,7 +2107,7 @@ UIL.List.prototype.listout = function( e ){
 UIL.List.prototype.listwheel = function( e ){
 
     if( !this.scroll ) return;
-    if( UIL.main ) UIL.main.lockwheel = true;
+    if( this.isUI ) UIL.main.lockwheel = true;
     var delta = 0;
     if( e.wheelDeltaY ) delta = -e.wheelDeltaY*0.04;
     else if( e.wheelDelta ) delta = -e.wheelDelta*0.2;
@@ -2152,13 +2150,13 @@ UIL.List.prototype.listShow = function(){
     if( this.side === 'up' ) UIL.setSvg( this.c[4], 'd','M 12 10 L 8 6 4 10');
     else UIL.setSvg( this.c[4], 'd','M 12 6 L 8 10 4 6');
 
-    if(UIL.main) UIL.main.calc(this.h-20);
+    if( this.isUI ) UIL.main.calc(this.h-20);
 
 };
 
 UIL.List.prototype.listHide = function(){
 
-    if( UIL.main ) UIL.main.calc(-(this.h-20));
+    if( this.isUI ) UIL.main.calc(-(this.h-20));
 
     this.show = false;
     this.h = 20;
@@ -2476,12 +2474,14 @@ UIL.Circular.prototype.up = function( e ){
 UIL.Circular.prototype.down = function( e ){
 
     this.isDown = true;
+    document.addEventListener( 'mouseup', this, false );
+    document.addEventListener( 'mousemove', this, false );
+
+    this.rect = this.c[3].getBoundingClientRect();
+    this.old = this.value;
     this.oldr = null;
     this.move( e );
     this.mode(2);
-
-    document.addEventListener( 'mouseup', this, false );
-    document.addEventListener( 'mousemove', this, false );
 
 };
 
@@ -2489,16 +2489,14 @@ UIL.Circular.prototype.move = function( e ){
 
     if( this.isDown ){
 
-        e.preventDefault(); 
-        var rect = this.c[3].getBoundingClientRect();
-        var x = this.radius - (e.clientX - rect.left);
-        var y = this.radius - (e.clientY - rect.top);
+        var x = this.radius - (e.clientX - this.rect.left);
+        var y = this.radius - (e.clientY - this.rect.top);
         this.r = Math.atan2( y, x ) - Math.PI*0.5;
 
         var range = this.twoPi;
         this.r = (((this.r%range)+range)%range);
 
-        if( this.oldr!==null ) this.r = Math.abs(this.r - this.oldr) > Math.PI ? this.oldr : this.r;
+        if( this.oldr !== null ) this.r = Math.abs(this.r - this.oldr) > Math.PI ? this.oldr : this.r;
 
         var steps = 1/range;
         var value = (this.r)*steps;
@@ -2597,44 +2595,18 @@ UIL.Knob = function( o ){
 UIL.Knob.prototype = Object.create( UIL.Circular.prototype );
 UIL.Knob.prototype.constructor = UIL.Knob;
 
-UIL.Knob.prototype.up = function( e ){
-
-    this.isDown = false;
-    document.removeEventListener( 'mouseup', this, false );
-    document.removeEventListener( 'mousemove', this, false );
-
-    if(this.isOver) this.mode(1);
-    else this.mode( 0 );
-    
-
-};
-
-UIL.Knob.prototype.down = function( e ){
-
-    this.isDown = true;
-    this.oldr = null;
-    this.move( e );
-    this.mode( 2 );
-
-    document.addEventListener( 'mouseup', this, false );
-    document.addEventListener( 'mousemove', this, false );
-
-};
-
 UIL.Knob.prototype.move = function( e ){
 
     if( this.isDown ){
 
-        e.preventDefault(); 
-        var rect = this.c[3].getBoundingClientRect();
-        var x = this.radius - (e.clientX - rect.left);
-        var y = this.radius - (e.clientY - rect.top);
-        this.r = Math.atan2( x, y ) *-1;
+        var x = this.radius - (e.clientX - this.rect.left);
+        var y = this.radius - (e.clientY - this.rect.top);
+        this.r = - Math.atan2( x, y );
 
         if (this.r > this.mPI) this.r = this.mPI;
         if (this.r < -this.mPI) this.r = -this.mPI
 
-        if( this.oldr!==null ) this.r = Math.abs(this.r - this.oldr) > Math.PI ? this.oldr : this.r;
+        if( this.oldr !== null ) this.r = Math.abs(this.r - this.oldr) > Math.PI ? this.oldr : this.r;
 
         var steps = 1 / this.cirRange;
         var value = (this.r + this.mPI) * steps;

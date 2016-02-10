@@ -184,7 +184,7 @@ UIL.List.prototype.listup = function( e ){
 
 UIL.List.prototype.listout = function( e ){
 
-    if( UIL.main ) UIL.main.lockwheel = false;
+    if( this.isUI ) UIL.main.lockwheel = false;
     this.listup();
     var name = e.relatedTarget.name;
     if( name === undefined ) this.listHide();
@@ -194,7 +194,7 @@ UIL.List.prototype.listout = function( e ){
 UIL.List.prototype.listwheel = function( e ){
 
     if( !this.scroll ) return;
-    if( UIL.main ) UIL.main.lockwheel = true;
+    if( this.isUI ) UIL.main.lockwheel = true;
     var delta = 0;
     if( e.wheelDeltaY ) delta = -e.wheelDeltaY*0.04;
     else if( e.wheelDelta ) delta = -e.wheelDelta*0.2;
@@ -237,13 +237,13 @@ UIL.List.prototype.listShow = function(){
     if( this.side === 'up' ) UIL.setSvg( this.c[4], 'd','M 12 10 L 8 6 4 10');
     else UIL.setSvg( this.c[4], 'd','M 12 6 L 8 10 4 6');
 
-    if(UIL.main) UIL.main.calc(this.h-20);
+    if( this.isUI ) UIL.main.calc(this.h-20);
 
 };
 
 UIL.List.prototype.listHide = function(){
 
-    if( UIL.main ) UIL.main.calc(-(this.h-20));
+    if( this.isUI ) UIL.main.calc(-(this.h-20));
 
     this.show = false;
     this.h = 20;
