@@ -66,9 +66,9 @@ UIL.Proto.prototype = {
     init: function (){
 
         this.c[0].style.height = this.h + 'px';
-        this.c[0].style.background = UIL.bgcolor(this.color);
+        if( this.isUI ) this.c[0].style.background = UIL.bgcolor(this.color);
 
-        if( this.autoHeight ) this.c[0].style.transition = 'height, 0.1s ease-out';
+        if( this.autoHeight ) this.c[0].style.transition = 'height 0.1s ease-out';
 
         for( var i = 0; i < this.c.length; i++ ){
             if( i === 0 ){ 

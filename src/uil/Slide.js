@@ -2,8 +2,6 @@ UIL.Slide = function( o ){
 
     UIL.Proto.call( this, o );
 
-    //this.type = 'slide';
-
     this.setTypeNumber( o );
 
     this.range = this.max - this.min;
@@ -13,7 +11,6 @@ UIL.Slide = function( o ){
     this.h = o.height || 20;
     this.h = this.h < 11 ? 11 : this.h;
 
-    //this.height = this.h - 3;
     this.value = o.value || 0;
     this.old = this.value;
     this.isDown = false;
@@ -28,13 +25,13 @@ UIL.Slide = function( o ){
     this.c[4] = UIL.DOM('UIL svgbox', 'rect', 'left:4px; top:4px; width:'+(this.width-8)+'px; height:'+(this.h-10)+'px; pointer-events:none;', { width:'100%', height:'100%', fill: this.fontColor });
 
     // pattern test
-    UIL.DOM( null, 'defs', null, {}, this.c[3] );
-    UIL.DOM( null, 'pattern', null, {id:'sripe', x:0, y:0, width:10, height:10, patternUnits:'userSpaceOnUse' }, this.c[3], 1 );
-    UIL.DOM( null, 'line', null, { x1:5, x2:0, y1:0, y2:10, stroke:UIL.SVGC, 'stroke-width':1  }, this.c[3].childNodes[1], 0 );
-    UIL.DOM( null, 'line', null, { x1:10, x2:5, y1:0, y2:10, stroke:UIL.SVGC, 'stroke-width':1  }, this.c[3].childNodes[1], 0 );
+    var svg = this.c[3];
+    UIL.DOM( null, 'defs', null, {}, svg );
+    UIL.DOM( null, 'pattern', null, {id:'sripe', x:0, y:0, width:10, height:10, patternUnits:'userSpaceOnUse' }, svg, 1 );
+    UIL.DOM( null, 'line', null, { x1:5, x2:0, y1:0, y2:10, stroke:UIL.SVGC, 'stroke-width':1  }, svg, [1,0] );
+    UIL.DOM( null, 'line', null, { x1:10, x2:5, y1:0, y2:10, stroke:UIL.SVGC, 'stroke-width':1  }, svg, [1,0] );
 
-
-    this.c[3].events = [ 'mouseover', 'mousedown', 'mouseout' ];
+    svg.events = [ 'mouseover', 'mousedown', 'mouseout' ];
 
     this.init();
 
@@ -160,8 +157,6 @@ UIL.Slide.prototype.rSize = function(){
     this.c[3].style.width = this.width + 'px';
     this.c[4].style.left = (this.sa + 4) + 'px';
 
-    
-    
     this.update();
 
 };

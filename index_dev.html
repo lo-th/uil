@@ -55,12 +55,12 @@ var callbackLogo = function( v ){ document.getElementById('logoin').setAttribute
 
 
 // single UI element
-var s = new UIL.Slide({target:document.body, callback:callbackSize, name:'ui size', min:100, max:400, value:300, step:10, color:'no', size:100, pos:{left:'10px', top:'40px' }, simple:true });
-var b = new UIL.Button({target:document.body, callback:populate, name:'populate', color:'no', size:100, pos:{left:'10px', top:'60px'}, simple:true });
-var h = new UIL.String({target:document.body, callback:null, name:' ', value:'YOO', color:'no', size:60, pos:{left:'10px', top:'90px' }, simple:true });
-var c = new UIL.Color({target:document.body, callback:callbackLogo, name:' ', color:'no', value:0x000000, size:100, pos:{left:'10px', top:'auto', bottom:'10px' }, simple:true, side:'up', type:'html' });
-var c = new UIL.List({target:document.body, callback:null, name:' ', color:'no', size:100, list:list, pos:{left:'120px', top:'auto', bottom:'10px' }, simple:true, side:'up', full:true });
-var w = new UIL.Number({target:document.body, callback:null, name:' ', color:'no', size:100, pos:{left:'290px', top:'auto', bottom:'10px' }, simple:true });
+var s = new UIL.Slide({target:document.body, callback:callbackSize, name:'ui size', min:100, max:400, value:300, step:10, size:100, pos:{left:'10px', top:'40px' }, simple:true });
+var b = new UIL.Button({target:document.body, callback:populate, name:'populate', size:100, pos:{left:'10px', top:'60px'}, simple:true });
+var h = new UIL.String({target:document.body, callback:null, name:' ', value:'YOO', size:60, pos:{left:'10px', top:'90px' }, simple:true });
+var c = new UIL.Color({target:document.body, callback:callbackLogo, name:' ', value:0x000000, size:100, pos:{left:'10px', top:'auto', bottom:'10px' }, simple:true, side:'up', type:'html' });
+var c = new UIL.List({target:document.body, callback:null, name:' ', size:100, list:list, pos:{left:'120px', top:'auto', bottom:'10px' }, simple:true, side:'up', full:true });
+var w = new UIL.Number({target:document.body, callback:null, name:' ', size:100, pos:{left:'290px', top:'auto', bottom:'10px' }, simple:true });
 
 // in GUI element
 var ui = new UIL.Gui('top:145px; left:50%;', 300, true, 'N');

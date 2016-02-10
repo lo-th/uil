@@ -53,23 +53,23 @@ var UIL = ( function () {
 
     UIL.classDefine = function(){
             
-        UIL.CC('UIL', UIL.UNS + ' position:absolute; pointer-events:none; box-sizing:border-box; margin:0; padding:0; border:none; ');
+        UIL.CC('UIL', UIL.UNS + ' position:absolute; pointer-events:none; box-sizing:border-box; margin:0; padding:0; border:none; overflow:hidden; background:none;');
 
-        UIL.CC('UIL.content', ' display:block; width:300px; height:auto; top:0; left:0; overflow:hidden; background:none; transition:height, 0.1s ease-out;');
-        UIL.CC('UIL.inner', 'width:100%; top:0; left:0; height:auto; overflow:hidden; background:none; ');
-        UIL.CC('UIL.bottom', UIL.TXT+'width:100%; top:auto; bottom:0; left:0; height:20px; overflow:hidden; background:none; text-align:center; padding:5px 10px; pointer-events:auto; cursor:pointer;' );
+        UIL.CC('UIL.content', ' display:block; width:300px; height:auto; top:0; left:0; transition:height 0.1s ease-out;');
+        UIL.CC('UIL.inner', 'width:100%; top:0; left:0; height:auto; ');
+        UIL.CC('UIL.bottom', UIL.TXT+'width:100%; top:auto; bottom:0; left:0; height:20px; text-align:center; padding:5px 10px; pointer-events:auto; cursor:pointer;' );
 
-        UIL.CC('UIL.base', 'position:relative; height:20px; overflow:hidden; float: left');
+        UIL.CC('UIL.base', 'position:relative; height:20px; float:left;');
 
         UIL.CC('UIL.text', UIL.TXT );
         UIL.CC('UIL.textSelect', UIL.TXT + UIL.US + 'outline:none; -webkit-appearance:none; -moz-appearance:none; border:1px solid rgba(255,255,255,0.1);' );
 
-        UIL.CC('UIL.list', 'box-sizing:content-box; border:20px solid transparent; border-bottom:10px solid transparent; left:80px; top:0px; width:190px; height:90px; overflow:hidden; cursor:s-resize; pointer-events:auto; display:none;');
+        UIL.CC('UIL.list', 'box-sizing:content-box; border:20px solid transparent; border-bottom:10px solid transparent; left:80px; top:0px; width:190px; height:90px; cursor:s-resize; pointer-events:auto; display:none;');
         UIL.CC('UIL.list-in', 'left:0; top:0; width:100%; background:rgba(0,0,0,0.2); ');
         UIL.CC('UIL.listItem', 'position:relative; height:18px; background:rgba(0,0,0,0.2); border-bottom:1px solid rgba(0,0,0,0.2); pointer-events:auto; cursor:pointer;'+UIL.TXT);
         UIL.CC('UIL.listItem:hover', 'background:'+UIL.SELECT+'; color:#FFFFFF;')
 
-        UIL.CC('UIL.scroll-bg', 'cursor:w-resize; pointer-events:auto; background-image:linear-gradient(to right,  rgba(255,255,255,0), rgba(255,255,255,0.1));');
+        UIL.CC('UIL.scroll-bg', 'cursor:w-resize; pointer-events:auto; background-image:linear-gradient(to right, rgba(255,255,255,0), rgba(255,255,255,0.1));');
         UIL.CC('UIL.scroll', ' background:rgba(255,255,255,0.2);');
         UIL.CC('UIL.svgbox', 'left:100px; top:1px; width:190px; height:17px; pointer-events:auto; cursor:pointer;');
 

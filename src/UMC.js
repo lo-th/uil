@@ -121,7 +121,7 @@ var UMC = UMC || ( function () {
     UMC.get = function( dom, id ){
 
         if( id === undefined ) return dom; // root
-        else if(!isNaN( id )) return dom.childNodes[ id ]; // first child
+        else if( !isNaN( id ) ) return dom.childNodes[ id ]; // first child
         else if( id instanceof Array ){
             if(id.length === 2) return dom.childNodes[ id[0] ].childNodes[ id[1] ];
             if(id.length === 3) return dom.childNodes[ id[0] ].childNodes[ id[1] ].childNodes[ id[2] ];

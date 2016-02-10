@@ -251,9 +251,7 @@ UIL.List.prototype.listHide = function(){
     this.c[0].style.height = this.h + 'px';
     this.c[2].style.display = 'none';
     UIL.setSvg( this.c[4], 'd','M 6 4 L 10 8 6 12');
-
     
-
 };
 
 // -----
