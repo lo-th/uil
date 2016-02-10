@@ -13,5 +13,6 @@
     "src/uil/Bool.js",
     "src/uil/Button.js",
     "src/uil/Circular.js",
-    "src/uil/Knob.js"
+    "src/uil/Knob.js",
+    "src/uil/Joystick.js"
 ]

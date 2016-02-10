@@ -61,8 +61,10 @@ var Crea = Crea || ( function () {
             // create new svg if not def
             if( dom === undefined ) dom = doc.createElementNS( svgns, 'svg' );
 
+            Crea.add( dom, type, obj, id );
+
             // create the element 
-            var g = doc.createElementNS( svgns, type );
+            /*var g = doc.createElementNS( svgns, type );
 
             // add attributes
             for(var att in obj){
@@ -75,7 +77,7 @@ var Crea = Crea || ( function () {
             if( SVG_TYPE_G.indexOf(type) !== -1 && id === undefined  ) g.setAttributeNS( null, 'pointer-events', 'none' );
 
             if( id === undefined ) dom.appendChild( g );
-            else dom.childNodes[ id || 0 ].appendChild( g );
+            else dom.childNodes[ id || 0 ].appendChild( g );*/
 
             
         } else { // is html element
@@ -112,18 +114,42 @@ var Crea = Crea || ( function () {
 
     };
 
-    /*Crea.Svg = function (){
+    // SVG SIDE
 
-        this.root = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    Crea.add = function( dom, type, o, id ){ // add attributes
+
+        var g = document.createElementNS( svgns, type );
+
+        this.set( g, o );
+        this.get( dom, id ).appendChild( g );
+
+        return g;
 
     };
 
-    Crea.Svg.prototype = {
-        constructor: Crea.svg,
+    Crea.set = function( g, o ){
 
-    };*/
+        for( var att in o ){
+            if( att === 'txt' ) g.textContent = o[ att ];
+            g.setAttributeNS( null, att, o[ att ] );
+        }
 
+        // only root can have mouse event
+        //g.setAttributeNS( null, 'pointer-events', 'none' );
+        g.style.pointerEvents = 'none';
 
+    };
+
+    Crea.get = function( dom, id ){
+
+        if( id === undefined ) return dom; // root
+        else if(!isNaN( id )) return dom.childNodes[ id ]; // first child
+        else if( id instanceof Array ){
+            if(id.length === 2) return dom.childNodes[ id[0] ].childNodes[ id[1] ];
+            if(id.length === 3) return dom.childNodes[ id[0] ].childNodes[ id[1] ].childNodes[ id[2] ];
+        }
+
+    };
 
     return Crea;
 

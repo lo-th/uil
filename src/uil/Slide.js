@@ -15,17 +15,18 @@ UIL.Slide = function( o ){
 
     //this.height = this.h - 3;
     this.value = o.value || 0;
+    this.old = this.value;
     this.isDown = false;
     this.isOver = false;
 
     var ty = (o.height * 0.5) - 10;
 
-    if(this.c[1]!==undefined) this.c[1].style.top = ty+'px';
+    if(this.c[1]!==undefined) this.c[1].style.top = ty + 'px';
 
     this.c[2] = UIL.DOM('UIL text', 'div', 'top:'+ty+'px; text-align:right; width:40px; padding:3px 5px; color:'+ this.fontColor );
     this.c[3] = UIL.DOM('UIL svgbox', 'rect', 'width:'+this.width+'px; height:'+(this.h-3)+'px; cursor:w-resize;', { width:'100%', height:this.h-3, fill:UIL.SVGB, 'stroke-width':1, stroke:UIL.SVGC });
-    this.c[4] = UIL.DOM('UIL svgbox', 'rect', 'width:'+this.width+'px; height:'+(this.h-3)+'px; pointer-events:none;', { x:4, y:4, width:this.width-8, height:this.h-10, fill: this.fontColor });
-    
+    this.c[4] = UIL.DOM('UIL svgbox', 'rect', 'left:4px; top:4px; width:'+(this.width-8)+'px; height:'+(this.h-10)+'px; pointer-events:none;', { width:'100%', height:'100%', fill: this.fontColor });
+
     // pattern test
     UIL.DOM( null, 'defs', null, {}, this.c[3] );
     UIL.DOM( null, 'pattern', null, {id:'sripe', x:0, y:0, width:10, height:10, patternUnits:'userSpaceOnUse' }, this.c[3], 1 );
@@ -110,37 +111,45 @@ UIL.Slide.prototype.up = function( e ){
 UIL.Slide.prototype.down = function( e ){
 
     this.isDown = true;
-    this.prev = { x:e.clientX, d:0, v:parseFloat(this.value) };
+    document.addEventListener( 'mouseup', this, false );
+    document.addEventListener( 'mousemove', this, false );
+
+    this.left = this.c[3].getBoundingClientRect().left;
+    this.old = this.value;
     this.move( e );
     this.mode(2);
 
-    document.addEventListener( 'mouseup', this, false );
-    document.addEventListener( 'mousemove', this, false );
+    
 
 };
 
 UIL.Slide.prototype.move = function( e ){
 
     if( this.isDown ){
-        e.preventDefault(); 
-        var rect = this.c[3].getBoundingClientRect();
-        var n = (((( e.clientX - rect.left - 4 ) / this.w ) * this.range + this.min )-this.prev.v);
+        var n = ((( e.clientX - this.left - 4 ) / this.w ) * this.range + this.min ) - this.old;
         if(n > this.step || n < this.step){ 
             n = ~~ ( n / this.step );
-            this.value = this.numValue( this.prev.v + ( n * this.step ) );
+            this.value = this.numValue( this.old + ( n * this.step ) );
             this.update( true );
-            this.prev.v = this.value;
+            this.old = this.value;
         }
     }
 
 };
 
+UIL.Slide.prototype.listen = function( v ){
+
+    this.value = v;
+    this.update();
+
+};
+
 UIL.Slide.prototype.update = function( up ){
 
-    var ww = (this.w * ((this.value-this.min)/this.range));
-    UIL.setSvg( this.c[4], 'width', ww );
+    var ww = this.w * (( this.value - this.min ) / this.range );
+    this.c[4].style.width = ww + 'px';
     this.c[2].textContent = this.value;
-    if( up ) this.callback(this.value);
+    if( up ) this.callback( this.value );
 
 };
 
@@ -154,8 +163,9 @@ UIL.Slide.prototype.rSize = function(){
     this.c[2].style.left = this.size - 50 + 'px';
     this.c[3].style.left = this.sa + 'px';
     this.c[3].style.width = this.width + 'px';
-    this.c[4].style.left = this.sa + 'px';
-    this.c[4].style.width = this.width + 'px';
+    this.c[4].style.left = (this.sa + 4) + 'px';
+
+    
     
     this.update();
 

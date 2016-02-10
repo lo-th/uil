@@ -61,8 +61,10 @@ var Crea = Crea || ( function () {
             // create new svg if not def
             if( dom === undefined ) dom = doc.createElementNS( svgns, 'svg' );
 
+            Crea.add( dom, type, obj, id );
+
             // create the element 
-            var g = doc.createElementNS( svgns, type );
+            /*var g = doc.createElementNS( svgns, type );
 
             // add attributes
             for(var att in obj){
@@ -75,7 +77,7 @@ var Crea = Crea || ( function () {
             if( SVG_TYPE_G.indexOf(type) !== -1 && id === undefined  ) g.setAttributeNS( null, 'pointer-events', 'none' );
 
             if( id === undefined ) dom.appendChild( g );
-            else dom.childNodes[ id || 0 ].appendChild( g );
+            else dom.childNodes[ id || 0 ].appendChild( g );*/
 
             
         } else { // is html element
@@ -112,18 +114,42 @@ var Crea = Crea || ( function () {
 
     };
 
-    /*Crea.Svg = function (){
+    // SVG SIDE
 
-        this.root = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    Crea.add = function( dom, type, o, id ){ // add attributes
+
+        var g = document.createElementNS( svgns, type );
+
+        this.set( g, o );
+        this.get( dom, id ).appendChild( g );
+
+        return g;
 
     };
 
-    Crea.Svg.prototype = {
-        constructor: Crea.svg,
+    Crea.set = function( g, o ){
 
-    };*/
+        for( var att in o ){
+            if( att === 'txt' ) g.textContent = o[ att ];
+            g.setAttributeNS( null, att, o[ att ] );
+        }
 
+        // only root can have mouse event
+        //g.setAttributeNS( null, 'pointer-events', 'none' );
+        g.style.pointerEvents = 'none';
 
+    };
+
+    Crea.get = function( dom, id ){
+
+        if( id === undefined ) return dom; // root
+        else if(!isNaN( id )) return dom.childNodes[ id ]; // first child
+        else if( id instanceof Array ){
+            if(id.length === 2) return dom.childNodes[ id[0] ].childNodes[ id[1] ];
+            if(id.length === 3) return dom.childNodes[ id[0] ].childNodes[ id[1] ].childNodes[ id[2] ];
+        }
+
+    };
 
     return Crea;
 
@@ -157,8 +183,9 @@ var UIL = UIL || ( function () {
 
         DOM: Crea.dom,
         CC: Crea.cc,
-        setDom : Crea.setDom,
+        //setDom : Crea.setDom,
         setSvg : Crea.setSvg,
+
 
         COLOR : 'N',
         SELECT : '#035fcf',
@@ -189,7 +216,7 @@ var UIL = UIL || ( function () {
 
             UIL.CC('UIL.base', 'position:relative; height:20px; overflow:hidden; float: left');
 
-            UIL.CC('UIL.text', UIL.TXT);
+            UIL.CC('UIL.text', UIL.TXT );
             UIL.CC('UIL.textSelect', UIL.TXT + UIL.US + 'outline:none; -webkit-appearance:none; -moz-appearance:none; border:1px solid rgba(255,255,255,0.1);' );
 
             UIL.CC('UIL.list', 'box-sizing:content-box; border:20px solid transparent; border-bottom:10px solid transparent; left:80px; top:0px; width:190px; height:90px; overflow:hidden; cursor:s-resize; pointer-events:auto; display:none;');
@@ -197,7 +224,7 @@ var UIL = UIL || ( function () {
             UIL.CC('UIL.listItem', 'position:relative; height:18px; background:rgba(0,0,0,0.2); border-bottom:1px solid rgba(0,0,0,0.2); pointer-events:auto; cursor:pointer;'+UIL.TXT);
             UIL.CC('UIL.listItem:hover', 'background:'+UIL.SELECT+'; color:#FFFFFF;')
 
-            UIL.CC('UIL.scroll-bg', 'cursor:w-resize; pointer-events:auto; background-image:linear-gradient(to right,  rgba(255,255,255,0),  rgba(255,255,255,0.1));');
+            UIL.CC('UIL.scroll-bg', 'cursor:w-resize; pointer-events:auto; background-image:linear-gradient(to right,  rgba(255,255,255,0), rgba(255,255,255,0.1));');
             UIL.CC('UIL.scroll', ' background:rgba(255,255,255,0.2);');
             UIL.CC('UIL.svgbox', 'left:100px; top:1px; width:190px; height:17px; pointer-events:auto; cursor:pointer;');
 
@@ -725,20 +752,23 @@ UIL.Proto.prototype = {
         }
     },
 
-    setTypeNumber:function( obj ){
+    setTypeNumber:function( o ){
 
-        this.min = obj.min === undefined ? -Infinity : obj.min;
-        this.max = obj.max === undefined ?  Infinity : obj.max;
-        this.step = obj.step === undefined ?  0.01 : obj.step;
-        this.precision = obj.precision === undefined ? 2 : obj.precision;
+        this.min = o.min === undefined ? -Infinity : o.min;
+        this.max = o.max === undefined ?  Infinity : o.max;
+        this.precision = o.precision === undefined ? 2 : o.precision;
+
+        var step;
 
         switch(this.precision){
-            case 0:  this.step = 1; break;
-            case 1:  this.step = 0.1; break;
-            case 2:  this.step = 0.01; break;
-            case 3:  this.step = 0.001; break;
-            case 4:  this.step = 0.0001; break;
+            case 0:  step = 1; break;
+            case 1:  step = 0.1; break;
+            case 2:  step = 0.01; break;
+            case 3:  step = 0.001; break;
+            case 4:  step = 0.0001; break;
         }
+
+        this.step = o.step === undefined ?  step : o.step;
         
     },
 
@@ -1486,8 +1516,8 @@ UIL.Color.prototype.updateDisplay = function(){
     this.c[3].style.color = cc;
 
     if( this.type === 'array' ) this.callback( this.rgb );
-    if( this.type === 'html' )this.callback( this.value );
-    if( this.type === 'hex' )this.callback( this.value );
+    if( this.type === 'html' ) this.callback( this.value );
+    if( this.type === 'hex' ) this.callback( this.value );
 };
 
 UIL.Color.prototype.setColor = function( color ){
@@ -1683,6 +1713,7 @@ UIL.packDX = function(c, a){
 UIL.dec2hex = function(x){
     return (x < 16 ? '0' : '') + x.toString(16);
 };
+
 UIL.HSLToRGB = function(hsl){
     var m1, m2, r, g, b;
     var h = hsl[0], s = hsl[1], l = hsl[2];
@@ -1727,17 +1758,18 @@ UIL.Slide = function( o ){
 
     //this.height = this.h - 3;
     this.value = o.value || 0;
+    this.old = this.value;
     this.isDown = false;
     this.isOver = false;
 
     var ty = (o.height * 0.5) - 10;
 
-    if(this.c[1]!==undefined) this.c[1].style.top = ty+'px';
+    if(this.c[1]!==undefined) this.c[1].style.top = ty + 'px';
 
     this.c[2] = UIL.DOM('UIL text', 'div', 'top:'+ty+'px; text-align:right; width:40px; padding:3px 5px; color:'+ this.fontColor );
     this.c[3] = UIL.DOM('UIL svgbox', 'rect', 'width:'+this.width+'px; height:'+(this.h-3)+'px; cursor:w-resize;', { width:'100%', height:this.h-3, fill:UIL.SVGB, 'stroke-width':1, stroke:UIL.SVGC });
-    this.c[4] = UIL.DOM('UIL svgbox', 'rect', 'width:'+this.width+'px; height:'+(this.h-3)+'px; pointer-events:none;', { x:4, y:4, width:this.width-8, height:this.h-10, fill: this.fontColor });
-    
+    this.c[4] = UIL.DOM('UIL svgbox', 'rect', 'left:4px; top:4px; width:'+(this.width-8)+'px; height:'+(this.h-10)+'px; pointer-events:none;', { width:'100%', height:'100%', fill: this.fontColor });
+
     // pattern test
     UIL.DOM( null, 'defs', null, {}, this.c[3] );
     UIL.DOM( null, 'pattern', null, {id:'sripe', x:0, y:0, width:10, height:10, patternUnits:'userSpaceOnUse' }, this.c[3], 1 );
@@ -1822,37 +1854,45 @@ UIL.Slide.prototype.up = function( e ){
 UIL.Slide.prototype.down = function( e ){
 
     this.isDown = true;
-    this.prev = { x:e.clientX, d:0, v:parseFloat(this.value) };
+    document.addEventListener( 'mouseup', this, false );
+    document.addEventListener( 'mousemove', this, false );
+
+    this.left = this.c[3].getBoundingClientRect().left;
+    this.old = this.value;
     this.move( e );
     this.mode(2);
 
-    document.addEventListener( 'mouseup', this, false );
-    document.addEventListener( 'mousemove', this, false );
+    
 
 };
 
 UIL.Slide.prototype.move = function( e ){
 
     if( this.isDown ){
-        e.preventDefault(); 
-        var rect = this.c[3].getBoundingClientRect();
-        var n = (((( e.clientX - rect.left - 4 ) / this.w ) * this.range + this.min )-this.prev.v);
+        var n = ((( e.clientX - this.left - 4 ) / this.w ) * this.range + this.min ) - this.old;
         if(n > this.step || n < this.step){ 
             n = ~~ ( n / this.step );
-            this.value = this.numValue( this.prev.v + ( n * this.step ) );
+            this.value = this.numValue( this.old + ( n * this.step ) );
             this.update( true );
-            this.prev.v = this.value;
+            this.old = this.value;
         }
     }
 
 };
 
+UIL.Slide.prototype.listen = function( v ){
+
+    this.value = v;
+    this.update();
+
+};
+
 UIL.Slide.prototype.update = function( up ){
 
-    var ww = (this.w * ((this.value-this.min)/this.range));
-    UIL.setSvg( this.c[4], 'width', ww );
+    var ww = this.w * (( this.value - this.min ) / this.range );
+    this.c[4].style.width = ww + 'px';
     this.c[2].textContent = this.value;
-    if( up ) this.callback(this.value);
+    if( up ) this.callback( this.value );
 
 };
 
@@ -1866,8 +1906,9 @@ UIL.Slide.prototype.rSize = function(){
     this.c[2].style.left = this.size - 50 + 'px';
     this.c[3].style.left = this.sa + 'px';
     this.c[3].style.width = this.width + 'px';
-    this.c[4].style.left = this.sa + 'px';
-    this.c[4].style.width = this.width + 'px';
+    this.c[4].style.left = (this.sa + 4) + 'px';
+
+    
     
     this.update();
 
@@ -2644,3 +2685,4 @@ UIL.Knob.prototype.update = function( up ){
     if( up ) this.callback(this.value);
     
 };
+

@@ -27,8 +27,9 @@ var UIL = UIL || ( function () {
 
         DOM: Crea.dom,
         CC: Crea.cc,
-        setDom : Crea.setDom,
+        //setDom : Crea.setDom,
         setSvg : Crea.setSvg,
+
 
         COLOR : 'N',
         SELECT : '#035fcf',
@@ -59,7 +60,7 @@ var UIL = UIL || ( function () {
 
             UIL.CC('UIL.base', 'position:relative; height:20px; overflow:hidden; float: left');
 
-            UIL.CC('UIL.text', UIL.TXT);
+            UIL.CC('UIL.text', UIL.TXT );
             UIL.CC('UIL.textSelect', UIL.TXT + UIL.US + 'outline:none; -webkit-appearance:none; -moz-appearance:none; border:1px solid rgba(255,255,255,0.1);' );
 
             UIL.CC('UIL.list', 'box-sizing:content-box; border:20px solid transparent; border-bottom:10px solid transparent; left:80px; top:0px; width:190px; height:90px; overflow:hidden; cursor:s-resize; pointer-events:auto; display:none;');
@@ -67,7 +68,7 @@ var UIL = UIL || ( function () {
             UIL.CC('UIL.listItem', 'position:relative; height:18px; background:rgba(0,0,0,0.2); border-bottom:1px solid rgba(0,0,0,0.2); pointer-events:auto; cursor:pointer;'+UIL.TXT);
             UIL.CC('UIL.listItem:hover', 'background:'+UIL.SELECT+'; color:#FFFFFF;')
 
-            UIL.CC('UIL.scroll-bg', 'cursor:w-resize; pointer-events:auto; background-image:linear-gradient(to right,  rgba(255,255,255,0),  rgba(255,255,255,0.1));');
+            UIL.CC('UIL.scroll-bg', 'cursor:w-resize; pointer-events:auto; background-image:linear-gradient(to right,  rgba(255,255,255,0), rgba(255,255,255,0.1));');
             UIL.CC('UIL.scroll', ' background:rgba(255,255,255,0.2);');
             UIL.CC('UIL.svgbox', 'left:100px; top:1px; width:190px; height:17px; pointer-events:auto; cursor:pointer;');
 

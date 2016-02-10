@@ -150,20 +150,23 @@ UIL.Proto.prototype = {
         }
     },
 
-    setTypeNumber:function( obj ){
+    setTypeNumber:function( o ){
 
-        this.min = obj.min === undefined ? -Infinity : obj.min;
-        this.max = obj.max === undefined ?  Infinity : obj.max;
-        this.step = obj.step === undefined ?  0.01 : obj.step;
-        this.precision = obj.precision === undefined ? 2 : obj.precision;
+        this.min = o.min === undefined ? -Infinity : o.min;
+        this.max = o.max === undefined ?  Infinity : o.max;
+        this.precision = o.precision === undefined ? 2 : o.precision;
+
+        var step;
 
         switch(this.precision){
-            case 0:  this.step = 1; break;
-            case 1:  this.step = 0.1; break;
-            case 2:  this.step = 0.01; break;
-            case 3:  this.step = 0.001; break;
-            case 4:  this.step = 0.0001; break;
+            case 0:  step = 1; break;
+            case 1:  step = 0.1; break;
+            case 2:  step = 0.01; break;
+            case 3:  step = 0.001; break;
+            case 4:  step = 0.0001; break;
         }
+
+        this.step = o.step === undefined ?  step : o.step;
         
     },
 

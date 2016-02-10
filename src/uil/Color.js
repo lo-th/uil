@@ -197,8 +197,8 @@ UIL.Color.prototype.updateDisplay = function(){
     this.c[3].style.color = cc;
 
     if( this.type === 'array' ) this.callback( this.rgb );
-    if( this.type === 'html' )this.callback( this.value );
-    if( this.type === 'hex' )this.callback( this.value );
+    if( this.type === 'html' ) this.callback( this.value );
+    if( this.type === 'hex' ) this.callback( this.value );
 };
 
 UIL.Color.prototype.setColor = function( color ){
@@ -394,6 +394,7 @@ UIL.packDX = function(c, a){
 UIL.dec2hex = function(x){
     return (x < 16 ? '0' : '') + x.toString(16);
 };
+
 UIL.HSLToRGB = function(hsl){
     var m1, m2, r, g, b;
     var h = hsl[0], s = hsl[1], l = hsl[2];
