@@ -84,6 +84,8 @@ UIL.Joystick = function( o ){
     UIL.DOM( null, 'stop', null, { offset:'80%', style:'stop-color:'+color4+'; stop-opacity:1;' }, this.c[4].childNodes[1], 1 );
     UIL.DOM( null, 'stop', null, { offset:'100%', style:'stop-color:'+color5+'; stop-opacity:1;' }, this.c[4].childNodes[1], 1 );
 
+    //console.log( this.c[4] )
+
     this.c[5].textContent = 'x'+ this.value[0] +' y' + this.value[1];
 
     this.c[2].events = [ 'mouseover', 'mousedown', 'mouseout' ];

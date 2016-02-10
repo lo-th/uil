@@ -9,7 +9,7 @@
 
 var define, module, exports;
 
-//var Crea = Crea || {};
+//var UMC = UMC || {};
 
 var UIL = ( function () {
 
@@ -26,10 +26,10 @@ var UIL = ( function () {
     UIL.US = '-o-user-select:text; -ms-user-select:text; -khtml-user-select:text; -webkit-user-select:text; -moz-user-select:text;';
     UIL.TXT = 'font-family:"Lucida Console", Monaco, monospace; font-size:11px; color:#cccccc; background:none; padding:3px 10px; left:0; top:0; height:17px; width:100px; overflow:hidden; white-space: nowrap;';
 
-    UIL.DOM = Crea.dom;
-    UIL.CC = Crea.cc;
+    UIL.DOM = UMC.dom;
+    UIL.CC = UMC.cc;
         //setDom : Crea.setDom,
-    UIL.setSvg = Crea.setSvg;
+    UIL.setSvg = UMC.setSvg;
 
 
     UIL.COLOR = 'N';
