@@ -125,7 +125,7 @@ UIL.Slide.prototype.move = function( e ){
 
     if( this.isDown ){
         var n = ((( e.clientX - this.left - 4 ) / this.w ) * this.range + this.min ) - this.old;
-        if(n > this.step || n < this.step){ 
+        if(n >= this.step || n <= this.step){ 
             n = ~~ ( n / this.step );
             this.value = this.numValue( this.old + ( n * this.step ) );
             this.update( true );

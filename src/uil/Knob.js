@@ -62,26 +62,30 @@ UIL.Knob.prototype.constructor = UIL.Knob;
 
 UIL.Knob.prototype.move = function( e ){
 
-    if( this.isDown ){
+    if( !this.isDown ) return;
 
-        var x = this.radius - (e.clientX - this.rect.left);
-        var y = this.radius - (e.clientY - this.rect.top);
-        this.r = - Math.atan2( x, y );
+    var x = this.radius - (e.clientX - this.rect.left);
+    var y = this.radius - (e.clientY - this.rect.top);
+    this.r = - Math.atan2( x, y );
 
-        if (this.r > this.mPI) this.r = this.mPI;
-        if (this.r < -this.mPI) this.r = -this.mPI
+    if( this.oldr !== null ) this.r = Math.abs(this.r - this.oldr) > Math.PI ? this.oldr : this.r;
 
-        if( this.oldr !== null ) this.r = Math.abs(this.r - this.oldr) > Math.PI ? this.oldr : this.r;
+    this.r = this.r > this.mPI ? this.mPI : this.r;
+    this.r = this.r < -this.mPI ? -this.mPI : this.r;
 
-        var steps = 1 / this.cirRange;
-        var value = (this.r + this.mPI) * steps;
+    var steps = 1 / this.cirRange;
+    var value = (this.r + this.mPI) * steps;
 
-        this.value = this.numValue( (this.range*value)+this.min );
+    var n = ( ( this.range * value ) + this.min ) - this.old;
 
+    if(n >= this.step || n <= this.step){ 
+        n = ~~ ( n / this.step );
+        this.value = this.numValue( this.old + ( n * this.step ) );
         this.update( true );
-
+        this.old = this.value;
         this.oldr = this.r;
     }
+    
 
 };
 

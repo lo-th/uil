@@ -132,24 +132,34 @@ UIL.Circular.prototype.down = function( e ){
 
 UIL.Circular.prototype.move = function( e ){
 
-    if( this.isDown ){
+    if( !this.isDown ) return;
 
-        var x = this.radius - (e.clientX - this.rect.left);
-        var y = this.radius - (e.clientY - this.rect.top);
-        this.r = Math.atan2( y, x ) - Math.PI*0.5;
+    var x = this.radius - (e.clientX - this.rect.left);
+    var y = this.radius - (e.clientY - this.rect.top);
 
-        var range = this.twoPi;
-        this.r = (((this.r%range)+range)%range);
+    this.r = Math.atan2( y, x ) - (Math.PI * 0.5);
+    this.r = (((this.r%this.twoPi)+this.twoPi)%this.twoPi);
 
-        if( this.oldr !== null ) this.r = Math.abs(this.r - this.oldr) > Math.PI ? this.oldr : this.r;
+    if( this.oldr !== null ){ 
 
-        var steps = 1/range;
-        var value = (this.r)*steps;
+        var dif = this.r - this.oldr;
+        this.r = Math.abs(dif) > Math.PI ? this.oldr : this.r;
 
-        this.value = this.numValue( (this.range*value)+this.min );
+        if(dif>6) this.r = 0;
+        if(dif<-6) this.r = this.twoPi;
 
+    }
+
+    var steps = 1 / this.twoPi;
+    var value = this.r * steps;
+
+    var n = ( ( this.range * value ) + this.min ) - this.old;
+
+    if(n >= this.step || n <= this.step){ 
+        n = ~~ ( n / this.step );
+        this.value = this.numValue( this.old + ( n * this.step ) );
         this.update( true );
-
+        this.old = this.value;
         this.oldr = this.r;
     }
 
