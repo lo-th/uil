@@ -273,7 +273,6 @@ UIL.Gui.prototype = {
             this.height += ny;
             this.content.style.height = this.height+'px';
         } else {
-
             var total = this.inner.offsetHeight;
             this.height = total+20;
             this.content.style.height = this.height+'px';

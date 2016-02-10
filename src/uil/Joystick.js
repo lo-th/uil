@@ -88,7 +88,7 @@ UIL.Joystick = function( o ){
 
     this.init();
 
-    this.update();
+    this.update(false);
 }
 
 UIL.Joystick.prototype = Object.create( UIL.Proto.prototype );
@@ -195,9 +195,9 @@ UIL.Joystick.prototype.move = function( e ){
 
 };
 
-UIL.Joystick.prototype.update = function(){
+UIL.Joystick.prototype.update = function(up){
 
-    
+    if(up === undefined) up = true;
 
     if(this.interval !== null){
 
@@ -235,7 +235,7 @@ UIL.Joystick.prototype.update = function(){
     this.oldx = this.x;
     this.oldy = this.y;
 
-    this.callback(this.value);
+    if(up) this.callback(this.value);
 
     if( this.interval !== null && this.x === 0 && this.y === 0 ){
         clearInterval(this.interval);

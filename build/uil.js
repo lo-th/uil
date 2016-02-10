@@ -541,7 +541,6 @@ UIL.Gui.prototype = {
             this.height += ny;
             this.content.style.height = this.height+'px';
         } else {
-
             var total = this.inner.offsetHeight;
             this.height = total+20;
             this.content.style.height = this.height+'px';
@@ -847,8 +846,9 @@ UIL.Group = function( o ){
 
     this.isOpen = o.open || false;
 
-    this.c[2] = UIL.DOM('UIL', 'div', 'top:25px; overflow:hidden; height:auto;');
+    this.c[2] = UIL.DOM('UIL inner', 'div', 'top:25px');//UIL.DOM('UIL', 'div', 'top:25px; overflow:hidden; height:auto;');
     this.c[3] = UIL.DOM('UIL', 'path','position:absolute; width:16px; left:'+(this.sa+this.sb-17)+'px; top:4px; pointer-events:none;',{ width:16, height:16, 'd':'M 6 4 L 10 8 6 12', 'stroke-width':2, stroke:this.fontColor, fill:'none', 'stroke-linecap':'butt' } );
+    //this.c[4] = UIL.DOM('UIL inner');
 
     this.c[0].style.height = this.h + 'px';
     this.c[1].style.height = this.h + 'px';
@@ -864,7 +864,7 @@ UIL.Group = function( o ){
     this.init();
 
     if( this.isOpen ) this.open();
-    if( UIL.main ) UIL.main.calc();
+    //if( UIL.main ) UIL.main.calc();
 
 };
 
@@ -887,8 +887,6 @@ UIL.Group.prototype.click = function( e ){
     if( this.isOpen ) this.close();
     else this.open();
 
-    //if( UIL.main ) UIL.main.calc();
-
 };
 
 
@@ -906,21 +904,20 @@ UIL.Group.prototype.open = function(){
     UIL.setSvg( this.c[3], 'd','M 12 6 L 8 10 4 6');
     this.calc();
 
-    if(UIL.main) UIL.main.calc( this.h-25 );
+    if( this.isUI ) UIL.main.calc( this.h -25 );
 
 };
 
 UIL.Group.prototype.close = function(){
 
-    if(UIL.main) UIL.main.calc(-(this.h-25));
+    if( this.isUI ) UIL.main.calc(-(this.h-25 ));
+
     this.isOpen = false;
     UIL.setSvg( this.c[3], 'd','M 6 4 L 10 8 6 12');
     this.h = 25;
 
     //this.c[2].style.height = 0 + 'px';
     this.c[0].style.height = this.h + 'px';
-
-    
 
 };
 
@@ -947,13 +944,10 @@ UIL.Group.prototype.calc = function(){
 
     if( !this.isOpen ) return;
     this.h = 25;
-    var i = this.uis.length;
-    while(i--) this.h += this.uis[i].h;
 
+    var total = this.c[2].offsetHeight;
+    this.h += total;
 
-    //this.h = this.c[2].clientHeight + 25;
-
-    //this.c[2].style.height = ( this.h - 25 ) + 'px';
     this.c[0].style.height = this.h + 'px';
 
 };
@@ -2773,7 +2767,7 @@ UIL.Joystick = function( o ){
 
     this.init();
 
-    this.update();
+    this.update(false);
 }
 
 UIL.Joystick.prototype = Object.create( UIL.Proto.prototype );
@@ -2880,9 +2874,9 @@ UIL.Joystick.prototype.move = function( e ){
 
 };
 
-UIL.Joystick.prototype.update = function(){
+UIL.Joystick.prototype.update = function(up){
 
-    
+    if(up === undefined) up = true;
 
     if(this.interval !== null){
 
@@ -2920,7 +2914,7 @@ UIL.Joystick.prototype.update = function(){
     this.oldx = this.x;
     this.oldy = this.y;
 
-    this.callback(this.value);
+    if(up) this.callback(this.value);
 
     if( this.interval !== null && this.x === 0 && this.y === 0 ){
         clearInterval(this.interval);
