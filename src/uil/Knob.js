@@ -2,7 +2,8 @@ UIL.Knob = function( o ){
 
     UIL.Proto.call( this, o );
 
-    this.type = 'knob';
+    //this.type = 'knob';
+    this.autoWidth = false;
 
     this.setTypeNumber( o );
 

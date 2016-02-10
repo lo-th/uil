@@ -2,7 +2,13 @@ UIL.Proto = function( o ){
 
     o = o || {};
 
-    this.type = '';
+    //this.type = '';
+
+    // if need resize width
+    this.autoWidth = true;
+
+    // if height can change
+    this.autoHeight = false;
 
     // if is on ui pannel
     this.isUI = o.isUI || false;
@@ -49,13 +55,9 @@ UIL.Proto = function( o ){
             this.c[0].style[p] = o.pos[p];
         }
         this.mono = true;
-    }/* else {
-        if(UIL.main){
-            this.liner = UIL.main.liner();
-            this.c[0].appendChild( this.liner );
-        }
-    }*/
-}
+    }
+
+};
 
 UIL.Proto.prototype = {
 
@@ -66,7 +68,7 @@ UIL.Proto.prototype = {
         this.c[0].style.height = this.h + 'px';
         this.c[0].style.background = UIL.bgcolor(this.color);
 
-        if(this.type==='list' || this.type==='group' || this.type==='color') this.c[0].style.transition = 'height, 0.1s ease-out';
+        if( this.autoHeight ) this.c[0].style.transition = 'height, 0.1s ease-out';
 
         for( var i = 0; i < this.c.length; i++ ){
             if( i === 0 ){ 
@@ -91,7 +93,7 @@ UIL.Proto.prototype = {
 
     setSize:function(sx){
 
-        if(this.type === 'circular' || this.type === 'knob' ) return;
+        if( !this.autoWidth ) return;
 
         this.size = sx || UIL.WIDTH;
         if( this.simple ){
@@ -105,20 +107,11 @@ UIL.Proto.prototype = {
     },
     
     clear:function(){
-
-        //console.log(event.this);
         
         this.clearEvent();
 
         var i = this.c.length;
         while(i--){
-            //if(i==0){
-                /*if( this.liner !== null ){ 
-                    this.c[0].removeChild( this.liner );
-                    this.liner = null;
-                }*/
-                
-            //} else {
             if(i !== 0){
                 if( this.c[i] !== undefined ){
                     if( this.c[i].children ) this.clearDOM( this.c[i] );
@@ -133,8 +126,6 @@ UIL.Proto.prototype = {
 
         this.c[0] = null;
         this.handleEvent = null;
-
-        
 
         this.c = null;
         if(this.callback) this.callback = null;
@@ -156,29 +147,29 @@ UIL.Proto.prototype = {
         this.max = o.max === undefined ?  Infinity : o.max;
         this.precision = o.precision === undefined ? 2 : o.precision;
 
-        var step;
+        var s;
 
         switch(this.precision){
-            case 0:  step = 1; break;
-            case 1:  step = 0.1; break;
-            case 2:  step = 0.01; break;
-            case 3:  step = 0.001; break;
-            case 4:  step = 0.0001; break;
+            case 0: s = 1; break;
+            case 1: s = 0.1; break;
+            case 2: s = 0.01; break;
+            case 3: s = 0.001; break;
+            case 4: s = 0.0001; break;
         }
 
-        this.step = o.step === undefined ?  step : o.step;
+        this.step = o.step === undefined ?  s : o.step;
         
     },
 
     numValue:function( n ){
 
-        return Math.min( this.max, Math.max( this.min, n ) ).toFixed( this.precision )*1;
+        return Math.min( this.max, Math.max( this.min, n ) ).toFixed( this.precision ) * 1;
 
     },
 
     rSize:function(){
 
-        if(this.type === 'circular' || this.type === 'knob' || this.type === 'joystick' ) return;
+        if( !this.autoWidth ) return;
 
         this.c[0].style.width = this.size+'px';
         if( !this.simple ) this.c[1].style.width = this.sa+'px';

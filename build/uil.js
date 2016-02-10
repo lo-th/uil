@@ -157,7 +157,7 @@ var Crea = Crea || ( function () {
 /**   _   _____ _   _   
 *    | | |_   _| |_| |
 *    | |_ _| | |  _  |
-*    |___|_|_| |_| |_| 2015
+*    |___|_|_| |_| |_| 2016
 *    @author lo.th / http://lo-th.github.io/labs/
 */
 
@@ -171,8 +171,8 @@ var UIL = ( function () {
 
     UIL = function () {};
 
-    UIL.main = null;
     UIL.REVISION =  '0.9';
+    UIL.main = null;
     UIL.DEF = false;
     UIL.WIDTH = 300;
     UIL.BW = 190;
@@ -254,8 +254,6 @@ var UIL = ( function () {
 
 })();
 
-
-//UIL.classDefine();
 
 // UMD (Universal Module Definition)
 
@@ -457,26 +455,17 @@ UIL.Gui.prototype = {
 
     add:function( type, o ){
         
-        o.isUI = true;
-        var n;
-        switch(type){
-            case 'button': n = new UIL.Button(o); break;
-            case 'string': n = new UIL.String(o); break;
-            case 'number': n = new UIL.Number(o); break;
-            case 'title':  n = new UIL.Title(o);  break;
-            case 'color':  n = new UIL.Color(o);  break;
-            case 'slide':  n = new UIL.Slide(o);  break;
-            case 'bool':   n = new UIL.Bool(o);   break;
-            case 'list':   n = new UIL.List(o);   break;
-            case 'group':  n = new UIL.Group(o);  break;
-            case 'knob':   n = new UIL.Knob(o);   break;
-            case 'circular':n = new UIL.Circular(o);   break;
-            case 'joystick':n = new UIL.Joystick(o);   break;
-        }
-        this.uis.push(n);
+        if( o.isUI === undefined ) o.isUI = true;
+
+        type = type[0].toUpperCase() + type.slice(1);
+        var n = new UIL[type](o);
+        this.uis.push( n );
         this.calc();
+        
         return n;
     },
+
+    ////
 
     resize:function(e){
 
@@ -581,7 +570,6 @@ UIL.Gui.prototype = {
         this.width = UIL.WIDTH;
         this.content.style.width = this.width + 'px';
 
-
         if( this.isCenter ) this.content.style.marginLeft = -(~~ (UIL.WIDTH*0.5)) + 'px';
 
         var i = this.uis.length;
@@ -619,7 +607,13 @@ UIL.Proto = function( o ){
 
     o = o || {};
 
-    this.type = '';
+    //this.type = '';
+
+    // if need resize width
+    this.autoWidth = true;
+
+    // if height can change
+    this.autoHeight = false;
 
     // if is on ui pannel
     this.isUI = o.isUI || false;
@@ -666,13 +660,9 @@ UIL.Proto = function( o ){
             this.c[0].style[p] = o.pos[p];
         }
         this.mono = true;
-    }/* else {
-        if(UIL.main){
-            this.liner = UIL.main.liner();
-            this.c[0].appendChild( this.liner );
-        }
-    }*/
-}
+    }
+
+};
 
 UIL.Proto.prototype = {
 
@@ -683,7 +673,7 @@ UIL.Proto.prototype = {
         this.c[0].style.height = this.h + 'px';
         this.c[0].style.background = UIL.bgcolor(this.color);
 
-        if(this.type==='list' || this.type==='group' || this.type==='color') this.c[0].style.transition = 'height, 0.1s ease-out';
+        if( this.autoHeight ) this.c[0].style.transition = 'height, 0.1s ease-out';
 
         for( var i = 0; i < this.c.length; i++ ){
             if( i === 0 ){ 
@@ -708,7 +698,7 @@ UIL.Proto.prototype = {
 
     setSize:function(sx){
 
-        if(this.type === 'circular' || this.type === 'knob' ) return;
+        if( !this.autoWidth ) return;
 
         this.size = sx || UIL.WIDTH;
         if( this.simple ){
@@ -722,20 +712,11 @@ UIL.Proto.prototype = {
     },
     
     clear:function(){
-
-        //console.log(event.this);
         
         this.clearEvent();
 
         var i = this.c.length;
         while(i--){
-            //if(i==0){
-                /*if( this.liner !== null ){ 
-                    this.c[0].removeChild( this.liner );
-                    this.liner = null;
-                }*/
-                
-            //} else {
             if(i !== 0){
                 if( this.c[i] !== undefined ){
                     if( this.c[i].children ) this.clearDOM( this.c[i] );
@@ -750,8 +731,6 @@ UIL.Proto.prototype = {
 
         this.c[0] = null;
         this.handleEvent = null;
-
-        
 
         this.c = null;
         if(this.callback) this.callback = null;
@@ -773,29 +752,29 @@ UIL.Proto.prototype = {
         this.max = o.max === undefined ?  Infinity : o.max;
         this.precision = o.precision === undefined ? 2 : o.precision;
 
-        var step;
+        var s;
 
         switch(this.precision){
-            case 0:  step = 1; break;
-            case 1:  step = 0.1; break;
-            case 2:  step = 0.01; break;
-            case 3:  step = 0.001; break;
-            case 4:  step = 0.0001; break;
+            case 0: s = 1; break;
+            case 1: s = 0.1; break;
+            case 2: s = 0.01; break;
+            case 3: s = 0.001; break;
+            case 4: s = 0.0001; break;
         }
 
-        this.step = o.step === undefined ?  step : o.step;
+        this.step = o.step === undefined ?  s : o.step;
         
     },
 
     numValue:function( n ){
 
-        return Math.min( this.max, Math.max( this.min, n ) ).toFixed( this.precision )*1;
+        return Math.min( this.max, Math.max( this.min, n ) ).toFixed( this.precision ) * 1;
 
     },
 
     rSize:function(){
 
-        if(this.type === 'circular' || this.type === 'knob' || this.type === 'joystick' ) return;
+        if( !this.autoWidth ) return;
 
         this.c[0].style.width = this.size+'px';
         if( !this.simple ) this.c[1].style.width = this.sa+'px';
@@ -844,13 +823,14 @@ UIL.Group = function( o ){
 
     UIL.Proto.call( this, o );
 
-    this.type = 'group';
+    //this.type = 'group';
+    this.autoHeight = true;
 
     this.h = 25;
 
     this.isOpen = o.open || false;
 
-    this.c[2] = UIL.DOM('UIL inner', 'div', 'top:25px');//UIL.DOM('UIL', 'div', 'top:25px; overflow:hidden; height:auto;');
+    this.c[2] = UIL.DOM('UIL inner', 'div', 'top:25px');
     this.c[3] = UIL.DOM('UIL', 'path','position:absolute; width:16px; left:'+(this.sa+this.sb-17)+'px; top:4px; pointer-events:none;',{ width:16, height:16, 'd':'M 6 4 L 10 8 6 12', 'stroke-width':2, stroke:this.fontColor, fill:'none', 'stroke-linecap':'butt' } );
     //this.c[4] = UIL.DOM('UIL inner');
 
@@ -868,7 +848,6 @@ UIL.Group = function( o ){
     this.init();
 
     if( this.isOpen ) this.open();
-    //if( UIL.main ) UIL.main.calc();
 
 };
 
@@ -895,12 +874,14 @@ UIL.Group.prototype.click = function( e ){
 
 
 
-UIL.Group.prototype.add = function(type, obj){
-    obj.target = this.c[2];
-    UIL.Gui.prototype.add.call( this, type, obj );
+UIL.Group.prototype.add = function( type, o ){
+
+    o.target = this.c[2];
+    o.isUI = this.isUI;
+
+    UIL.Gui.prototype.add.call( this, type, o );
+
 };
-
-
 
 UIL.Group.prototype.open = function(){
 
@@ -920,7 +901,6 @@ UIL.Group.prototype.close = function(){
     UIL.setSvg( this.c[3], 'd','M 6 4 L 10 8 6 12');
     this.h = 25;
 
-    //this.c[2].style.height = 0 + 'px';
     this.c[0].style.height = this.h + 'px';
 
 };
@@ -976,7 +956,7 @@ UIL.Title = function( o ){
     
     UIL.Proto.call( this, o );
 
-    this.type = 'title';
+    //this.type = 'title';
 
     this.h = o.height || 31;
 
@@ -1031,7 +1011,7 @@ UIL.String = function( o ){
 
     UIL.Proto.call( this, o );
 
-    this.type = 'string';
+    //this.type = 'string';
     this.value = o.value || '';
     this.allway = o.allway || false;
 
@@ -1331,7 +1311,8 @@ UIL.Color = function( o ){
     
     UIL.Proto.call( this, o );
 
-    this.type = 'color';
+    //this.type = 'color';
+    this.autoHeight = true;
 
     this.type = o.type || 'array';
     this.width = this.sb;
@@ -1755,7 +1736,7 @@ UIL.Slide = function( o ){
 
     UIL.Proto.call( this, o );
 
-    this.type = 'slide';
+    //this.type = 'slide';
 
     this.setTypeNumber( o );
 
@@ -1786,13 +1767,10 @@ UIL.Slide = function( o ){
     UIL.DOM( null, 'line', null, { x1:5, x2:0, y1:0, y2:10, stroke:UIL.SVGC, 'stroke-width':1  }, this.c[3].childNodes[1], 0 );
     UIL.DOM( null, 'line', null, { x1:10, x2:5, y1:0, y2:10, stroke:UIL.SVGC, 'stroke-width':1  }, this.c[3].childNodes[1], 0 );
 
-    //console.log(this.c[3])
 
     this.c[3].events = [ 'mouseover', 'mousedown', 'mouseout' ];
 
     this.init();
-
-    //if(UIL.main) UIL.main.calc();
 
 };
 
@@ -1925,7 +1903,8 @@ UIL.List = function( o ){
 
     UIL.Proto.call( this, o );
 
-    this.type = 'list';
+    //this.type = 'list';
+    this.autoHeight = true;
 
     this.c[2] = UIL.DOM('UIL list');
     this.c[3] = UIL.DOM('UIL svgbox', 'rect', '', {width:'100%', height:17, fill:UIL.bgcolor(UIL.COLOR), 'stroke-width':1, stroke:UIL.SVGC  });
@@ -2217,7 +2196,7 @@ UIL.Bool = function( o ){
 
     UIL.Proto.call( this, o );
 
-    this.type = 'bool';
+    //this.type = 'bool';
 
     this.value = o.value || false;
 
@@ -2277,7 +2256,7 @@ UIL.Button = function( o ){
 
     UIL.Proto.call( this, o );
 
-    this.type = 'button';
+    //this.type = 'button';
 
     this.value = o.value || false;
 
@@ -2366,8 +2345,10 @@ UIL.Button.prototype.rSize = function(){
 UIL.Circular = function( o ){
 
     UIL.Proto.call( this, o );
-    this.type = 'circular';
-    
+
+    //this.type = 'circular';
+    this.autoWidth = false;
+
     this.setTypeNumber( o );
 
     this.range = this.max - this.min;
@@ -2557,7 +2538,8 @@ UIL.Knob = function( o ){
 
     UIL.Proto.call( this, o );
 
-    this.type = 'knob';
+    //this.type = 'knob';
+    this.autoWidth = false;
 
     this.setTypeNumber( o );
 
@@ -2684,7 +2666,9 @@ UIL.Knob.prototype.update = function( up ){
 UIL.Joystick = function( o ){
 
     UIL.Proto.call( this, o );
-    this.type = 'joystick';
+
+    //this.type = 'joystick';
+    this.autoWidth = false;
 
     this.value = [0,0];
 

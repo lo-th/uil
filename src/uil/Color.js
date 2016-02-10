@@ -2,7 +2,8 @@ UIL.Color = function( o ){
     
     UIL.Proto.call( this, o );
 
-    this.type = 'color';
+    //this.type = 'color';
+    this.autoHeight = true;
 
     this.type = o.type || 'array';
     this.width = this.sb;

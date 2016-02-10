@@ -185,26 +185,17 @@ UIL.Gui.prototype = {
 
     add:function( type, o ){
         
-        o.isUI = true;
-        var n;
-        switch(type){
-            case 'button': n = new UIL.Button(o); break;
-            case 'string': n = new UIL.String(o); break;
-            case 'number': n = new UIL.Number(o); break;
-            case 'title':  n = new UIL.Title(o);  break;
-            case 'color':  n = new UIL.Color(o);  break;
-            case 'slide':  n = new UIL.Slide(o);  break;
-            case 'bool':   n = new UIL.Bool(o);   break;
-            case 'list':   n = new UIL.List(o);   break;
-            case 'group':  n = new UIL.Group(o);  break;
-            case 'knob':   n = new UIL.Knob(o);   break;
-            case 'circular':n = new UIL.Circular(o);   break;
-            case 'joystick':n = new UIL.Joystick(o);   break;
-        }
-        this.uis.push(n);
+        if( o.isUI === undefined ) o.isUI = true;
+
+        type = type[0].toUpperCase() + type.slice(1);
+        var n = new UIL[type](o);
+        this.uis.push( n );
         this.calc();
+        
         return n;
     },
+
+    ////
 
     resize:function(e){
 
@@ -308,7 +299,6 @@ UIL.Gui.prototype = {
 
         this.width = UIL.WIDTH;
         this.content.style.width = this.width + 'px';
-
 
         if( this.isCenter ) this.content.style.marginLeft = -(~~ (UIL.WIDTH*0.5)) + 'px';
 

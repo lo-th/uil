@@ -2,7 +2,7 @@ UIL.Slide = function( o ){
 
     UIL.Proto.call( this, o );
 
-    this.type = 'slide';
+    //this.type = 'slide';
 
     this.setTypeNumber( o );
 
@@ -33,13 +33,10 @@ UIL.Slide = function( o ){
     UIL.DOM( null, 'line', null, { x1:5, x2:0, y1:0, y2:10, stroke:UIL.SVGC, 'stroke-width':1  }, this.c[3].childNodes[1], 0 );
     UIL.DOM( null, 'line', null, { x1:10, x2:5, y1:0, y2:10, stroke:UIL.SVGC, 'stroke-width':1  }, this.c[3].childNodes[1], 0 );
 
-    //console.log(this.c[3])
 
     this.c[3].events = [ 'mouseover', 'mousedown', 'mouseout' ];
 
     this.init();
-
-    //if(UIL.main) UIL.main.calc();
 
 };
 

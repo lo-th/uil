@@ -1,7 +1,9 @@
 UIL.Joystick = function( o ){
 
     UIL.Proto.call( this, o );
-    this.type = 'joystick';
+
+    //this.type = 'joystick';
+    this.autoWidth = false;
 
     this.value = [0,0];
 

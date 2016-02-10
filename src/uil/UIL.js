@@ -1,7 +1,7 @@
 /**   _   _____ _   _   
 *    | | |_   _| |_| |
 *    | |_ _| | |  _  |
-*    |___|_|_| |_| |_| 2015
+*    |___|_|_| |_| |_| 2016
 *    @author lo.th / http://lo-th.github.io/labs/
 */
 
@@ -15,8 +15,8 @@ var UIL = ( function () {
 
     UIL = function () {};
 
-    UIL.main = null;
     UIL.REVISION =  '0.9';
+    UIL.main = null;
     UIL.DEF = false;
     UIL.WIDTH = 300;
     UIL.BW = 190;
@@ -98,8 +98,6 @@ var UIL = ( function () {
 
 })();
 
-
-//UIL.classDefine();
 
 // UMD (Universal Module Definition)
 

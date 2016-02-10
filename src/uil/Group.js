@@ -2,13 +2,14 @@ UIL.Group = function( o ){
 
     UIL.Proto.call( this, o );
 
-    this.type = 'group';
+    //this.type = 'group';
+    this.autoHeight = true;
 
     this.h = 25;
 
     this.isOpen = o.open || false;
 
-    this.c[2] = UIL.DOM('UIL inner', 'div', 'top:25px');//UIL.DOM('UIL', 'div', 'top:25px; overflow:hidden; height:auto;');
+    this.c[2] = UIL.DOM('UIL inner', 'div', 'top:25px');
     this.c[3] = UIL.DOM('UIL', 'path','position:absolute; width:16px; left:'+(this.sa+this.sb-17)+'px; top:4px; pointer-events:none;',{ width:16, height:16, 'd':'M 6 4 L 10 8 6 12', 'stroke-width':2, stroke:this.fontColor, fill:'none', 'stroke-linecap':'butt' } );
     //this.c[4] = UIL.DOM('UIL inner');
 
@@ -26,7 +27,6 @@ UIL.Group = function( o ){
     this.init();
 
     if( this.isOpen ) this.open();
-    //if( UIL.main ) UIL.main.calc();
 
 };
 
@@ -53,12 +53,14 @@ UIL.Group.prototype.click = function( e ){
 
 
 
-UIL.Group.prototype.add = function(type, obj){
-    obj.target = this.c[2];
-    UIL.Gui.prototype.add.call( this, type, obj );
+UIL.Group.prototype.add = function( type, o ){
+
+    o.target = this.c[2];
+    o.isUI = this.isUI;
+
+    UIL.Gui.prototype.add.call( this, type, o );
+
 };
-
-
 
 UIL.Group.prototype.open = function(){
 
@@ -78,7 +80,6 @@ UIL.Group.prototype.close = function(){
     UIL.setSvg( this.c[3], 'd','M 6 4 L 10 8 6 12');
     this.h = 25;
 
-    //this.c[2].style.height = 0 + 'px';
     this.c[0].style.height = this.h + 'px';
 
 };

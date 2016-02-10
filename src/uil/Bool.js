@@ -2,7 +2,7 @@ UIL.Bool = function( o ){
 
     UIL.Proto.call( this, o );
 
-    this.type = 'bool';
+    //this.type = 'bool';
 
     this.value = o.value || false;
 

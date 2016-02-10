@@ -2,7 +2,7 @@ UIL.Button = function( o ){
 
     UIL.Proto.call( this, o );
 
-    this.type = 'button';
+    //this.type = 'button';
 
     this.value = o.value || false;
 

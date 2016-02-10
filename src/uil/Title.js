@@ -2,7 +2,7 @@ UIL.Title = function( o ){
     
     UIL.Proto.call( this, o );
 
-    this.type = 'title';
+    //this.type = 'title';
 
     this.h = o.height || 31;
 

@@ -2,7 +2,8 @@ UIL.List = function( o ){
 
     UIL.Proto.call( this, o );
 
-    this.type = 'list';
+    //this.type = 'list';
+    this.autoHeight = true;
 
     this.c[2] = UIL.DOM('UIL list');
     this.c[3] = UIL.DOM('UIL svgbox', 'rect', '', {width:'100%', height:17, fill:UIL.bgcolor(UIL.COLOR), 'stroke-width':1, stroke:UIL.SVGC  });
