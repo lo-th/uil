@@ -305,6 +305,12 @@ UIL.Gui.prototype = {
         var i = this.uis.length;
         while(i--){
             this.uis[i].setSize();
+            //this.uis[i].rSize();
+        }
+
+        i = this.uis.length;
+        while(i--){
+            //this.uis[i].setSize();
             this.uis[i].rSize();
         }
 

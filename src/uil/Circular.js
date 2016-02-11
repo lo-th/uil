@@ -7,10 +7,6 @@ UIL.Circular = function( o ){
 
     this.setTypeNumber( o );
 
-    this.range = this.max - this.min;
-
-    this.value = o.value || 0;
-
     this.radius = o.radius || 15;
     
     this.size = (this.radius*2)+20;

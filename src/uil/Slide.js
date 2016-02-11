@@ -4,14 +4,12 @@ UIL.Slide = function( o ){
 
     this.setTypeNumber( o );
 
-    this.range = this.max - this.min;
     this.width = UIL.BW - 40;
     this.w = this.width - 8;
 
     this.h = o.height || 20;
     this.h = this.h < 11 ? 11 : this.h;
 
-    this.value = o.value || 0;
     this.old = this.value;
     this.isDown = false;
     this.isOver = false;

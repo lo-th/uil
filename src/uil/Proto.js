@@ -110,16 +110,21 @@ UIL.Proto.prototype = {
         
         this.clearEvent();
 
+        this.purge(this.c[0])
+
         var i = this.c.length;
         while(i--){
             if(i !== 0){
                 if( this.c[i] !== undefined ){
-                    if( this.c[i].children ) this.clearDOM( this.c[i] );
+                    //if( this.c[i].children ) 
+                    this.clearDOM( this.c[i] );
                     this.c[0].removeChild( this.c[i] );
                     this.c[i] = null;
                 }
             }
         }
+
+        this.c[0].innerHTML = '';
 
         if( this.target !== null ) this.target.removeChild( this.c[0] );
         else UIL.main.inner.removeChild( this.c[0] );
@@ -131,17 +136,49 @@ UIL.Proto.prototype = {
         if(this.callback) this.callback = null;
         if(this.value) this.value = null;
 
+        this.purge(this);
+
         //this = null;
     },
 
-    clearDOM:function(dom){
-        while ( dom.children.length ){
-            if(dom.lastChild.children) while ( dom.lastChild.children.length ) dom.lastChild.removeChild( dom.lastChild.lastChild );
-            dom.removeChild( dom.lastChild );
+    purge : function (d) {
+        var a = d.attributes, i, l, n;
+        if (a) {
+            for (i = a.length - 1; i >= 0; i -= 1) {
+                n = a[i].name;
+                if (typeof d[n] === 'function') {
+                    d[n] = null;
+                }
+            }
+        }
+        a = d.childNodes;
+        if (a) {
+            l = a.length;
+            for (i = 0; i < l; i += 1) {
+                this.purge(d.childNodes[i]);
+            }
         }
     },
 
+    clearDOM:function(dom){
+        while ( dom.lastChild ){
+            if(dom.lastChild.children) while ( dom.lastChild.lastChild ) dom.lastChild.removeChild( dom.lastChild.lastChild );
+            dom.removeChild( dom.lastChild );
+        }
+
+        /*while ( dom.children.length ){
+            if(dom.lastChild.children) while ( dom.lastChild.children.length ) dom.lastChild.removeChild( dom.lastChild.lastChild );
+            dom.removeChild( dom.lastChild );
+        }*/
+    },
+
     setTypeNumber:function( o ){
+
+        this.value = 0;
+        if(o.value !== undefined){
+            if( typeof o.value === 'string' ) this.value = o.value * 1;
+            else this.value = o.value;
+        }
 
         this.min = o.min === undefined ? -Infinity : o.min;
         this.max = o.max === undefined ?  Infinity : o.max;
@@ -158,6 +195,8 @@ UIL.Proto.prototype = {
         }
 
         this.step = o.step === undefined ?  s : o.step;
+
+        this.range = this.max - this.min;
         
     },
 

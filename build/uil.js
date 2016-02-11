@@ -96,6 +96,13 @@ var UMC = UMC || ( function () {
 
     // SVG SIDE
 
+    UMC.clone = function ( dom, deep ){
+
+        if(deep===undefined) deep = true; 
+        return dom.cloneNode(deep);
+    
+    };
+
     UMC.add = function( dom, type, o, id ){ // add attributes
 
         var g = document.createElementNS( svgns, type );
@@ -164,6 +171,7 @@ var UIL = ( function () {
     UIL.CC = UMC.cc;
         //setDom : Crea.setDom,
     UIL.setSvg = UMC.setSvg;
+    UIL.clone = UMC.clone;
 
 
     UIL.COLOR = 'N';
@@ -553,6 +561,12 @@ UIL.Gui.prototype = {
         var i = this.uis.length;
         while(i--){
             this.uis[i].setSize();
+            //this.uis[i].rSize();
+        }
+
+        i = this.uis.length;
+        while(i--){
+            //this.uis[i].setSize();
             this.uis[i].rSize();
         }
 
@@ -693,16 +707,21 @@ UIL.Proto.prototype = {
         
         this.clearEvent();
 
+        this.purge(this.c[0])
+
         var i = this.c.length;
         while(i--){
             if(i !== 0){
                 if( this.c[i] !== undefined ){
-                    if( this.c[i].children ) this.clearDOM( this.c[i] );
+                    //if( this.c[i].children ) 
+                    this.clearDOM( this.c[i] );
                     this.c[0].removeChild( this.c[i] );
                     this.c[i] = null;
                 }
             }
         }
+
+        this.c[0].innerHTML = '';
 
         if( this.target !== null ) this.target.removeChild( this.c[0] );
         else UIL.main.inner.removeChild( this.c[0] );
@@ -714,17 +733,49 @@ UIL.Proto.prototype = {
         if(this.callback) this.callback = null;
         if(this.value) this.value = null;
 
+        this.purge(this);
+
         //this = null;
     },
 
-    clearDOM:function(dom){
-        while ( dom.children.length ){
-            if(dom.lastChild.children) while ( dom.lastChild.children.length ) dom.lastChild.removeChild( dom.lastChild.lastChild );
-            dom.removeChild( dom.lastChild );
+    purge : function (d) {
+        var a = d.attributes, i, l, n;
+        if (a) {
+            for (i = a.length - 1; i >= 0; i -= 1) {
+                n = a[i].name;
+                if (typeof d[n] === 'function') {
+                    d[n] = null;
+                }
+            }
+        }
+        a = d.childNodes;
+        if (a) {
+            l = a.length;
+            for (i = 0; i < l; i += 1) {
+                this.purge(d.childNodes[i]);
+            }
         }
     },
 
+    clearDOM:function(dom){
+        while ( dom.lastChild ){
+            if(dom.lastChild.children) while ( dom.lastChild.lastChild ) dom.lastChild.removeChild( dom.lastChild.lastChild );
+            dom.removeChild( dom.lastChild );
+        }
+
+        /*while ( dom.children.length ){
+            if(dom.lastChild.children) while ( dom.lastChild.children.length ) dom.lastChild.removeChild( dom.lastChild.lastChild );
+            dom.removeChild( dom.lastChild );
+        }*/
+    },
+
     setTypeNumber:function( o ){
+
+        this.value = 0;
+        if(o.value !== undefined){
+            if( typeof o.value === 'string' ) this.value = o.value * 1;
+            else this.value = o.value;
+        }
 
         this.min = o.min === undefined ? -Infinity : o.min;
         this.max = o.max === undefined ?  Infinity : o.max;
@@ -741,6 +792,8 @@ UIL.Proto.prototype = {
         }
 
         this.step = o.step === undefined ?  s : o.step;
+
+        this.range = this.max - this.min;
         
     },
 
@@ -1076,7 +1129,7 @@ UIL.Number = function( o ){
 
     this.isSelect = false;
 
-    if(o.value !== undefined){
+    if( o.value !== undefined ){
         if(!isNaN(o.value)){ this.value = [o.value];}
         else if(o.value instanceof Array ){ this.value = o.value; this.isNumber=false;}
         else if(o.value instanceof Object ){ 
@@ -1085,7 +1138,7 @@ UIL.Number = function( o ){
             if(o.value.y) this.value[1] = o.value.y;
             if(o.value.z) this.value[2] = o.value.z;
             if(o.value.w) this.value[3] = o.value.w;
-            this.isVector=true;
+            this.isVector = true;
         }
     }
 
@@ -1718,14 +1771,12 @@ UIL.Slide = function( o ){
 
     this.setTypeNumber( o );
 
-    this.range = this.max - this.min;
     this.width = UIL.BW - 40;
     this.w = this.width - 8;
 
     this.h = o.height || 20;
     this.h = this.h < 11 ? 11 : this.h;
 
-    this.value = o.value || 0;
     this.old = this.value;
     this.isDown = false;
     this.isOver = false;
@@ -2114,6 +2165,8 @@ UIL.List.prototype.listShow = function(){
     if( this.side === 'up' ) UIL.setSvg( this.c[4], 'd','M 12 10 L 8 6 4 10');
     else UIL.setSvg( this.c[4], 'd','M 12 6 L 8 10 4 6');
 
+    this.rSizeContent();
+
     if( this.isUI ) UIL.main.calc(this.h-20);
 
 };
@@ -2138,7 +2191,16 @@ UIL.List.prototype.text = function( txt ){
 
 };
 
+UIL.List.prototype.rSizeContent = function(){
+
+    var i = this.length;
+    while(i--) this.listIn.children[i].style.width = this.w + 'px';
+
+};
+
 UIL.List.prototype.rSize = function(){
+
+    UIL.setSvg( this.c[6], 'x', this.sb-15 );
 
     UIL.Proto.prototype.rSize.call( this );
 
@@ -2156,13 +2218,10 @@ UIL.List.prototype.rSize = function(){
     this.c[6].style.width = this.sb+'px';
     this.c[6].style.left = this.sa+'px';
 
-   // UIL.setSvg( this.c[3], 'width', this.sb );
-    UIL.setSvg( this.c[6], 'x', this.sb-15 );
-
     this.w = this.sb;
     if(this.max > this.maxHeight) this.w = this.sb-20;
-    var i = this.length;
-    while(i--) this.listIn.children[i].style.width = this.w + 'px';
+
+    if(this.show) this.rSizeContent();
 
 };
 UIL.Bool = function( o ){
@@ -2323,10 +2382,6 @@ UIL.Circular = function( o ){
     this.autoWidth = false;
 
     this.setTypeNumber( o );
-
-    this.range = this.max - this.min;
-
-    this.value = o.value || 0;
 
     this.radius = o.radius || 15;
     
@@ -2516,12 +2571,9 @@ UIL.Knob = function( o ){
 
     this.setTypeNumber( o );
 
-    this.range = this.max - this.min;
     this.mPI = Math.PI * 0.8;
     this.toDeg = 180 / Math.PI;
     this.cirRange = this.mPI * 2;
-
-    this.value = o.value || 0;
 
     this.radius = o.radius || 15;
     

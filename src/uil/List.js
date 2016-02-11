@@ -238,6 +238,8 @@ UIL.List.prototype.listShow = function(){
     if( this.side === 'up' ) UIL.setSvg( this.c[4], 'd','M 12 10 L 8 6 4 10');
     else UIL.setSvg( this.c[4], 'd','M 12 6 L 8 10 4 6');
 
+    this.rSizeContent();
+
     if( this.isUI ) UIL.main.calc(this.h-20);
 
 };
@@ -262,7 +264,16 @@ UIL.List.prototype.text = function( txt ){
 
 };
 
+UIL.List.prototype.rSizeContent = function(){
+
+    var i = this.length;
+    while(i--) this.listIn.children[i].style.width = this.w + 'px';
+
+};
+
 UIL.List.prototype.rSize = function(){
+
+    UIL.setSvg( this.c[6], 'x', this.sb-15 );
 
     UIL.Proto.prototype.rSize.call( this );
 
@@ -280,12 +291,9 @@ UIL.List.prototype.rSize = function(){
     this.c[6].style.width = this.sb+'px';
     this.c[6].style.left = this.sa+'px';
 
-   // UIL.setSvg( this.c[3], 'width', this.sb );
-    UIL.setSvg( this.c[6], 'x', this.sb-15 );
-
     this.w = this.sb;
     if(this.max > this.maxHeight) this.w = this.sb-20;
-    var i = this.length;
-    while(i--) this.listIn.children[i].style.width = this.w + 'px';
+
+    if(this.show) this.rSizeContent();
 
 };

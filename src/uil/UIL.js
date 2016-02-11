@@ -30,6 +30,7 @@ var UIL = ( function () {
     UIL.CC = UMC.cc;
         //setDom : Crea.setDom,
     UIL.setSvg = UMC.setSvg;
+    UIL.clone = UMC.clone;
 
 
     UIL.COLOR = 'N';

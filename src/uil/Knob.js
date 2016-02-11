@@ -7,12 +7,9 @@ UIL.Knob = function( o ){
 
     this.setTypeNumber( o );
 
-    this.range = this.max - this.min;
     this.mPI = Math.PI * 0.8;
     this.toDeg = 180 / Math.PI;
     this.cirRange = this.mPI * 2;
-
-    this.value = o.value || 0;
 
     this.radius = o.radius || 15;
     

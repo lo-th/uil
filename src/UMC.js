@@ -96,6 +96,13 @@ var UMC = UMC || ( function () {
 
     // SVG SIDE
 
+    UMC.clone = function ( dom, deep ){
+
+        if(deep===undefined) deep = true; 
+        return dom.cloneNode(deep);
+    
+    };
+
     UMC.add = function( dom, type, o, id ){ // add attributes
 
         var g = document.createElementNS( svgns, type );

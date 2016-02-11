@@ -15,7 +15,7 @@ UIL.Number = function( o ){
 
     this.isSelect = false;
 
-    if(o.value !== undefined){
+    if( o.value !== undefined ){
         if(!isNaN(o.value)){ this.value = [o.value];}
         else if(o.value instanceof Array ){ this.value = o.value; this.isNumber=false;}
         else if(o.value instanceof Object ){ 
@@ -24,7 +24,7 @@ UIL.Number = function( o ){
             if(o.value.y) this.value[1] = o.value.y;
             if(o.value.z) this.value[2] = o.value.z;
             if(o.value.w) this.value[3] = o.value.w;
-            this.isVector=true;
+            this.isVector = true;
         }
     }
 
