@@ -19,17 +19,20 @@ UIL.Slide = function( o ){
     if(this.c[1]!==undefined) this.c[1].style.top = ty + 'px';
 
     this.c[2] = UIL.DOM('UIL text', 'div', 'top:'+ty+'px; text-align:right; width:40px; padding:3px 5px; color:'+ this.fontColor );
-    this.c[3] = UIL.DOM('UIL svgbox', 'rect', 'width:'+this.width+'px; height:'+(this.h-3)+'px; cursor:w-resize;', { width:'100%', height:this.h-3, fill:UIL.SVGB, 'stroke-width':1, stroke:UIL.SVGC });
-    this.c[4] = UIL.DOM('UIL svgbox', 'rect', 'left:4px; top:4px; width:'+(this.width-8)+'px; height:'+(this.h-10)+'px; pointer-events:none;', { width:'100%', height:'100%', fill: this.fontColor });
+    this.c[3] = UIL.DOM('UIL slidebg', 'rect', 'top:2px; height:'+(this.h-4)+'px; cursor:w-resize;' );
+    this.c[4] = UIL.DOM('UIL', 'rect', 'left:4px; top:5px; height:'+(this.h-10)+'px; background:' + this.fontColor+';' );
+    //this.c[3] = UIL.DOM('UIL svgbox', 'rect', 'width:'+this.width+'px; height:'+(this.h-3)+'px; cursor:w-resize;', { width:'100%', height:this.h-3, fill:UIL.SVGB, 'stroke-width':1, stroke:UIL.SVGC });
+    //this.c[4] = UIL.DOM('UIL svgbox', 'rect', 'left:4px; top:4px; width:'+(this.width-8)+'px; height:'+(this.h-10)+'px; pointer-events:none;', { width:'100%', height:'100%', fill: this.fontColor });
 
     // pattern test
-    var svg = this.c[3];
+    /*var svg = this.c[3];
     UIL.DOM( null, 'defs', null, {}, svg );
     UIL.DOM( null, 'pattern', null, {id:'sripe', x:0, y:0, width:10, height:10, patternUnits:'userSpaceOnUse' }, svg, 1 );
     UIL.DOM( null, 'line', null, { x1:5, x2:0, y1:0, y2:10, stroke:UIL.SVGC, 'stroke-width':1  }, svg, [1,0] );
     UIL.DOM( null, 'line', null, { x1:10, x2:5, y1:0, y2:10, stroke:UIL.SVGC, 'stroke-width':1  }, svg, [1,0] );
+    */
 
-    svg.events = [ 'mouseover', 'mousedown', 'mouseout' ];
+    this.c[3].events = [ 'mouseover', 'mousedown', 'mouseout' ];
 
     this.init();
 
@@ -58,16 +61,20 @@ UIL.Slide.prototype.mode = function( mode ){
 
     switch(mode){
         case 0: // base
-            UIL.setSvg( this.c[3], 'fill','rgba(0,0,0,0.2)');
-            UIL.setSvg( this.c[4], 'fill', this.fontColor );
+            //UIL.setSvg( this.c[3], 'fill','rgba(0,0,0,0.2)');
+            this.c[4].style.background = this.fontColor;
+
+            //UIL.setSvg( this.c[4], 'fill', this.fontColor );
         break;
         case 1: // over
-            UIL.setSvg( this.c[3], 'fill','rgba(0,0,0,0.6)');
-            UIL.setSvg( this.c[4], 'fill', UIL.SELECT );
+            //UIL.setSvg( this.c[3], 'fill','rgba(0,0,0,0.6)');
+            this.c[4].style.background = UIL.SELECT;
+            //UIL.setSvg( this.c[4], 'fill', UIL.SELECT );
         break;
         case 2: // edit
-            UIL.setSvg( this.c[3], 'fill','url(#sripe)');
-            UIL.setSvg( this.c[4], 'fill', UIL.MOVING );
+            //UIL.setSvg( this.c[3], 'fill','url(#sripe)');
+            this.c[4].style.background = UIL.MOVING;
+            //UIL.setSvg( this.c[4], 'fill', UIL.MOVING );
         break;
 
     }

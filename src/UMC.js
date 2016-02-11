@@ -37,15 +37,37 @@ var UMC = UMC || ( function () {
 
     };
 
-    UMC.clearDom = function( dom ){
+    UMC.clear = function( dom ){
+
+        UMC.purge( dom );
 
         while ( dom.children.length ){
 
-            if( dom.lastChild.children ) while ( dom.lastChild.children.length ) dom.lastChild.removeChild( dom.lastChild.lastChild );
+            if( dom.lastChild.children.length ) UMC.clear( dom.lastChild );
+
+            //if( dom.lastChild.children.length ){ while ( dom.lastChild.children.length ) dom.lastChild.removeChild( dom.lastChild.lastChild ); }
             dom.removeChild( dom.lastChild );
 
         }
 
+    };
+
+    UMC.purge = function ( dom ) {
+        var a = dom.attributes, i, n;
+        if (a) {
+            i = a.length;
+            while(i--){
+                n = a[i].name;
+                if (typeof dom[n] === 'function') dom[n] = null;
+            }
+        }
+        a = dom.childNodes;
+        if (a) {
+            i = a.length;
+            while(i--){ 
+                UMC.purge(dom.childNodes[i]); 
+            }
+        }
     };
 
     // DOM CREATOR
@@ -84,8 +106,11 @@ var UMC = UMC || ( function () {
         if( name === '*' ) adds = '';
 
         var style = doc.createElement( 'style' );
-        style.setAttribute( 'type', 'text/css' );
-        style.setAttribute( 'id', name );
+        style.type = 'text/css';
+        //style.innerHTML = rules;
+
+        //style.setAttribute( 'type', 'text/css' );
+        //style.setAttribute( 'id', name );
 
         head.appendChild(style);
 

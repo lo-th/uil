@@ -1,6 +1,6 @@
 UIL.Gui = function(css, w, center, color){
 
-    UIL.sizer( w || 300 );
+    UIL.sizer( w || 245 );
 
     this.width = UIL.WIDTH;
 
@@ -16,6 +16,7 @@ UIL.Gui = function(css, w, center, color){
 
     this.content = UIL.DOM('UIL content', 'div', css);
     document.body.appendChild( this.content );
+    this.content.style.background = UIL.bgcolor( this.color, 1, true );
 
     this.inner = UIL.DOM('UIL inner');
     this.content.appendChild(this.inner);
@@ -23,18 +24,18 @@ UIL.Gui = function(css, w, center, color){
 
     
     
-    this.scrollBG = UIL.DOM('UIL scroll-bg', 'div', 'right:0; top:0; width:10px; height:10px; cursor:s-resize; display:none; ');
+    this.scrollBG = UIL.DOM('UIL scroll-bg');
     this.content.appendChild(this.scrollBG);
     this.scrollBG.name = 'scroll';
 
-    this.scroll = UIL.DOM('UIL scroll', 'div', 'left:4px; top:0; width:3px; height:10px;  ');
+    this.scroll = UIL.DOM('UIL scroll');
     this.scrollBG.appendChild( this.scroll );
 
     this.bottom = UIL.DOM('UIL bottom');
     this.content.appendChild(this.bottom);
     this.bottom.textContent = 'close';
     this.bottom.name = 'bottom';
-    this.bottom.style.background = UIL.bgcolor( this.color );
+    //this.bottom.style.background = 'none';//UIL.bgcolor( this.color );
 
     this.changeWidth();
 
@@ -88,7 +89,7 @@ UIL.Gui.prototype = {
             this.move( e );
             //UIL.setSvg(this.scroll, 'fill','#FFF');
 
-            this.scroll.style.background = 'rgba(255,255,255,0.75)';
+            this.scroll.style.background = '#AAAAAA';//'rgba(255,255,255,0.75)';
 
             document.addEventListener( 'mouseup', this, false );
             document.addEventListener( 'mousemove', this, false );
@@ -109,7 +110,7 @@ UIL.Gui.prototype = {
 
         if(!this.isDown) return;
 
-        this.scroll.style.background = 'rgba(255,255,255,0.75)';
+        this.scroll.style.background = '#AAAAAA';
 
         this.update( (e.clientY-this.top)-(this.sh*0.5) );
 
@@ -122,7 +123,7 @@ UIL.Gui.prototype = {
         if( !e.target.name ) return;
 
         if(e.target.name === 'scroll'){
-            this.scroll.style.background = 'rgba(255,255,255,0.2)';
+            this.scroll.style.background = '#666666';
         }
 
     },
@@ -130,7 +131,7 @@ UIL.Gui.prototype = {
     up: function( e ){
 
         this.isDown = false;
-        this.scroll.style.background = 'rgba(255,255,255,0.2)';
+        this.scroll.style.background = '#666666';
         document.removeEventListener( 'mouseup', this, false );
         document.removeEventListener( 'mousemove', this, false );
 
@@ -140,7 +141,7 @@ UIL.Gui.prototype = {
 
         if( !e.target.name ) return;
         if(e.target.name === 'scroll'){
-            this.scroll.style.background = 'rgba(255,255,255,0.5)';
+            this.scroll.style.background = '#888888';
         }
 
     },
@@ -280,7 +281,7 @@ UIL.Gui.prototype = {
         if(this.tmp) clearTimeout(this.tmp);
 
         this.top = this.content.getBoundingClientRect().top;
-        this.maxHeight = window.innerHeight - this.top - 10;
+        this.maxHeight = window.innerHeight - this.top;// - 10;
 
         if(this.height>this.maxHeight){
 
@@ -300,7 +301,10 @@ UIL.Gui.prototype = {
         this.width = UIL.WIDTH;
         this.content.style.width = this.width + 'px';
 
-        if( this.isCenter ) this.content.style.marginLeft = -(~~ (UIL.WIDTH*0.5)) + 'px';
+        if( this.isCenter ){ 
+
+            this.content.style.marginLeft = -(~~ (UIL.WIDTH*0.5)) + 'px';
+        }
 
         var i = this.uis.length;
         while(i--){

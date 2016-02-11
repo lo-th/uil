@@ -9,7 +9,8 @@ UIL.Group = function( o ){
     this.isOpen = o.open || false;
 
     this.c[2] = UIL.DOM('UIL inner', 'div', 'top:25px');
-    this.c[3] = UIL.DOM('UIL', 'path','position:absolute; width:16px; left:'+(this.sa+this.sb-17)+'px; top:4px; pointer-events:none;',{ width:16, height:16, 'd':'M 6 4 L 10 8 6 12', 'stroke-width':2, stroke:this.fontColor, fill:'none', 'stroke-linecap':'butt' } );
+    this.c[3] = UIL.DOM('UIL', 'rect', 'top:2px; left:2px; height:21px; background-image:'+ UIL.GroupBG );
+    this.c[4] = UIL.DOM('UIL', 'path','position:absolute; width:16px; left:'+(this.sa+this.sb-17)+'px; top:4px; pointer-events:none;',{ width:16, height:16, 'd':'M 6 4 L 10 8 6 12', 'stroke-width':2, stroke:this.fontColor, fill:'none', 'stroke-linecap':'butt' } );
 
     this.c[0].style.height = this.h + 'px';
     this.c[1].style.height = this.h + 'px';
@@ -61,7 +62,7 @@ UIL.Group.prototype.add = function( type, o ){
 UIL.Group.prototype.open = function(){
 
     this.isOpen = true;
-    UIL.setSvg( this.c[3], 'd','M 12 6 L 8 10 4 6');
+    UIL.setSvg( this.c[4], 'd','M 12 6 L 8 10 4 6');
     this.rSizeContent();
 
     if( this.isUI ) UIL.main.calc( this.h -25 );
@@ -73,7 +74,7 @@ UIL.Group.prototype.close = function(){
     if( this.isUI ) UIL.main.calc(-(this.h-25 ));
 
     this.isOpen = false;
-    UIL.setSvg( this.c[3], 'd','M 6 4 L 10 8 6 12');
+    UIL.setSvg( this.c[4], 'd','M 6 4 L 10 8 6 12');
     this.h = 25;
 
     this.c[0].style.height = this.h + 'px';
@@ -126,9 +127,10 @@ UIL.Group.prototype.rSize = function(){
 
     UIL.Proto.prototype.rSize.call( this );
 
-    this.c[3].style.left = ( this.sa + this.sb - 17 ) + 'px';
+    this.c[4].style.left = ( this.sa + this.sb - 17 ) + 'px';
     this.c[1].style.width = this.size + 'px';
     this.c[2].style.width = this.size + 'px';
+    this.c[3].style.width = (this.size - 4) + 'px';
 
     if(this.isOpen) this.rSizeContent();
 

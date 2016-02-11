@@ -105,12 +105,28 @@ UIL.Proto.prototype = {
         }
 
     },
+
+    dispose:function(){
+
+        this.clearEvent();
+        UIL.clear( this.c[0] );
+
+        if( this.target !== null ) this.target.removeChild( this.c[0] );
+        else UIL.main.inner.removeChild( this.c[0] );
+
+        this.c = null;
+        this.callback = null;
+        this.target = null;
+
+    },
     
     clear:function(){
-        
-        this.clearEvent();
 
-        this.purge(this.c[0])
+        this.dispose();
+        
+        /*this.clearEvent();
+
+        //this.purge(this.c[0])
 
         var i = this.c.length;
         while(i--){
@@ -134,14 +150,14 @@ UIL.Proto.prototype = {
 
         this.c = null;
         if(this.callback) this.callback = null;
-        if(this.value) this.value = null;
+        if(this.value) this.value = null;*/
 
-        this.purge(this);
+        //this.purge(this);
 
         //this = null;
     },
 
-    purge : function (d) {
+    /*purge : function (d) {
         var a = d.attributes, i, l, n;
         if (a) {
             for (i = a.length - 1; i >= 0; i -= 1) {
@@ -158,9 +174,9 @@ UIL.Proto.prototype = {
                 this.purge(d.childNodes[i]);
             }
         }
-    },
+    },*/
 
-    clearDOM:function(dom){
+    /*clearDOM:function(dom){
         while ( dom.lastChild ){
             if(dom.lastChild.children) while ( dom.lastChild.lastChild ) dom.lastChild.removeChild( dom.lastChild.lastChild );
             dom.removeChild( dom.lastChild );
@@ -169,8 +185,8 @@ UIL.Proto.prototype = {
         /*while ( dom.children.length ){
             if(dom.lastChild.children) while ( dom.lastChild.children.length ) dom.lastChild.removeChild( dom.lastChild.lastChild );
             dom.removeChild( dom.lastChild );
-        }*/
-    },
+        }
+    },*/
 
     setTypeNumber:function( o ){
 

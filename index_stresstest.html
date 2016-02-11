@@ -13,7 +13,25 @@ body { font-family:monospace; background:#222; font-size:12px; color:#fff;}
 #content3 { position:absolute; top:30px; left:420px; pointer-events:none; width:375px;}
 #content4 { position:absolute; top:30px; left:830px; pointer-events:none; width:375px;}
 </style>
-<script type="text/javascript" src="build/uil.min.js"></script>
+
+<script type="text/javascript" src="src/UMC.js"></script>
+
+<script type="text/javascript" src="src/uil/UIL.js"></script>
+<script type="text/javascript" src="src/uil/Gui.js"></script>
+<script type="text/javascript" src="src/uil/Proto.js"></script>
+<script type="text/javascript" src="src/uil/Bool.js"></script>
+<script type="text/javascript" src="src/uil/Color.js"></script>
+<script type="text/javascript" src="src/uil/Group.js"></script>
+<script type="text/javascript" src="src/uil/List.js"></script>
+<script type="text/javascript" src="src/uil/Number.js"></script>
+<script type="text/javascript" src="src/uil/Slide.js"></script>
+<script type="text/javascript" src="src/uil/String.js"></script>
+<script type="text/javascript" src="src/uil/Title.js"></script>
+<script type="text/javascript" src="src/uil/Button.js"></script>
+<script type="text/javascript" src="src/uil/Circular.js"></script>
+<script type="text/javascript" src="src/uil/Knob.js"></script>
+<script type="text/javascript" src="src/uil/Joystick.js"></script>
+
 </head>
 
 <body>
@@ -62,7 +80,6 @@ function addElement(id, name, min, max, precision){
 };
 
 function add(){
-    console.log(w.value[0])
     for(var i = 0; i<w.value[0]; i++){
         sl.push( addElement(0,'yoo',0,1,2) );
         sl.push( addElement(1,'yoo',0,1,2) );
@@ -75,7 +92,11 @@ function remove(){
     while(sl.length){ 
         sl.pop().clear();
     }
-}        
+}
+
+//b.dispose()
+//w.dispose()
+//console.log(b)     
 
 </script>
 </body>
