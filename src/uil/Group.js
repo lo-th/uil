@@ -9,12 +9,13 @@ UIL.Group = function( o ){
     this.isOpen = o.open || false;
 
     this.c[2] = UIL.DOM('UIL inner', 'div', 'top:25px');
-    this.c[3] = UIL.DOM('UIL', 'rect', 'top:2px; left:2px; height:21px; background-image:'+ UIL.GroupBG );
+    this.c[3] = UIL.DOM('UIL', 'rect', 'top:2px; left:2px; height:21px; width:5px; background-image:'+ UIL.GroupBG );
     this.c[4] = UIL.DOM('UIL', 'path','position:absolute; width:16px; left:'+(this.sa+this.sb-17)+'px; top:4px; pointer-events:none;',{ width:16, height:16, 'd':'M 6 4 L 10 8 6 12', 'stroke-width':2, stroke:this.fontColor, fill:'none', 'stroke-linecap':'butt' } );
 
     this.c[0].style.height = this.h + 'px';
     this.c[1].style.height = this.h + 'px';
     this.c[1].style.top = 4 + 'px';
+    this.c[1].style.left = 4 + 'px';
     this.c[1].style.pointerEvents = 'auto';
     this.c[1].style.cursor = 'pointer';
     this.c[1].name = 'group';
@@ -130,7 +131,7 @@ UIL.Group.prototype.rSize = function(){
     this.c[4].style.left = ( this.sa + this.sb - 17 ) + 'px';
     this.c[1].style.width = this.size + 'px';
     this.c[2].style.width = this.size + 'px';
-    this.c[3].style.width = (this.size - 4) + 'px';
+    //this.c[3].style.width = (this.size - 4) + 'px';
 
     if(this.isOpen) this.rSizeContent();
 

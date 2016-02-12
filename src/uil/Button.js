@@ -2,13 +2,10 @@ UIL.Button = function( o ){
 
     UIL.Proto.call( this, o );
 
-    //this.type = 'button';
-
     this.value = o.value || false;
 
     this.c[2] = UIL.DOM('UIL button', 'div', 'background:'+UIL.bgcolor(UIL.COLOR)+'; height:17px' );
-    //this.c[2] = UIL.DOM('UIL svgbox', 'rect', '', { width:'100%', height:17, fill:UIL.bgcolor(UIL.COLOR), 'stroke-width':1, stroke:UIL.SVGC  });
-    this.c[3] = UIL.DOM('UIL text', 'div', 'text-align:center; padding:4px 10px');// border:1px solid rgba(120,120,120,0.6);');
+    this.c[3] = UIL.DOM('UIL text', 'div', 'text-align:center; padding:4px 10px');
     this.c[3].style.color = this.fontColor;
 
     this.c[2].events = [ 'click', 'mouseover', 'mousedown', 'mouseup', 'mouseout' ];
@@ -65,7 +62,7 @@ UIL.Button.prototype.mode = function( mode ){
 
 UIL.Button.prototype.click = function( e ){
 
-    this.callback( this.value );
+    this.send();
 
 };
 
