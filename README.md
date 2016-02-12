@@ -24,6 +24,8 @@ ui.add('number', { name:'Vector4', callback:callback, value:[0,0,0,0] });
 **3 - callback is simple function easy to define**
 ```sh
 var callback = function(value){ debug.innerHTML = value; }
+// you can also set like that 
+ui.add('number', { name:'Vector4', value:[0,0,0,0] }).onChange( function(v){ debug.innerHTML = v; } );
 ```
 **4 - you can reset all value**
 ```sh
