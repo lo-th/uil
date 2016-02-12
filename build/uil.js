@@ -295,6 +295,8 @@ UIL.Gui = function(css, w, center, color){
 
     this.width = UIL.WIDTH;
     this.height = 20;
+    this.prevY = -1;
+
 
     UIL.main = this;
 
@@ -458,8 +460,17 @@ UIL.Gui.prototype = {
         var n = new UIL[type](o);
         this.uis.push( n );
 
-        this.calc( n.h + 1 );
-        
+        if(!n.autoWidth){
+            var y = n.c[0].getBoundingClientRect().top;
+            if( this.prevY !== y ){
+                this.calc( n.h + 1 );
+                this.prevY = y;
+            }
+        }else{
+            this.prevY = -1;
+            this.calc( n.h + 1 );
+        }
+
         return n;
     },
 
