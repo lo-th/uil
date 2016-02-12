@@ -190,7 +190,7 @@ var UIL = ( function () {
 
     UIL.UNS = '-o-user-select:none; -ms-user-select:none; -khtml-user-select:none; -webkit-user-select:none; -moz-user-select:none;';
     UIL.US = '-o-user-select:text; -ms-user-select:text; -khtml-user-select:text; -webkit-user-select:text; -moz-user-select:text;';
-    UIL.TXT = 'font-family:"Lucida Console", Monaco, monospace; font-size:11px; color:#cccccc; letter-spacing: -1px; padding:3px 10px; left:0; top:0; height:17px; width:100px; overflow:hidden; white-space: nowrap;';
+    UIL.TXT = 'font-family:"Lucida Console", Monaco, monospace; font-size:11px; color:#cccccc; padding:2px 10px; left:0; top:2px; height:16px; width:100px; overflow:hidden; white-space: nowrap;';
 
     UIL.DOM = UMC.dom;
     UIL.CC = UMC.cc;
@@ -232,11 +232,12 @@ var UIL = ( function () {
         UIL.CC('UIL.base', 'position:relative; height:20px; float:left;');
 
         UIL.CC('UIL.text', UIL.TXT );
-        UIL.CC('UIL.textSelect', UIL.TXT + UIL.US + 'outline:none; -webkit-appearance:none; -moz-appearance:none; border:1px solid rgba(255,255,255,0.1);' );
+        //UIL.CC('UIL.number', UIL.TXT + 'letter-spacing:-1px;' );
+        UIL.CC('UIL.textSelect', UIL.TXT + UIL.US + 'padding:2px 5px; outline:none; -webkit-appearance:none; -moz-appearance:none; border:1px solid rgba(255,255,255,0.1);' );
 
         UIL.CC('UIL.slidebg', 'border:1px solid '+UIL.Border+'; left:100px; top:1px; pointer-events:auto; cursor:w-resize; background-image:'+UIL.SlideBG+';' );
 
-        UIL.CC('UIL.button', 'border:1px solid '+UIL.Border+'; left:100px; top:1px; height:17px; pointer-events:auto; cursor:pointer;' );
+        UIL.CC('UIL.button', 'border:1px solid '+UIL.Border+'; left:100px; top:1px; height:18px; pointer-events:auto; cursor:pointer;' );
 
         UIL.CC('UIL.list', 'box-sizing:content-box; border:20px solid transparent; border-bottom:10px solid transparent; left:80px; top:0px; width:190px; height:90px; cursor:s-resize; pointer-events:auto; display:none;');
         UIL.CC('UIL.list-in', 'left:0; top:0; width:100%; background:rgba(0,0,0,0.2); ');
@@ -1076,7 +1077,7 @@ UIL.String = function( o ){
     this.value = o.value || '';
     this.allway = o.allway || false;
 
-    this.c[2] = UIL.DOM( 'UIL textSelect', 'div', 'pointer-events:auto; padding:3px 5px;' );
+    this.c[2] = UIL.DOM( 'UIL textSelect', 'div', 'pointer-events:auto; ' );
     this.c[2].name = 'input';
 
     this.c[2].style.color = this.fontColor;
@@ -1192,7 +1193,7 @@ UIL.Number = function( o ){
     while(i--){
         if(this.isAngle) this.value[i] = (this.value[i] * 180 / Math.PI).toFixed( this.precision );
         //this.c[2+i] = UIL.DOM('UIL text', 'input', 'pointer-events:auto; padding:0px 5px; padding-bottom:2px; width:'+this.w+'px; left:'+(UIL.AW+(this.w*i)+(5*i))+'px;');
-        this.c[2+i] = UIL.DOM('UIL textSelect', 'div', 'pointer-events:auto; cursor:move; padding:3px 5px; width:'+this.w+'px; left:'+(UIL.AW+(this.w*i)+(5*i))+'px;');
+        this.c[2+i] = UIL.DOM('UIL textSelect', 'div', 'pointer-events:auto; cursor:move; width:'+this.w+'px; left:'+(UIL.AW+(this.w*i)+(5*i))+'px;');
         this.c[2+i].name = i;
        // this.c[2+i].value = this.value[i];
         this.c[2+i].textContent = this.value[i];
@@ -1347,7 +1348,7 @@ UIL.Number.prototype.validate = function(){
     while(i--) ar[i] = this.value[i]*this.toRad;
 
     if( this.isNumber ) this.send( ar[0] );
-    else this.sned( ar );
+    else this.send( ar );
 
 };
 
@@ -1385,28 +1386,28 @@ UIL.Color = function( o ){
     this.mid = Math.floor(this.width * 0.5 );
     this.markerSize = this.wheelWidth * 0.3;
 
-    this.c[2] = UIL.DOM('UIL button', 'div', 'height:17px' );
-    this.c[3] = UIL.DOM('UIL text', 'div', 'padding:4px 10px');
+    this.c[2] = UIL.DOM('UIL text', 'div', 'pointer-events:auto; cursor:pointer; border:1px solid '+ UIL.Border );//UIL.DOM('UIL button', 'div', 'height:17px' );
+    //this.c[3] = null;//UIL.DOM('UIL text', 'div', '');
 
     if(this.side === 'up'){
         this.decal = 5;
-        this.c[3].style.top = 'auto';
+        //this.c[3].style.top = 'auto';
         this.c[2].style.top = 'auto';
-        this.c[3].style.bottom = '2px';
+        //this.c[3].style.bottom = '2px';
         this.c[2].style.bottom = '2px';
     }
 
-    this.c[4] = UIL.DOM('UIL', 'div', 'display:none' );
-    this.c[5] = UIL.DOM('UIL', 'canvas', 'display:none;');
-    this.c[6] = UIL.DOM('UIL', 'canvas', 'pointer-events:auto; cursor:pointer; display:none;');
+    this.c[3] = UIL.DOM('UIL', 'div', 'display:none' );
+    this.c[4] = UIL.DOM('UIL', 'canvas', 'display:none;');
+    this.c[5] = UIL.DOM('UIL', 'canvas', 'pointer-events:auto; cursor:pointer; display:none;');
 
-    if(this.side === 'up') this.c[6].style.pointerEvents = 'none';
+    if(this.side === 'up') this.c[5].style.pointerEvents = 'none';
 
+    this.c[4].width = this.c[4].height = this.width;
     this.c[5].width = this.c[5].height = this.width;
-    this.c[6].width = this.c[6].height = this.width;
 
-    this.ctxMask = this.c[5].getContext('2d');
-    this.ctxOverlay = this.c[6].getContext('2d');
+    this.ctxMask = this.c[4].getContext('2d');
+    this.ctxOverlay = this.c[5].getContext('2d');
     this.ctxMask.translate(this.mid, this.mid);
     this.ctxOverlay.translate(this.mid, this.mid);
 
@@ -1422,7 +1423,7 @@ UIL.Color = function( o ){
     this.isShow = false;
 
     this.c[2].events = [ 'click' ];
-    this.c[6].events = [ 'mousedown', 'mousemove', 'mouseup', 'mouseout' ];
+    this.c[5].events = [ 'mousedown', 'mousemove', 'mouseup', 'mouseout' ];
 
     this.setColor( this.value );
 
@@ -1482,7 +1483,7 @@ UIL.Color.prototype.move = function( e ){
 
     if(!this.isDown) return;
 
-    this.offset = this.c[6].getBoundingClientRect();
+    this.offset = this.c[5].getBoundingClientRect();
     var pos = { x: e.pageX - this.offset.left - this.mid, y: e.pageY - this.offset.top - this.mid };
     this.circleDrag = Math.max(Math.abs(pos.x), Math.abs(pos.y)) > (this.square + 2);
 
@@ -1517,12 +1518,12 @@ UIL.Color.prototype.show = function(){
     if(this.side=='up'){ 
         this.holdTop = this.c[0].style.top.substring(0,this.c[0].style.top.length-2) * 1 || 'auto';
         if(!isNaN(this.holdTop)) this.c[0].style.top = (this.holdTop-(this.h-20))+'px';
-        setTimeout(function(){this.c[6].style.pointerEvents = 'auto';}.bind(this), 100);
+        setTimeout(function(){this.c[5].style.pointerEvents = 'auto';}.bind(this), 100);
     }
 
+    this.c[3].style.display = 'block';
     this.c[4].style.display = 'block';
     this.c[5].style.display = 'block';
-    this.c[6].style.display = 'block';
 
     if( this.isUI ) UIL.main.calc( this.h-20 );
 
@@ -1538,9 +1539,9 @@ UIL.Color.prototype.hide = function(){
         this.c[6].style.pointerEvents = 'none';
     }
     this.c[0].style.height = this.h+'px';
+    this.c[3].style.display = 'none';
     this.c[4].style.display = 'none';
     this.c[5].style.display = 'none';
-    this.c[6].style.display = 'none';
     //this.c[6].onmousedown = null;
     //this.c[6].onmouseout = null;
     
@@ -1549,19 +1550,19 @@ UIL.Color.prototype.hide = function(){
 UIL.Color.prototype.updateDisplay = function(){
     this.invert = (this.rgb[0] * 0.3 + this.rgb[1] * .59 + this.rgb[2] * .11) <= 0.6;
 
-    this.c[4].style.background = UIL.pack(UIL.HSLToRGB([this.hsl[0], 1, 0.5]));
+    this.c[3].style.background = UIL.pack(UIL.HSLToRGB([this.hsl[0], 1, 0.5]));
 
     this.drawMarkers();
     
     this.value = this.bcolor;
 
     this.c[2].style.background = this.bcolor;
-    this.c[3].textContent = UIL.hexFormat(this.bcolor);
+    this.c[2].textContent = UIL.hexFormat(this.bcolor);
 
     
     var cc = this.invert ? '#fff' : '#000';
     
-    this.c[3].style.color = cc;
+    this.c[2].style.color = cc;
 
     if( this.type === 'array' ) this.send( this.rgb );
     if( this.type === 'html' || this.type === 'hex' ) this.send();
@@ -1694,21 +1695,21 @@ UIL.Color.prototype.rSize = function(){
     this.c[2].style.width = this.sb + 'px';
     this.c[2].style.left = this.sa + 'px';
 
-    this.c[3].style.width = this.sb + 'px';
-    this.c[3].style.left = this.sa + 'px';
+    //this.c[3].style.width = this.sb + 'px';
+    //this.c[3].style.left = this.sa + 'px';
 
-    this.c[4].style.width = (this.square * 2 - 1) + 'px';
-    this.c[4].style.height = (this.square * 2 - 1) + 'px';
-    this.c[4].style.top = (this.mid+this.decal )-this.square + 'px';
-    this.c[4].style.left = (this.mid+this.sa )-this.square + 'px';
+    this.c[3].style.width = (this.square * 2 - 1) + 'px';
+    this.c[3].style.height = (this.square * 2 - 1) + 'px';
+    this.c[3].style.top = (this.mid+this.decal )-this.square + 'px';
+    this.c[3].style.left = (this.mid+this.sa )-this.square + 'px';
+
+    this.c[4].width = this.c[4].height = this.width;
+    this.c[4].style.left = this.sa + 'px';
+    this.c[4].style.top = this.decal + 'px';
 
     this.c[5].width = this.c[5].height = this.width;
     this.c[5].style.left = this.sa + 'px';
     this.c[5].style.top = this.decal + 'px';
-
-    this.c[6].width = this.c[6].height = this.width;
-    this.c[6].style.left = this.sa + 'px';
-    this.c[6].style.top = this.decal + 'px';
 
     this.ctxMask.translate(this.mid, this.mid);
     this.ctxOverlay.translate(this.mid, this.mid);
@@ -1962,7 +1963,7 @@ UIL.List = function( o ){
     this.c[2] = UIL.DOM('UIL list');
     this.c[3] = UIL.DOM('UIL button', 'div', 'background:'+UIL.bgcolor(UIL.COLOR)+'; height:17px' );
     this.c[4] = UIL.DOM('UIL', 'path','position:absolute; width:16px; height:16px; left:'+(this.sa+this.sb-17)+'px; top:1px;',{ width:16, height:16, 'd':'M 6 4 L 10 8 6 12', 'stroke-width':2, stroke:this.fontColor, fill:'none', 'stroke-linecap':'butt' } );
-    this.c[5] = UIL.DOM('UIL text', 'div', 'text-align:center; padding:4px 10px; ');
+    this.c[5] = UIL.DOM('UIL text', 'div', 'text-align:center;  ');
     this.c[6] = UIL.DOM('UIL', 'div', 'right:14px; top:20px; height:16px; width:10px; pointer-events:none; background:#666');
 
     this.c[2].name = 'list';
@@ -2305,8 +2306,8 @@ UIL.Button = function( o ){
 
     this.value = o.value || false;
 
-    this.c[2] = UIL.DOM('UIL button', 'div', 'background:'+UIL.bgcolor(UIL.COLOR)+'; height:17px' );
-    this.c[3] = UIL.DOM('UIL text', 'div', 'text-align:center; padding:4px 10px');
+    this.c[2] = UIL.DOM('UIL button', 'div', 'background:'+UIL.bgcolor(UIL.COLOR)+'; height:18px' );
+    this.c[3] = UIL.DOM('UIL text', 'div', 'text-align:center;');
     this.c[3].style.color = this.fontColor;
 
     this.c[2].events = [ 'click', 'mouseover', 'mousedown', 'mouseup', 'mouseout' ];

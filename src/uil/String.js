@@ -5,7 +5,7 @@ UIL.String = function( o ){
     this.value = o.value || '';
     this.allway = o.allway || false;
 
-    this.c[2] = UIL.DOM( 'UIL textSelect', 'div', 'pointer-events:auto; padding:3px 5px;' );
+    this.c[2] = UIL.DOM( 'UIL textSelect', 'div', 'pointer-events:auto; ' );
     this.c[2].name = 'input';
 
     this.c[2].style.color = this.fontColor;

@@ -24,7 +24,7 @@ var UIL = ( function () {
 
     UIL.UNS = '-o-user-select:none; -ms-user-select:none; -khtml-user-select:none; -webkit-user-select:none; -moz-user-select:none;';
     UIL.US = '-o-user-select:text; -ms-user-select:text; -khtml-user-select:text; -webkit-user-select:text; -moz-user-select:text;';
-    UIL.TXT = 'font-family:"Lucida Console", Monaco, monospace; font-size:11px; color:#cccccc; letter-spacing: -1px; padding:3px 10px; left:0; top:0; height:17px; width:100px; overflow:hidden; white-space: nowrap;';
+    UIL.TXT = 'font-family:"Lucida Console", Monaco, monospace; font-size:11px; color:#cccccc; padding:2px 10px; left:0; top:2px; height:16px; width:100px; overflow:hidden; white-space: nowrap;';
 
     UIL.DOM = UMC.dom;
     UIL.CC = UMC.cc;
@@ -66,11 +66,12 @@ var UIL = ( function () {
         UIL.CC('UIL.base', 'position:relative; height:20px; float:left;');
 
         UIL.CC('UIL.text', UIL.TXT );
-        UIL.CC('UIL.textSelect', UIL.TXT + UIL.US + 'outline:none; -webkit-appearance:none; -moz-appearance:none; border:1px solid rgba(255,255,255,0.1);' );
+        //UIL.CC('UIL.number', UIL.TXT + 'letter-spacing:-1px;' );
+        UIL.CC('UIL.textSelect', UIL.TXT + UIL.US + 'padding:2px 5px; outline:none; -webkit-appearance:none; -moz-appearance:none; border:1px solid rgba(255,255,255,0.1);' );
 
         UIL.CC('UIL.slidebg', 'border:1px solid '+UIL.Border+'; left:100px; top:1px; pointer-events:auto; cursor:w-resize; background-image:'+UIL.SlideBG+';' );
 
-        UIL.CC('UIL.button', 'border:1px solid '+UIL.Border+'; left:100px; top:1px; height:17px; pointer-events:auto; cursor:pointer;' );
+        UIL.CC('UIL.button', 'border:1px solid '+UIL.Border+'; left:100px; top:1px; height:18px; pointer-events:auto; cursor:pointer;' );
 
         UIL.CC('UIL.list', 'box-sizing:content-box; border:20px solid transparent; border-bottom:10px solid transparent; left:80px; top:0px; width:190px; height:90px; cursor:s-resize; pointer-events:auto; display:none;');
         UIL.CC('UIL.list-in', 'left:0; top:0; width:100%; background:rgba(0,0,0,0.2); ');

@@ -21,28 +21,28 @@ UIL.Color = function( o ){
     this.mid = Math.floor(this.width * 0.5 );
     this.markerSize = this.wheelWidth * 0.3;
 
-    this.c[2] = UIL.DOM('UIL button', 'div', 'height:17px' );
-    this.c[3] = UIL.DOM('UIL text', 'div', 'padding:4px 10px');
+    this.c[2] = UIL.DOM('UIL text', 'div', 'pointer-events:auto; cursor:pointer; border:1px solid '+ UIL.Border );//UIL.DOM('UIL button', 'div', 'height:17px' );
+    //this.c[3] = null;//UIL.DOM('UIL text', 'div', '');
 
     if(this.side === 'up'){
         this.decal = 5;
-        this.c[3].style.top = 'auto';
+        //this.c[3].style.top = 'auto';
         this.c[2].style.top = 'auto';
-        this.c[3].style.bottom = '2px';
+        //this.c[3].style.bottom = '2px';
         this.c[2].style.bottom = '2px';
     }
 
-    this.c[4] = UIL.DOM('UIL', 'div', 'display:none' );
-    this.c[5] = UIL.DOM('UIL', 'canvas', 'display:none;');
-    this.c[6] = UIL.DOM('UIL', 'canvas', 'pointer-events:auto; cursor:pointer; display:none;');
+    this.c[3] = UIL.DOM('UIL', 'div', 'display:none' );
+    this.c[4] = UIL.DOM('UIL', 'canvas', 'display:none;');
+    this.c[5] = UIL.DOM('UIL', 'canvas', 'pointer-events:auto; cursor:pointer; display:none;');
 
-    if(this.side === 'up') this.c[6].style.pointerEvents = 'none';
+    if(this.side === 'up') this.c[5].style.pointerEvents = 'none';
 
+    this.c[4].width = this.c[4].height = this.width;
     this.c[5].width = this.c[5].height = this.width;
-    this.c[6].width = this.c[6].height = this.width;
 
-    this.ctxMask = this.c[5].getContext('2d');
-    this.ctxOverlay = this.c[6].getContext('2d');
+    this.ctxMask = this.c[4].getContext('2d');
+    this.ctxOverlay = this.c[5].getContext('2d');
     this.ctxMask.translate(this.mid, this.mid);
     this.ctxOverlay.translate(this.mid, this.mid);
 
@@ -58,7 +58,7 @@ UIL.Color = function( o ){
     this.isShow = false;
 
     this.c[2].events = [ 'click' ];
-    this.c[6].events = [ 'mousedown', 'mousemove', 'mouseup', 'mouseout' ];
+    this.c[5].events = [ 'mousedown', 'mousemove', 'mouseup', 'mouseout' ];
 
     this.setColor( this.value );
 
@@ -118,7 +118,7 @@ UIL.Color.prototype.move = function( e ){
 
     if(!this.isDown) return;
 
-    this.offset = this.c[6].getBoundingClientRect();
+    this.offset = this.c[5].getBoundingClientRect();
     var pos = { x: e.pageX - this.offset.left - this.mid, y: e.pageY - this.offset.top - this.mid };
     this.circleDrag = Math.max(Math.abs(pos.x), Math.abs(pos.y)) > (this.square + 2);
 
@@ -153,12 +153,12 @@ UIL.Color.prototype.show = function(){
     if(this.side=='up'){ 
         this.holdTop = this.c[0].style.top.substring(0,this.c[0].style.top.length-2) * 1 || 'auto';
         if(!isNaN(this.holdTop)) this.c[0].style.top = (this.holdTop-(this.h-20))+'px';
-        setTimeout(function(){this.c[6].style.pointerEvents = 'auto';}.bind(this), 100);
+        setTimeout(function(){this.c[5].style.pointerEvents = 'auto';}.bind(this), 100);
     }
 
+    this.c[3].style.display = 'block';
     this.c[4].style.display = 'block';
     this.c[5].style.display = 'block';
-    this.c[6].style.display = 'block';
 
     if( this.isUI ) UIL.main.calc( this.h-20 );
 
@@ -174,9 +174,9 @@ UIL.Color.prototype.hide = function(){
         this.c[6].style.pointerEvents = 'none';
     }
     this.c[0].style.height = this.h+'px';
+    this.c[3].style.display = 'none';
     this.c[4].style.display = 'none';
     this.c[5].style.display = 'none';
-    this.c[6].style.display = 'none';
     //this.c[6].onmousedown = null;
     //this.c[6].onmouseout = null;
     
@@ -185,19 +185,19 @@ UIL.Color.prototype.hide = function(){
 UIL.Color.prototype.updateDisplay = function(){
     this.invert = (this.rgb[0] * 0.3 + this.rgb[1] * .59 + this.rgb[2] * .11) <= 0.6;
 
-    this.c[4].style.background = UIL.pack(UIL.HSLToRGB([this.hsl[0], 1, 0.5]));
+    this.c[3].style.background = UIL.pack(UIL.HSLToRGB([this.hsl[0], 1, 0.5]));
 
     this.drawMarkers();
     
     this.value = this.bcolor;
 
     this.c[2].style.background = this.bcolor;
-    this.c[3].textContent = UIL.hexFormat(this.bcolor);
+    this.c[2].textContent = UIL.hexFormat(this.bcolor);
 
     
     var cc = this.invert ? '#fff' : '#000';
     
-    this.c[3].style.color = cc;
+    this.c[2].style.color = cc;
 
     if( this.type === 'array' ) this.send( this.rgb );
     if( this.type === 'html' || this.type === 'hex' ) this.send();
@@ -330,21 +330,21 @@ UIL.Color.prototype.rSize = function(){
     this.c[2].style.width = this.sb + 'px';
     this.c[2].style.left = this.sa + 'px';
 
-    this.c[3].style.width = this.sb + 'px';
-    this.c[3].style.left = this.sa + 'px';
+    //this.c[3].style.width = this.sb + 'px';
+    //this.c[3].style.left = this.sa + 'px';
 
-    this.c[4].style.width = (this.square * 2 - 1) + 'px';
-    this.c[4].style.height = (this.square * 2 - 1) + 'px';
-    this.c[4].style.top = (this.mid+this.decal )-this.square + 'px';
-    this.c[4].style.left = (this.mid+this.sa )-this.square + 'px';
+    this.c[3].style.width = (this.square * 2 - 1) + 'px';
+    this.c[3].style.height = (this.square * 2 - 1) + 'px';
+    this.c[3].style.top = (this.mid+this.decal )-this.square + 'px';
+    this.c[3].style.left = (this.mid+this.sa )-this.square + 'px';
+
+    this.c[4].width = this.c[4].height = this.width;
+    this.c[4].style.left = this.sa + 'px';
+    this.c[4].style.top = this.decal + 'px';
 
     this.c[5].width = this.c[5].height = this.width;
     this.c[5].style.left = this.sa + 'px';
     this.c[5].style.top = this.decal + 'px';
-
-    this.c[6].width = this.c[6].height = this.width;
-    this.c[6].style.left = this.sa + 'px';
-    this.c[6].style.top = this.decal + 'px';
 
     this.ctxMask.translate(this.mid, this.mid);
     this.ctxOverlay.translate(this.mid, this.mid);
