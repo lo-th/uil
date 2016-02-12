@@ -194,9 +194,9 @@ var UIL = ( function () {
 
     UIL.DOM = UMC.dom;
     UIL.CC = UMC.cc;
-        //setDom : Crea.setDom,
+
     UIL.setSvg = UMC.setSvg;
-    UIL.clone = UMC.clone;
+    //UIL.clone = UMC.clone;
     UIL.clear = UMC.clear;
 
 
@@ -281,8 +281,7 @@ var UIL = ( function () {
 ( function ( root ) {
     if ( typeof define === 'function' && define.amd ) {// AMD
         define( 'uil', UIL );
-        //define( [], function () { return UIL; } );
-    } else if ( 'undefined' !== typeof exports && 'undefined' !== typeof module ) {// else if ( typeof exports === 'object' ) { // Node.js
+    } else if ( 'undefined' !== typeof exports && 'undefined' !== typeof module ) {
         module.exports = UIL;
     } else {// Global variable
         root.UIL = UIL;
@@ -707,9 +706,9 @@ UIL.Proto.prototype = {
 
     },
 
-    send:function(){
+    send:function( v ){
 
-        if( this.callback ) this.callback( this.value );
+        if( this.callback ) this.callback( v || this.value );
 
     },
 
@@ -1074,18 +1073,17 @@ UIL.String = function( o ){
 
     UIL.Proto.call( this, o );
 
-    //this.type = 'string';
     this.value = o.value || '';
     this.allway = o.allway || false;
 
     this.c[2] = UIL.DOM( 'UIL textSelect', 'div', 'pointer-events:auto; padding:3px 5px;' );
-    //this.c[2].name = 'input';
-    //this.c[2].value = this.value;
+    this.c[2].name = 'input';
+
     this.c[2].style.color = this.fontColor;
     this.c[2].contentEditable = true;
     this.c[2].textContent = this.value;
 
-    this.c[2].events = [ 'click', 'keydown', 'keyup' ];
+    this.c[2].events = [ 'click', 'keydown', 'keyup', 'blur' ];
 
     this.init();
 
@@ -1101,6 +1099,7 @@ UIL.String.prototype.handleEvent = function( e ) {
 
     switch( e.type ) {
         case 'click': this.click( e ); break;
+        case 'blur': this.blur( e ); break;
         case 'keydown': this.keydown( e ); break;
         case 'keyup': this.keyup( e ); break;
     }
@@ -1108,13 +1107,19 @@ UIL.String.prototype.handleEvent = function( e ) {
 };
 
 UIL.String.prototype.click = function( e ){
-//e.preventDefault();
-//if(this.select) return;
+
+    e.preventDefault();
+    e.target.contentEditable = true;
     e.target.focus();
     e.target.style.cursor = 'auto';
-    e.target.style.border = '1px solid ' + UIL.BorderSelect;
-  //  this.select = true;
-   // console.log('select')
+    e.target.style.borderColor = UIL.BorderSelect;
+
+};
+
+UIL.String.prototype.blur = function( e ){
+
+    e.target.style.borderColor = UIL.Border;
+    e.target.contentEditable = false;
 
 };
 
@@ -1122,16 +1127,17 @@ UIL.String.prototype.keydown = function( e ){
 
     if( e.keyCode === 13 ){ 
         e.preventDefault();
-        this.value = e.target.textContent;//e.target.value;
-        this.callback( this.value );
+        this.value = e.target.textContent;
         e.target.blur();
+        this.send();
     }
 
 };
 
 UIL.String.prototype.keyup = function( e ){
 
-    if( this.allway ) this.callback( this.value );
+    this.value = e.target.textContent;
+    if( this.allway ) this.send();
     
 };
 
@@ -1571,9 +1577,9 @@ UIL.Color.prototype.updateDisplay = function(){
     
     this.c[3].style.color = cc;
 
-    if( this.type === 'array' ) this.callback( this.rgb );
-    if( this.type === 'html' ) this.callback( this.value );
-    if( this.type === 'hex' ) this.callback( this.value );
+    if( this.type === 'array' ) this.send( this.rgb );
+    if( this.type === 'html' || this.type === 'hex' ) this.send( );
+    //if(  ) this.callback( this.value );
 };
 
 UIL.Color.prototype.setColor = function( color ){

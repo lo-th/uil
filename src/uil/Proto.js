@@ -73,9 +73,9 @@ UIL.Proto.prototype = {
 
     },
 
-    send:function(){
+    send:function( v ){
 
-        if( this.callback ) this.callback( this.value );
+        if( this.callback ) this.callback( v || this.value );
 
     },
 

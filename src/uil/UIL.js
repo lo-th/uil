@@ -28,9 +28,9 @@ var UIL = ( function () {
 
     UIL.DOM = UMC.dom;
     UIL.CC = UMC.cc;
-        //setDom : Crea.setDom,
+
     UIL.setSvg = UMC.setSvg;
-    UIL.clone = UMC.clone;
+    //UIL.clone = UMC.clone;
     UIL.clear = UMC.clear;
 
 
@@ -115,8 +115,7 @@ var UIL = ( function () {
 ( function ( root ) {
     if ( typeof define === 'function' && define.amd ) {// AMD
         define( 'uil', UIL );
-        //define( [], function () { return UIL; } );
-    } else if ( 'undefined' !== typeof exports && 'undefined' !== typeof module ) {// else if ( typeof exports === 'object' ) { // Node.js
+    } else if ( 'undefined' !== typeof exports && 'undefined' !== typeof module ) {
         module.exports = UIL;
     } else {// Global variable
         root.UIL = UIL;
