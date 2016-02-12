@@ -1267,18 +1267,6 @@ UIL.Number.prototype.focus = function( e ){
 
 };
 
-/*UIL.Number.prototype.click = function( e ){
-
-    document.removeEventListener( 'mouseup', this, false );
-    document.removeEventListener( 'mousemove', this, false );
-
-    e.target.focus();
-    e.target.style.cursor = 'auto';
-    
-    this.isSelect = true;
-
-};*/
-
 UIL.Number.prototype.down = function( e ){
 
     if(this.isSelect) return;
@@ -1349,8 +1337,6 @@ UIL.Number.prototype.testValue = function( n ){
 
     if(!isNaN( this.c[2+n].textContent )) this.value[n] = this.c[2+n].textContent;
     else this.c[2+n].textContent = this.value[n];
-  //  if(!isNaN( this.c[2+n].value )) this.value[n] = this.c[2+n].value;
-    //else this.c[2+n].value = this.value[n];
 
 };
 
@@ -1360,8 +1346,8 @@ UIL.Number.prototype.validate = function(){
     var i = this.length;
     while(i--) ar[i] = this.value[i]*this.toRad;
 
-    if( this.isNumber ) this.callback( ar[0] );
-    else this.callback( ar );
+    if( this.isNumber ) this.send( ar[0] );
+    else this.sned( ar );
 
 };
 
@@ -1578,7 +1564,7 @@ UIL.Color.prototype.updateDisplay = function(){
     this.c[3].style.color = cc;
 
     if( this.type === 'array' ) this.send( this.rgb );
-    if( this.type === 'html' || this.type === 'hex' ) this.send( );
+    if( this.type === 'html' || this.type === 'hex' ) this.send();
     //if(  ) this.callback( this.value );
 };
 
@@ -1971,7 +1957,6 @@ UIL.List = function( o ){
 
     UIL.Proto.call( this, o );
 
-    //this.type = 'list';
     this.autoHeight = true;
 
     this.c[2] = UIL.DOM('UIL list');
@@ -2115,14 +2100,13 @@ UIL.List.prototype.listdown = function( e ){
     if( name !== 'list' && name !== undefined ){
         this.value = e.target.name;
         this.c[5].textContent = this.value;
-        this.callback( this.value );
+        this.send();
         this.listHide();
     } else if ( name ==='list' && this.scroll ){
         this.isDown = true;
         this.listmove( e );
         this.listIn.style.background = 'rgba(0,0,0,0.6)';
         this.c[6].style.background = '#AAA';
-        //UIL.setSvg( this.c[6], 'fill', '#AAA');
         e.preventDefault();
     }
 
@@ -2135,7 +2119,7 @@ UIL.List.prototype.listmove = function( e ){
         var y = e.clientY - rect.top;
         if( y < 30 ) y = 30;
         if( y > 100 ) y = 100;
-        this.py = ~~(((y-30)/70)*this.range);//.toFixed(0);
+        this.py = ~~(((y-30)/70)*this.range);
 
         this.update();
     }
@@ -2147,7 +2131,6 @@ UIL.List.prototype.listup = function( e ){
     this.isDown = false;
     this.listIn.style.background = 'rgba(0,0,0,0.2)';
     this.c[6].style.background = '#666';
-    //UIL.setSvg( this.c[6], 'fill', '#666' );
 
 };
 
@@ -2187,7 +2170,6 @@ UIL.List.prototype.update = function( y ){
     this.py = y === undefined ? this.py : y;
     this.listIn.style.top = -this.py+'px';
     this.c[6].style.top = (((this.py*70)/this.range)+22) + 'px';
-    //UIL.setSvg( this.c[6], 'y', ((this.py*70)/this.range)+2 );
 
 };
 
@@ -2242,8 +2224,6 @@ UIL.List.prototype.rSizeContent = function(){
 
 UIL.List.prototype.rSize = function(){
 
-    //UIL.setSvg( this.c[6], 'x', this.sb-15 );
-
     UIL.Proto.prototype.rSize.call( this );
 
     this.c[2].style.width = this.sb+'px';
@@ -2256,9 +2236,6 @@ UIL.List.prototype.rSize = function(){
 
     this.c[5].style.width = this.sb+'px';
     this.c[5].style.left = this.sa+'px';
-
-    //this.c[6].style.width = this.sb+'px';
-    //this.c[6].style.left = this.sa+'px';
 
     this.w = this.sb;
     if(this.max > this.maxHeight) this.w = this.sb-20;
@@ -2309,7 +2286,7 @@ UIL.Bool.prototype.click = function( e ){
         this.c[2].style.background = 'rgba(0,0,0,0.4)';
     }
 
-    this.callback( this.value );
+    this.send();
 
 };
 
@@ -2970,7 +2947,7 @@ UIL.Joystick.prototype.update = function(up){
     this.oldx = this.x;
     this.oldy = this.y;
 
-    if(up) this.callback(this.value);
+    if(up) this.send();
 
     if( this.interval !== null && this.x === 0 && this.y === 0 ){
         clearInterval(this.interval);

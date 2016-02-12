@@ -200,7 +200,7 @@ UIL.Color.prototype.updateDisplay = function(){
     this.c[3].style.color = cc;
 
     if( this.type === 'array' ) this.send( this.rgb );
-    if( this.type === 'html' || this.type === 'hex' ) this.send( );
+    if( this.type === 'html' || this.type === 'hex' ) this.send();
     //if(  ) this.callback( this.value );
 };
 

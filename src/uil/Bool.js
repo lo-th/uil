@@ -41,7 +41,7 @@ UIL.Bool.prototype.click = function( e ){
         this.c[2].style.background = 'rgba(0,0,0,0.4)';
     }
 
-    this.callback( this.value );
+    this.send();
 
 };
 

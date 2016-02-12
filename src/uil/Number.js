@@ -117,18 +117,6 @@ UIL.Number.prototype.focus = function( e ){
 
 };
 
-/*UIL.Number.prototype.click = function( e ){
-
-    document.removeEventListener( 'mouseup', this, false );
-    document.removeEventListener( 'mousemove', this, false );
-
-    e.target.focus();
-    e.target.style.cursor = 'auto';
-    
-    this.isSelect = true;
-
-};*/
-
 UIL.Number.prototype.down = function( e ){
 
     if(this.isSelect) return;
@@ -199,8 +187,6 @@ UIL.Number.prototype.testValue = function( n ){
 
     if(!isNaN( this.c[2+n].textContent )) this.value[n] = this.c[2+n].textContent;
     else this.c[2+n].textContent = this.value[n];
-  //  if(!isNaN( this.c[2+n].value )) this.value[n] = this.c[2+n].value;
-    //else this.c[2+n].value = this.value[n];
 
 };
 
@@ -210,8 +196,8 @@ UIL.Number.prototype.validate = function(){
     var i = this.length;
     while(i--) ar[i] = this.value[i]*this.toRad;
 
-    if( this.isNumber ) this.callback( ar[0] );
-    else this.callback( ar );
+    if( this.isNumber ) this.send( ar[0] );
+    else this.sned( ar );
 
 };
 

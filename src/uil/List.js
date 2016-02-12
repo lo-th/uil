@@ -2,7 +2,6 @@ UIL.List = function( o ){
 
     UIL.Proto.call( this, o );
 
-    //this.type = 'list';
     this.autoHeight = true;
 
     this.c[2] = UIL.DOM('UIL list');
@@ -146,14 +145,13 @@ UIL.List.prototype.listdown = function( e ){
     if( name !== 'list' && name !== undefined ){
         this.value = e.target.name;
         this.c[5].textContent = this.value;
-        this.callback( this.value );
+        this.send();
         this.listHide();
     } else if ( name ==='list' && this.scroll ){
         this.isDown = true;
         this.listmove( e );
         this.listIn.style.background = 'rgba(0,0,0,0.6)';
         this.c[6].style.background = '#AAA';
-        //UIL.setSvg( this.c[6], 'fill', '#AAA');
         e.preventDefault();
     }
 
@@ -166,7 +164,7 @@ UIL.List.prototype.listmove = function( e ){
         var y = e.clientY - rect.top;
         if( y < 30 ) y = 30;
         if( y > 100 ) y = 100;
-        this.py = ~~(((y-30)/70)*this.range);//.toFixed(0);
+        this.py = ~~(((y-30)/70)*this.range);
 
         this.update();
     }
@@ -178,7 +176,6 @@ UIL.List.prototype.listup = function( e ){
     this.isDown = false;
     this.listIn.style.background = 'rgba(0,0,0,0.2)';
     this.c[6].style.background = '#666';
-    //UIL.setSvg( this.c[6], 'fill', '#666' );
 
 };
 
@@ -218,7 +215,6 @@ UIL.List.prototype.update = function( y ){
     this.py = y === undefined ? this.py : y;
     this.listIn.style.top = -this.py+'px';
     this.c[6].style.top = (((this.py*70)/this.range)+22) + 'px';
-    //UIL.setSvg( this.c[6], 'y', ((this.py*70)/this.range)+2 );
 
 };
 
@@ -273,8 +269,6 @@ UIL.List.prototype.rSizeContent = function(){
 
 UIL.List.prototype.rSize = function(){
 
-    //UIL.setSvg( this.c[6], 'x', this.sb-15 );
-
     UIL.Proto.prototype.rSize.call( this );
 
     this.c[2].style.width = this.sb+'px';
@@ -287,9 +281,6 @@ UIL.List.prototype.rSize = function(){
 
     this.c[5].style.width = this.sb+'px';
     this.c[5].style.left = this.sa+'px';
-
-    //this.c[6].style.width = this.sb+'px';
-    //this.c[6].style.left = this.sa+'px';
 
     this.w = this.sb;
     if(this.max > this.maxHeight) this.w = this.sb-20;

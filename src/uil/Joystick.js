@@ -241,7 +241,7 @@ UIL.Joystick.prototype.update = function(up){
     this.oldx = this.x;
     this.oldy = this.y;
 
-    if(up) this.callback(this.value);
+    if(up) this.send();
 
     if( this.interval !== null && this.x === 0 && this.y === 0 ){
         clearInterval(this.interval);
