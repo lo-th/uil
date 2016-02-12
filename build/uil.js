@@ -1831,7 +1831,7 @@ UIL.Slide.prototype.constructor = UIL.Slide;
 UIL.Slide.prototype.handleEvent = function( e ) {
 
     e.preventDefault();
-    e.stopPropagation();
+    //e.stopPropagation();
 
     switch( e.type ) {
         case 'mouseover': this.over( e ); break;
@@ -1961,7 +1961,7 @@ UIL.List = function( o ){
     this.autoHeight = true;
 
     this.c[2] = UIL.DOM('UIL list');
-    this.c[3] = UIL.DOM('UIL button', 'div', 'background:'+UIL.bgcolor(UIL.COLOR)+'; height:17px' );
+    this.c[3] = UIL.DOM('UIL button', 'div', 'background:'+UIL.bgcolor(UIL.COLOR)+'; height:18px;' );
     this.c[4] = UIL.DOM('UIL', 'path','position:absolute; width:16px; height:16px; left:'+(this.sa+this.sb-17)+'px; top:1px;',{ width:16, height:16, 'd':'M 6 4 L 10 8 6 12', 'stroke-width':2, stroke:this.fontColor, fill:'none', 'stroke-linecap':'butt' } );
     this.c[5] = UIL.DOM('UIL text', 'div', 'text-align:center;  ');
     this.c[6] = UIL.DOM('UIL', 'div', 'right:14px; top:20px; height:16px; width:10px; pointer-events:none; background:#666');
@@ -1972,7 +1972,7 @@ UIL.List = function( o ){
     this.c[5].style.color = this.fontColor;
 
     this.c[2].events = [ 'mousedown', 'mousemove', 'mouseup', 'mouseout', 'mousewheel' ];
-    this.c[3].events = [ 'click', 'mousedown', 'mouseover', 'mouseout', 'mouseup' ];
+    this.c[3].events = [ 'click', 'mousedown', 'mouseover', 'mouseout' ];
 
     this.list = o.list || [];
     if(o.value){
@@ -2050,7 +2050,6 @@ UIL.List.prototype.constructor = UIL.List;
 UIL.List.prototype.handleEvent = function( e ) {
 
     e.preventDefault();
-    e.stopPropagation();
 
     var name = e.target.name || '';
     switch( e.type ) {
@@ -2267,7 +2266,6 @@ UIL.Bool.prototype.constructor = UIL.Bool;
 UIL.Bool.prototype.handleEvent = function( e ) {
 
     e.preventDefault();
-    e.stopPropagation();
 
     switch( e.type ) {
         case 'click': this.click(e); break;
@@ -2325,7 +2323,6 @@ UIL.Button.prototype.constructor = UIL.Button;
 UIL.Button.prototype.handleEvent = function( e ) {
 
     e.preventDefault();
-    e.stopPropagation();
 
     switch( e.type ) {
         case 'click': this.click( e ); break;

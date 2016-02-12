@@ -44,7 +44,7 @@ UIL.Slide.prototype.constructor = UIL.Slide;
 UIL.Slide.prototype.handleEvent = function( e ) {
 
     e.preventDefault();
-    e.stopPropagation();
+    //e.stopPropagation();
 
     switch( e.type ) {
         case 'mouseover': this.over( e ); break;

@@ -23,7 +23,6 @@ UIL.Button.prototype.constructor = UIL.Button;
 UIL.Button.prototype.handleEvent = function( e ) {
 
     e.preventDefault();
-    e.stopPropagation();
 
     switch( e.type ) {
         case 'click': this.click( e ); break;

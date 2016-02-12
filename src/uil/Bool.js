@@ -21,7 +21,6 @@ UIL.Bool.prototype.constructor = UIL.Bool;
 UIL.Bool.prototype.handleEvent = function( e ) {
 
     e.preventDefault();
-    e.stopPropagation();
 
     switch( e.type ) {
         case 'click': this.click(e); break;
