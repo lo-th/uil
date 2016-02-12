@@ -21,7 +21,7 @@ UIL.Color = function( o ){
     this.mid = Math.floor(this.width * 0.5 );
     this.markerSize = this.wheelWidth * 0.3;
 
-    this.c[2] = UIL.DOM('UIL svgbox', 'rect', '',  { width:'100%', height:17, fill:'#000', 'stroke-width':1, stroke:UIL.SVGC });
+    this.c[2] = UIL.DOM('UIL button', 'div', 'height:17px' );
     this.c[3] = UIL.DOM('UIL text', 'div', 'padding:4px 10px');
 
     if(this.side === 'up'){
@@ -32,9 +32,9 @@ UIL.Color = function( o ){
         this.c[2].style.bottom = '2px';
     }
 
-    this.c[4] = UIL.DOM('UIL', 'rect', 'left:'+ this.sa+'px;  top:'+this.decal+'px; width:'+this.width+'px; height:'+this.width+'px;',  { x:(this.mid - this.square), y:(this.mid - this.square), width:(this.square * 2 - 1), height:(this.square * 2 - 1), fill:'#000' });
-    this.c[5] = UIL.DOM('UIL', 'canvas', 'left:'+ this.sa+'px;  top:'+this.decal+'px; display:none;');
-    this.c[6] = UIL.DOM('UIL', 'canvas', 'left:'+ this.sa+'px;  top:'+this.decal+'px; pointer-events:auto; cursor:pointer; display:none;');
+    this.c[4] = UIL.DOM('UIL', 'div', 'display:none' );
+    this.c[5] = UIL.DOM('UIL', 'canvas', 'display:none;');
+    this.c[6] = UIL.DOM('UIL', 'canvas', 'pointer-events:auto; cursor:pointer; display:none;');
 
     if(this.side === 'up') this.c[6].style.pointerEvents = 'none';
 
@@ -185,12 +185,14 @@ UIL.Color.prototype.hide = function(){
 UIL.Color.prototype.updateDisplay = function(){
     this.invert = (this.rgb[0] * 0.3 + this.rgb[1] * .59 + this.rgb[2] * .11) <= 0.6;
 
-    UIL.setSvg( this.c[4], 'fill',UIL.pack(UIL.HSLToRGB([this.hsl[0], 1, 0.5])));
+    this.c[4].style.background = UIL.pack(UIL.HSLToRGB([this.hsl[0], 1, 0.5]));
+
     this.drawMarkers();
     
     this.value = this.bcolor;
-    UIL.setSvg( this.c[2], 'fill', this.bcolor);
-    this.c[3].textContent = UIL.hexFormat(this.bcolor);//this.value);
+
+    this.c[2].style.background = this.bcolor;
+    this.c[3].textContent = UIL.hexFormat(this.bcolor);
 
     
     var cc = this.invert ? '#fff' : '#000';
@@ -331,23 +333,18 @@ UIL.Color.prototype.rSize = function(){
     this.c[3].style.width = this.sb + 'px';
     this.c[3].style.left = this.sa + 'px';
 
-    this.c[4].style.width = this.width + 'px';
-    this.c[4].style.height = this.width + 'px';
-    this.c[4].style.left = this.sa + 'px';
+    this.c[4].style.width = (this.square * 2 - 1) + 'px';
+    this.c[4].style.height = (this.square * 2 - 1) + 'px';
+    this.c[4].style.top = (this.mid+this.decal )-this.square + 'px';
+    this.c[4].style.left = (this.mid+this.sa )-this.square + 'px';
 
     this.c[5].width = this.c[5].height = this.width;
     this.c[5].style.left = this.sa + 'px';
+    this.c[5].style.top = this.decal + 'px';
 
     this.c[6].width = this.c[6].height = this.width;
     this.c[6].style.left = this.sa + 'px';
-    this.c[5].style.top = this.decal + 'px';
     this.c[6].style.top = this.decal + 'px';
-
-    //UIL.setSvg( this.c[2], 'width',this.sb);
-    UIL.setSvg( this.c[4], 'width',this.square * 2 - 1);
-    UIL.setSvg( this.c[4], 'height',this.square * 2 - 1);
-    UIL.setSvg( this.c[4], 'x',this.mid - this.square);
-    UIL.setSvg( this.c[4], 'y',this.mid - this.square);
 
     this.ctxMask.translate(this.mid, this.mid);
     this.ctxOverlay.translate(this.mid, this.mid);

@@ -83,7 +83,6 @@ UIL.Knob.prototype.move = function( e ){
         this.old = this.value;
         this.oldr = this.r;
     }
-    
 
 };
 
@@ -121,6 +120,6 @@ UIL.Knob.prototype.update = function( up ){
 
     UIL.setSvg( this.c[4], 'transform', 'rotate('+this.rr+' '+this.radius+' '+this.radius+')' );
 
-    if( up ) this.callback(this.value);
+    if( up ) this.send();
     
 };

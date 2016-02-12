@@ -6,10 +6,10 @@ UIL.List = function( o ){
     this.autoHeight = true;
 
     this.c[2] = UIL.DOM('UIL list');
-    this.c[3] = UIL.DOM('UIL svgbox', 'rect', '', {width:'100%', height:17, fill:UIL.bgcolor(UIL.COLOR), 'stroke-width':1, stroke:UIL.SVGC  });
-    this.c[4] = UIL.DOM('UIL', 'path','position:absolute; width:16px; height:16px; left:'+(this.sa+this.sb-17)+'px; top:1px; pointer-events:none;',{ width:16, height:16, 'd':'M 6 4 L 10 8 6 12', 'stroke-width':2, stroke:this.fontColor, fill:'none', 'stroke-linecap':'butt' } );
+    this.c[3] = UIL.DOM('UIL button', 'div', 'background:'+UIL.bgcolor(UIL.COLOR)+'; height:17px' );
+    this.c[4] = UIL.DOM('UIL', 'path','position:absolute; width:16px; height:16px; left:'+(this.sa+this.sb-17)+'px; top:1px;',{ width:16, height:16, 'd':'M 6 4 L 10 8 6 12', 'stroke-width':2, stroke:this.fontColor, fill:'none', 'stroke-linecap':'butt' } );
     this.c[5] = UIL.DOM('UIL text', 'div', 'text-align:center; padding:4px 10px; ');
-    this.c[6] = UIL.DOM('UIL svgbox', 'rect', 'top:20px; height:90px; pointer-events:none;', { x:this.sb-15, y:0, width:10, height:16, fill:'#666', 'stroke-width':1, stroke:UIL.SVGC  });
+    this.c[6] = UIL.DOM('UIL', 'div', 'right:14px; top:20px; height:16px; width:10px; pointer-events:none; background:#666');
 
     this.c[2].name = 'list';
     this.c[3].name = 'title';
@@ -115,18 +115,15 @@ UIL.List.prototype.mode = function( mode ){
     switch(mode){
         case 0: // base
             this.c[5].style.color = this.fontColor;
-            //this.c[3].style.background = UIL.bgcolor(UIL.COLOR);
-            UIL.setSvg(this.c[3], 'fill', UIL.bgcolor(UIL.COLOR) );
+            this.c[3].style.background = UIL.bgcolor(UIL.COLOR);
         break;
         case 1: // over
             this.c[5].style.color = '#FFF';
-            //this.c[3].style.background = UIL.SELECT;
-            UIL.setSvg(this.c[3], 'fill', UIL.SELECT );
+            this.c[3].style.background = UIL.SELECT;
         break;
         case 2: // edit / down
             this.c[5].style.color = this.fontColor;
-            //this.c[3].style.background = UIL.SELECTDOWN;
-            UIL.setSvg(this.c[3], 'fill', UIL.SELECTDOWN );
+            this.c[3].style.background = UIL.SELECTDOWN;
         break;
 
     }
@@ -155,7 +152,8 @@ UIL.List.prototype.listdown = function( e ){
         this.isDown = true;
         this.listmove( e );
         this.listIn.style.background = 'rgba(0,0,0,0.6)';
-        UIL.setSvg( this.c[6], 'fill', '#AAA');
+        this.c[6].style.background = '#AAA';
+        //UIL.setSvg( this.c[6], 'fill', '#AAA');
         e.preventDefault();
     }
 
@@ -179,7 +177,8 @@ UIL.List.prototype.listup = function( e ){
 
     this.isDown = false;
     this.listIn.style.background = 'rgba(0,0,0,0.2)';
-    UIL.setSvg( this.c[6], 'fill', '#666' );
+    this.c[6].style.background = '#666';
+    //UIL.setSvg( this.c[6], 'fill', '#666' );
 
 };
 
@@ -218,7 +217,8 @@ UIL.List.prototype.update = function( y ){
     if( !this.scroll ) return;
     this.py = y === undefined ? this.py : y;
     this.listIn.style.top = -this.py+'px';
-    UIL.setSvg( this.c[6], 'y', ((this.py*70)/this.range)+2 );
+    this.c[6].style.top = (((this.py*70)/this.range)+22) + 'px';
+    //UIL.setSvg( this.c[6], 'y', ((this.py*70)/this.range)+2 );
 
 };
 
@@ -273,7 +273,7 @@ UIL.List.prototype.rSizeContent = function(){
 
 UIL.List.prototype.rSize = function(){
 
-    UIL.setSvg( this.c[6], 'x', this.sb-15 );
+    //UIL.setSvg( this.c[6], 'x', this.sb-15 );
 
     UIL.Proto.prototype.rSize.call( this );
 
@@ -288,8 +288,8 @@ UIL.List.prototype.rSize = function(){
     this.c[5].style.width = this.sb+'px';
     this.c[5].style.left = this.sa+'px';
 
-    this.c[6].style.width = this.sb+'px';
-    this.c[6].style.left = this.sa+'px';
+    //this.c[6].style.width = this.sb+'px';
+    //this.c[6].style.left = this.sa+'px';
 
     this.w = this.sb;
     if(this.max > this.maxHeight) this.w = this.sb-20;

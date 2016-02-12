@@ -24,7 +24,7 @@ UIL.Proto = function( o ){
 
     this.h = 20;
     
-    if(o.color) UIL.COLOR = o.color;
+    if( o.color ) UIL.COLOR = o.color;
     this.color = UIL.COLOR;
 
     this.fontColor = o.fontColor === undefined ? '#cccccc' : o.fontColor;
@@ -32,7 +32,9 @@ UIL.Proto = function( o ){
 
     this.txt = o.name || 'Proto';
     this.target = o.target || null;
-    this.callback = o.callback || function(){};
+
+    this.callback = o.callback  === undefined ? null : o.callback;
+    this.endCallback = null;
 
     // elements
 
@@ -63,20 +65,55 @@ UIL.Proto.prototype = {
 
     constructor: UIL.Proto,
 
+    // update every change
+
+    onChange : function( f ){
+
+        this.callback = f;
+
+    },
+
+    send:function(){
+
+        if( this.callback ) this.callback( this.value );
+
+    },
+
+    // update only on end
+
+    onFinishChange : function( f ){
+
+        this.callback = null;
+        this.endCallback = f;
+
+    },
+
+    sendEnd:function(){
+
+        if( this.endCallback ) this.endCallback( this.value );
+
+    },
+
+    // make de node
+
     init: function (){
 
         this.c[0].style.height = this.h + 'px';
-        if( this.isUI ) this.c[0].style.background = UIL.bgcolor(this.color);
 
+        if( this.isUI ) this.c[0].style.background = UIL.bgcolor(this.color);
         if( this.autoHeight ) this.c[0].style.transition = 'height 0.1s ease-out';
 
         for( var i = 0; i < this.c.length; i++ ){
-            if( i === 0 ){ 
-                if(this.target !== null ) this.target.appendChild( this.c[0] );
-                else UIL.main.inner.appendChild( this.c[0] );
+            if( i === 0 ){
+                if( this.target !== null ){ 
+                    this.target.appendChild( this.c[0] );
+                } else {
+                    if( this.isUI ) UIL.main.inner.appendChild( this.c[0] );
+                    else document.body.appendChild( this.c[0] );
+                }
             }
             else {
-                if( this.c[i] !== undefined ) this.c[0].appendChild(this.c[i]);
+                if( this.c[i] !== undefined ) this.c[0].appendChild( this.c[i] );
             }
         }
 
@@ -86,10 +123,27 @@ UIL.Proto.prototype = {
 
     },
 
-    setCallBack:function(callback){
-        if(this.callback) this.callback = null;
-        this.callback = callback;
+    // clear node
+    
+    clear:function(){
+
+        this.clearEvent();
+        UIL.clear( this.c[0] );
+
+        if( this.target !== null ){ 
+            this.target.removeChild( this.c[0] );
+        } else {
+            if( this.isUI ) UIL.main.inner.removeChild( this.c[0] );
+            else document.body.removeChild( this.c[0] );
+        }
+
+        this.c = null;
+        this.callback = null;
+        this.target = null;
+
     },
+
+    // change size 
 
     setSize:function(sx){
 
@@ -106,87 +160,16 @@ UIL.Proto.prototype = {
 
     },
 
-    dispose:function(){
+    rSize:function(){
 
-        this.clearEvent();
-        UIL.clear( this.c[0] );
+        if( !this.autoWidth ) return;
 
-        if( this.target !== null ) this.target.removeChild( this.c[0] );
-        else UIL.main.inner.removeChild( this.c[0] );
-
-        this.c = null;
-        this.callback = null;
-        this.target = null;
-
-    },
+        this.c[0].style.width = this.size + 'px';
+        if( !this.simple ) this.c[1].style.width = this.sa + 'px';
     
-    clear:function(){
-
-        this.dispose();
-        
-        /*this.clearEvent();
-
-        //this.purge(this.c[0])
-
-        var i = this.c.length;
-        while(i--){
-            if(i !== 0){
-                if( this.c[i] !== undefined ){
-                    //if( this.c[i].children ) 
-                    this.clearDOM( this.c[i] );
-                    this.c[0].removeChild( this.c[i] );
-                    this.c[i] = null;
-                }
-            }
-        }
-
-        this.c[0].innerHTML = '';
-
-        if( this.target !== null ) this.target.removeChild( this.c[0] );
-        else UIL.main.inner.removeChild( this.c[0] );
-
-        this.c[0] = null;
-        this.handleEvent = null;
-
-        this.c = null;
-        if(this.callback) this.callback = null;
-        if(this.value) this.value = null;*/
-
-        //this.purge(this);
-
-        //this = null;
     },
 
-    /*purge : function (d) {
-        var a = d.attributes, i, l, n;
-        if (a) {
-            for (i = a.length - 1; i >= 0; i -= 1) {
-                n = a[i].name;
-                if (typeof d[n] === 'function') {
-                    d[n] = null;
-                }
-            }
-        }
-        a = d.childNodes;
-        if (a) {
-            l = a.length;
-            for (i = 0; i < l; i += 1) {
-                this.purge(d.childNodes[i]);
-            }
-        }
-    },*/
-
-    /*clearDOM:function(dom){
-        while ( dom.lastChild ){
-            if(dom.lastChild.children) while ( dom.lastChild.lastChild ) dom.lastChild.removeChild( dom.lastChild.lastChild );
-            dom.removeChild( dom.lastChild );
-        }
-
-        /*while ( dom.children.length ){
-            if(dom.lastChild.children) while ( dom.lastChild.children.length ) dom.lastChild.removeChild( dom.lastChild.lastChild );
-            dom.removeChild( dom.lastChild );
-        }
-    },*/
+    // for numeric value
 
     setTypeNumber:function( o ){
 
@@ -222,17 +205,8 @@ UIL.Proto.prototype = {
 
     },
 
-    rSize:function(){
-
-        if( !this.autoWidth ) return;
-
-        this.c[0].style.width = this.size+'px';
-        if( !this.simple ) this.c[1].style.width = this.sa+'px';
-    
-    },
-
     // ----------------------
-    //   EVENTS DISPATCH
+    //   Events dispatch
     // ----------------------
 
     addEvent: function(){

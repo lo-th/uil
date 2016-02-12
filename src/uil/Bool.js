@@ -2,18 +2,14 @@ UIL.Bool = function( o ){
 
     UIL.Proto.call( this, o );
 
-    //this.type = 'bool';
-
     this.value = o.value || false;
 
-    this.c[2] = UIL.DOM('UIL svgbox', 'rect', 'width:17px;', {width:17, height:17, fill:UIL.SVGB, 'stroke-width':1, stroke:UIL.SVGC });
+    this.c[2] = UIL.DOM('UIL button', 'div', 'background:'+UIL.SVGB+'; height:17px; width:17px;' );
     this.c[3] = UIL.DOM('UIL svgbox', 'path','width:17px; pointer-events:none;',{ width:17, height:17, d:'M 4 9 L 6 12 14 4', 'stroke-width':2, stroke:this.fontColor, fill:'none', 'stroke-linecap':'butt' });
 
     if(!this.value) this.c[3].style.display = 'none';
 
     this.c[2].events = [ 'click' ];
-
-   
 
     this.init();
 
@@ -38,11 +34,11 @@ UIL.Bool.prototype.click = function( e ){
     if(this.value){
         this.value = false;
         this.c[3].style.display = 'none';
-        UIL.setSvg( this.c[2], 'fill', 'rgba(0,0,0,0.2)' );
+        this.c[2].style.background = 'rgba(0,0,0,0.2)';
     } else {
         this.value = true;
         this.c[3].style.display = 'block';
-        UIL.setSvg( this.c[2], 'fill', 'rgba(0,0,0,0.4)' );
+        this.c[2].style.background = 'rgba(0,0,0,0.4)';
     }
 
     this.callback( this.value );

@@ -19,7 +19,7 @@ UIL.Slide = function( o ){
     if(this.c[1]!==undefined) this.c[1].style.top = ty + 'px';
 
     this.c[2] = UIL.DOM('UIL text', 'div', 'top:'+ty+'px; text-align:right; width:40px; padding:3px 5px; color:'+ this.fontColor );
-    this.c[3] = UIL.DOM('UIL slidebg', 'rect', 'top:2px; height:'+(this.h-4)+'px; cursor:w-resize;' );
+    this.c[3] = UIL.DOM('UIL slidebg', 'rect', 'top:2px; height:'+(this.h-4)+'px;' );
     this.c[4] = UIL.DOM('UIL', 'rect', 'left:4px; top:5px; height:'+(this.h-10)+'px; background:' + this.fontColor+';' );
     //this.c[3] = UIL.DOM('UIL svgbox', 'rect', 'width:'+this.width+'px; height:'+(this.h-3)+'px; cursor:w-resize;', { width:'100%', height:this.h-3, fill:UIL.SVGB, 'stroke-width':1, stroke:UIL.SVGC });
     //this.c[4] = UIL.DOM('UIL svgbox', 'rect', 'left:4px; top:4px; width:'+(this.width-8)+'px; height:'+(this.h-10)+'px; pointer-events:none;', { width:'100%', height:'100%', fill: this.fontColor });
@@ -103,8 +103,9 @@ UIL.Slide.prototype.up = function( e ){
 
     if(this.isOver) this.mode(1);
     else this.mode(0);
-    
 
+    this.sendEnd();
+    
 };
 
 UIL.Slide.prototype.down = function( e ){
@@ -146,7 +147,8 @@ UIL.Slide.prototype.update = function( up ){
     var ww = this.w * (( this.value - this.min ) / this.range );
     this.c[4].style.width = ww + 'px';
     this.c[2].textContent = this.value;
-    if( up ) this.callback( this.value );
+
+    if( up ) this.send();
 
 };
 

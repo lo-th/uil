@@ -110,7 +110,8 @@ UIL.Circular.prototype.up = function( e ){
 
     if(this.isOver) this.mode(1);
     else this.mode(0);
-    
+
+    this.sendEnd();
 
 };
 
@@ -183,6 +184,6 @@ UIL.Circular.prototype.update = function( up ){
     this.c[2].textContent = this.value;
     this.percent = (this.value - this.min) / this.range;
     UIL.setSvg( this.c[4], 'd', this.makePath() );
-    if( up ) this.callback(this.value);
+    if( up ) this.send();
     
 };

@@ -22,8 +22,6 @@ UIL.Gui = function(css, w, center, color){
     this.content.appendChild(this.inner);
     this.inner.name = 'inner';
 
-    
-    
     this.scrollBG = UIL.DOM('UIL scroll-bg');
     this.content.appendChild(this.scrollBG);
     this.scrollBG.name = 'scroll';
