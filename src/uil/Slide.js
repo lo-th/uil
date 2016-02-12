@@ -7,8 +7,8 @@ UIL.Slide = function( o ){
     this.width = UIL.BW - 40;
     this.w = this.width - 8;
 
-    this.h = o.height || 20;
-    this.h = this.h < 11 ? 11 : this.h;
+    //this.h = o.height || 20;
+    //this.h = this.h < 11 ? 11 : this.h;
 
     this.old = this.value;
     this.isDown = false;

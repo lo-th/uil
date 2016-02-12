@@ -2,7 +2,6 @@ UIL.Color = function( o ){
     
     UIL.Proto.call( this, o );
 
-    //this.type = 'color';
     this.autoHeight = true;
 
     this.type = o.type || 'array';
@@ -14,14 +13,16 @@ UIL.Color = function( o ){
     this.holdTop = 0;
     
     this.wheelWidth = this.width*0.1;
-    this.decal = 22;
+    this.decal = this.h + 2;
     
     this.radius = (this.width - this.wheelWidth) * 0.5 - 1;
     this.square = Math.floor((this.radius - this.wheelWidth * 0.5) * 0.7) - 1;
     this.mid = Math.floor(this.width * 0.5 );
     this.markerSize = this.wheelWidth * 0.3;
 
-    this.c[2] = UIL.DOM('UIL text', 'div', 'pointer-events:auto; cursor:pointer; border:1px solid '+ UIL.Border );//UIL.DOM('UIL button', 'div', 'height:17px' );
+    this.oldh = this.h;
+
+    this.c[2] = UIL.DOM('UIL text', 'div',  'height:'+(this.h-4)+'px;' + 'pointer-events:auto; cursor:pointer; border:1px solid '+ UIL.Border );//UIL.DOM('UIL button', 'div', 'height:17px' );
     //this.c[3] = null;//UIL.DOM('UIL text', 'div', '');
 
     if(this.side === 'up'){
@@ -147,7 +148,7 @@ UIL.Color.prototype.show = function(){
 
     if(this.oldWidth!==this.width) this.redraw();
     this.isShow = true;
-    this.h = this.width + 30;
+    this.h = this.width + this.oldh + 10;
     this.c[0].style.height = this.h+'px';
 
     if(this.side=='up'){ 
@@ -160,25 +161,23 @@ UIL.Color.prototype.show = function(){
     this.c[4].style.display = 'block';
     this.c[5].style.display = 'block';
 
-    if( this.isUI ) UIL.main.calc( this.h-20 );
+    if( this.isUI ) UIL.main.calc( this.h-this.oldh );
 
 };
 
 UIL.Color.prototype.hide = function(){
 
-    if( this.isUI ) UIL.main.calc( -(this.h-20) );
+    if( this.isUI ) UIL.main.calc( -(this.h-this.oldh) );
     this.isShow = false;
-    this.h = 20;
+    this.h = this.oldh;
     if(this.side=='up'){ 
         if(!isNaN(this.holdTop)) this.c[0].style.top = (this.holdTop)+'px';
-        this.c[6].style.pointerEvents = 'none';
+        this.c[5].style.pointerEvents = 'none';
     }
     this.c[0].style.height = this.h+'px';
     this.c[3].style.display = 'none';
     this.c[4].style.display = 'none';
     this.c[5].style.display = 'none';
-    //this.c[6].onmousedown = null;
-    //this.c[6].onmouseout = null;
     
 };
 
@@ -320,7 +319,7 @@ UIL.Color.prototype.rSize = function(){
     this.width = this.sb;
     this.wheelWidth = this.width*0.1;
 
-    this.decal = 22;
+    //this.decal = 22;
     if( this.side === 'up' ) this.decal = 5;
     this.radius = (this.width - this.wheelWidth) * 0.5 - 1;
     this.square = Math.floor((this.radius - this.wheelWidth * 0.5) * 0.7) - 1;

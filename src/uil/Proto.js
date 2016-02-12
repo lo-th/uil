@@ -22,7 +22,8 @@ UIL.Proto = function( o ){
     // define obj size
     this.setSize( o.size );
 
-    this.h = 20;
+    this.h = o.height || 20;
+    this.h = this.h < 11 ? 11 : this.h;
     
     if( o.color ) UIL.COLOR = o.color;
     this.color = UIL.COLOR;
