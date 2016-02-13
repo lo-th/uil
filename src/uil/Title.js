@@ -9,7 +9,7 @@ UIL.Title = function( o ){
     var id = o.id || 0;
     var prefix = o.prefix || '';
 
-    this.c[2] = UIL.DOM( 'UIL text', 'div', 'text-align:right; width:40px; padding:3px 5px;');
+    this.c[2] = UIL.DOM( 'UIL text', 'div', 'text-align:right; width:40px;');
     this.c[2].style.color = this.fontColor;
 
     if( this.h === 31 ){

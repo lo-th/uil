@@ -36,7 +36,7 @@ UIL.Circular = function( o ){
 
     this.percent = 0;
 
-    this.c[2] = UIL.DOM('UIL text', 'div', 'top:'+(this.height+20)+'px; text-align:center; width:'+this.size+'px; padding:3px 5px; color:'+ this.fontColor );
+    this.c[2] = UIL.DOM('UIL text', 'div', 'text-align:center; top:'+(this.height+20)+'px; width:'+this.size+'px; color:'+ this.fontColor );
 
     this.c[3] = UIL.DOM('UIL svgbox', 'circle', 'left:10px; top:'+this.top+'px; width:'+this.w+'px; height:'+this.height+'px; cursor:pointer;', { cx:this.radius, cy:this.radius, r:this.radius, fill:'rgba(0,0,0,0.3)' });
     this.c[4] = UIL.DOM('UIL svgbox', 'path', 'left:10px; top:'+this.top+'px; width:'+this.w+'px; height:'+this.height+'px; pointer-events:none;', { d:this.makePath(), fill:this.fontColor });

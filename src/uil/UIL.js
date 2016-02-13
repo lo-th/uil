@@ -66,7 +66,7 @@ var UIL = ( function () {
         UIL.CC('UIL.base', 'position:relative; height:20px; float:left;');
 
         UIL.CC('UIL.text', UIL.TXT );
-        //UIL.CC('UIL.number', UIL.TXT + 'letter-spacing:-1px;' );
+        UIL.CC('UIL.number', UIL.TXT + 'letter-spacing:-1px; padding:2px 5px;' );
         UIL.CC('UIL.textSelect', UIL.TXT + UIL.US + 'padding:2px 5px; outline:none; -webkit-appearance:none; -moz-appearance:none; border:1px solid rgba(255,255,255,0.1);' );
 
         UIL.CC('UIL.slidebg', 'border:1px solid '+UIL.Border+'; left:100px; top:1px; pointer-events:auto; cursor:w-resize; background-image:'+UIL.SlideBG+';' );

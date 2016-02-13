@@ -22,14 +22,12 @@ UIL.Color = function( o ){
 
     this.oldh = this.h;
 
-    this.c[2] = UIL.DOM('UIL text', 'div',  'height:'+(this.h-4)+'px;' + 'pointer-events:auto; cursor:pointer; border:1px solid '+ UIL.Border );//UIL.DOM('UIL button', 'div', 'height:17px' );
-    //this.c[3] = null;//UIL.DOM('UIL text', 'div', '');
+    this.c[2] = UIL.DOM('UIL text', 'div',  'height:'+(this.h-4)+'px;' + 'pointer-events:auto; cursor:pointer; border:1px solid '+ UIL.Border );
+ 
 
     if(this.side === 'up'){
         this.decal = 5;
-        //this.c[3].style.top = 'auto';
         this.c[2].style.top = 'auto';
-        //this.c[3].style.bottom = '2px';
         this.c[2].style.bottom = '2px';
     }
 
@@ -328,9 +326,6 @@ UIL.Color.prototype.rSize = function(){
 
     this.c[2].style.width = this.sb + 'px';
     this.c[2].style.left = this.sa + 'px';
-
-    //this.c[3].style.width = this.sb + 'px';
-    //this.c[3].style.left = this.sa + 'px';
 
     this.c[3].style.width = (this.square * 2 - 1) + 'px';
     this.c[3].style.height = (this.square * 2 - 1) + 'px';

@@ -7,7 +7,7 @@ UIL.List = function( o ){
     this.c[2] = UIL.DOM('UIL list');
     this.c[3] = UIL.DOM('UIL button', 'div', 'background:'+UIL.bgcolor(UIL.COLOR)+'; height:18px;' );
     this.c[4] = UIL.DOM('UIL', 'path','position:absolute; width:16px; height:16px; left:'+(this.sa+this.sb-17)+'px; top:1px;',{ width:16, height:16, 'd':'M 6 4 L 10 8 6 12', 'stroke-width':2, stroke:this.fontColor, fill:'none', 'stroke-linecap':'butt' } );
-    this.c[5] = UIL.DOM('UIL text', 'div', 'text-align:center;  ');
+    this.c[5] = UIL.DOM('UIL text', 'div', 'text-align:center;');
     this.c[6] = UIL.DOM('UIL', 'div', 'right:14px; top:20px; height:16px; width:10px; pointer-events:none; background:#666');
 
     this.c[2].name = 'list';
