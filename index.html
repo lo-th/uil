@@ -78,18 +78,18 @@ function populate(){
 
         gr0 = ui.add('group', { name:'Group' });
 
-        gr0.add('slide',  { name:'slide', callback:callback, min:-100, max:100, value:0, precision:0 });
-        gr0.add('slide',  { name:'slide', callback:callback, min:-100, max:100, value:0, precision:0 });
-        gr0.add('slide',  { name:'slide', callback:callback, min:-100, max:100, value:0, precision:0 });
-        gr0.add('slide',  { name:'slide', callback:callback, min:-100, max:100, value:0, precision:0 });
-        gr0.add('slide',  { name:'slide', callback:callback, min:-100, max:100, value:0, precision:0 });
+        gr0.add('slide',  { name:'slide', callback:callback, min:-100, max:100, value:0, precision:0, fontColor:'#B0CC99' });
+        gr0.add('slide',  { name:'slide', callback:callback, min:-100, max:100, value:0, precision:0, fontColor:'#F6E497' });
+        gr0.add('slide',  { name:'slide', callback:callback, min:-100, max:100, value:0, precision:0, fontColor:'#C79F4B'});
+        gr0.add('slide',  { name:'slide', callback:callback, min:-100, max:100, value:0, precision:0, fontColor:'#FF5B2B' });
+        gr0.add('slide',  { name:'slide', callback:callback, min:-100, max:100, value:0, precision:0, fontColor:'#E70739' });
 
         gr1 = ui.add('group', { name:'circulars', fontColor:'#D4B87B' });
 
-        gr1.add('circular', { name:'circular', callback:callback, size:50, height:120, min:0, max:100, value:25, precision:2 , fontColor:'#D4B87B' });
-        gr1.add('circular', { name:'circular', callback:callback, size:66, height:120, min:0, max:100, value:50, precision:2 , fontColor:'#D4B87B' });
-        gr1.add('circular', { name:'circular', callback:callback, size:84, height:120, min:0, max:100, value:70, precision:0, step:10, fontColor:'#D4B87B' });
-        gr1.add('circular', { name:'circular', callback:callback, size:100, min:0, max:100, value:100, precision:0, step:1, fontColor:'#D4B87B' });
+        gr1.add('circular', { name:'circular', callback:callback, size:50, height:120, min:0, max:100, value:25, precision:2 , fontColor:'#B0CC99' });
+        gr1.add('circular', { name:'circular', callback:callback, size:66, height:120, min:0, max:100, value:50, precision:2 , fontColor:'#F6E497' });
+        gr1.add('circular', { name:'circular', callback:callback, size:84, height:120, min:0, max:100, value:70, precision:0, step:10, fontColor:'#C79F4B' });
+        gr1.add('circular', { name:'circular', callback:callback, size:100, min:0, max:100, value:100, precision:0, step:1, fontColor:'#FF5B2B' });
 
         gr2 = ui.add('group', { name:'knobs', fontColor:'#D4B87B' });
 

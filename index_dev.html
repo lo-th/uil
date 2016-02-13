@@ -68,7 +68,7 @@ populate();
 
 function populate(){
     if(!display){
-        ui.add('title',  { name:'Title', color:'N', titleColor:'#D4B87B'});
+        ui.add('title',  { name:'Title', titleColor:'#D4B87B'});
         ui.add('bool',   { name:'bool', callback:callback, titleColor:'#D4B87B' });
         ui.add('color',  { name:'color', callback:callback, type:'html', value:0x000000, fontColor:'#D4B87B'});
         ui.add('color',  { name:'color', callback:callback, type:'hex', value:[0,1,1,1], height:40 });

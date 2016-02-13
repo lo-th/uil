@@ -25,11 +25,15 @@ UIL.Proto = function( o ){
     this.h = o.height || 20;
     this.h = this.h < 11 ? 11 : this.h;
     
-    if( o.color ) UIL.COLOR = o.color;
-    this.color = UIL.COLOR;
+    this.bgcolor = UIL.COLOR || o.bgcolor;
 
-    this.fontColor = o.fontColor === undefined ? '#cccccc' : o.fontColor;
-    this.titleColor = o.titleColor === undefined ? '#cccccc' : o.titleColor;
+
+
+    //this.fontColor = o.fontColor === undefined ? UIL.BASECOLOR : o.fontColor;
+    this.titleColor = o.titleColor || UIL.BASECOLOR;
+    this.fontColor = o.fontColor || UIL.BASECOLOR;
+    this.colorPlus = UIL.ColorLuma(this.fontColor, 0.3);
+    
 
     this.txt = o.name || 'Proto';
     this.target = o.target || null;
@@ -103,7 +107,7 @@ UIL.Proto.prototype = {
 
         this.c[0].style.height = this.h + 'px';
 
-        if( this.isUI ) this.c[0].style.background = UIL.bgcolor(this.color);
+        if( this.isUI ) this.c[0].style.background = UIL.bgcolor(this.bgcolor);
         if( this.autoHeight ) this.c[0].style.transition = 'height 0.1s ease-out';
 
         for( var i = 0; i < this.c.length; i++ ){

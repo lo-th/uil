@@ -201,6 +201,7 @@ var UIL = ( function () {
 
 
     UIL.COLOR = 'N';
+    UIL.BASECOLOR = '#C0C0C0';
     UIL.SELECT = '#035fcf';
     UIL.MOVING = '#03afff';
     UIL.SELECTDOWN = '#024699';
@@ -208,8 +209,12 @@ var UIL = ( function () {
     UIL.SVGC = 'rgba(120,120,120,0.6)';
     UIL.Border = 'rgba(120,120,120,0.3)';
     UIL.BorderSelect = 'rgba(3,95,207,0.6)';
-    UIL.GroupBG = 'url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAMAAAADAQMAAABs5if8AAAABlBMVEVMaXH///+a4ocPAAAAAnRSTlMAM8lDrC4AAAAOSURBVHicY2BgcGBgAAAAxgBBOTEMSwAAAABJRU5ErkJggg==)';
-    UIL.SlideBG = 'url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFAQMAAAC3obSmAAAABlBMVEVMaXH///+a4ocPAAAAAnRSTlMAM8lDrC4AAAASSURBVHicY3BgaGDgYBBgUAAABkIA+fbHMRYAAAAASUVORK5CYII=)';
+    UIL.PNG = 'url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAA';
+    //UIL.GroupBG = UIL.PNG + 'OSURBVHicY2BgcGBgAAAAxgBBOTEMSwAAAABJRU5ErkJggg==)';
+    //UIL.SlideBG = UIL.PNG + 'SSURBVHicY3BgaGDgYBBgUAAABkIA+fbHMRYAAAAASUVORK5CYII=)';
+    UIL.GroupBG = UIL.PNG + 'MAAAADAQMAAABs5if8AAAABlBMVEVMaXH///+a4ocPAAAAAnRSTlMAM8lDrC4AAAAOSURBVHicY2BgcGBgAAAAxgBBOTEMSwAAAABJRU5ErkJggg==)';
+    UIL.SlideBG = UIL.PNG + 'UAAAAFAQMAAAC3obSmAAAABlBMVEVMaXH///+a4ocPAAAAAnRSTlMAM8lDrC4AAAASSURBVHicY3BgaGDgYBBgUAAABkIA+fbHMRYAAAAASUVORK5CYII=)';
+   
     UIL.sizer = function(w){
 
         this.WIDTH = ~~ w;
@@ -250,6 +255,27 @@ var UIL = ( function () {
         UIL.CC('UIL.svgbox', 'left:100px; top:1px; width:190px; height:17px; pointer-events:auto; cursor:pointer;');
 
         UIL.DEF = true;
+    };
+
+    UIL.ColorLuma = function (hex, lum) {
+
+        // validate hex string
+        hex = String(hex).replace(/[^0-9a-f]/gi, '');
+        if (hex.length < 6) {
+            hex = hex[0]+hex[0]+hex[1]+hex[1]+hex[2]+hex[2];
+        }
+        lum = lum || 0;
+
+        // convert to decimal and change luminosity
+        var rgb = "#", c, i;
+        for (i = 0; i < 3; i++) {
+            c = parseInt(hex.substr(i*2,2), 16);
+            c = Math.round(Math.min(Math.max(0, c + (c * lum)), 255)).toString(16);
+            rgb += ("00"+c).substr(c.length);
+        }
+
+        return rgb;
+
     };
 
     UIL.bgcolor = function(p, a, bg){
@@ -659,11 +685,15 @@ UIL.Proto = function( o ){
     this.h = o.height || 20;
     this.h = this.h < 11 ? 11 : this.h;
     
-    if( o.color ) UIL.COLOR = o.color;
-    this.color = UIL.COLOR;
+    this.bgcolor = UIL.COLOR || o.bgcolor;
 
-    this.fontColor = o.fontColor === undefined ? '#cccccc' : o.fontColor;
-    this.titleColor = o.titleColor === undefined ? '#cccccc' : o.titleColor;
+
+
+    //this.fontColor = o.fontColor === undefined ? UIL.BASECOLOR : o.fontColor;
+    this.titleColor = o.titleColor || UIL.BASECOLOR;
+    this.fontColor = o.fontColor || UIL.BASECOLOR;
+    this.colorPlus = UIL.ColorLuma(this.fontColor, 0.3);
+    
 
     this.txt = o.name || 'Proto';
     this.target = o.target || null;
@@ -737,7 +767,7 @@ UIL.Proto.prototype = {
 
         this.c[0].style.height = this.h + 'px';
 
-        if( this.isUI ) this.c[0].style.background = UIL.bgcolor(this.color);
+        if( this.isUI ) this.c[0].style.background = UIL.bgcolor(this.bgcolor);
         if( this.autoHeight ) this.c[0].style.transition = 'height 0.1s ease-out';
 
         for( var i = 0; i < this.c.length; i++ ){
@@ -891,7 +921,7 @@ UIL.Group = function( o ){
     this.isOpen = o.open || false;
 
     this.c[2] = UIL.DOM('UIL inner', 'div', 'top:25px');
-    this.c[3] = UIL.DOM('UIL', 'div', 'top:2px; left:2px; height:21px; width:5px; background-image:'+ UIL.GroupBG );
+    this.c[3] = UIL.DOM('UIL', 'div', 'top:2px; left:2px; height:21px; width:6px; background-image:'+ UIL.GroupBG );
     this.c[4] = UIL.DOM('UIL', 'path','position:absolute; width:16px; left:'+(this.sa+this.sb-17)+'px; top:4px; pointer-events:none;',{ width:16, height:16, 'd':'M 6 4 L 10 8 6 12', 'stroke-width':2, stroke:this.fontColor, fill:'none', 'stroke-linecap':'butt' } );
 
     this.c[0].style.height = this.h + 'px';
@@ -1744,13 +1774,16 @@ UIL.u255 = function(color, i){
 UIL.u16 = function(color, i){
     return parseInt(color.substring(i, i + 1), 16) / 15;
 };
+
 UIL.unpack = function(color){
     if (color.length == 7) return [ UIL.u255(color, 1), UIL.u255(color, 3), UIL.u255(color, 5) ];
     else if (color.length == 4) return [ UIL.u16(color,1), UIL.u16(color,2), UIL.u16(color,3) ];
 };
+
 UIL.packDX = function(c, a){
     return '#' + UIL.dec2hex(a) + UIL.dec2hex(c) + UIL.dec2hex(c) + UIL.dec2hex(c);
 };
+
 UIL.dec2hex = function(x){
     return (x < 16 ? '0' : '') + x.toString(16);
 };
@@ -1794,7 +1827,7 @@ UIL.Slide = function( o ){
 
     this.c[2] = UIL.DOM('UIL number', 'div', ' text-align:right; width:47px; color:'+ this.fontColor );
     this.c[3] = UIL.DOM('UIL slidebg', 'div', 'top:2px; height:'+(this.h-4)+'px;' );
-    this.c[4] = UIL.DOM('UIL', 'div', 'left:4px; top:5px; height:'+(this.h-10)+'px; background:' + this.fontColor+';' );
+    this.c[4] = UIL.DOM('UIL', 'div', 'left:4px; top:5px; height:'+(this.h-10)+'px; background:' + this.fontColor +';' );
 
     this.c[3].events = [ 'mouseover', 'mousedown', 'mouseout' ];
 
@@ -1824,15 +1857,13 @@ UIL.Slide.prototype.mode = function( mode ){
 
     switch(mode){
         case 0: // base
+            this.c[2].style.color = this.fontColor;
             this.c[4].style.background = this.fontColor;
         break;
         case 1: // over
-            this.c[4].style.background = UIL.SELECT;
+            this.c[2].style.color = this.colorPlus;
+            this.c[4].style.background = this.colorPlus;
         break;
-        case 2: // edit
-            this.c[4].style.background = UIL.MOVING;
-        break;
-
     }
 }
 
@@ -1873,7 +1904,7 @@ UIL.Slide.prototype.down = function( e ){
     this.left = this.c[3].getBoundingClientRect().left;
     this.old = this.value;
     this.move( e );
-    this.mode(2);
+    //this.mode(2);
 
 };
 
@@ -2438,17 +2469,19 @@ UIL.Circular.prototype.mode = function( mode ){
 
     switch(mode){
         case 0: // base
+            this.c[2].style.color = this.fontColor;
             UIL.setSvg( this.c[3], 'fill','rgba(0,0,0,0.2)');
             UIL.setSvg( this.c[4], 'fill', this.fontColor );
         break;
         case 1: // over
+        this.c[2].style.color = this.colorPlus;
             UIL.setSvg( this.c[3], 'fill','rgba(0,0,0,0.6)');
-            UIL.setSvg( this.c[4], 'fill', UIL.SELECT );
+            UIL.setSvg( this.c[4], 'fill', this.colorPlus );
         break;
-        case 2: // edit
+        /*case 2: // edit
             UIL.setSvg( this.c[3], 'fill','rgba(0,0,0,0.2)');
             UIL.setSvg( this.c[4], 'fill', UIL.MOVING );
-        break;
+        break;*/
 
     }
 }
@@ -2491,7 +2524,7 @@ UIL.Circular.prototype.down = function( e ){
     this.old = this.value;
     this.oldr = null;
     this.move( e );
-    this.mode(2);
+    //this.mode(2);
 
 };
 

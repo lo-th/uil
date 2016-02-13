@@ -10,7 +10,7 @@ UIL.Slide = function( o ){
 
     this.c[2] = UIL.DOM('UIL number', 'div', ' text-align:right; width:47px; color:'+ this.fontColor );
     this.c[3] = UIL.DOM('UIL slidebg', 'div', 'top:2px; height:'+(this.h-4)+'px;' );
-    this.c[4] = UIL.DOM('UIL', 'div', 'left:4px; top:5px; height:'+(this.h-10)+'px; background:' + this.fontColor+';' );
+    this.c[4] = UIL.DOM('UIL', 'div', 'left:4px; top:5px; height:'+(this.h-10)+'px; background:' + this.fontColor +';' );
 
     this.c[3].events = [ 'mouseover', 'mousedown', 'mouseout' ];
 
@@ -40,15 +40,13 @@ UIL.Slide.prototype.mode = function( mode ){
 
     switch(mode){
         case 0: // base
+            this.c[2].style.color = this.fontColor;
             this.c[4].style.background = this.fontColor;
         break;
         case 1: // over
-            this.c[4].style.background = UIL.SELECT;
+            this.c[2].style.color = this.colorPlus;
+            this.c[4].style.background = this.colorPlus;
         break;
-        case 2: // edit
-            this.c[4].style.background = UIL.MOVING;
-        break;
-
     }
 }
 
@@ -89,7 +87,7 @@ UIL.Slide.prototype.down = function( e ){
     this.left = this.c[3].getBoundingClientRect().left;
     this.old = this.value;
     this.move( e );
-    this.mode(2);
+    //this.mode(2);
 
 };
 

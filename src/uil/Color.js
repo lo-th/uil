@@ -376,13 +376,16 @@ UIL.u255 = function(color, i){
 UIL.u16 = function(color, i){
     return parseInt(color.substring(i, i + 1), 16) / 15;
 };
+
 UIL.unpack = function(color){
     if (color.length == 7) return [ UIL.u255(color, 1), UIL.u255(color, 3), UIL.u255(color, 5) ];
     else if (color.length == 4) return [ UIL.u16(color,1), UIL.u16(color,2), UIL.u16(color,3) ];
 };
+
 UIL.packDX = function(c, a){
     return '#' + UIL.dec2hex(a) + UIL.dec2hex(c) + UIL.dec2hex(c) + UIL.dec2hex(c);
 };
+
 UIL.dec2hex = function(x){
     return (x < 16 ? '0' : '') + x.toString(16);
 };

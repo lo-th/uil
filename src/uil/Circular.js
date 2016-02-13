@@ -72,17 +72,19 @@ UIL.Circular.prototype.mode = function( mode ){
 
     switch(mode){
         case 0: // base
+            this.c[2].style.color = this.fontColor;
             UIL.setSvg( this.c[3], 'fill','rgba(0,0,0,0.2)');
             UIL.setSvg( this.c[4], 'fill', this.fontColor );
         break;
         case 1: // over
+        this.c[2].style.color = this.colorPlus;
             UIL.setSvg( this.c[3], 'fill','rgba(0,0,0,0.6)');
-            UIL.setSvg( this.c[4], 'fill', UIL.SELECT );
+            UIL.setSvg( this.c[4], 'fill', this.colorPlus );
         break;
-        case 2: // edit
+        /*case 2: // edit
             UIL.setSvg( this.c[3], 'fill','rgba(0,0,0,0.2)');
             UIL.setSvg( this.c[4], 'fill', UIL.MOVING );
-        break;
+        break;*/
 
     }
 }
@@ -125,7 +127,7 @@ UIL.Circular.prototype.down = function( e ){
     this.old = this.value;
     this.oldr = null;
     this.move( e );
-    this.mode(2);
+    //this.mode(2);
 
 };
 
