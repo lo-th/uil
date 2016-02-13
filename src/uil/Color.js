@@ -49,7 +49,7 @@ UIL.Color = function( o ){
     this.value = '#ffffff';
     if( o.value !== undefined ){
         if(o.value instanceof Array) this.value = UIL.pack(o.value);
-        else if(!isNaN(o.value)) this.value = UIL.numFormat(o.value);
+        else if(!isNaN(o.value)) this.value = UIL.hexToHtml(o.value);
         else this.value = o.value;
     }
     this.bcolor = null;
@@ -179,7 +179,7 @@ UIL.Color.prototype.hide = function(){
     
 };
 
-UIL.Color.prototype.updateDisplay = function(){
+UIL.Color.prototype.update = function( up ){
     this.invert = (this.rgb[0] * 0.3 + this.rgb[1] * .59 + this.rgb[2] * .11) <= 0.6;
 
     this.c[3].style.background = UIL.pack(UIL.HSLToRGB([this.hsl[0], 1, 0.5]));
@@ -189,16 +189,19 @@ UIL.Color.prototype.updateDisplay = function(){
     this.value = this.bcolor;
 
     this.c[2].style.background = this.bcolor;
-    this.c[2].textContent = UIL.hexFormat(this.bcolor);
+    this.c[2].textContent = UIL.htmlToHex(this.bcolor);
 
     
     var cc = this.invert ? '#fff' : '#000';
     
     this.c[2].style.color = cc;
 
+    if(!up) return;
+
     if( this.type === 'array' ) this.send( this.rgb );
-    if( this.type === 'html' || this.type === 'hex' ) this.send();
-    //if(  ) this.callback( this.value );
+    if( this.type === 'hex' ) this.send( UIL.htmlToHex(this.value) );
+    if( this.type === 'html' ) this.send( );
+
 };
 
 UIL.Color.prototype.setColor = function( color ){
@@ -208,7 +211,7 @@ UIL.Color.prototype.setColor = function( color ){
         this.bcolor = color;
         this.rgb = unpack;
         this.hsl = UIL.RGBtoHSL(this.rgb);
-        this.updateDisplay();
+        this.update();
     }
     return this;
 
@@ -219,7 +222,7 @@ UIL.Color.prototype.setHSL = function( hsl ){
     this.hsl = hsl;
     this.rgb = UIL.HSLToRGB(hsl);
     this.bcolor = UIL.pack(this.rgb);
-    this.updateDisplay();
+    this.update( true );
     return this;
 
 };
@@ -358,11 +361,7 @@ UIL.hexToHtml = function(v){
     return "#" + ("000000" + v.toString(16)).substr(-6);
 };
 
-UIL.numFormat = function(v){ 
-    return "#" + ("000000" + v.toString(16)).substr(-6);
-    //return "#"+v.toString(16);
-};
-UIL.hexFormat = function(v){ return v.toUpperCase().replace("#", "0x"); };
+UIL.htmlToHex = function(v){ return v.toUpperCase().replace("#", "0x"); };
 
 UIL.pack = function(rgb){
     var r = Math.round(rgb[0] * 255);
@@ -370,6 +369,7 @@ UIL.pack = function(rgb){
     var b = Math.round(rgb[2] * 255);
     return '#' + UIL.dec2hex(r) + UIL.dec2hex(g) + UIL.dec2hex(b);
 };
+
 UIL.u255 = function(color, i){
     return parseInt(color.substring(i, i + 2), 16) / 255;
 };

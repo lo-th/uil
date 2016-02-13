@@ -9,8 +9,8 @@ UIL.Slide = function( o ){
     this.isOver = false;
 
     this.c[2] = UIL.DOM('UIL number', 'div', ' text-align:right; width:47px; color:'+ this.fontColor );
-    this.c[3] = UIL.DOM('UIL slidebg', 'rect', 'top:2px; height:'+(this.h-4)+'px;' );
-    this.c[4] = UIL.DOM('UIL', 'rect', 'left:4px; top:5px; height:'+(this.h-10)+'px; background:' + this.fontColor+';' );
+    this.c[3] = UIL.DOM('UIL slidebg', 'div', 'top:2px; height:'+(this.h-4)+'px;' );
+    this.c[4] = UIL.DOM('UIL', 'div', 'left:4px; top:5px; height:'+(this.h-10)+'px; background:' + this.fontColor+';' );
 
     this.c[3].events = [ 'mouseover', 'mousedown', 'mouseout' ];
 

@@ -71,12 +71,7 @@ UIL.Proto.prototype = {
     onChange : function( f ){
 
         this.callback = f;
-
-    },
-
-    send:function( v ){
-
-        if( this.callback ) this.callback( v || this.value );
+        return this;
 
     },
 
@@ -86,6 +81,13 @@ UIL.Proto.prototype = {
 
         this.callback = null;
         this.endCallback = f;
+        return this;
+
+    },
+
+    send:function( v ){
+
+        if( this.callback ) this.callback( v || this.value );
 
     },
 
