@@ -208,7 +208,7 @@ var UIL = ( function () {
     UIL.SVGB = 'rgba(0,0,0,0.3)';
     UIL.SVGC = 'rgba(120,120,120,0.6)';
     UIL.Border = '#4f4f4f'; //'rgba(120,120,120,0.3)';
-    UIL.BorderSelect = 'rgba(3,95,207,0.6)';
+    UIL.BorderSelect = UIL.SELECT;//'rgba(3,95,207,0.6)';
     UIL.PNG = 'url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAA';
     UIL.GroupBG = UIL.PNG + 'MAAAADAQMAAABs5if8AAAABlBMVEVMaXH///+a4ocPAAAAAnRSTlMAM8lDrC4AAAAOSURBVHicY2BgcGBgAAAAxgBBOTEMSwAAAABJRU5ErkJggg==)';
     UIL.SlideBG = UIL.PNG + 'UAAAAFAQMAAAC3obSmAAAABlBMVEVMaXH///+a4ocPAAAAAnRSTlMAM8lDrC4AAAASSURBVHicY3BgaGDgYBBgUAAABkIA+fbHMRYAAAAASUVORK5CYII=)';
@@ -225,7 +225,7 @@ var UIL = ( function () {
 
         UIL.CC('UIL.text', UIL.TXT );
         UIL.CC('UIL.number', UIL.TXT + 'letter-spacing:-1px; padding:2px 5px;' );
-        UIL.CC('UIL.textSelect', UIL.TXT + UIL.US + 'padding:2px 5px; outline:none; -webkit-appearance:none; -moz-appearance:none; border:1px solid rgba(255,255,255,0.1);' );
+        UIL.CC('UIL.textSelect', UIL.TXT + UIL.US + 'pointer-events:auto; padding:2px 5px; outline:none; -webkit-appearance:none; -moz-appearance:none; border:1px dashed ' + UIL.Border+';' );
 
         UIL.CC('UIL.slidebg', 'border:1px solid '+UIL.Border+'; left:100px; top:1px; pointer-events:auto; cursor:w-resize; background:rgba(0,0,0,0.3); ' );
 
@@ -1182,7 +1182,7 @@ UIL.String = function( o ){
     this.value = o.value || '';
     this.allway = o.allway || false;
 
-    this.c[2] = UIL.DOM( 'UIL textSelect', 'div', 'pointer-events:auto; ' );
+    this.c[2] = UIL.DOM( 'UIL textSelect' );
     this.c[2].name = 'input';
 
     this.c[2].style.color = this.fontColor;
@@ -1298,7 +1298,7 @@ UIL.Number = function( o ){
     while(i--){
         if(this.isAngle) this.value[i] = (this.value[i] * 180 / Math.PI).toFixed( this.precision );
         //this.c[2+i] = UIL.DOM('UIL text', 'input', 'pointer-events:auto; padding:0px 5px; padding-bottom:2px; width:'+this.w+'px; left:'+(UIL.AW+(this.w*i)+(5*i))+'px;');
-        this.c[2+i] = UIL.DOM('UIL textSelect', 'div', 'pointer-events:auto; cursor:move; width:'+this.w+'px; left:'+(UIL.AW+(this.w*i)+(5*i))+'px;');
+        this.c[2+i] = UIL.DOM('UIL textSelect', 'div', 'cursor:move; width:'+this.w+'px; left:'+(UIL.AW+(this.w*i)+(5*i))+'px;');
         this.c[2+i].name = i;
        // this.c[2+i].value = this.value[i];
         this.c[2+i].textContent = this.value[i];
@@ -1359,7 +1359,8 @@ UIL.Number.prototype.keyup = function( e ){
 UIL.Number.prototype.blur = function( e ){
 
     this.isSelect = false;
-    e.target.style.border = '1px solid rgba(255,255,255,0.1)';
+    e.target.style.borderColor = UIL.Border;
+    //e.target.style.border = '1px solid rgba(255,255,255,0.1)';
     e.target.style.cursor = 'move';
 
 };
@@ -1368,7 +1369,8 @@ UIL.Number.prototype.focus = function( e ){
 
     this.isSelect = true;
     this.current = undefined;
-    e.target.style.border = '1px solid ' + UIL.BorderSelect;
+    e.target.style.borderColor = UIL.BorderSelect;
+    //e.target.style.border = '1px solid ' + UIL.BorderSelect;
     e.target.style.cursor = 'auto';
 
 };
@@ -1379,7 +1381,7 @@ UIL.Number.prototype.down = function( e ){
 
     e.preventDefault();
 
-    e.target.style.border = '1px solid rgba(255,255,255,0.2)';
+    //e.target.style.border = '1px solid rgba(255,255,255,0.2)';
     this.current = parseFloat(e.target.name);
 
     this.prev = { x:e.clientX, y:e.clientY, d:0, id:(this.current+2)};
@@ -1404,7 +1406,7 @@ UIL.Number.prototype.up = function( e ){
 
         if( this.current === parseFloat(e.target.name) ) e.target.focus();
 
-        else this.c[2+this.current].style.border = '1px solid rgba(255,255,255,0.1)';
+       // else e.target.style.borderColor = UIL.BorderSelect;;//this.c[2+this.current].style.border = '1px solid rgba(255,255,255,0.1)';
 
 
         //this.c[2+this.current].style.cursor = 'move';
@@ -1492,7 +1494,7 @@ UIL.Color = function( o ){
 
     this.oldh = this.h;
 
-    this.c[2] = UIL.DOM('UIL text', 'div',  'height:'+(this.h-4)+'px;' + 'pointer-events:auto; cursor:pointer; border:1px solid '+ UIL.Border );
+    this.c[2] = UIL.DOM('UIL text', 'div',  'height:'+(this.h-4)+'px;' + 'border-radius:6px; pointer-events:auto; cursor:pointer; border:1px solid '+ UIL.Border );
  
 
     if(this.side === 'up'){

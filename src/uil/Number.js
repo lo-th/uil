@@ -42,7 +42,7 @@ UIL.Number = function( o ){
     while(i--){
         if(this.isAngle) this.value[i] = (this.value[i] * 180 / Math.PI).toFixed( this.precision );
         //this.c[2+i] = UIL.DOM('UIL text', 'input', 'pointer-events:auto; padding:0px 5px; padding-bottom:2px; width:'+this.w+'px; left:'+(UIL.AW+(this.w*i)+(5*i))+'px;');
-        this.c[2+i] = UIL.DOM('UIL textSelect', 'div', 'pointer-events:auto; cursor:move; width:'+this.w+'px; left:'+(UIL.AW+(this.w*i)+(5*i))+'px;');
+        this.c[2+i] = UIL.DOM('UIL textSelect', 'div', 'cursor:move; width:'+this.w+'px; left:'+(UIL.AW+(this.w*i)+(5*i))+'px;');
         this.c[2+i].name = i;
        // this.c[2+i].value = this.value[i];
         this.c[2+i].textContent = this.value[i];
@@ -103,7 +103,8 @@ UIL.Number.prototype.keyup = function( e ){
 UIL.Number.prototype.blur = function( e ){
 
     this.isSelect = false;
-    e.target.style.border = '1px solid rgba(255,255,255,0.1)';
+    e.target.style.borderColor = UIL.Border;
+    //e.target.style.border = '1px solid rgba(255,255,255,0.1)';
     e.target.style.cursor = 'move';
 
 };
@@ -112,7 +113,8 @@ UIL.Number.prototype.focus = function( e ){
 
     this.isSelect = true;
     this.current = undefined;
-    e.target.style.border = '1px solid ' + UIL.BorderSelect;
+    e.target.style.borderColor = UIL.BorderSelect;
+    //e.target.style.border = '1px solid ' + UIL.BorderSelect;
     e.target.style.cursor = 'auto';
 
 };
@@ -123,7 +125,7 @@ UIL.Number.prototype.down = function( e ){
 
     e.preventDefault();
 
-    e.target.style.border = '1px solid rgba(255,255,255,0.2)';
+    //e.target.style.border = '1px solid rgba(255,255,255,0.2)';
     this.current = parseFloat(e.target.name);
 
     this.prev = { x:e.clientX, y:e.clientY, d:0, id:(this.current+2)};
@@ -148,7 +150,7 @@ UIL.Number.prototype.up = function( e ){
 
         if( this.current === parseFloat(e.target.name) ) e.target.focus();
 
-        else this.c[2+this.current].style.border = '1px solid rgba(255,255,255,0.1)';
+       // else e.target.style.borderColor = UIL.BorderSelect;;//this.c[2+this.current].style.border = '1px solid rgba(255,255,255,0.1)';
 
 
         //this.c[2+this.current].style.cursor = 'move';
