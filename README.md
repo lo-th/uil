@@ -5,7 +5,7 @@ uil.js is a lightweight ui for javascript with some svg.
 
 **1 - init engine**
 ```sh
-var ui = new UIL.Gui('top:150px; left:50%; margin-left:-150px;');
+var ui = new UIL.Gui( { css:'top:145px; left:50%;', size:300, center:true } );
 ```
 **2 - add value**
 ```sh
