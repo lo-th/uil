@@ -163,11 +163,15 @@ UIL.Gui.prototype = {
         
         if( o.isUI === undefined ) o.isUI = true;
 
-        type = type[0].toUpperCase() + type.slice(1);
-        var n = new UIL[type](o);
+        //type = type[0].toUpperCase() + type.slice(1);
+
+        //var n = new UIL[type](o);
+
+        var n = UIL.add( type, o );
+
         this.uis.push( n );
 
-        if(!n.autoWidth){
+        if( !n.autoWidth ){
             var y = n.c[0].getBoundingClientRect().top;
             if( this.prevY !== y ){
                 this.calc( n.h + 1 );

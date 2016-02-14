@@ -1,3 +1,46 @@
+// ----------------------
+//   Root function
+// ----------------------
+
+UIL.add = function( type, o ){
+
+    type = type[0].toUpperCase() + type.slice(1);
+    var n = new UIL[type](o);
+    return n;
+
+};
+
+UIL.autoType = function( v ){
+
+    /*if( v === undefined ){ // button, group, title
+
+    } else {
+
+    }*/
+
+};
+
+
+// ----------------------
+//   Color function
+// ----------------------
+UIL.bgcolor = function(p, a, bg){
+    var r=44, g=44, b=44;
+    a = a || 0.66;
+    if(p){
+        switch(p){
+            //case 'N': a = 1; break;
+            case 'r': case 'R': case 'S': r=160; b=68; break;
+            case 'g': case 'G': case 'E': g=120; b=68; break;
+            case 'b': case 'B': case 'T': b=120; g=68; break;
+            case 'no': case 'NO': a=0; break;
+        }
+    }
+    if(bg){r-=20; g-=20; b-=20;}
+    var color = 'rgba('+r+','+g+','+b+','+a+')';
+    if(a === 0) color = 'none';
+    return color;
+};
 
 UIL.ColorLuma = function ( hex, lum ) {
 
