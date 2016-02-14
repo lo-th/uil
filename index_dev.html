@@ -17,6 +17,7 @@ body { font-family: "Lucida Console", Monaco, monospace; background-color:#16161
 <script type="text/javascript" src="src/UMC.js"></script>
 
 <script type="text/javascript" src="src/uil/UIL.js"></script>
+<script type="text/javascript" src="src/uil/Tools.js"></script>
 <script type="text/javascript" src="src/uil/Gui.js"></script>
 <script type="text/javascript" src="src/uil/Proto.js"></script>
 <script type="text/javascript" src="src/uil/Bool.js"></script>
@@ -50,7 +51,7 @@ document.getElementById('version').innerHTML = 'il '+ UIL.REVISION;
 var debug = document.getElementById('debug');
 var callback = function( v ){ debug.innerHTML = v; }
 var callbackButton = function(){ debug.innerHTML = "i'm a button !!" ; }
-var callbackSize = function( v ){ timer = setTimeout( UIL.sizer( v ), 1000); }
+var callbackSize = function( v ){ ui.setWidth( v ); }
 var callbackLogo = function( v ){ document.getElementById('logoin').setAttributeNS(null, 'fill', UIL.hexToHtml(v)); document.getElementById('version').style.color = UIL.hexToHtml(v);  }
 
 
@@ -63,7 +64,8 @@ var c = new UIL.List({target:document.body, callback:null, name:' ', size:100, l
 var w = new UIL.Number({target:document.body, callback:null, name:' ', size:100, pos:{left:'290px', top:'auto', bottom:'10px' }, simple:true });
 
 // in GUI element
-var ui = new UIL.Gui('top:145px; left:50%;', 300, true, 'N');
+var ui = new UIL.Gui( { size:300, center:true, css:'top:145px; left:50%;' } );
+
 populate();
 
 function populate(){
@@ -72,6 +74,7 @@ function populate(){
         ui.add('bool',   { name:'bool', callback:callback, titleColor:'#D4B87B' });
         ui.add('color',  { name:'color', callback:callback, type:'html', value:0x000000, fontColor:'#D4B87B'});
         ui.add('color',  { name:'color', callback:callback, type:'hex', value:[0,1,1,1], height:40 });
+        ui.add('color',  { name:'color', callback:callback, type:'rgb', value:[0,1,1,1], height:40 });
         ui.add('slide',  { name:'slide', callback:callback, min:-100, max:100, value:0, precision:0, fontColor:'#D4B87B' });
         ui.add('slide',  { name:'slide', callback:callback, min:-1, max:1, value:0, step:0.01, precision:2, height:40 });
         ui.add('string', { name:'string', callback:callback, value:'welcome to uil', fontColor:'#D4B87B'});

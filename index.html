@@ -50,7 +50,7 @@ var callbackButton = function(){ debug.innerHTML = "i'm a button !!" ; }
 var callbackSize = function(v){ timer = setTimeout( UIL.sizer(v), 1000); }
 var callbackLogo = function(v){ document.getElementById('logoin').setAttributeNS(null, 'fill', UIL.hexToHtml(v)); document.getElementById('version').style.color = UIL.hexToHtml(v);  }
 
-var ui = new UIL.Gui('top:145px; left:50%;', 300, true);
+var ui = new UIL.Gui( { css:'top:145px; left:50%;', size:300, center:true } );
 
 // single UI element
 var s = new UIL.Slide({target:document.body, callback:callbackSize, name:'ui size', min:100, max:400, value:300, step:10, color:'no', size:100, pos:{left:'10px', top:'40px' }, simple:true });

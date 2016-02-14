@@ -1,25 +1,24 @@
-UIL.Gui = function(css, w, center, color){
+UIL.Gui = function( o ){
 
-    UIL.sizer( w || 245 );
+    o = o || {};
 
     this.width = UIL.WIDTH;
     this.height = 20;
     this.prevY = -1;
 
-
     UIL.main = this;
 
-    this.color = color || UIL.COLOR;
+    this.color = o.color || UIL.COLOR;
     
-    this.isCenter = center || false;
+    this.isCenter = o.center || false;
     this.lockwheel = false;
     this.isOpen = true;
 
     this.uis = [];
 
-    this.content = UIL.DOM('UIL content', 'div', css);
+    this.content = UIL.DOM('UIL content', 'div', o.css || '' );
     document.body.appendChild( this.content );
-    this.content.style.background = UIL.bgcolor( this.color, 1, true );
+    //this.content.style.background = UIL.bgcolor( this.color, 1, true );
 
     this.top = this.content.getBoundingClientRect().top;
 
@@ -38,9 +37,7 @@ UIL.Gui = function(css, w, center, color){
     this.content.appendChild(this.bottom);
     this.bottom.textContent = 'close';
     this.bottom.name = 'bottom';
-
-    this.changeWidth();
-
+    
     this.isDown = false;
     this.isScroll = false;
 
@@ -54,7 +51,8 @@ UIL.Gui = function(css, w, center, color){
     
     window.addEventListener("resize", function(e){this.resize(e)}.bind(this), false );
 
-    //this.resize();
+    this.setWidth( o.size || 245 );
+
 }
 
 UIL.Gui.prototype = {
@@ -293,7 +291,14 @@ UIL.Gui.prototype = {
 
     },
 
-    changeWidth:function() {
+    setWidth:function( size ) {
+
+        if( size ){
+            UIL.WIDTH = ~~ size;
+            var s = UIL.WIDTH / 3;
+            UIL.BW = ~~ ((s*2)-10);
+            UIL.AW = ~~ s;
+        }
 
         this.width = UIL.WIDTH;
         this.content.style.width = this.width + 'px';

@@ -41,10 +41,12 @@ UIL.Slide.prototype.mode = function( mode ){
     switch(mode){
         case 0: // base
             this.c[2].style.color = this.fontColor;
+            this.c[3].style.background = 'rgba(0,0,0,0.3)';
             this.c[4].style.background = this.fontColor;
         break;
         case 1: // over
             this.c[2].style.color = this.colorPlus;
+            this.c[3].style.background = UIL.SlideBG;
             this.c[4].style.background = this.colorPlus;
         break;
     }
@@ -94,7 +96,7 @@ UIL.Slide.prototype.down = function( e ){
 UIL.Slide.prototype.move = function( e ){
 
     if( this.isDown ){
-        var n = ((( e.clientX - this.left - 4 ) / this.w ) * this.range + this.min ) - this.old;
+        var n = ((( e.clientX - this.left - 3 ) / this.w ) * this.range + this.min ) - this.old;
         if(n >= this.step || n <= this.step){ 
             n = ~~ ( n / this.step );
             this.value = this.numValue( this.old + ( n * this.step ) );
@@ -127,7 +129,7 @@ UIL.Slide.prototype.rSize = function(){
     UIL.Proto.prototype.rSize.call( this );
 
     this.width = this.sb - 47;
-    this.w = this.width - 8;
+    this.w = this.width - 6;
 
     var tx = 47;
     if(this.isUI) tx = 57;
@@ -139,7 +141,7 @@ UIL.Slide.prototype.rSize = function(){
     this.c[2].style.top = ty + 'px';
     this.c[3].style.left = this.sa + 'px';
     this.c[3].style.width = this.width + 'px';
-    this.c[4].style.left = (this.sa + 4) + 'px';
+    this.c[4].style.left = (this.sa + 3) + 'px';
 
     this.update();
 

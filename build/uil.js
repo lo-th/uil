@@ -207,24 +207,11 @@ var UIL = ( function () {
     UIL.SELECTDOWN = '#024699';
     UIL.SVGB = 'rgba(0,0,0,0.3)';
     UIL.SVGC = 'rgba(120,120,120,0.6)';
-    UIL.Border = 'rgba(120,120,120,0.3)';
+    UIL.Border = '#4f4f4f'; //'rgba(120,120,120,0.3)';
     UIL.BorderSelect = 'rgba(3,95,207,0.6)';
     UIL.PNG = 'url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAA';
-    //UIL.GroupBG = UIL.PNG + 'OSURBVHicY2BgcGBgAAAAxgBBOTEMSwAAAABJRU5ErkJggg==)';
-    //UIL.SlideBG = UIL.PNG + 'SSURBVHicY3BgaGDgYBBgUAAABkIA+fbHMRYAAAAASUVORK5CYII=)';
     UIL.GroupBG = UIL.PNG + 'MAAAADAQMAAABs5if8AAAABlBMVEVMaXH///+a4ocPAAAAAnRSTlMAM8lDrC4AAAAOSURBVHicY2BgcGBgAAAAxgBBOTEMSwAAAABJRU5ErkJggg==)';
     UIL.SlideBG = UIL.PNG + 'UAAAAFAQMAAAC3obSmAAAABlBMVEVMaXH///+a4ocPAAAAAnRSTlMAM8lDrC4AAAASSURBVHicY3BgaGDgYBBgUAAABkIA+fbHMRYAAAAASUVORK5CYII=)';
-   
-    UIL.sizer = function(w){
-
-        this.WIDTH = ~~ w;
-        var s = this.WIDTH/3;
-        this.BW = ~~ ((s*2)-10);
-        this.AW = ~~ s;
-
-        if(this.main) this.main.changeWidth();
-
-    };
 
     UIL.classDefine = function(){
             
@@ -240,7 +227,7 @@ var UIL = ( function () {
         UIL.CC('UIL.number', UIL.TXT + 'letter-spacing:-1px; padding:2px 5px;' );
         UIL.CC('UIL.textSelect', UIL.TXT + UIL.US + 'padding:2px 5px; outline:none; -webkit-appearance:none; -moz-appearance:none; border:1px solid rgba(255,255,255,0.1);' );
 
-        UIL.CC('UIL.slidebg', 'border:1px solid '+UIL.Border+'; left:100px; top:1px; pointer-events:auto; cursor:w-resize; background-image:'+UIL.SlideBG+';' );
+        UIL.CC('UIL.slidebg', 'border:1px solid '+UIL.Border+'; left:100px; top:1px; pointer-events:auto; cursor:w-resize; background:rgba(0,0,0,0.3); ' );
 
         UIL.CC('UIL.button', 'border:1px solid '+UIL.Border+'; left:100px; top:1px; height:18px; pointer-events:auto; cursor:pointer;' );
 
@@ -255,27 +242,6 @@ var UIL = ( function () {
         UIL.CC('UIL.svgbox', 'left:100px; top:1px; width:190px; height:17px; pointer-events:auto; cursor:pointer;');
 
         UIL.DEF = true;
-    };
-
-    UIL.ColorLuma = function (hex, lum) {
-
-        // validate hex string
-        hex = String(hex).replace(/[^0-9a-f]/gi, '');
-        if (hex.length < 6) {
-            hex = hex[0]+hex[0]+hex[1]+hex[1]+hex[2]+hex[2];
-        }
-        lum = lum || 0;
-
-        // convert to decimal and change luminosity
-        var rgb = "#", c, i;
-        for (i = 0; i < 3; i++) {
-            c = parseInt(hex.substr(i*2,2), 16);
-            c = Math.round(Math.min(Math.max(0, c + (c * lum)), 255)).toString(16);
-            rgb += ("00"+c).substr(c.length);
-        }
-
-        return rgb;
-
     };
 
     UIL.bgcolor = function(p, a, bg){
@@ -315,28 +281,128 @@ var UIL = ( function () {
     }
 })(this);
 
-UIL.Gui = function(css, w, center, color){
 
-    UIL.sizer( w || 245 );
+UIL.ColorLuma = function ( hex, lum ) {
+
+    // validate hex string
+    hex = String(hex).replace(/[^0-9a-f]/gi, '');
+    if (hex.length < 6) {
+        hex = hex[0]+hex[0]+hex[1]+hex[1]+hex[2]+hex[2];
+    }
+    lum = lum || 0;
+
+    // convert to decimal and change luminosity
+    var rgb = "#", c, i;
+    for (i = 0; i < 3; i++) {
+        c = parseInt(hex.substr(i*2,2), 16);
+        c = Math.round(Math.min(Math.max(0, c + (c * lum)), 255)).toString(16);
+        rgb += ("00"+c).substr(c.length);
+    }
+
+    return rgb;
+
+};
+
+
+UIL.hexToHtml = function(v){ 
+
+    return "#" + ("000000" + v.toString(16)).substr(-6);
+    
+};
+
+UIL.htmlToHex = function(v){ 
+
+    return v.toUpperCase().replace("#", "0x");
+
+};
+
+UIL.u255 = function(color, i){
+
+    return parseInt(color.substring(i, i + 2), 16) / 255;
+
+};
+
+UIL.u16 = function( color, i ){
+
+    return parseInt(color.substring(i, i + 1), 16) / 15;
+
+};
+
+UIL.unpack = function( color ){
+
+    if (color.length == 7) return [ UIL.u255(color, 1), UIL.u255(color, 3), UIL.u255(color, 5) ];
+    else if (color.length == 4) return [ UIL.u16(color,1), UIL.u16(color,2), UIL.u16(color,3) ];
+
+};
+
+UIL.htmlRgb = function( rgb ){
+    return 'rgb(' + Math.round(rgb[0] * 255) + ','+ Math.round(rgb[1] * 255) + ','+ Math.round(rgb[2] * 255) + ')'
+}
+
+UIL.rgbToHex = function( rgb ){
+
+    return '#' + ( '000000' + ( ( rgb[0] * 255 ) << 16 ^ ( rgb[1] * 255 ) << 8 ^ ( rgb[2] * 255 ) << 0 ).toString( 16 ) ).slice( - 6 );
+
+};
+
+UIL.hueToRgb = function( p, q, t ){
+
+    if ( t < 0 ) t += 1;
+    if ( t > 1 ) t -= 1;
+    if ( t < 1 / 6 ) return p + ( q - p ) * 6 * t;
+    if ( t < 1 / 2 ) return q;
+    if ( t < 2 / 3 ) return p + ( q - p ) * 6 * ( 2 / 3 - t );
+    return p;
+
+};
+
+UIL.rgbToHsl = function(rgb){
+
+    var r = rgb[0], g = rgb[1], b = rgb[2], min = Math.min(r, g, b), max = Math.max(r, g, b), delta = max - min, h = 0, s = 0, l = (min + max) / 2;
+    if (l > 0 && l < 1) s = delta / (l < 0.5 ? (2 * l) : (2 - 2 * l));
+    if (delta > 0) {
+        if (max == r && max != g) h += (g - b) / delta;
+        if (max == g && max != b) h += (2 + (b - r) / delta);
+        if (max == b && max != r) h += (4 + (r - g) / delta);
+        h /= 6;
+    }
+    return [ h, s, l ];
+
+};
+
+UIL.hslToRgb = function( hsl ){
+
+    var p, q, h = hsl[0], s = hsl[1], l = hsl[2];
+
+    if ( s === 0 ) return [ l, l, l ];
+    else {
+        q = l <= 0.5 ? l * (s + 1) : l + s - ( l * s );
+        p = l * 2 - q;
+        return [ UIL.hueToRgb(p, q, h + 0.33333), UIL.hueToRgb(p, q, h), UIL.hueToRgb(p, q, h - 0.33333) ];
+    }
+
+};
+UIL.Gui = function( o ){
+
+    o = o || {};
 
     this.width = UIL.WIDTH;
     this.height = 20;
     this.prevY = -1;
 
-
     UIL.main = this;
 
-    this.color = color || UIL.COLOR;
+    this.color = o.color || UIL.COLOR;
     
-    this.isCenter = center || false;
+    this.isCenter = o.center || false;
     this.lockwheel = false;
     this.isOpen = true;
 
     this.uis = [];
 
-    this.content = UIL.DOM('UIL content', 'div', css);
+    this.content = UIL.DOM('UIL content', 'div', o.css || '' );
     document.body.appendChild( this.content );
-    this.content.style.background = UIL.bgcolor( this.color, 1, true );
+    //this.content.style.background = UIL.bgcolor( this.color, 1, true );
 
     this.top = this.content.getBoundingClientRect().top;
 
@@ -355,9 +421,7 @@ UIL.Gui = function(css, w, center, color){
     this.content.appendChild(this.bottom);
     this.bottom.textContent = 'close';
     this.bottom.name = 'bottom';
-
-    this.changeWidth();
-
+    
     this.isDown = false;
     this.isScroll = false;
 
@@ -371,7 +435,8 @@ UIL.Gui = function(css, w, center, color){
     
     window.addEventListener("resize", function(e){this.resize(e)}.bind(this), false );
 
-    //this.resize();
+    this.setWidth( o.size || 245 );
+
 }
 
 UIL.Gui.prototype = {
@@ -610,7 +675,14 @@ UIL.Gui.prototype = {
 
     },
 
-    changeWidth:function() {
+    setWidth:function( size ) {
+
+        if( size ){
+            UIL.WIDTH = ~~ size;
+            var s = UIL.WIDTH / 3;
+            UIL.BW = ~~ ((s*2)-10);
+            UIL.AW = ~~ s;
+        }
 
         this.width = UIL.WIDTH;
         this.content.style.width = this.width + 'px';
@@ -1446,8 +1518,8 @@ UIL.Color = function( o ){
     this.hsl = null;
     this.value = '#ffffff';
     if( o.value !== undefined ){
-        if(o.value instanceof Array) this.value = UIL.pack(o.value);
-        else if(!isNaN(o.value)) this.value = UIL.hexToHtml(o.value);
+        if(o.value instanceof Array) this.value = UIL.rgbToHex( o.value );
+        else if(!isNaN(o.value)) this.value = UIL.hexToHtml( o.value );
         else this.value = o.value;
     }
     this.bcolor = null;
@@ -1580,7 +1652,7 @@ UIL.Color.prototype.hide = function(){
 UIL.Color.prototype.update = function( up ){
     this.invert = (this.rgb[0] * 0.3 + this.rgb[1] * .59 + this.rgb[2] * .11) <= 0.6;
 
-    this.c[3].style.background = UIL.pack(UIL.HSLToRGB([this.hsl[0], 1, 0.5]));
+    this.c[3].style.background = UIL.rgbToHex( UIL.hslToRgb([this.hsl[0], 1, 0.5]) );
 
     this.drawMarkers();
     
@@ -1597,8 +1669,9 @@ UIL.Color.prototype.update = function( up ){
     if(!up) return;
 
     if( this.type === 'array' ) this.send( this.rgb );
-    if( this.type === 'hex' ) this.send( UIL.htmlToHex(this.value) );
-    if( this.type === 'html' ) this.send( );
+    if( this.type === 'rgb' ) this.send( UIL.htmlRgb( this.rgb ) );
+    if( this.type === 'hex' ) this.send( UIL.htmlToHex( this.value ) );
+    if( this.type === 'html' ) this.send();
 
 };
 
@@ -1608,7 +1681,7 @@ UIL.Color.prototype.setColor = function( color ){
     if (this.bcolor != color && unpack) {
         this.bcolor = color;
         this.rgb = unpack;
-        this.hsl = UIL.RGBtoHSL(this.rgb);
+        this.hsl = UIL.rgbToHsl( this.rgb );
         this.update();
     }
     return this;
@@ -1618,8 +1691,8 @@ UIL.Color.prototype.setColor = function( color ){
 UIL.Color.prototype.setHSL = function( hsl ){
 
     this.hsl = hsl;
-    this.rgb = UIL.HSLToRGB(hsl);
-    this.bcolor = UIL.pack(this.rgb);
+    this.rgb = UIL.hslToRgb( hsl );
+    this.bcolor = UIL.rgbToHex( this.rgb );
     this.update( true );
     return this;
 
@@ -1669,7 +1742,7 @@ UIL.Color.prototype.drawCircle = function(){
         am = (a1 + a2) * 0.5;
         tan = 1 / Math.cos((a2 - a1) * 0.5);
         xm = Math.sin(am) * tan, ym = -Math.cos(am) * tan;
-        color2 = UIL.pack(UIL.HSLToRGB([d2, 1, 0.5]));
+        color2 = UIL.rgbToHex( UIL.hslToRgb([d2, 1, 0.5]) );
         if (i > 0) {
             var grad = m.createLinearGradient(ar[0], ar[1], ar[2], ar[3]);
             grad.addColorStop(0, color1);
@@ -1718,7 +1791,6 @@ UIL.Color.prototype.rSize = function(){
     this.width = this.sb;
     this.wheelWidth = this.width*0.1;
 
-    //this.decal = 22;
     if( this.side === 'up' ) this.decal = 5;
     this.radius = (this.width - this.wheelWidth) * 0.5 - 1;
     this.square = Math.floor((this.radius - this.wheelWidth * 0.5) * 0.7) - 1;
@@ -1751,69 +1823,6 @@ UIL.Color.prototype.rSize = function(){
         if( this.isUI ) UIL.main.calc();
     }
 
-};
-
-//-----------------------------------------
-// COLOR FUNCTION
-UIL.hexToHtml = function(v){ 
-    return "#" + ("000000" + v.toString(16)).substr(-6);
-};
-
-UIL.htmlToHex = function(v){ return v.toUpperCase().replace("#", "0x"); };
-
-UIL.pack = function(rgb){
-    var r = Math.round(rgb[0] * 255);
-    var g = Math.round(rgb[1] * 255);
-    var b = Math.round(rgb[2] * 255);
-    return '#' + UIL.dec2hex(r) + UIL.dec2hex(g) + UIL.dec2hex(b);
-};
-
-UIL.u255 = function(color, i){
-    return parseInt(color.substring(i, i + 2), 16) / 255;
-};
-UIL.u16 = function(color, i){
-    return parseInt(color.substring(i, i + 1), 16) / 15;
-};
-
-UIL.unpack = function(color){
-    if (color.length == 7) return [ UIL.u255(color, 1), UIL.u255(color, 3), UIL.u255(color, 5) ];
-    else if (color.length == 4) return [ UIL.u16(color,1), UIL.u16(color,2), UIL.u16(color,3) ];
-};
-
-UIL.packDX = function(c, a){
-    return '#' + UIL.dec2hex(a) + UIL.dec2hex(c) + UIL.dec2hex(c) + UIL.dec2hex(c);
-};
-
-UIL.dec2hex = function(x){
-    return (x < 16 ? '0' : '') + x.toString(16);
-};
-
-UIL.HSLToRGB = function(hsl){
-    var m1, m2, r, g, b;
-    var h = hsl[0], s = hsl[1], l = hsl[2];
-    m2 = (l <= 0.5) ? l * (s + 1) : l + s - l * s;
-    m1 = l * 2 - m2;
-    return [ UIL.HUEtoRGB(m1, m2, h + 0.33333), UIL.HUEtoRGB(m1, m2, h), UIL.HUEtoRGB(m1, m2, h - 0.33333) ];
-};
-UIL.HUEtoRGB = function(m1, m2, h){
-     h = (h + 1) % 1;
-    if (h * 6 < 1) return m1 + (m2 - m1) * h * 6;
-    if (h * 2 < 1) return m2;
-    if (h * 3 < 2) return m1 + (m2 - m1) * (0.66666 - h) * 6;
-    return m1;
-};
-UIL.RGBtoHSL = function(rgb){
-    var r = rgb[0], g = rgb[1], b = rgb[2], min = Math.min(r, g, b), max = Math.max(r, g, b), delta = max - min, h = 0, s = 0, l = (min + max) / 2;
-    if (l > 0 && l < 1) {
-        s = delta / (l < 0.5 ? (2 * l) : (2 - 2 * l));
-    }
-    if (delta > 0) {
-        if (max == r && max != g) h += (g - b) / delta;
-        if (max == g && max != b) h += (2 + (b - r) / delta);
-        if (max == b && max != r) h += (4 + (r - g) / delta);
-        h /= 6;
-    }
-    return [h, s, l];
 };
 UIL.Slide = function( o ){
 
@@ -1858,10 +1867,12 @@ UIL.Slide.prototype.mode = function( mode ){
     switch(mode){
         case 0: // base
             this.c[2].style.color = this.fontColor;
+            this.c[3].style.background = 'rgba(0,0,0,0.3)';
             this.c[4].style.background = this.fontColor;
         break;
         case 1: // over
             this.c[2].style.color = this.colorPlus;
+            this.c[3].style.background = UIL.SlideBG;
             this.c[4].style.background = this.colorPlus;
         break;
     }
@@ -1911,7 +1922,7 @@ UIL.Slide.prototype.down = function( e ){
 UIL.Slide.prototype.move = function( e ){
 
     if( this.isDown ){
-        var n = ((( e.clientX - this.left - 4 ) / this.w ) * this.range + this.min ) - this.old;
+        var n = ((( e.clientX - this.left - 3 ) / this.w ) * this.range + this.min ) - this.old;
         if(n >= this.step || n <= this.step){ 
             n = ~~ ( n / this.step );
             this.value = this.numValue( this.old + ( n * this.step ) );
@@ -1944,7 +1955,7 @@ UIL.Slide.prototype.rSize = function(){
     UIL.Proto.prototype.rSize.call( this );
 
     this.width = this.sb - 47;
-    this.w = this.width - 8;
+    this.w = this.width - 6;
 
     var tx = 47;
     if(this.isUI) tx = 57;
@@ -1956,7 +1967,7 @@ UIL.Slide.prototype.rSize = function(){
     this.c[2].style.top = ty + 'px';
     this.c[3].style.left = this.sa + 'px';
     this.c[3].style.width = this.width + 'px';
-    this.c[4].style.left = (this.sa + 4) + 'px';
+    this.c[4].style.left = (this.sa + 3) + 'px';
 
     this.update();
 
