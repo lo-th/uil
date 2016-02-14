@@ -38,8 +38,10 @@ UIL.Proto = function( o ){
     this.txt = o.name || 'Proto';
     this.target = o.target || null;
 
-    this.callback = o.callback  === undefined ? null : o.callback;
+    this.callback = o.callback === undefined ? null : o.callback;
     this.endCallback = null;
+
+    if( this.callback === null && this.isUI && UIL.main.callback !== null ) this.callback = UIL.main.callback;
 
     // elements
 

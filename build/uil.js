@@ -419,6 +419,8 @@ UIL.Gui = function( o ){
 
     UIL.main = this;
 
+    this.callback = o.callback  === undefined ? null : o.callback;
+
     this.color = o.color || UIL.COLOR;
     
     this.isCenter = o.center || false;
@@ -468,6 +470,13 @@ UIL.Gui = function( o ){
 
 UIL.Gui.prototype = {
     constructor: UIL.Gui,
+
+    onChange : function( f ){
+
+        this.callback = f;
+        return this;
+
+    },
 
     handleEvent : function( e ) {
 
@@ -803,6 +812,8 @@ UIL.Proto = function( o ){
 
     this.callback = o.callback  === undefined ? null : o.callback;
     this.endCallback = null;
+
+    if(this.callback === null && this.isUI && UIL.main.callback !== null ) this.callback = UIL.main.callback;
 
     // elements
 
