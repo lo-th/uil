@@ -20,8 +20,7 @@ UIL.Knob = function( o ){
         this.radius = ~~ (this.size-20)*0.5;
     }
 
-    this.w = this.radius*2;
-    this.height = this.radius*2;
+    this.w = this.height = this.radius * 2;
     this.h = o.height || (this.height + 40);
     this.top = 0;
 
@@ -37,7 +36,7 @@ UIL.Knob = function( o ){
 
     this.percent = 0;
 
-    this.c[2] = UIL.DOM('UIL text', 'div', 'text-align:center; top:'+(this.height+20)+'px; width:'+this.size+'px; color:'+ this.fontColor );
+    this.c[2] = UIL.DOM('UIL number', 'div', 'text-align:center; top:'+(this.height+24)+'px; width:'+this.size+'px; color:'+ this.fontColor );
 
     this.c[3] = UIL.DOM('UIL svgbox', 'circle', 'left:10px; top:'+this.top+'px; width:'+this.w+'px; height:'+this.height+'px; cursor:pointer;', { cx:this.radius, cy:this.radius, r:this.radius-4, fill:'rgba(0,0,0,0.3)' });
     this.c[4] = UIL.DOM('UIL svgbox', 'circle', 'left:10px; top:'+this.top+'px; width:'+this.w+'px; height:'+this.height+'px; pointer-events:none;', { cx:this.radius, cy:this.radius*0.5, r:3, fill:this.fontColor });

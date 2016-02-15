@@ -1046,7 +1046,7 @@ UIL.Group = function( o ){
 
     this.c[2] = UIL.DOM('UIL inner', 'div', 'top:'+this.h+'px');
     this.c[3] = UIL.DOM('UIL', 'div', 'top:2px; left:2px; height:'+(this.h-4)+'px; width:6px; background-image:'+ UIL.GroupBG );
-    this.c[4] = UIL.DOM('UIL', 'path','position:absolute; width:16px; left:'+(this.sa+this.sb-17)+'px; top:'+((this.h*0.5)-8)+'px; pointer-events:none;',{ width:16, height:16, 'd':'M 6 4 L 10 8 6 12', 'stroke-width':2, stroke:this.fontColor, fill:'none', 'stroke-linecap':'butt' } );
+    this.c[4] = UIL.DOM('UIL', 'path','position:absolute; width:16px; top:'+((this.h*0.5)-8)+'px; pointer-events:none;',{ width:16, height:16, 'd':'M 6 4 L 10 8 6 12', 'stroke-width':2, stroke:this.fontColor, fill:'none', 'stroke-linecap':'butt' } );
 
     this.c[0].style.height = this.h + 'px';
     this.c[1].style.height = this.h + 'px';
@@ -1167,7 +1167,6 @@ UIL.Group.prototype.rSize = function(){
     this.c[4].style.left = ( this.sa + this.sb - 17 ) + 'px';
     this.c[1].style.width = this.size + 'px';
     this.c[2].style.width = this.size + 'px';
-    //this.c[3].style.width = (this.size - 4) + 'px';
 
     if(this.isOpen) this.rSizeContent();
 
@@ -1350,7 +1349,7 @@ UIL.Number = function( o ){
     while(i--){
         if(this.isAngle) this.value[i] = (this.value[i] * 180 / Math.PI).toFixed( this.precision );
         //this.c[2+i] = UIL.DOM('UIL text', 'input', 'pointer-events:auto; padding:0px 5px; padding-bottom:2px; width:'+this.w+'px; left:'+(UIL.AW+(this.w*i)+(5*i))+'px;');
-        this.c[2+i] = UIL.DOM('UIL textSelect', 'div', 'cursor:move; width:'+this.w+'px; left:'+(UIL.AW+(this.w*i)+(5*i))+'px; height:'+(this.h-4)+'px; line-height:'+(this.h-8)+'px;');
+        this.c[2+i] = UIL.DOM('UIL textSelect', 'div', 'letter-spacing:-1px; cursor:move; width:'+this.w+'px; left:'+(UIL.AW+(this.w*i)+(5*i))+'px; height:'+(this.h-4)+'px; line-height:'+(this.h-8)+'px;');
         this.c[2+i].name = i;
        // this.c[2+i].value = this.value[i];
         this.c[2+i].textContent = this.value[i];
@@ -2337,10 +2336,16 @@ UIL.Bool = function( o ){
 
     var t = ~~ (this.h*0.5)-8;
 
-    this.c[2] = UIL.DOM('UIL button', 'div', 'background:'+UIL.SVGB+'; height:18px; width:18px; top:'+t+'px;' );
-    this.c[3] = UIL.DOM('UIL svgbox', 'path','width:17px; pointer-events:none; top:'+(t+1)+'px;',{ width:17, height:17, d:'M 4 9 L 6 12 14 4', 'stroke-width':2, stroke:this.fontColor, fill:'none', 'stroke-linecap':'butt' });
+    this.c[2] = UIL.DOM('UIL button', 'div', 'background:'+UIL.Border+'; height:18px; width:36px; top:'+t+'px; border-radius:8px; ' );
+    
+    this.c[3] = UIL.DOM('UIL svgbox', 'path','width:17px; pointer-events:none; top:'+(t+1)+'px;',{ width:17, height:17, d:'M 4 9 L 6 12 14 4', 'stroke-width':2, stroke:'#000', fill:'none', 'stroke-linecap':'butt' });
+    this.c[4] = UIL.DOM('UIL', 'div', 'height:16px; width:16px; top:'+(t+1)+'px; border-radius:8px; background:'+UIL.bgcolor(UIL.COLOR,1)+'; transition:margin 0.1s ease-out;' );
 
-    if(!this.value) this.c[3].style.display = 'none';
+    if(this.value){
+        this.c[4].style.marginLeft = '18px';
+        this.c[2].style.background = this.fontColor;
+        this.c[2].style.borderColor = this.fontColor;
+    }
 
     this.c[2].events = [ 'click' ];
 
@@ -2365,12 +2370,14 @@ UIL.Bool.prototype.click = function( e ){
 
     if(this.value){
         this.value = false;
-        this.c[3].style.display = 'none';
-        this.c[2].style.background = 'rgba(0,0,0,0.2)';
+        this.c[4].style.marginLeft = '0px';
+        this.c[2].style.background = UIL.Border;
+        this.c[2].style.borderColor = UIL.Border;
     } else {
         this.value = true;
-        this.c[3].style.display = 'block';
-        this.c[2].style.background = 'rgba(0,0,0,0.4)';
+        this.c[4].style.marginLeft = '18px';
+        this.c[2].style.background = this.fontColor;
+        this.c[2].style.borderColor = this.fontColor;
     }
 
     this.send();
@@ -2383,7 +2390,8 @@ UIL.Bool.prototype.rSize = function(){
 
     UIL.Proto.prototype.rSize.call( this );
     this.c[2].style.left = this.sa + 'px';
-    this.c[3].style.left = this.sa + 'px';
+    this.c[3].style.left = this.sa+1 + 'px';
+    this.c[4].style.left = this.sa+1 + 'px';
 
 };
 UIL.Button = function( o ){
@@ -2494,8 +2502,7 @@ UIL.Circular = function( o ){
         this.radius = ~~ (this.size-20)*0.5;
     }
 
-    this.w = this.radius*2;
-    this.height = this.radius*2;
+    this.w = this.height = this.radius * 2;
     this.h = o.height || (this.height + 40);
 
     this.twoPi = Math.PI * 2;
@@ -2514,7 +2521,7 @@ UIL.Circular = function( o ){
 
     this.percent = 0;
 
-    this.c[2] = UIL.DOM('UIL text', 'div', 'text-align:center; top:'+(this.height+20)+'px; width:'+this.size+'px; color:'+ this.fontColor );
+    this.c[2] = UIL.DOM('UIL number', 'div', 'text-align:center; top:'+(this.height+24)+'px; width:'+this.size+'px; color:'+ this.fontColor );
 
     this.c[3] = UIL.DOM('UIL svgbox', 'circle', 'left:10px; top:'+this.top+'px; width:'+this.w+'px; height:'+this.height+'px; cursor:pointer;', { cx:this.radius, cy:this.radius, r:this.radius, fill:'rgba(0,0,0,0.3)' });
     this.c[4] = UIL.DOM('UIL svgbox', 'path', 'left:10px; top:'+this.top+'px; width:'+this.w+'px; height:'+this.height+'px; pointer-events:none;', { d:this.makePath(), fill:this.fontColor });
@@ -2689,8 +2696,7 @@ UIL.Knob = function( o ){
         this.radius = ~~ (this.size-20)*0.5;
     }
 
-    this.w = this.radius*2;
-    this.height = this.radius*2;
+    this.w = this.height = this.radius * 2;
     this.h = o.height || (this.height + 40);
     this.top = 0;
 
@@ -2706,7 +2712,7 @@ UIL.Knob = function( o ){
 
     this.percent = 0;
 
-    this.c[2] = UIL.DOM('UIL text', 'div', 'text-align:center; top:'+(this.height+20)+'px; width:'+this.size+'px; color:'+ this.fontColor );
+    this.c[2] = UIL.DOM('UIL number', 'div', 'text-align:center; top:'+(this.height+24)+'px; width:'+this.size+'px; color:'+ this.fontColor );
 
     this.c[3] = UIL.DOM('UIL svgbox', 'circle', 'left:10px; top:'+this.top+'px; width:'+this.w+'px; height:'+this.height+'px; cursor:pointer;', { cx:this.radius, cy:this.radius, r:this.radius-4, fill:'rgba(0,0,0,0.3)' });
     this.c[4] = UIL.DOM('UIL svgbox', 'circle', 'left:10px; top:'+this.top+'px; width:'+this.w+'px; height:'+this.height+'px; pointer-events:none;', { cx:this.radius, cy:this.radius*0.5, r:3, fill:this.fontColor });

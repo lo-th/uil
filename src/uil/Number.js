@@ -42,7 +42,7 @@ UIL.Number = function( o ){
     while(i--){
         if(this.isAngle) this.value[i] = (this.value[i] * 180 / Math.PI).toFixed( this.precision );
         //this.c[2+i] = UIL.DOM('UIL text', 'input', 'pointer-events:auto; padding:0px 5px; padding-bottom:2px; width:'+this.w+'px; left:'+(UIL.AW+(this.w*i)+(5*i))+'px;');
-        this.c[2+i] = UIL.DOM('UIL textSelect', 'div', 'cursor:move; width:'+this.w+'px; left:'+(UIL.AW+(this.w*i)+(5*i))+'px; height:'+(this.h-4)+'px; line-height:'+(this.h-8)+'px;');
+        this.c[2+i] = UIL.DOM('UIL textSelect', 'div', 'letter-spacing:-1px; cursor:move; width:'+this.w+'px; left:'+(UIL.AW+(this.w*i)+(5*i))+'px; height:'+(this.h-4)+'px; line-height:'+(this.h-8)+'px;');
         this.c[2+i].name = i;
        // this.c[2+i].value = this.value[i];
         this.c[2+i].textContent = this.value[i];

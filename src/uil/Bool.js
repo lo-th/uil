@@ -6,10 +6,16 @@ UIL.Bool = function( o ){
 
     var t = ~~ (this.h*0.5)-8;
 
-    this.c[2] = UIL.DOM('UIL button', 'div', 'background:'+UIL.SVGB+'; height:18px; width:18px; top:'+t+'px;' );
-    this.c[3] = UIL.DOM('UIL svgbox', 'path','width:17px; pointer-events:none; top:'+(t+1)+'px;',{ width:17, height:17, d:'M 4 9 L 6 12 14 4', 'stroke-width':2, stroke:this.fontColor, fill:'none', 'stroke-linecap':'butt' });
+    this.c[2] = UIL.DOM('UIL button', 'div', 'background:'+UIL.Border+'; height:18px; width:36px; top:'+t+'px; border-radius:8px; ' );
+    
+    this.c[3] = UIL.DOM('UIL svgbox', 'path','width:17px; pointer-events:none; top:'+(t+1)+'px;',{ width:17, height:17, d:'M 4 9 L 6 12 14 4', 'stroke-width':2, stroke:'#000', fill:'none', 'stroke-linecap':'butt' });
+    this.c[4] = UIL.DOM('UIL', 'div', 'height:16px; width:16px; top:'+(t+1)+'px; border-radius:8px; background:'+UIL.bgcolor(UIL.COLOR,1)+'; transition:margin 0.1s ease-out;' );
 
-    if(!this.value) this.c[3].style.display = 'none';
+    if(this.value){
+        this.c[4].style.marginLeft = '18px';
+        this.c[2].style.background = this.fontColor;
+        this.c[2].style.borderColor = this.fontColor;
+    }
 
     this.c[2].events = [ 'click' ];
 
@@ -34,12 +40,14 @@ UIL.Bool.prototype.click = function( e ){
 
     if(this.value){
         this.value = false;
-        this.c[3].style.display = 'none';
-        this.c[2].style.background = 'rgba(0,0,0,0.2)';
+        this.c[4].style.marginLeft = '0px';
+        this.c[2].style.background = UIL.Border;
+        this.c[2].style.borderColor = UIL.Border;
     } else {
         this.value = true;
-        this.c[3].style.display = 'block';
-        this.c[2].style.background = 'rgba(0,0,0,0.4)';
+        this.c[4].style.marginLeft = '18px';
+        this.c[2].style.background = this.fontColor;
+        this.c[2].style.borderColor = this.fontColor;
     }
 
     this.send();
@@ -52,6 +60,7 @@ UIL.Bool.prototype.rSize = function(){
 
     UIL.Proto.prototype.rSize.call( this );
     this.c[2].style.left = this.sa + 'px';
-    this.c[3].style.left = this.sa + 'px';
+    this.c[3].style.left = this.sa+1 + 'px';
+    this.c[4].style.left = this.sa+1 + 'px';
 
 };
