@@ -22,7 +22,9 @@ UIL.Proto = function( o ){
     // define obj size
     this.setSize( o.size );
 
-    this.h = o.height || 20;
+    var h = 20;
+    if( this.isUI ) h = UIL.main.height;
+    this.h = o.height || h;
     this.h = this.h < 11 ? 11 : this.h;
     
     this.bgcolor = UIL.COLOR || o.bgcolor;
@@ -49,7 +51,7 @@ UIL.Proto = function( o ){
 
     this.c[0] = UIL.DOM('UIL base');
 
-    if(this.isUI) this.c[0].style.marginBottom = '1px';
+    if( this.isUI ) this.c[0].style.marginBottom = '1px';
     
 
     if(!this.simple){ 
@@ -111,6 +113,10 @@ UIL.Proto.prototype = {
 
         if( this.isUI ) this.c[0].style.background = UIL.bgcolor(this.bgcolor);
         if( this.autoHeight ) this.c[0].style.transition = 'height 0.1s ease-out';
+        if( this.c[1] !== undefined && this.autoWidth ){
+            this.c[1].style.height = (this.h-4) + 'px';
+            this.c[1].style.lineHeight = (this.h-8) + 'px';
+        }
 
         for( var i = 0; i < this.c.length; i++ ){
             if( i === 0 ){

@@ -4,12 +4,12 @@ UIL.Title = function( o ){
 
     //this.type = 'title';
 
-    this.h = o.height || 31;
+    //this.h = o.height || 31;
 
     var id = o.id || 0;
     var prefix = o.prefix || '';
 
-    this.c[2] = UIL.DOM( 'UIL text', 'div', 'text-align:right; width:40px;');
+    this.c[2] = UIL.DOM( 'UIL text', 'div', 'text-align:right; width:40px; line-height:'+ (this.h-8) + 'px');
     this.c[2].style.color = this.fontColor;
 
     if( this.h === 31 ){

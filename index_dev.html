@@ -70,23 +70,23 @@ populate();
 
 function populate(){
     if(!display){
-        ui.add('title',  { name:'Title', titleColor:'#D4B87B'});
-        ui.add('bool',   { name:'bool', titleColor:'#D4B87B' });
+        ui.add('title',  { name:'Title', titleColor:'#D4B87B', height:30});
+        ui.add('bool',   { name:'bool', titleColor:'#D4B87B', height:30 });
         ui.add('color',  { name:'color', type:'html', value:0x000000, fontColor:'#D4B87B'});
         ui.add('color',  { name:'color', type:'hex', value:[0,1,1,1], height:40 });
         ui.add('color',  { name:'color', type:'rgb', value:[0,1,1,1], height:40 });
         ui.add('slide',  { name:'slide',  min:-100, max:100, value:0, precision:0, fontColor:'#D4B87B' });
         ui.add('slide',  { name:'slide',  min:-1, max:1, value:0, step:0.01, precision:2, height:40 });
-        ui.add('string', { name:'string',  value:'welcome to uil', fontColor:'#D4B87B'});
-        ui.add('list',   { name:'list',  list:list, fontColor:'#D4B87B'});
-        ui.add('list',   { name:'list',  list:list2});
+        ui.add('string', { name:'string',  value:'welcome to uil', fontColor:'#D4B87B', height:40});
+        ui.add('list',   { name:'list',  list:list, fontColor:'#D4B87B', height:30});
+        ui.add('list',   { name:'list',  list:list2, height:40});
         ui.add('number', { name:'number',  value:20});
         ui.add('number', { name:'vector2', value:[0,0], fontColor:'#D4B87B' });
         ui.add('number', { name:'vector3', value:[0,0,0] });
-        ui.add('number', { name:'vector4', value:[0,0,0,0], step:1, precision:0 });
-        ui.add('button', { name:'button', callback:callbackButton, fontColor:'#D4B87B' });
+        ui.add('number', { name:'vector4', value:[0,0,0,0], step:1, precision:0, height:30 });
+        ui.add('button', { name:'button', callback:callbackButton, fontColor:'#D4B87B', height:30 });
 
-        gr0 = ui.add('group', { name:'Group', fontColor:'#D4B87B' });
+        gr0 = ui.add('group', { name:'Group', fontColor:'#D4B87B', height:30 });
         gr0.add('slide',  { name:'slide', min:-100, max:100, value:0, precision:0 });
         gr0.add('slide',  { name:'slide', min:-100, max:100, value:0, precision:0 });
         gr0.add('slide',  { name:'slide', min:-100, max:100, value:0, precision:0 });

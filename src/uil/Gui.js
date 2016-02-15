@@ -2,8 +2,10 @@ UIL.Gui = function( o ){
 
     o = o || {};
 
+    this.height = o.height || 20;
+
     this.width = UIL.WIDTH;
-    this.height = 20;
+    this.h = this.height;
     this.prevY = -1;
 
     UIL.main = this;
@@ -35,7 +37,7 @@ UIL.Gui = function( o ){
     this.scroll = UIL.DOM('UIL scroll');
     this.scrollBG.appendChild( this.scroll );
 
-    this.bottom = UIL.DOM('UIL bottom');
+    this.bottom = UIL.DOM('UIL bottom', 'div', 'height:'+ this.height+'px; line-height:'+(this.height-5)+'px;');
     this.content.appendChild(this.bottom);
     this.bottom.textContent = 'close';
     this.bottom.name = 'bottom';
@@ -231,8 +233,8 @@ UIL.Gui.prototype = {
         y = y < 0 ? 0 :y;
         y = y > this.range ? this.range : y;
 
-        this.inner.style.top = -( y / this.ratio ) + 'px';
-        this.scroll.style.top = y + 'px';
+        this.inner.style.top = -( ~~(y / this.ratio) ) + 'px';
+        this.scroll.style.top = ( ~~ y ) + 'px';
 
         this.py = y;
 
@@ -242,8 +244,8 @@ UIL.Gui.prototype = {
 
         this.isScroll = true;
 
-        this.total = this.height;//-20;
-        this.maxView = this.maxHeight-20;
+        this.total = this.h;
+        this.maxView = this.maxHeight-this.height;
 
         this.ratio = this.maxView / this.total;
         this.sh = this.maxView * this.ratio;
@@ -278,8 +280,8 @@ UIL.Gui.prototype = {
 
     calc:function( y ) {
 
-        if( y !== undefined ) this.height += y;
-        else this.height = this.inner.offsetHeight;
+        if( y !== undefined ) this.h += y;
+        else this.h = this.inner.offsetHeight;
         
         clearTimeout(this.tmp);
         this.tmp = setTimeout( this.testHeight.bind(this), 10);
@@ -292,13 +294,13 @@ UIL.Gui.prototype = {
 
         this.maxHeight = window.innerHeight - this.top;
 
-        if( this.height > this.maxHeight ){
+        if( this.h > this.maxHeight ){
             this.content.style.height = this.maxHeight + 'px';
             this.bottom.style.background = UIL.bgcolor( this.color, 1 );
             this.showScroll();
         }else{
             this.bottom.style.background = UIL.bgcolor( this.color );
-            this.content.style.height = (this.height + 20) +'px';
+            this.content.style.height = (this.h + this.height) +'px';
             this.hideScroll();
         }
 
@@ -344,7 +346,7 @@ UIL.Gui.prototype = {
             this.testHeight();
             this.bottom.textContent = 'close';
         }else{
-            this.content.style.height = '20px';
+            this.content.style.height = this.height + 'px';
             this.tmp = setTimeout( this.endHide.bind(this), 100 );
         }
         

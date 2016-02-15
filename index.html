@@ -5,7 +5,6 @@
 <title>Uil</title>
 <link rel="shortcut icon" href="favicon.ico">
 <style>
-*{ margin: 0; padding: 0; border: 0; -o-user-select:none; -ms-user-select:none; -khtml-user-select:none; -webkit-user-select:none; -moz-user-select:none; } 
 html{ overflow:hidden; width:100%; height:100%; }
 body { font-family:"Lucida Console", Monaco, monospace; background-color:#111; background-image:url(images/orion.png); font-size:12px; color:#fff;}
 #bg{
@@ -17,9 +16,9 @@ body { font-family:"Lucida Console", Monaco, monospace; background-color:#111; b
     background-size: cover;
 }
 
-#version { position:absolute; top:98px; left:50%; width:90px; height:10px; pointer-events:none; text-align:right;  font-size:16px;}
+#version { position:absolute; top:60px; left:50%; width:100px; height:10px; margin-left:23px; pointer-events:none; font-size:12px;}
 #debug { position:absolute; top:10px; left:10px; width:300px; pointer-events:none;}
-#logo{position:absolute; left:50%; margin-left:-128px;  margin-top:-60px; transform: scale(0.5,0.5);}
+#logo{position:absolute; left:50%; margin-left:-128px;  margin-top:-90px; transform: scale(0.33,0.33);}
 </style>
 <script type="text/javascript" src="build/uil.min.js"></script>
 </head>
@@ -56,7 +55,7 @@ var b = UIL.add('button', {target:document.body, callback:populate, name:'popula
 var c = UIL.add('color', {target:document.body, callback:callbackLogo, name:' ', color:'no', size:100, pos:{left:'10px', top:'auto', bottom:'10px' }, simple:true, side:'up', type:'html' });
 
 // init gui and define global callback
-var ui = new UIL.Gui( { css:'top:145px; left:50%;', size:300, center:true } ).onChange( callback );
+var ui = new UIL.Gui( { css:'top:98px; left:50%;', size:300, center:true, height:27 } ).onChange( callback );
 
 populate();
 
@@ -65,25 +64,25 @@ function populate(){
         ui.add('title',  { name:'Title', color:'N'});
         ui.add('bool',   { name:'bool' });
         ui.add('color',  { name:'color', type:'html', value:0xffffff});
-        ui.add('color',  { name:'color', type:'html', value:[0,1,1,1]});
+        ui.add('color',  { name:'color', type:'html', value:[0,1,1,1], height:20});
         ui.add('slide',  { name:'slide', min:-100, max:100, value:0, precision:0 });
-        ui.add('slide',  { name:'slide', min:-1, max:1, value:0, step:0.01, precision:2, height:30 });
+        ui.add('slide',  { name:'slide', min:-1, max:1, value:0, step:0.01, precision:2, height:20 });
         ui.add('string', { name:'string', value:'welcome to uil'});
         ui.add('list',   { name:'list', list:list});
-        ui.add('list',   { name:'list', list:list2});
+        ui.add('list',   { name:'list', list:list2, height:20, itemHeight:40 });
         ui.add('number', { name:'number', value:20});
         ui.add('number', { name:'vector2', value:[0,0] });
         ui.add('number', { name:'vector3', value:[0,0,0] });
-        ui.add('number', { name:'vector4', value:[0,0,0,0], step:1, precision:0 });
+        ui.add('number', { name:'vector4', value:[0,0,0,0], step:1, precision:0, height:36 });
         ui.add('button', { name:'button', callback:callbackButton });
 
-        gr0 = ui.add('group', { name:'Group' });
+        gr0 = ui.add('group', { name:'Group', height:36 });
 
-        gr0.add('slide',  { name:'slide', min:-100, max:100, value:0, precision:0, fontColor:'#B0CC99' });
-        gr0.add('slide',  { name:'slide', min:-100, max:100, value:0, precision:0, fontColor:'#F6E497' });
-        gr0.add('slide',  { name:'slide', min:-100, max:100, value:0, precision:0, fontColor:'#C79F4B'});
-        gr0.add('slide',  { name:'slide', min:-100, max:100, value:0, precision:0, fontColor:'#FF5B2B' });
-        gr0.add('slide',  { name:'slide', min:-100, max:100, value:0, precision:0, fontColor:'#E70739' });
+        gr0.add('slide',  { name:'slide', min:-100, max:100, value:0, precision:0, fontColor:'#B0CC99', height:20 });
+        gr0.add('slide',  { name:'slide', min:-100, max:100, value:0, precision:0, fontColor:'#F6E497', height:20  });
+        gr0.add('slide',  { name:'slide', min:-100, max:100, value:0, precision:0, fontColor:'#C79F4B', height:20  });
+        gr0.add('slide',  { name:'slide', min:-100, max:100, value:0, precision:0, fontColor:'#FF5B2B', height:20  });
+        gr0.add('slide',  { name:'slide', min:-100, max:100, value:0, precision:0, fontColor:'#E70739', height:20  });
 
         gr1 = ui.add('group', { name:'circulars', fontColor:'#D4B87B' });
 

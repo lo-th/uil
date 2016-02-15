@@ -136,7 +136,7 @@ UIL.Slide.prototype.rSize = function(){
 
     var ty = ~~(this.h * 0.5) - 8;
 
-    if(this.c[1]!==undefined) this.c[1].style.top = ty + 'px';
+    //if(this.c[1]!==undefined) this.c[1].style.top = ty + 'px';
     this.c[2].style.left = this.size - tx + 'px';
     this.c[2].style.top = ty + 'px';
     this.c[3].style.left = this.sa + 'px';
