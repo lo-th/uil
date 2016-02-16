@@ -13,6 +13,9 @@ UIL.Proto = function( o ){
     // if is on ui pannel
     this.isUI = o.isUI || false;
 
+    // only for number
+    this.isNumber = false;
+
     // only most simple 
     this.mono = false;
 
@@ -73,6 +76,25 @@ UIL.Proto = function( o ){
 UIL.Proto.prototype = {
 
     constructor: UIL.Proto,
+
+    listen : function( ){
+
+        UIL.listens.push( this );
+        return this;
+
+    },
+
+    listening : function( v ){
+
+        if( this.isNumber ) this.value = this.numValue( v );
+        else this.value = v;
+        this.update();
+
+    },
+
+    update: function( ) {
+        
+    },
 
     // update every change
 
@@ -188,6 +210,8 @@ UIL.Proto.prototype = {
 
     setTypeNumber:function( o ){
 
+        this.isNumber = true;
+
         this.value = 0;
         if(o.value !== undefined){
             if( typeof o.value === 'string' ) this.value = o.value * 1;
@@ -211,6 +235,8 @@ UIL.Proto.prototype = {
         this.step = o.step === undefined ?  s : o.step;
 
         this.range = this.max - this.min;
+
+        this.value = this.numValue( this.value );
         
     },
 

@@ -87,21 +87,25 @@ UIL.Knob.prototype.move = function( e ){
 
 UIL.Knob.prototype.makeGrad = function(){
 
-    var d = '';
-    var startangle = Math.PI+this.mPI;
-    var endangle = Math.PI-this.mPI;
-    var step = (startangle-endangle)/this.radius;
-    var r = this.radius;
+    var d = '', step, range, a, x, y, x2, y2, r = this.radius;
+    var startangle = Math.PI + this.mPI;
+    var endangle = Math.PI - this.mPI;
 
-    var a, x, y, x2, y2;
+    if(this.step>5){
+        range =  this.range / this.step;
+        step = ( startangle - endangle ) / range;
+    } else {
+        step = ( startangle - endangle ) / r;
+        range = r;
+    }
 
-    for ( var i = 0; i <= this.radius; ++i ) {
+    for ( var i = 0; i <= range; ++i ) {
 
-        a = startangle-(step*i);
-        x = r + Math.sin(a)*r;
-        y = r + Math.cos(a)*r;
-        x2 = r + Math.sin(a)*(r-3);
-        y2 = r + Math.cos(a)*(r-3);
+        a = startangle - ( step * i );
+        x = r + Math.sin( a ) * r;
+        y = r + Math.cos( a ) * r;
+        x2 = r + Math.sin( a ) * ( r - 3 );
+        y2 = r + Math.cos( a ) * ( r - 3 );
         d += 'M' + x + ' ' + y + ' L' + x2 + ' '+y2 + ' ';
 
     }
@@ -115,9 +119,9 @@ UIL.Knob.prototype.update = function( up ){
     this.c[2].textContent = this.value;
     this.percent = (this.value - this.min) / this.range;
 
-    this.rr = ( (this.percent*this.cirRange) - (this.mPI)) * this.toDeg;
+    var r = ( (this.percent * this.cirRange) - (this.mPI)) * this.toDeg;
 
-    UIL.setSvg( this.c[4], 'transform', 'rotate('+this.rr+' '+this.radius+' '+this.radius+')' );
+    UIL.setSvg( this.c[4], 'transform', 'rotate('+ r +' '+this.radius+' '+this.radius+')' );
 
     if( up ) this.send();
     

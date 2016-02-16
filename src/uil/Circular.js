@@ -80,10 +80,6 @@ UIL.Circular.prototype.mode = function( mode ){
             UIL.setSvg( this.c[3], 'fill','rgba(0,0,0,0.6)');
             UIL.setSvg( this.c[4], 'fill', this.colorPlus );
         break;
-        /*case 2: // edit
-            UIL.setSvg( this.c[3], 'fill','rgba(0,0,0,0.2)');
-            UIL.setSvg( this.c[4], 'fill', UIL.MOVING );
-        break;*/
 
     }
 }
@@ -126,7 +122,6 @@ UIL.Circular.prototype.down = function( e ){
     this.old = this.value;
     this.oldr = null;
     this.move( e );
-    //this.mode(2);
 
 };
 
@@ -145,8 +140,8 @@ UIL.Circular.prototype.move = function( e ){
         var dif = this.r - this.oldr;
         this.r = Math.abs(dif) > Math.PI ? this.oldr : this.r;
 
-        if(dif>6) this.r = 0;
-        if(dif<-6) this.r = this.twoPi;
+        if(dif > 6) this.r = 0;
+        if(dif < -6) this.r = this.twoPi;
 
     }
 
@@ -168,22 +163,22 @@ UIL.Circular.prototype.move = function( e ){
 UIL.Circular.prototype.makePath = function(){
 
     var r = this.radius;
-    var unit = this.twoPi;  
-    var start = 0;
-    var end = this.percent * unit - 0.001;
-    var x1 = r + r * Math.sin(start);
-    var y1 = r - r * Math.cos(start);
+    //var start = 0;
+    var end = this.percent * this.twoPi - 0.001;
+    //var x1 = r + r * Math.sin(start);
+    //var y1 = r - r * Math.cos(start);
     var x2 = r + r * Math.sin(end);
     var y2 = r - r * Math.cos(end);
-    var big = end - start > Math.PI ? 1 : 0;
-    return "M " + r + "," + r + " L " + x1 + "," + y1 + " A " + r + "," + r + " 0 " + big + " 1 " + x2 + "," + y2 + " Z";
+    //var big = end - start > Math.PI ? 1 : 0;
+    var big = end > Math.PI ? 1 : 0;
+    return "M " + r + "," + r + " L " + r + "," + 0 + " A " + r + "," + r + " 0 " + big + " 1 " + x2 + "," + y2 + " Z";
 
 };
 
 UIL.Circular.prototype.update = function( up ){
 
     this.c[2].textContent = this.value;
-    this.percent = (this.value - this.min) / this.range;
+    this.percent = ( this.value - this.min ) / this.range;
     UIL.setSvg( this.c[4], 'd', this.makePath() );
     if( up ) this.send();
     

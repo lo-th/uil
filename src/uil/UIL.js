@@ -33,6 +33,7 @@ var UIL = ( function () {
     //UIL.clone = UMC.clone;
     UIL.clear = UMC.clear;
 
+    UIL.listens = [];
 
     UIL.COLOR = 'N';
     UIL.BASECOLOR = '#C0C0C0';

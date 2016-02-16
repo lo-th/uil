@@ -4,7 +4,7 @@ UIL.Slide = function( o ){
 
     this.setTypeNumber( o );
 
-    this.old = this.value;
+    //this.old = this.value;
     this.isDown = false;
     this.isOver = false;
 
@@ -107,19 +107,11 @@ UIL.Slide.prototype.move = function( e ){
 
 };
 
-UIL.Slide.prototype.listen = function( v ){
-
-    this.value = v;
-    this.update();
-
-};
-
 UIL.Slide.prototype.update = function( up ){
 
     var ww = this.w * (( this.value - this.min ) / this.range );
     this.c[4].style.width = ww + 'px';
     this.c[2].textContent = this.value;
-
     if( up ) this.send();
 
 };

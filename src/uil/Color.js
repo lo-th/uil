@@ -168,7 +168,7 @@ UIL.Color.prototype.hide = function(){
     if( this.isUI ) UIL.main.calc( -(this.h-this.oldh) );
     this.isShow = false;
     this.h = this.oldh;
-    if(this.side=='up'){ 
+    if(this.side === 'up'){ 
         if(!isNaN(this.holdTop)) this.c[0].style.top = (this.holdTop)+'px';
         this.c[5].style.pointerEvents = 'none';
     }
@@ -180,7 +180,8 @@ UIL.Color.prototype.hide = function(){
 };
 
 UIL.Color.prototype.update = function( up ){
-    this.invert = (this.rgb[0] * 0.3 + this.rgb[1] * .59 + this.rgb[2] * .11) <= 0.6;
+
+    
 
     this.c[3].style.background = UIL.rgbToHex( UIL.hslToRgb([this.hsl[0], 1, 0.5]) );
 
@@ -191,10 +192,8 @@ UIL.Color.prototype.update = function( up ){
     this.c[2].style.background = this.bcolor;
     this.c[2].textContent = UIL.htmlToHex(this.bcolor);
 
-    
-    var cc = this.invert ? '#fff' : '#000';
-    
-    this.c[2].style.color = cc;
+    this.invert = UIL.findDeepInver( this.rgb );
+    this.c[2].style.color = this.invert ? '#fff' : '#000';;
 
     if(!up) return;
 

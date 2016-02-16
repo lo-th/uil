@@ -63,6 +63,12 @@ UIL.ColorLuma = function ( hex, lum ) {
 
 };
 
+UIL.findDeepInver = function( rgb ){ 
+
+    return (rgb[0] * 0.3 + rgb[1] * .59 + rgb[2] * .11) <= 0.6;
+    
+};
+
 
 UIL.hexToHtml = function(v){ 
 

@@ -199,6 +199,7 @@ var UIL = ( function () {
     //UIL.clone = UMC.clone;
     UIL.clear = UMC.clear;
 
+    UIL.listens = [];
 
     UIL.COLOR = 'N';
     UIL.BASECOLOR = '#C0C0C0';
@@ -329,6 +330,12 @@ UIL.ColorLuma = function ( hex, lum ) {
 
     return rgb;
 
+};
+
+UIL.findDeepInver = function( rgb ){ 
+
+    return (rgb[0] * 0.3 + rgb[1] * .59 + rgb[2] * .11) <= 0.6;
+    
 };
 
 
@@ -788,6 +795,9 @@ UIL.Proto = function( o ){
     // if is on ui pannel
     this.isUI = o.isUI || false;
 
+    // only for number
+    this.isNumber = false;
+
     // only most simple 
     this.mono = false;
 
@@ -848,6 +858,25 @@ UIL.Proto = function( o ){
 UIL.Proto.prototype = {
 
     constructor: UIL.Proto,
+
+    listen : function( ){
+
+        UIL.listens.push( this );
+        return this;
+
+    },
+
+    listening : function( v ){
+
+        if( this.isNumber ) this.value = this.numValue( v );
+        else this.value = v;
+        this.update();
+
+    },
+
+    update: function( ) {
+        
+    },
 
     // update every change
 
@@ -963,6 +992,8 @@ UIL.Proto.prototype = {
 
     setTypeNumber:function( o ){
 
+        this.isNumber = true;
+
         this.value = 0;
         if(o.value !== undefined){
             if( typeof o.value === 'string' ) this.value = o.value * 1;
@@ -986,6 +1017,8 @@ UIL.Proto.prototype = {
         this.step = o.step === undefined ?  s : o.step;
 
         this.range = this.max - this.min;
+
+        this.value = this.numValue( this.value );
         
     },
 
@@ -1691,7 +1724,7 @@ UIL.Color.prototype.hide = function(){
     if( this.isUI ) UIL.main.calc( -(this.h-this.oldh) );
     this.isShow = false;
     this.h = this.oldh;
-    if(this.side=='up'){ 
+    if(this.side === 'up'){ 
         if(!isNaN(this.holdTop)) this.c[0].style.top = (this.holdTop)+'px';
         this.c[5].style.pointerEvents = 'none';
     }
@@ -1703,7 +1736,8 @@ UIL.Color.prototype.hide = function(){
 };
 
 UIL.Color.prototype.update = function( up ){
-    this.invert = (this.rgb[0] * 0.3 + this.rgb[1] * .59 + this.rgb[2] * .11) <= 0.6;
+
+    
 
     this.c[3].style.background = UIL.rgbToHex( UIL.hslToRgb([this.hsl[0], 1, 0.5]) );
 
@@ -1714,10 +1748,8 @@ UIL.Color.prototype.update = function( up ){
     this.c[2].style.background = this.bcolor;
     this.c[2].textContent = UIL.htmlToHex(this.bcolor);
 
-    
-    var cc = this.invert ? '#fff' : '#000';
-    
-    this.c[2].style.color = cc;
+    this.invert = UIL.findDeepInver( this.rgb );
+    this.c[2].style.color = this.invert ? '#fff' : '#000';;
 
     if(!up) return;
 
@@ -1883,7 +1915,7 @@ UIL.Slide = function( o ){
 
     this.setTypeNumber( o );
 
-    this.old = this.value;
+    //this.old = this.value;
     this.isDown = false;
     this.isOver = false;
 
@@ -1986,19 +2018,11 @@ UIL.Slide.prototype.move = function( e ){
 
 };
 
-UIL.Slide.prototype.listen = function( v ){
-
-    this.value = v;
-    this.update();
-
-};
-
 UIL.Slide.prototype.update = function( up ){
 
     var ww = this.w * (( this.value - this.min ) / this.range );
     this.c[4].style.width = ww + 'px';
     this.c[2].textContent = this.value;
-
     if( up ) this.send();
 
 };
@@ -2436,20 +2460,14 @@ UIL.Button.prototype.mode = function( mode ){
         case 0: // base
             this.c[3].style.color = this.fontColor;
             this.c[2].style.background = UIL.bgcolor(UIL.COLOR);
-            //this.c[3].style.background = UIL.bgcolor(UIL.COLOR);
-            //UIL.setSvg(this.c[2], 'fill', UIL.bgcolor(UIL.COLOR) );
         break;
         case 1: // over
             this.c[3].style.color = '#FFF';
             this.c[2].style.background = UIL.SELECT;
-            //this.c[3].style.background = UIL.SELECT;
-            //UIL.setSvg(this.c[2], 'fill', UIL.SELECT );
         break;
         case 2: // edit / down
             this.c[3].style.color = this.fontColor;
             this.c[2].style.background = UIL.SELECTDOWN;
-            //this.c[3].style.background = UIL.SELECTDOWN;
-            //UIL.setSvg(this.c[2], 'fill', UIL.SELECTDOWN );
         break;
 
     }
@@ -2467,9 +2485,9 @@ UIL.Button.prototype.label = function( string ){
 
 };
 
-UIL.Button.prototype.icon = function( string ){
+UIL.Button.prototype.icon = function( string, y ){
 
-    this.c[3].style.padding = '0px 0px';
+    this.c[3].style.padding = ( y || 0 )+'px 0px';
     this.c[3].innerHTML = string;
 
 };
@@ -2566,10 +2584,6 @@ UIL.Circular.prototype.mode = function( mode ){
             UIL.setSvg( this.c[3], 'fill','rgba(0,0,0,0.6)');
             UIL.setSvg( this.c[4], 'fill', this.colorPlus );
         break;
-        /*case 2: // edit
-            UIL.setSvg( this.c[3], 'fill','rgba(0,0,0,0.2)');
-            UIL.setSvg( this.c[4], 'fill', UIL.MOVING );
-        break;*/
 
     }
 }
@@ -2612,7 +2626,6 @@ UIL.Circular.prototype.down = function( e ){
     this.old = this.value;
     this.oldr = null;
     this.move( e );
-    //this.mode(2);
 
 };
 
@@ -2631,8 +2644,8 @@ UIL.Circular.prototype.move = function( e ){
         var dif = this.r - this.oldr;
         this.r = Math.abs(dif) > Math.PI ? this.oldr : this.r;
 
-        if(dif>6) this.r = 0;
-        if(dif<-6) this.r = this.twoPi;
+        if(dif > 6) this.r = 0;
+        if(dif < -6) this.r = this.twoPi;
 
     }
 
@@ -2654,22 +2667,22 @@ UIL.Circular.prototype.move = function( e ){
 UIL.Circular.prototype.makePath = function(){
 
     var r = this.radius;
-    var unit = this.twoPi;  
-    var start = 0;
-    var end = this.percent * unit - 0.001;
-    var x1 = r + r * Math.sin(start);
-    var y1 = r - r * Math.cos(start);
+    //var start = 0;
+    var end = this.percent * this.twoPi - 0.001;
+    //var x1 = r + r * Math.sin(start);
+    //var y1 = r - r * Math.cos(start);
     var x2 = r + r * Math.sin(end);
     var y2 = r - r * Math.cos(end);
-    var big = end - start > Math.PI ? 1 : 0;
-    return "M " + r + "," + r + " L " + x1 + "," + y1 + " A " + r + "," + r + " 0 " + big + " 1 " + x2 + "," + y2 + " Z";
+    //var big = end - start > Math.PI ? 1 : 0;
+    var big = end > Math.PI ? 1 : 0;
+    return "M " + r + "," + r + " L " + r + "," + 0 + " A " + r + "," + r + " 0 " + big + " 1 " + x2 + "," + y2 + " Z";
 
 };
 
 UIL.Circular.prototype.update = function( up ){
 
     this.c[2].textContent = this.value;
-    this.percent = (this.value - this.min) / this.range;
+    this.percent = ( this.value - this.min ) / this.range;
     UIL.setSvg( this.c[4], 'd', this.makePath() );
     if( up ) this.send();
     
@@ -2763,21 +2776,25 @@ UIL.Knob.prototype.move = function( e ){
 
 UIL.Knob.prototype.makeGrad = function(){
 
-    var d = '';
-    var startangle = Math.PI+this.mPI;
-    var endangle = Math.PI-this.mPI;
-    var step = (startangle-endangle)/this.radius;
-    var r = this.radius;
+    var d = '', step, range, a, x, y, x2, y2, r = this.radius;
+    var startangle = Math.PI + this.mPI;
+    var endangle = Math.PI - this.mPI;
 
-    var a, x, y, x2, y2;
+    if(this.step>5){
+        range =  this.range / this.step;
+        step = ( startangle - endangle ) / range;
+    } else {
+        step = ( startangle - endangle ) / r;
+        range = r;
+    }
 
-    for ( var i = 0; i <= this.radius; ++i ) {
+    for ( var i = 0; i <= range; ++i ) {
 
-        a = startangle-(step*i);
-        x = r + Math.sin(a)*r;
-        y = r + Math.cos(a)*r;
-        x2 = r + Math.sin(a)*(r-3);
-        y2 = r + Math.cos(a)*(r-3);
+        a = startangle - ( step * i );
+        x = r + Math.sin( a ) * r;
+        y = r + Math.cos( a ) * r;
+        x2 = r + Math.sin( a ) * ( r - 3 );
+        y2 = r + Math.cos( a ) * ( r - 3 );
         d += 'M' + x + ' ' + y + ' L' + x2 + ' '+y2 + ' ';
 
     }
@@ -2791,9 +2808,9 @@ UIL.Knob.prototype.update = function( up ){
     this.c[2].textContent = this.value;
     this.percent = (this.value - this.min) / this.range;
 
-    this.rr = ( (this.percent*this.cirRange) - (this.mPI)) * this.toDeg;
+    var r = ( (this.percent * this.cirRange) - (this.mPI)) * this.toDeg;
 
-    UIL.setSvg( this.c[4], 'transform', 'rotate('+this.rr+' '+this.radius+' '+this.radius+')' );
+    UIL.setSvg( this.c[4], 'transform', 'rotate('+ r +' '+this.radius+' '+this.radius+')' );
 
     if( up ) this.send();
     

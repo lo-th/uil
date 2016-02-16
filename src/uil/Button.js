@@ -40,20 +40,14 @@ UIL.Button.prototype.mode = function( mode ){
         case 0: // base
             this.c[3].style.color = this.fontColor;
             this.c[2].style.background = UIL.bgcolor(UIL.COLOR);
-            //this.c[3].style.background = UIL.bgcolor(UIL.COLOR);
-            //UIL.setSvg(this.c[2], 'fill', UIL.bgcolor(UIL.COLOR) );
         break;
         case 1: // over
             this.c[3].style.color = '#FFF';
             this.c[2].style.background = UIL.SELECT;
-            //this.c[3].style.background = UIL.SELECT;
-            //UIL.setSvg(this.c[2], 'fill', UIL.SELECT );
         break;
         case 2: // edit / down
             this.c[3].style.color = this.fontColor;
             this.c[2].style.background = UIL.SELECTDOWN;
-            //this.c[3].style.background = UIL.SELECTDOWN;
-            //UIL.setSvg(this.c[2], 'fill', UIL.SELECTDOWN );
         break;
 
     }
@@ -71,9 +65,9 @@ UIL.Button.prototype.label = function( string ){
 
 };
 
-UIL.Button.prototype.icon = function( string ){
+UIL.Button.prototype.icon = function( string, y ){
 
-    this.c[3].style.padding = '0px 0px';
+    this.c[3].style.padding = ( y || 0 )+'px 0px';
     this.c[3].innerHTML = string;
 
 };
