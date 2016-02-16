@@ -25,6 +25,11 @@ UIL.Proto = function( o ){
     // define obj size
     this.setSize( o.size );
 
+    // like dat gui
+    this.parent = null;
+    this.val = null;
+    this.isSend = false;
+
     var h = 20;
     if( this.isUI ) h = UIL.main.height;
     this.h = o.height || h;
@@ -84,10 +89,11 @@ UIL.Proto.prototype = {
 
     },
 
-    listening : function( v ){
-
-        if( this.isNumber ) this.value = this.numValue( v );
-        else this.value = v;
+    listening : function(){
+        if( this.parent === null ) return;
+        if( this.isSend ) return;
+        if( this.isNumber ) this.value = this.numValue( this.parent[ this.val ] );
+        else this.value = this.parent[ this.val ];
         this.update();
 
     },
@@ -116,14 +122,17 @@ UIL.Proto.prototype = {
     },
 
     send:function( v ){
-
+        this.isSend = true;
         if( this.callback ) this.callback( v || this.value );
+        if( this.parent !== null ) this.parent[ this.val ] = v || this.value;
+        this.isSend = false;
 
     },
 
-    sendEnd:function(){
+    sendEnd:function( v ){
 
-        if( this.endCallback ) this.endCallback( this.value );
+        if( this.endCallback ) this.endCallback( v || this.value );
+        if( this.parent !== null ) this.parent[ this.val ] = v || this.value;
 
     },
 
@@ -282,5 +291,18 @@ UIL.Proto.prototype = {
 
     handleEvent: function( e ) {
         
+    },
+
+    // ----------------------
+    // object referency
+    // ----------------------
+
+    setReferency: function(obj, val){
+
+        this.parent = obj;
+        this.val = val;
+
     }
+
+
 }

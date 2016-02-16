@@ -271,23 +271,53 @@ var UIL = ( function () {
 //   Root function
 // ----------------------
 
-UIL.add = function( type, o ){
+UIL.add = function(){
 
-    type = type[0].toUpperCase() + type.slice(1);
+    var a = arguments;
+
+    var type, o, ref=false;
+
+    if( typeof a[0] === 'string' ){ 
+
+        type = a[0][0].toUpperCase() + a[0].slice(1);
+        o = a[1] || {};
+
+    } else if ( typeof a[0] === 'object' ){ // like dat gui
+
+        ref = true;
+        if( a[2] === undefined ) [].push.call(a, {});
+        type = UIL.autoType.apply( this, a );//UIL.autoType( a[0], a[1] );
+        o = a[2];
+
+        o.name = a[1];
+        o.value = a[0][a[1]];
+
+    }
+
     var n = new UIL[type](o);
+    if( ref ) n.setReferency( a[0], a[1] );
     return n;
 
 };
 
-UIL.autoType = function( v ){
+UIL.autoType = function(){
 
-    /*if( v === undefined ){ // button, group, title
+    var a = arguments;
 
-    } else {
+    var type = 'Slide';
 
-    }*/
+    if(a[2].type) type = a[2].type;
+
+    return type;
 
 };
+
+UIL.update = function(){
+    var i = UIL.listens.length;
+    while(i--){
+        UIL.listens[i].listening();
+    }
+}
 
 
 // ----------------------
@@ -474,7 +504,7 @@ UIL.Gui = function( o ){
     
     window.addEventListener("resize", function(e){this.resize(e)}.bind(this), false );
 
-    this.setWidth( o.size || 245 );
+    this.setWidth( o.size || 240 );
 
 }
 
@@ -589,15 +619,20 @@ UIL.Gui.prototype = {
 
     // Add node to gui
 
-    add:function( type, o ){
-        
-        if( o.isUI === undefined ) o.isUI = true;
+    add:function(){
 
-        //type = type[0].toUpperCase() + type.slice(1);
+        var a = arguments;
 
-        //var n = new UIL[type](o);
+        if( typeof a[1] === 'object' ){ 
+            a[1].isUI = true; 
+        } else if( typeof a[1] === 'string' ){
+            if( a[2] === undefined ) [].push.call(a, { isUI:true });
+            else a[2].isUI = true;
+        } 
 
-        var n = UIL.add( type, o );
+
+        var n = UIL.add.apply( this, a );
+        //var n = UIL.add( ...args );
 
         this.uis.push( n );
 
@@ -807,6 +842,11 @@ UIL.Proto = function( o ){
     // define obj size
     this.setSize( o.size );
 
+    // like dat gui
+    this.parent = null;
+    this.val = null;
+    this.isSend = false;
+
     var h = 20;
     if( this.isUI ) h = UIL.main.height;
     this.h = o.height || h;
@@ -866,10 +906,11 @@ UIL.Proto.prototype = {
 
     },
 
-    listening : function( v ){
-
-        if( this.isNumber ) this.value = this.numValue( v );
-        else this.value = v;
+    listening : function(){
+        if( this.parent === null ) return;
+        if( this.isSend ) return;
+        if( this.isNumber ) this.value = this.numValue( this.parent[ this.val ] );
+        else this.value = this.parent[ this.val ];
         this.update();
 
     },
@@ -898,14 +939,17 @@ UIL.Proto.prototype = {
     },
 
     send:function( v ){
-
+        this.isSend = true;
         if( this.callback ) this.callback( v || this.value );
+        if( this.parent !== null ) this.parent[ this.val ] = v || this.value;
+        this.isSend = false;
 
     },
 
-    sendEnd:function(){
+    sendEnd:function( v ){
 
-        if( this.endCallback ) this.endCallback( this.value );
+        if( this.endCallback ) this.endCallback( v || this.value );
+        if( this.parent !== null ) this.parent[ this.val ] = v || this.value;
 
     },
 
@@ -1064,7 +1108,20 @@ UIL.Proto.prototype = {
 
     handleEvent: function( e ) {
         
+    },
+
+    // ----------------------
+    // object referency
+    // ----------------------
+
+    setReferency: function(obj, val){
+
+        this.parent = obj;
+        this.val = val;
+
     }
+
+
 }
 UIL.Group = function( o ){
 
@@ -1120,12 +1177,22 @@ UIL.Group.prototype.click = function( e ){
 
 };
 
-UIL.Group.prototype.add = function( type, o ){
+UIL.Group.prototype.add = function( ){
 
-    o.target = this.c[2];
-    o.isUI = this.isUI;
+    var a = arguments;
 
-    UIL.Gui.prototype.add.call( this, type, o );
+    if( typeof a[1] === 'object' ){ 
+        a[1].isUI = this.isUI; 
+        a[1].target = this.c[2];
+    } else if( typeof arguments[1] === 'string' ){
+        if( a[2] === undefined ) [].push.call(a, { isUI:true, target:this.c[2] });
+        else{ 
+            a[2].isUI = true;
+            a[2].target = this.c[2];
+        }
+    }
+
+    UIL.Gui.prototype.add.apply( this, a );
 
 };
 

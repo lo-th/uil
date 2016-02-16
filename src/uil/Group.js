@@ -52,12 +52,22 @@ UIL.Group.prototype.click = function( e ){
 
 };
 
-UIL.Group.prototype.add = function( type, o ){
+UIL.Group.prototype.add = function( ){
 
-    o.target = this.c[2];
-    o.isUI = this.isUI;
+    var a = arguments;
 
-    UIL.Gui.prototype.add.call( this, type, o );
+    if( typeof a[1] === 'object' ){ 
+        a[1].isUI = this.isUI; 
+        a[1].target = this.c[2];
+    } else if( typeof arguments[1] === 'string' ){
+        if( a[2] === undefined ) [].push.call(a, { isUI:true, target:this.c[2] });
+        else{ 
+            a[2].isUI = true;
+            a[2].target = this.c[2];
+        }
+    }
+
+    UIL.Gui.prototype.add.apply( this, a );
 
 };
 

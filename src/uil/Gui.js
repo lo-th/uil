@@ -55,7 +55,7 @@ UIL.Gui = function( o ){
     
     window.addEventListener("resize", function(e){this.resize(e)}.bind(this), false );
 
-    this.setWidth( o.size || 245 );
+    this.setWidth( o.size || 240 );
 
 }
 
@@ -170,15 +170,20 @@ UIL.Gui.prototype = {
 
     // Add node to gui
 
-    add:function( type, o ){
-        
-        if( o.isUI === undefined ) o.isUI = true;
+    add:function(){
 
-        //type = type[0].toUpperCase() + type.slice(1);
+        var a = arguments;
 
-        //var n = new UIL[type](o);
+        if( typeof a[1] === 'object' ){ 
+            a[1].isUI = true; 
+        } else if( typeof a[1] === 'string' ){
+            if( a[2] === undefined ) [].push.call(a, { isUI:true });
+            else a[2].isUI = true;
+        } 
 
-        var n = UIL.add( type, o );
+
+        var n = UIL.add.apply( this, a );
+        //var n = UIL.add( ...args );
 
         this.uis.push( n );
 

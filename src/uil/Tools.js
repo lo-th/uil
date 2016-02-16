@@ -2,23 +2,53 @@
 //   Root function
 // ----------------------
 
-UIL.add = function( type, o ){
+UIL.add = function(){
 
-    type = type[0].toUpperCase() + type.slice(1);
+    var a = arguments;
+
+    var type, o, ref=false;
+
+    if( typeof a[0] === 'string' ){ 
+
+        type = a[0][0].toUpperCase() + a[0].slice(1);
+        o = a[1] || {};
+
+    } else if ( typeof a[0] === 'object' ){ // like dat gui
+
+        ref = true;
+        if( a[2] === undefined ) [].push.call(a, {});
+        type = UIL.autoType.apply( this, a );//UIL.autoType( a[0], a[1] );
+        o = a[2];
+
+        o.name = a[1];
+        o.value = a[0][a[1]];
+
+    }
+
     var n = new UIL[type](o);
+    if( ref ) n.setReferency( a[0], a[1] );
     return n;
 
 };
 
-UIL.autoType = function( v ){
+UIL.autoType = function(){
 
-    /*if( v === undefined ){ // button, group, title
+    var a = arguments;
 
-    } else {
+    var type = 'Slide';
 
-    }*/
+    if(a[2].type) type = a[2].type;
+
+    return type;
 
 };
+
+UIL.update = function(){
+    var i = UIL.listens.length;
+    while(i--){
+        UIL.listens[i].listening();
+    }
+}
 
 
 // ----------------------
