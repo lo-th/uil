@@ -7,6 +7,8 @@ UIL.Number = function( o ){
     this.setTypeNumber( o );
 
     this.allway = o.allway || false;
+    this.isDrag = o.drag === undefined ? true : o.drag;
+
     this.value = [0];
     this.toRad = 1;
     this.isNumber = true;
@@ -41,13 +43,14 @@ UIL.Number = function( o ){
     var i = this.length;
     while(i--){
         if(this.isAngle) this.value[i] = (this.value[i] * 180 / Math.PI).toFixed( this.precision );
-        //this.c[2+i] = UIL.DOM('UIL text', 'input', 'pointer-events:auto; padding:0px 5px; padding-bottom:2px; width:'+this.w+'px; left:'+(UIL.AW+(this.w*i)+(5*i))+'px;');
-        this.c[2+i] = UIL.DOM('UIL textSelect', 'div', 'letter-spacing:-1px; cursor:move; width:'+this.w+'px; left:'+(UIL.AW+(this.w*i)+(5*i))+'px; height:'+(this.h-4)+'px; line-height:'+(this.h-8)+'px;');
+        this.c[2+i] = UIL.DOM('UIL textSelect', 'div', 'letter-spacing:-1px; cursor:pointer; height:'+(this.h-4)+'px; line-height:'+(this.h-8)+'px;');
         this.c[2+i].name = i;
-       // this.c[2+i].value = this.value[i];
+        if(this.isDrag) this.c[2+i].style.cursor = 'move';
+        if(o.center) this.c[2+i].style.textAlign = 'center';
+
         this.c[2+i].textContent = this.value[i];
         this.c[2+i].style.color = this.fontColor;
-        this.c[2+i].contentEditable = true;
+        //this.c[2+i].contentEditable = true;
         this.c[2+i].events = [ 'keydown', 'keyup', 'mousedown', 'blur', 'focus' ]; //'click', 
 
     }
@@ -82,6 +85,8 @@ UIL.Number.prototype.handleEvent = function( e ) {
 
 UIL.Number.prototype.keydown = function( e ){
 
+    e.stopPropagation();
+
     if( e.keyCode === 13 ){
         e.preventDefault();
         this.testValue( parseFloat(e.target.name) );
@@ -92,6 +97,8 @@ UIL.Number.prototype.keydown = function( e ){
 };
 
 UIL.Number.prototype.keyup = function( e ){
+    
+    e.stopPropagation();
 
     if( this.allway ){ 
         this.testValue( parseFloat(e.target.name) );
@@ -104,8 +111,10 @@ UIL.Number.prototype.blur = function( e ){
 
     this.isSelect = false;
     e.target.style.borderColor = UIL.Border;
+    e.target.contentEditable = false;
     //e.target.style.border = '1px solid rgba(255,255,255,0.1)';
-    e.target.style.cursor = 'move';
+    if(this.isDrag) e.target.style.cursor = 'move';
+    else  e.target.style.cursor = 'pointer';
 
 };
 
@@ -114,8 +123,9 @@ UIL.Number.prototype.focus = function( e ){
     this.isSelect = true;
     this.current = undefined;
     e.target.style.borderColor = UIL.BorderSelect;
+    
     //e.target.style.border = '1px solid ' + UIL.BorderSelect;
-    e.target.style.cursor = 'auto';
+    if(this.isDrag) e.target.style.cursor = 'auto';
 
 };
 
@@ -125,6 +135,8 @@ UIL.Number.prototype.down = function( e ){
 
     e.preventDefault();
 
+    
+
     //e.target.style.border = '1px solid rgba(255,255,255,0.2)';
     this.current = parseFloat(e.target.name);
 
@@ -132,8 +144,10 @@ UIL.Number.prototype.down = function( e ){
     if( this.isNumber ) this.prev.v = parseFloat(this.value);
     else this.prev.v = parseFloat( this.value[this.current] );
 
+
+
     document.addEventListener( 'mouseup', this, false );
-    document.addEventListener( 'mousemove', this, false );
+    if(this.isDrag) document.addEventListener( 'mousemove', this, false );
 
 };
 
@@ -144,11 +158,14 @@ UIL.Number.prototype.up = function( e ){
     e.preventDefault();
 
     document.removeEventListener( 'mouseup', this, false );
-    document.removeEventListener( 'mousemove', this, false );
+    if(this.isDrag) document.removeEventListener( 'mousemove', this, false );
 
     if(this.current !== undefined){ 
 
-        if( this.current === parseFloat(e.target.name) ) e.target.focus();
+        if( this.current === parseFloat(e.target.name) ){ 
+            e.target.contentEditable = true;
+            e.target.focus();
+        }
 
        // else e.target.style.borderColor = UIL.BorderSelect;;//this.c[2+this.current].style.border = '1px solid rgba(255,255,255,0.1)';
 
@@ -185,10 +202,13 @@ UIL.Number.prototype.move = function( e ){
 
 UIL.Number.prototype.testValue = function( n ){
 
-    
-
-    if(!isNaN( this.c[2+n].textContent )) this.value[n] = this.c[2+n].textContent;
-    else this.c[2+n].textContent = this.value[n];
+    if(!isNaN( this.c[2+n].textContent )){ 
+        var nx = this.numValue( this.c[2+n].textContent );
+        this.c[2+n].textContent = nx;
+        this.value[n] = nx;
+    } else { // not number
+        this.c[2+n].textContent = this.value[n];
+    }
 
 };
 
@@ -206,10 +226,10 @@ UIL.Number.prototype.validate = function(){
 UIL.Number.prototype.rSize = function(){
 
     UIL.Proto.prototype.rSize.call( this );
-    this.w = ((this.sb+5)/(this.length))-5;
+    this.w = ~~( ( this.sb + 5 ) / this.length )-5;
     var i = this.length;
     while(i--){
-        this.c[2+i].style.left = (this.sa+(this.w*i)+(5*i)) + 'px';
+        this.c[2+i].style.left = (~~( this.sa + ( this.w * i )+( 5 * i ))) + 'px';
         this.c[2+i].style.width = this.w + 'px';
     }
 

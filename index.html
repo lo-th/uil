@@ -46,7 +46,7 @@ var debug = document.getElementById('debug');
 
 var callback = function(v){ debug.innerHTML = v; }
 var callbackButton = function(){ debug.innerHTML = "i'm a button !!" ; }
-var callbackSize = function(v){ timer = setTimeout( UIL.sizer(v), 1000); }
+var callbackSize = function(v){  ui.setWidth( v ); }
 var callbackLogo = function(v){ document.getElementById('logoin').setAttributeNS(null, 'fill', UIL.hexToHtml(v)); document.getElementById('version').style.color = UIL.hexToHtml(v);  }
 
 // single UI element

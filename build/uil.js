@@ -189,7 +189,7 @@ var UIL = ( function () {
     UIL.AW = 100;
 
     UIL.UNS = '-o-user-select:none; -ms-user-select:none; -khtml-user-select:none; -webkit-user-select:none; -moz-user-select:none;';
-    UIL.US = '-o-user-select:text; -ms-user-select:text; -khtml-user-select:text; -webkit-user-select:text; -moz-user-select:text;';
+    //UIL.US = '-o-user-select:text; -ms-user-select:text; -khtml-user-select:text; -webkit-user-select:text; -moz-user-select:text;';
     UIL.TXT = 'font-family:"Lucida Console", Monaco, monospace; font-size:11px; color:#cccccc; padding:2px 10px; left:0; top:2px; height:16px; width:100px; overflow:hidden; white-space: nowrap;';
 
     UIL.DOM = UMC.dom;
@@ -226,7 +226,7 @@ var UIL = ( function () {
 
         UIL.CC('UIL.text', UIL.TXT );
         UIL.CC('UIL.number', UIL.TXT + 'letter-spacing:-1px; padding:2px 5px;' );
-        UIL.CC('UIL.textSelect', UIL.TXT + UIL.US + 'pointer-events:auto; padding:2px 5px; outline:none; -webkit-appearance:none; -moz-appearance:none; border:1px dashed ' + UIL.Border+';' );
+        UIL.CC('UIL.textSelect', UIL.TXT + 'pointer-events:auto; padding:2px 5px; outline:none; -webkit-appearance:none; -moz-appearance:none; border:1px dashed ' + UIL.Border+';' );
 
         UIL.CC('UIL.slidebg', 'border:1px solid '+UIL.Border+'; left:100px; top:1px; pointer-events:auto; cursor:w-resize; background:rgba(0,0,0,0.3); ' );
 
@@ -842,6 +842,9 @@ UIL.Proto = function( o ){
     // define obj size
     this.setSize( o.size );
 
+    if(o.sa !== undefined ) this.sa = o.sa;
+    if(o.sb !== undefined ) this.sb = o.sb;
+
     // like dat gui
     this.parent = null;
     this.val = null;
@@ -879,7 +882,7 @@ UIL.Proto = function( o ){
     if( this.isUI ) this.c[0].style.marginBottom = '1px';
     
 
-    if(!this.simple){ 
+    if( !this.simple ){ 
         this.c[1] = UIL.DOM('UIL text');
         this.c[1].textContent = this.txt;
         this.c[1].style.color = this.titleColor;
@@ -898,6 +901,38 @@ UIL.Proto = function( o ){
 UIL.Proto.prototype = {
 
     constructor: UIL.Proto,
+
+    // make de node
+
+    init: function (){
+
+        this.c[0].style.height = this.h + 'px';
+
+        if( this.isUI ) this.c[0].style.background = UIL.bgcolor(this.bgcolor);
+        if( this.autoHeight ) this.c[0].style.transition = 'height 0.1s ease-out';
+        if( this.c[1] !== undefined && this.autoWidth ){
+            this.c[1].style.height = (this.h-4) + 'px';
+            this.c[1].style.lineHeight = (this.h-8) + 'px';
+        }
+
+        for( var i = 0; i < this.c.length; i++ ){
+            if( i === 0 ){
+                if( this.target !== null ){ 
+                    this.target.appendChild( this.c[0] );
+                } else {
+                    if( this.isUI ) UIL.main.inner.appendChild( this.c[0] );
+                    else document.body.appendChild( this.c[0] );
+                }
+            }
+            else {
+                if( this.c[i] !== undefined ) this.c[0].appendChild( this.c[i] );
+            }
+        }
+
+        this.rSize();
+        this.addEvent();
+
+    },
 
     listen : function( ){
 
@@ -953,38 +988,7 @@ UIL.Proto.prototype = {
 
     },
 
-    // make de node
-
-    init: function (){
-
-        this.c[0].style.height = this.h + 'px';
-
-        if( this.isUI ) this.c[0].style.background = UIL.bgcolor(this.bgcolor);
-        if( this.autoHeight ) this.c[0].style.transition = 'height 0.1s ease-out';
-        if( this.c[1] !== undefined && this.autoWidth ){
-            this.c[1].style.height = (this.h-4) + 'px';
-            this.c[1].style.lineHeight = (this.h-8) + 'px';
-        }
-
-        for( var i = 0; i < this.c.length; i++ ){
-            if( i === 0 ){
-                if( this.target !== null ){ 
-                    this.target.appendChild( this.c[0] );
-                } else {
-                    if( this.isUI ) UIL.main.inner.appendChild( this.c[0] );
-                    else document.body.appendChild( this.c[0] );
-                }
-            }
-            else {
-                if( this.c[i] !== undefined ) this.c[0].appendChild( this.c[i] );
-            }
-        }
-
-        this.rSize();
-        
-        this.addEvent();
-
-    },
+    
 
     // clear node
     
@@ -1335,12 +1339,10 @@ UIL.String = function( o ){
 
     this.c[2] = UIL.DOM( 'UIL textSelect', 'div', 'height:'+(this.h-4)+'px; line-height:'+(this.h-8)+'px;' );
     this.c[2].name = 'input';
-
     this.c[2].style.color = this.fontColor;
-    this.c[2].contentEditable = true;
     this.c[2].textContent = this.value;
 
-    this.c[2].events = [ 'click', 'keydown', 'keyup', 'blur' ];
+    this.c[2].events = [ 'mousedown', 'keydown', 'keyup', 'blur', 'focus' ];
 
     this.init();
 
@@ -1351,25 +1353,21 @@ UIL.String.prototype.constructor = UIL.String;
 
 UIL.String.prototype.handleEvent = function( e ) {
 
-    //e.preventDefault();
-    //e.stopPropagation();
-
     switch( e.type ) {
-        case 'click': this.click( e ); break;
+        case 'mousedown': this.down( e ); break;
         case 'blur': this.blur( e ); break;
+        case 'focus': this.focus( e ); break
         case 'keydown': this.keydown( e ); break;
         case 'keyup': this.keyup( e ); break;
     }
 
 };
 
-UIL.String.prototype.click = function( e ){
+UIL.String.prototype.down = function( e ){
 
-    e.preventDefault();
     e.target.contentEditable = true;
     e.target.focus();
     e.target.style.cursor = 'auto';
-    e.target.style.borderColor = UIL.BorderSelect;
 
 };
 
@@ -1380,7 +1378,15 @@ UIL.String.prototype.blur = function( e ){
 
 };
 
+UIL.String.prototype.focus = function( e ){
+
+    e.target.style.borderColor = UIL.BorderSelect;
+
+};
+
 UIL.String.prototype.keydown = function( e ){
+    
+    e.stopPropagation();
 
     if( e.keyCode === 13 ){ 
         e.preventDefault();
@@ -1392,6 +1398,8 @@ UIL.String.prototype.keydown = function( e ){
 };
 
 UIL.String.prototype.keyup = function( e ){
+    
+    e.stopPropagation();
 
     this.value = e.target.textContent;
     if( this.allway ) this.send();
@@ -1414,6 +1422,8 @@ UIL.Number = function( o ){
     this.setTypeNumber( o );
 
     this.allway = o.allway || false;
+    this.isDrag = o.drag === undefined ? true : o.drag;
+
     this.value = [0];
     this.toRad = 1;
     this.isNumber = true;
@@ -1448,13 +1458,14 @@ UIL.Number = function( o ){
     var i = this.length;
     while(i--){
         if(this.isAngle) this.value[i] = (this.value[i] * 180 / Math.PI).toFixed( this.precision );
-        //this.c[2+i] = UIL.DOM('UIL text', 'input', 'pointer-events:auto; padding:0px 5px; padding-bottom:2px; width:'+this.w+'px; left:'+(UIL.AW+(this.w*i)+(5*i))+'px;');
-        this.c[2+i] = UIL.DOM('UIL textSelect', 'div', 'letter-spacing:-1px; cursor:move; width:'+this.w+'px; left:'+(UIL.AW+(this.w*i)+(5*i))+'px; height:'+(this.h-4)+'px; line-height:'+(this.h-8)+'px;');
+        this.c[2+i] = UIL.DOM('UIL textSelect', 'div', 'letter-spacing:-1px; cursor:pointer; height:'+(this.h-4)+'px; line-height:'+(this.h-8)+'px;');
         this.c[2+i].name = i;
-       // this.c[2+i].value = this.value[i];
+        if(this.isDrag) this.c[2+i].style.cursor = 'move';
+        if(o.center) this.c[2+i].style.textAlign = 'center';
+
         this.c[2+i].textContent = this.value[i];
         this.c[2+i].style.color = this.fontColor;
-        this.c[2+i].contentEditable = true;
+        //this.c[2+i].contentEditable = true;
         this.c[2+i].events = [ 'keydown', 'keyup', 'mousedown', 'blur', 'focus' ]; //'click', 
 
     }
@@ -1489,6 +1500,8 @@ UIL.Number.prototype.handleEvent = function( e ) {
 
 UIL.Number.prototype.keydown = function( e ){
 
+    e.stopPropagation();
+
     if( e.keyCode === 13 ){
         e.preventDefault();
         this.testValue( parseFloat(e.target.name) );
@@ -1499,6 +1512,8 @@ UIL.Number.prototype.keydown = function( e ){
 };
 
 UIL.Number.prototype.keyup = function( e ){
+    
+    e.stopPropagation();
 
     if( this.allway ){ 
         this.testValue( parseFloat(e.target.name) );
@@ -1511,8 +1526,10 @@ UIL.Number.prototype.blur = function( e ){
 
     this.isSelect = false;
     e.target.style.borderColor = UIL.Border;
+    e.target.contentEditable = false;
     //e.target.style.border = '1px solid rgba(255,255,255,0.1)';
-    e.target.style.cursor = 'move';
+    if(this.isDrag) e.target.style.cursor = 'move';
+    else  e.target.style.cursor = 'pointer';
 
 };
 
@@ -1521,8 +1538,9 @@ UIL.Number.prototype.focus = function( e ){
     this.isSelect = true;
     this.current = undefined;
     e.target.style.borderColor = UIL.BorderSelect;
+    
     //e.target.style.border = '1px solid ' + UIL.BorderSelect;
-    e.target.style.cursor = 'auto';
+    if(this.isDrag) e.target.style.cursor = 'auto';
 
 };
 
@@ -1532,6 +1550,8 @@ UIL.Number.prototype.down = function( e ){
 
     e.preventDefault();
 
+    
+
     //e.target.style.border = '1px solid rgba(255,255,255,0.2)';
     this.current = parseFloat(e.target.name);
 
@@ -1539,8 +1559,10 @@ UIL.Number.prototype.down = function( e ){
     if( this.isNumber ) this.prev.v = parseFloat(this.value);
     else this.prev.v = parseFloat( this.value[this.current] );
 
+
+
     document.addEventListener( 'mouseup', this, false );
-    document.addEventListener( 'mousemove', this, false );
+    if(this.isDrag) document.addEventListener( 'mousemove', this, false );
 
 };
 
@@ -1551,11 +1573,14 @@ UIL.Number.prototype.up = function( e ){
     e.preventDefault();
 
     document.removeEventListener( 'mouseup', this, false );
-    document.removeEventListener( 'mousemove', this, false );
+    if(this.isDrag) document.removeEventListener( 'mousemove', this, false );
 
     if(this.current !== undefined){ 
 
-        if( this.current === parseFloat(e.target.name) ) e.target.focus();
+        if( this.current === parseFloat(e.target.name) ){ 
+            e.target.contentEditable = true;
+            e.target.focus();
+        }
 
        // else e.target.style.borderColor = UIL.BorderSelect;;//this.c[2+this.current].style.border = '1px solid rgba(255,255,255,0.1)';
 
@@ -1592,10 +1617,13 @@ UIL.Number.prototype.move = function( e ){
 
 UIL.Number.prototype.testValue = function( n ){
 
-    
-
-    if(!isNaN( this.c[2+n].textContent )) this.value[n] = this.c[2+n].textContent;
-    else this.c[2+n].textContent = this.value[n];
+    if(!isNaN( this.c[2+n].textContent )){ 
+        var nx = this.numValue( this.c[2+n].textContent );
+        this.c[2+n].textContent = nx;
+        this.value[n] = nx;
+    } else { // not number
+        this.c[2+n].textContent = this.value[n];
+    }
 
 };
 
@@ -1613,10 +1641,10 @@ UIL.Number.prototype.validate = function(){
 UIL.Number.prototype.rSize = function(){
 
     UIL.Proto.prototype.rSize.call( this );
-    this.w = ((this.sb+5)/(this.length))-5;
+    this.w = ~~( ( this.sb + 5 ) / this.length )-5;
     var i = this.length;
     while(i--){
-        this.c[2+i].style.left = (this.sa+(this.w*i)+(5*i)) + 'px';
+        this.c[2+i].style.left = (~~( this.sa + ( this.w * i )+( 5 * i ))) + 'px';
         this.c[2+i].style.width = this.w + 'px';
     }
 

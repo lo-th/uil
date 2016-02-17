@@ -25,6 +25,9 @@ UIL.Proto = function( o ){
     // define obj size
     this.setSize( o.size );
 
+    if(o.sa !== undefined ) this.sa = o.sa;
+    if(o.sb !== undefined ) this.sb = o.sb;
+
     // like dat gui
     this.parent = null;
     this.val = null;
@@ -62,7 +65,7 @@ UIL.Proto = function( o ){
     if( this.isUI ) this.c[0].style.marginBottom = '1px';
     
 
-    if(!this.simple){ 
+    if( !this.simple ){ 
         this.c[1] = UIL.DOM('UIL text');
         this.c[1].textContent = this.txt;
         this.c[1].style.color = this.titleColor;
@@ -81,6 +84,38 @@ UIL.Proto = function( o ){
 UIL.Proto.prototype = {
 
     constructor: UIL.Proto,
+
+    // make de node
+
+    init: function (){
+
+        this.c[0].style.height = this.h + 'px';
+
+        if( this.isUI ) this.c[0].style.background = UIL.bgcolor(this.bgcolor);
+        if( this.autoHeight ) this.c[0].style.transition = 'height 0.1s ease-out';
+        if( this.c[1] !== undefined && this.autoWidth ){
+            this.c[1].style.height = (this.h-4) + 'px';
+            this.c[1].style.lineHeight = (this.h-8) + 'px';
+        }
+
+        for( var i = 0; i < this.c.length; i++ ){
+            if( i === 0 ){
+                if( this.target !== null ){ 
+                    this.target.appendChild( this.c[0] );
+                } else {
+                    if( this.isUI ) UIL.main.inner.appendChild( this.c[0] );
+                    else document.body.appendChild( this.c[0] );
+                }
+            }
+            else {
+                if( this.c[i] !== undefined ) this.c[0].appendChild( this.c[i] );
+            }
+        }
+
+        this.rSize();
+        this.addEvent();
+
+    },
 
     listen : function( ){
 
@@ -136,38 +171,7 @@ UIL.Proto.prototype = {
 
     },
 
-    // make de node
-
-    init: function (){
-
-        this.c[0].style.height = this.h + 'px';
-
-        if( this.isUI ) this.c[0].style.background = UIL.bgcolor(this.bgcolor);
-        if( this.autoHeight ) this.c[0].style.transition = 'height 0.1s ease-out';
-        if( this.c[1] !== undefined && this.autoWidth ){
-            this.c[1].style.height = (this.h-4) + 'px';
-            this.c[1].style.lineHeight = (this.h-8) + 'px';
-        }
-
-        for( var i = 0; i < this.c.length; i++ ){
-            if( i === 0 ){
-                if( this.target !== null ){ 
-                    this.target.appendChild( this.c[0] );
-                } else {
-                    if( this.isUI ) UIL.main.inner.appendChild( this.c[0] );
-                    else document.body.appendChild( this.c[0] );
-                }
-            }
-            else {
-                if( this.c[i] !== undefined ) this.c[0].appendChild( this.c[i] );
-            }
-        }
-
-        this.rSize();
-        
-        this.addEvent();
-
-    },
+    
 
     // clear node
     
