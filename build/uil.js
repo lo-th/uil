@@ -370,7 +370,7 @@ UIL.findDeepInver = function( rgb ){
 
 
 UIL.hexToHtml = function(v){ 
-
+    v = v === undefined ? 0x000000 : v;
     return "#" + ("000000" + v.toString(16)).substr(-6);
     
 };

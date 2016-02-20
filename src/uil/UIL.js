@@ -28,10 +28,8 @@ var UIL = ( function () {
 
     UIL.DOM = UMC.dom;
     UIL.CC = UMC.cc;
-
-    UIL.setSvg = UMC.setSvg;
-    //UIL.clone = UMC.clone;
     UIL.clear = UMC.clear;
+    UIL.setSvg = UMC.setSvg;
 
     UIL.listens = [];
 
