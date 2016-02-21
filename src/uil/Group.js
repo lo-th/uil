@@ -67,7 +67,7 @@ UIL.Group.prototype.add = function( ){
         }
     }
 
-    UIL.Gui.prototype.add.apply( this, a );
+    return UIL.Gui.prototype.add.apply( this, a );
 
 };
 
