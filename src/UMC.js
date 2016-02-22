@@ -41,14 +41,22 @@ var UMC = UMC || ( function () {
 
         UMC.purge( dom );
 
-        while ( dom.children.length ){
+        while (dom.firstChild) {
+
+            if ( dom.firstChild.firstChild ) UMC.clear( dom.firstChild );
+
+            dom.removeChild( dom.firstChild ); 
+            
+        }
+
+        /*while ( dom.children.length ){
 
             if( dom.lastChild.children.length ) UMC.clear( dom.lastChild );
 
             //if( dom.lastChild.children.length ){ while ( dom.lastChild.children.length ) dom.lastChild.removeChild( dom.lastChild.lastChild ); }
             dom.removeChild( dom.lastChild );
 
-        }
+        }*/
 
     };
 

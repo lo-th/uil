@@ -4,8 +4,13 @@ UIL.Proto = function( o ){
 
     //this.type = '';
 
+    this.p = o.Tpercent || 0;
+
     // if need resize width
     this.autoWidth = true;
+
+    this.isGroup = false;
+    this.parentGroup = null;
 
     // if height can change
     this.autoHeight = false;
@@ -195,17 +200,20 @@ UIL.Proto.prototype = {
 
     // change size 
 
-    setSize:function(sx){
+    setSize:function( sx ){
 
         if( !this.autoWidth ) return;
 
         this.size = sx || UIL.WIDTH;
+        if( !this.p ) this.p = UIL.P;
+
         if( this.simple ){
             this.sa = 1;
             this.sb = sx-2;
         }else{
-            this.sa = ~~ (this.size/3);
-            this.sb = ~~ ((this.sa*2)-10);
+            var pp = this.size * ( this.p / 100 );
+            this.sa = ~~ pp;
+            this.sb = ~~ this.size - pp - 10;
         }
 
     },

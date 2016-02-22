@@ -41,14 +41,22 @@ var UMC = UMC || ( function () {
 
         UMC.purge( dom );
 
-        while ( dom.children.length ){
+        while (dom.firstChild) {
+
+            if ( dom.firstChild.firstChild ) UMC.clear( dom.firstChild );
+
+            dom.removeChild( dom.firstChild ); 
+            
+        }
+
+        /*while ( dom.children.length ){
 
             if( dom.lastChild.children.length ) UMC.clear( dom.lastChild );
 
             //if( dom.lastChild.children.length ){ while ( dom.lastChild.children.length ) dom.lastChild.removeChild( dom.lastChild.lastChild ); }
             dom.removeChild( dom.lastChild );
 
-        }
+        }*/
 
     };
 
@@ -185,8 +193,9 @@ var UIL = ( function () {
     UIL.main = null;
     UIL.DEF = false;
     UIL.WIDTH = 300;
-    UIL.BW = 190;
-    UIL.AW = 100;
+    //UIL.BW = 190;
+    //UIL.AW = 100;
+    UIL.P = 30;
 
     UIL.UNS = '-o-user-select:none; -ms-user-select:none; -khtml-user-select:none; -webkit-user-select:none; -moz-user-select:none;';
     //UIL.US = '-o-user-select:text; -ms-user-select:text; -khtml-user-select:text; -webkit-user-select:text; -moz-user-select:text;';
@@ -194,10 +203,8 @@ var UIL = ( function () {
 
     UIL.DOM = UMC.dom;
     UIL.CC = UMC.cc;
-
-    UIL.setSvg = UMC.setSvg;
-    //UIL.clone = UMC.clone;
     UIL.clear = UMC.clear;
+    UIL.setSvg = UMC.setSvg;
 
     UIL.listens = [];
 
@@ -226,7 +233,7 @@ var UIL = ( function () {
 
         UIL.CC('UIL.text', UIL.TXT );
         UIL.CC('UIL.number', UIL.TXT + 'letter-spacing:-1px; padding:2px 5px;' );
-        UIL.CC('UIL.textSelect', UIL.TXT + 'pointer-events:auto; padding:2px 5px; outline:none; -webkit-appearance:none; -moz-appearance:none; border:1px dashed ' + UIL.Border+';' );
+        UIL.CC('UIL.textSelect', UIL.TXT + 'pointer-events:auto; padding:2px 5px; outline:none; -webkit-appearance:none; -moz-appearance:none; border:1px dashed ' + UIL.Border+'; -ms-user-select:element;' );
 
         UIL.CC('UIL.slidebg', 'border:1px solid '+UIL.Border+'; left:100px; top:1px; pointer-events:auto; cursor:w-resize; background:rgba(0,0,0,0.3); ' );
 
@@ -452,6 +459,8 @@ UIL.Gui = function( o ){
     o = o || {};
 
     this.height = o.height || 20;
+
+    if( o.Tpercent !== undefined ) UIL.P = o.Tpercent;
 
     this.width = UIL.WIDTH;
     this.h = this.height;
@@ -687,7 +696,7 @@ UIL.Gui.prototype = {
         y = y < 0 ? 0 :y;
         y = y > this.range ? this.range : y;
 
-        this.inner.style.top = -( ~~(y / this.ratio) ) + 'px';
+        this.inner.style.top = -( ~~ ( y / this.ratio ) ) + 'px';
         this.scroll.style.top = ( ~~ y ) + 'px';
 
         this.py = y;
@@ -699,7 +708,7 @@ UIL.Gui.prototype = {
         this.isScroll = true;
 
         this.total = this.h;
-        this.maxView = this.maxHeight-this.height;
+        this.maxView = this.maxHeight - this.height;
 
         this.ratio = this.maxView / this.total;
         this.sh = this.maxView * this.ratio;
@@ -736,8 +745,13 @@ UIL.Gui.prototype = {
 
         if( y !== undefined ) this.h += y;
         else this.h = this.inner.offsetHeight;
+
+        /*var i = this.uis.length;
+        while(i--){
+            if( this.uis[i].isGroup ) this.uis[i].calc();
+        }*/
         
-        clearTimeout(this.tmp);
+        clearTimeout( this.tmp );
         this.tmp = setTimeout( this.testHeight.bind(this), 10);
 
     },
@@ -764,9 +778,12 @@ UIL.Gui.prototype = {
 
         if( size ){
             UIL.WIDTH = ~~ size;
-            var s = UIL.WIDTH / 3;
-            UIL.BW = ~~ ((s*2)-10);
-            UIL.AW = ~~ s;
+
+            //var pp = UIL.WIDTH * (50/100);
+
+            //var s = UIL.WIDTH / 3;
+            //UIL.BW = ~~ UIL.WIDTH - pp;//((s*2)-10);
+            //UIL.AW = ~~ pp;//s;
         }
 
         this.width = UIL.WIDTH;
@@ -774,16 +791,14 @@ UIL.Gui.prototype = {
 
         if( this.isCenter ) this.content.style.marginLeft = -(~~ (UIL.WIDTH*0.5)) + 'px';
 
-        var l = this.uis.length
+        var l = this.uis.length;
         var i = l;
         while(i--){
             this.uis[i].setSize();
-            //this.uis[i].rSize();
         }
 
         i = l;
         while(i--){
-            //this.uis[i].setSize();
             this.uis[i].rSize();
         }
 
@@ -821,8 +836,13 @@ UIL.Proto = function( o ){
 
     //this.type = '';
 
+    this.p = o.Tpercent || 0;
+
     // if need resize width
     this.autoWidth = true;
+
+    this.isGroup = false;
+    this.parentGroup = null;
 
     // if height can change
     this.autoHeight = false;
@@ -1012,17 +1032,20 @@ UIL.Proto.prototype = {
 
     // change size 
 
-    setSize:function(sx){
+    setSize:function( sx ){
 
         if( !this.autoWidth ) return;
 
         this.size = sx || UIL.WIDTH;
+        if( !this.p ) this.p = UIL.P;
+
         if( this.simple ){
             this.sa = 1;
             this.sb = sx-2;
         }else{
-            this.sa = ~~ (this.size/3);
-            this.sb = ~~ ((this.sa*2)-10);
+            var pp = this.size * ( this.p / 100 );
+            this.sa = ~~ pp;
+            this.sb = ~~ this.size - pp - 10;
         }
 
     },
@@ -1132,6 +1155,7 @@ UIL.Group = function( o ){
     UIL.Proto.call( this, o );
 
     this.autoHeight = true;
+    this.isGroup = true;
 
     //this.h = 25;
     this.baseH = this.h;
@@ -1186,7 +1210,7 @@ UIL.Group.prototype.add = function( ){
     var a = arguments;
 
     if( typeof a[1] === 'object' ){ 
-        a[1].isUI = this.isUI; 
+        a[1].isUI = this.isUI;
         a[1].target = this.c[2];
     } else if( typeof arguments[1] === 'string' ){
         if( a[2] === undefined ) [].push.call(a, { isUI:true, target:this.c[2] });
@@ -1196,7 +1220,10 @@ UIL.Group.prototype.add = function( ){
         }
     }
 
-    UIL.Gui.prototype.add.apply( this, a );
+    var n = UIL.Gui.prototype.add.apply( this, a );
+    n.parentGroup = this;
+
+    return n;
 
 };
 
@@ -1206,7 +1233,7 @@ UIL.Group.prototype.open = function(){
     UIL.setSvg( this.c[4], 'd','M 12 6 L 8 10 4 6');
     this.rSizeContent();
 
-    if( this.isUI ) UIL.main.calc( this.h -this.baseH );
+    if( this.isUI ) UIL.main.calc( this.h - this.baseH );
 
 };
 
@@ -1241,13 +1268,17 @@ UIL.Group.prototype.clearGroup = function(){
 
 };
 
-UIL.Group.prototype.calc = function(){
+UIL.Group.prototype.calc = function( y ){
 
     if( !this.isOpen ) return;
-    this.h = this.baseH;
 
-    var total = this.c[2].offsetHeight;
-    this.h += total;
+    //this.h = this.baseH;
+
+    if( y !== undefined ){ this.h += y; }
+    else this.h = this.c[2].offsetHeight + this.baseH;
+
+    //var total = this.c[2].offsetHeight;
+    //this.h += total;
 
     this.c[0].style.height = this.h + 'px';
 
@@ -1337,7 +1368,7 @@ UIL.String = function( o ){
     this.value = o.value || '';
     this.allway = o.allway || false;
 
-    this.c[2] = UIL.DOM( 'UIL textSelect', 'div', 'height:'+(this.h-4)+'px; line-height:'+(this.h-8)+'px;' );
+    this.c[2] = UIL.DOM( 'UIL textSelect', 'div', 'height:'+(this.h-4)+'px; line-height:'+(this.h-8)+'px; ' );
     this.c[2].name = 'input';
     this.c[2].style.color = this.fontColor;
     this.c[2].textContent = this.value;
@@ -1671,7 +1702,7 @@ UIL.Color = function( o ){
     this.mid = Math.floor(this.width * 0.5 );
     this.markerSize = this.wheelWidth * 0.3;
 
-    this.oldh = this.h;
+    this.baseH = this.h;
 
     this.c[2] = UIL.DOM('UIL text', 'div',  'height:'+(this.h-4)+'px;' + 'border-radius:6px; pointer-events:auto; cursor:pointer; border:1px solid '+ UIL.Border + '; line-height:'+(this.h-8)+'px;' );
  
@@ -1797,7 +1828,7 @@ UIL.Color.prototype.show = function(){
 
     if(this.oldWidth!==this.width) this.redraw();
     this.isShow = true;
-    this.h = this.width + this.oldh + 10;
+    this.h = this.width + this.baseH + 10;
     this.c[0].style.height = this.h+'px';
 
     if(this.side=='up'){ 
@@ -1810,15 +1841,18 @@ UIL.Color.prototype.show = function(){
     this.c[4].style.display = 'block';
     this.c[5].style.display = 'block';
 
-    if( this.isUI ) UIL.main.calc( this.h-this.oldh );
+    if( this.parentGroup !== null ){ this.parentGroup.calc( this.h - this.baseH );}
+    if( this.isUI ) UIL.main.calc( this.h - this.baseH );
 
 };
 
 UIL.Color.prototype.hide = function(){
 
-    if( this.isUI ) UIL.main.calc( -(this.h-this.oldh) );
+    if( this.parentGroup !== null ){ this.parentGroup.calc( -(this.h-this.baseH) );}
+    if( this.isUI ) UIL.main.calc( -(this.h-this.baseH) );
+
     this.isShow = false;
-    this.h = this.oldh;
+    this.h = this.baseH;
     if(this.side === 'up'){ 
         if(!isNaN(this.holdTop)) this.c[0].style.top = (this.holdTop)+'px';
         this.c[5].style.pointerEvents = 'none';
@@ -1831,8 +1865,6 @@ UIL.Color.prototype.hide = function(){
 };
 
 UIL.Color.prototype.update = function( up ){
-
-    
 
     this.c[3].style.background = UIL.rgbToHex( UIL.hslToRgb([this.hsl[0], 1, 0.5]) );
 
@@ -2352,8 +2384,6 @@ UIL.List.prototype.listwheel = function( e ){
 
     this.py += delta;
 
-    
-
     this.update(this.py);
 
 };
@@ -2395,12 +2425,14 @@ UIL.List.prototype.listShow = function(){
 
     this.rSizeContent();
 
-    if( this.isUI ) UIL.main.calc(this.h-this.baseH);
+    if( this.parentGroup !== null ){ this.parentGroup.calc( this.h - this.baseH );}
+    if( this.isUI ) UIL.main.calc( this.h - this.baseH );
 
 };
 
 UIL.List.prototype.listHide = function(){
 
+    if( this.parentGroup !== null ){ this.parentGroup.calc( -(this.h-this.baseH) );}
     if( this.isUI ) UIL.main.calc(-(this.h-this.baseH));
 
     this.show = false;
@@ -2430,16 +2462,16 @@ UIL.List.prototype.rSize = function(){
 
     UIL.Proto.prototype.rSize.call( this );
 
-    this.c[2].style.width = this.sb+'px';
+    this.c[2].style.width = this.sb + 'px';
     this.c[2].style.left = this.sa - 20 +'px';
 
-    this.c[3].style.width = this.sb+'px';
-    this.c[3].style.left = this.sa+'px';
+    this.c[3].style.width = this.sb + 'px';
+    this.c[3].style.left = this.sa + 'px';
 
-    this.c[4].style.left = this.sa + this.sb - 17 +'px';
+    this.c[4].style.left = this.sa + this.sb - 17 + 'px';
 
-    this.c[5].style.width = this.sb+'px';
-    this.c[5].style.left = this.sa+'px';
+    this.c[5].style.width = this.sb + 'px';
+    this.c[5].style.left = this.sa + 'px';
 
     this.w = this.sb;
     if(this.max > this.maxHeight) this.w = this.sb-20;

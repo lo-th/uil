@@ -206,8 +206,6 @@ UIL.List.prototype.listwheel = function( e ){
 
     this.py += delta;
 
-    
-
     this.update(this.py);
 
 };
@@ -249,12 +247,14 @@ UIL.List.prototype.listShow = function(){
 
     this.rSizeContent();
 
-    if( this.isUI ) UIL.main.calc(this.h-this.baseH);
+    if( this.parentGroup !== null ){ this.parentGroup.calc( this.h - this.baseH );}
+    if( this.isUI ) UIL.main.calc( this.h - this.baseH );
 
 };
 
 UIL.List.prototype.listHide = function(){
 
+    if( this.parentGroup !== null ){ this.parentGroup.calc( -(this.h-this.baseH) );}
     if( this.isUI ) UIL.main.calc(-(this.h-this.baseH));
 
     this.show = false;
@@ -284,16 +284,16 @@ UIL.List.prototype.rSize = function(){
 
     UIL.Proto.prototype.rSize.call( this );
 
-    this.c[2].style.width = this.sb+'px';
+    this.c[2].style.width = this.sb + 'px';
     this.c[2].style.left = this.sa - 20 +'px';
 
-    this.c[3].style.width = this.sb+'px';
-    this.c[3].style.left = this.sa+'px';
+    this.c[3].style.width = this.sb + 'px';
+    this.c[3].style.left = this.sa + 'px';
 
-    this.c[4].style.left = this.sa + this.sb - 17 +'px';
+    this.c[4].style.left = this.sa + this.sb - 17 + 'px';
 
-    this.c[5].style.width = this.sb+'px';
-    this.c[5].style.left = this.sa+'px';
+    this.c[5].style.width = this.sb + 'px';
+    this.c[5].style.left = this.sa + 'px';
 
     this.w = this.sb;
     if(this.max > this.maxHeight) this.w = this.sb-20;

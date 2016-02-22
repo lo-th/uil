@@ -20,7 +20,7 @@ UIL.Color = function( o ){
     this.mid = Math.floor(this.width * 0.5 );
     this.markerSize = this.wheelWidth * 0.3;
 
-    this.oldh = this.h;
+    this.baseH = this.h;
 
     this.c[2] = UIL.DOM('UIL text', 'div',  'height:'+(this.h-4)+'px;' + 'border-radius:6px; pointer-events:auto; cursor:pointer; border:1px solid '+ UIL.Border + '; line-height:'+(this.h-8)+'px;' );
  
@@ -146,7 +146,7 @@ UIL.Color.prototype.show = function(){
 
     if(this.oldWidth!==this.width) this.redraw();
     this.isShow = true;
-    this.h = this.width + this.oldh + 10;
+    this.h = this.width + this.baseH + 10;
     this.c[0].style.height = this.h+'px';
 
     if(this.side=='up'){ 
@@ -159,15 +159,18 @@ UIL.Color.prototype.show = function(){
     this.c[4].style.display = 'block';
     this.c[5].style.display = 'block';
 
-    if( this.isUI ) UIL.main.calc( this.h-this.oldh );
+    if( this.parentGroup !== null ){ this.parentGroup.calc( this.h - this.baseH );}
+    if( this.isUI ) UIL.main.calc( this.h - this.baseH );
 
 };
 
 UIL.Color.prototype.hide = function(){
 
-    if( this.isUI ) UIL.main.calc( -(this.h-this.oldh) );
+    if( this.parentGroup !== null ){ this.parentGroup.calc( -(this.h-this.baseH) );}
+    if( this.isUI ) UIL.main.calc( -(this.h-this.baseH) );
+
     this.isShow = false;
-    this.h = this.oldh;
+    this.h = this.baseH;
     if(this.side === 'up'){ 
         if(!isNaN(this.holdTop)) this.c[0].style.top = (this.holdTop)+'px';
         this.c[5].style.pointerEvents = 'none';
@@ -180,8 +183,6 @@ UIL.Color.prototype.hide = function(){
 };
 
 UIL.Color.prototype.update = function( up ){
-
-    
 
     this.c[3].style.background = UIL.rgbToHex( UIL.hslToRgb([this.hsl[0], 1, 0.5]) );
 

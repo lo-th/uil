@@ -4,6 +4,8 @@ UIL.Gui = function( o ){
 
     this.height = o.height || 20;
 
+    if( o.Tpercent !== undefined ) UIL.P = o.Tpercent;
+
     this.width = UIL.WIDTH;
     this.h = this.height;
     this.prevY = -1;
@@ -238,7 +240,7 @@ UIL.Gui.prototype = {
         y = y < 0 ? 0 :y;
         y = y > this.range ? this.range : y;
 
-        this.inner.style.top = -( ~~(y / this.ratio) ) + 'px';
+        this.inner.style.top = -( ~~ ( y / this.ratio ) ) + 'px';
         this.scroll.style.top = ( ~~ y ) + 'px';
 
         this.py = y;
@@ -250,7 +252,7 @@ UIL.Gui.prototype = {
         this.isScroll = true;
 
         this.total = this.h;
-        this.maxView = this.maxHeight-this.height;
+        this.maxView = this.maxHeight - this.height;
 
         this.ratio = this.maxView / this.total;
         this.sh = this.maxView * this.ratio;
@@ -287,8 +289,13 @@ UIL.Gui.prototype = {
 
         if( y !== undefined ) this.h += y;
         else this.h = this.inner.offsetHeight;
+
+        /*var i = this.uis.length;
+        while(i--){
+            if( this.uis[i].isGroup ) this.uis[i].calc();
+        }*/
         
-        clearTimeout(this.tmp);
+        clearTimeout( this.tmp );
         this.tmp = setTimeout( this.testHeight.bind(this), 10);
 
     },
@@ -315,9 +322,12 @@ UIL.Gui.prototype = {
 
         if( size ){
             UIL.WIDTH = ~~ size;
-            var s = UIL.WIDTH / 3;
-            UIL.BW = ~~ ((s*2)-10);
-            UIL.AW = ~~ s;
+
+            //var pp = UIL.WIDTH * (50/100);
+
+            //var s = UIL.WIDTH / 3;
+            //UIL.BW = ~~ UIL.WIDTH - pp;//((s*2)-10);
+            //UIL.AW = ~~ pp;//s;
         }
 
         this.width = UIL.WIDTH;
@@ -325,16 +335,14 @@ UIL.Gui.prototype = {
 
         if( this.isCenter ) this.content.style.marginLeft = -(~~ (UIL.WIDTH*0.5)) + 'px';
 
-        var l = this.uis.length
+        var l = this.uis.length;
         var i = l;
         while(i--){
             this.uis[i].setSize();
-            //this.uis[i].rSize();
         }
 
         i = l;
         while(i--){
-            //this.uis[i].setSize();
             this.uis[i].rSize();
         }
 

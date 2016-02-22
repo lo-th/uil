@@ -3,6 +3,7 @@ UIL.Group = function( o ){
     UIL.Proto.call( this, o );
 
     this.autoHeight = true;
+    this.isGroup = true;
 
     //this.h = 25;
     this.baseH = this.h;
@@ -57,7 +58,7 @@ UIL.Group.prototype.add = function( ){
     var a = arguments;
 
     if( typeof a[1] === 'object' ){ 
-        a[1].isUI = this.isUI; 
+        a[1].isUI = this.isUI;
         a[1].target = this.c[2];
     } else if( typeof arguments[1] === 'string' ){
         if( a[2] === undefined ) [].push.call(a, { isUI:true, target:this.c[2] });
@@ -67,7 +68,10 @@ UIL.Group.prototype.add = function( ){
         }
     }
 
-    UIL.Gui.prototype.add.apply( this, a );
+    var n = UIL.Gui.prototype.add.apply( this, a );
+    n.parentGroup = this;
+
+    return n;
 
 };
 
@@ -77,7 +81,7 @@ UIL.Group.prototype.open = function(){
     UIL.setSvg( this.c[4], 'd','M 12 6 L 8 10 4 6');
     this.rSizeContent();
 
-    if( this.isUI ) UIL.main.calc( this.h -this.baseH );
+    if( this.isUI ) UIL.main.calc( this.h - this.baseH );
 
 };
 
@@ -112,13 +116,17 @@ UIL.Group.prototype.clearGroup = function(){
 
 };
 
-UIL.Group.prototype.calc = function(){
+UIL.Group.prototype.calc = function( y ){
 
     if( !this.isOpen ) return;
-    this.h = this.baseH;
 
-    var total = this.c[2].offsetHeight;
-    this.h += total;
+    //this.h = this.baseH;
+
+    if( y !== undefined ){ this.h += y; }
+    else this.h = this.c[2].offsetHeight + this.baseH;
+
+    //var total = this.c[2].offsetHeight;
+    //this.h += total;
 
     this.c[0].style.height = this.h + 'px';
 
