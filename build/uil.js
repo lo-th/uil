@@ -189,7 +189,7 @@ var UIL = ( function () {
 
     UIL = function () {};
 
-    UIL.REVISION = 0.95;
+    UIL.REVISION = 0.96;
     UIL.main = null;
     UIL.DEF = false;
     UIL.WIDTH = 300;
@@ -776,15 +776,7 @@ UIL.Gui.prototype = {
 
     setWidth:function( size ) {
 
-        if( size ){
-            UIL.WIDTH = ~~ size;
-
-            //var pp = UIL.WIDTH * (50/100);
-
-            //var s = UIL.WIDTH / 3;
-            //UIL.BW = ~~ UIL.WIDTH - pp;//((s*2)-10);
-            //UIL.AW = ~~ pp;//s;
-        }
+        if( size ) UIL.WIDTH = ~~ size;
 
         this.width = UIL.WIDTH;
         this.content.style.width = this.width + 'px';
@@ -1040,8 +1032,8 @@ UIL.Proto.prototype = {
         if( !this.p ) this.p = UIL.P;
 
         if( this.simple ){
-            this.sa = 1;
-            this.sb = sx-2;
+            this.sa = 0;
+            this.sb = this.size;
         }else{
             var pp = this.size * ( this.p / 100 );
             this.sa = ~~ pp;

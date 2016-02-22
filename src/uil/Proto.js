@@ -208,8 +208,8 @@ UIL.Proto.prototype = {
         if( !this.p ) this.p = UIL.P;
 
         if( this.simple ){
-            this.sa = 1;
-            this.sb = sx-2;
+            this.sa = 0;
+            this.sb = this.size;
         }else{
             var pp = this.size * ( this.p / 100 );
             this.sa = ~~ pp;

@@ -15,7 +15,7 @@ var UIL = ( function () {
 
     UIL = function () {};
 
-    UIL.REVISION = 0.95;
+    UIL.REVISION = 0.96;
     UIL.main = null;
     UIL.DEF = false;
     UIL.WIDTH = 300;
