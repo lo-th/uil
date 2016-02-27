@@ -15,7 +15,7 @@ var UMC = UMC || ( function () {
     var head = doc.getElementsByTagName('head')[0];
 
     var DOM_SIZE = [ 'height', 'width', 'top', 'left', 'bottom', 'right', 'margin-left', 'margin-right', 'margin-top', 'margin-bottom'];
-    var SVG_TYPE_D = [ 'pattern', 'defs', 'transform', 'stop', 'animate', 'radialGradient', 'linearGradient' ];
+    var SVG_TYPE_D = [ 'pattern', 'defs', 'transform', 'stop', 'animate', 'radialGradient', 'linearGradient', 'animateMotion' ];
     var SVG_TYPE_G = [ 'rect', 'circle', 'path', 'polygon', 'text', 'g', 'line', 'foreignObject' ];
 
     var svgns = "http://www.w3.org/2000/svg";
@@ -94,6 +94,7 @@ var UMC = UMC || ( function () {
         } else { // is html element
 
             if( dom === undefined ) dom = doc.createElementNS( htmls, type );//doc.createElement( type );
+            else dom = dom.appendChild( doc.createElementNS( htmls, type ) );
 
         }
 
@@ -199,7 +200,7 @@ var UIL = ( function () {
 
     UIL.UNS = '-o-user-select:none; -ms-user-select:none; -khtml-user-select:none; -webkit-user-select:none; -moz-user-select:none;';
     //UIL.US = '-o-user-select:text; -ms-user-select:text; -khtml-user-select:text; -webkit-user-select:text; -moz-user-select:text;';
-    UIL.TXT = 'font-family:"Lucida Console", Monaco, monospace; font-size:11px; color:#cccccc; padding:2px 10px; left:0; top:2px; height:16px; width:100px; overflow:hidden; white-space: nowrap;';
+    UIL.TXT = 'font-family:"Lucida Console", Monaco, monospace; font-size:11px; color:#CCC; padding:2px 10px; left:0; top:2px; height:16px; width:100px; overflow:hidden; white-space: nowrap;';
 
     UIL.DOM = UMC.dom;
     UIL.CC = UMC.cc;
@@ -218,8 +219,13 @@ var UIL = ( function () {
     UIL.Border = '#4f4f4f'; //'rgba(120,120,120,0.3)';
     UIL.BorderSelect = UIL.SELECT;//'rgba(3,95,207,0.6)';
     UIL.PNG = 'url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAA';
+    UIL.PNGP = 'oAAAAKAgMAAADwXCcuAAAACVBMVEVMaXHi4uLi4uLDusitAAAAAnRSTlMAgJsrThgAAAA';
     UIL.GroupBG = UIL.PNG + 'MAAAADAQMAAABs5if8AAAABlBMVEVMaXH///+a4ocPAAAAAnRSTlMAM8lDrC4AAAAOSURBVHicY2BgcGBgAAAAxgBBOTEMSwAAAABJRU5ErkJggg==)';
     UIL.SlideBG = UIL.PNG + 'UAAAAFAQMAAAC3obSmAAAABlBMVEVMaXH///+a4ocPAAAAAnRSTlMAM8lDrC4AAAASSURBVHicY3BgaGDgYBBgUAAABkIA+fbHMRYAAAAASUVORK5CYII=)';
+
+    UIL.F0 = UIL.PNG + UIL.PNGP + 'kSURBVHicY2BkYGBgc2BgYJwAZKSwMDBIckIwkA0SA8sxMAAAN24CxaaVoKMAAAAASUVORK5CYII=)';
+    UIL.F1 = UIL.PNG + UIL.PNGP + 'kSURBVHicY2CAAgEGB4YUxokMkmxuDGyRnAyMS1gYGAJgsgwAPlADDRCT8ZwAAAAASUVORK5CYII=)';
+    UIL.X0 = UIL.PNG + UIL.PNGP + 'lSURBVHicYxBgcGBIYZzIIMnmxsAWycnAuIQFjEFskBhIDqgGAGxoBXlOWpMvAAAAAElFTkSuQmCC)';
 
     UIL.classDefine = function(){
             
@@ -908,6 +914,10 @@ UIL.Proto = function( o ){
         this.mono = true;
     }
 
+    if(o.css){
+        this.c[0].style.cssText = o.css; 
+    }
+
 };
 
 UIL.Proto.prototype = {
@@ -1156,7 +1166,7 @@ UIL.Group = function( o ){
 
     this.c[2] = UIL.DOM('UIL inner', 'div', 'top:'+this.h+'px');
     this.c[3] = UIL.DOM('UIL', 'div', 'top:2px; left:2px; height:'+(this.h-4)+'px; width:6px; background-image:'+ UIL.GroupBG );
-    this.c[4] = UIL.DOM('UIL', 'path','position:absolute; width:16px; top:'+((this.h*0.5)-8)+'px; pointer-events:none;',{ width:16, height:16, 'd':'M 6 4 L 10 8 6 12', 'stroke-width':2, stroke:this.fontColor, fill:'none', 'stroke-linecap':'butt' } );
+    this.c[4] = UIL.DOM('UIL', 'div','position:absolute; width:10px; height:10px; top:'+(~~(this.h*0.5)-5)+'px; pointer-events:none; background:'+ UIL.F0 );
 
     this.c[0].style.height = this.h + 'px';
     this.c[1].style.height = this.h + 'px';
@@ -1213,7 +1223,7 @@ UIL.Group.prototype.add = function( ){
     }
 
     var n = UIL.Gui.prototype.add.apply( this, a );
-    n.parentGroup = this;
+    if( n.autoHeight ) n.parentGroup = this;
 
     return n;
 
@@ -1222,7 +1232,7 @@ UIL.Group.prototype.add = function( ){
 UIL.Group.prototype.open = function(){
 
     this.isOpen = true;
-    UIL.setSvg( this.c[4], 'd','M 12 6 L 8 10 4 6');
+    this.c[4].style.background = UIL.F1;
     this.rSizeContent();
 
     if( this.isUI ) UIL.main.calc( this.h - this.baseH );
@@ -1234,7 +1244,7 @@ UIL.Group.prototype.close = function(){
     if( this.isUI ) UIL.main.calc(-(this.h-this.baseH ));
 
     this.isOpen = false;
-    UIL.setSvg( this.c[4], 'd','M 6 4 L 10 8 6 12');
+    this.c[4].style.background = UIL.F0;
     this.h = this.baseH;
 
     this.c[0].style.height = this.h + 'px';
@@ -2173,12 +2183,12 @@ UIL.List = function( o ){
     UIL.Proto.call( this, o );
 
     this.autoHeight = true;
+    var align = o.align || 'center';
 
     this.c[2] = UIL.DOM('UIL list');
     this.c[3] = UIL.DOM('UIL button', 'div', 'background:'+UIL.bgcolor(UIL.COLOR)+'; height:'+(this.h-2)+'px;' );
-    this.c[4] = UIL.DOM('UIL', 'path','position:absolute; width:16px; height:16px; left:'+(this.sa+this.sb-17)+'px; top:'+((this.h*0.5)-8)+'px;',{ width:16, height:16, 'd':'M 6 4 L 10 8 6 12', 'stroke-width':2, stroke:this.fontColor, fill:'none', 'stroke-linecap':'butt' } );
-    //this.c[5] = UIL.DOM('UIL text', 'div', 'text-align:center;');
-    this.c[5] = UIL.DOM('UIL text', 'div', 'text-align:center; height:'+(this.h-4)+'px; line-height:'+(this.h-8)+'px;');
+    this.c[4] = UIL.DOM('UIL', 'div', 'position:absolute; width:10px; height:10px; left:'+((this.sa+this.sb)-5)+'px; top:'+(~~(this.h*0.5)-5)+'px; background:'+ UIL.F0 );
+    this.c[5] = UIL.DOM('UIL text', 'div', 'text-align:'+align+'; height:'+(this.h-4)+'px; line-height:'+(this.h-8)+'px;');
     this.c[6] = UIL.DOM('UIL', 'div', 'right:14px; top:'+this.h+'px; height:16px; width:10px; pointer-events:none; background:#666; display:none;');
 
     this.c[2].name = 'list';
@@ -2412,8 +2422,8 @@ UIL.List.prototype.listShow = function(){
     }
     this.c[0].style.height = this.h+'px';
     this.c[2].style.display = 'block';
-    if( this.side === 'up' ) UIL.setSvg( this.c[4], 'd','M 12 10 L 8 6 4 10');
-    else UIL.setSvg( this.c[4], 'd','M 12 6 L 8 10 4 6');
+    if( this.side === 'up' ) this.c[4].style.background = UIL.F0;
+    else this.c[4].style.background = UIL.F1;
 
     this.rSizeContent();
 
@@ -2431,7 +2441,7 @@ UIL.List.prototype.listHide = function(){
     this.h = this.baseH;
     this.c[0].style.height = this.h + 'px';
     this.c[2].style.display = 'none';
-    UIL.setSvg( this.c[4], 'd','M 6 4 L 10 8 6 12');
+    this.c[4].style.background = UIL.F0;
     
 };
 

@@ -84,6 +84,10 @@ UIL.Proto = function( o ){
         this.mono = true;
     }
 
+    if(o.css){
+        this.c[0].style.cssText = o.css; 
+    }
+
 };
 
 UIL.Proto.prototype = {

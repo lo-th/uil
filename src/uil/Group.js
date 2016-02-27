@@ -12,7 +12,7 @@ UIL.Group = function( o ){
 
     this.c[2] = UIL.DOM('UIL inner', 'div', 'top:'+this.h+'px');
     this.c[3] = UIL.DOM('UIL', 'div', 'top:2px; left:2px; height:'+(this.h-4)+'px; width:6px; background-image:'+ UIL.GroupBG );
-    this.c[4] = UIL.DOM('UIL', 'path','position:absolute; width:16px; top:'+((this.h*0.5)-8)+'px; pointer-events:none;',{ width:16, height:16, 'd':'M 6 4 L 10 8 6 12', 'stroke-width':2, stroke:this.fontColor, fill:'none', 'stroke-linecap':'butt' } );
+    this.c[4] = UIL.DOM('UIL', 'div','position:absolute; width:10px; height:10px; top:'+(~~(this.h*0.5)-5)+'px; pointer-events:none; background:'+ UIL.F0 );
 
     this.c[0].style.height = this.h + 'px';
     this.c[1].style.height = this.h + 'px';
@@ -69,7 +69,7 @@ UIL.Group.prototype.add = function( ){
     }
 
     var n = UIL.Gui.prototype.add.apply( this, a );
-    n.parentGroup = this;
+    if( n.autoHeight ) n.parentGroup = this;
 
     return n;
 
@@ -78,7 +78,7 @@ UIL.Group.prototype.add = function( ){
 UIL.Group.prototype.open = function(){
 
     this.isOpen = true;
-    UIL.setSvg( this.c[4], 'd','M 12 6 L 8 10 4 6');
+    this.c[4].style.background = UIL.F1;
     this.rSizeContent();
 
     if( this.isUI ) UIL.main.calc( this.h - this.baseH );
@@ -90,7 +90,7 @@ UIL.Group.prototype.close = function(){
     if( this.isUI ) UIL.main.calc(-(this.h-this.baseH ));
 
     this.isOpen = false;
-    UIL.setSvg( this.c[4], 'd','M 6 4 L 10 8 6 12');
+    this.c[4].style.background = UIL.F0;
     this.h = this.baseH;
 
     this.c[0].style.height = this.h + 'px';

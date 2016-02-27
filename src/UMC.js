@@ -15,7 +15,7 @@ var UMC = UMC || ( function () {
     var head = doc.getElementsByTagName('head')[0];
 
     var DOM_SIZE = [ 'height', 'width', 'top', 'left', 'bottom', 'right', 'margin-left', 'margin-right', 'margin-top', 'margin-bottom'];
-    var SVG_TYPE_D = [ 'pattern', 'defs', 'transform', 'stop', 'animate', 'radialGradient', 'linearGradient' ];
+    var SVG_TYPE_D = [ 'pattern', 'defs', 'transform', 'stop', 'animate', 'radialGradient', 'linearGradient', 'animateMotion' ];
     var SVG_TYPE_G = [ 'rect', 'circle', 'path', 'polygon', 'text', 'g', 'line', 'foreignObject' ];
 
     var svgns = "http://www.w3.org/2000/svg";
@@ -94,6 +94,7 @@ var UMC = UMC || ( function () {
         } else { // is html element
 
             if( dom === undefined ) dom = doc.createElementNS( htmls, type );//doc.createElement( type );
+            else dom = dom.appendChild( doc.createElementNS( htmls, type ) );
 
         }
 
