@@ -3,8 +3,8 @@ UIL.Proto = function( o ){
     o = o || {};
 
     //this.type = '';
-
-    this.p = o.Tpercent || 0;
+    // percent of title
+    this.p = o.p || 0;
 
     // if need resize width
     this.autoWidth = true;
@@ -30,8 +30,12 @@ UIL.Proto = function( o ){
     // define obj size
     this.setSize( o.size );
 
+    // title size
     if(o.sa !== undefined ) this.sa = o.sa;
+
     if(o.sb !== undefined ) this.sb = o.sb;
+    // last number size for slide
+    this.sc = o.sc === undefined ? 47 : o.sc;
 
     // like dat gui
     this.parent = null;
@@ -140,6 +144,12 @@ UIL.Proto.prototype = {
         else this.value = this.parent[ this.val ];
         this.update();
 
+    },
+
+    setValue : function( v ){
+        if( this.isNumber ) this.value = this.numValue( v );
+        else this.value = v;
+        this.update();
     },
 
     update: function( ) {
@@ -318,7 +328,13 @@ UIL.Proto.prototype = {
         this.parent = obj;
         this.val = val;
 
-    }
+    },
+
+    display:function(v){
+
+        this.c[0].style.display = v ? 'block' : 'none';
+
+    },
 
 
 }

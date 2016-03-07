@@ -833,8 +833,8 @@ UIL.Proto = function( o ){
     o = o || {};
 
     //this.type = '';
-
-    this.p = o.Tpercent || 0;
+    // percent of title
+    this.p = o.p || 0;
 
     // if need resize width
     this.autoWidth = true;
@@ -860,8 +860,12 @@ UIL.Proto = function( o ){
     // define obj size
     this.setSize( o.size );
 
+    // title size
     if(o.sa !== undefined ) this.sa = o.sa;
+
     if(o.sb !== undefined ) this.sb = o.sb;
+    // last number size for slide
+    this.sc = o.sc === undefined ? 47 : o.sc;
 
     // like dat gui
     this.parent = null;
@@ -970,6 +974,12 @@ UIL.Proto.prototype = {
         else this.value = this.parent[ this.val ];
         this.update();
 
+    },
+
+    setValue : function( v ){
+        if( this.isNumber ) this.value = this.numValue( v );
+        else this.value = v;
+        this.update();
     },
 
     update: function( ) {
@@ -1148,7 +1158,13 @@ UIL.Proto.prototype = {
         this.parent = obj;
         this.val = val;
 
-    }
+    },
+
+    display:function(v){
+
+        this.c[0].style.display = v ? 'block' : 'none';
+
+    },
 
 
 }
@@ -2160,15 +2176,16 @@ UIL.Slide.prototype.rSize = function(){
 
     UIL.Proto.prototype.rSize.call( this );
 
-    this.width = this.sb - 47;
+    this.width = this.sb - this.sc;
     this.w = this.width - 6;
 
-    var tx = 47;
-    if(this.isUI) tx = 57;
+    var tx = this.sc;
+    if(this.isUI || !this.simple) tx = this.sc+10;
 
     var ty = ~~(this.h * 0.5) - 8;
 
     //if(this.c[1]!==undefined) this.c[1].style.top = ty + 'px';
+    this.c[2].style.width = this.sc + 'px';
     this.c[2].style.left = this.size - tx + 'px';
     this.c[2].style.top = ty + 'px';
     this.c[3].style.left = this.sa + 'px';
