@@ -83,6 +83,14 @@ UIL.Number.prototype.handleEvent = function( e ) {
 
 };
 
+UIL.Number.prototype.setValue = function( v, n ){
+
+    n = n || 0;
+    this.value[n] = this.numValue( v );
+    this.c[2+n].textContent = this.value[n];
+
+};
+
 UIL.Number.prototype.keydown = function( e ){
 
     e.stopPropagation();

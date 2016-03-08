@@ -834,7 +834,7 @@ UIL.Proto = function( o ){
 
     //this.type = '';
     // percent of title
-    this.p = o.p || 0;
+    this.p = o.p || o.tPercent || 0;
 
     // if need resize width
     this.autoWidth = true;
@@ -1544,6 +1544,14 @@ UIL.Number.prototype.handleEvent = function( e ) {
         case 'mousemove': this.move( e ); break;
 
     }
+
+};
+
+UIL.Number.prototype.setValue = function( v, n ){
+
+    n = n || 0;
+    this.value[n] = this.numValue( v );
+    this.c[2+n].textContent = this.value[n];
 
 };
 

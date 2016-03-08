@@ -4,7 +4,7 @@ UIL.Proto = function( o ){
 
     //this.type = '';
     // percent of title
-    this.p = o.p || 0;
+    this.p = o.p || o.tPercent || 0;
 
     // if need resize width
     this.autoWidth = true;
