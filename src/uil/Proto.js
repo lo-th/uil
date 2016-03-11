@@ -69,28 +69,34 @@ UIL.Proto = function( o ){
 
     this.c = [];
 
+    // style 
+
+    this.s = [];
+
     //this.c[0] = UIL.DOM('UIL base');
     this.c[0] = UIL.DOM('UIL', 'div', 'position:relative; height:20px; float:left;');
+    this.s[0] = this.c[0].style;
 
-    if( this.isUI ) this.c[0].style.marginBottom = '1px';
+    if( this.isUI ) this.s[0].marginBottom = '1px';
     
 
     if( !this.simple ){ 
         this.c[1] = UIL.DOM('UIL text');
+        this.s[1] = this.c[1].style;
         this.c[1].textContent = this.txt;
-        this.c[1].style.color = this.titleColor;
+        this.s[1].color = this.titleColor;
     }
 
     if(o.pos){
-        this.c[0].style.position = 'absolute';
+        this.s[0].position = 'absolute';
         for(var p in o.pos){
-            this.c[0].style[p] = o.pos[p];
+            this.s[0][p] = o.pos[p];
         }
         this.mono = true;
     }
 
     if(o.css){
-        this.c[0].style.cssText = o.css; 
+        this.s[0].cssText = o.css; 
     }
 
 };
@@ -103,34 +109,28 @@ UIL.Proto.prototype = {
 
     init: function (){
 
-        this.c[0].style.height = this.h + 'px';
+        var s = this.s; // style cached
 
-        if( this.isUI ) this.c[0].style.background = UIL.bgcolor(this.bgcolor);
-        if( this.autoHeight ) this.c[0].style.transition = 'height 0.1s ease-out';
+        //s[0] = this.c[0].style;
+        s[0].height = this.h + 'px';
+
+        if( this.isUI ) this.s[0].background = UIL.bgcolor(this.bgcolor);
+        if( this.autoHeight ) this.s[0].transition = 'height 0.1s ease-out';
         if( this.c[1] !== undefined && this.autoWidth ){
-            this.c[1].style.height = (this.h-4) + 'px';
-            this.c[1].style.lineHeight = (this.h-8) + 'px';
+            s[1] = this.c[1].style;
+            s[1].height = (this.h-4) + 'px';
+            s[1].lineHeight = (this.h-8) + 'px';
         }
 
         var frag = UIL.frag();
 
         for( var i=1, lng = this.c.length; i !== lng; i++ ){
-            if( this.c[i] !== undefined ) frag.appendChild( this.c[i] );
+            if( this.c[i] !== undefined ) {
+                frag.appendChild( this.c[i] );
+                s[i] = this.c[i].style;
+            }
         }
 
-        /*for( var i = 0; i < this.c.length; i++ ){
-            if( i === 0 ){
-                if( this.target !== null ){ 
-                    this.target.appendChild( this.c[0] );
-                } else {
-                    if( this.isUI ) UIL.main.inner.appendChild( this.c[0] );
-                    else document.body.appendChild( this.c[0] );
-                }
-            }
-            else {
-                if( this.c[i] !== undefined ) this.c[0].appendChild( this.c[i] );
-            }
-        }*/
 
         if( this.target !== null ){ 
             this.target.appendChild( this.c[0] );
@@ -140,6 +140,8 @@ UIL.Proto.prototype = {
         }
 
         this.c[0].appendChild( frag );
+
+        //this.s = s;
 
         this.rSize();
         this.addEvent();
@@ -223,6 +225,7 @@ UIL.Proto.prototype = {
         }
 
         this.c = null;
+        this.s = null;
         this.callback = null;
         this.target = null;
 
@@ -252,8 +255,8 @@ UIL.Proto.prototype = {
 
         if( !this.autoWidth ) return;
 
-        this.c[0].style.width = this.size + 'px';
-        if( !this.simple ) this.c[1].style.width = this.sa + 'px';
+        this.s[0].width = this.size + 'px';
+        if( !this.simple ) this.s[1].width = this.sa + 'px';
     
     },
 
@@ -348,7 +351,7 @@ UIL.Proto.prototype = {
 
     display:function(v){
 
-        this.c[0].style.display = v ? 'block' : 'none';
+        this.s[0].display = v ? 'block' : 'none';
 
     },
 

@@ -38,16 +38,18 @@ UIL.Bool.prototype.handleEvent = function( e ) {
 
 UIL.Bool.prototype.click = function( e ){
 
+    var s = this.s;
+
     if(this.value){
         this.value = false;
-        this.c[4].style.marginLeft = '0px';
-        this.c[2].style.background = UIL.Border;
-        this.c[2].style.borderColor = UIL.Border;
+        s[4].marginLeft = '0px';
+        s[2].background = UIL.Border;
+        s[2].borderColor = UIL.Border;
     } else {
         this.value = true;
-        this.c[4].style.marginLeft = '18px';
-        this.c[2].style.background = this.fontColor;
-        this.c[2].style.borderColor = this.fontColor;
+        s[4].marginLeft = '18px';
+        s[2].background = this.fontColor;
+        s[2].borderColor = this.fontColor;
     }
 
     this.send();
@@ -59,8 +61,9 @@ UIL.Bool.prototype.click = function( e ){
 UIL.Bool.prototype.rSize = function(){
 
     UIL.Proto.prototype.rSize.call( this );
-    this.c[2].style.left = this.sa + 'px';
-    this.c[3].style.left = this.sa+1 + 'px';
-    this.c[4].style.left = this.sa+1 + 'px';
+    var s = this.s;
+    s[2].left = this.sa + 'px';
+    s[3].left = this.sa+1 + 'px';
+    s[4].left = this.sa+1 + 'px';
 
 };

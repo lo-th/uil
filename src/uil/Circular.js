@@ -71,12 +71,12 @@ UIL.Circular.prototype.mode = function( mode ){
 
     switch(mode){
         case 0: // base
-            this.c[2].style.color = this.fontColor;
+            this.s[2].color = this.fontColor;
             UIL.setSvg( this.c[3], 'fill','rgba(0,0,0,0.2)');
             UIL.setSvg( this.c[4], 'fill', this.fontColor );
         break;
         case 1: // over
-        this.c[2].style.color = this.colorPlus;
+        this.s[2].color = this.colorPlus;
             UIL.setSvg( this.c[3], 'fill','rgba(0,0,0,0.6)');
             UIL.setSvg( this.c[4], 'fill', this.colorPlus );
         break;

@@ -23,19 +23,23 @@ UIL.Color = function( o ){
     this.baseH = this.h;
 
     this.c[2] = UIL.DOM('UIL text', 'div',  'height:'+(this.h-4)+'px;' + 'border-radius:6px; pointer-events:auto; cursor:pointer; border:1px solid '+ UIL.Border + '; line-height:'+(this.h-8)+'px;' );
- 
+
+    this.s[2] = this.c[2].style;
 
     if(this.side === 'up'){
         this.decal = 5;
-        this.c[2].style.top = 'auto';
-        this.c[2].style.bottom = '2px';
+        this.s[2].top = 'auto';
+        this.s[2].bottom = '2px';
     }
 
     this.c[3] = UIL.DOM('UIL', 'div', 'display:none' );
     this.c[4] = UIL.DOM('UIL', 'canvas', 'display:none;');
     this.c[5] = UIL.DOM('UIL', 'canvas', 'pointer-events:auto; cursor:pointer; display:none;');
 
-    if(this.side === 'up') this.c[5].style.pointerEvents = 'none';
+    this.s[3] = this.c[3].style;
+    this.s[5] = this.c[5].style;
+
+    if(this.side === 'up') this.s[5].pointerEvents = 'none';
 
     this.c[4].width = this.c[4].height = this.width;
     this.c[5].width = this.c[5].height = this.width;
@@ -147,17 +151,17 @@ UIL.Color.prototype.show = function(){
     if(this.oldWidth!==this.width) this.redraw();
     this.isShow = true;
     this.h = this.width + this.baseH + 10;
-    this.c[0].style.height = this.h+'px';
+    this.s[0].height = this.h+'px';
 
     if(this.side=='up'){ 
-        this.holdTop = this.c[0].style.top.substring(0,this.c[0].style.top.length-2) * 1 || 'auto';
-        if(!isNaN(this.holdTop)) this.c[0].style.top = (this.holdTop-(this.h-20))+'px';
-        setTimeout(function(){this.c[5].style.pointerEvents = 'auto';}.bind(this), 100);
+        this.holdTop = this.s[0].top.substring(0,this.s[0].top.length-2) * 1 || 'auto';
+        if(!isNaN(this.holdTop)) this.s[0].top = (this.holdTop-(this.h-20))+'px';
+        setTimeout(function(){this.s[5].pointerEvents = 'auto';}.bind(this), 100);
     }
 
-    this.c[3].style.display = 'block';
-    this.c[4].style.display = 'block';
-    this.c[5].style.display = 'block';
+    this.s[3].display = 'block';
+    this.s[4].display = 'block';
+    this.s[5].display = 'block';
 
     if( this.parentGroup !== null ){ this.parentGroup.calc( this.h - this.baseH );}
     if( this.isUI ) UIL.main.calc( this.h - this.baseH );
@@ -172,29 +176,29 @@ UIL.Color.prototype.hide = function(){
     this.isShow = false;
     this.h = this.baseH;
     if(this.side === 'up'){ 
-        if(!isNaN(this.holdTop)) this.c[0].style.top = (this.holdTop)+'px';
-        this.c[5].style.pointerEvents = 'none';
+        if(!isNaN(this.holdTop)) this.s[0].top = (this.holdTop)+'px';
+        this.s[5].pointerEvents = 'none';
     }
-    this.c[0].style.height = this.h+'px';
-    this.c[3].style.display = 'none';
-    this.c[4].style.display = 'none';
-    this.c[5].style.display = 'none';
+    this.s[0].height = this.h+'px';
+    this.s[3].display = 'none';
+    this.s[4].display = 'none';
+    this.s[5].display = 'none';
     
 };
 
 UIL.Color.prototype.update = function( up ){
 
-    this.c[3].style.background = UIL.rgbToHex( UIL.hslToRgb([this.hsl[0], 1, 0.5]) );
+    this.s[3].background = UIL.rgbToHex( UIL.hslToRgb([this.hsl[0], 1, 0.5]) );
 
     this.drawMarkers();
     
     this.value = this.bcolor;
 
-    this.c[2].style.background = this.bcolor;
+    this.s[2].background = this.bcolor;
     this.c[2].textContent = UIL.htmlToHex(this.bcolor);
 
     this.invert = UIL.findDeepInver( this.rgb );
-    this.c[2].style.color = this.invert ? '#fff' : '#000';;
+    this.s[2].color = this.invert ? '#fff' : '#000';;
 
     if(!up) return;
 
@@ -327,21 +331,23 @@ UIL.Color.prototype.rSize = function(){
     this.mid = Math.floor(this.width * 0.5 );
     this.markerSize = this.wheelWidth * 0.3;
 
-    this.c[2].style.width = this.sb + 'px';
-    this.c[2].style.left = this.sa + 'px';
+    var s = this.s;
 
-    this.c[3].style.width = (this.square * 2 - 1) + 'px';
-    this.c[3].style.height = (this.square * 2 - 1) + 'px';
-    this.c[3].style.top = (this.mid+this.decal )-this.square + 'px';
-    this.c[3].style.left = (this.mid+this.sa )-this.square + 'px';
+    s[2].width = this.sb + 'px';
+    s[2].left = this.sa + 'px';
+
+    s[3].width = (this.square * 2 - 1) + 'px';
+    s[3].height = (this.square * 2 - 1) + 'px';
+    s[3].top = (this.mid+this.decal )-this.square + 'px';
+    s[3].left = (this.mid+this.sa )-this.square + 'px';
 
     this.c[4].width = this.c[4].height = this.width;
-    this.c[4].style.left = this.sa + 'px';
-    this.c[4].style.top = this.decal + 'px';
+    s[4].left = this.sa + 'px';
+    s[4].top = this.decal + 'px';
 
     this.c[5].width = this.c[5].height = this.width;
-    this.c[5].style.left = this.sa + 'px';
-    this.c[5].style.top = this.decal + 'px';
+    s[5].left = this.sa + 'px';
+    s[5].top = this.decal + 'px';
 
     this.ctxMask.translate(this.mid, this.mid);
     this.ctxOverlay.translate(this.mid, this.mid);

@@ -229,10 +229,16 @@ var UIL = ( function () {
     UIL.PNGP = 'oAAAAKAgMAAADwXCcuAAAACVBMVEVMaXHi4uLi4uLDusitAAAAAnRSTlMAgJsrThgAAAA';
     UIL.GroupBG = UIL.PNG + 'MAAAADAQMAAABs5if8AAAABlBMVEVMaXH///+a4ocPAAAAAnRSTlMAM8lDrC4AAAAOSURBVHicY2BgcGBgAAAAxgBBOTEMSwAAAABJRU5ErkJggg==)';
     UIL.SlideBG = UIL.PNG + 'UAAAAFAQMAAAC3obSmAAAABlBMVEVMaXH///+a4ocPAAAAAnRSTlMAM8lDrC4AAAASSURBVHicY3BgaGDgYBBgUAAABkIA+fbHMRYAAAAASUVORK5CYII=)';
+    //UIL.SlideBG_B = UIL.PNG + 'UAAAAFCAYAAACNbyblAAAAHUlEQVQImWNgYGBg+A8FDDCAIQATROcz4lOAYgwAzyYj3rE9lZIAAAAASUVORK5CYII=)';
+    //UIL.SlideBG_N = UIL.PNG + 'UAAAAFCAYAAACNbyblAAAAG0lEQVQImWNggID/UAwHGAIMWAT+MxJQgDAGAOa6CPmLYuUPAAAAAElFTkSuQmCC)';
+    UIL.SlideBG_NN = UIL.PNG + 'UAAAAFCAYAAACNbyblAAAALElEQVQImV3MsQ0AIAwDwUsmYTRGyeg0SAi7eekKF8bbwu4ETCdAJ0Ddfr8H+wEEqTj7jz0AAAAASUVORK5CYII=)';
+
 
     UIL.F0 = UIL.PNG + UIL.PNGP + 'kSURBVHicY2BkYGBgc2BgYJwAZKSwMDBIckIwkA0SA8sxMAAAN24CxaaVoKMAAAAASUVORK5CYII=)';
     UIL.F1 = UIL.PNG + UIL.PNGP + 'kSURBVHicY2CAAgEGB4YUxokMkmxuDGyRnAyMS1gYGAJgsgwAPlADDRCT8ZwAAAAASUVORK5CYII=)';
     UIL.X0 = UIL.PNG + UIL.PNGP + 'lSURBVHicYxBgcGBIYZzIIMnmxsAWycnAuIQFjEFskBhIDqgGAGxoBXlOWpMvAAAAAElFTkSuQmCC)';
+
+
 
     UIL.classDefine = function(){
             
@@ -909,28 +915,34 @@ UIL.Proto = function( o ){
 
     this.c = [];
 
+    // style 
+
+    this.s = [];
+
     //this.c[0] = UIL.DOM('UIL base');
     this.c[0] = UIL.DOM('UIL', 'div', 'position:relative; height:20px; float:left;');
+    this.s[0] = this.c[0].style;
 
-    if( this.isUI ) this.c[0].style.marginBottom = '1px';
+    if( this.isUI ) this.s[0].marginBottom = '1px';
     
 
     if( !this.simple ){ 
         this.c[1] = UIL.DOM('UIL text');
+        this.s[1] = this.c[1].style;
         this.c[1].textContent = this.txt;
-        this.c[1].style.color = this.titleColor;
+        this.s[1].color = this.titleColor;
     }
 
     if(o.pos){
-        this.c[0].style.position = 'absolute';
+        this.s[0].position = 'absolute';
         for(var p in o.pos){
-            this.c[0].style[p] = o.pos[p];
+            this.s[0][p] = o.pos[p];
         }
         this.mono = true;
     }
 
     if(o.css){
-        this.c[0].style.cssText = o.css; 
+        this.s[0].cssText = o.css; 
     }
 
 };
@@ -943,34 +955,28 @@ UIL.Proto.prototype = {
 
     init: function (){
 
-        this.c[0].style.height = this.h + 'px';
+        var s = this.s; // style cached
 
-        if( this.isUI ) this.c[0].style.background = UIL.bgcolor(this.bgcolor);
-        if( this.autoHeight ) this.c[0].style.transition = 'height 0.1s ease-out';
+        //s[0] = this.c[0].style;
+        s[0].height = this.h + 'px';
+
+        if( this.isUI ) this.s[0].background = UIL.bgcolor(this.bgcolor);
+        if( this.autoHeight ) this.s[0].transition = 'height 0.1s ease-out';
         if( this.c[1] !== undefined && this.autoWidth ){
-            this.c[1].style.height = (this.h-4) + 'px';
-            this.c[1].style.lineHeight = (this.h-8) + 'px';
+            s[1] = this.c[1].style;
+            s[1].height = (this.h-4) + 'px';
+            s[1].lineHeight = (this.h-8) + 'px';
         }
 
         var frag = UIL.frag();
 
         for( var i=1, lng = this.c.length; i !== lng; i++ ){
-            if( this.c[i] !== undefined ) frag.appendChild( this.c[i] );
+            if( this.c[i] !== undefined ) {
+                frag.appendChild( this.c[i] );
+                s[i] = this.c[i].style;
+            }
         }
 
-        /*for( var i = 0; i < this.c.length; i++ ){
-            if( i === 0 ){
-                if( this.target !== null ){ 
-                    this.target.appendChild( this.c[0] );
-                } else {
-                    if( this.isUI ) UIL.main.inner.appendChild( this.c[0] );
-                    else document.body.appendChild( this.c[0] );
-                }
-            }
-            else {
-                if( this.c[i] !== undefined ) this.c[0].appendChild( this.c[i] );
-            }
-        }*/
 
         if( this.target !== null ){ 
             this.target.appendChild( this.c[0] );
@@ -980,6 +986,8 @@ UIL.Proto.prototype = {
         }
 
         this.c[0].appendChild( frag );
+
+        //this.s = s;
 
         this.rSize();
         this.addEvent();
@@ -1063,6 +1071,7 @@ UIL.Proto.prototype = {
         }
 
         this.c = null;
+        this.s = null;
         this.callback = null;
         this.target = null;
 
@@ -1092,8 +1101,8 @@ UIL.Proto.prototype = {
 
         if( !this.autoWidth ) return;
 
-        this.c[0].style.width = this.size + 'px';
-        if( !this.simple ) this.c[1].style.width = this.sa + 'px';
+        this.s[0].width = this.size + 'px';
+        if( !this.simple ) this.s[1].width = this.sa + 'px';
     
     },
 
@@ -1188,7 +1197,7 @@ UIL.Proto.prototype = {
 
     display:function(v){
 
-        this.c[0].style.display = v ? 'block' : 'none';
+        this.s[0].display = v ? 'block' : 'none';
 
     },
 
@@ -1210,12 +1219,14 @@ UIL.Group = function( o ){
     this.c[3] = UIL.DOM('UIL', 'div', 'top:2px; left:2px; height:'+(this.h-4)+'px; width:6px; background-image:'+ UIL.GroupBG );
     this.c[4] = UIL.DOM('UIL', 'div','position:absolute; width:10px; height:10px; top:'+(~~(this.h*0.5)-5)+'px; pointer-events:none; background:'+ UIL.F0 );
 
-    this.c[0].style.height = this.h + 'px';
-    this.c[1].style.height = this.h + 'px';
-    this.c[1].style.top = 4 + 'px';
-    this.c[1].style.left = 4 + 'px';
-    this.c[1].style.pointerEvents = 'auto';
-    this.c[1].style.cursor = 'pointer';
+    var s = this.s;
+
+    s[0].height = this.h + 'px';
+    s[1].height = this.h + 'px';
+    s[1].top = 4 + 'px';
+    s[1].left = 4 + 'px';
+    s[1].pointerEvents = 'auto';
+    s[1].cursor = 'pointer';
     this.c[1].name = 'group';
 
     this.uis = [];
@@ -1274,7 +1285,7 @@ UIL.Group.prototype.add = function( ){
 UIL.Group.prototype.open = function(){
 
     this.isOpen = true;
-    this.c[4].style.background = UIL.F1;
+    this.s[4].background = UIL.F1;
     this.rSizeContent();
 
     if( this.isUI ) UIL.main.calc( this.h - this.baseH );
@@ -1286,10 +1297,10 @@ UIL.Group.prototype.close = function(){
     if( this.isUI ) UIL.main.calc(-(this.h-this.baseH ));
 
     this.isOpen = false;
-    this.c[4].style.background = UIL.F0;
+    this.s[4].background = UIL.F0;
     this.h = this.baseH;
 
-    this.c[0].style.height = this.h + 'px';
+    this.s[0].height = this.h + 'px';
 
 };
 
@@ -1324,7 +1335,7 @@ UIL.Group.prototype.calc = function( y ){
     //var total = this.c[2].offsetHeight;
     //this.h += total;
 
-    this.c[0].style.height = this.h + 'px';
+    this.s[0].height = this.h + 'px';
 
 };
 
@@ -1343,9 +1354,11 @@ UIL.Group.prototype.rSize = function(){
 
     UIL.Proto.prototype.rSize.call( this );
 
-    this.c[4].style.left = ( this.sa + this.sb - 17 ) + 'px';
-    this.c[1].style.width = this.size + 'px';
-    this.c[2].style.width = this.size + 'px';
+    var s = this.s;
+
+    s[4].left = ( this.sa + this.sb - 17 ) + 'px';
+    s[1].width = this.size + 'px';
+    s[2].width = this.size + 'px';
 
     if(this.isOpen) this.rSizeContent();
 
@@ -1361,13 +1374,13 @@ UIL.Title = function( o ){
     var id = o.id || 0;
     var prefix = o.prefix || '';
 
-    this.c[2] = UIL.DOM( 'UIL text', 'div', 'text-align:right; width:40px; line-height:'+ (this.h-8) + 'px');
-    this.c[2].style.color = this.fontColor;
+    this.c[2] = UIL.DOM( 'UIL text', 'div', 'text-align:right; width:40px; line-height:'+ (this.h-8) + 'px; color:' + this.fontColor );
+    //this.c[2].style.color = this.fontColor;
 
     if( this.h === 31 ){
 
-        this.c[0].style.height = this.h + 'px';
-        this.c[1].style.top = 8 + 'px';
+        this.s[0].height = this.h + 'px';
+        this.s[1].top = 8 + 'px';
         this.c[2].style.top = 8 + 'px';
 
     }
@@ -1389,8 +1402,8 @@ UIL.Title.prototype.constructor = UIL.Title;
 UIL.Title.prototype.rSize = function(){
 
     UIL.Proto.prototype.rSize.call( this );
-    this.c[1].style.width = this.size-50 + 'px';
-    this.c[2].style.left = this.size-(50+26) + 'px';
+    this.s[1].width = this.size-50 + 'px';
+    this.s[2].left = this.size-(50+26) + 'px';
 
 };
 
@@ -1412,9 +1425,9 @@ UIL.String = function( o ){
     this.value = o.value || '';
     this.allway = o.allway || false;
 
-    this.c[2] = UIL.DOM( 'UIL textSelect', 'div', 'height:'+(this.h-4)+'px; line-height:'+(this.h-8)+'px; ' );
+    this.c[2] = UIL.DOM( 'UIL textSelect', 'div', 'height:'+(this.h-4)+'px; line-height:'+(this.h-8)+'px; color:' +  this.fontColor );
     this.c[2].name = 'input';
-    this.c[2].style.color = this.fontColor;
+    //this.c[2].style.color = ;
     this.c[2].textContent = this.value;
 
     this.c[2].events = [ 'mousedown', 'keydown', 'keyup', 'blur', 'focus' ];
@@ -1484,8 +1497,8 @@ UIL.String.prototype.keyup = function( e ){
 UIL.String.prototype.rSize = function(){
 
     UIL.Proto.prototype.rSize.call( this );
-    this.c[2].style.left = this.sa + 'px';
-    this.c[2].style.width = this.sb + 'px';
+    this.s[2].left = this.sa + 'px';
+    this.s[2].width = this.sb + 'px';
 
 };
 UIL.Number = function( o ){
@@ -1725,10 +1738,11 @@ UIL.Number.prototype.rSize = function(){
 
     UIL.Proto.prototype.rSize.call( this );
     this.w = ~~( ( this.sb + 5 ) / this.length )-5;
+    var s = this.s;
     var i = this.length;
     while(i--){
-        this.c[2+i].style.left = (~~( this.sa + ( this.w * i )+( 5 * i ))) + 'px';
-        this.c[2+i].style.width = this.w + 'px';
+        s[2+i].left = (~~( this.sa + ( this.w * i )+( 5 * i ))) + 'px';
+        s[2+i].width = this.w + 'px';
     }
 
 };
@@ -1757,19 +1771,23 @@ UIL.Color = function( o ){
     this.baseH = this.h;
 
     this.c[2] = UIL.DOM('UIL text', 'div',  'height:'+(this.h-4)+'px;' + 'border-radius:6px; pointer-events:auto; cursor:pointer; border:1px solid '+ UIL.Border + '; line-height:'+(this.h-8)+'px;' );
- 
+
+    this.s[2] = this.c[2].style;
 
     if(this.side === 'up'){
         this.decal = 5;
-        this.c[2].style.top = 'auto';
-        this.c[2].style.bottom = '2px';
+        this.s[2].top = 'auto';
+        this.s[2].bottom = '2px';
     }
 
     this.c[3] = UIL.DOM('UIL', 'div', 'display:none' );
     this.c[4] = UIL.DOM('UIL', 'canvas', 'display:none;');
     this.c[5] = UIL.DOM('UIL', 'canvas', 'pointer-events:auto; cursor:pointer; display:none;');
 
-    if(this.side === 'up') this.c[5].style.pointerEvents = 'none';
+    this.s[3] = this.c[3].style;
+    this.s[5] = this.c[5].style;
+
+    if(this.side === 'up') this.s[5].pointerEvents = 'none';
 
     this.c[4].width = this.c[4].height = this.width;
     this.c[5].width = this.c[5].height = this.width;
@@ -1881,17 +1899,17 @@ UIL.Color.prototype.show = function(){
     if(this.oldWidth!==this.width) this.redraw();
     this.isShow = true;
     this.h = this.width + this.baseH + 10;
-    this.c[0].style.height = this.h+'px';
+    this.s[0].height = this.h+'px';
 
     if(this.side=='up'){ 
-        this.holdTop = this.c[0].style.top.substring(0,this.c[0].style.top.length-2) * 1 || 'auto';
-        if(!isNaN(this.holdTop)) this.c[0].style.top = (this.holdTop-(this.h-20))+'px';
-        setTimeout(function(){this.c[5].style.pointerEvents = 'auto';}.bind(this), 100);
+        this.holdTop = this.s[0].top.substring(0,this.s[0].top.length-2) * 1 || 'auto';
+        if(!isNaN(this.holdTop)) this.s[0].top = (this.holdTop-(this.h-20))+'px';
+        setTimeout(function(){this.s[5].pointerEvents = 'auto';}.bind(this), 100);
     }
 
-    this.c[3].style.display = 'block';
-    this.c[4].style.display = 'block';
-    this.c[5].style.display = 'block';
+    this.s[3].display = 'block';
+    this.s[4].display = 'block';
+    this.s[5].display = 'block';
 
     if( this.parentGroup !== null ){ this.parentGroup.calc( this.h - this.baseH );}
     if( this.isUI ) UIL.main.calc( this.h - this.baseH );
@@ -1906,29 +1924,29 @@ UIL.Color.prototype.hide = function(){
     this.isShow = false;
     this.h = this.baseH;
     if(this.side === 'up'){ 
-        if(!isNaN(this.holdTop)) this.c[0].style.top = (this.holdTop)+'px';
-        this.c[5].style.pointerEvents = 'none';
+        if(!isNaN(this.holdTop)) this.s[0].top = (this.holdTop)+'px';
+        this.s[5].pointerEvents = 'none';
     }
-    this.c[0].style.height = this.h+'px';
-    this.c[3].style.display = 'none';
-    this.c[4].style.display = 'none';
-    this.c[5].style.display = 'none';
+    this.s[0].height = this.h+'px';
+    this.s[3].display = 'none';
+    this.s[4].display = 'none';
+    this.s[5].display = 'none';
     
 };
 
 UIL.Color.prototype.update = function( up ){
 
-    this.c[3].style.background = UIL.rgbToHex( UIL.hslToRgb([this.hsl[0], 1, 0.5]) );
+    this.s[3].background = UIL.rgbToHex( UIL.hslToRgb([this.hsl[0], 1, 0.5]) );
 
     this.drawMarkers();
     
     this.value = this.bcolor;
 
-    this.c[2].style.background = this.bcolor;
+    this.s[2].background = this.bcolor;
     this.c[2].textContent = UIL.htmlToHex(this.bcolor);
 
     this.invert = UIL.findDeepInver( this.rgb );
-    this.c[2].style.color = this.invert ? '#fff' : '#000';;
+    this.s[2].color = this.invert ? '#fff' : '#000';;
 
     if(!up) return;
 
@@ -2061,21 +2079,23 @@ UIL.Color.prototype.rSize = function(){
     this.mid = Math.floor(this.width * 0.5 );
     this.markerSize = this.wheelWidth * 0.3;
 
-    this.c[2].style.width = this.sb + 'px';
-    this.c[2].style.left = this.sa + 'px';
+    var s = this.s;
 
-    this.c[3].style.width = (this.square * 2 - 1) + 'px';
-    this.c[3].style.height = (this.square * 2 - 1) + 'px';
-    this.c[3].style.top = (this.mid+this.decal )-this.square + 'px';
-    this.c[3].style.left = (this.mid+this.sa )-this.square + 'px';
+    s[2].width = this.sb + 'px';
+    s[2].left = this.sa + 'px';
+
+    s[3].width = (this.square * 2 - 1) + 'px';
+    s[3].height = (this.square * 2 - 1) + 'px';
+    s[3].top = (this.mid+this.decal )-this.square + 'px';
+    s[3].left = (this.mid+this.sa )-this.square + 'px';
 
     this.c[4].width = this.c[4].height = this.width;
-    this.c[4].style.left = this.sa + 'px';
-    this.c[4].style.top = this.decal + 'px';
+    s[4].left = this.sa + 'px';
+    s[4].top = this.decal + 'px';
 
     this.c[5].width = this.c[5].height = this.width;
-    this.c[5].style.left = this.sa + 'px';
-    this.c[5].style.top = this.decal + 'px';
+    s[5].left = this.sa + 'px';
+    s[5].top = this.decal + 'px';
 
     this.ctxMask.translate(this.mid, this.mid);
     this.ctxOverlay.translate(this.mid, this.mid);
@@ -2128,16 +2148,18 @@ UIL.Slide.prototype.handleEvent = function( e ) {
 
 UIL.Slide.prototype.mode = function( mode ){
 
+    var s = this.s;
+
     switch(mode){
         case 0: // base
-            this.c[2].style.color = this.fontColor;
-            this.c[3].style.background = 'rgba(0,0,0,0.3)';
-            this.c[4].style.background = this.fontColor;
+            s[2].color = this.fontColor;
+            s[3].background = 'rgba(0,0,0,0.3)';
+            s[4].background = this.fontColor;
         break;
         case 1: // over
-            this.c[2].style.color = this.colorPlus;
-            this.c[3].style.background = UIL.SlideBG;
-            this.c[4].style.background = this.colorPlus;
+            s[2].color = this.colorPlus;
+            s[3].background = UIL.SlideBG;
+            s[4].background = this.colorPlus;
         break;
     }
 }
@@ -2200,7 +2222,8 @@ UIL.Slide.prototype.move = function( e ){
 UIL.Slide.prototype.update = function( up ){
 
     var ww = this.w * (( this.value - this.min ) / this.range );
-    this.c[4].style.width = ww + 'px';
+   
+    this.s[4].width = ww + 'px';
     this.c[2].textContent = this.value;
     if( up ) this.send();
 
@@ -2218,13 +2241,14 @@ UIL.Slide.prototype.rSize = function(){
 
     var ty = ~~(this.h * 0.5) - 8;
 
-    //if(this.c[1]!==undefined) this.c[1].style.top = ty + 'px';
-    this.c[2].style.width = this.sc + 'px';
-    this.c[2].style.left = this.size - tx + 'px';
-    this.c[2].style.top = ty + 'px';
-    this.c[3].style.left = this.sa + 'px';
-    this.c[3].style.width = this.width + 'px';
-    this.c[4].style.left = (this.sa + 3) + 'px';
+    var s = this.s;
+
+    s[2].width = this.sc + 'px';
+    s[2].left = this.size - tx + 'px';
+    s[2].top = ty + 'px';
+    s[3].left = this.sa + 'px';
+    s[3].width = this.width + 'px';
+    s[4].left = (this.sa + 3) + 'px';
 
     this.update();
 
@@ -2366,18 +2390,20 @@ UIL.List.prototype.itemOut = function( e ){
 
 UIL.List.prototype.mode = function( mode ){
 
+    var s = this.s;
+
     switch(mode){
         case 0: // base
-            this.c[5].style.color = this.fontColor;
-            this.c[3].style.background = UIL.bgcolor(UIL.COLOR);
+            s[5].color = this.fontColor;
+            s[3].background = UIL.bgcolor(UIL.COLOR);
         break;
         case 1: // over
-            this.c[5].style.color = '#FFF';
-            this.c[3].style.background = UIL.SELECT;
+            s[5].color = '#FFF';
+            s[3].background = UIL.SELECT;
         break;
         case 2: // edit / down
-            this.c[5].style.color = this.fontColor;
-            this.c[3].style.background = UIL.SELECTDOWN;
+            s[5].color = this.fontColor;
+            s[3].background = UIL.SELECTDOWN;
         break;
 
     }
@@ -2406,7 +2432,7 @@ UIL.List.prototype.listdown = function( e ){
         this.isDown = true;
         this.listmove( e );
         this.listIn.style.background = 'rgba(0,0,0,0.6)';
-        this.c[6].style.background = '#AAA';
+        this.s[6].background = '#AAA';
 
         e.preventDefault();
     }
@@ -2426,7 +2452,7 @@ UIL.List.prototype.listup = function( e ){
 
     this.isDown = false;
     this.listIn.style.background = 'rgba(0,0,0,0.2)';
-    this.c[6].style.background = '#666';
+    this.s[6].background = '#666';
 
 };
 
@@ -2465,7 +2491,7 @@ UIL.List.prototype.update = function( y ){
     y = y > this.range ? this.range : y;
 
     this.listIn.style.top = -(~~( y / this.ratio ))+'px';
-    this.c[6].style.top = ( ~~ y ) + this.baseH + 'px';
+    this.s[6].top = ( ~~ y ) + this.baseH + 'px';
 
     this.py = y;
 
@@ -2478,16 +2504,16 @@ UIL.List.prototype.listShow = function(){
     this.h = this.maxHeight + this.baseH + 10;
     if( !this.scroll ){
         this.h = this.baseH + 10 + this.max;
-        this.c[6].style.display = 'none';
+        this.s[6].display = 'none';
         this.c[2].removeEventListener( 'mousewheel', this, false );
         this.c[2].removeEventListener( 'mousemove',  this, false ); 
     } else {
-        this.c[6].style.display = 'block';
+        this.s[6].display = 'block';
     }
-    this.c[0].style.height = this.h+'px';
-    this.c[2].style.display = 'block';
-    if( this.side === 'up' ) this.c[4].style.background = UIL.F0;
-    else this.c[4].style.background = UIL.F1;
+    this.s[0].height = this.h+'px';
+    this.s[2].display = 'block';
+    if( this.side === 'up' ) this.s[4].background = UIL.F0;
+    else this.s[4].background = UIL.F1;
 
     this.rSizeContent();
 
@@ -2503,9 +2529,9 @@ UIL.List.prototype.listHide = function(){
 
     this.show = false;
     this.h = this.baseH;
-    this.c[0].style.height = this.h + 'px';
-    this.c[2].style.display = 'none';
-    this.c[4].style.background = UIL.F0;
+    this.s[0].height = this.h + 'px';
+    this.s[2].display = 'none';
+    this.s[4].background = UIL.F0;
     
 };
 
@@ -2528,16 +2554,18 @@ UIL.List.prototype.rSize = function(){
 
     UIL.Proto.prototype.rSize.call( this );
 
-    this.c[2].style.width = this.sb + 'px';
-    this.c[2].style.left = this.sa - 20 +'px';
+    var s = this.s;
 
-    this.c[3].style.width = this.sb + 'px';
-    this.c[3].style.left = this.sa + 'px';
+    s[2].width = this.sb + 'px';
+    s[2].left = this.sa - 20 +'px';
 
-    this.c[4].style.left = this.sa + this.sb - 17 + 'px';
+    s[3].width = this.sb + 'px';
+    s[3].left = this.sa + 'px';
 
-    this.c[5].style.width = this.sb + 'px';
-    this.c[5].style.left = this.sa + 'px';
+    s[4].left = this.sa + this.sb - 17 + 'px';
+
+    s[5].width = this.sb + 'px';
+    s[5].left = this.sa + 'px';
 
     this.w = this.sb;
     if(this.max > this.maxHeight) this.w = this.sb-20;
@@ -2585,16 +2613,18 @@ UIL.Bool.prototype.handleEvent = function( e ) {
 
 UIL.Bool.prototype.click = function( e ){
 
+    var s = this.s;
+
     if(this.value){
         this.value = false;
-        this.c[4].style.marginLeft = '0px';
-        this.c[2].style.background = UIL.Border;
-        this.c[2].style.borderColor = UIL.Border;
+        s[4].marginLeft = '0px';
+        s[2].background = UIL.Border;
+        s[2].borderColor = UIL.Border;
     } else {
         this.value = true;
-        this.c[4].style.marginLeft = '18px';
-        this.c[2].style.background = this.fontColor;
-        this.c[2].style.borderColor = this.fontColor;
+        s[4].marginLeft = '18px';
+        s[2].background = this.fontColor;
+        s[2].borderColor = this.fontColor;
     }
 
     this.send();
@@ -2606,9 +2636,10 @@ UIL.Bool.prototype.click = function( e ){
 UIL.Bool.prototype.rSize = function(){
 
     UIL.Proto.prototype.rSize.call( this );
-    this.c[2].style.left = this.sa + 'px';
-    this.c[3].style.left = this.sa+1 + 'px';
-    this.c[4].style.left = this.sa+1 + 'px';
+    var s = this.s;
+    s[2].left = this.sa + 'px';
+    s[3].left = this.sa+1 + 'px';
+    s[4].left = this.sa+1 + 'px';
 
 };
 UIL.Button = function( o ){
@@ -2649,18 +2680,20 @@ UIL.Button.prototype.handleEvent = function( e ) {
 
 UIL.Button.prototype.mode = function( mode ){
 
+    var s = this.s;
+
     switch(mode){
         case 0: // base
-            this.c[3].style.color = this.fontColor;
-            this.c[2].style.background = UIL.bgcolor(UIL.COLOR);
+            s[3].color = this.fontColor;
+            s[2].background = UIL.bgcolor(UIL.COLOR);
         break;
         case 1: // over
-            this.c[3].style.color = '#FFF';
-            this.c[2].style.background = UIL.SELECT;
+            s[3].color = '#FFF';
+            s[2].background = UIL.SELECT;
         break;
         case 2: // edit / down
-            this.c[3].style.color = this.fontColor;
-            this.c[2].style.background = UIL.SELECTDOWN;
+            s[3].color = this.fontColor;
+            s[2].background = UIL.SELECTDOWN;
         break;
 
     }
@@ -2680,7 +2713,7 @@ UIL.Button.prototype.label = function( string ){
 
 UIL.Button.prototype.icon = function( string, y ){
 
-    this.c[3].style.padding = ( y || 0 )+'px 0px';
+    this.s[3].padding = ( y || 0 )+'px 0px';
     this.c[3].innerHTML = string;
 
 };
@@ -2689,10 +2722,12 @@ UIL.Button.prototype.rSize = function(){
 
     UIL.Proto.prototype.rSize.call( this );
 
-    this.c[2].style.left = this.sa + 'px';
-    this.c[3].style.left = this.sa + 'px';
-    this.c[2].style.width = this.sb + 'px';
-    this.c[3].style.width = this.sb + 'px';
+    var s = this.s;
+
+    s[2].left = this.sa + 'px';
+    s[3].left = this.sa + 'px';
+    s[2].width = this.sb + 'px';
+    s[3].width = this.sb + 'px';
 
 };
 UIL.Circular = function( o ){
@@ -2768,12 +2803,12 @@ UIL.Circular.prototype.mode = function( mode ){
 
     switch(mode){
         case 0: // base
-            this.c[2].style.color = this.fontColor;
+            this.s[2].color = this.fontColor;
             UIL.setSvg( this.c[3], 'fill','rgba(0,0,0,0.2)');
             UIL.setSvg( this.c[4], 'fill', this.fontColor );
         break;
         case 1: // over
-        this.c[2].style.color = this.colorPlus;
+        this.s[2].color = this.colorPlus;
             UIL.setSvg( this.c[3], 'fill','rgba(0,0,0,0.6)');
             UIL.setSvg( this.c[4], 'fill', this.colorPlus );
         break;

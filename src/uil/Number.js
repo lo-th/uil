@@ -235,10 +235,11 @@ UIL.Number.prototype.rSize = function(){
 
     UIL.Proto.prototype.rSize.call( this );
     this.w = ~~( ( this.sb + 5 ) / this.length )-5;
+    var s = this.s;
     var i = this.length;
     while(i--){
-        this.c[2+i].style.left = (~~( this.sa + ( this.w * i )+( 5 * i ))) + 'px';
-        this.c[2+i].style.width = this.w + 'px';
+        s[2+i].left = (~~( this.sa + ( this.w * i )+( 5 * i ))) + 'px';
+        s[2+i].width = this.w + 'px';
     }
 
 };

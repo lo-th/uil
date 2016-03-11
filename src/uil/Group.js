@@ -14,12 +14,14 @@ UIL.Group = function( o ){
     this.c[3] = UIL.DOM('UIL', 'div', 'top:2px; left:2px; height:'+(this.h-4)+'px; width:6px; background-image:'+ UIL.GroupBG );
     this.c[4] = UIL.DOM('UIL', 'div','position:absolute; width:10px; height:10px; top:'+(~~(this.h*0.5)-5)+'px; pointer-events:none; background:'+ UIL.F0 );
 
-    this.c[0].style.height = this.h + 'px';
-    this.c[1].style.height = this.h + 'px';
-    this.c[1].style.top = 4 + 'px';
-    this.c[1].style.left = 4 + 'px';
-    this.c[1].style.pointerEvents = 'auto';
-    this.c[1].style.cursor = 'pointer';
+    var s = this.s;
+
+    s[0].height = this.h + 'px';
+    s[1].height = this.h + 'px';
+    s[1].top = 4 + 'px';
+    s[1].left = 4 + 'px';
+    s[1].pointerEvents = 'auto';
+    s[1].cursor = 'pointer';
     this.c[1].name = 'group';
 
     this.uis = [];
@@ -78,7 +80,7 @@ UIL.Group.prototype.add = function( ){
 UIL.Group.prototype.open = function(){
 
     this.isOpen = true;
-    this.c[4].style.background = UIL.F1;
+    this.s[4].background = UIL.F1;
     this.rSizeContent();
 
     if( this.isUI ) UIL.main.calc( this.h - this.baseH );
@@ -90,10 +92,10 @@ UIL.Group.prototype.close = function(){
     if( this.isUI ) UIL.main.calc(-(this.h-this.baseH ));
 
     this.isOpen = false;
-    this.c[4].style.background = UIL.F0;
+    this.s[4].background = UIL.F0;
     this.h = this.baseH;
 
-    this.c[0].style.height = this.h + 'px';
+    this.s[0].height = this.h + 'px';
 
 };
 
@@ -128,7 +130,7 @@ UIL.Group.prototype.calc = function( y ){
     //var total = this.c[2].offsetHeight;
     //this.h += total;
 
-    this.c[0].style.height = this.h + 'px';
+    this.s[0].height = this.h + 'px';
 
 };
 
@@ -147,9 +149,11 @@ UIL.Group.prototype.rSize = function(){
 
     UIL.Proto.prototype.rSize.call( this );
 
-    this.c[4].style.left = ( this.sa + this.sb - 17 ) + 'px';
-    this.c[1].style.width = this.size + 'px';
-    this.c[2].style.width = this.size + 'px';
+    var s = this.s;
+
+    s[4].left = ( this.sa + this.sb - 17 ) + 'px';
+    s[1].width = this.size + 'px';
+    s[2].width = this.size + 'px';
 
     if(this.isOpen) this.rSizeContent();
 

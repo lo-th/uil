@@ -135,18 +135,20 @@ UIL.List.prototype.itemOut = function( e ){
 
 UIL.List.prototype.mode = function( mode ){
 
+    var s = this.s;
+
     switch(mode){
         case 0: // base
-            this.c[5].style.color = this.fontColor;
-            this.c[3].style.background = UIL.bgcolor(UIL.COLOR);
+            s[5].color = this.fontColor;
+            s[3].background = UIL.bgcolor(UIL.COLOR);
         break;
         case 1: // over
-            this.c[5].style.color = '#FFF';
-            this.c[3].style.background = UIL.SELECT;
+            s[5].color = '#FFF';
+            s[3].background = UIL.SELECT;
         break;
         case 2: // edit / down
-            this.c[5].style.color = this.fontColor;
-            this.c[3].style.background = UIL.SELECTDOWN;
+            s[5].color = this.fontColor;
+            s[3].background = UIL.SELECTDOWN;
         break;
 
     }
@@ -175,7 +177,7 @@ UIL.List.prototype.listdown = function( e ){
         this.isDown = true;
         this.listmove( e );
         this.listIn.style.background = 'rgba(0,0,0,0.6)';
-        this.c[6].style.background = '#AAA';
+        this.s[6].background = '#AAA';
 
         e.preventDefault();
     }
@@ -195,7 +197,7 @@ UIL.List.prototype.listup = function( e ){
 
     this.isDown = false;
     this.listIn.style.background = 'rgba(0,0,0,0.2)';
-    this.c[6].style.background = '#666';
+    this.s[6].background = '#666';
 
 };
 
@@ -234,7 +236,7 @@ UIL.List.prototype.update = function( y ){
     y = y > this.range ? this.range : y;
 
     this.listIn.style.top = -(~~( y / this.ratio ))+'px';
-    this.c[6].style.top = ( ~~ y ) + this.baseH + 'px';
+    this.s[6].top = ( ~~ y ) + this.baseH + 'px';
 
     this.py = y;
 
@@ -247,16 +249,16 @@ UIL.List.prototype.listShow = function(){
     this.h = this.maxHeight + this.baseH + 10;
     if( !this.scroll ){
         this.h = this.baseH + 10 + this.max;
-        this.c[6].style.display = 'none';
+        this.s[6].display = 'none';
         this.c[2].removeEventListener( 'mousewheel', this, false );
         this.c[2].removeEventListener( 'mousemove',  this, false ); 
     } else {
-        this.c[6].style.display = 'block';
+        this.s[6].display = 'block';
     }
-    this.c[0].style.height = this.h+'px';
-    this.c[2].style.display = 'block';
-    if( this.side === 'up' ) this.c[4].style.background = UIL.F0;
-    else this.c[4].style.background = UIL.F1;
+    this.s[0].height = this.h+'px';
+    this.s[2].display = 'block';
+    if( this.side === 'up' ) this.s[4].background = UIL.F0;
+    else this.s[4].background = UIL.F1;
 
     this.rSizeContent();
 
@@ -272,9 +274,9 @@ UIL.List.prototype.listHide = function(){
 
     this.show = false;
     this.h = this.baseH;
-    this.c[0].style.height = this.h + 'px';
-    this.c[2].style.display = 'none';
-    this.c[4].style.background = UIL.F0;
+    this.s[0].height = this.h + 'px';
+    this.s[2].display = 'none';
+    this.s[4].background = UIL.F0;
     
 };
 
@@ -297,16 +299,18 @@ UIL.List.prototype.rSize = function(){
 
     UIL.Proto.prototype.rSize.call( this );
 
-    this.c[2].style.width = this.sb + 'px';
-    this.c[2].style.left = this.sa - 20 +'px';
+    var s = this.s;
 
-    this.c[3].style.width = this.sb + 'px';
-    this.c[3].style.left = this.sa + 'px';
+    s[2].width = this.sb + 'px';
+    s[2].left = this.sa - 20 +'px';
 
-    this.c[4].style.left = this.sa + this.sb - 17 + 'px';
+    s[3].width = this.sb + 'px';
+    s[3].left = this.sa + 'px';
 
-    this.c[5].style.width = this.sb + 'px';
-    this.c[5].style.left = this.sa + 'px';
+    s[4].left = this.sa + this.sb - 17 + 'px';
+
+    s[5].width = this.sb + 'px';
+    s[5].left = this.sa + 'px';
 
     this.w = this.sb;
     if(this.max > this.maxHeight) this.w = this.sb-20;

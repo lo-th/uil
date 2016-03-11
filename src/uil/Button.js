@@ -36,18 +36,20 @@ UIL.Button.prototype.handleEvent = function( e ) {
 
 UIL.Button.prototype.mode = function( mode ){
 
+    var s = this.s;
+
     switch(mode){
         case 0: // base
-            this.c[3].style.color = this.fontColor;
-            this.c[2].style.background = UIL.bgcolor(UIL.COLOR);
+            s[3].color = this.fontColor;
+            s[2].background = UIL.bgcolor(UIL.COLOR);
         break;
         case 1: // over
-            this.c[3].style.color = '#FFF';
-            this.c[2].style.background = UIL.SELECT;
+            s[3].color = '#FFF';
+            s[2].background = UIL.SELECT;
         break;
         case 2: // edit / down
-            this.c[3].style.color = this.fontColor;
-            this.c[2].style.background = UIL.SELECTDOWN;
+            s[3].color = this.fontColor;
+            s[2].background = UIL.SELECTDOWN;
         break;
 
     }
@@ -67,7 +69,7 @@ UIL.Button.prototype.label = function( string ){
 
 UIL.Button.prototype.icon = function( string, y ){
 
-    this.c[3].style.padding = ( y || 0 )+'px 0px';
+    this.s[3].padding = ( y || 0 )+'px 0px';
     this.c[3].innerHTML = string;
 
 };
@@ -76,9 +78,11 @@ UIL.Button.prototype.rSize = function(){
 
     UIL.Proto.prototype.rSize.call( this );
 
-    this.c[2].style.left = this.sa + 'px';
-    this.c[3].style.left = this.sa + 'px';
-    this.c[2].style.width = this.sb + 'px';
-    this.c[3].style.width = this.sb + 'px';
+    var s = this.s;
+
+    s[2].left = this.sa + 'px';
+    s[3].left = this.sa + 'px';
+    s[2].width = this.sb + 'px';
+    s[3].width = this.sb + 'px';
 
 };
