@@ -4,7 +4,7 @@ UIL.Button = function( o ){
 
     this.value = o.value || false;
 
-    this.c[2] = UIL.DOM('UIL button', 'div', 'background:'+UIL.bgcolor(UIL.COLOR)+'; height:'+(this.h-2)+'px;' );
+    this.c[2] = UIL.DOM('UIL', 'div', 'border:1px solid '+UIL.Border+'; top:1px; pointer-events:auto; cursor:pointer; background:'+UIL.bgcolor(UIL.COLOR)+'; height:'+(this.h-2)+'px;' );
     this.c[3] = UIL.DOM('UIL text', 'div', 'text-align:center; height:'+(this.h-4)+'px; line-height:'+(this.h-8)+'px;');
     this.c[3].style.color = this.fontColor;
 

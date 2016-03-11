@@ -5,6 +5,7 @@ UIL.Gui = function( o ){
     this.height = o.height || 20;
 
     if( o.Tpercent !== undefined ) UIL.P = o.Tpercent;
+    if( o.css === undefined ) o.css = '';
 
     this.width = UIL.WIDTH;
     this.h = this.height;
@@ -22,24 +23,26 @@ UIL.Gui = function( o ){
 
     this.uis = [];
 
-    this.content = UIL.DOM('UIL content', 'div', o.css || '' );
+    this.content = UIL.DOM('UIL', 'div',  'display:block; width:300px; height:auto; top:0; right:10px; transition:height 0.1s ease-out;' + o.css );
     document.body.appendChild( this.content );
     //this.content.style.background = UIL.bgcolor( this.color, 1, true );
 
     this.top = this.content.getBoundingClientRect().top;
 
-    this.inner = UIL.DOM('UIL inner');
+    this.inner = UIL.DOM('UIL', 'div', 'width:100%; top:0; left:0; height:auto;');
     this.content.appendChild(this.inner);
     this.inner.name = 'inner';
 
-    this.scrollBG = UIL.DOM('UIL scroll-bg');
+    //this.scrollBG = UIL.DOM('UIL scroll-bg');
+    this.scrollBG = UIL.DOM('UIL', 'div', 'right:0; top:0; width:10px; height:10px; cursor:s-resize; pointer-events:auto; display:none;');
     this.content.appendChild(this.scrollBG);
     this.scrollBG.name = 'scroll';
 
-    this.scroll = UIL.DOM('UIL scroll');
+    //this.scroll = UIL.DOM('UIL scroll');
+    this.scroll = UIL.DOM('UIL', 'div', 'background:#666; right:0; top:0; width:5px; height:10px;');
     this.scrollBG.appendChild( this.scroll );
 
-    this.bottom = UIL.DOM('UIL bottom', 'div', 'height:'+ this.height+'px; line-height:'+(this.height-5)+'px;');
+    this.bottom = UIL.DOM('UIL', 'div',  UIL.TXT+'width:100%; top:auto; bottom:0; left:0; text-align:center; pointer-events:auto; cursor:pointer; height:'+ this.height+'px; line-height:'+(this.height-5)+'px;');
     this.content.appendChild(this.bottom);
     this.bottom.textContent = 'close';
     this.bottom.name = 'bottom';

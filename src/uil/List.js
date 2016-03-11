@@ -5,8 +5,8 @@ UIL.List = function( o ){
     this.autoHeight = true;
     var align = o.align || 'center';
 
-    this.c[2] = UIL.DOM('UIL list');
-    this.c[3] = UIL.DOM('UIL button', 'div', 'background:'+UIL.bgcolor(UIL.COLOR)+'; height:'+(this.h-2)+'px;' );
+    this.c[2] = UIL.DOM('UIL', 'div', 'box-sizing:content-box; border:20px solid transparent; border-bottom:10px solid transparent top:0px; height:90px; cursor:s-resize; pointer-events:auto; display:none;');
+    this.c[3] = UIL.DOM('UIL', 'div', 'border:1px solid '+UIL.Border+'; top:1px; pointer-events:auto; cursor:pointer; background:'+UIL.bgcolor(UIL.COLOR)+'; height:'+(this.h-2)+'px;' );
     this.c[4] = UIL.DOM('UIL', 'div', 'position:absolute; width:10px; height:10px; left:'+((this.sa+this.sb)-5)+'px; top:'+(~~(this.h*0.5)-5)+'px; background:'+ UIL.F0 );
     this.c[5] = UIL.DOM('UIL text', 'div', 'text-align:'+align+'; height:'+(this.h-4)+'px; line-height:'+(this.h-8)+'px;');
     this.c[6] = UIL.DOM('UIL', 'div', 'right:14px; top:'+this.h+'px; height:16px; width:10px; pointer-events:none; background:#666; display:none;');
@@ -15,7 +15,6 @@ UIL.List = function( o ){
     this.c[3].name = 'title';
 
     this.c[2].style.borderTop = this.h+'px solid transparent';
-
     this.c[5].style.color = this.fontColor;
 
     this.c[2].events = [ 'mousedown', 'mousemove', 'mouseup', 'mouseout', 'mousewheel' ];
@@ -77,7 +76,7 @@ UIL.List = function( o ){
         this.scroll = true;
     }
 
-    this.listIn = UIL.DOM('UIL list-in');
+    this.listIn = UIL.DOM('UIL', 'div', 'left:0; top:0; width:100%; background:rgba(0,0,0,0.2); ');
     this.listIn.name = 'list';
     this.c[2].style.height = this.maxHeight + 'px';
     this.c[2].appendChild(this.listIn);
@@ -87,9 +86,10 @@ UIL.List = function( o ){
     for( var i=0; i<this.length; i++ ){
         n = this.list[i];
         item = UIL.DOM('UIL listItem', 'div', 'width:'+this.w+'px; height:'+this.itemHeight+'px; line-height:'+(this.itemHeight-5)+'px;');
+        //item = UIL.DOM('UIL', 'div', UIL.TXT + 'position:relative; background:rgba(0,0,0,0.2); margin-bottom:1px; pointer-events:auto; cursor:pointer; width:'+this.w+'px; height:'+this.itemHeight+'px; line-height:'+(this.itemHeight-5)+'px;');
         item.textContent = n;
         item.style.color = this.fontColor;
-        item.name = n;
+        item.name = 'item';//n;
         this.listIn.appendChild(item);
     }
 
@@ -119,6 +119,19 @@ UIL.List.prototype.handleEvent = function( e ) {
     }
 
 }
+
+/*
+UIL.List.prototype.itemOver = function( e ){
+    e.target.style.background = UIL.SELECT;
+    e.target.style.color = '#FFF';
+};
+
+UIL.List.prototype.itemOut = function( e ){
+    e.target.style.background = 'rgba(0,0,0,0.2)';
+    e.target.style.color = '#CCC';
+};
+*/
+
 
 UIL.List.prototype.mode = function( mode ){
 
@@ -154,7 +167,7 @@ UIL.List.prototype.listdown = function( e ){
 
     var name = e.target.name;
     if( name !== 'list' && name !== undefined ){
-        this.value = e.target.name;
+        this.value = e.target.textContent;//name;
         this.c[5].textContent = this.value;
         this.send();
         this.listHide();

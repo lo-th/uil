@@ -69,7 +69,8 @@ UIL.Proto = function( o ){
 
     this.c = [];
 
-    this.c[0] = UIL.DOM('UIL base');
+    //this.c[0] = UIL.DOM('UIL base');
+    this.c[0] = UIL.DOM('UIL', 'div', 'position:relative; height:20px; float:left;');
 
     if( this.isUI ) this.c[0].style.marginBottom = '1px';
     
@@ -111,7 +112,13 @@ UIL.Proto.prototype = {
             this.c[1].style.lineHeight = (this.h-8) + 'px';
         }
 
-        for( var i = 0; i < this.c.length; i++ ){
+        var frag = UIL.frag();
+
+        for( var i=1, lng = this.c.length; i !== lng; i++ ){
+            if( this.c[i] !== undefined ) frag.appendChild( this.c[i] );
+        }
+
+        /*for( var i = 0; i < this.c.length; i++ ){
             if( i === 0 ){
                 if( this.target !== null ){ 
                     this.target.appendChild( this.c[0] );
@@ -123,7 +130,16 @@ UIL.Proto.prototype = {
             else {
                 if( this.c[i] !== undefined ) this.c[0].appendChild( this.c[i] );
             }
+        }*/
+
+        if( this.target !== null ){ 
+            this.target.appendChild( this.c[0] );
+        } else {
+            if( this.isUI ) UIL.main.inner.appendChild( this.c[0] );
+            else document.body.appendChild( this.c[0] );
         }
+
+        this.c[0].appendChild( frag );
 
         this.rSize();
         this.addEvent();

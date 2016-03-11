@@ -21,7 +21,13 @@ var UMC = UMC || ( function () {
     var svgns = "http://www.w3.org/2000/svg";
     var htmls = "http://www.w3.org/1999/xhtml";
 
+    var frg = doc.createDocumentFragment();
+
     UMC = function () {};
+
+    UMC.frag = function(){
+        return frg;//doc.createDocumentFragment();
+    };
 
     UMC.setSvg = function( dom, type, value, id ){
 
