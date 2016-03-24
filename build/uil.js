@@ -14,12 +14,21 @@ var UMC = UMC || ( function () {
     var doc = document;
     var head = doc.getElementsByTagName('head')[0];
 
+    var UNS = '-o-user-select:none; -ms-user-select:none; -khtml-user-select:none; -webkit-user-select:none; -moz-user-select:none;';
+    var BASIC = UNS + 'position:absolute; pointer-events:none; box-sizing:border-box; margin:0; padding:0; border:none; overflow:hidden; background:none;';
+    var TXT = BASIC + 'font-family:"Lucida Console", Monaco, monospace; font-size:11px; color:#CCC; padding:2px 10px; left:0; top:2px; height:16px; width:100px; overflow:hidden; white-space: nowrap;';
+    var TXTEDITE = BASIC + TXT + 'pointer-events:auto; padding:2px 5px; outline:none; -webkit-appearance:none; -moz-appearance:none; border:1px dashed #4f4f4f; -ms-user-select:element;'
+    var NUMBER =  BASIC + TXT + 'letter-spacing:-1px; padding:2px 5px;';
+
     var DOM_SIZE = [ 'height', 'width', 'top', 'left', 'bottom', 'right', 'margin-left', 'margin-right', 'margin-top', 'margin-bottom'];
     var SVG_TYPE_D = [ 'pattern', 'defs', 'transform', 'stop', 'animate', 'radialGradient', 'linearGradient', 'animateMotion' ];
     var SVG_TYPE_G = [ 'rect', 'circle', 'path', 'polygon', 'text', 'g', 'line', 'foreignObject' ];
 
     var svgns = "http://www.w3.org/2000/svg";
     var htmls = "http://www.w3.org/1999/xhtml";
+
+    var tmp;
+    var img = new Image();
 
     var frg = doc.createDocumentFragment();
 
@@ -104,7 +113,13 @@ var UMC = UMC || ( function () {
 
         }
 
-        if( Class ) dom.setAttribute( 'class', Class );
+        if( Class ){
+            if(Class === 'UIL') css = BASIC + css; 
+            else if(Class === 'UIL text') css = TXT + css;
+            else if(Class === 'UIL textSelect') css = TXTEDITE + css; 
+            else if(Class === 'UIL number') css = NUMBER + css; 
+            else dom.setAttribute( 'class', Class );
+        }
         if( css ) dom.style.cssText = css; 
 
         if( id === undefined ) return dom;
@@ -176,6 +191,137 @@ var UMC = UMC || ( function () {
 
     };
 
+    UMC.toCanvas = function( canvas, content, w, h ){
+
+        //var canvas = document.createElement("canvas");
+        var ctx = canvas.getContext("2d");
+
+       // console.time("start copy");
+
+        //canvas.width = w;
+        //canvas.height = h;
+        var dcopy = null;
+
+        if( typeof content === 'string' ){
+
+            dcopy = UMC.dom( null, 'iframe', 'position:abolute; left:0; top:0; width:'+w+'px; height:'+h+'px;' );
+            dcopy.src = content;
+
+            //console.log(dcopy)
+
+            //document.body.appendChild(dcopy);
+
+        }else{
+            dcopy = content.cloneNode(true);//document.createElement('div');
+            dcopy.style.left = 0;
+        }
+        
+
+
+        //var clone = content.cloneNode(true);
+        //dcopy.appendChild(clone);
+
+
+        /*var dcopy = doc.createDocumentFragment();//
+        var tmp = document.createElement('template');//UMC.dom(null, 'div', '' );
+        tmp.innerHTML = content.innerHTML;
+        //tmp.setAttribute('xmlns', 'http://www.w3.org/1999/xhtml');
+        dcopy = tmp.content;*/
+
+       // var dcopy = UMC.dom(null, 'div', 'width:'+w+'px; height:'+h+'px; top:0; left:0;' );
+        //var tmp = doc.createDocumentFragment();//
+        /*var dcopy = UMC.dom(null, 'div', '' );
+        dcopy.innerHTML = content.innerHTML;
+        dcopy.setAttribute('xmlns', 'http://www.w3.org/1999/xhtml');*/
+
+        var svg = UMC.dom(null, 'foreignObject', 'position:abolute; left:0; top:0;', { width:w, height:h });
+
+        svg.childNodes[0].appendChild( dcopy );
+
+
+
+        
+        svg.setAttribute("version", "1.1");
+        svg.setAttribute('xmlns', 'http://www.w3.org/2000/svg' );
+        svg.setAttribute("xmlns:xlink", "http://www.w3.org/1999/xlink");
+
+        svg.setAttribute('width', w );
+        svg.setAttribute('height', h );
+        svg.childNodes[0].setAttribute('width', '100%' );
+        svg.childNodes[0].setAttribute('height', '100%' );
+
+        //var data = "data:image/svg+xml;charset=utf-8,"+ (new XMLSerializer).serializeToString(svg);
+        //var data = "data:image/svg+xml;utf8,"+ (new XMLSerializer).serializeToString(svg);
+        var data = 'data:image/svg+xml;base64,'+ window.btoa((new XMLSerializer).serializeToString(svg));
+
+        //var data = 'data:image/svg+xml;base64,' + window.btoa(unescape(encodeURIComponent((new XMLSerializer).serializeToString(svg))))
+        
+ 
+        //var s = new XMLSerializer();
+        //var data = (new XMLSerializer).serializeToString(svg);
+
+        dcopy = null;
+
+       // console.timeEnd("start copy");
+
+        /*var data = "<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'>" +
+             "<foreignObject width='100%' height='100%'>" +
+               "<div xmlns='http://www.w3.org/1999/xhtml' style='font-size:40px'>" +
+                 "<em>J'</em> aime <span style='color:white; text-shadow:0 0 2px blue;'>les licornes.</span>" +
+               "</div>" +
+             "</foreignObject>" +
+           "</svg>";*/
+
+        //console.log(data);
+
+
+        //svg.childNodes[0].setAttribute('class','UIL');
+        //svg.childNodes[0].appendChild((new XMLSerializer).serializeToString(this.content));
+        //var DOMURL = window.webkitURL || window.URL;
+
+        //console.time("start draw");
+
+        //var DOMURL = self.URL || self.webkitURL || self;
+        //var img = new Image();
+        //img.width = w;
+        //img.height = h;
+        
+        
+        img.src = data;
+
+       
+        //clearTimeout( tmp );
+        tmp = setTimeout(function() {
+            ctx.clearRect( 0, 0, w, h );
+            ctx.drawImage( img, 0, 0, w, h, 0, 0, w, h );
+        }, 0);
+
+        //var blob = new Blob([data], {type: "image/svg+xml;charset=utf-8"});
+        //var url = DOMURL.createObjectURL(blob);
+        /*img.onload = function() {
+             img.onload = null; 
+            //img.crossOrigin ='anonymous';
+            ctx.clearRect( 0, 0, w, h );
+            //console.log('done', img.width, img.height)
+            //ctx.scale(0.4, 0.4);
+            ctx.drawImage(img, 0, 0, w, h, 0, 0, w, h);
+          //  DOMURL.revokeObjectURL(url);
+            //console.timeEnd("start draw");
+        };*/
+
+        //img.src = data;
+
+        //img.src = url;
+
+
+        //document.body.appendChild(canvas);
+    
+
+
+        //console.log(svg);
+
+    };
+
     return UMC;
 
 })();
@@ -206,6 +352,7 @@ var UIL = ( function () {
 
     UIL.UNS = '-o-user-select:none; -ms-user-select:none; -khtml-user-select:none; -webkit-user-select:none; -moz-user-select:none;';
     //UIL.US = '-o-user-select:text; -ms-user-select:text; -khtml-user-select:text; -webkit-user-select:text; -moz-user-select:text;';
+    UIL.BASIC = UIL.UNS + 'position:absolute; pointer-events:none; box-sizing:border-box; margin:0; padding:0; border:none; overflow:hidden; background:none;';
     UIL.TXT = 'font-family:"Lucida Console", Monaco, monospace; font-size:11px; color:#CCC; padding:2px 10px; left:0; top:2px; height:16px; width:100px; overflow:hidden; white-space: nowrap;';
 
     UIL.frag = UMC.frag;
@@ -541,6 +688,12 @@ UIL.Gui = function( o ){
 
 UIL.Gui.prototype = {
     constructor: UIL.Gui,
+
+    getHTML : function(){
+
+        return this.content;
+
+    },
 
     onChange : function( f ){
 
@@ -890,7 +1043,7 @@ UIL.Proto = function( o ){
 
     var h = 20;
     if( this.isUI ) h = UIL.main.height;
-    this.h = o.height || h;
+    this.h = o.h || o.height || h;
     this.h = this.h < 11 ? 11 : this.h;
     
     this.bgcolor = UIL.COLOR || o.bgcolor;
@@ -919,15 +1072,16 @@ UIL.Proto = function( o ){
 
     this.s = [];
 
-    //this.c[0] = UIL.DOM('UIL base');
-    this.c[0] = UIL.DOM('UIL', 'div', 'position:relative; height:20px; float:left;');
+    //this.c[0] = UIL.DOM('UIL', 'div', 'position:relative; height:20px; float:left;');
+    this.c[0] = UIL.DOM(null, 'div', UIL.BASIC + 'position:relative; height:20px; float:left;');
     this.s[0] = this.c[0].style;
 
     if( this.isUI ) this.s[0].marginBottom = '1px';
     
 
     if( !this.simple ){ 
-        this.c[1] = UIL.DOM('UIL text');
+        //this.c[1] = UIL.DOM('UIL text');
+        this.c[1] = UIL.DOM(null, 'div', UIL.BASIC + UIL.TXT );
         this.s[1] = this.c[1].style;
         this.c[1].textContent = this.txt;
         this.s[1].color = this.titleColor;
@@ -1229,6 +1383,8 @@ UIL.Group = function( o ){
     s[1].cursor = 'pointer';
     this.c[1].name = 'group';
 
+    this.s[1].color = this.fontColor;
+
     this.uis = [];
 
     this.c[1].events = [ 'click' ];
@@ -1375,7 +1531,6 @@ UIL.Title = function( o ){
     var prefix = o.prefix || '';
 
     this.c[2] = UIL.DOM( 'UIL text', 'div', 'text-align:right; width:40px; line-height:'+ (this.h-8) + 'px; color:' + this.fontColor );
-    //this.c[2].style.color = this.fontColor;
 
     if( this.h === 31 ){
 
@@ -2579,12 +2734,17 @@ UIL.Bool = function( o ){
 
     this.value = o.value || false;
 
-    var t = ~~ (this.h*0.5)-8;
+    var t = ~~ (this.h*0.5)-((this.h-2)*0.5);
 
-    this.c[2] = UIL.DOM('UIL', 'div', 'background:'+UIL.Border+'; height:18px; width:36px; top:'+t+'px; border-radius:8px; pointer-events:auto; cursor:pointer;' );
-    
+    this.c[2] = UIL.DOM('UIL', 'div', 'background:'+ UIL.Border +'; height:'+(this.h-2)+'px; width:36px; top:'+t+'px; border-radius:20px; pointer-events:auto; cursor:pointer;' );
+    this.c[3] = UIL.DOM('UIL', 'div', 'background:'+ UIL.Border +'; height:'+(this.h-6)+'px; width:'+(this.h-6)+'px; top:'+(t+2)+'px; border-radius:20px; ' );
+
+    //this.c[3] = UIL.DOM('UIL', 'path', 'width:17px; top:'+(t+1)+'px;',{ width:17, height:17, d:'M 4 9 L 6 12 14 4', 'stroke-width':2, stroke:'#000', fill:'none', 'stroke-linecap':'butt' });
+    this.c[4] = UIL.DOM('UIL', 'div', 'height:'+(this.h-4)+'px; width:16px; top:'+(t+1)+'px; border-radius:20px; background:'+UIL.bgcolor(UIL.COLOR,1)+'; transition:margin 0.1s ease-out;' );
+
+    /*this.c[2] = UIL.DOM('UIL', 'div', 'background:'+ UIL.Border +'; height:18px; width:36px; top:'+t+'px; border-radius:8px; pointer-events:auto; cursor:pointer;' );
     this.c[3] = UIL.DOM('UIL', 'path', 'width:17px; top:'+(t+1)+'px;',{ width:17, height:17, d:'M 4 9 L 6 12 14 4', 'stroke-width':2, stroke:'#000', fill:'none', 'stroke-linecap':'butt' });
-    this.c[4] = UIL.DOM('UIL', 'div', 'height:16px; width:16px; top:'+(t+1)+'px; border-radius:8px; background:'+UIL.bgcolor(UIL.COLOR,1)+'; transition:margin 0.1s ease-out;' );
+    this.c[4] = UIL.DOM('UIL', 'div', 'height:16px; width:16px; top:'+(t+1)+'px; border-radius:8px; background:'+UIL.bgcolor(UIL.COLOR,1)+'; transition:margin 0.1s ease-out;' );*/
 
     if(this.value){
         this.c[4].style.marginLeft = '18px';
@@ -2638,7 +2798,7 @@ UIL.Bool.prototype.rSize = function(){
     UIL.Proto.prototype.rSize.call( this );
     var s = this.s;
     s[2].left = this.sa + 'px';
-    s[3].left = this.sa+1 + 'px';
+    s[3].left = this.sa+((this.h-6)*0.5) + 'px';
     s[4].left = this.sa+1 + 'px';
 
 };
@@ -2648,6 +2808,8 @@ UIL.Button = function( o ){
 
     this.value = o.value || false;
 
+    this.isLoadButton = o.loader || false;
+
     this.c[2] = UIL.DOM('UIL', 'div', 'border:1px solid '+UIL.Border+'; top:1px; pointer-events:auto; cursor:pointer; background:'+UIL.bgcolor(UIL.COLOR)+'; height:'+(this.h-2)+'px;' );
     this.c[3] = UIL.DOM('UIL text', 'div', 'text-align:center; height:'+(this.h-4)+'px; line-height:'+(this.h-8)+'px;');
     this.c[3].style.color = this.fontColor;
@@ -2656,6 +2818,8 @@ UIL.Button = function( o ){
 
     if( this.c[1] !== undefined ) this.c[1].textContent = '';
     this.c[3].innerHTML = this.txt;
+
+    if( this.isLoadButton ) this.initLoader();
 
     this.init();
 
@@ -2674,6 +2838,7 @@ UIL.Button.prototype.handleEvent = function( e ) {
         case 'mousedown': this.mode( 2 ); break;
         case 'mouseup': this.mode( 0 ); break;
         case 'mouseout': this.mode( 0 ); break;
+        case 'change': this.fileSelect( e ); break;
     }
 
 };
@@ -2698,6 +2863,41 @@ UIL.Button.prototype.mode = function( mode ){
 
     }
 }
+
+UIL.Button.prototype.initLoader = function(){
+
+    this.c[4] = UIL.DOM('UIL', 'input', 'border:1px solid '+UIL.Border+'; top:1px; opacity:0; pointer-events:auto; cursor:pointer; background:'+UIL.bgcolor(UIL.COLOR)+'; height:'+(this.h-2)+'px;' );
+    this.c[4].name = 'loader';
+    this.c[4].type = "file";
+
+    this.c[2].events = [  ];
+    this.c[4].events = [ 'change', 'mouseover', 'mousedown', 'mouseup', 'mouseout' ];
+
+    //this.hide = document.createElement('input');
+
+
+
+};
+
+UIL.Button.prototype.fileSelect = function( e ){
+
+    if( ! e.target.files ) return;
+
+    var file = e.target.files[0];
+
+    if( file === undefined ) return;
+
+    var reader = new FileReader();
+    var fname = file.name;
+    var type = fname.substring(fname.indexOf('.')+1, fname.length);
+
+    if( type === 'png' || type === 'jpg' ) reader.readAsDataURL(file);
+    else if(type==='z') reader.readAsBinaryString(file);
+    else reader.readAsText(file);
+
+    reader.onload = function(e) { this.send( e.target.result ); }.bind(this);
+
+};
 
 UIL.Button.prototype.click = function( e ){
 
@@ -2725,8 +2925,15 @@ UIL.Button.prototype.rSize = function(){
     var s = this.s;
 
     s[2].left = this.sa + 'px';
-    s[3].left = this.sa + 'px';
     s[2].width = this.sb + 'px';
+
+    if(s[4]){
+        s[4].left = this.sa + 'px';
+        s[4].width = this.sb + 'px';
+    }
+
+    s[3].left = this.sa + 'px';
+    
     s[3].width = this.sb + 'px';
 
 };

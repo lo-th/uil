@@ -24,6 +24,8 @@ UIL.Group = function( o ){
     s[1].cursor = 'pointer';
     this.c[1].name = 'group';
 
+    this.s[1].color = this.fontColor;
+
     this.uis = [];
 
     this.c[1].events = [ 'click' ];

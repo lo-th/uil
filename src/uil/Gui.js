@@ -67,6 +67,12 @@ UIL.Gui = function( o ){
 UIL.Gui.prototype = {
     constructor: UIL.Gui,
 
+    getHTML : function(){
+
+        return this.content;
+
+    },
+
     onChange : function( f ){
 
         this.callback = f;

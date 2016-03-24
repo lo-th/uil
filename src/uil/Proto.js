@@ -44,7 +44,7 @@ UIL.Proto = function( o ){
 
     var h = 20;
     if( this.isUI ) h = UIL.main.height;
-    this.h = o.height || h;
+    this.h = o.h || o.height || h;
     this.h = this.h < 11 ? 11 : this.h;
     
     this.bgcolor = UIL.COLOR || o.bgcolor;
@@ -73,15 +73,16 @@ UIL.Proto = function( o ){
 
     this.s = [];
 
-    //this.c[0] = UIL.DOM('UIL base');
-    this.c[0] = UIL.DOM('UIL', 'div', 'position:relative; height:20px; float:left;');
+    //this.c[0] = UIL.DOM('UIL', 'div', 'position:relative; height:20px; float:left;');
+    this.c[0] = UIL.DOM(null, 'div', UIL.BASIC + 'position:relative; height:20px; float:left;');
     this.s[0] = this.c[0].style;
 
     if( this.isUI ) this.s[0].marginBottom = '1px';
     
 
     if( !this.simple ){ 
-        this.c[1] = UIL.DOM('UIL text');
+        //this.c[1] = UIL.DOM('UIL text');
+        this.c[1] = UIL.DOM(null, 'div', UIL.BASIC + UIL.TXT );
         this.s[1] = this.c[1].style;
         this.c[1].textContent = this.txt;
         this.s[1].color = this.titleColor;

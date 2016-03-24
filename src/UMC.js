@@ -14,12 +14,21 @@ var UMC = UMC || ( function () {
     var doc = document;
     var head = doc.getElementsByTagName('head')[0];
 
+    var UNS = '-o-user-select:none; -ms-user-select:none; -khtml-user-select:none; -webkit-user-select:none; -moz-user-select:none;';
+    var BASIC = UNS + 'position:absolute; pointer-events:none; box-sizing:border-box; margin:0; padding:0; border:none; overflow:hidden; background:none;';
+    var TXT = BASIC + 'font-family:"Lucida Console", Monaco, monospace; font-size:11px; color:#CCC; padding:2px 10px; left:0; top:2px; height:16px; width:100px; overflow:hidden; white-space: nowrap;';
+    var TXTEDITE = BASIC + TXT + 'pointer-events:auto; padding:2px 5px; outline:none; -webkit-appearance:none; -moz-appearance:none; border:1px dashed #4f4f4f; -ms-user-select:element;'
+    var NUMBER =  BASIC + TXT + 'letter-spacing:-1px; padding:2px 5px;';
+
     var DOM_SIZE = [ 'height', 'width', 'top', 'left', 'bottom', 'right', 'margin-left', 'margin-right', 'margin-top', 'margin-bottom'];
     var SVG_TYPE_D = [ 'pattern', 'defs', 'transform', 'stop', 'animate', 'radialGradient', 'linearGradient', 'animateMotion' ];
     var SVG_TYPE_G = [ 'rect', 'circle', 'path', 'polygon', 'text', 'g', 'line', 'foreignObject' ];
 
     var svgns = "http://www.w3.org/2000/svg";
     var htmls = "http://www.w3.org/1999/xhtml";
+
+    var tmp;
+    var img = new Image();
 
     var frg = doc.createDocumentFragment();
 
@@ -104,7 +113,13 @@ var UMC = UMC || ( function () {
 
         }
 
-        if( Class ) dom.setAttribute( 'class', Class );
+        if( Class ){
+            if(Class === 'UIL') css = BASIC + css; 
+            else if(Class === 'UIL text') css = TXT + css;
+            else if(Class === 'UIL textSelect') css = TXTEDITE + css; 
+            else if(Class === 'UIL number') css = NUMBER + css; 
+            else dom.setAttribute( 'class', Class );
+        }
         if( css ) dom.style.cssText = css; 
 
         if( id === undefined ) return dom;
@@ -173,6 +188,137 @@ var UMC = UMC || ( function () {
             if(id.length === 2) return dom.childNodes[ id[0] ].childNodes[ id[1] ];
             if(id.length === 3) return dom.childNodes[ id[0] ].childNodes[ id[1] ].childNodes[ id[2] ];
         }
+
+    };
+
+    UMC.toCanvas = function( canvas, content, w, h ){
+
+        //var canvas = document.createElement("canvas");
+        var ctx = canvas.getContext("2d");
+
+       // console.time("start copy");
+
+        //canvas.width = w;
+        //canvas.height = h;
+        var dcopy = null;
+
+        if( typeof content === 'string' ){
+
+            dcopy = UMC.dom( null, 'iframe', 'position:abolute; left:0; top:0; width:'+w+'px; height:'+h+'px;' );
+            dcopy.src = content;
+
+            //console.log(dcopy)
+
+            //document.body.appendChild(dcopy);
+
+        }else{
+            dcopy = content.cloneNode(true);//document.createElement('div');
+            dcopy.style.left = 0;
+        }
+        
+
+
+        //var clone = content.cloneNode(true);
+        //dcopy.appendChild(clone);
+
+
+        /*var dcopy = doc.createDocumentFragment();//
+        var tmp = document.createElement('template');//UMC.dom(null, 'div', '' );
+        tmp.innerHTML = content.innerHTML;
+        //tmp.setAttribute('xmlns', 'http://www.w3.org/1999/xhtml');
+        dcopy = tmp.content;*/
+
+       // var dcopy = UMC.dom(null, 'div', 'width:'+w+'px; height:'+h+'px; top:0; left:0;' );
+        //var tmp = doc.createDocumentFragment();//
+        /*var dcopy = UMC.dom(null, 'div', '' );
+        dcopy.innerHTML = content.innerHTML;
+        dcopy.setAttribute('xmlns', 'http://www.w3.org/1999/xhtml');*/
+
+        var svg = UMC.dom(null, 'foreignObject', 'position:abolute; left:0; top:0;', { width:w, height:h });
+
+        svg.childNodes[0].appendChild( dcopy );
+
+
+
+        
+        svg.setAttribute("version", "1.1");
+        svg.setAttribute('xmlns', 'http://www.w3.org/2000/svg' );
+        svg.setAttribute("xmlns:xlink", "http://www.w3.org/1999/xlink");
+
+        svg.setAttribute('width', w );
+        svg.setAttribute('height', h );
+        svg.childNodes[0].setAttribute('width', '100%' );
+        svg.childNodes[0].setAttribute('height', '100%' );
+
+        //var data = "data:image/svg+xml;charset=utf-8,"+ (new XMLSerializer).serializeToString(svg);
+        //var data = "data:image/svg+xml;utf8,"+ (new XMLSerializer).serializeToString(svg);
+        var data = 'data:image/svg+xml;base64,'+ window.btoa((new XMLSerializer).serializeToString(svg));
+
+        //var data = 'data:image/svg+xml;base64,' + window.btoa(unescape(encodeURIComponent((new XMLSerializer).serializeToString(svg))))
+        
+ 
+        //var s = new XMLSerializer();
+        //var data = (new XMLSerializer).serializeToString(svg);
+
+        dcopy = null;
+
+       // console.timeEnd("start copy");
+
+        /*var data = "<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'>" +
+             "<foreignObject width='100%' height='100%'>" +
+               "<div xmlns='http://www.w3.org/1999/xhtml' style='font-size:40px'>" +
+                 "<em>J'</em> aime <span style='color:white; text-shadow:0 0 2px blue;'>les licornes.</span>" +
+               "</div>" +
+             "</foreignObject>" +
+           "</svg>";*/
+
+        //console.log(data);
+
+
+        //svg.childNodes[0].setAttribute('class','UIL');
+        //svg.childNodes[0].appendChild((new XMLSerializer).serializeToString(this.content));
+        //var DOMURL = window.webkitURL || window.URL;
+
+        //console.time("start draw");
+
+        //var DOMURL = self.URL || self.webkitURL || self;
+        //var img = new Image();
+        //img.width = w;
+        //img.height = h;
+        
+        
+        img.src = data;
+
+       
+        //clearTimeout( tmp );
+        tmp = setTimeout(function() {
+            ctx.clearRect( 0, 0, w, h );
+            ctx.drawImage( img, 0, 0, w, h, 0, 0, w, h );
+        }, 0);
+
+        //var blob = new Blob([data], {type: "image/svg+xml;charset=utf-8"});
+        //var url = DOMURL.createObjectURL(blob);
+        /*img.onload = function() {
+             img.onload = null; 
+            //img.crossOrigin ='anonymous';
+            ctx.clearRect( 0, 0, w, h );
+            //console.log('done', img.width, img.height)
+            //ctx.scale(0.4, 0.4);
+            ctx.drawImage(img, 0, 0, w, h, 0, 0, w, h);
+          //  DOMURL.revokeObjectURL(url);
+            //console.timeEnd("start draw");
+        };*/
+
+        //img.src = data;
+
+        //img.src = url;
+
+
+        //document.body.appendChild(canvas);
+    
+
+
+        //console.log(svg);
 
     };
 

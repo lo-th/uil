@@ -41,6 +41,15 @@ body { font-family: "Lucida Console", Monaco, monospace; background-color:#16161
 <div id='debug'></div>
 <script>
 
+var canvas = document.createElement("canvas");
+canvas.width = 300;
+canvas.height = 700;
+canvas.style.cssText = 'position:absolute; right:400px; top:0;';
+document.body.appendChild(canvas);
+var ctx = canvas.getContext("2d");
+ctx.fillStyle = '#000';
+ctx.fillRect( 0,0, 300, 700); 
+
 var timer = null;
 var display = false;
 var list = ['item-0', 'item-1', 'item-2', 'item-3', 'item-4', 'item-5', 'item-6', 'item-7', 'item-8', 'item-9', 'item-10', 'item-11', 'item-12'];
@@ -49,7 +58,14 @@ var list2 = ['item-0', 'item-1', 'item-2'];
 document.getElementById('version').innerHTML = 'il '+ UIL.REVISION;
 
 var debug = document.getElementById('debug');
-var callback = function( v ){ debug.innerHTML = v; }
+var callback = function( v ){ 
+    debug.innerHTML = v;
+
+    //UMC.toCanvas(canvas, ui.content, 300, 600 );
+
+    UMC.toCanvas(canvas, 'http://lo-th.github.io/uil/index.html', 600, 600 );
+
+}
 var callbackButton = function(){ debug.innerHTML = "i'm a button !!" ; }
 var callbackSize = function( v ){ ui.setWidth( v ); }
 var callbackLogo = function( v ){ document.getElementById('logoin').setAttributeNS(null, 'fill', UIL.hexToHtml(v)); document.getElementById('version').style.color = UIL.hexToHtml(v);  }
@@ -68,12 +84,14 @@ var w = UIL.add('number', { target:document.body, callback:null, name:' ', size:
 var ui = new UIL.Gui( { size:300 } ).onChange( callback );
 populate();
 
+//loop();
+
 ///ui.toCanvas();
 
 function populate(){
     if(!display){
         ui.add('title',  { name:'Title', titleColor:'#D4B87B', height:30});
-        ui.add('bool',   { name:'bool', titleColor:'#D4B87B', height:12 });
+        ui.add('bool',   { name:'bool', titleColor:'#D4B87B', height:30 });
         ui.add('color',  { name:'color', type:'html', value:0x000000, fontColor:'#D4B87B'});
         ui.add('color',  { name:'color', type:'hex', value:[0,1,1,1], height:40 });
         ui.add('color',  { name:'color', type:'rgb', value:[0,1,1,1], height:40 });
@@ -86,7 +104,7 @@ function populate(){
         ui.add('number', { name:'vector2', value:[0,0], fontColor:'#D4B87B' });
         ui.add('number', { name:'vector3', value:[0,0,0] });
         ui.add('number', { name:'vector4', value:[0,0,0,0], step:1, precision:0, height:30 });
-        ui.add('button', { name:'button', callback:callbackButton, fontColor:'#D4B87B', height:30, loader:true });
+        ui.add('button', { name:'button', callback:callbackButton, fontColor:'#D4B87B', height:30 });
 
         gr0 = ui.add('group', { name:'Group', fontColor:'#D4B87B', height:30 });
         gr0.add('list',   { name:'listH', list:list, fontColor:'#D4B87B', height:30});
@@ -125,6 +143,14 @@ function populate(){
         b.label('populate');
     }
 
+
+}
+
+
+function loop(){
+    window.requestAnimationFrame(loop);
+
+    UMC.toCanvas(canvas, ui.content, 300, 600 );
 
 }
 
