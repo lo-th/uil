@@ -62,7 +62,7 @@ populate();
 function populate(){
     if(!display){
         ui.add('title',  { name:'Title', color:'N'});
-        ui.add('bool',   { name:'bool' });
+        ui.add('bool',   { name:'bool', h:20 });
         ui.add('color',  { name:'color', type:'html', value:0xffffff});
         ui.add('color',  { name:'color', type:'html', value:[0,1,1,1], height:20});
         ui.add('slide',  { name:'slide', min:-100, max:100, value:0, precision:0 });
