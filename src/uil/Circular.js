@@ -5,6 +5,8 @@ UIL.Circular = function( o ){
     //this.type = 'circular';
     this.autoWidth = false;
 
+    this.buttonColor = UIL.BUTTON;
+
     this.setTypeNumber( o );
 
     this.radius = o.radius || 15;
@@ -39,7 +41,7 @@ UIL.Circular = function( o ){
 
     this.c[3] = UIL.DOM('UIL', 'circle', 'left:10px; top:'+this.top+'px; width:'+this.w+'px; height:'+this.height+'px; pointer-events:auto; cursor:pointer;', { cx:this.radius, cy:this.radius, r:this.radius, fill:'rgba(0,0,0,0.3)' });
     this.c[4] = UIL.DOM('UIL', 'path', 'left:10px; top:'+this.top+'px; width:'+this.w+'px; height:'+this.height+'px;', { d:this.makePath(), fill:this.fontColor });
-    this.c[5] = UIL.DOM('UIL', 'circle', 'left:10px; top:'+this.top+'px; width:'+this.w+'px; height:'+this.height+'px;', { cx:this.radius, cy:this.radius, r:this.radius*0.5, fill:UIL.bgcolor(UIL.COLOR, 1), 'stroke-width':1, stroke:UIL.SVGC });
+    this.c[5] = UIL.DOM('UIL', 'circle', 'left:10px; top:'+this.top+'px; width:'+this.w+'px; height:'+this.height+'px;', { cx:this.radius, cy:this.radius, r:this.radius*0.5, fill:this.buttonColor, 'stroke-width':1, stroke:UIL.SVGC });
 
     this.c[3].events = [ 'mouseover', 'mousedown', 'mouseout' ];
 

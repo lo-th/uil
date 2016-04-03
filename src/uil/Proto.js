@@ -43,11 +43,14 @@ UIL.Proto = function( o ){
     this.isSend = false;
 
     var h = 20;
-    if( this.isUI ) h = UIL.main.height;
+    if( this.isUI ) h = UIL.HEIGHT;//UIL.main.height;
     this.h = o.h || o.height || h;
     this.h = this.h < 11 ? 11 : this.h;
     
     this.bgcolor = UIL.COLOR || o.bgcolor;
+
+    this.bg = this.isUI ? UIL.main.bg : 'rgba(44,44,44,0.3)';
+    if(o.bg !== undefined ) this.bg = o.bg;
 
 
 
@@ -115,7 +118,7 @@ UIL.Proto.prototype = {
         //s[0] = this.c[0].style;
         s[0].height = this.h + 'px';
 
-        if( this.isUI ) this.s[0].background = UIL.bgcolor(this.bgcolor);
+        if( this.isUI ) this.s[0].background = this.bg;//this.isUI ? UIL.main.bg : UIL.bgcolor(this.bgcolor);
         if( this.autoHeight ) this.s[0].transition = 'height 0.1s ease-out';
         if( this.c[1] !== undefined && this.autoWidth ){
             s[1] = this.c[1].style;
@@ -146,6 +149,13 @@ UIL.Proto.prototype = {
 
         this.rSize();
         this.addEvent();
+
+    },
+
+    setBG : function(c){
+
+        this.bg = c;
+        this.s[0].background = c;
 
     },
 

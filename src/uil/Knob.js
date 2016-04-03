@@ -5,6 +5,8 @@ UIL.Knob = function( o ){
     //this.type = 'knob';
     this.autoWidth = false;
 
+    this.buttonColor = UIL.BUTTON;
+
     this.setTypeNumber( o );
 
     this.mPI = Math.PI * 0.8;
@@ -42,7 +44,7 @@ UIL.Knob = function( o ){
     this.c[4] = UIL.DOM('UIL', 'circle', 'left:10px; top:'+this.top+'px; width:'+this.w+'px; height:'+this.height+'px;', { cx:this.radius, cy:this.radius*0.5, r:3, fill:this.fontColor });
     this.c[5] = UIL.DOM('UIL', 'path', 'left:10px; top:'+this.top+'px; width:'+this.w+'px; height:'+this.height+'px;', { d:this.makeGrad(), 'stroke-width':1, stroke:UIL.SVGC });
     
-    UIL.DOM( null, 'circle', null, { cx:this.radius, cy:this.radius, r:this.radius*0.7, fill:UIL.bgcolor(UIL.COLOR, 1), 'stroke-width':1, stroke:UIL.SVGC }, this.c[3] );
+    UIL.DOM( null, 'circle', null, { cx:this.radius, cy:this.radius, r:this.radius*0.7, fill:this.buttonColor, 'stroke-width':1, stroke:UIL.SVGC }, this.c[3] );
 
     this.c[3].events = [ 'mouseover', 'mousedown', 'mouseout' ];
 

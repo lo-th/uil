@@ -19,6 +19,7 @@ var UIL = ( function () {
     UIL.main = null;
     UIL.DEF = false;
     UIL.WIDTH = 300;
+    UIL.HEIGHT = 20;
     //UIL.BW = 190;
     //UIL.AW = 100;
     UIL.P = 30;
@@ -38,9 +39,14 @@ var UIL = ( function () {
 
     UIL.COLOR = 'N';
     UIL.BASECOLOR = '#C0C0C0';
+
+    UIL.BUTTON = '#404040';
+    UIL.BOOLBG = '#181818'
+
     UIL.SELECT = '#035fcf';
     UIL.MOVING = '#03afff';
     UIL.SELECTDOWN = '#024699';
+    UIL.BG = 'rgba(0,0,0,0.3)';
     UIL.SVGB = 'rgba(0,0,0,0.3)';
     UIL.SVGC = 'rgba(120,120,120,0.6)';
     UIL.Border = '#4f4f4f'; //'rgba(120,120,120,0.3)';

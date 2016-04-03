@@ -2,13 +2,13 @@ UIL.Gui = function( o ){
 
     o = o || {};
 
-    this.height = o.height || 20;
+    //this.height = o.height || 20;
 
     if( o.Tpercent !== undefined ) UIL.P = o.Tpercent;
     if( o.css === undefined ) o.css = '';
 
     this.width = UIL.WIDTH;
-    this.h = this.height;
+    this.h = 0;//this.height;
     this.prevY = -1;
 
     UIL.main = this;
@@ -16,10 +16,14 @@ UIL.Gui = function( o ){
     this.callback = o.callback  === undefined ? null : o.callback;
 
     this.color = o.color || UIL.COLOR;
+    this.bg = o.bg || 'rgba(44,44,44,0.3)';
     
     this.isCenter = o.center || false;
     this.lockwheel = false;
     this.isOpen = true;
+
+    // bottom and close height
+    this.height = o.height || UIL.HEIGHT;
 
     this.uis = [];
 
@@ -29,8 +33,11 @@ UIL.Gui = function( o ){
 
     this.top = this.content.getBoundingClientRect().top;
 
+    this.innerContent = UIL.DOM('UIL', 'div', 'width:100%; top:0; left:0; height:auto;');
+    this.content.appendChild(this.innerContent);
+
     this.inner = UIL.DOM('UIL', 'div', 'width:100%; top:0; left:0; height:auto;');
-    this.content.appendChild(this.inner);
+    this.innerContent.appendChild(this.inner);
     this.inner.name = 'inner';
 
     //this.scrollBG = UIL.DOM('UIL scroll-bg');
@@ -42,13 +49,16 @@ UIL.Gui = function( o ){
     this.scroll = UIL.DOM('UIL', 'div', 'background:#666; right:0; top:0; width:5px; height:10px;');
     this.scrollBG.appendChild( this.scroll );
 
-    this.bottom = UIL.DOM('UIL', 'div',  UIL.TXT+'width:100%; top:auto; bottom:0; left:0; text-align:center; pointer-events:auto; cursor:pointer; height:'+ this.height+'px; line-height:'+(this.height-5)+'px;');
+    this.bottom = UIL.DOM('UIL', 'div',  UIL.TXT+'width:100%; top:auto; bottom:0; left:0; border-bottom-right-radius:10px;  border-bottom-left-radius:10px; text-align:center; pointer-events:auto; cursor:pointer; height:'+this.height+'px; line-height:'+(this.height-5)+'px;');
     this.content.appendChild(this.bottom);
     this.bottom.textContent = 'close';
     this.bottom.name = 'bottom';
+    this.bottom.style.background = this.bg;
     
     this.isDown = false;
     this.isScroll = false;
+
+    this.callbackClose = function(){};
 
     this.content.addEventListener( 'mousedown', this, false );
     this.content.addEventListener( 'mousemove', this, false );
@@ -66,6 +76,19 @@ UIL.Gui = function( o ){
 
 UIL.Gui.prototype = {
     constructor: UIL.Gui,
+
+    setBG : function(c){
+
+        this.bg = c;
+
+        var i = this.uis.length;
+        while(i--){
+            this.uis[i].setBG(c);
+        }
+
+        this.bottom.style.background = c;
+
+    },
 
     getHTML : function(){
 
@@ -313,15 +336,20 @@ UIL.Gui.prototype = {
 
         if( this.tmp ) clearTimeout(this.tmp);
 
+        if( !this.isOpen ) return;
+
         this.maxHeight = window.innerHeight - this.top;
 
         if( this.h > this.maxHeight ){
             this.content.style.height = this.maxHeight + 'px';
-            this.bottom.style.background = UIL.bgcolor( this.color, 1 );
+            this.innerContent.style.height = (this.maxHeight -this.height )+ 'px';
+            this.bottom.style.background = this.bg;//UIL.bgcolor( this.color, 1 );
+            //this.bottom.style.color =  
             this.showScroll();
         }else{
-            this.bottom.style.background = UIL.bgcolor( this.color );
+            this.bottom.style.background = this.bg;//UIL.bgcolor( this.color );
             this.content.style.height = (this.h + this.height) +'px';
+            this.innerContent.style.height = this.h  +'px';
             this.hideScroll();
         }
 
@@ -363,6 +391,8 @@ UIL.Gui.prototype = {
             this.content.style.height = this.height + 'px';
             this.tmp = setTimeout( this.endHide.bind(this), 100 );
         }
+
+        
         
     },
 
@@ -371,6 +401,9 @@ UIL.Gui.prototype = {
         if( this.tmp ) clearTimeout(this.tmp);
         this.inner.style.display = 'none'; 
         this.bottom.textContent = 'open';
+        this.scrollBG.style.display = 'none';
+
+        this.callbackClose();
 
     }
 

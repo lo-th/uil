@@ -346,6 +346,7 @@ var UIL = ( function () {
     UIL.main = null;
     UIL.DEF = false;
     UIL.WIDTH = 300;
+    UIL.HEIGHT = 20;
     //UIL.BW = 190;
     //UIL.AW = 100;
     UIL.P = 30;
@@ -365,9 +366,14 @@ var UIL = ( function () {
 
     UIL.COLOR = 'N';
     UIL.BASECOLOR = '#C0C0C0';
+
+    UIL.BUTTON = '#404040';
+    UIL.BOOLBG = '#181818'
+
     UIL.SELECT = '#035fcf';
     UIL.MOVING = '#03afff';
     UIL.SELECTDOWN = '#024699';
+    UIL.BG = 'rgba(0,0,0,0.3)';
     UIL.SVGB = 'rgba(0,0,0,0.3)';
     UIL.SVGC = 'rgba(120,120,120,0.6)';
     UIL.Border = '#4f4f4f'; //'rgba(120,120,120,0.3)';
@@ -496,7 +502,7 @@ UIL.update = function(){
 // ----------------------
 //   Color function
 // ----------------------
-UIL.bgcolor = function(p, a, bg){
+/*UIL.bgcolor = function(p, a, bg){
     var r=44, g=44, b=44;
     a = a || 0.66;
     if(p){
@@ -512,7 +518,7 @@ UIL.bgcolor = function(p, a, bg){
     var color = 'rgba('+r+','+g+','+b+','+a+')';
     if(a === 0) color = 'none';
     return color;
-};
+};*/
 
 UIL.ColorLuma = function ( hex, lum ) {
 
@@ -624,13 +630,13 @@ UIL.Gui = function( o ){
 
     o = o || {};
 
-    this.height = o.height || 20;
+    //this.height = o.height || 20;
 
     if( o.Tpercent !== undefined ) UIL.P = o.Tpercent;
     if( o.css === undefined ) o.css = '';
 
     this.width = UIL.WIDTH;
-    this.h = this.height;
+    this.h = 0;//this.height;
     this.prevY = -1;
 
     UIL.main = this;
@@ -638,10 +644,14 @@ UIL.Gui = function( o ){
     this.callback = o.callback  === undefined ? null : o.callback;
 
     this.color = o.color || UIL.COLOR;
+    this.bg = o.bg || 'rgba(44,44,44,0.3)';
     
     this.isCenter = o.center || false;
     this.lockwheel = false;
     this.isOpen = true;
+
+    // bottom and close height
+    this.height = o.height || UIL.HEIGHT;
 
     this.uis = [];
 
@@ -651,8 +661,11 @@ UIL.Gui = function( o ){
 
     this.top = this.content.getBoundingClientRect().top;
 
+    this.innerContent = UIL.DOM('UIL', 'div', 'width:100%; top:0; left:0; height:auto;');
+    this.content.appendChild(this.innerContent);
+
     this.inner = UIL.DOM('UIL', 'div', 'width:100%; top:0; left:0; height:auto;');
-    this.content.appendChild(this.inner);
+    this.innerContent.appendChild(this.inner);
     this.inner.name = 'inner';
 
     //this.scrollBG = UIL.DOM('UIL scroll-bg');
@@ -664,13 +677,16 @@ UIL.Gui = function( o ){
     this.scroll = UIL.DOM('UIL', 'div', 'background:#666; right:0; top:0; width:5px; height:10px;');
     this.scrollBG.appendChild( this.scroll );
 
-    this.bottom = UIL.DOM('UIL', 'div',  UIL.TXT+'width:100%; top:auto; bottom:0; left:0; text-align:center; pointer-events:auto; cursor:pointer; height:'+ this.height+'px; line-height:'+(this.height-5)+'px;');
+    this.bottom = UIL.DOM('UIL', 'div',  UIL.TXT+'width:100%; top:auto; bottom:0; left:0; border-bottom-right-radius:10px;  border-bottom-left-radius:10px; text-align:center; pointer-events:auto; cursor:pointer; height:'+this.height+'px; line-height:'+(this.height-5)+'px;');
     this.content.appendChild(this.bottom);
     this.bottom.textContent = 'close';
     this.bottom.name = 'bottom';
+    this.bottom.style.background = this.bg;
     
     this.isDown = false;
     this.isScroll = false;
+
+    this.callbackClose = function(){};
 
     this.content.addEventListener( 'mousedown', this, false );
     this.content.addEventListener( 'mousemove', this, false );
@@ -688,6 +704,19 @@ UIL.Gui = function( o ){
 
 UIL.Gui.prototype = {
     constructor: UIL.Gui,
+
+    setBG : function(c){
+
+        this.bg = c;
+
+        var i = this.uis.length;
+        while(i--){
+            this.uis[i].setBG(c);
+        }
+
+        this.bottom.style.background = c;
+
+    },
 
     getHTML : function(){
 
@@ -935,15 +964,20 @@ UIL.Gui.prototype = {
 
         if( this.tmp ) clearTimeout(this.tmp);
 
+        if( !this.isOpen ) return;
+
         this.maxHeight = window.innerHeight - this.top;
 
         if( this.h > this.maxHeight ){
             this.content.style.height = this.maxHeight + 'px';
-            this.bottom.style.background = UIL.bgcolor( this.color, 1 );
+            this.innerContent.style.height = (this.maxHeight -this.height )+ 'px';
+            this.bottom.style.background = this.bg;//UIL.bgcolor( this.color, 1 );
+            //this.bottom.style.color =  
             this.showScroll();
         }else{
-            this.bottom.style.background = UIL.bgcolor( this.color );
+            this.bottom.style.background = this.bg;//UIL.bgcolor( this.color );
             this.content.style.height = (this.h + this.height) +'px';
+            this.innerContent.style.height = this.h  +'px';
             this.hideScroll();
         }
 
@@ -985,6 +1019,8 @@ UIL.Gui.prototype = {
             this.content.style.height = this.height + 'px';
             this.tmp = setTimeout( this.endHide.bind(this), 100 );
         }
+
+        
         
     },
 
@@ -993,6 +1029,9 @@ UIL.Gui.prototype = {
         if( this.tmp ) clearTimeout(this.tmp);
         this.inner.style.display = 'none'; 
         this.bottom.textContent = 'open';
+        this.scrollBG.style.display = 'none';
+
+        this.callbackClose();
 
     }
 
@@ -1042,11 +1081,14 @@ UIL.Proto = function( o ){
     this.isSend = false;
 
     var h = 20;
-    if( this.isUI ) h = UIL.main.height;
+    if( this.isUI ) h = UIL.HEIGHT;//UIL.main.height;
     this.h = o.h || o.height || h;
     this.h = this.h < 11 ? 11 : this.h;
     
     this.bgcolor = UIL.COLOR || o.bgcolor;
+
+    this.bg = this.isUI ? UIL.main.bg : 'rgba(44,44,44,0.3)';
+    if(o.bg !== undefined ) this.bg = o.bg;
 
 
 
@@ -1114,7 +1156,7 @@ UIL.Proto.prototype = {
         //s[0] = this.c[0].style;
         s[0].height = this.h + 'px';
 
-        if( this.isUI ) this.s[0].background = UIL.bgcolor(this.bgcolor);
+        if( this.isUI ) this.s[0].background = this.bg;//this.isUI ? UIL.main.bg : UIL.bgcolor(this.bgcolor);
         if( this.autoHeight ) this.s[0].transition = 'height 0.1s ease-out';
         if( this.c[1] !== undefined && this.autoWidth ){
             s[1] = this.c[1].style;
@@ -1145,6 +1187,13 @@ UIL.Proto.prototype = {
 
         this.rSize();
         this.addEvent();
+
+    },
+
+    setBG : function(c){
+
+        this.bg = c;
+        this.s[0].background = c;
 
     },
 
@@ -1364,6 +1413,9 @@ UIL.Group = function( o ){
     this.autoHeight = true;
     this.isGroup = true;
 
+    //this.bg = o.bg || null;
+    
+
     //this.h = 25;
     this.baseH = this.h;
 
@@ -1391,12 +1443,25 @@ UIL.Group = function( o ){
 
     this.init();
 
+    if( o.bg !== undefined ) this.setBG(o.bg);
+
     if( this.isOpen ) this.open();
 
 };
 
 UIL.Group.prototype = Object.create( UIL.Proto.prototype );
 UIL.Group.prototype.constructor = UIL.Group;
+
+UIL.Group.prototype.setBG = function( c ){
+
+    this.s[0].background = c;
+
+    var i = this.uis.length;
+    while(i--){
+        this.uis[i].setBG( c );
+    }
+
+};
 
 UIL.Group.prototype.handleEvent = function( e ) {
 
@@ -1408,6 +1473,7 @@ UIL.Group.prototype.handleEvent = function( e ) {
     }
 
 };
+
 
 UIL.Group.prototype.click = function( e ){
 
@@ -1530,7 +1596,7 @@ UIL.Title = function( o ){
     var id = o.id || 0;
     var prefix = o.prefix || '';
 
-    this.c[2] = UIL.DOM( 'UIL text', 'div', 'text-align:right; width:40px; line-height:'+ (this.h-8) + 'px; color:' + this.fontColor );
+    this.c[2] = UIL.DOM( 'UIL text', 'div', 'text-align:right; width:60px; line-height:'+ (this.h-8) + 'px; color:' + this.fontColor );
 
     if( this.h === 31 ){
 
@@ -1540,11 +1606,11 @@ UIL.Title = function( o ){
 
     }
     
-    var idt = id || 0;
-    if(id<10) idt = '0'+id;
+    //var idt = id || 0;
+    //if(id<10) idt = '0'+id;
 
     this.c[1].textContent = this.txt.substring(0,1).toUpperCase() + this.txt.substring(1).replace("-", " ");
-    this.c[2].textContent = prefix.toUpperCase()+' '+idt;
+    this.c[2].textContent = prefix;//.toUpperCase()+' '+idt;
 
     this.init();
 
@@ -2415,8 +2481,10 @@ UIL.List = function( o ){
     this.autoHeight = true;
     var align = o.align || 'center';
 
+    this.buttonColor = UIL.BUTTON;
+
     this.c[2] = UIL.DOM('UIL', 'div', 'box-sizing:content-box; border:20px solid transparent; border-bottom:10px solid transparent top:0px; height:90px; cursor:s-resize; pointer-events:auto; display:none;');
-    this.c[3] = UIL.DOM('UIL', 'div', 'border:1px solid '+UIL.Border+'; top:1px; pointer-events:auto; cursor:pointer; background:'+UIL.bgcolor(UIL.COLOR)+'; height:'+(this.h-2)+'px;' );
+    this.c[3] = UIL.DOM('UIL', 'div', 'border:1px solid '+UIL.Border+'; top:1px; pointer-events:auto; cursor:pointer; background:'+this.buttonColor+'; height:'+(this.h-2)+'px;' );
     this.c[4] = UIL.DOM('UIL', 'div', 'position:absolute; width:10px; height:10px; left:'+((this.sa+this.sb)-5)+'px; top:'+(~~(this.h*0.5)-5)+'px; background:'+ UIL.F0 );
     this.c[5] = UIL.DOM('UIL text', 'div', 'text-align:'+align+'; height:'+(this.h-4)+'px; line-height:'+(this.h-8)+'px;');
     this.c[6] = UIL.DOM('UIL', 'div', 'right:14px; top:'+this.h+'px; height:16px; width:10px; pointer-events:none; background:#666; display:none;');
@@ -2550,7 +2618,7 @@ UIL.List.prototype.mode = function( mode ){
     switch(mode){
         case 0: // base
             s[5].color = this.fontColor;
-            s[3].background = UIL.bgcolor(UIL.COLOR);
+            s[3].background = this.buttonColor;
         break;
         case 1: // over
             s[5].color = '#FFF';
@@ -2734,15 +2802,17 @@ UIL.Bool = function( o ){
 
     this.value = o.value || false;
 
+    this.buttonColor = UIL.BUTTON;
+
     var t = ~~ (this.h*0.5)-((this.h-2)*0.5);
 
-    this.c[2] = UIL.DOM('UIL', 'div', 'background:'+ UIL.Border +'; height:'+(this.h-2)+'px; width:36px; top:'+t+'px; border-radius:20px; pointer-events:auto; cursor:pointer;' );
-    this.c[3] = UIL.DOM('UIL', 'div', 'opasity:0, background:'+ UIL.Border +'; height:'+(this.h-6)+'px; width:'+(this.h-6)+'px; top:'+(t+2)+'px; border-radius:20px; ' );
+    this.c[2] = UIL.DOM('UIL', 'div', 'background:'+ UIL.BOOLBG +'; height:'+(this.h-2)+'px; width:36px; top:'+t+'px; border-radius:20px; pointer-events:auto; cursor:pointer; transition:0.1s ease-out;' );
+    this.c[3] = UIL.DOM('UIL', 'div', 'opasity:0, background:'+ UIL.BOOLBG +'; height:'+(this.h-6)+'px; width:'+(this.h-6)+'px; top:'+(t+2)+'px; border-radius:20px; ' );
 
     //this.c[3] = UIL.DOM('UIL', 'path', 'width:17px; top:'+(t+1)+'px;',{ width:17, height:17, d:'M 4 9 L 6 12 14 4', 'stroke-width':2, stroke:'#000', fill:'none', 'stroke-linecap':'butt' });
-    this.c[4] = UIL.DOM('UIL', 'div', 'height:'+(this.h-4)+'px; width:16px; top:'+(t+1)+'px; border-radius:20px; background:'+UIL.bgcolor(UIL.COLOR,1)+'; transition:margin 0.1s ease-out;' );
+    this.c[4] = UIL.DOM('UIL', 'div', 'border:1px solid '+UIL.Border+'; height:'+(this.h-4)+'px; width:16px; top:'+(t+1)+'px; border-radius:20px; background:'+this.buttonColor+'; transition:margin 0.1s ease-out;' );
 
-    /*this.c[2] = UIL.DOM('UIL', 'div', 'background:'+ UIL.Border +'; height:18px; width:36px; top:'+t+'px; border-radius:8px; pointer-events:auto; cursor:pointer;' );
+    /*this.c[2] = UIL.DOM('UIL', 'div', 'background:'+ UIL.BOOLBG +'; height:18px; width:36px; top:'+t+'px; border-radius:8px; pointer-events:auto; cursor:pointer;' );
     this.c[3] = UIL.DOM('UIL', 'path', 'width:17px; top:'+(t+1)+'px;',{ width:17, height:17, d:'M 4 9 L 6 12 14 4', 'stroke-width':2, stroke:'#000', fill:'none', 'stroke-linecap':'butt' });
     this.c[4] = UIL.DOM('UIL', 'div', 'height:16px; width:16px; top:'+(t+1)+'px; border-radius:8px; background:'+UIL.bgcolor(UIL.COLOR,1)+'; transition:margin 0.1s ease-out;' );*/
 
@@ -2778,13 +2848,15 @@ UIL.Bool.prototype.click = function( e ){
     if(this.value){
         this.value = false;
         s[4].marginLeft = '0px';
-        s[2].background = UIL.Border;
-        s[2].borderColor = UIL.Border;
+        s[2].background = UIL.BOOLBG;
+        s[2].borderColor = UIL.BOOLBG;
+        s[4].borderColor = UIL.Border;
     } else {
         this.value = true;
         s[4].marginLeft = '18px';
         s[2].background = this.fontColor;
         s[2].borderColor = this.fontColor;
+        s[4].borderColor = this.fontColor;
     }
 
     this.send();
@@ -2807,10 +2879,13 @@ UIL.Button = function( o ){
     UIL.Proto.call( this, o );
 
     this.value = o.value || false;
+    this.buttonColor = UIL.BUTTON;
 
     this.isLoadButton = o.loader || false;
+    this.isDragButton = o.drag || false;
+    this.r = o.r || 0;
 
-    this.c[2] = UIL.DOM('UIL', 'div', 'border:1px solid '+UIL.Border+'; top:1px; pointer-events:auto; cursor:pointer; background:'+UIL.bgcolor(UIL.COLOR)+'; height:'+(this.h-2)+'px;' );
+    this.c[2] = UIL.DOM('UIL', 'div', 'border:1px solid '+UIL.Border+'; top:1px; pointer-events:auto; cursor:pointer; background:'+this.buttonColor+'; height:'+(this.h-2)+'px; border-radius:'+this.r+'px;' );
     this.c[3] = UIL.DOM('UIL text', 'div', 'text-align:center; height:'+(this.h-4)+'px; line-height:'+(this.h-8)+'px;');
     this.c[3].style.color = this.fontColor;
 
@@ -2820,6 +2895,7 @@ UIL.Button = function( o ){
     this.c[3].innerHTML = this.txt;
 
     if( this.isLoadButton ) this.initLoader();
+    if( this.isDragButton ) this.initDrager();
 
     this.init();
 
@@ -2838,9 +2914,27 @@ UIL.Button.prototype.handleEvent = function( e ) {
         case 'mousedown': this.mode( 2 ); break;
         case 'mouseup': this.mode( 0 ); break;
         case 'mouseout': this.mode( 0 ); break;
-        case 'change': this.fileSelect( e ); break;
+        case 'change': this.fileSelect( e.target.files[0] ); break;
+
+        case 'dragover': this.dragover(); break;
+        case 'dragend': this.dragend(); break;
+        case 'dragleave': this.dragend(); break;
+        case 'drop': this.drop( e ); break;
     }
 
+};
+
+UIL.Button.prototype.dragover = function(){
+    this.s[5].borderColor = UIL.SELECT;
+    this.s[5].color = UIL.SELECT;
+};
+UIL.Button.prototype.dragend = function(){
+    this.s[5].borderColor = this.fontColor;
+    this.s[5].color = this.fontColor;
+};
+UIL.Button.prototype.drop = function(e){
+    this.dragend();
+    this.fileSelect( e.dataTransfer.files[0] );
 };
 
 UIL.Button.prototype.mode = function( mode ){
@@ -2850,7 +2944,7 @@ UIL.Button.prototype.mode = function( mode ){
     switch(mode){
         case 0: // base
             s[3].color = this.fontColor;
-            s[2].background = UIL.bgcolor(UIL.COLOR);
+            s[2].background = this.buttonColor;
         break;
         case 1: // over
             s[3].color = '#FFF';
@@ -2864,9 +2958,20 @@ UIL.Button.prototype.mode = function( mode ){
     }
 }
 
+UIL.Button.prototype.initDrager = function(){
+
+    this.c[5] = UIL.DOM('UIL text', 'div', ' text-align:center; line-height:'+(this.h-8)+'px; border:1px dashed '+this.fontColor+'; top:2px; pointer-events:auto; cursor:default; height:'+(this.h-4)+'px; border-radius:'+this.r+'px;' );
+    this.c[5].textContent = 'DRAG';
+
+    this.c[2].events = [  ];
+    this.c[5].events = [ 'dragover', 'dragend', 'dragleave', 'drop' ];
+
+
+};
+
 UIL.Button.prototype.initLoader = function(){
 
-    this.c[4] = UIL.DOM('UIL', 'input', 'border:1px solid '+UIL.Border+'; top:1px; opacity:0; pointer-events:auto; cursor:pointer; background:'+UIL.bgcolor(UIL.COLOR)+'; height:'+(this.h-2)+'px;' );
+    this.c[4] = UIL.DOM('UIL', 'input', 'border:1px solid '+UIL.Border+'; top:1px; opacity:0; pointer-events:auto; cursor:pointer; height:'+(this.h-2)+'px;' );
     this.c[4].name = 'loader';
     this.c[4].type = "file";
 
@@ -2875,15 +2980,13 @@ UIL.Button.prototype.initLoader = function(){
 
     //this.hide = document.createElement('input');
 
-
-
 };
 
-UIL.Button.prototype.fileSelect = function( e ){
+UIL.Button.prototype.fileSelect = function( file ){
 
-    if( ! e.target.files ) return;
+    //if( ! e.target.files ) return;
 
-    var file = e.target.files[0];
+    //var file = e.target.files[0];
 
     if( file === undefined ) return;
 
@@ -2892,10 +2995,13 @@ UIL.Button.prototype.fileSelect = function( e ){
     var type = fname.substring(fname.indexOf('.')+1, fname.length);
 
     if( type === 'png' || type === 'jpg' ) reader.readAsDataURL(file);
-    else if(type==='z') reader.readAsBinaryString(file);
+    else if(type === 'z') reader.readAsBinaryString(file);
     else reader.readAsText(file);
 
-    reader.onload = function(e) { this.send( e.target.result ); }.bind(this);
+    reader.onload = function(e) { 
+        this.callback( e.target.result, fname, type );
+        //this.send( e.target.result ); 
+    }.bind(this);
 
 };
 
@@ -2923,18 +3029,28 @@ UIL.Button.prototype.rSize = function(){
     UIL.Proto.prototype.rSize.call( this );
 
     var s = this.s;
+    var w = this.sb;
+    var d = this.sa;
 
-    s[2].left = this.sa + 'px';
-    s[2].width = this.sb + 'px';
+    if(this.isDragButton){ 
+        w = (w*0.5)-5;
 
-    if(s[4]){
-        s[4].left = this.sa + 'px';
-        s[4].width = this.sb + 'px';
+        s[5].left = (d+w+5) + 'px';
+        s[5].width = w + 'px';
     }
 
-    s[3].left = this.sa + 'px';
+    s[2].left = d + 'px';
+    s[2].width = w + 'px';
+
+    s[3].left = d + 'px';
+    s[3].width = w + 'px';
+
+    if(s[4]){
+        s[4].left = d + 'px';
+        s[4].width = w + 'px';
+    }
+
     
-    s[3].width = this.sb + 'px';
 
 };
 UIL.Circular = function( o ){
@@ -2943,6 +3059,8 @@ UIL.Circular = function( o ){
 
     //this.type = 'circular';
     this.autoWidth = false;
+
+    this.buttonColor = UIL.BUTTON;
 
     this.setTypeNumber( o );
 
@@ -2978,7 +3096,7 @@ UIL.Circular = function( o ){
 
     this.c[3] = UIL.DOM('UIL', 'circle', 'left:10px; top:'+this.top+'px; width:'+this.w+'px; height:'+this.height+'px; pointer-events:auto; cursor:pointer;', { cx:this.radius, cy:this.radius, r:this.radius, fill:'rgba(0,0,0,0.3)' });
     this.c[4] = UIL.DOM('UIL', 'path', 'left:10px; top:'+this.top+'px; width:'+this.w+'px; height:'+this.height+'px;', { d:this.makePath(), fill:this.fontColor });
-    this.c[5] = UIL.DOM('UIL', 'circle', 'left:10px; top:'+this.top+'px; width:'+this.w+'px; height:'+this.height+'px;', { cx:this.radius, cy:this.radius, r:this.radius*0.5, fill:UIL.bgcolor(UIL.COLOR, 1), 'stroke-width':1, stroke:UIL.SVGC });
+    this.c[5] = UIL.DOM('UIL', 'circle', 'left:10px; top:'+this.top+'px; width:'+this.w+'px; height:'+this.height+'px;', { cx:this.radius, cy:this.radius, r:this.radius*0.5, fill:this.buttonColor, 'stroke-width':1, stroke:UIL.SVGC });
 
     this.c[3].events = [ 'mouseover', 'mousedown', 'mouseout' ];
 
@@ -3129,6 +3247,8 @@ UIL.Knob = function( o ){
     //this.type = 'knob';
     this.autoWidth = false;
 
+    this.buttonColor = UIL.BUTTON;
+
     this.setTypeNumber( o );
 
     this.mPI = Math.PI * 0.8;
@@ -3166,7 +3286,7 @@ UIL.Knob = function( o ){
     this.c[4] = UIL.DOM('UIL', 'circle', 'left:10px; top:'+this.top+'px; width:'+this.w+'px; height:'+this.height+'px;', { cx:this.radius, cy:this.radius*0.5, r:3, fill:this.fontColor });
     this.c[5] = UIL.DOM('UIL', 'path', 'left:10px; top:'+this.top+'px; width:'+this.w+'px; height:'+this.height+'px;', { d:this.makeGrad(), 'stroke-width':1, stroke:UIL.SVGC });
     
-    UIL.DOM( null, 'circle', null, { cx:this.radius, cy:this.radius, r:this.radius*0.7, fill:UIL.bgcolor(UIL.COLOR, 1), 'stroke-width':1, stroke:UIL.SVGC }, this.c[3] );
+    UIL.DOM( null, 'circle', null, { cx:this.radius, cy:this.radius, r:this.radius*0.7, fill:this.buttonColor, 'stroke-width':1, stroke:UIL.SVGC }, this.c[3] );
 
     this.c[3].events = [ 'mouseover', 'mousedown', 'mouseout' ];
 

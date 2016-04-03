@@ -5,8 +5,10 @@ UIL.List = function( o ){
     this.autoHeight = true;
     var align = o.align || 'center';
 
+    this.buttonColor = UIL.BUTTON;
+
     this.c[2] = UIL.DOM('UIL', 'div', 'box-sizing:content-box; border:20px solid transparent; border-bottom:10px solid transparent top:0px; height:90px; cursor:s-resize; pointer-events:auto; display:none;');
-    this.c[3] = UIL.DOM('UIL', 'div', 'border:1px solid '+UIL.Border+'; top:1px; pointer-events:auto; cursor:pointer; background:'+UIL.bgcolor(UIL.COLOR)+'; height:'+(this.h-2)+'px;' );
+    this.c[3] = UIL.DOM('UIL', 'div', 'border:1px solid '+UIL.Border+'; top:1px; pointer-events:auto; cursor:pointer; background:'+this.buttonColor+'; height:'+(this.h-2)+'px;' );
     this.c[4] = UIL.DOM('UIL', 'div', 'position:absolute; width:10px; height:10px; left:'+((this.sa+this.sb)-5)+'px; top:'+(~~(this.h*0.5)-5)+'px; background:'+ UIL.F0 );
     this.c[5] = UIL.DOM('UIL text', 'div', 'text-align:'+align+'; height:'+(this.h-4)+'px; line-height:'+(this.h-8)+'px;');
     this.c[6] = UIL.DOM('UIL', 'div', 'right:14px; top:'+this.h+'px; height:16px; width:10px; pointer-events:none; background:#666; display:none;');
@@ -140,7 +142,7 @@ UIL.List.prototype.mode = function( mode ){
     switch(mode){
         case 0: // base
             s[5].color = this.fontColor;
-            s[3].background = UIL.bgcolor(UIL.COLOR);
+            s[3].background = this.buttonColor;
         break;
         case 1: // over
             s[5].color = '#FFF';

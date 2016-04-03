@@ -54,7 +54,7 @@ UIL.update = function(){
 // ----------------------
 //   Color function
 // ----------------------
-UIL.bgcolor = function(p, a, bg){
+/*UIL.bgcolor = function(p, a, bg){
     var r=44, g=44, b=44;
     a = a || 0.66;
     if(p){
@@ -70,7 +70,7 @@ UIL.bgcolor = function(p, a, bg){
     var color = 'rgba('+r+','+g+','+b+','+a+')';
     if(a === 0) color = 'none';
     return color;
-};
+};*/
 
 UIL.ColorLuma = function ( hex, lum ) {
 

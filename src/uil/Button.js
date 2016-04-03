@@ -3,10 +3,13 @@ UIL.Button = function( o ){
     UIL.Proto.call( this, o );
 
     this.value = o.value || false;
+    this.buttonColor = UIL.BUTTON;
 
     this.isLoadButton = o.loader || false;
+    this.isDragButton = o.drag || false;
+    this.r = o.r || 0;
 
-    this.c[2] = UIL.DOM('UIL', 'div', 'border:1px solid '+UIL.Border+'; top:1px; pointer-events:auto; cursor:pointer; background:'+UIL.bgcolor(UIL.COLOR)+'; height:'+(this.h-2)+'px;' );
+    this.c[2] = UIL.DOM('UIL', 'div', 'border:1px solid '+UIL.Border+'; top:1px; pointer-events:auto; cursor:pointer; background:'+this.buttonColor+'; height:'+(this.h-2)+'px; border-radius:'+this.r+'px;' );
     this.c[3] = UIL.DOM('UIL text', 'div', 'text-align:center; height:'+(this.h-4)+'px; line-height:'+(this.h-8)+'px;');
     this.c[3].style.color = this.fontColor;
 
@@ -16,6 +19,7 @@ UIL.Button = function( o ){
     this.c[3].innerHTML = this.txt;
 
     if( this.isLoadButton ) this.initLoader();
+    if( this.isDragButton ) this.initDrager();
 
     this.init();
 
@@ -34,9 +38,27 @@ UIL.Button.prototype.handleEvent = function( e ) {
         case 'mousedown': this.mode( 2 ); break;
         case 'mouseup': this.mode( 0 ); break;
         case 'mouseout': this.mode( 0 ); break;
-        case 'change': this.fileSelect( e ); break;
+        case 'change': this.fileSelect( e.target.files[0] ); break;
+
+        case 'dragover': this.dragover(); break;
+        case 'dragend': this.dragend(); break;
+        case 'dragleave': this.dragend(); break;
+        case 'drop': this.drop( e ); break;
     }
 
+};
+
+UIL.Button.prototype.dragover = function(){
+    this.s[5].borderColor = UIL.SELECT;
+    this.s[5].color = UIL.SELECT;
+};
+UIL.Button.prototype.dragend = function(){
+    this.s[5].borderColor = this.fontColor;
+    this.s[5].color = this.fontColor;
+};
+UIL.Button.prototype.drop = function(e){
+    this.dragend();
+    this.fileSelect( e.dataTransfer.files[0] );
 };
 
 UIL.Button.prototype.mode = function( mode ){
@@ -46,7 +68,7 @@ UIL.Button.prototype.mode = function( mode ){
     switch(mode){
         case 0: // base
             s[3].color = this.fontColor;
-            s[2].background = UIL.bgcolor(UIL.COLOR);
+            s[2].background = this.buttonColor;
         break;
         case 1: // over
             s[3].color = '#FFF';
@@ -60,9 +82,20 @@ UIL.Button.prototype.mode = function( mode ){
     }
 }
 
+UIL.Button.prototype.initDrager = function(){
+
+    this.c[5] = UIL.DOM('UIL text', 'div', ' text-align:center; line-height:'+(this.h-8)+'px; border:1px dashed '+this.fontColor+'; top:2px; pointer-events:auto; cursor:default; height:'+(this.h-4)+'px; border-radius:'+this.r+'px;' );
+    this.c[5].textContent = 'DRAG';
+
+    this.c[2].events = [  ];
+    this.c[5].events = [ 'dragover', 'dragend', 'dragleave', 'drop' ];
+
+
+};
+
 UIL.Button.prototype.initLoader = function(){
 
-    this.c[4] = UIL.DOM('UIL', 'input', 'border:1px solid '+UIL.Border+'; top:1px; opacity:0; pointer-events:auto; cursor:pointer; background:'+UIL.bgcolor(UIL.COLOR)+'; height:'+(this.h-2)+'px;' );
+    this.c[4] = UIL.DOM('UIL', 'input', 'border:1px solid '+UIL.Border+'; top:1px; opacity:0; pointer-events:auto; cursor:pointer; height:'+(this.h-2)+'px;' );
     this.c[4].name = 'loader';
     this.c[4].type = "file";
 
@@ -71,15 +104,13 @@ UIL.Button.prototype.initLoader = function(){
 
     //this.hide = document.createElement('input');
 
-
-
 };
 
-UIL.Button.prototype.fileSelect = function( e ){
+UIL.Button.prototype.fileSelect = function( file ){
 
-    if( ! e.target.files ) return;
+    //if( ! e.target.files ) return;
 
-    var file = e.target.files[0];
+    //var file = e.target.files[0];
 
     if( file === undefined ) return;
 
@@ -88,10 +119,13 @@ UIL.Button.prototype.fileSelect = function( e ){
     var type = fname.substring(fname.indexOf('.')+1, fname.length);
 
     if( type === 'png' || type === 'jpg' ) reader.readAsDataURL(file);
-    else if(type==='z') reader.readAsBinaryString(file);
+    else if(type === 'z') reader.readAsBinaryString(file);
     else reader.readAsText(file);
 
-    reader.onload = function(e) { this.send( e.target.result ); }.bind(this);
+    reader.onload = function(e) { 
+        this.callback( e.target.result, fname, type );
+        //this.send( e.target.result ); 
+    }.bind(this);
 
 };
 
@@ -119,17 +153,27 @@ UIL.Button.prototype.rSize = function(){
     UIL.Proto.prototype.rSize.call( this );
 
     var s = this.s;
+    var w = this.sb;
+    var d = this.sa;
 
-    s[2].left = this.sa + 'px';
-    s[2].width = this.sb + 'px';
+    if(this.isDragButton){ 
+        w = (w*0.5)-5;
 
-    if(s[4]){
-        s[4].left = this.sa + 'px';
-        s[4].width = this.sb + 'px';
+        s[5].left = (d+w+5) + 'px';
+        s[5].width = w + 'px';
     }
 
-    s[3].left = this.sa + 'px';
+    s[2].left = d + 'px';
+    s[2].width = w + 'px';
+
+    s[3].left = d + 'px';
+    s[3].width = w + 'px';
+
+    if(s[4]){
+        s[4].left = d + 'px';
+        s[4].width = w + 'px';
+    }
+
     
-    s[3].width = this.sb + 'px';
 
 };

@@ -5,6 +5,9 @@ UIL.Group = function( o ){
     this.autoHeight = true;
     this.isGroup = true;
 
+    //this.bg = o.bg || null;
+    
+
     //this.h = 25;
     this.baseH = this.h;
 
@@ -32,12 +35,25 @@ UIL.Group = function( o ){
 
     this.init();
 
+    if( o.bg !== undefined ) this.setBG(o.bg);
+
     if( this.isOpen ) this.open();
 
 };
 
 UIL.Group.prototype = Object.create( UIL.Proto.prototype );
 UIL.Group.prototype.constructor = UIL.Group;
+
+UIL.Group.prototype.setBG = function( c ){
+
+    this.s[0].background = c;
+
+    var i = this.uis.length;
+    while(i--){
+        this.uis[i].setBG( c );
+    }
+
+};
 
 UIL.Group.prototype.handleEvent = function( e ) {
 
@@ -49,6 +65,7 @@ UIL.Group.prototype.handleEvent = function( e ) {
     }
 
 };
+
 
 UIL.Group.prototype.click = function( e ){
 
