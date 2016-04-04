@@ -3,7 +3,7 @@ UIL.Button = function( o ){
     UIL.Proto.call( this, o );
 
     this.value = o.value || false;
-    this.buttonColor = UIL.BUTTON;
+    this.buttonColor = o.bColor || UIL.BUTTON;
 
     this.isLoadButton = o.loader || false;
     this.isDragButton = o.drag || false;

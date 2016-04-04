@@ -2343,25 +2343,31 @@ UIL.Slide = function( o ){
     this.isOver = false;
 
     this.c[2] = UIL.DOM('UIL number', 'div', ' text-align:right; width:47px; color:'+ this.fontColor );
-    this.c[3] = UIL.DOM('UIL', 'div', 'border:1px solid '+UIL.Border+'; pointer-events:auto; cursor:w-resize; background:rgba(0,0,0,0.3); top:2px; height:'+(this.h-4)+'px;' );
-    this.c[4] = UIL.DOM('UIL', 'div', 'left:4px; top:5px; height:'+(this.h-10)+'px; background:' + this.fontColor +';' );
+    this.c[3] = UIL.DOM('UIL', 'div', 'pointer-events:auto; cursor:w-resize; top:0; height:'+this.h+'px;' );
+    this.c[4] = UIL.DOM('UIL', 'div', 'border:1px solid '+UIL.Border+'; pointer-events:none; background:rgba(0,0,0,0.3); top:2px; height:'+(this.h-4)+'px;' );
+    this.c[5] = UIL.DOM('UIL', 'div', 'left:4px; top:5px; height:'+(this.h-10)+'px; background:' + this.fontColor +';' );
 
     if(this.type !== 0){
-        this.c[3].style.borderRadius = '4px';
-        this.c[3].style.height = '8px';
-        this.c[3].style.top = (this.h*0.5)-4 + 'px';
-        this.c[4].style.borderRadius = '2px';
-        this.c[4].style.height = '4px';
-        this.c[4].style.top = (this.h*0.5)-2 + 'px';
+        var h1 = 4;
+        var h2 = 8;
         var ww = this.h-4;
         var ra = 20;
 
         if(this.type === 2){
+            h1 = 2;
+            h2 = 4;
             ra = 2;
             ww = (this.h-4)*0.5
         }
 
-        this.c[5] = UIL.DOM('UIL', 'div', 'border-radius:'+ra+'px; margin-left:'+(-ww*0.5)+'px; border:1px solid '+UIL.Border+'; background:'+this.buttonColor+'; left:4px; top:2px; height:'+(this.h-4)+'px; width:'+ww+'px;' );
+        this.c[4].style.borderRadius = h1 + 'px';
+        this.c[4].style.height = h2 + 'px';
+        this.c[4].style.top = (this.h*0.5) - h1 + 'px';
+        this.c[5].style.borderRadius = (h1*0.5) + 'px';
+        this.c[5].style.height = h1 + 'px';
+        this.c[5].style.top = (this.h*0.5)-(h1*0.5) + 'px';
+
+        this.c[6] = UIL.DOM('UIL', 'div', 'border-radius:'+ra+'px; margin-left:'+(-ww*0.5)+'px; border:1px solid '+UIL.Border+'; background:'+this.buttonColor+'; left:4px; top:2px; height:'+(this.h-4)+'px; width:'+ww+'px;' );
     }
 
     this.c[3].events = [ 'mouseover', 'mousedown', 'mouseout' ];
@@ -2395,13 +2401,13 @@ UIL.Slide.prototype.mode = function( mode ){
     switch(mode){
         case 0: // base
             s[2].color = this.fontColor;
-            s[3].background = 'rgba(0,0,0,0.3)';
-            s[4].background = this.fontColor;
+            s[4].background = 'rgba(0,0,0,0.3)';
+            s[5].background = this.fontColor;
         break;
         case 1: // over
             s[2].color = this.colorPlus;
-            s[3].background = UIL.SlideBG;
-            s[4].background = this.colorPlus;
+            s[4].background = UIL.SlideBG;
+            s[5].background = this.colorPlus;
         break;
     }
 }
@@ -2465,8 +2471,8 @@ UIL.Slide.prototype.update = function( up ){
 
     var ww = this.w * (( this.value - this.min ) / this.range );
    
-    this.s[4].width = ww + 'px';
-    if(this.s[5])this.s[5].left = (this.sa+ww+ 3) + 'px';
+    this.s[5].width = ww + 'px';
+    if(this.s[6])this.s[6].left = (this.sa+ww+ 3) + 'px';
     this.c[2].textContent = this.value;
 
     if( up ) this.send();
@@ -2492,7 +2498,9 @@ UIL.Slide.prototype.rSize = function(){
     s[2].top = ty + 'px';
     s[3].left = this.sa + 'px';
     s[3].width = this.width + 'px';
-    s[4].left = (this.sa + 3) + 'px';
+    s[4].left = this.sa + 'px';
+    s[4].width = this.width + 'px';
+    s[5].left = (this.sa + 3) + 'px';
 
     this.update();
 
@@ -2902,7 +2910,7 @@ UIL.Button = function( o ){
     UIL.Proto.call( this, o );
 
     this.value = o.value || false;
-    this.buttonColor = UIL.BUTTON;
+    this.buttonColor = o.bColor || UIL.BUTTON;
 
     this.isLoadButton = o.loader || false;
     this.isDragButton = o.drag || false;
