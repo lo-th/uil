@@ -2335,6 +2335,9 @@ UIL.Slide = function( o ){
 
     this.setTypeNumber( o );
 
+    this.type = o.type || 0;
+    this.buttonColor = o.bColor || UIL.BUTTON;
+
     //this.old = this.value;
     this.isDown = false;
     this.isOver = false;
@@ -2342,6 +2345,24 @@ UIL.Slide = function( o ){
     this.c[2] = UIL.DOM('UIL number', 'div', ' text-align:right; width:47px; color:'+ this.fontColor );
     this.c[3] = UIL.DOM('UIL', 'div', 'border:1px solid '+UIL.Border+'; pointer-events:auto; cursor:w-resize; background:rgba(0,0,0,0.3); top:2px; height:'+(this.h-4)+'px;' );
     this.c[4] = UIL.DOM('UIL', 'div', 'left:4px; top:5px; height:'+(this.h-10)+'px; background:' + this.fontColor +';' );
+
+    if(this.type !== 0){
+        this.c[3].style.borderRadius = '4px';
+        this.c[3].style.height = '8px';
+        this.c[3].style.top = (this.h*0.5)-4 + 'px';
+        this.c[4].style.borderRadius = '2px';
+        this.c[4].style.height = '4px';
+        this.c[4].style.top = (this.h*0.5)-2 + 'px';
+        var ww = this.h-4;
+        var ra = 20;
+
+        if(this.type === 2){
+            ra = 2;
+            ww = (this.h-4)*0.5
+        }
+
+        this.c[5] = UIL.DOM('UIL', 'div', 'border-radius:'+ra+'px; margin-left:'+(-ww*0.5)+'px; border:1px solid '+UIL.Border+'; background:'+this.buttonColor+'; left:4px; top:2px; height:'+(this.h-4)+'px; width:'+ww+'px;' );
+    }
 
     this.c[3].events = [ 'mouseover', 'mousedown', 'mouseout' ];
 
@@ -2445,7 +2466,9 @@ UIL.Slide.prototype.update = function( up ){
     var ww = this.w * (( this.value - this.min ) / this.range );
    
     this.s[4].width = ww + 'px';
+    if(this.s[5])this.s[5].left = (this.sa+ww+ 3) + 'px';
     this.c[2].textContent = this.value;
+
     if( up ) this.send();
 
 };
@@ -2522,7 +2545,7 @@ UIL.List = function( o ){
     //this.range = this.max - this.maxHeight;
     this.ratio = this.maxHeight / this.max;
     this.sh = this.maxHeight * this.ratio;
-    if( this.sh < 20 ) this.sh = 20;
+    //if( this.sh < 20 ) this.sh = 20;
     this.range = this.maxHeight - this.sh;
     this.c[6].style.height = this.sh + 'px';
 

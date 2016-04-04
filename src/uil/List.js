@@ -46,7 +46,7 @@ UIL.List = function( o ){
     //this.range = this.max - this.maxHeight;
     this.ratio = this.maxHeight / this.max;
     this.sh = this.maxHeight * this.ratio;
-    if( this.sh < 20 ) this.sh = 20;
+    //if( this.sh < 20 ) this.sh = 20;
     this.range = this.maxHeight - this.sh;
     this.c[6].style.height = this.sh + 'px';
 
