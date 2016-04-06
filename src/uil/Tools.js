@@ -2,6 +2,13 @@
 //   Root function
 // ----------------------
 
+UIL.update = function(){
+    var i = UIL.listens.length;
+    while(i--){
+        UIL.listens[i].listening();
+    }
+};
+
 UIL.add = function(){
 
     var a = arguments;
@@ -43,12 +50,7 @@ UIL.autoType = function(){
 
 };
 
-UIL.update = function(){
-    var i = UIL.listens.length;
-    while(i--){
-        UIL.listens[i].listening();
-    }
-}
+
 
 
 // ----------------------

@@ -259,6 +259,7 @@ UIL.Gui.prototype = {
             this.uis.pop();
         }
         this.uis = [];
+        UIL.listens = [];
         this.calc();
 
     },

@@ -450,6 +450,13 @@ var UIL = ( function () {
 //   Root function
 // ----------------------
 
+UIL.update = function(){
+    var i = UIL.listens.length;
+    while(i--){
+        UIL.listens[i].listening();
+    }
+};
+
 UIL.add = function(){
 
     var a = arguments;
@@ -491,12 +498,7 @@ UIL.autoType = function(){
 
 };
 
-UIL.update = function(){
-    var i = UIL.listens.length;
-    while(i--){
-        UIL.listens[i].listening();
-    }
-}
+
 
 
 // ----------------------
@@ -887,6 +889,7 @@ UIL.Gui.prototype = {
             this.uis.pop();
         }
         this.uis = [];
+        UIL.listens = [];
         this.calc();
 
     },
@@ -1205,18 +1208,24 @@ UIL.Proto.prototype = {
     },
 
     listening : function(){
+
         if( this.parent === null ) return;
         if( this.isSend ) return;
-        if( this.isNumber ) this.value = this.numValue( this.parent[ this.val ] );
-        else this.value = this.parent[ this.val ];
-        this.update();
+
+        this.setValue( this.parent[ this.val ] );
+        //if( this.isNumber ) this.value = this.numValue( this.parent[ this.val ] );
+        //else this.value = this.parent[ this.val ];
+
+        //this.update();
 
     },
 
     setValue : function( v ){
         if( this.isNumber ) this.value = this.numValue( v );
         else this.value = v;
+
         this.update();
+
     },
 
     update: function( ) {
@@ -2406,7 +2415,8 @@ UIL.Slide.prototype.mode = function( mode ){
         break;
         case 1: // over
             s[2].color = this.colorPlus;
-            s[4].background = UIL.SlideBG;
+            if( !s[6] ) s[4].background = UIL.SlideBG;
+            else s[4].background = 'rgba(0,0,0,0.6)';
             s[5].background = this.colorPlus;
         break;
     }
@@ -2471,8 +2481,8 @@ UIL.Slide.prototype.update = function( up ){
 
     var ww = this.w * (( this.value - this.min ) / this.range );
    
-    this.s[5].width = ww + 'px';
-    if(this.s[6])this.s[6].left = (this.sa+ww+ 3) + 'px';
+    this.s[5].width = ~~ ww + 'px';
+    if(this.s[6])this.s[6].left = ~~ (this.sa +ww + 3) + 'px';
     this.c[2].textContent = this.value;
 
     if( up ) this.send();
