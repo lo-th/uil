@@ -172,10 +172,6 @@ UIL.Proto.prototype = {
         if( this.isSend ) return;
 
         this.setValue( this.parent[ this.val ] );
-        //if( this.isNumber ) this.value = this.numValue( this.parent[ this.val ] );
-        //else this.value = this.parent[ this.val ];
-
-        //this.update();
 
     },
 
