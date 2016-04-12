@@ -1111,6 +1111,7 @@ UIL.Proto = function( o ){
     
 
     this.txt = o.name || 'Proto';
+    this.rename = o.rename || '';
     this.target = o.target || null;
 
     this.callback = o.callback === undefined ? null : o.callback;
@@ -1137,7 +1138,7 @@ UIL.Proto = function( o ){
         //this.c[1] = UIL.DOM('UIL text');
         this.c[1] = UIL.DOM(null, 'div', UIL.BASIC + UIL.TXT );
         this.s[1] = this.c[1].style;
-        this.c[1].textContent = this.txt;
+        this.c[1].textContent = this.rename === '' ? this.txt : this.rename;
         this.s[1].color = this.titleColor;
     }
 
@@ -1201,6 +1202,10 @@ UIL.Proto.prototype = {
         this.rSize();
         this.addEvent();
 
+    },
+
+    rename:function(s){
+        this.c[1].textContent = s;
     },
 
     setBG : function(c){
