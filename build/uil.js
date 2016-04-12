@@ -839,10 +839,14 @@ UIL.Gui.prototype = {
         var a = arguments;
 
         if( typeof a[1] === 'object' ){ 
-            a[1].isUI = true; 
+            a[1].isUI = true;
+            a[1].main = this;
         } else if( typeof a[1] === 'string' ){
-            if( a[2] === undefined ) [].push.call(a, { isUI:true });
-            else a[2].isUI = true;
+            if( a[2] === undefined ) [].push.call(a, { isUI:true, main:this });
+            else {
+                a[2].isUI = true;
+                a[2].main = this;
+            }
         } 
 
 
@@ -1043,6 +1047,8 @@ UIL.Proto = function( o ){
 
     o = o || {};
 
+    this.main = o.main || null;
+
     //this.type = '';
     // percent of title
     this.p = o.p || o.tPercent || 0;
@@ -1084,13 +1090,13 @@ UIL.Proto = function( o ){
     this.isSend = false;
 
     var h = 20;
-    if( this.isUI ) h = UIL.HEIGHT;//UIL.main.height;
+    if( this.isUI ) h = UIL.HEIGHT;//this.main.height;
     this.h = o.h || o.height || h;
     this.h = this.h < 11 ? 11 : this.h;
     
     this.bgcolor = UIL.COLOR || o.bgcolor;
 
-    this.bg = this.isUI ? UIL.main.bg : 'rgba(44,44,44,0.3)';
+    this.bg = this.isUI ? this.main.bg : 'rgba(44,44,44,0.3)';
     if(o.bg !== undefined ) this.bg = o.bg;
 
 
@@ -1107,7 +1113,7 @@ UIL.Proto = function( o ){
     this.callback = o.callback === undefined ? null : o.callback;
     this.endCallback = null;
 
-    if( this.callback === null && this.isUI && UIL.main.callback !== null ) this.callback = UIL.main.callback;
+    if( this.callback === null && this.isUI && this.main.callback !== null ) this.callback = this.main.callback;
 
     // elements
 
@@ -1152,6 +1158,7 @@ UIL.Proto.prototype = {
 
     // make de node
 
+
     init: function (){
 
         var s = this.s; // style cached
@@ -1159,7 +1166,7 @@ UIL.Proto.prototype = {
         //s[0] = this.c[0].style;
         s[0].height = this.h + 'px';
 
-        if( this.isUI ) this.s[0].background = this.bg;//this.isUI ? UIL.main.bg : UIL.bgcolor(this.bgcolor);
+        if( this.isUI ) this.s[0].background = this.bg;//this.isUI ? this.main.bg : UIL.bgcolor(this.bgcolor);
         if( this.autoHeight ) this.s[0].transition = 'height 0.1s ease-out';
         if( this.c[1] !== undefined && this.autoWidth ){
             s[1] = this.c[1].style;
@@ -1180,7 +1187,7 @@ UIL.Proto.prototype = {
         if( this.target !== null ){ 
             this.target.appendChild( this.c[0] );
         } else {
-            if( this.isUI ) UIL.main.inner.appendChild( this.c[0] );
+            if( this.isUI ) this.main.inner.appendChild( this.c[0] );
             else document.body.appendChild( this.c[0] );
         }
 
@@ -1274,7 +1281,7 @@ UIL.Proto.prototype = {
         if( this.target !== null ){ 
             this.target.removeChild( this.c[0] );
         } else {
-            if( this.isUI ) UIL.main.inner.removeChild( this.c[0] );
+            if( this.isUI ) this.main.inner.removeChild( this.c[0] );
             else document.body.removeChild( this.c[0] );
         }
 
@@ -1515,13 +1522,13 @@ UIL.Group.prototype.open = function(){
     this.s[4].background = UIL.F1;
     this.rSizeContent();
 
-    if( this.isUI ) UIL.main.calc( this.h - this.baseH );
+    if( this.isUI ) this.main.calc( this.h - this.baseH );
 
 };
 
 UIL.Group.prototype.close = function(){
 
-    if( this.isUI ) UIL.main.calc(-(this.h-this.baseH ));
+    if( this.isUI ) this.main.calc(-(this.h-this.baseH ));
 
     this.isOpen = false;
     this.s[4].background = UIL.F0;
@@ -2138,14 +2145,14 @@ UIL.Color.prototype.show = function(){
     this.s[5].display = 'block';
 
     if( this.parentGroup !== null ){ this.parentGroup.calc( this.h - this.baseH );}
-    if( this.isUI ) UIL.main.calc( this.h - this.baseH );
+    if( this.isUI ) this.main.calc( this.h - this.baseH );
 
 };
 
 UIL.Color.prototype.hide = function(){
 
     if( this.parentGroup !== null ){ this.parentGroup.calc( -(this.h-this.baseH) );}
-    if( this.isUI ) UIL.main.calc( -(this.h-this.baseH) );
+    if( this.isUI ) this.main.calc( -(this.h-this.baseH) );
 
     this.isShow = false;
     this.h = this.baseH;
@@ -2330,7 +2337,7 @@ UIL.Color.prototype.rSize = function(){
         this.redraw();
         this.h = this.width+30;
         this.c[0].height = this.h + 'px';
-        if( this.isUI ) UIL.main.calc();
+        if( this.isUI ) this.main.calc();
     }
 
 };
@@ -2786,7 +2793,7 @@ UIL.List.prototype.listup = function( e ){
 
 UIL.List.prototype.listout = function( e ){
 
-    if( this.isUI ) UIL.main.lockwheel = false;
+    if( this.isUI ) this.main.lockwheel = false;
     this.listup();
     var name = e.relatedTarget.name;
     if( name === undefined ) this.listHide();
@@ -2796,7 +2803,7 @@ UIL.List.prototype.listout = function( e ){
 UIL.List.prototype.listwheel = function( e ){
 
     if( !this.scroll ) return;
-    if( this.isUI ) UIL.main.lockwheel = true;
+    if( this.isUI ) this.main.lockwheel = true;
     var delta = 0;
     if( e.wheelDeltaY ) delta = -e.wheelDeltaY*0.04;
     else if( e.wheelDelta ) delta = -e.wheelDelta*0.2;
@@ -2846,14 +2853,14 @@ UIL.List.prototype.listShow = function(){
     this.rSizeContent();
 
     if( this.parentGroup !== null ){ this.parentGroup.calc( this.h - this.baseH );}
-    if( this.isUI ) UIL.main.calc( this.h - this.baseH );
+    if( this.isUI ) this.main.calc( this.h - this.baseH );
 
 };
 
 UIL.List.prototype.listHide = function(){
 
     if( this.parentGroup !== null ){ this.parentGroup.calc( -(this.h-this.baseH) );}
-    if( this.isUI ) UIL.main.calc(-(this.h-this.baseH));
+    if( this.isUI ) this.main.calc(-(this.h-this.baseH));
 
     this.show = false;
     this.h = this.baseH;

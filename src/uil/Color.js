@@ -164,14 +164,14 @@ UIL.Color.prototype.show = function(){
     this.s[5].display = 'block';
 
     if( this.parentGroup !== null ){ this.parentGroup.calc( this.h - this.baseH );}
-    if( this.isUI ) UIL.main.calc( this.h - this.baseH );
+    if( this.isUI ) this.main.calc( this.h - this.baseH );
 
 };
 
 UIL.Color.prototype.hide = function(){
 
     if( this.parentGroup !== null ){ this.parentGroup.calc( -(this.h-this.baseH) );}
-    if( this.isUI ) UIL.main.calc( -(this.h-this.baseH) );
+    if( this.isUI ) this.main.calc( -(this.h-this.baseH) );
 
     this.isShow = false;
     this.h = this.baseH;
@@ -356,7 +356,7 @@ UIL.Color.prototype.rSize = function(){
         this.redraw();
         this.h = this.width+30;
         this.c[0].height = this.h + 'px';
-        if( this.isUI ) UIL.main.calc();
+        if( this.isUI ) this.main.calc();
     }
 
 };

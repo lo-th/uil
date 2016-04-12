@@ -102,13 +102,13 @@ UIL.Group.prototype.open = function(){
     this.s[4].background = UIL.F1;
     this.rSizeContent();
 
-    if( this.isUI ) UIL.main.calc( this.h - this.baseH );
+    if( this.isUI ) this.main.calc( this.h - this.baseH );
 
 };
 
 UIL.Group.prototype.close = function(){
 
-    if( this.isUI ) UIL.main.calc(-(this.h-this.baseH ));
+    if( this.isUI ) this.main.calc(-(this.h-this.baseH ));
 
     this.isOpen = false;
     this.s[4].background = UIL.F0;

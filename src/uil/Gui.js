@@ -209,10 +209,14 @@ UIL.Gui.prototype = {
         var a = arguments;
 
         if( typeof a[1] === 'object' ){ 
-            a[1].isUI = true; 
+            a[1].isUI = true;
+            a[1].main = this;
         } else if( typeof a[1] === 'string' ){
-            if( a[2] === undefined ) [].push.call(a, { isUI:true });
-            else a[2].isUI = true;
+            if( a[2] === undefined ) [].push.call(a, { isUI:true, main:this });
+            else {
+                a[2].isUI = true;
+                a[2].main = this;
+            }
         } 
 
 

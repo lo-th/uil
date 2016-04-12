@@ -47,6 +47,13 @@ var obj = {
 
 }
 
+var obj2 = {
+
+    speed: 5
+
+}
+
+
 var debug = document.getElementById('debug');
 var callback = function( v ){ debug.innerHTML = obj.speed;  }
 
@@ -57,6 +64,16 @@ ui.add( obj, 'speed', { min:-5, max:5 } ).listen();
 ui.add( obj, 'speed', { min:-5, max:5 } ).listen();
 ui.add( obj, 'speed', { type:'Circular', min:-5, max:5, size:120 } ).listen();
 ui.add( obj, 'speed', { type:'Knob', min:-5, max:5, size:120 } ).listen();
+
+
+
+var ui2 = new UIL.Gui({css:'top:20px; left:20px;'}).onChange( callback );
+
+ui2.add( obj2, 'speed', { min:-5, max:5 } ).listen();
+ui2.add( obj2, 'speed', { min:-5, max:5 } ).listen();
+ui2.add( obj2, 'speed', { min:-5, max:5 } ).listen();
+ui2.add( obj2, 'speed', { type:'Circular', min:-5, max:5, size:120 } ).listen();
+ui2.add( obj2, 'speed', { type:'Knob', min:-5, max:5, size:120 } ).listen();
 
 loop();
 
