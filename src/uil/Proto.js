@@ -26,6 +26,9 @@ UIL.Proto = function( o ){
     // only most simple 
     this.mono = false;
 
+    // stop listening for edite slide text
+    this.isEdit = false;
+
     // no title 
     this.simple = o.simple || false;
 
@@ -173,6 +176,7 @@ UIL.Proto.prototype = {
 
         if( this.parent === null ) return;
         if( this.isSend ) return;
+        if( this.isEdit ) return;
 
         this.setValue( this.parent[ this.val ] );
 

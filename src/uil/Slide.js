@@ -209,6 +209,7 @@ UIL.Slide.prototype.textdown = function( e ){
 
     e.target.contentEditable = true;
     e.target.focus();
+    this.isEdit = true;
 
 };
 
@@ -235,6 +236,7 @@ UIL.Slide.prototype.blur = function( e ){
 
     e.target.style.border = 'none';
     e.target.contentEditable = false;
+    this.isEdit = false;
 
 };
 

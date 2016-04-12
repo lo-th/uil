@@ -1071,6 +1071,9 @@ UIL.Proto = function( o ){
     // only most simple 
     this.mono = false;
 
+    // stop listening for edite slide text
+    this.isEdit = false;
+
     // no title 
     this.simple = o.simple || false;
 
@@ -1218,6 +1221,7 @@ UIL.Proto.prototype = {
 
         if( this.parent === null ) return;
         if( this.isSend ) return;
+        if( this.isEdit ) return;
 
         this.setValue( this.parent[ this.val ] );
 
@@ -2552,6 +2556,7 @@ UIL.Slide.prototype.textdown = function( e ){
 
     e.target.contentEditable = true;
     e.target.focus();
+    this.isEdit = true;
 
 };
 
@@ -2578,6 +2583,7 @@ UIL.Slide.prototype.blur = function( e ){
 
     e.target.style.border = 'none';
     e.target.contentEditable = false;
+    this.isEdit = false;
 
 };
 
