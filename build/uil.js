@@ -2373,10 +2373,12 @@ UIL.Slide = function( o ){
     this.c[3].name = 'scroll';
 
     if(this.stype !== 0){
-        var h1 = 4;
-        var h2 = 8;
-        var ww = this.h-4;
-        var ra = 20;
+        if(this.stype === 1 || this.stype === 3){
+            var h1 = 4;
+            var h2 = 8;
+            var ww = this.h-4;
+            var ra = 20;
+        }
 
         if(this.stype === 2){
             h1 = 2;
@@ -2384,6 +2386,8 @@ UIL.Slide = function( o ){
             ra = 2;
             ww = (this.h-4)*0.5
         }
+
+        if(this.stype === 3) this.c[5].style.visible = 'none';
 
         this.c[4].style.borderRadius = h1 + 'px';
         this.c[4].style.height = h2 + 'px';
@@ -2510,8 +2514,8 @@ UIL.Slide.prototype.update = function( up ){
 
     var ww = this.w * (( this.value - this.min ) / this.range );
    
-    this.s[5].width = ~~ ww + 'px';
-    if(this.s[6])this.s[6].left = ~~ (this.sa +ww + 3) + 'px';
+    if(this.stype !== 3) this.s[5].width = ~~ ww + 'px';
+    if(this.s[6]) this.s[6].left = ~~ (this.sa +ww + 3) + 'px';
     this.c[2].textContent = this.value;
 
     if( up ) this.send();
