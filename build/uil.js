@@ -650,6 +650,7 @@ UIL.Gui = function( o ){
     
     this.isCenter = o.center || false;
     this.lockwheel = false;
+    this.onWheel = false;
     this.isOpen = true;
 
     // bottom and close height
@@ -695,6 +696,7 @@ UIL.Gui = function( o ){
     this.content.addEventListener( 'mouseout',  this, false );
     this.content.addEventListener( 'mouseup',   this, false );
     this.content.addEventListener( 'mouseover', this, false );
+    //this.content.addEventListener( 'mousewheel', this, false );
 
     document.addEventListener( 'mousewheel', this, false );
     
@@ -811,7 +813,12 @@ UIL.Gui.prototype = {
 
     wheel: function ( e ){
 
+        e.preventDefault();
+        e.stopPropagation();
+
         if( this.lockwheel || !this.isScroll ) return;
+
+        //this.onWheel = true;
 
         var x = e.clientX;
         var px = this.content.getBoundingClientRect().left;
@@ -820,9 +827,9 @@ UIL.Gui.prototype = {
         if(x>(px+this.width)) return;
 
         var delta = 0;
-        if(e.wheelDeltaY) delta= -e.wheelDeltaY*0.04;
-        else if(e.wheelDelta) delta= -e.wheelDelta*0.2;
-        else if(e.detail) delta=e.detail*4.0;
+        if(e.wheelDeltaY) delta = -e.wheelDeltaY*0.04;
+        else if(e.wheelDelta) delta = -e.wheelDelta*0.2;
+        else if(e.detail) delta =e.detail*4.0;
 
         this.py += delta;
 
@@ -896,6 +903,8 @@ UIL.Gui.prototype = {
         UIL.listens = [];
         this.calc();
 
+
+
     },
 
     // -----------------------------------
@@ -911,6 +920,8 @@ UIL.Gui.prototype = {
         this.scroll.style.top = ( ~~ y ) + 'px';
 
         this.py = y;
+
+        //this.onWheel = false;
 
     },
 
@@ -1265,8 +1276,10 @@ UIL.Proto.prototype = {
 
     send:function( v ){
         this.isSend = true;
-        if( this.callback ) this.callback( v || this.value );
+
         if( this.parent !== null ) this.parent[ this.val ] = v || this.value;
+        if( this.callback ) this.callback( v || this.value );
+        
         this.isSend = false;
 
     },
@@ -1572,13 +1585,19 @@ UIL.Group.prototype.calc = function( y ){
 
     //this.h = this.baseH;
 
-    if( y !== undefined ){ this.h += y; }
+    if( y !== undefined ){ 
+        this.h += y;
+        if( this.isUI ) this.main.calc( y );
+
+    }
     else this.h = this.c[2].offsetHeight + this.baseH;
 
     //var total = this.c[2].offsetHeight;
     //this.h += total;
 
     this.s[0].height = this.h + 'px';
+
+    //
 
 };
 
@@ -1994,7 +2013,7 @@ UIL.Color = function( o ){
 
     this.autoHeight = true;
 
-    this.type = o.type || 'array';
+    this.ctype = o.ctype || 'array';
     this.width = this.sb;
     this.oldWidth = 0;
 
@@ -2154,14 +2173,14 @@ UIL.Color.prototype.show = function(){
     this.s[5].display = 'block';
 
     if( this.parentGroup !== null ){ this.parentGroup.calc( this.h - this.baseH );}
-    if( this.isUI ) this.main.calc( this.h - this.baseH );
+    else if( this.isUI ) this.main.calc( this.h - this.baseH );
 
 };
 
 UIL.Color.prototype.hide = function(){
 
     if( this.parentGroup !== null ){ this.parentGroup.calc( -(this.h-this.baseH) );}
-    if( this.isUI ) this.main.calc( -(this.h-this.baseH) );
+    else if( this.isUI ) this.main.calc( -(this.h-this.baseH) );
 
     this.isShow = false;
     this.h = this.baseH;
@@ -2192,10 +2211,10 @@ UIL.Color.prototype.update = function( up ){
 
     if(!up) return;
 
-    if( this.type === 'array' ) this.send( this.rgb );
-    if( this.type === 'rgb' ) this.send( UIL.htmlRgb( this.rgb ) );
-    if( this.type === 'hex' ) this.send( UIL.htmlToHex( this.value ) );
-    if( this.type === 'html' ) this.send();
+    if( this.ctype === 'array' ) this.send( this.rgb );
+    if( this.ctype === 'rgb' ) this.send( UIL.htmlRgb( this.rgb ) );
+    if( this.ctype === 'hex' ) this.send( UIL.htmlToHex( this.value ) );
+    if( this.ctype === 'html' ) this.send();
 
 };
 
@@ -2362,6 +2381,7 @@ UIL.Slide = function( o ){
     //this.old = this.value;
     this.isDown = false;
     this.isOver = false;
+    this.allway = o.allway || false;
 
     //this.c[2] = UIL.DOM('UIL number', 'div', ' text-align:right; width:47px; color:'+ this.fontColor );
     this.c[2] = UIL.DOM('UIL textSelect', 'div', ' text-align:right; cursor:pointer; width:47px; border:none; color:'+ this.fontColor );
@@ -2453,6 +2473,7 @@ UIL.Slide.prototype.mode = function( mode ){
 UIL.Slide.prototype.over = function( e ){
 
     e.preventDefault();
+    e.stopPropagation();
 
     this.isOver = true;
     this.mode(1);
@@ -2462,6 +2483,7 @@ UIL.Slide.prototype.over = function( e ){
 UIL.Slide.prototype.out = function( e ){
 
     e.preventDefault();
+    e.stopPropagation();
 
     this.isOver = false;
     if(this.isDown) return;
@@ -2472,6 +2494,7 @@ UIL.Slide.prototype.out = function( e ){
 UIL.Slide.prototype.up = function( e ){
 
     e.preventDefault();
+    e.stopPropagation();
 
     this.isDown = false;
     document.removeEventListener( 'mouseup', this, false );
@@ -2487,6 +2510,7 @@ UIL.Slide.prototype.up = function( e ){
 UIL.Slide.prototype.down = function( e ){
 
     e.preventDefault();
+    e.stopPropagation();
 
     this.isDown = true;
     document.addEventListener( 'mouseup', this, false );
@@ -2868,14 +2892,14 @@ UIL.List.prototype.listShow = function(){
     this.rSizeContent();
 
     if( this.parentGroup !== null ){ this.parentGroup.calc( this.h - this.baseH );}
-    if( this.isUI ) this.main.calc( this.h - this.baseH );
+    else if( this.isUI ) this.main.calc( this.h - this.baseH );
 
 };
 
 UIL.List.prototype.listHide = function(){
 
     if( this.parentGroup !== null ){ this.parentGroup.calc( -(this.h-this.baseH) );}
-    if( this.isUI ) this.main.calc(-(this.h-this.baseH));
+    else if( this.isUI ) this.main.calc(-(this.h-this.baseH));
 
     this.show = false;
     this.h = this.baseH;
@@ -2931,13 +2955,17 @@ UIL.Bool = function( o ){
 
     this.buttonColor = UIL.BUTTON;
 
-    var t = ~~ (this.h*0.5)-((this.h-2)*0.5);
+    this.inh = o.inh || this.h;
 
-    this.c[2] = UIL.DOM('UIL', 'div', 'background:'+ UIL.BOOLBG +'; height:'+(this.h-2)+'px; width:36px; top:'+t+'px; border-radius:20px; pointer-events:auto; cursor:pointer; transition:0.1s ease-out;' );
-    this.c[3] = UIL.DOM('UIL', 'div', 'opasity:0, background:'+ UIL.BOOLBG +'; height:'+(this.h-6)+'px; width:'+(this.h-6)+'px; top:'+(t+2)+'px; border-radius:20px; ' );
+    var t = ~~ (this.h*0.5)-((this.inh-2)*0.5);
+
+
+
+    this.c[2] = UIL.DOM('UIL', 'div', 'background:'+ UIL.BOOLBG +'; height:'+(this.inh-2)+'px; width:36px; top:'+t+'px; border-radius:20px; pointer-events:auto; cursor:pointer; transition:0.1s ease-out;' );
+    this.c[3] = UIL.DOM('UIL', 'div', 'opasity:0, background:'+ UIL.BOOLBG +'; height:'+(this.inh-6)+'px; width:'+(this.inh-6)+'px; top:'+(t+2)+'px; border-radius:20px; ' );
 
     //this.c[3] = UIL.DOM('UIL', 'path', 'width:17px; top:'+(t+1)+'px;',{ width:17, height:17, d:'M 4 9 L 6 12 14 4', 'stroke-width':2, stroke:'#000', fill:'none', 'stroke-linecap':'butt' });
-    this.c[4] = UIL.DOM('UIL', 'div', 'border:1px solid '+UIL.Border+'; height:'+(this.h-4)+'px; width:16px; top:'+(t+1)+'px; border-radius:20px; background:'+this.buttonColor+'; transition:margin 0.1s ease-out;' );
+    this.c[4] = UIL.DOM('UIL', 'div', 'border:1px solid '+UIL.Border+'; height:'+(this.inh-4)+'px; width:16px; top:'+(t+1)+'px; border-radius:20px; background:'+this.buttonColor+'; transition:margin 0.1s ease-out;' );
 
     /*this.c[2] = UIL.DOM('UIL', 'div', 'background:'+ UIL.BOOLBG +'; height:18px; width:36px; top:'+t+'px; border-radius:8px; pointer-events:auto; cursor:pointer;' );
     this.c[3] = UIL.DOM('UIL', 'path', 'width:17px; top:'+(t+1)+'px;',{ width:17, height:17, d:'M 4 9 L 6 12 14 4', 'stroke-width':2, stroke:'#000', fill:'none', 'stroke-linecap':'butt' });

@@ -265,14 +265,14 @@ UIL.List.prototype.listShow = function(){
     this.rSizeContent();
 
     if( this.parentGroup !== null ){ this.parentGroup.calc( this.h - this.baseH );}
-    if( this.isUI ) this.main.calc( this.h - this.baseH );
+    else if( this.isUI ) this.main.calc( this.h - this.baseH );
 
 };
 
 UIL.List.prototype.listHide = function(){
 
     if( this.parentGroup !== null ){ this.parentGroup.calc( -(this.h-this.baseH) );}
-    if( this.isUI ) this.main.calc(-(this.h-this.baseH));
+    else if( this.isUI ) this.main.calc(-(this.h-this.baseH));
 
     this.show = false;
     this.h = this.baseH;

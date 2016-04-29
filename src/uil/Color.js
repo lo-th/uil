@@ -4,7 +4,7 @@ UIL.Color = function( o ){
 
     this.autoHeight = true;
 
-    this.type = o.type || 'array';
+    this.ctype = o.ctype || 'array';
     this.width = this.sb;
     this.oldWidth = 0;
 
@@ -164,14 +164,14 @@ UIL.Color.prototype.show = function(){
     this.s[5].display = 'block';
 
     if( this.parentGroup !== null ){ this.parentGroup.calc( this.h - this.baseH );}
-    if( this.isUI ) this.main.calc( this.h - this.baseH );
+    else if( this.isUI ) this.main.calc( this.h - this.baseH );
 
 };
 
 UIL.Color.prototype.hide = function(){
 
     if( this.parentGroup !== null ){ this.parentGroup.calc( -(this.h-this.baseH) );}
-    if( this.isUI ) this.main.calc( -(this.h-this.baseH) );
+    else if( this.isUI ) this.main.calc( -(this.h-this.baseH) );
 
     this.isShow = false;
     this.h = this.baseH;
@@ -202,10 +202,10 @@ UIL.Color.prototype.update = function( up ){
 
     if(!up) return;
 
-    if( this.type === 'array' ) this.send( this.rgb );
-    if( this.type === 'rgb' ) this.send( UIL.htmlRgb( this.rgb ) );
-    if( this.type === 'hex' ) this.send( UIL.htmlToHex( this.value ) );
-    if( this.type === 'html' ) this.send();
+    if( this.ctype === 'array' ) this.send( this.rgb );
+    if( this.ctype === 'rgb' ) this.send( UIL.htmlRgb( this.rgb ) );
+    if( this.ctype === 'hex' ) this.send( UIL.htmlToHex( this.value ) );
+    if( this.ctype === 'html' ) this.send();
 
 };
 

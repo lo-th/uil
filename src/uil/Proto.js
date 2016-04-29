@@ -220,8 +220,10 @@ UIL.Proto.prototype = {
 
     send:function( v ){
         this.isSend = true;
-        if( this.callback ) this.callback( v || this.value );
+
         if( this.parent !== null ) this.parent[ this.val ] = v || this.value;
+        if( this.callback ) this.callback( v || this.value );
+        
         this.isSend = false;
 
     },

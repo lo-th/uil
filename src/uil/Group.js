@@ -143,13 +143,19 @@ UIL.Group.prototype.calc = function( y ){
 
     //this.h = this.baseH;
 
-    if( y !== undefined ){ this.h += y; }
+    if( y !== undefined ){ 
+        this.h += y;
+        if( this.isUI ) this.main.calc( y );
+
+    }
     else this.h = this.c[2].offsetHeight + this.baseH;
 
     //var total = this.c[2].offsetHeight;
     //this.h += total;
 
     this.s[0].height = this.h + 'px';
+
+    //
 
 };
 

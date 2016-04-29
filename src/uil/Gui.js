@@ -20,6 +20,7 @@ UIL.Gui = function( o ){
     
     this.isCenter = o.center || false;
     this.lockwheel = false;
+    this.onWheel = false;
     this.isOpen = true;
 
     // bottom and close height
@@ -65,6 +66,7 @@ UIL.Gui = function( o ){
     this.content.addEventListener( 'mouseout',  this, false );
     this.content.addEventListener( 'mouseup',   this, false );
     this.content.addEventListener( 'mouseover', this, false );
+    //this.content.addEventListener( 'mousewheel', this, false );
 
     document.addEventListener( 'mousewheel', this, false );
     
@@ -181,7 +183,12 @@ UIL.Gui.prototype = {
 
     wheel: function ( e ){
 
+        e.preventDefault();
+        e.stopPropagation();
+
         if( this.lockwheel || !this.isScroll ) return;
+
+        //this.onWheel = true;
 
         var x = e.clientX;
         var px = this.content.getBoundingClientRect().left;
@@ -190,9 +197,9 @@ UIL.Gui.prototype = {
         if(x>(px+this.width)) return;
 
         var delta = 0;
-        if(e.wheelDeltaY) delta= -e.wheelDeltaY*0.04;
-        else if(e.wheelDelta) delta= -e.wheelDelta*0.2;
-        else if(e.detail) delta=e.detail*4.0;
+        if(e.wheelDeltaY) delta = -e.wheelDeltaY*0.04;
+        else if(e.wheelDelta) delta = -e.wheelDelta*0.2;
+        else if(e.detail) delta =e.detail*4.0;
 
         this.py += delta;
 
@@ -266,6 +273,8 @@ UIL.Gui.prototype = {
         UIL.listens = [];
         this.calc();
 
+
+
     },
 
     // -----------------------------------
@@ -281,6 +290,8 @@ UIL.Gui.prototype = {
         this.scroll.style.top = ( ~~ y ) + 'px';
 
         this.py = y;
+
+        //this.onWheel = false;
 
     },
 

@@ -10,6 +10,7 @@ UIL.Slide = function( o ){
     //this.old = this.value;
     this.isDown = false;
     this.isOver = false;
+    this.allway = o.allway || false;
 
     //this.c[2] = UIL.DOM('UIL number', 'div', ' text-align:right; width:47px; color:'+ this.fontColor );
     this.c[2] = UIL.DOM('UIL textSelect', 'div', ' text-align:right; cursor:pointer; width:47px; border:none; color:'+ this.fontColor );
@@ -101,6 +102,7 @@ UIL.Slide.prototype.mode = function( mode ){
 UIL.Slide.prototype.over = function( e ){
 
     e.preventDefault();
+    e.stopPropagation();
 
     this.isOver = true;
     this.mode(1);
@@ -110,6 +112,7 @@ UIL.Slide.prototype.over = function( e ){
 UIL.Slide.prototype.out = function( e ){
 
     e.preventDefault();
+    e.stopPropagation();
 
     this.isOver = false;
     if(this.isDown) return;
@@ -120,6 +123,7 @@ UIL.Slide.prototype.out = function( e ){
 UIL.Slide.prototype.up = function( e ){
 
     e.preventDefault();
+    e.stopPropagation();
 
     this.isDown = false;
     document.removeEventListener( 'mouseup', this, false );
@@ -135,6 +139,7 @@ UIL.Slide.prototype.up = function( e ){
 UIL.Slide.prototype.down = function( e ){
 
     e.preventDefault();
+    e.stopPropagation();
 
     this.isDown = true;
     document.addEventListener( 'mouseup', this, false );
