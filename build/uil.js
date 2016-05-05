@@ -1458,6 +1458,7 @@ UIL.Group = function( o ){
     this.c[2] = UIL.DOM('UIL', 'div', 'width:100%; left:0; height:auto; top:'+this.h+'px');
     this.c[3] = UIL.DOM('UIL', 'div', 'top:2px; left:2px; height:'+(this.h-4)+'px; width:6px; background-image:'+ UIL.GroupBG );
     this.c[4] = UIL.DOM('UIL', 'div','position:absolute; width:10px; height:10px; top:'+(~~(this.h*0.5)-5)+'px; pointer-events:none; background:'+ UIL.F0 );
+    if(o.line) this.c[5] = UIL.DOM('UIL', 'div', 'background:'+this.fontColor+'; width:100%; left:0; height:1px; bottom:0px');
 
     var s = this.s;
 
@@ -1470,6 +1471,7 @@ UIL.Group = function( o ){
     this.c[1].name = 'group';
 
     this.s[1].color = this.fontColor;
+    this.s[1].fontWeight = 'bold';
 
     this.uis = [];
 
