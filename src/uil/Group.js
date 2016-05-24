@@ -123,11 +123,14 @@ UIL.Group.prototype.close = function(){
 UIL.Group.prototype.clear = function(){
 
     this.clearGroup();
+    if( this.isUI ) this.main.calc( -(this.h +1 ));
     UIL.Proto.prototype.clear.call( this );
 
 };
 
 UIL.Group.prototype.clearGroup = function(){
+
+    this.close();
 
     var i = this.uis.length;
     while(i--){
@@ -135,7 +138,17 @@ UIL.Group.prototype.clearGroup = function(){
         this.uis.pop();
     }
     this.uis = [];
-    this.calc();
+
+    //if( this.isUI ) this.main.calc( -this.h+ this.baseH );
+
+    this.h = this.baseH;
+    //this.s[0].height = this.h + 'px';
+    //this.s[2].height = 0;
+
+    
+
+
+    //this.calc();
 
 };
 

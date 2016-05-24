@@ -1565,11 +1565,14 @@ UIL.Group.prototype.close = function(){
 UIL.Group.prototype.clear = function(){
 
     this.clearGroup();
+    if( this.isUI ) this.main.calc( -(this.h +1 ));
     UIL.Proto.prototype.clear.call( this );
 
 };
 
 UIL.Group.prototype.clearGroup = function(){
+
+    this.close();
 
     var i = this.uis.length;
     while(i--){
@@ -1577,7 +1580,17 @@ UIL.Group.prototype.clearGroup = function(){
         this.uis.pop();
     }
     this.uis = [];
-    this.calc();
+
+    //if( this.isUI ) this.main.calc( -this.h+ this.baseH );
+
+    this.h = this.baseH;
+    //this.s[0].height = this.h + 'px';
+    //this.s[2].height = 0;
+
+    
+
+
+    //this.calc();
 
 };
 
@@ -3004,17 +3017,11 @@ UIL.Bool.prototype.click = function( e ){
 
     if(this.value){
         this.value = false;
-        s[4].marginLeft = '0px';
-        s[2].background = UIL.BOOLBG;
-        s[2].borderColor = UIL.BOOLBG;
-        s[4].borderColor = UIL.Border;
     } else {
-        this.value = true;
-        s[4].marginLeft = '18px';
-        s[2].background = this.fontColor;
-        s[2].borderColor = this.fontColor;
-        s[4].borderColor = this.fontColor;
+        this.value = true;;
     }
+
+    this.update();
 
     this.send();
 
@@ -3030,6 +3037,24 @@ UIL.Bool.prototype.rSize = function(){
     s[3].left = this.sa+1+ 'px';//((this.h-6)*0.5) + 'px';
     s[4].left = this.sa+1 + 'px';
 
+};
+
+UIL.Bool.prototype.update = function() {
+
+    var s = this.s;
+
+    if(this.value){
+        s[4].marginLeft = '18px';
+        s[2].background = this.fontColor;
+        s[2].borderColor = this.fontColor;
+        s[4].borderColor = this.fontColor;
+    } else {
+        s[4].marginLeft = '0px';
+        s[2].background = UIL.BOOLBG;
+        s[2].borderColor = UIL.BOOLBG;
+        s[4].borderColor = UIL.Border;
+    }
+        
 };
 UIL.Button = function( o ){
 

@@ -53,17 +53,11 @@ UIL.Bool.prototype.click = function( e ){
 
     if(this.value){
         this.value = false;
-        s[4].marginLeft = '0px';
-        s[2].background = UIL.BOOLBG;
-        s[2].borderColor = UIL.BOOLBG;
-        s[4].borderColor = UIL.Border;
     } else {
-        this.value = true;
-        s[4].marginLeft = '18px';
-        s[2].background = this.fontColor;
-        s[2].borderColor = this.fontColor;
-        s[4].borderColor = this.fontColor;
+        this.value = true;;
     }
+
+    this.update();
 
     this.send();
 
@@ -76,7 +70,25 @@ UIL.Bool.prototype.rSize = function(){
     UIL.Proto.prototype.rSize.call( this );
     var s = this.s;
     s[2].left = this.sa + 'px';
-    s[3].left = this.sa+1+ 'px';//((this.h-6)*0.5) + 'px';
+    s[3].left = this.sa+1+ 'px';
     s[4].left = this.sa+1 + 'px';
 
+};
+
+UIL.Bool.prototype.update = function() {
+
+    var s = this.s;
+
+    if(this.value){
+        s[4].marginLeft = '18px';
+        s[2].background = this.fontColor;
+        s[2].borderColor = this.fontColor;
+        s[4].borderColor = this.fontColor;
+    } else {
+        s[4].marginLeft = '0px';
+        s[2].background = UIL.BOOLBG;
+        s[2].borderColor = UIL.BOOLBG;
+        s[4].borderColor = UIL.Border;
+    }
+        
 };
