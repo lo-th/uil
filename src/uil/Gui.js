@@ -79,6 +79,12 @@ UIL.Gui = function( o ){
 UIL.Gui.prototype = {
     constructor: UIL.Gui,
 
+    hide : function (b) {
+
+        if(b) this.content.style.display = 'none';
+        else this.content.style.display = 'block';
+    },
+
     setBG : function(c){
 
         this.bg = c;
