@@ -3034,7 +3034,7 @@ UIL.Bool.prototype.rSize = function(){
     UIL.Proto.prototype.rSize.call( this );
     var s = this.s;
     s[2].left = this.sa + 'px';
-    s[3].left = this.sa+1+ 'px';//((this.h-6)*0.5) + 'px';
+    s[3].left = this.sa+1+ 'px';
     s[4].left = this.sa+1 + 'px';
 
 };
@@ -3169,19 +3169,23 @@ UIL.Button.prototype.fileSelect = function( file ){
     //if( ! e.target.files ) return;
 
     //var file = e.target.files[0];
+   
+    this.c[4].type = "null";
+    // console.log( this.c[4] )
 
     if( file === undefined ) return;
 
     var reader = new FileReader();
     var fname = file.name;
-    var type = fname.substring(fname.indexOf('.')+1, fname.length);
+    var type = fname.substring(fname.indexOf('.')+1, fname.length );
 
-    if( type === 'png' || type === 'jpg' ) reader.readAsDataURL(file);
-    else if(type === 'z') reader.readAsBinaryString(file);
-    else reader.readAsText(file);
+    if( type === 'png' || type === 'jpg' ) reader.readAsDataURL( file );
+    else if(type === 'z') reader.readAsBinaryString( file );
+    else reader.readAsText( file );
 
     reader.onload = function(e) { 
         this.callback( e.target.result, fname, type );
+         this.c[4].type = "file";
         //this.send( e.target.result ); 
     }.bind(this);
 
