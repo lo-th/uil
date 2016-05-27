@@ -60,8 +60,8 @@ var callback = function( v ){ debug.innerHTML = obj.speed;  }
 var ui = new UIL.Gui().onChange( callback );
 
 ui.add( obj, 'speed', { min:-5, max:5 } ).listen();
-ui.add( obj, 'speed', { min:-5, max:5 } ).listen();
-ui.add( obj, 'speed', { min:-5, max:5 } ).listen();
+ui.add( obj, 'speed', { min:-5, max:5, stype:1 } ).listen();
+ui.add( obj, 'speed', { min:-5, max:5, stype:2 } ).listen();
 ui.add( obj, 'speed', { type:'Circular', min:-5, max:5, size:120 } ).listen();
 ui.add( obj, 'speed', { type:'Knob', min:-5, max:5, size:120 } ).listen();
 
@@ -70,8 +70,8 @@ ui.add( obj, 'speed', { type:'Knob', min:-5, max:5, size:120 } ).listen();
 var ui2 = new UIL.Gui({css:'top:0px; left:10px;'}).onChange( callback );
 
 ui2.add( obj2, 'speed', { min:-5, max:5, rename:'speed 2', fontColor:'#D4B87B' } ).listen();
-ui2.add( obj2, 'speed', { min:-5, max:5, fontColor:'#D4B87B' } ).listen();
-ui2.add( obj2, 'speed', { min:-5, max:5, fontColor:'#D4B87B' } ).listen();
+ui2.add( obj2, 'speed', { min:-5, max:5, fontColor:'#D4B87B', stype:1 } ).listen();
+ui2.add( obj2, 'speed', { min:-5, max:5, fontColor:'#D4B87B', stype:2 } ).listen();
 ui2.add( obj2, 'speed', { type:'Circular', min:-5, max:5, size:120, fontColor:'#D4B87B' } ).listen();
 ui2.add( obj2, 'speed', { type:'Knob', min:-5, max:5, size:120, fontColor:'#D4B87B' } ).listen();
 
