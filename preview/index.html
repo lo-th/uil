@@ -179,7 +179,7 @@
                 var geo = new THREE.PlaneBufferGeometry( 1, 1, 1, 1 );
                 geo.applyMatrix( new THREE.Matrix4().makeRotationX( - Math.PI * 0.5 ) );
 
-                ground = new THREE.Mesh( geo, new THREE.MeshLambertMaterial( { map:texture, transparent:true } ) );
+                ground = new THREE.Mesh( geo, new THREE.MeshLambertMaterial( { map:texture, transparent:true, side:THREE.DoubleSide } ) );
 
                 ground.castShadow = true;
                 ground.receiveShadow = true;
