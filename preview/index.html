@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>three.js webgl - draggable cubes</title>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+        <style>
+            body {
+                font-family: Monospace;
+                background-color: #333333;
+                color: #FFFFFF;
+                margin: 0px;
+                overflow: hidden;
+            }
+        </style>
+    </head>
+    <body link="#C0C0C0" vlink="#808080" alink="#FF0000">
+
+        <script src="js/three.min.js"></script>
+
+        <script src="js/OrbitControls.js"></script>
+
+        <script src="js/stats.min.js"></script>
+
+        <script src="src/UMC.js"></script>
+
+        <script src="src/uil_2/UIL.js"></script>
+        <script src="src/uil_2/Events.js"></script>
+        <script src="src/uil_2/Tools.js"></script>
+        <script src="src/uil_2/Gui.js"></script>
+        <script src="src/uil_2/Proto.js"></script>
+        <script src="src/uil_2/Bool.js"></script>
+        <script src="src/uil_2/Color.js"></script>
+        <script src="src/uil_2/Group.js"></script>
+        <script src="src/uil_2/List.js"></script>
+        <script src="src/uil_2/Number.js"></script>
+        <script src="src/uil_2/Slide.js"></script>
+        <script src="src/uil_2/String.js"></script>
+        <script src="src/uil_2/Title.js"></script>
+        <script src="src/uil_2/Button.js"></script>
+        <script src="src/uil_2/Circular.js"></script>
+        <script src="src/uil_2/Knob.js"></script>
+        <script src="src/uil_2/Joystick.js"></script>
+
+        <script>
+
+        var ui;
+
+            var container, stats, info;
+            var camera, controls, scene, renderer;
+            var objects = [];
+            var ground, mouse3d, texture;
+            var plane = new THREE.Plane();
+            var raycaster = new THREE.Raycaster();
+            var mouse = new THREE.Vector2(),
+            offset = new THREE.Vector3(),
+            intersection = new THREE.Vector3(),
+            INTERSECTED, SELECTED, OVER;
+
+            init();
+            animate();
+
+            function init() {
+
+                //maps.init();
+                //maps.add();
+
+                //texture = new THREE.Texture( maps.getCanvas() );
+                //maps.setExtraUpdate( function(){ texture.needsUpdate = true; } )
+                //texture.needsUpdate = true;
+
+                container = document.createElement( 'div' );
+                document.body.appendChild( container );
+
+                camera = new THREE.PerspectiveCamera( 70, window.innerWidth / window.innerHeight, 1, 5000 );
+                camera.position.set( -100, 400, 300 );
+
+                controls = new THREE.OrbitControls( camera );
+
+                scene = new THREE.Scene();
+
+                scene.add( new THREE.AmbientLight( 0x505050 ) );
+
+                var light = new THREE.SpotLight( 0xffffff, 1.5 );
+                light.position.set( 0, 500, 500 );
+                light.castShadow = true;
+
+                light.shadow = new THREE.LightShadow( new THREE.PerspectiveCamera( 50, 1, 200, 5000 ) );
+                light.shadow.bias = - 0.00022;
+                light.shadow.mapSize.width = 2048;
+                light.shadow.mapSize.height = 2048;
+
+                scene.add( light );
+
+                
+
+                var geo2 = new THREE.CylinderBufferGeometry( 10, 1, 20 );
+                geo2.applyMatrix( new THREE.Matrix4().makeTranslation( 0, 10, 0 ) );
+
+                mouse3d = new THREE.Mesh( geo2, new THREE.MeshLambertMaterial( { color: 0xffffff, transparent:true, opacity:0.5 } ) );
+
+                mouse3d.castShadow = true;
+                mouse3d.receiveShadow = true;
+
+                scene.add( mouse3d );
+
+
+                renderer = new THREE.WebGLRenderer( { antialias: true } );
+                renderer.setClearColor( 0x606060);
+                renderer.setPixelRatio( window.devicePixelRatio );
+                renderer.setSize( window.innerWidth, window.innerHeight );
+                renderer.sortObjects = false;
+
+                renderer.shadowMap.enabled = true;
+                renderer.shadowMap.type = THREE.PCFShadowMap;
+
+                container.appendChild( renderer.domElement );
+
+                info = document.createElement( 'div' );
+                info.style.position = 'absolute';
+                info.style.top = '10px';
+                info.style.width = '100%';
+                info.style.textAlign = 'center';
+                info.style.mouseEvent = 'none';
+                //info.innerHTML = '<a href="http://threejs.org" target="_blank">three.js</a> webgl - interactive canvas - ( double click for new node )';
+                container.appendChild( info );
+
+                stats = new Stats();
+                container.appendChild( stats.dom );
+
+                renderer.domElement.addEventListener( 'mousemove', onDocumentMouseMove, false );
+                renderer.domElement.addEventListener( 'mousedown', onDocumentMouseDown, false );
+                renderer.domElement.addEventListener( 'mouseup', onDocumentMouseUp, false );
+                renderer.domElement.addEventListener( 'dblclick', onDocumentDoubleClick, false );
+
+                //
+
+                window.addEventListener( 'resize', onWindowResize, false );
+
+
+                initGui();
+
+            }
+
+            function initGui(){
+
+                
+
+
+
+                ui = new UIL.Gui( { width:300, isCanvas:true, is3d:true } );//.onChange( callback );
+
+                //ui.setMaxHeight( 300 );
+
+                ui.add('title',  { name:'UIL 3D', titleColor:'#D4B87B', height:30});
+                ui.add('slide',  { name:'slide',  min:-100, max:100, value:0, precision:0, fontColor:'#D4B87B', stype:0, allway:true });
+                ui.add('slide',  { name:'slide',  min:-100, max:100, value:0, precision:0, fontColor:'#D4B87B', stype:1 });
+                ui.add('slide',  { name:'slide',  min:-1, max:1, value:0, step:0.01, precision:2, height:20, stype :3 });
+
+                ui.add('slide',  { name:'slide',  min:-100, max:100, value:0, precision:0, fontColor:'#D4B87B', stype:0, allway:true });
+                ui.add('slide',  { name:'slide',  min:-100, max:100, value:0, precision:0, fontColor:'#D4B87B', stype:1 });
+                ui.add('slide',  { name:'slide',  min:-1, max:1, value:0, step:0.01, precision:2, height:20, stype :3 });
+
+                ui.add('slide',  { name:'slide',  min:-100, max:100, value:0, precision:0, fontColor:'#D4B87B', stype:0, allway:true });
+                ui.add('slide',  { name:'slide',  min:-100, max:100, value:0, precision:0, fontColor:'#D4B87B', stype:1 });
+                ui.add('slide',  { name:'slide',  min:-1, max:1, value:0, step:0.01, precision:2, height:20, stype :3 });
+
+                
+
+                //gr1.open();
+
+                texture = new THREE.Texture( ui.getCanvas() );
+                texture.minFilter = THREE.LinearFilter;
+               // texture.magFilter = THREE.LinearFilter;
+               // texture.magFilter = THREE.NearestFilter;
+
+
+
+                var geo = new THREE.PlaneBufferGeometry( 1, 1, 1, 1 );
+                geo.applyMatrix( new THREE.Matrix4().makeRotationX( - Math.PI * 0.5 ) );
+
+                ground = new THREE.Mesh( geo, new THREE.MeshLambertMaterial( { map:texture, transparent:true } ) );
+
+                ground.castShadow = true;
+                ground.receiveShadow = true;
+
+                scene.add( ground );
+                objects.push( ground );
+
+                ui.setExtraUpdate( function(){ 
+                    texture.needsUpdate = true;
+                    ground.scale.x = ui.width;
+                    ground.scale.z = ui.height;
+                } )
+
+            }
+
+            function findMouse(){
+
+                var x = Math.round(mouse3d.position.x + (ground.scale.x * 0.5));
+                var y = Math.round(mouse3d.position.z + (ground.scale.z * 0.5));
+                ui.mouse.set( x, y );
+                info.innerHTML = 'x:'+x + ' y:'+y;
+
+            }
+
+            function onWindowResize() {
+
+                camera.aspect = window.innerWidth / window.innerHeight;
+                camera.updateProjectionMatrix();
+
+                renderer.setSize( window.innerWidth, window.innerHeight );
+
+            }
+
+            function onDocumentDoubleClick( event ) {
+
+                //maps.double( event, Math.round(mouse3d.position.x + 256), Math.round(mouse3d.position.z + 256) );
+
+            };
+
+
+            function onDocumentMouseMove( event ) {
+
+                event.preventDefault();
+
+                mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
+                mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
+
+                raycaster.setFromCamera( mouse, camera );
+
+                var intersects = raycaster.intersectObjects( objects );
+
+                if ( intersects.length > 0 ) {
+
+                    //container.style.cursor = 'pointer';
+                    mouse3d.position.copy( intersects[ 0 ].point );
+                    mouse3d.visible = true;
+
+                    
+
+                    //maps.move( event, Math.round(mouse3d.position.x + 256), Math.round(mouse3d.position.z + 256) );
+
+                    OVER = true;
+
+                } else {
+
+                    mouse3d.visible = false;
+
+                    mouse3d.position.set(-1000, 0, -1000 );
+
+
+
+                    //container.style.cursor = 'auto';
+
+                    OVER = false;
+
+                }
+
+                findMouse();
+
+            
+            }
+
+            function onDocumentMouseDown( event ) {
+
+                event.preventDefault();
+
+                raycaster.setFromCamera( mouse, camera );
+
+                var intersects = raycaster.intersectObjects( objects );
+
+                if ( intersects.length > 0 ) {
+
+                    controls.enabled = false;
+
+                    if( OVER ){ 
+                        mouse3d.material.color.setHex( 0xFF0000 );
+                        mouse3d.scale.y = 0.8;
+
+                        findMouse();
+
+                        //maps.down( event, Math.round(mouse3d.position.x + 256), Math.round(mouse3d.position.z + 256) );
+                    }
+
+                   // container.style.cursor = 'move';
+
+                }
+
+            }
+
+            function onDocumentMouseUp( event ) {
+
+                event.preventDefault();
+
+                controls.enabled = true;
+
+                mouse3d.material.color.setHex( 0xFFFFFF )
+                mouse3d.scale.y = 1;
+
+                //maps.up( event, Math.round(mouse3d.position.x + 256), Math.round(mouse3d.position.z + 256) );
+
+                //container.style.cursor = 'auto';
+
+            }
+
+            //
+
+            function animate() {
+
+                requestAnimationFrame( animate );
+
+                renderer.render( scene, camera );
+
+                stats.update();
+
+            }
+
+        </script>
+
+    </body>
+</html>
