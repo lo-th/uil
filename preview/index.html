@@ -85,12 +85,12 @@
 
                 var light = new THREE.SpotLight( 0xffffff, 1.5 );
                 light.position.set( 0, 1000, 200 );
-                light.castShadow = true;
+                /*light.castShadow = true;
 
                 light.shadow = new THREE.LightShadow( new THREE.PerspectiveCamera( 50, 1, 200, 5000 ) );
                 light.shadow.bias = - 0.00022;
                 light.shadow.mapSize.width = 2048;
-                light.shadow.mapSize.height = 2048;
+                light.shadow.mapSize.height = 2048;*/
 
                 scene.add( light );
 
@@ -117,8 +117,8 @@
                 renderer.setSize( window.innerWidth, window.innerHeight );
                 renderer.sortObjects = false;
 
-                renderer.shadowMap.enabled = true;
-                renderer.shadowMap.type = THREE.PCFShadowMap;
+                //renderer.shadowMap.enabled = true;
+                //renderer.shadowMap.type = THREE.PCFShadowMap;
 
                 container.appendChild( renderer.domElement );
 
@@ -154,9 +154,9 @@
 
 
 
-                ui = new UIL.Gui( { width:300, isCanvas:true, is3d:true } );//.onChange( callback );
+                ui = new UIL.Gui( { width:256, isCanvas:true, is3d:true } );//.onChange( callback );
 
-                //ui.setMaxHeight( 300 );
+                ui.setMaxHeight( 256 );
 
                 ui.add('title',  { name:'UIL 3D', titleColor:'#D4B87B', height:30});
 
@@ -185,11 +185,11 @@
 
                 //gr1.open();
 
-                var envMap = new THREE.TextureLoader().load( 'plastic.jpg' ); 
-                envMap.mapping = THREE.SphericalReflectionMapping;
+             //   var envMap = new THREE.TextureLoader().load( 'plastic.jpg' ); 
+              //  envMap.mapping = THREE.SphericalReflectionMapping;
 
                 texture = new THREE.Texture( ui.getCanvas() );
-                texture.minFilter = THREE.LinearFilter;
+               // texture.minFilter = THREE.LinearFilter;
                // texture.magFilter = THREE.LinearFilter;
                // texture.magFilter = THREE.NearestFilter;
 
@@ -222,11 +222,11 @@
                 }*/
 
               //  
-               //ground = new THREE.Mesh( geo, new THREE.MeshLambertMaterial( { wireframe:false,  map:texture, transparent:true, side:THREE.DoubleSide, envMap:envMap } ) );
+               ground = new THREE.Mesh( geo, new THREE.MeshLambertMaterial( { wireframe:false,  map:texture, transparent:true } ) );
 
 
 
-                ground = new THREE.Mesh( geo, new THREE.MeshStandardMaterial( { wireframe:false, roughness:0.3, metalness:0.7, map:texture, transparent:true, side:THREE.DoubleSide, envMap:envMap } ) );
+               // ground = new THREE.Mesh( geo, new THREE.MeshStandardMaterial( { wireframe:false, roughness:0.3, metalness:0.7, map:texture, transparent:true, side:THREE.DoubleSide, envMap:envMap } ) );
 
                 ground.castShadow = true;
                 ground.receiveShadow = true;
@@ -255,7 +255,7 @@
                // var x = Math.round(mouse3d.position.x + (ground.scale.x * 0.5));
                // var y = Math.round(mouse3d.position.z + (ground.scale.z * 0.5));
                 ui.mouse.set( x, y );
-                info.innerHTML = 'x:'+x + ' y:'+y;
+                info.innerHTML = 'x:'+x + ' y:'+y + '   ' + ui.width + '/' + ui.height;
 
             }
 

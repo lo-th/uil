@@ -124,8 +124,12 @@ UIL.Gui = function( o ){
         if( !this.is3d ) document.body.appendChild( this.canvas );
 
         //this.svg = UMC.dom( null, 'foreignObject', 'position:abolute; left:0; top:0; width:'+w+'; height:'+h+';', { width:w, height:h } );
-        this.svg = UMC.dom( null, 'foreignObject', 'position:abolute; left:0; top:0; width:100%; height:100%;' );
+        this.svg = UMC.dom( null, 'foreignObject', 'position:abolute; left:0; top:0;' );
         this.svg.childNodes[0].appendChild( this.content );
+
+        this.svg.setAttribute("version", "1.1");
+        this.svg.setAttribute('xmlns', 'http://www.w3.org/2000/svg' );
+        this.svg.setAttribute("xmlns:xlink", "http://www.w3.org/1999/xlink");
 
         this.xml = new XMLSerializer();
 
@@ -183,10 +187,16 @@ UIL.Gui.prototype = {
 
        // this.svg = UMC.dom( null, 'foreignObject', 'position:abolute; left:0; top:0; width:300; height:300;', { width:300, height:300 } );
        // this.svg.childNodes[0].appendChild( this.content.cloneNode( true ) );
+
+        this.svg.setAttribute('width', this.width );
+        this.svg.setAttribute('height', this.height );
+        this.svg.childNodes[0].setAttribute('width', this.width );
+        this.svg.childNodes[0].setAttribute('height', this.height );
        //dcopy = null;
 
        // var 
-       // img.crossOrigin ='anonymous';
+       //
+        this.img.crossOrigin ='anonymous';
         this.img.src = 'data:image/svg+xml;base64,'+ window.btoa( this.xml.serializeToString( this.svg ) );
 
        // var parser = new DOMParser();
@@ -303,7 +313,7 @@ UIL.Gui.prototype = {
                         this.old = this.current; 
                         this.uis[ this.current ].mouseAction( this.mouse );
                         if( this.uis[ this.current ].getActif() ) this.draw();
-                        
+
                     }
 
                     //debug.innerHTML = this.current + '   ' + this.mouse.x;
