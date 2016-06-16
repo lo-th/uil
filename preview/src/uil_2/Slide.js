@@ -17,28 +17,30 @@ UIL.Slide = function( o ){
     //this.c[2] = UIL.DOM('UIL number', 'div', ' text-align:right; width:47px; color:'+ this.fontColor );
     this.c[2] = UIL.DOM('UIL textSelect', 'div', ' text-align:right; pointer-events:none; width:47px; border:none; color:'+ this.fontColor );
     this.c[3] = UIL.DOM('UIL', 'div', 'top:0; height:'+this.h+'px;' );
-    this.c[4] = UIL.DOM('UIL', 'div', 'border:1px solid '+UIL.Border+'; background:rgba(0,0,0,0.3); top:2px; height:'+(this.h-4)+'px;' );
-    this.c[5] = UIL.DOM('UIL', 'div', 'left:4px; top:5px; height:'+(this.h-10)+'px; background:' + this.fontColor +';' );
+    this.c[4] = UIL.DOM('UIL', 'div', 'border:1px solid '+UIL.Border+'; top:2px; height:'+(this.h-4)+'px;' );
+    this.c[5] = UIL.DOM('UIL', 'div', 'left:4px; top:5px; height:'+(this.h-10)+'px; ' );
 
     this.c[2].name = 'text';
     this.c[3].name = 'scroll';
 
+    
+    if( this.stype === 1 || this.stype === 3 ){
+        var h1 = 4;
+        var h2 = 8;
+        var ww = this.h-4;
+        var ra = 20;
+    }
+
+    if(this.stype === 2){
+        h1 = 2;
+        h2 = 6;
+        ra = 2;
+        ww = (this.h-4)*0.5;
+    }
+
+    if(this.stype === 3) this.c[5].style.visible = 'none';
+
     if(this.stype !== 0){
-        if(this.stype === 1 || this.stype === 3){
-            var h1 = 4;
-            var h2 = 8;
-            var ww = this.h-4;
-            var ra = 20;
-        }
-
-        if(this.stype === 2){
-            h1 = 2;
-            h2 = 4;
-            ra = 2;
-            ww = (this.h-4)*0.5
-        }
-
-        if(this.stype === 3) this.c[5].style.visible = 'none';
 
         this.c[4].style.borderRadius = h1 + 'px';
         this.c[4].style.height = h2 + 'px';
@@ -46,9 +48,12 @@ UIL.Slide = function( o ){
         this.c[5].style.borderRadius = (h1*0.5) + 'px';
         this.c[5].style.height = h1 + 'px';
         this.c[5].style.top = (this.h*0.5)-(h1*0.5) + 'px';
-
+        if(this.stype === 2) this.c[5].style.top = (this.h*0.5) + 'px';
         this.c[6] = UIL.DOM('UIL', 'div', 'border-radius:'+ra+'px; margin-left:'+(-ww*0.5)+'px; border:1px solid '+UIL.Border+'; background:'+this.buttonColor+'; left:4px; top:2px; height:'+(this.h-4)+'px; width:'+ww+'px;' );
+
     }
+
+    // not on gui
 
     if( !this.isUI ){
 
@@ -64,6 +69,8 @@ UIL.Slide = function( o ){
     }
 
     this.init();
+
+    this.mode(0);
 
 };
 
@@ -99,37 +106,30 @@ UIL.Slide.prototype.mouseAction = function( mouse ) {
         if( this.m ){
             this.mode(0);
             this.isDown = false;
-            this.actif = true
+            this.actif = false;
+
         }
 
     } else {
-
-        
-
-        
-
 
 
         if( mouse.x >= this.sa && mouse.x <= this.sa + this.width ){
 
             this.isDown = mouse.down ? true : false;
-            //this.isOver = true;
             if( !this.m ) this.mode(1);
+            this.actif = true;
 
-            
-
-        }/* else {
-            this.isOver = false;
-            if( !this.m )this.mode(0);
-            mouse.defCursor();
-        }*/
+        }
 
         if( this.isDown ){ 
+
             this.old = this.value;
             this.move( mouse.x );
             mouse.setCursor('w-resize');
 
-            this.actif = true
+            this.actif = true;
+        } else {
+            mouse.defCursor();
         }
         //this.actif = true;
     }
@@ -143,14 +143,17 @@ UIL.Slide.prototype.mode = function ( mode ) {
     switch(mode){
         case 0: // base
             s[2].color = this.fontColor;
-            s[4].background = 'rgba(0,0,0,0.3)';
+            //s[4].borderColor = 'rgba(255,255,255,0.1)';
+            s[4].background = 'rgba(0,0,0,0.2)';
             s[5].background = this.fontColor;
             this.m = 0;
         break;
         case 1: // over
             s[2].color = this.colorPlus;
-            if( !s[6] ) s[4].background = UIL.SlideBG;
-            else s[4].background = 'rgba(0,0,0,0.6)';
+            //if( !s[6] ) s[4].background = UIL.SlideBG;
+           // else
+            //s[4].borderColor = 'rgba(255,255,255,0.2)';
+            s[4].background = 'rgba(0,0,0,0.4)';
             s[5].background = this.colorPlus;
             this.m = 1;
         break;

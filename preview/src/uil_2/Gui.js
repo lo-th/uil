@@ -288,21 +288,22 @@ UIL.Gui.prototype = {
                     }*/
                     
                     if( !this.mouse.down ){
+
                         if( this.old !== -1 ){
                              this.uis[ this.old ].mouseAction();
                              this.draw();
-                        } 
+                        }
+
                         this.current = this.findID( this.mouse.y );
+
                     }
 
-                    if( this.current > -1 ){ 
+                    if( this.current > -1 ){
+
                         this.old = this.current; 
-                        /*if( this.old !== this.current && this.old !== -1 ){
-                             this.uis[ this.old ].mouseAction();
-                             this.draw();
-                        } */
                         this.uis[ this.current ].mouseAction( this.mouse );
                         if( this.uis[ this.current ].getActif() ) this.draw();
+                        
                     }
 
                     //debug.innerHTML = this.current + '   ' + this.mouse.x;

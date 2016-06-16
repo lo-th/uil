@@ -46,6 +46,8 @@
 
         var ui;
 
+        var muv = new THREE.Vector2();
+
             var container, stats, info;
             var camera, controls, scene, renderer;
             var objects = [];
@@ -82,7 +84,7 @@
                 scene.add( new THREE.AmbientLight( 0x505050 ) );
 
                 var light = new THREE.SpotLight( 0xffffff, 1.5 );
-                light.position.set( 0, 500, 500 );
+                light.position.set( 0, 1000, 200 );
                 light.castShadow = true;
 
                 light.shadow = new THREE.LightShadow( new THREE.PerspectiveCamera( 50, 1, 200, 5000 ) );
@@ -96,9 +98,13 @@
 
                 var geo2 = new THREE.CylinderBufferGeometry( 10, 1, 20 );
                 geo2.applyMatrix( new THREE.Matrix4().makeTranslation( 0, 10, 0 ) );
+                geo2.applyMatrix(  new THREE.Matrix4().makeRotationX( - Math.PI * 0.5 ) );;
+
+
 
                 mouse3d = new THREE.Mesh( geo2, new THREE.MeshLambertMaterial( { color: 0xffffff, transparent:true, opacity:0.5 } ) );
 
+                  mouse3d.up = new THREE.Vector3(1,0,0)
                 mouse3d.castShadow = true;
                 mouse3d.receiveShadow = true;
 
@@ -179,6 +185,9 @@
 
                 //gr1.open();
 
+                var envMap = new THREE.TextureLoader().load( 'plastic.jpg' ); 
+                envMap.mapping = THREE.SphericalReflectionMapping;
+
                 texture = new THREE.Texture( ui.getCanvas() );
                 texture.minFilter = THREE.LinearFilter;
                // texture.magFilter = THREE.LinearFilter;
@@ -186,10 +195,38 @@
 
 
 
-                var geo = new THREE.PlaneBufferGeometry( 1, 1, 1, 1 );
+               // var geo = new THREE.PlaneBufferGeometry( 1, 1, 4, 1 );
+                var geo = new THREE.SphereBufferGeometry(1, 16, 8, Math.PI* 0.25, Math.PI* 0.5, Math.PI* 0.25, Math.PI* 0.5);
+
                 geo.applyMatrix( new THREE.Matrix4().makeRotationX( - Math.PI * 0.5 ) );
 
-                ground = new THREE.Mesh( geo, new THREE.MeshLambertMaterial( { map:texture, transparent:true, side:THREE.DoubleSide } ) );
+               /* var vertices = geo.attributes.position.array;
+                var lng = vertices.length/3;
+                var n;
+
+                
+
+
+                console.log(lng/3)
+                for ( var i = 0; i < lng; i ++ ) {
+                    n = i*3;
+
+                    var yy = (vertices[ n ])*100;
+
+                    if(yy<0)yy*=-1;
+
+                    console.log(yy)
+
+                    vertices[ n + 1 ] = yy
+
+                }*/
+
+              //  
+               //ground = new THREE.Mesh( geo, new THREE.MeshLambertMaterial( { wireframe:false,  map:texture, transparent:true, side:THREE.DoubleSide, envMap:envMap } ) );
+
+
+
+                ground = new THREE.Mesh( geo, new THREE.MeshStandardMaterial( { wireframe:false, roughness:0.3, metalness:0.7, map:texture, transparent:true, side:THREE.DoubleSide, envMap:envMap } ) );
 
                 ground.castShadow = true;
                 ground.receiveShadow = true;
@@ -199,7 +236,12 @@
 
                 ui.setExtraUpdate( function(){ 
                     texture.needsUpdate = true;
+
+                    //ground.scale.x = ui.width;
+                    //ground.scale.z = ui.height;
+
                     ground.scale.x = ui.width;
+                    ground.scale.y = ui.height;
                     ground.scale.z = ui.height;
                 } )
 
@@ -207,8 +249,11 @@
 
             function findMouse(){
 
-                var x = Math.round(mouse3d.position.x + (ground.scale.x * 0.5));
-                var y = Math.round(mouse3d.position.z + (ground.scale.z * 0.5));
+                var x = Math.round(muv.x * ui.width);
+                var y = Math.round(ui.height-(muv.y * ui.height));
+
+               // var x = Math.round(mouse3d.position.x + (ground.scale.x * 0.5));
+               // var y = Math.round(mouse3d.position.z + (ground.scale.z * 0.5));
                 ui.mouse.set( x, y );
                 info.innerHTML = 'x:'+x + ' y:'+y;
 
@@ -247,6 +292,10 @@
                     mouse3d.position.copy( intersects[ 0 ].point );
                     mouse3d.visible = true;
 
+                    mouse3d.lookAt(new THREE.Vector3())
+
+                    muv = intersects[ 0 ].uv;
+
                     
 
                     //maps.move( event, Math.round(mouse3d.position.x + 256), Math.round(mouse3d.position.z + 256) );
@@ -257,7 +306,10 @@
 
                     mouse3d.visible = false;
 
-                    mouse3d.position.set(-1000, 0, -1000 );
+                   // mouse3d.position.set(-1000, 0, -1000 );
+
+                    muv.x = -1000;
+                    muv.y = -1000;
 
 
 
