@@ -70,8 +70,8 @@ var w = UIL.add('number', { target:document.body, callback:null, name:' ', size:
 
 // in GUI element
 //var ui = new UIL.Gui( { size:300, center:true, css:'top:145px; left:50%;' } ).onChange( callback );
-var ui = new UIL.Gui( { size:300 } ).onChange( callback );
-var ui2 = new UIL.Gui( {  css:'top:20px; left:20px;', size:300 } ).onChange( callback );
+var ui = new UIL.Gui( { width:200 } ).onChange( callback );
+var ui2 = new UIL.Gui( {  css:'top:20px; left:20px;', width:200 } ).onChange( callback );
 populate();
 
 ///ui.toCanvas();
@@ -111,9 +111,9 @@ function populate(){
         gr0.add('slide',  { name:'slide', min:-100, max:100, value:0, precision:0 });
         gr0.add('slide',  { name:'slide', min:-100, max:100, value:0, precision:0 });
 
-        gr0.open();
+        //gr0.open();
 
-        gr0.clear();
+        //gr0.clear();
 
         gr1 = ui.add('group', { name:'circulars', fontColor:'#D4B87B', bg:'rgba(99,44,99,0.3)' });
 
@@ -140,6 +140,7 @@ function populate(){
         b.label('clear');
     } else {
         ui.clear();
+        ui2.clear();
         display = false;
         b.label('populate');
     }

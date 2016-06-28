@@ -71,7 +71,7 @@ var callback = function( v ){
 
     debug.innerHTML = v;
 
-    //html2canvas( canvas2, ui.content, ui.width, ui.height );
+    html2canvas( canvas2, ui.content, ui.width, ui.height );
 
 
    // var canvasPlus = html2canvas(ui.content);
@@ -172,9 +172,9 @@ function populate(){
 function loop(){
 
     window.requestAnimationFrame(loop);
-    UMC.toCanvas( canvas, ui.content, ui.width, ui.height );
+    //UMC.toCanvas( canvas, ui.content, ui.width, ui.height );
 
-   // html2canvas( canvas2, ui.content, ui.width, ui.height );
+    //html2canvas( canvas2, ui.content, ui.width, ui.height );
 
 }
 

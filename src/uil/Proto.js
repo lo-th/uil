@@ -247,7 +247,7 @@ UIL.Proto.prototype = {
         if( this.target !== null ){ 
             this.target.removeChild( this.c[0] );
         } else {
-            if( this.isUI ) this.main.inner.removeChild( this.c[0] );
+            if( this.isUI ) this.main.clearOne( this );//this.main.inner.removeChild( this.c[0] );
             else document.body.removeChild( this.c[0] );
         }
 

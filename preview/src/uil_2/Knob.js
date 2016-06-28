@@ -15,7 +15,7 @@ UIL.Knob = function( o ){
 
     this.radius = o.radius || 15;
     
-    this.size = (this.radius*2)+20;
+    this.size = ( this.radius*2 )+20;
 
     if(o.size !== undefined){
         this.size = o.size;

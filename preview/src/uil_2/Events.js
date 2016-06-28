@@ -31,8 +31,10 @@ UIL.Events = function ( root, element ) {
 
     document.addEventListener( 'keydown',    this, false );
     document.addEventListener( 'keyup',      this, false );
-    document.addEventListener( 'focus',      this, false );
-    document.addEventListener( 'blur',       this, false );
+    //document.addEventListener( 'focus',      this, false );
+    //document.addEventListener( 'blur',       this, false );
+
+    document.addEventListener( 'dragstart',      this, false );
 
     window.addEventListener("resize", this, false );
 
@@ -56,8 +58,12 @@ UIL.Events.prototype = {
 
     handleEvent : function ( e ) {
 
-        e.preventDefault();
-        e.stopPropagation();
+        e = e || window.event;
+
+        if( type === 'dragstart' ) return false;
+
+        if(e.stopPropagation) e.stopPropagation();
+        if(e.preventDefault) e.preventDefault();
 
         var type = e.type.substring(0,5);
 
@@ -107,6 +113,9 @@ UIL.Events.prototype = {
 
     this.delta = 0;
 
+    this.clientX = 0;
+    this.clientY = 0;
+
 };
 
 UIL.Mouse.prototype = {
@@ -118,6 +127,9 @@ UIL.Mouse.prototype = {
 
         this.x = this.ox - this.dx;
         this.y = this.oy - this.dy;
+
+        this.clientX = this.x;
+        this.clientY = this.y;
 
     },
 

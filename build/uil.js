@@ -637,9 +637,19 @@ UIL.Gui = function( o ){
     if( o.Tpercent !== undefined ) UIL.P = o.Tpercent;
     if( o.css === undefined ) o.css = '';
 
-    this.width = UIL.WIDTH;
+    this.height = 20;
+    this.width = o.width || UIL.WIDTH;
+    UIL.WIDTH = this.width;
+
+    this.left = 0;
+    this.top = 0;
+
+
     this.h = 0;//this.height;
     this.prevY = -1;
+
+    // bottom and close height
+    this.bh = o.bh || 20;
 
     UIL.main = this;
 
@@ -653,8 +663,7 @@ UIL.Gui = function( o ){
     this.onWheel = false;
     this.isOpen = true;
 
-    // bottom and close height
-    this.height = o.height || UIL.HEIGHT;
+  
 
     this.uis = [];
 
@@ -662,7 +671,7 @@ UIL.Gui = function( o ){
     document.body.appendChild( this.content );
     //this.content.style.background = UIL.bgcolor( this.color, 1, true );
 
-    this.top = this.content.getBoundingClientRect().top;
+    //this.top = this.content.getBoundingClientRect().top;
 
     this.innerContent = UIL.DOM('UIL', 'div', 'width:100%; top:0; left:0; height:auto;');
     this.content.appendChild(this.innerContent);
@@ -680,7 +689,7 @@ UIL.Gui = function( o ){
     this.scroll = UIL.DOM('UIL', 'div', 'background:#666; right:0; top:0; width:5px; height:10px;');
     this.scrollBG.appendChild( this.scroll );
 
-    this.bottom = UIL.DOM('UIL', 'div',  UIL.TXT+'width:100%; top:auto; bottom:0; left:0; border-bottom-right-radius:10px;  border-bottom-left-radius:10px; text-align:center; pointer-events:auto; cursor:pointer; height:'+this.height+'px; line-height:'+(this.height-5)+'px;');
+    this.bottom = UIL.DOM('UIL', 'div',  UIL.TXT+'width:100%; top:auto; bottom:0; left:0; border-bottom-right-radius:10px;  border-bottom-left-radius:10px; text-align:center; pointer-events:auto; cursor:pointer; height:'+this.bh+'px; line-height:'+(this.bh-5)+'px;');
     this.content.appendChild(this.bottom);
     this.bottom.textContent = 'close';
     this.bottom.name = 'bottom';
@@ -702,7 +711,7 @@ UIL.Gui = function( o ){
     
     window.addEventListener("resize", function(e){this.resize(e)}.bind(this), false );
 
-    this.setWidth( o.size || 240 );
+    this.setWidth();
 
 }
 
@@ -772,7 +781,8 @@ UIL.Gui.prototype = {
         }
         if(e.target.name === 'bottom'){
             this.isOpen = this.isOpen ? false : true;
-            this.show();
+            this.bottom.textContent = this.isOpen ? 'close' : 'open';
+            this.testHeight();
         }
         
     },
@@ -795,6 +805,10 @@ UIL.Gui.prototype = {
             this.scroll.style.background = '#666';
         }
 
+        if(e.target.name === 'bottom'){
+            this.bottom.style.color = '#CCC';
+        }
+
     },
 
     up: function( e ){
@@ -811,6 +825,9 @@ UIL.Gui.prototype = {
         if( !e.target.name ) return;
         if(e.target.name === 'scroll'){
             this.scroll.style.background = '#888';
+        }
+        if(e.target.name === 'bottom'){
+            this.bottom.style.color = '#FFF';
         }
 
     },
@@ -867,6 +884,7 @@ UIL.Gui.prototype = {
         //var n = UIL.add( ...args );
 
         this.uis.push( n );
+        n.py = this.h;
 
         if( !n.autoWidth ){
             var y = n.c[0].getBoundingClientRect().top;
@@ -887,8 +905,17 @@ UIL.Gui.prototype = {
     remove: function ( n ) { 
 
         var i = this.uis.indexOf( n ); 
-        if ( i !== -1 ) { 
-            this.uis[i].clear();
+        if ( i !== -1 ) this.uis[i].clear();
+
+    },
+
+    // call after uis clear
+
+    clearOne: function ( n ) { 
+
+        var i = this.uis.indexOf( n ); 
+        if ( i !== -1 ) {
+            this.inner.removeChild( this.uis[i].c[0] );
             this.uis.splice( i, 1 ); 
         }
 
@@ -898,18 +925,13 @@ UIL.Gui.prototype = {
 
     clear:function(){
 
-        this.update( 0 );
         var i = this.uis.length;
-        while(i--){
-            this.uis[i].clear();
-            this.uis[i] = null;
-            this.uis.pop();
-        }
+        while(i--) this.uis[i].clear();
+
         this.uis = [];
         UIL.listens = [];
-        this.calc();
 
-
+        this.calc( - this.h );
 
     },
 
@@ -936,7 +958,7 @@ UIL.Gui.prototype = {
         this.isScroll = true;
 
         this.total = this.h;
-        this.maxView = this.maxHeight - this.height;
+        this.maxView = this.maxHeight;// - this.height;
 
         this.ratio = this.maxView / this.total;
         this.sh = this.maxView * this.ratio;
@@ -971,14 +993,7 @@ UIL.Gui.prototype = {
 
     calc:function( y ) {
 
-        if( y !== undefined ) this.h += y;
-        else this.h = this.inner.offsetHeight;
-
-        /*var i = this.uis.length;
-        while(i--){
-            if( this.uis[i].isGroup ) this.uis[i].calc();
-        }*/
-        
+        this.h += y;
         clearTimeout( this.tmp );
         this.tmp = setTimeout( this.testHeight.bind(this), 10);
 
@@ -986,40 +1001,52 @@ UIL.Gui.prototype = {
 
     testHeight:function(){
 
-        if( this.tmp ) clearTimeout(this.tmp);
+        if( this.tmp ) clearTimeout( this.tmp );
 
-        if( !this.isOpen ) return;
+        this.height = this.top + this.bh;
 
-        this.maxHeight = window.innerHeight - this.top;
+        if( this.isOpen ){
 
-        if( this.h > this.maxHeight ){
-            this.content.style.height = this.maxHeight + 'px';
-            this.innerContent.style.height = (this.maxHeight -this.height )+ 'px';
-            this.bottom.style.background = this.bg;//UIL.bgcolor( this.color, 1 );
-            //this.bottom.style.color =  
-            this.showScroll();
-        }else{
-            this.bottom.style.background = this.bg;//UIL.bgcolor( this.color );
-            this.content.style.height = (this.h + this.height) +'px';
-            this.innerContent.style.height = this.h  +'px';
+
+        this.maxHeight = window.innerHeight - this.top - this.bh;
+
+            if( this.h > this.maxHeight ){
+
+                this.height = this.maxHeight + this.bh;
+                this.showScroll();
+
+            }else{
+
+                this.height = this.h + this.bh;
+                this.hideScroll();
+
+            }
+
+        } else {
+
             this.hideScroll();
+
         }
+
+        this.innerContent.style.height = this.height - this.bh + 'px';
+        this.content.style.height = this.height + 'px';
+        this.bottom.style.top = this.height - this.bh + 'px';
+        //this.zone.h = this.height;
 
     },
 
-    setWidth:function( size ) {
+    setWidth:function( w ) {
 
-        if( size ) UIL.WIDTH = ~~ size;
-
-        this.width = UIL.WIDTH;
+        if( w ) this.width = w;
         this.content.style.width = this.width + 'px';
 
-        if( this.isCenter ) this.content.style.marginLeft = -(~~ (UIL.WIDTH*0.5)) + 'px';
+
+        if( this.isCenter ) this.content.style.marginLeft = -(~~ (this.width*0.5)) + 'px';
 
         var l = this.uis.length;
         var i = l;
         while(i--){
-            this.uis[i].setSize();
+            this.uis[i].setSize( this.width );
         }
 
         i = l;
@@ -1027,37 +1054,10 @@ UIL.Gui.prototype = {
             this.uis[i].rSize();
         }
 
-        this.calc();
+        this.resize();
 
     },
 
-    // -----------------------------------
-
-    show:function(){
-
-        if( this.isOpen ){
-            this.inner.style.display = 'block';
-            this.testHeight();
-            this.bottom.textContent = 'close';
-        }else{
-            this.content.style.height = this.height + 'px';
-            this.tmp = setTimeout( this.endHide.bind(this), 100 );
-        }
-
-        
-        
-    },
-
-    endHide: function(){
-
-        if( this.tmp ) clearTimeout(this.tmp);
-        this.inner.style.display = 'none'; 
-        this.bottom.textContent = 'open';
-        this.scrollBG.style.display = 'none';
-
-        this.callbackClose();
-
-    }
 
 };
 UIL.Proto = function( o ){
@@ -1309,7 +1309,7 @@ UIL.Proto.prototype = {
         if( this.target !== null ){ 
             this.target.removeChild( this.c[0] );
         } else {
-            if( this.isUI ) this.main.inner.removeChild( this.c[0] );
+            if( this.isUI ) this.main.clearOne( this );//this.main.inner.removeChild( this.c[0] );
             else document.body.removeChild( this.c[0] );
         }
 

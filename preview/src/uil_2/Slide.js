@@ -64,7 +64,7 @@ UIL.Slide = function( o ){
         this.c[3].style.cursor = 'w-resize';
 
         this.c[3].events = [ 'mouseover', 'mousedown', 'mouseout' ];
-        this.c[2].events = [ 'keydown', 'keyup', 'mousedown', 'blur', 'focus' ];
+        this.c[2].events = [ 'keydown', 'keyup', 'mousedown', 'blur' ];
 
     }
 
@@ -105,6 +105,7 @@ UIL.Slide.prototype.mouseAction = function( mouse ) {
 
         if( this.m ){
             this.mode(0);
+            this.mode(2);
             this.isDown = false;
             this.actif = false;
 
@@ -112,7 +113,7 @@ UIL.Slide.prototype.mouseAction = function( mouse ) {
 
     } else {
 
-
+        // mouse over slide
         if( mouse.x >= this.sa && mouse.x <= this.sa + this.width ){
 
             this.isDown = mouse.down ? true : false;
@@ -121,17 +122,27 @@ UIL.Slide.prototype.mouseAction = function( mouse ) {
 
         }
 
+        // is text select
+        if( mouse.x >= this.sa + this.width && mouse.x <= this.sa + this.width + this.sc ){
+
+             this.mode(3);
+
+
+        }
+
         if( this.isDown ){ 
 
             this.old = this.value;
             this.move( mouse.x );
             mouse.setCursor('w-resize');
-
             this.actif = true;
+
         } else {
+
             mouse.defCursor();
+
         }
-        //this.actif = true;
+
     }
 
 };
@@ -143,19 +154,37 @@ UIL.Slide.prototype.mode = function ( mode ) {
     switch(mode){
         case 0: // base
             s[2].color = this.fontColor;
-            //s[4].borderColor = 'rgba(255,255,255,0.1)';
             s[4].background = 'rgba(0,0,0,0.2)';
             s[5].background = this.fontColor;
             this.m = 0;
         break;
         case 1: // over
             s[2].color = this.colorPlus;
-            //if( !s[6] ) s[4].background = UIL.SlideBG;
-           // else
-            //s[4].borderColor = 'rgba(255,255,255,0.2)';
             s[4].background = 'rgba(0,0,0,0.4)';
             s[5].background = this.colorPlus;
             this.m = 1;
+        break;
+
+        case 2: // text unselect
+            s[2].color = this.fontColor;
+            s[2].border = 'none';
+            this.c[2].contentEditable = false;
+            this.c[2].blur();
+            this.isEdit = false;
+            //this.m = 2;
+        break;
+
+        case 3: // text edit
+            s[2].color = this.colorPlus;
+            s[2].border = '1px dashed ' + UIL.BorderSelect;
+            this.c[2].contentEditable = true;
+            //.selection = [0,2];
+            //this.c[2].selectionStart = 0;
+            //this.c[2].selectionEnd = 2;
+            this.c[2].focus();
+            //this.c[2].setSelectionRange(0,2);
+            this.isEdit = true;
+            //this.m = 3;
         break;
     }
 };
@@ -281,9 +310,11 @@ UIL.Slide.prototype.validate = function ( e ) {
 
 UIL.Slide.prototype.textdown = function ( e ) {
 
-    e.target.contentEditable = true;
-    e.target.focus();
-    this.isEdit = true;
+    this.mode(3);
+
+    //e.target.contentEditable = true;
+    //e.target.focus();
+    //this.isEdit = true;
 
 };
 
@@ -308,14 +339,16 @@ UIL.Slide.prototype.keyup = function ( e ) {
 
 UIL.Slide.prototype.blur = function ( e ) {
 
-    e.target.style.border = 'none';
-    e.target.contentEditable = false;
-    this.isEdit = false;
+    this.mode(2);
+
+    //e.target.style.border = 'none';
+    //e.target.contentEditable = false;
+    //this.isEdit = false;
 
 };
 
 UIL.Slide.prototype.focus = function ( e ) {
 
-    e.target.style.border = '1px dashed ' + UIL.BorderSelect;
+    //e.target.style.border = '1px dashed ' + UIL.BorderSelect;
 
 };
