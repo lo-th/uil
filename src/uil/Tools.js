@@ -2,18 +2,53 @@
 //   Root function
 // ----------------------
 
+UIL.loop = function(){
+
+    if( UIL.isLoop ) requestAnimationFrame( UIL.loop );
+    UIL.update();
+
+};
+
 UIL.update = function(){
+
     var i = UIL.listens.length;
-    while(i--){
-        UIL.listens[i].listening();
+    while(i--) UIL.listens[i].listening();
+
+};
+
+UIL.removeListen = function ( proto ){
+
+    var id = UIL.listens.indexOf( proto );
+    UIL.listens.splice(id, 1);
+
+    if( UIL.listens.length === 0 ) UIL.isLoop = false;
+
+    //console.log( UIL.listens.length )
+
+};
+
+UIL.addListen = function ( proto ){
+
+    var id = UIL.listens.indexOf( proto );
+
+    if( id !== -1 ) return; 
+
+    UIL.listens.push( proto );
+
+    if( !UIL.isLoop ){
+        UIL.isLoop = true;
+        UIL.loop();
     }
+
+    //console.log( UIL.listens.length )
+
 };
 
 UIL.add = function(){
 
     var a = arguments;
 
-    var type, o, ref=false;
+    var type, o, ref = false;
 
     if( typeof a[0] === 'string' ){ 
 

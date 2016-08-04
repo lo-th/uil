@@ -32,12 +32,17 @@ UIL.Proto = function( o ){
     // no title 
     this.simple = o.simple || false;
 
+    this.width = this.isUI ? this.main.width : UIL.WIDTH;
+    if(o.width !== undefined ) this.width = o.width;
+    if(o.size !== undefined ) this.width = o.size;
+
+    //console.log(this.width)
+
     // define obj size
-    this.setSize( o.size );
+    this.setSize( this.width );
 
     // title size
     if(o.sa !== undefined ) this.sa = o.sa;
-
     if(o.sb !== undefined ) this.sb = o.sb;
     // last number size for slide
     this.sc = o.sc === undefined ? 47 : o.sc;
@@ -91,7 +96,7 @@ UIL.Proto = function( o ){
 
     if( !this.simple ){ 
         //this.c[1] = UIL.DOM('UIL text');
-        this.c[1] = UIL.DOM(null, 'div', UIL.BASIC + UIL.TXT );
+        this.c[1] = UIL.DOM(null, 'div', UIL.TXT );
         this.s[1] = this.c[1].style;
         this.c[1].textContent = this.rename === '' ? this.txt : this.rename;
         this.s[1].color = this.titleColor;
@@ -171,6 +176,8 @@ UIL.Proto.prototype = {
     },
 
     listen : function( ){
+
+        UIL.addListen( this );
 
         UIL.listens.push( this );
         return this;
@@ -264,16 +271,16 @@ UIL.Proto.prototype = {
 
         if( !this.autoWidth ) return;
 
-        this.size = sx || UIL.WIDTH;
+        this.width = sx;// || UIL.WIDTH;
         if( !this.p ) this.p = UIL.P;
 
         if( this.simple ){
             this.sa = 0;
-            this.sb = this.size;
+            this.sb = this.width;
         }else{
-            var pp = this.size * ( this.p / 100 );
+            var pp = this.width * ( this.p / 100 );
             this.sa = ~~ pp;
-            this.sb = ~~ this.size - pp - 10;
+            this.sb = ~~ this.width - pp - 10;
         }
 
     },
@@ -282,7 +289,7 @@ UIL.Proto.prototype = {
 
         if( !this.autoWidth ) return;
 
-        this.s[0].width = this.size + 'px';
+        this.s[0].width = this.width + 'px';
         if( !this.simple ) this.s[1].width = this.sa + 'px';
     
     },

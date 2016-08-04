@@ -5,24 +5,24 @@ UIL.Color = function( o ){
     this.autoHeight = true;
 
     this.ctype = o.ctype || 'array';
-    this.width = this.sb;
+    this.ww = this.sb;
     this.oldWidth = 0;
 
     // color up or down
     this.side = o.side || 'down';
     this.holdTop = 0;
     
-    this.wheelWidth = this.width*0.1;
+    this.wheelWidth = this.ww*0.1;
     this.decal = this.h + 2;
     
-    this.radius = (this.width - this.wheelWidth) * 0.5 - 1;
+    this.radius = (this.ww - this.wheelWidth) * 0.5 - 1;
     this.square = Math.floor((this.radius - this.wheelWidth * 0.5) * 0.7) - 1;
-    this.mid = Math.floor(this.width * 0.5 );
+    this.mid = Math.floor(this.ww * 0.5 );
     this.markerSize = this.wheelWidth * 0.3;
 
     this.baseH = this.h;
 
-    this.c[2] = UIL.DOM('UIL text', 'div',  'height:'+(this.h-4)+'px;' + 'border-radius:6px; pointer-events:auto; cursor:pointer; border:1px solid '+ UIL.Border + '; line-height:'+(this.h-8)+'px;' );
+    this.c[2] = UIL.DOM( null, 'div',  UIL.TXT + 'height:'+(this.h-4)+'px;' + 'border-radius:6px; pointer-events:auto; cursor:pointer; border:1px solid '+ UIL.Border + '; line-height:'+(this.h-8)+'px;' );
 
     this.s[2] = this.c[2].style;
 
@@ -32,17 +32,17 @@ UIL.Color = function( o ){
         this.s[2].bottom = '2px';
     }
 
-    this.c[3] = UIL.DOM('UIL', 'div', 'display:none' );
-    this.c[4] = UIL.DOM('UIL', 'canvas', 'display:none;');
-    this.c[5] = UIL.DOM('UIL', 'canvas', 'pointer-events:auto; cursor:pointer; display:none;');
+    this.c[3] = UIL.DOM( null, 'div', UIL.BASIC + 'display:none' );
+    this.c[4] = UIL.DOM( null, 'canvas', UIL.BASIC + 'display:none;');
+    this.c[5] = UIL.DOM( null, 'canvas', UIL.BASIC + 'pointer-events:auto; cursor:pointer; display:none;');
 
     this.s[3] = this.c[3].style;
     this.s[5] = this.c[5].style;
 
     if(this.side === 'up') this.s[5].pointerEvents = 'none';
 
-    this.c[4].width = this.c[4].height = this.width;
-    this.c[5].width = this.c[5].height = this.width;
+    this.c[4].width = this.c[4].height = this.ww;
+    this.c[5].width = this.c[5].height = this.ww;
 
     this.ctxMask = this.c[4].getContext('2d');
     this.ctxOverlay = this.c[5].getContext('2d');
@@ -140,7 +140,7 @@ UIL.Color.prototype.move = function( e ){
 //////
 
 UIL.Color.prototype.redraw = function(){
-    this.oldWidth = this.width;
+    this.oldWidth = this.ww;
     this.drawCircle();
     this.drawMask();
     this.drawMarkers();
@@ -148,9 +148,9 @@ UIL.Color.prototype.redraw = function(){
 
 UIL.Color.prototype.show = function(){
 
-    if(this.oldWidth!==this.width) this.redraw();
+    if(this.oldWidth!==this.ww) this.redraw();
     this.isShow = true;
-    this.h = this.width + this.baseH + 10;
+    this.h = this.ww + this.baseH + 10;
     this.s[0].height = this.h+'px';
 
     if(this.side=='up'){ 
@@ -296,7 +296,7 @@ UIL.Color.prototype.drawCircle = function(){
 
 UIL.Color.prototype.drawMarkers = function(){
 
-    var m = this.markerSize, ra=this.radius, sz = this.width, lw = Math.ceil(m/ 4), r = m - lw + 1, c1 = this.invert ? '#fff' : '#000', c2 = this.invert ? '#000' : '#fff';
+    var m = this.markerSize, ra=this.radius, sz = this.ww, lw = Math.ceil(m/ 4), r = m - lw + 1, c1 = this.invert ? '#fff' : '#000', c2 = this.invert ? '#000' : '#fff';
     var angle = this.hsl[0] * 6.28;
     var ar = [Math.sin(angle) * ra, -Math.cos(angle) * ra, 2 * this.square * (.5 - this.hsl[1]), 2 * this.square * (.5 - this.hsl[2]) ];
   
@@ -322,13 +322,13 @@ UIL.Color.prototype.rSize = function(){
 
     UIL.Proto.prototype.rSize.call( this );
 
-    this.width = this.sb;
-    this.wheelWidth = this.width*0.1;
+    this.ww = this.sb;
+    this.wheelWidth = this.ww*0.1;
 
     if( this.side === 'up' ) this.decal = 5;
-    this.radius = (this.width - this.wheelWidth) * 0.5 - 1;
+    this.radius = (this.ww - this.wheelWidth) * 0.5 - 1;
     this.square = Math.floor((this.radius - this.wheelWidth * 0.5) * 0.7) - 1;
-    this.mid = Math.floor(this.width * 0.5 );
+    this.mid = Math.floor(this.ww * 0.5 );
     this.markerSize = this.wheelWidth * 0.3;
 
     var s = this.s;
@@ -341,11 +341,11 @@ UIL.Color.prototype.rSize = function(){
     s[3].top = (this.mid+this.decal )-this.square + 'px';
     s[3].left = (this.mid+this.sa )-this.square + 'px';
 
-    this.c[4].width = this.c[4].height = this.width;
+    this.c[4].width = this.c[4].height = this.ww;
     s[4].left = this.sa + 'px';
     s[4].top = this.decal + 'px';
 
-    this.c[5].width = this.c[5].height = this.width;
+    this.c[5].width = this.c[5].height = this.ww;
     s[5].left = this.sa + 'px';
     s[5].top = this.decal + 'px';
 
@@ -354,7 +354,7 @@ UIL.Color.prototype.rSize = function(){
 
     if( this.isShow ){ 
         this.redraw();
-        this.h = this.width+30;
+        this.h = this.ww+30;
         this.c[0].height = this.h + 'px';
         if( this.isUI ) this.main.calc();
     }

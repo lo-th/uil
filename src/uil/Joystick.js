@@ -19,11 +19,15 @@ UIL.Joystick = function( o ){
 
     this.radius = o.radius || 50;
 
-    this.size = (this.radius*2)+20;
+    this.width = (this.radius*2)+20;
 
+    if(o.width !== undefined){
+        this.width = o.width;
+        this.radius = ~~ (this.width-20)*0.5;
+    }
     if(o.size !== undefined){
-        this.size = o.size;
-        this.radius = ~~ (this.size-20)*0.5;
+        this.width = o.size;
+        this.radius = ~~ (this.width-20)*0.5;
     }
 
     this.innerRadius = o.innerRadius || this.radius*0.6;
@@ -33,20 +37,20 @@ UIL.Joystick = function( o ){
 
     this.top = 0;
 
-    this.c[0].style.width = this.size +'px';
+    this.c[0].style.width = this.width +'px';
 
     if(this.c[1] !== undefined) {
 
-        this.c[1].style.width = this.size +'px';
+        this.c[1].style.width = this.width +'px';
         this.c[1].style.textAlign = 'center';
         this.top = 20;
 
     }
 
-    this.c[2] = UIL.DOM('UIL', 'circle', 'left:10px; top:'+this.top+'px; width:'+this.w+'px; height:'+this.height+'px;  pointer-events:auto; cursor:pointer;', { cx:this.radius, cy:this.radius, r:this.radius, fill:'url(#grad)' });
-    this.c[3] = UIL.DOM('UIL', 'circle', 'left:0px; top:'+(this.top-10)+'px; width:'+(this.w+20)+'px; height:'+(this.height+20)+'px;', { cx:this.radius+10, cy:this.radius+10, r:this.innerRadius+10, fill:'url(#gradS)'});
-    this.c[4] = UIL.DOM('UIL', 'circle', 'left:10px; top:'+this.top+'px; width:'+this.w+'px; height:'+this.height+'px;', { cx:this.radius, cy:this.radius, r:this.innerRadius, fill:'url(#gradIn)', 'stroke-width':1, stroke:'#000'  });
-    this.c[5] = UIL.DOM('UIL text', 'div', 'text-align:center; top:'+(this.height+20)+'px; width:'+this.size+'px; color:'+ this.fontColor );
+    this.c[2] = UIL.DOM( null, 'circle', UIL.BASIC + 'left:10px; top:'+this.top+'px; width:'+this.w+'px; height:'+this.height+'px;  pointer-events:auto; cursor:pointer;', { cx:this.radius, cy:this.radius, r:this.radius, fill:'url(#grad)' });
+    this.c[3] = UIL.DOM( null, 'circle', UIL.BASIC + 'left:0px; top:'+(this.top-10)+'px; width:'+(this.w+20)+'px; height:'+(this.height+20)+'px;', { cx:this.radius+10, cy:this.radius+10, r:this.innerRadius+10, fill:'url(#gradS)'});
+    this.c[4] = UIL.DOM( null, 'circle', UIL.BASIC + 'left:10px; top:'+this.top+'px; width:'+this.w+'px; height:'+this.height+'px;', { cx:this.radius, cy:this.radius, r:this.innerRadius, fill:'url(#gradIn)', 'stroke-width':1, stroke:'#000'  });
+    this.c[5] = UIL.DOM( null, 'div', UIL.TXT + 'text-align:center; top:'+(this.height+20)+'px; width:'+this.width+'px; color:'+ this.fontColor );
 
     // gradian bakground
     var svg = this.c[2];

@@ -5,7 +5,7 @@ UIL.String = function( o ){
     this.value = o.value || '';
     this.allway = o.allway || false;
 
-    this.c[2] = UIL.DOM( 'UIL textSelect', 'div', 'height:'+(this.h-4)+'px; line-height:'+(this.h-8)+'px; color:' +  this.fontColor );
+    this.c[2] = UIL.DOM( null, 'div',  UIL.TXTSELECT );//+ 'height:'+(this.h-4)+'px; line-height:'+(this.h-8)+'px; ' );
     this.c[2].name = 'input';
     //this.c[2].style.color = ;
     this.c[2].textContent = this.value;
@@ -77,7 +77,10 @@ UIL.String.prototype.keyup = function( e ){
 UIL.String.prototype.rSize = function(){
 
     UIL.Proto.prototype.rSize.call( this );
+    this.s[2].color = this.fontColor;
     this.s[2].left = this.sa + 'px';
     this.s[2].width = this.sb + 'px';
-
+    this.s[2].height = this.h -4 + 'px';
+    this.s[2].lineHeight = this.h - 8 + 'px';
+ 
 };

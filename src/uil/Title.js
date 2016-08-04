@@ -9,7 +9,7 @@ UIL.Title = function( o ){
     var id = o.id || 0;
     var prefix = o.prefix || '';
 
-    this.c[2] = UIL.DOM( 'UIL text', 'div', 'text-align:right; width:60px; line-height:'+ (this.h-8) + 'px; color:' + this.fontColor );
+    this.c[2] = UIL.DOM( null, 'div', UIL.TXT + 'text-align:right; width:60px; line-height:'+ (this.h-8) + 'px; color:' + this.fontColor );
 
     if( this.h === 31 ){
 
@@ -36,8 +36,8 @@ UIL.Title.prototype.constructor = UIL.Title;
 UIL.Title.prototype.rSize = function(){
 
     UIL.Proto.prototype.rSize.call( this );
-    this.s[1].width = this.size-50 + 'px';
-    this.s[2].left = this.size-(50+26) + 'px';
+    this.s[1].width = this.width-50 + 'px';
+    this.s[2].left = this.width-(50+26) + 'px';
 
 };
 

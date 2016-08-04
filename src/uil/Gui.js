@@ -8,18 +8,30 @@ UIL.Gui = function( o ){
     if( o.css === undefined ) o.css = '';
 
     this.height = 20;
-    this.width = o.width || UIL.WIDTH;
-    UIL.WIDTH = this.width;
+    this.width = o.width !== undefined ? o.width : UIL.WIDTH;
+    this.width = o.size !== undefined ? o.size : UIL.WIDTH;
+    //UIL.WIDTH = this.width;
 
     this.left = 0;
-    this.top = 0;
+    this.top = o.top || 0;
 
 
     this.h = 0;//this.height;
     this.prevY = -1;
 
     // bottom and close height
+    this.isWithClose = true;
     this.bh = o.bh || 20;
+
+    if(o.close !== undefined ){
+        this.isWithClose = o.close;
+        this.bh = !this.isWithClose ? 0 : this.bh;
+    }
+
+
+
+    // scroll width
+    this.sw = o.sw || 10;
 
     UIL.main = this;
 
@@ -33,33 +45,31 @@ UIL.Gui = function( o ){
     this.onWheel = false;
     this.isOpen = true;
 
-  
-
     this.uis = [];
 
-    this.content = UIL.DOM('UIL', 'div',  'display:block; width:300px; height:auto; top:0; right:10px; transition:height 0.1s ease-out;' + o.css );
+    this.content = UIL.DOM( null, 'div', UIL.BASIC + 'display:block; width:'+this.width+'px; height:auto; top:0; right:10px; transition:height 0.1s ease-out;' + o.css );
     document.body.appendChild( this.content );
     //this.content.style.background = UIL.bgcolor( this.color, 1, true );
 
     //this.top = this.content.getBoundingClientRect().top;
 
-    this.innerContent = UIL.DOM('UIL', 'div', 'width:100%; top:0; left:0; height:auto;');
+    this.innerContent = UIL.DOM( null, 'div', UIL.BASIC + 'width:100%; top:0; left:0; height:auto;');
     this.content.appendChild(this.innerContent);
 
-    this.inner = UIL.DOM('UIL', 'div', 'width:100%; top:0; left:0; height:auto;');
+    this.inner = UIL.DOM( null, 'div', UIL.BASIC + 'width:100%; top:0; left:0; height:auto;');
     this.innerContent.appendChild(this.inner);
     this.inner.name = 'inner';
 
     //this.scrollBG = UIL.DOM('UIL scroll-bg');
-    this.scrollBG = UIL.DOM('UIL', 'div', 'right:0; top:0; width:10px; height:10px; cursor:s-resize; pointer-events:auto; display:none;');
+    this.scrollBG = UIL.DOM( null, 'div', UIL.BASIC + 'right:0; top:0; width:10px; height:10px; cursor:s-resize; pointer-events:auto; display:none;');
     this.content.appendChild(this.scrollBG);
     this.scrollBG.name = 'scroll';
 
     //this.scroll = UIL.DOM('UIL scroll');
-    this.scroll = UIL.DOM('UIL', 'div', 'background:#666; right:0; top:0; width:5px; height:10px;');
+    this.scroll = UIL.DOM( null, 'div', UIL.BASIC + 'background:#666; right:0; top:0; width:5px; height:10px;');
     this.scrollBG.appendChild( this.scroll );
 
-    this.bottom = UIL.DOM('UIL', 'div',  UIL.TXT+'width:100%; top:auto; bottom:0; left:0; border-bottom-right-radius:10px;  border-bottom-left-radius:10px; text-align:center; pointer-events:auto; cursor:pointer; height:'+this.bh+'px; line-height:'+(this.bh-5)+'px;');
+    this.bottom = UIL.DOM( null, 'div',  UIL.TXT+'width:100%; top:auto; bottom:0; left:0; border-bottom-right-radius:10px;  border-bottom-left-radius:10px; text-align:center; pointer-events:auto; cursor:pointer; height:'+this.bh+'px; line-height:'+(this.bh-5)+'px;');
     this.content.appendChild(this.bottom);
     this.bottom.textContent = 'close';
     this.bottom.name = 'bottom';
@@ -81,7 +91,9 @@ UIL.Gui = function( o ){
     
     window.addEventListener("resize", function(e){this.resize(e)}.bind(this), false );
 
-    this.setWidth();
+    //
+
+    this.setWidth( this.width );
 
 }
 
@@ -92,6 +104,7 @@ UIL.Gui.prototype = {
 
         if(b) this.content.style.display = 'none';
         else this.content.style.display = 'block';
+        
     },
 
     setBG : function(c){
@@ -239,14 +252,18 @@ UIL.Gui.prototype = {
         var a = arguments;
 
         if( typeof a[1] === 'object' ){ 
+
             a[1].isUI = true;
             a[1].main = this;
+
         } else if( typeof a[1] === 'string' ){
+
             if( a[2] === undefined ) [].push.call(a, { isUI:true, main:this });
             else {
                 a[2].isUI = true;
                 a[2].main = this;
             }
+            
         } 
 
 
@@ -377,8 +394,7 @@ UIL.Gui.prototype = {
 
         if( this.isOpen ){
 
-
-        this.maxHeight = window.innerHeight - this.top - this.bh;
+            this.maxHeight = window.innerHeight - this.top - this.bh;
 
             if( this.h > this.maxHeight ){
 
@@ -409,6 +425,8 @@ UIL.Gui.prototype = {
 
         if( w ) this.width = w;
         this.content.style.width = this.width + 'px';
+
+        //console.log(this.width)
 
 
         if( this.isCenter ) this.content.style.marginLeft = -(~~ (this.width*0.5)) + 'px';

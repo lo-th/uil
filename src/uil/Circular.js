@@ -11,11 +11,16 @@ UIL.Circular = function( o ){
 
     this.radius = o.radius || 15;
     
-    this.size = (this.radius*2)+20;
+    this.width = (this.radius*2)+20;
+
+    if(o.width !== undefined){
+        this.width = o.width;
+        this.radius = ~~ (this.width-20)*0.5;
+    }
 
     if(o.size !== undefined){
-        this.size = o.size;
-        this.radius = ~~ (this.size-20)*0.5;
+        this.width = o.size;
+        this.radius = ~~ (this.width-20)*0.5;
     }
 
     this.w = this.height = this.radius * 2;
@@ -25,11 +30,11 @@ UIL.Circular = function( o ){
 
     this.top = 0;
 
-    this.c[0].style.width = this.size +'px';
+    this.c[0].style.width = this.width +'px';
 
     if(this.c[1] !== undefined) {
 
-        this.c[1].style.width = this.size +'px';
+        this.c[1].style.width = this.width +'px';
         this.c[1].style.textAlign = 'center';
         this.top = 20;
 
@@ -37,11 +42,11 @@ UIL.Circular = function( o ){
 
     this.percent = 0;
 
-    this.c[2] = UIL.DOM('UIL number', 'div', 'text-align:center; top:'+(this.height+24)+'px; width:'+this.size+'px; color:'+ this.fontColor );
+    this.c[2] = UIL.DOM(null, 'div', UIL.NUM + 'text-align:center; top:'+(this.height+24)+'px; width:'+this.width+'px; color:'+ this.fontColor );
 
-    this.c[3] = UIL.DOM('UIL', 'circle', 'left:10px; top:'+this.top+'px; width:'+this.w+'px; height:'+this.height+'px; pointer-events:auto; cursor:pointer;', { cx:this.radius, cy:this.radius, r:this.radius, fill:'rgba(0,0,0,0.3)' });
-    this.c[4] = UIL.DOM('UIL', 'path', 'left:10px; top:'+this.top+'px; width:'+this.w+'px; height:'+this.height+'px;', { d:this.makePath(), fill:this.fontColor });
-    this.c[5] = UIL.DOM('UIL', 'circle', 'left:10px; top:'+this.top+'px; width:'+this.w+'px; height:'+this.height+'px;', { cx:this.radius, cy:this.radius, r:this.radius*0.5, fill:this.buttonColor, 'stroke-width':1, stroke:UIL.SVGC });
+    this.c[3] = UIL.DOM(null, 'circle', UIL.BASIC + 'left:10px; top:'+this.top+'px; width:'+this.w+'px; height:'+this.height+'px; pointer-events:auto; cursor:pointer;', { cx:this.radius, cy:this.radius, r:this.radius, fill:'rgba(0,0,0,0.3)' });
+    this.c[4] = UIL.DOM(null, 'path', UIL.BASIC + 'left:10px; top:'+this.top+'px; width:'+this.w+'px; height:'+this.height+'px;', { d:this.makePath(), fill:this.fontColor });
+    this.c[5] = UIL.DOM(null, 'circle', UIL.BASIC + 'left:10px; top:'+this.top+'px; width:'+this.w+'px; height:'+this.height+'px;', { cx:this.radius, cy:this.radius, r:this.radius*0.5, fill:this.buttonColor, 'stroke-width':1, stroke:UIL.SVGC });
 
     this.c[3].events = [ 'mouseover', 'mousedown', 'mouseout' ];
 
