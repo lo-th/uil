@@ -734,7 +734,7 @@ UIL.Gui = function( o ){
     this.content.addEventListener( 'mouseover', this, false );
     //this.content.addEventListener( 'mousewheel', this, false );
 
-    document.addEventListener( 'mousewheel', this, false );
+    document.addEventListener( 'mousewheel', function(e){this.wheel(e)}.bind(this), false );
     
     window.addEventListener("resize", function(e){this.resize(e)}.bind(this), false );
 
@@ -789,7 +789,7 @@ UIL.Gui.prototype = {
             case 'mousedown': this.down( e ); break;
             case 'mouseout': this.out( e ); break;
             case 'mouseover': this.over( e ); break;
-            case 'mousewheel': this.wheel( e ); break;
+            //case 'mousewheel': this.wheel( e ); break;
 
             case 'mouseup': this.up( e ); break;
             case 'mousemove': this.move( e ); break;
@@ -866,8 +866,8 @@ UIL.Gui.prototype = {
 
     wheel: function ( e ){
 
-        e.preventDefault();
-        e.stopPropagation();
+        //e.preventDefault();
+        //e.stopPropagation();
 
         if( this.lockwheel || !this.isScroll ) return;
 
@@ -3898,9 +3898,13 @@ UIL.Fps = function( o ){
     this.c[0].style.cursor = 'pointer';
     this.c[0].style.pointerEvents = 'auto';
 
-    this.c[2] = UIL.DOM( null, 'div', UIL.BASIC + 'display:none; left:10px; top:'+ this.h + 'px; height:'+(this.hplus - 10)+'px; ');
-    this.c[3] = UIL.DOM( null, 'div', UIL.BASIC + 'display:none; left:10px; top:'+ this.h + 'px; height:'+(this.hplus - 10)+'px; ');
-    this.c[4] = UIL.DOM( null, 'div', UIL.BASIC + 'display:none; left:10px; top:'+ this.h + 'px; height:'+(this.hplus - 10)+'px; ');
+    var panelCss = 'display:none; left:10px; top:'+ this.h + 'px; height:'+(this.hplus - 8)+'px; '
+
+    this.c[2] = UIL.DOM( null, 'div', UIL.BASIC + panelCss + 'border:1px solid rgba(255, 255, 255, 0.2);');
+    this.c[3] = UIL.DOM( null, 'div', UIL.BASIC + panelCss + 'border:1px solid rgba(255, 255, 255, 0);');
+    this.c[4] = UIL.DOM( null, 'div', UIL.BASIC + panelCss + 'border:1px solid rgba(255, 255, 255, 0);');
+
+    this.c[5] = UIL.DOM( null, 'div', UIL.BASIC + 'width:100%; bottom:0px; height:1px; background: rgba(255, 255, 255, 0.2);');
 
 
 
@@ -4098,7 +4102,7 @@ UIL.Fps.prototype.rSize = function(){
 
 
     var l = Math.floor( (this.width - 20) / this.nFrame );
-    var ww = l * this.nFrame;
+    var ww = (l * this.nFrame) + 2;
     var ll = Math.round((this.width - ww)*0.5);
 
     this.s[2].left = ll + 'px';

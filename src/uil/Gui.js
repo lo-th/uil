@@ -87,7 +87,7 @@ UIL.Gui = function( o ){
     this.content.addEventListener( 'mouseover', this, false );
     //this.content.addEventListener( 'mousewheel', this, false );
 
-    document.addEventListener( 'mousewheel', this, false );
+    document.addEventListener( 'mousewheel', function(e){this.wheel(e)}.bind(this), false );
     
     window.addEventListener("resize", function(e){this.resize(e)}.bind(this), false );
 
@@ -142,7 +142,7 @@ UIL.Gui.prototype = {
             case 'mousedown': this.down( e ); break;
             case 'mouseout': this.out( e ); break;
             case 'mouseover': this.over( e ); break;
-            case 'mousewheel': this.wheel( e ); break;
+            //case 'mousewheel': this.wheel( e ); break;
 
             case 'mouseup': this.up( e ); break;
             case 'mousemove': this.move( e ); break;
@@ -219,8 +219,8 @@ UIL.Gui.prototype = {
 
     wheel: function ( e ){
 
-        e.preventDefault();
-        e.stopPropagation();
+        //e.preventDefault();
+        //e.stopPropagation();
 
         if( this.lockwheel || !this.isScroll ) return;
 
