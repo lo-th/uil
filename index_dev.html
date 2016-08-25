@@ -55,7 +55,7 @@ document.getElementById('version').innerHTML = 'il '+ UIL.REVISION;
 
 var debug = document.getElementById('debug');
 var callback = function( v ){ debug.innerHTML = v; }
-var callbackButton = function(){ debug.innerHTML = "i'm a button !!" ; }
+var callbackButton = function( v ){ debug.innerHTML = "i'm a button !! " + v; }
 var callbackSize = function( v ){ ui.setWidth( v ); }
 var callbackLogo = function( v ){ 
     document.getElementById('logoin').setAttributeNS(null, 'fill', UIL.hexToHtml(v)); 
@@ -108,6 +108,9 @@ function populate(){
         ui.add('number', { name:'vec3', value:[0,0,0] });
         ui.add('number', { name:'vec4', value:[0,0,0,0], step:1, precision:0, height:30 });
         ui.add('button', { name:'LOAD', callback:callbackButton, fontColor:'#D4B87B', height:30, loader:true });
+        ui.add('button', { name:'LOAD', callback:callbackButton, fontColor:'#D4B87B', height:30, drag:true });
+
+        ui.add('button', { name:'MULTY', callback:callbackButton, fontColor:'#D4B87B', height:30, value:[1, 2, 3, 4] });
 
         gr0 = ui.add('group', { name:'Group', fontColor:'#D4B87B', height:30 });
 

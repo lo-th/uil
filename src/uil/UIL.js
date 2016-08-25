@@ -33,7 +33,7 @@ var UIL = ( function () {
         HEIGHT : 20,
         P : 30,
 
-        BASIC : '-o-user-select:none; -ms-user-select:none; -khtml-user-select:none; -webkit-user-select:none; -moz-user-select:none; position:absolute; pointer-events:none; box-sizing:border-box; margin:0; padding:0; border:none; overflow:hidden; background:none;',
+        BASIC : '-o-user-select:none; -ms-user-select:none; -khtml-user-select:none; -webkit-user-select:none; -moz-user-select:none; position:absolute; pointer-events:none; box-sizing:border-box; margin:0; padding:0; border:none;  background:none;',
 
         COLOR : 'N',
         BASECOLOR : '#C0C0C0',

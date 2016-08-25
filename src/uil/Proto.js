@@ -31,6 +31,7 @@ UIL.Proto = function( o ){
 
     // no title 
     this.simple = o.simple || false;
+    if(this.simple) this.sa = 0;
 
     this.width = this.isUI ? this.main.width : UIL.WIDTH;
     if(o.width !== undefined ) this.width = o.width;
@@ -44,6 +45,9 @@ UIL.Proto = function( o ){
     // title size
     if(o.sa !== undefined ) this.sa = o.sa;
     if(o.sb !== undefined ) this.sb = o.sb;
+
+    if( this.simple ) this.sb = this.width - this.sa;
+
     // last number size for slide
     this.sc = o.sc === undefined ? 47 : o.sc;
 
@@ -88,7 +92,7 @@ UIL.Proto = function( o ){
     this.s = [];
 
     //this.c[0] = UIL.DOM('UIL', 'div', 'position:relative; height:20px; float:left;');
-    this.c[0] = UIL.DOM(null, 'div', UIL.BASIC + 'position:relative; height:20px; float:left;');
+    this.c[0] = UIL.DOM(null, 'div', UIL.BASIC + 'position:relative; height:20px; float:left; overflow:hidden;');
     this.s[0] = this.c[0].style;
 
     if( this.isUI ) this.s[0].marginBottom = '1px';
@@ -275,8 +279,8 @@ UIL.Proto.prototype = {
         if( !this.p ) this.p = UIL.P;
 
         if( this.simple ){
-            this.sa = 0;
-            this.sb = this.width;
+            //this.sa = 0;
+            this.sb = this.width - this.sa;
         }else{
             var pp = this.width * ( this.p / 100 );
             this.sa = ~~ pp;
