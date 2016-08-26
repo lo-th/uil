@@ -7,36 +7,40 @@ UIL.Fps = function( o ){
     this.baseH = this.h;
     this.hplus = 50;
 
-    //this.c[2] = UIL.DOM( null, 'div', UIL.TXT + 'width:100%; height:'+this.baseH+'px; cursor:pointer; pointer-events:auto; ');
+    this.nFrame = 40;
+    this.l = 1;
 
-    //this.c[2].textContent = 'FPS';
+    this.pa1 = [];
+    this.pa2 = [];
+    this.pa3 = [];
+
+    var i = this.nFrame+1;
+    while(i--){
+        this.pa1.push(43);
+        this.pa2.push(43);
+        this.pa3.push(43);
+    }
+
     this.c[1].textContent = 'FPS';
     this.c[0].style.cursor = 'pointer';
     this.c[0].style.pointerEvents = 'auto';
 
-    var panelCss = 'display:none; left:10px; top:'+ this.h + 'px; height:'+(this.hplus - 8)+'px; '
+    var panelCss = 'display:none; left:10px; top:'+ this.h + 'px; height:'+(this.hplus - 8)+'px; background: rgba(255, 255, 255, 0.1);' + 'border:1px solid rgba(255, 255, 255, 0.2); '
 
-    this.c[2] = UIL.DOM( null, 'div', UIL.BASIC + panelCss + 'border:1px solid rgba(255, 255, 255, 0.2);');
-    this.c[3] = UIL.DOM( null, 'div', UIL.BASIC + panelCss + 'border:1px solid rgba(255, 255, 255, 0);');
-    this.c[4] = UIL.DOM( null, 'div', UIL.BASIC + panelCss + 'border:1px solid rgba(255, 255, 255, 0);');
+    this.c[2] = UIL.DOM( null, 'path', UIL.BASIC + panelCss , { fill:'none', 'stroke-width':1, stroke:this.fontColor, 'vector-effect':'non-scaling-stroke' });
 
-    this.c[5] = UIL.DOM( null, 'div', UIL.BASIC + 'width:100%; bottom:0px; height:1px; background: rgba(255, 255, 255, 0.2);');
+    this.c[2].setAttribute('viewBox', '0 0 40 42' );
+    this.c[2].setAttribute('height', '42px' );
+    this.c[2].setAttribute('preserveAspectRatio', 'none' );
 
-
-
-
-    
+    UIL.DOM(null, 'path', null, { fill:'none', 'stroke-width':1, stroke:'#FF0', 'vector-effect':'non-scaling-stroke' }, this.c[2] );
+    UIL.DOM(null, 'path', null, { fill:'none', 'stroke-width':1, stroke:'#0FF', 'vector-effect':'non-scaling-stroke' }, this.c[2] );
 
 
-   // this.c[2] = UIL.DOM( null, 'canvas', UIL.BASIC + 'display:none; left:10px; top:'+ (this.h + 10) + 'px;');
-
-    
-    //this.c[2].height = this.hplus - 20;
-
-    //this.ctx = this.c[2].getContext('2d');
+    // bottom line
+    this.c[3] = UIL.DOM( null, 'div', UIL.BASIC + 'width:100%; bottom:0px; height:1px; background: rgba(255, 255, 255, 0.2);');
 
     this.isShow = o.show || false;
-
 
     this.now = ( self.performance && self.performance.now ) ? self.performance.now.bind( performance ) : Date.now;
     this.startTime = this.now()
@@ -50,13 +54,7 @@ UIL.Fps = function( o ){
     this.mem = 0;
     this.mm = 0;
 
-    this.nFrame = 40;
-
     if ( self.performance && self.performance.memory ) this.isMem = true;
-
-    this.initGraph(1);
-    //this.mode = 0;
-
 
     this.c[0].events = [ 'click', 'mousedown', 'mouseover', 'mouseout' ];
 
@@ -107,68 +105,38 @@ UIL.Fps.prototype.mode = function( mode ){
     }
 }
 
-UIL.Fps.prototype.initGraph = function( l ){
+UIL.Fps.prototype.makePath = function ( point ) {
 
-    //while (this.c[2].firstChild) this.c[2].removeChild(this.c[2].firstChild);
-    //while (this.c[3].firstChild) this.c[3].removeChild(this.c[3].firstChild);
-    //while (this.c[2].firstChild) this.c[4].removeChild(this.c[4].firstChild);
+    var path = [];
     
-
-    var e, f, g;
-
-    //var l = Math.floor( w / 60 );
-
-    //console.log(w, l, l*60)
-
-    for ( var i = 0; i < this.nFrame; i ++ ) {
-
-        e = document.createElement( 'span' );
-        f = document.createElement( 'span' );
-        
-        e.style.cssText = 'position:relative; width:'+l+'px; height:1px; top:38px; float:left; border-bottom: 1px solid rgba(0,0,0,0.5); background:#CCC;  pointer-events:none;';
-        f.style.cssText = 'position:relative; width:'+l+'px; height:1px; top:38px; float:left; border-bottom: 1px solid rgba(0,0,0,0.5); background:#CC0;  pointer-events:none;';
-
-
-        //graph.appendChild( createElement( 'span', '', 'width:1px; height:30px; margin-top:10px; float:left; opacity:0.9; background:none; border-bottom: 1px solid '+ fg ) );
-
-        this.c[2].appendChild( e );
-        this.c[3].appendChild( f );
-
-        if ( this.isMem ) {
-
-            g = document.createElement( 'span' );
-            g.style.cssText = 'position:relative; width:'+l+'px; height:1px; top:38px; float:left; border-bottom: 1px solid rgba(0,0,0,0.5); background:#0CC;  pointer-events:none;';
-            this.c[4].appendChild( g );
-
-        }
-
-
+    for ( var i = 0; i < this.nFrame + 1; i ++ ) {
+        if(i === 0 ) path.push( 'M ' + i + ' ' + point[i] );
+        else path.push(' L ' + i + ' ' + point[i] );
     }
 
-}
+    return path;
 
-UIL.Fps.prototype.resizeGraph = function( l ){
-
-    for ( var i = 0; i < this.nFrame; i ++ ) {
-        this.c[2].children[ i ].style.width = l + 'px';
-        this.c[3].children[ i ].style.width = l + 'px';
-        if ( this.isMem ) this.c[4].children[ i ].style.width = l + 'px';
-    }
-
-}
+};
 
 UIL.Fps.prototype.drawGraph = function( ){
 
-    var c = this.c[2].appendChild( this.c[2].firstChild );
-    c.style.top = 8 + Math.min( 30, 30 - (this.fps/ 100) * 30 ) + 'px';
+    this.pa1.shift();
+    //this.pa1.push( 20 );
+    this.pa1.push(  Math.floor(8 + Math.min( 30, 30 - (this.fps/ 100) * 30 ))+0.5 );
 
-    c = this.c[3].appendChild( this.c[3].firstChild );
-    c.style.top = 8 + Math.min( 30, 30 - (this.ms/ 200) * 30 ) + 'px';
+    UIL.setSvg( this.c[2], 'd', this.makePath( this.pa1 ), 0 );
+
+    this.pa2.shift();
+    this.pa2.push(  Math.floor(8 + Math.min( 30, 30 - (this.ms/ 200) * 30 ))+0.5 );
+
+    UIL.setSvg( this.c[2], 'd', this.makePath( this.pa2 ), 1 );
 
     if ( this.isMem ) {
 
-        c = this.c[4].appendChild( this.c[4].firstChild );
-        c.style.top = 8 + Math.min( 30, 30 - this.mm * 30 ) + 'px';
+        this.pa3.shift();
+        this.pa3.push( Math.floor(8 + Math.min( 30, 30 - this.mm * 30 ))+0.5 );
+
+        UIL.setSvg( this.c[2], 'd', this.makePath( this.pa3 ), 2 );
 
     }
 
@@ -185,8 +153,8 @@ UIL.Fps.prototype.show = function(){
 
     this.s[0].height = this.h +'px';
     this.s[2].display = 'block'; 
-    this.s[3].display = 'block'; 
-    this.s[4].display = 'block'; 
+    //this.s[3].display = 'block'; 
+    //this.s[4].display = 'block'; 
     this.isShow = true;
 
     UIL.addListen( this );
@@ -201,9 +169,7 @@ UIL.Fps.prototype.hide = function(){
     else if( this.isUI ) this.main.calc( -this.hplus );
     
     this.s[0].height = this.h +'px';
-    this.s[2].display = 'none'; 
-    this.s[3].display = 'none'; 
-    this.s[4].display = 'none'; 
+    this.s[2].display = 'none';
     this.isShow = false;
 
     UIL.removeListen( this );
@@ -222,15 +188,10 @@ UIL.Fps.prototype.rSize = function(){
     var ll = Math.round((this.width - ww)*0.5);
 
     this.s[2].left = ll + 'px';
-    this.s[3].left = ll + 'px';
-    this.s[4].left = ll + 'px';
 
-    this.s[2].width = ww + 'px';
-    this.s[3].width = ww + 'px';
-    this.s[4].width = ww + 'px';
-
-    this.resizeGraph(  l  );
-
+    
+    this.s[2].width = (ww) + 'px';
+    this.c[2].setAttribute('width', ww + 'px' );
     
 }
 
@@ -247,25 +208,12 @@ UIL.Fps.prototype.end = function(){
 
     var time = this.now();
     this.ms = time - this.startTime;
-    //msMin = Math.min( msMin, ms );
-    //msMax = Math.max( msMax, ms );
-
-
-
-    //msText.textContent = ( ms | 0 ) + ' ms';// (' + ( msMin | 0 ) + '-' + ( msMax | 0 ) + ')';
-    //updateGraph( msGraph, ms / 200 );
 
     this.frames ++;
 
     if ( time > this.prevTime + 1000 ) {
 
         this.fps = Math.round( ( this.frames * 1000 ) / ( time - this.prevTime ) );
-        //fpsMin = Math.min( fpsMin, fps );
-        //fpsMax = Math.max( fpsMax, fps );
-
-
-        //fpsText.textContent = this.fps + ' fps';// (' + fpsMin + '-' + fpsMax + ')';
-        //updateGraph( fpsGraph, fps / 100 );
 
         this.prevTime = time;
         this.frames = 0;
@@ -278,12 +226,6 @@ UIL.Fps.prototype.end = function(){
             this.mem = Math.round( heapSize * 0.000000954 );
 
             this.mm = heapSize / heapSizeLimit;
-            //memMin = Math.min( memMin, mem );
-            //memMax = Math.max( memMax, mem );
-
-
-            //memText.textContent = mem + ' mb';// (' + memMin + '-' + memMax + ')';
-            //updateGraph( memGraph, heapSize / heapSizeLimit );
 
         }
 
