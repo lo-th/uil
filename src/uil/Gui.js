@@ -9,8 +9,7 @@ UIL.Gui = function( o ){
 
     this.height = 20;
     this.width = o.width !== undefined ? o.width : UIL.WIDTH;
-    this.width = o.size !== undefined ? o.size : UIL.WIDTH;
-    //UIL.WIDTH = this.width;
+    this.width = o.size !== undefined ? o.size : this.width;
 
     this.left = 0;
     this.top = o.top || 0;
@@ -49,9 +48,6 @@ UIL.Gui = function( o ){
 
     this.content = UIL.DOM( null, 'div', UIL.BASIC + 'display:block; width:'+this.width+'px; height:auto; top:0; right:10px; transition:height 0.1s ease-out;' + o.css );
     document.body.appendChild( this.content );
-    //this.content.style.background = UIL.bgcolor( this.color, 1, true );
-
-    //this.top = this.content.getBoundingClientRect().top;
 
     this.innerContent = UIL.DOM( null, 'div', UIL.BASIC + 'width:100%; top:0; left:0; height:auto;');
     this.content.appendChild(this.innerContent);

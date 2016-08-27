@@ -83,7 +83,7 @@ UIL.Circular.prototype.mode = function( mode ){
             UIL.setSvg( this.c[4], 'fill', this.fontColor );
         break;
         case 1: // over
-        this.s[2].color = this.colorPlus;
+            this.s[2].color = this.colorPlus;
             UIL.setSvg( this.c[3], 'fill','rgba(0,0,0,0.6)');
             UIL.setSvg( this.c[4], 'fill', this.colorPlus );
         break;

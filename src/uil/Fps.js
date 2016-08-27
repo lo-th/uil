@@ -2,39 +2,42 @@ UIL.Fps = function( o ){
 
     UIL.Proto.call( this, o );
 
+    this.round = Math.round;
+
     this.autoHeight = true;
 
     this.baseH = this.h;
     this.hplus = 50;
 
-    this.nFrame = 40;
+    this.res = o.res || 40;
     this.l = 1;
 
     this.pa1 = [];
     this.pa2 = [];
     this.pa3 = [];
 
-    var i = this.nFrame+1;
+    var i = this.res+1;
     while(i--){
-        this.pa1.push(43);
-        this.pa2.push(43);
-        this.pa3.push(43);
+        this.pa1.push(50);
+        this.pa2.push(50);
+        this.pa3.push(50);
     }
 
     this.c[1].textContent = 'FPS';
     this.c[0].style.cursor = 'pointer';
     this.c[0].style.pointerEvents = 'auto';
 
-    var panelCss = 'display:none; left:10px; top:'+ this.h + 'px; height:'+(this.hplus - 8)+'px; background: rgba(255, 255, 255, 0.1);' + 'border:1px solid rgba(255, 255, 255, 0.2); '
+    var panelCss = 'display:none; left:10px; top:'+ this.h + 'px; height:'+(this.hplus - 8)+'px; background: rgba(0, 0, 0, 0.2);' + 'border:1px solid rgba(255, 255, 255, 0.2); '
 
-    this.c[2] = UIL.DOM( null, 'path', UIL.BASIC + panelCss , { fill:'none', 'stroke-width':1, stroke:this.fontColor, 'vector-effect':'non-scaling-stroke' });
+    this.c[2] = UIL.DOM( null, 'path', UIL.BASIC + panelCss , { fill:'rgba(200,200,200,0.3)', 'stroke-width':1, stroke:this.fontColor, 'vector-effect':'non-scaling-stroke' });
 
-    this.c[2].setAttribute('viewBox', '0 0 40 42' );
-    this.c[2].setAttribute('height', '42px' );
+    this.c[2].setAttribute('viewBox', '0 0 '+this.res+' 42' );
+    this.c[2].setAttribute('height', '100%' );
+    this.c[2].setAttribute('width', '100%' );
     this.c[2].setAttribute('preserveAspectRatio', 'none' );
 
-    UIL.DOM(null, 'path', null, { fill:'none', 'stroke-width':1, stroke:'#FF0', 'vector-effect':'non-scaling-stroke' }, this.c[2] );
-    UIL.DOM(null, 'path', null, { fill:'none', 'stroke-width':1, stroke:'#0FF', 'vector-effect':'non-scaling-stroke' }, this.c[2] );
+    UIL.DOM(null, 'path', null, { fill:'rgba(255,255,0,0.3)', 'stroke-width':1, stroke:'#FF0', 'vector-effect':'non-scaling-stroke' }, this.c[2] );
+    UIL.DOM(null, 'path', null, { fill:'rgba(0,255,255,0.3)', 'stroke-width':1, stroke:'#0FF', 'vector-effect':'non-scaling-stroke' }, this.c[2] );
 
 
     // bottom line
@@ -107,36 +110,35 @@ UIL.Fps.prototype.mode = function( mode ){
 
 UIL.Fps.prototype.makePath = function ( point ) {
 
-    var path = [];
-    
-    for ( var i = 0; i < this.nFrame + 1; i ++ ) {
-        if(i === 0 ) path.push( 'M ' + i + ' ' + point[i] );
-        else path.push(' L ' + i + ' ' + point[i] );
-    }
+    var p = '';
+    p += 'M ' + (-1) + ' ' + 50;
+    for ( var i = 0; i < this.res + 1; i ++ ) { p += ' L ' + i + ' ' + point[i]; }
+    p += ' L ' + (this.res + 1) + ' ' + 50;
 
-    return path;
+    return p;
 
 };
 
 UIL.Fps.prototype.drawGraph = function( ){
 
-    this.pa1.shift();
-    //this.pa1.push( 20 );
-    this.pa1.push(  Math.floor(8 + Math.min( 30, 30 - (this.fps/ 100) * 30 ))+0.5 );
+    var svg = this.c[2];
 
-    UIL.setSvg( this.c[2], 'd', this.makePath( this.pa1 ), 0 );
+    this.pa1.shift();
+    this.pa1.push( 8.5 + this.round( ( 1 - (this.fps / 100)) * 30 ) );
+
+    UIL.setSvg( svg, 'd', this.makePath( this.pa1 ), 0 );
 
     this.pa2.shift();
-    this.pa2.push(  Math.floor(8 + Math.min( 30, 30 - (this.ms/ 200) * 30 ))+0.5 );
+    this.pa2.push( 8.5 + this.round( ( 1 - (this.ms / 200)) * 30 ) );
 
-    UIL.setSvg( this.c[2], 'd', this.makePath( this.pa2 ), 1 );
+    UIL.setSvg( svg, 'd', this.makePath( this.pa2 ), 1 );
 
     if ( this.isMem ) {
 
         this.pa3.shift();
-        this.pa3.push( Math.floor(8 + Math.min( 30, 30 - this.mm * 30 ))+0.5 );
+        this.pa3.push( 8.5 + this.round( ( 1 - this.mm) * 30 ) );
 
-        UIL.setSvg( this.c[2], 'd', this.makePath( this.pa3 ), 2 );
+        UIL.setSvg( svg, 'd', this.makePath( this.pa3 ), 2 );
 
     }
 
@@ -153,8 +155,6 @@ UIL.Fps.prototype.show = function(){
 
     this.s[0].height = this.h +'px';
     this.s[2].display = 'block'; 
-    //this.s[3].display = 'block'; 
-    //this.s[4].display = 'block'; 
     this.isShow = true;
 
     UIL.addListen( this );
@@ -181,27 +181,18 @@ UIL.Fps.prototype.rSize = function(){
 
     this.s[0].width = this.width + 'px';
     this.s[1].width = this.width + 'px';
-
-
-    var l = Math.floor( (this.width - 20) / this.nFrame );
-    var ww = (l * this.nFrame) + 2;
-    var ll = Math.round((this.width - ww)*0.5);
-
-    this.s[2].left = ll + 'px';
-
-    
-    this.s[2].width = (ww) + 'px';
-    this.c[2].setAttribute('width', ww + 'px' );
+    this.s[2].left = 10 + 'px';
+    this.s[2].width = (this.width-20) + 'px';
     
 }
+
+//////////////////
 
 UIL.Fps.prototype.begin = function(){
 
     this.startTime = this.now();
     
 }
-
-
 
 UIL.Fps.prototype.end = function(){
 
@@ -213,7 +204,7 @@ UIL.Fps.prototype.end = function(){
 
     if ( time > this.prevTime + 1000 ) {
 
-        this.fps = Math.round( ( this.frames * 1000 ) / ( time - this.prevTime ) );
+        this.fps = this.round( ( this.frames * 1000 ) / ( time - this.prevTime ) );
 
         this.prevTime = time;
         this.frames = 0;
@@ -223,7 +214,7 @@ UIL.Fps.prototype.end = function(){
             var heapSize = performance.memory.usedJSHeapSize;
             var heapSizeLimit = performance.memory.jsHeapSizeLimit;
 
-            this.mem = Math.round( heapSize * 0.000000954 );
+            this.mem = this.round( heapSize * 0.000000954 );
 
             this.mm = heapSize / heapSizeLimit;
 
