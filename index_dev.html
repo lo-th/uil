@@ -46,6 +46,8 @@ body { font-family: "Consolas", "Lucida Console", Monaco, monospace; background-
 UIL.setText(10);
 
 
+var testList;
+
 var timer = null;
 var display = false;
 var list = ['item-0', 'item-1', 'item-2', 'item-3', 'item-4', 'item-5', 'item-6', 'item-7', 'item-8', 'item-9', 'item-10', 'item-11', 'item-12'];
@@ -54,7 +56,7 @@ var list2 = ['item-0', 'item-1', 'item-2'];
 document.getElementById('version').innerHTML = 'il '+ UIL.REVISION;
 
 var debug = document.getElementById('debug');
-var callback = function( v ){ debug.innerHTML = v; }
+var callback = function( v ){  console.log('input'); debug.innerHTML = v; }
 var callbackButton = function( v ){ debug.innerHTML = "i'm a button !! " + v; }
 var callbackSize = function( v ){ ui.setWidth( v ); }
 var callbackLogo = function( v ){ 
@@ -92,16 +94,16 @@ function populate(){
 
         ui.add('fps',  { res:70 });
         
-        var bb = ui.add('bool',   { name:'bool', titleColor:'#D4B87B', h:30, inh:20, bg:'rgba(99,44,44,0.3)' });
+        var bb = ui.add('bool',   { name:'bool', titleColor:'#D4B87B', h:30, inh:20, bg:'rgba(99,44,44,0.3)' }).onChange( callback );;
         bb.setValue(true);
         ui.add('color',  { name:'color', type:'html', value:0x000000, fontColor:'#D4B87B'});
         ui.add('color',  { name:'color', type:'hex', value:[0,1,1,1], height:40 });
         ui.add('color',  { name:'color', type:'rgb', value:[0,1,1,1], height:40 });
-        ui.add('slide',  { name:'slide',  min:-100, max:100, value:0, precision:0, fontColor:'#D4B87B', stype:0 });
+        ui.add('slide',  { name:'slide',  min:-100, max:100, value:0, precision:0, fontColor:'#D4B87B', stype:0 }).onChange( callback );;
         ui.add('slide',  { name:'slide',  min:-100, max:100, value:0, precision:0, fontColor:'#D4B87B', stype:1 });
         ui.add('slide',  { name:'slide',  min:-1, max:1, value:0, step:0.01, precision:2, height:20, stype :2 });
-        ui.add('string', { name:'string',  value:'welcome to uil', fontColor:'#D4B87B', height:40});
-        ui.add('list',   { name:'list',  list:list, fontColor:'#D4B87B', height:30});
+        ui.add('string', { name:'string',  value:'welcome to uil', fontColor:'#D4B87B', height:40}).onChange( callback );
+        testList = ui.add('list',   { name:'list',  list:list, fontColor:'#D4B87B', height:30});
         ui.add('list',   { name:'list',  list:list2, height:40});
         ui.add('number', { name:'number',  value:20});
         ui.add('number', { name:'vec2', value:[0,0], fontColor:'#D4B87B' });
@@ -110,13 +112,13 @@ function populate(){
         ui.add('button', { name:'LOAD', callback:callbackButton, fontColor:'#D4B87B', height:30, loader:true });
         ui.add('button', { name:'LOAD', callback:callbackButton, fontColor:'#D4B87B', height:30, drag:true });
 
-        ui.add('button', { name:'MULTY', callback:callbackButton, fontColor:'#D4B87B', height:30, value:[1, 2, 3, 4] });
+        ui.add('button', { name:'MULTY', callback:callbackButton, fontColor:'#D4B87B', height:30, value:[1, 2, 3, 4] }).onChange( callback );;
 
         gr0 = ui.add('group', { name:'Group', fontColor:'#D4B87B', height:30 });
 
         gr0.add('color',  { name:'color', type:'hex', value:[0,1,1,1], h:40 });
-        gr0.add('list',   { name:'listH', list:list, fontColor:'#D4B87B', height:30});
-        gr0.add('slide',  { name:'slide', min:-100, max:100, value:0, precision:0 });
+        gr0.add('list',   { name:'listH', list:list, fontColor:'#D4B87B', height:30}).onChange( callback );;
+        gr0.add('slide',  { name:'slide', min:-100, max:100, value:0, precision:0 }).onChange( callback );;
         gr0.add('slide',  { name:'slide', min:-100, max:100, value:0, precision:0 });
         gr0.add('slide',  { name:'slide', min:-100, max:100, value:0, precision:0 });
         gr0.add('slide',  { name:'slide', min:-100, max:100, value:0, precision:0 });
@@ -146,6 +148,8 @@ function populate(){
         gr3.add('joystick', { name:'joystick', width:150, multiplicator:1, precision:2, fontColor:'#D4B87B' });
 
         //gr0.open();
+
+        testList.setList(['item-A', 'item-B', 'item-C', 'item-D', 'item-E', 'item-F', 'item-G', 'item-H', 'item-I', 'item-J', 'item-K', 'item-L', 'item-M'], 0)
 
         display = true;
         b.label('clear');

@@ -368,14 +368,14 @@ var UIL = ( function () {
         BUTTON : '#404040',
         BOOLBG : '#181818',
 
-        SELECT : '#035fcf',
+        SELECT : '#308AFF',
         MOVING : '#03afff',
         SELECTDOWN : '#024699',
         BG : 'rgba(0,0,0,0.3)',
         SVGB : 'rgba(0,0,0,0.3)',
         SVGC : 'rgba(120,120,120,0.6)',
         Border : '#4f4f4f',
-        BorderSelect : '#035fcf',
+        BorderSelect : '#308AFF',
         PNG : 'url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAA',
         PNGP : 'oAAAAKAgMAAADwXCcuAAAACVBMVEVMaXHi4uLi4uLDusitAAAAAnRSTlMAgJsrThgAAAA',
         /*GroupBG : UIL.PNG + 'MAAAADAQMAAABs5if8AAAABlBMVEVMaXH///+a4ocPAAAAAnRSTlMAM8lDrC4AAAAOSURBVHicY2BgcGBgAAAAxgBBOTEMSwAAAABJRU5ErkJggg==)',
@@ -2718,12 +2718,6 @@ UIL.List = function( o ){
     this.c[3].events = [ 'click', 'mousedown', 'mouseover', 'mouseout' ];
 
     this.list = o.list || [];
-    if(o.value){
-        if(!isNaN(o.value)) this.value = this.list[o.value];
-        else this.value = o.value;
-    }else{
-        this.value = this.list[0];
-    }
 
     this.baseH = this.h;
 
@@ -2734,16 +2728,9 @@ UIL.List = function( o ){
 
     // force full list 
     this.full = o.full || false;
-    if(this.full) this.maxItem = this.length;
+    //if(this.full) this.maxItem = this.length;
     
     this.maxHeight = this.maxItem * (this.itemHeight+1);
-    this.max = this.length * (this.itemHeight+1);
-    //this.range = this.max - this.maxHeight;
-    this.ratio = this.maxHeight / this.max;
-    this.sh = this.maxHeight * this.ratio;
-    //if( this.sh < 20 ) this.sh = 20;
-    this.range = this.maxHeight - this.sh;
-    this.c[6].style.height = this.sh + 'px';
 
     this.py = 0;
     this.w = this.sb;
@@ -2768,29 +2755,14 @@ UIL.List = function( o ){
 
     }
 
-    if( this.max > this.maxHeight ){ 
-        this.w = this.sb-20;
-        this.scroll = true;
-    }
-
     this.listIn = UIL.DOM( null, 'div', UIL.BASIC + 'left:0; top:0; width:100%; background:rgba(0,0,0,0.2); ');
     this.listIn.name = 'list';
     this.c[2].style.height = this.maxHeight + 'px';
     this.c[2].appendChild(this.listIn);
 
     // populate list
-    var item, n, l = this.sb;
-    for( var i=0; i<this.length; i++ ){
-        n = this.list[i];
-        item = UIL.DOM( null, 'div', UIL.ITEM + 'width:'+this.w+'px; height:'+this.itemHeight+'px; line-height:'+(this.itemHeight-5)+'px;');
-        //item = UIL.DOM('UIL', 'div', UIL.TXT + 'position:relative; background:rgba(0,0,0,0.2); margin-bottom:1px; pointer-events:auto; cursor:pointer; width:'+this.w+'px; height:'+this.itemHeight+'px; line-height:'+(this.itemHeight-5)+'px;');
-        item.textContent = n;
-        item.style.color = this.fontColor;
-        item.name = 'item';//n;
-        this.listIn.appendChild(item);
-    }
 
-    this.c[5].textContent = this.value;
+    this.setList( this.list, o.value );
     
 
     this.init();
@@ -2799,6 +2771,52 @@ UIL.List = function( o ){
 
 UIL.List.prototype = Object.create( UIL.Proto.prototype );
 UIL.List.prototype.constructor = UIL.List;
+
+UIL.List.prototype.clearList = function() {
+
+    while ( this.listIn.children.length ) this.listIn.removeChild( this.listIn.lastChild );
+
+}
+
+UIL.List.prototype.setList = function( list, value ) {
+
+    this.clearList();
+
+    this.list = list;
+    this.length = this.list.length;
+
+    if( this.full ) this.maxItem = this.length;
+    this.max = this.length * (this.itemHeight+1);
+    this.ratio = this.maxHeight / this.max;
+    this.sh = this.maxHeight * this.ratio;
+    this.range = this.maxHeight - this.sh;
+    this.c[6].style.height = this.sh + 'px';
+
+    if( this.max > this.maxHeight ){ 
+        this.w = this.sb-20;
+        this.scroll = true;
+    }
+
+    var item, n, l = this.sb;
+    for( var i=0; i<this.length; i++ ){
+        n = this.list[i];
+        item = UIL.DOM( null, 'div', UIL.ITEM + 'width:'+this.w+'px; height:'+this.itemHeight+'px; line-height:'+(this.itemHeight-5)+'px;');
+        item.textContent = n;
+        item.style.color = this.fontColor;
+        item.name = 'item';
+        this.listIn.appendChild( item );
+    }
+
+    if( value !== undefined ){
+        if(!isNaN(value)) this.value = this.list[ value ];
+        else this.value = value;
+    }else{
+        this.value = this.list[0];
+    }
+    
+    this.c[5].textContent = this.value;
+
+}
 
 UIL.List.prototype.handleEvent = function( e ) {
 
@@ -3929,7 +3947,7 @@ UIL.Fps = function( o ){
     this.c[0].style.cursor = 'pointer';
     this.c[0].style.pointerEvents = 'auto';
 
-    var panelCss = 'display:none; left:10px; top:'+ this.h + 'px; height:'+(this.hplus - 8)+'px; background: rgba(0, 0, 0, 0.2);' + 'border:1px solid rgba(255, 255, 255, 0.2); '
+    var panelCss = 'display:none; left:10px; top:'+ this.h + 'px; height:'+(this.hplus - 8)+'px; background: rgba(0, 0, 0, 0.2);' + 'border:1px solid rgba(255, 255, 255, 0.2); ';
 
     this.c[2] = UIL.DOM( null, 'path', UIL.BASIC + panelCss , { fill:'rgba(200,200,200,0.3)', 'stroke-width':1, stroke:this.fontColor, 'vector-effect':'non-scaling-stroke' });
 

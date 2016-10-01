@@ -46,7 +46,7 @@ var obj1 = { speed: 5 }
 var obj2 = { speed: 5 }
 
 var debug = document.getElementById('debug');
-var callback = function( v ){ debug.innerHTML = obj2.speed + ' | ' + obj1.speed; }
+var callback = function( v ){  console.log('input'); debug.innerHTML = obj2.speed + ' | ' + obj1.speed; }
 
 //
 
@@ -60,7 +60,7 @@ ui.add( obj1, 'speed', { type:'Knob', min:-5, max:5, size:120 } ).listen();
 
 var ui2 = new UIL.Gui({css:'top:0px; left:10px;'}).onChange( callback );
 
-ui2.add( obj2, 'speed', { min:-5, max:5, rename:'speed 2', fontColor:'#D4B87B' } ).listen();
+ui2.add( obj2, 'speed', { min:-5, max:5, rename:'speed 2', fontColor:'#D4B87B' } ).listen().onChange( callback );;
 ui2.add( obj2, 'speed', { min:-5, max:5, fontColor:'#D4B87B', stype:1 } ).listen();
 ui2.add( obj2, 'speed', { min:-5, max:5, fontColor:'#D4B87B', stype:2 } ).listen();
 ui2.add( obj2, 'speed', { type:'Circular', min:-5, max:5, size:120, fontColor:'#D4B87B' } ).listen();
