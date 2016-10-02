@@ -49,7 +49,7 @@ UIL.Gui = function( o ){
     this.content = UIL.DOM( null, 'div', UIL.BASIC + 'display:block; width:'+this.width+'px; height:auto; top:0; right:10px; transition:height 0.1s ease-out;' + o.css );
     document.body.appendChild( this.content );
 
-    this.innerContent = UIL.DOM( null, 'div', UIL.BASIC + 'width:100%; top:0; left:0; height:auto;');
+    this.innerContent = UIL.DOM( null, 'div', UIL.BASIC + 'width:100%; top:0; left:0; height:auto;overflow:hidden;');
     this.content.appendChild(this.innerContent);
 
     this.inner = UIL.DOM( null, 'div', UIL.BASIC + 'width:100%; top:0; left:0; height:auto;');

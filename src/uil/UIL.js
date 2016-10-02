@@ -99,4 +99,4 @@ var UIL = ( function () {
     } else {// Global variable
         root.UIL = UIL;
     }
-})(this);
+})( this );
