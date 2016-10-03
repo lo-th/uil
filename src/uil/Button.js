@@ -9,7 +9,7 @@ UIL.Button = function( o ){
     this.isLoadButton = o.loader || false;
     this.isDragButton = o.drag || false;
     if(this.isDragButton )this.isLoadButton=true;
-    this.r = o.r || 0;
+    this.r = o.r || 3;
 
     this.lng = this.value.length;
 
@@ -26,7 +26,10 @@ UIL.Button = function( o ){
     
 
     if( this.isLoadButton ) this.initLoader();
-    if( this.isDragButton ) this.initDrager();
+    if( this.isDragButton ){ 
+        this.lng ++;
+        this.initDrager();
+    }
 
     this.init();
 
@@ -175,27 +178,25 @@ UIL.Button.prototype.rSize = function(){
     var w = this.sb;
     var d = this.sa;
 
+    var i = this.lng;
+    var dc =  3;
+    var size = Math.floor( ( w-(dc*(i-1)) ) / i );
+
+    while(i--){
+        
+        s[i+2].width = size + 'px';
+        s[i+2].left = d + ( size * i ) + ( dc * i) + 'px';
+
+    }
 
     if( this.isDragButton ){ 
-        w = ~~ w * 0.5;
-        s[4].left = (d+w) + 'px';
-        s[4].width = w-4 + 'px';
+        s[4].left = (d+size+dc) + 'px';
+        s[4].width = size + 'px';
     }
 
     if( this.isLoadButton ){
         s[3].left = d + 'px';
-        s[3].width = w + 'px';
+        s[3].width = size + 'px';
     }
-
-    var tt = ~~ (w / this.lng);
-
-    for(var i = 0; i < this.lng; i++){
-
-        s[i+2].left = d + (tt*i) + 'px';
-        s[i+2].width = (tt-4) + 'px';
-
-    }
-
-    
 
 };

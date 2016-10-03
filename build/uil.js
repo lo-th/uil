@@ -2706,11 +2706,10 @@ UIL.List = function( o ){
 //transparent
     //this.c[2] = UIL.DOM( null, 'div', UIL.BASIC + 'box-sizing:content-box; border:20px solid transparent; border-bottom:10px solid transparent; top:0px; height:90px; cursor:s-resize; pointer-events:auto; display:none; overflow:hidden;');
     
-    this.c[2] = UIL.DOM( null, 'div', UIL.BASIC + 'top:0; height:90px; cursor:s-resize; pointer-events:auto; display:none; overflow:hidden;');
-
-    this.c[3] = UIL.DOM( null, 'div', UIL.BASIC + 'border:1px solid '+UIL.Border+'; top:1px; pointer-events:auto; cursor:pointer; background:'+this.buttonColor+'; height:'+(this.h-2)+'px;' );
+    this.c[2] = UIL.DOM( null, 'div', UIL.BASIC + 'top:0; height:90px; cursor:s-resize; pointer-events:auto; display:none; overflow:hidden; border:1px solid '+UIL.Border+';' );
+    this.c[3] = UIL.DOM( null, 'div', UIL.TXT + UIL.BASIC + 'text-align:'+align+'; line-height:'+(this.h-4)+'px; border:1px solid '+UIL.Border+'; top:1px; pointer-events:auto; cursor:pointer; background:'+this.buttonColor+'; height:'+(this.h-2)+'px;' );
     this.c[4] = UIL.DOM( null, 'div', UIL.BASIC + 'position:absolute; width:10px; height:10px; left:'+((this.sa+this.sb)-5)+'px; top:'+fltop+'px; background:'+ UIL.F0 );
-    this.c[5] = UIL.DOM( null, 'div', UIL.TXT   + 'text-align:'+align+'; height:'+(this.h-4)+'px; line-height:'+(this.h-8)+'px;');
+    //this.c[5] = UIL.DOM( null, 'div', UIL.TXT   + 'text-align:'+align+'; height:'+(this.h-4)+'px; line-height:'+(this.h-8)+'px;');
     //this.c[6] = UIL.DOM( null, 'div', UIL.BASIC + 'right:14px; top:'+this.h+'px; height:16px; width:10px; pointer-events:none; background:#666; display:none;');
 
     this.scroller = UIL.DOM( null, 'div', UIL.BASIC + 'right:5px;  width:10px; pointer-events:none; background:#666; display:none;');
@@ -2719,7 +2718,7 @@ UIL.List = function( o ){
     this.c[3].name = 'title';
 
     //this.c[2].style.borderTop = this.h + 'px solid transparent';
-    this.c[5].style.color = this.fontColor;
+    this.c[3].style.color = this.fontColor;
 
     this.c[2].events = [ 'mousedown', 'mousemove', 'mouseup', 'mousewheel', 'mouseout', 'mouseover' ];
     this.c[3].events = [ 'mousedown', 'mouseover' ,'mouseout']; 
@@ -2729,15 +2728,12 @@ UIL.List = function( o ){
     this.baseH = this.h;
 
     this.isShow = false;
-    this.maxItem = o.maxItem || 5;
+    //this.maxItem = o.maxItem || 5;
     this.itemHeight = o.itemHeight || (this.h-3);
-    this.length = this.list.length;
+    //this.length = this.list.length;
 
     // force full list 
     this.full = o.full || false;
-    //if(this.full) this.maxItem = this.length;
-    
-    this.maxHeight = this.maxItem * (this.itemHeight+1);
 
     this.py = 0;
     this.w = this.sb;
@@ -2751,28 +2747,25 @@ UIL.List = function( o ){
     if( this.side === 'up' ){
 
         this.c[2].style.top = 'auto';
-        //this.c[6].style.top = 'auto';
         this.c[3].style.top = 'auto';
         this.c[4].style.top = 'auto';
-        this.c[5].style.top = 'auto';
+        //this.c[5].style.top = 'auto';
 
-        this.c[2].style.bottom = this.h + 'px';
-        //this.c[6].style.bottom = this.h + 'px';
+        this.c[2].style.bottom = this.h-2 + 'px';
         this.c[3].style.bottom = '1px';
         this.c[4].style.bottom = fltop + 'px';
-        this.c[5].style.bottom = '2px';
+        //this.c[5].style.bottom = '2px';
 
     } else {
-        this.c[2].style.top = this.h + 'px';
+        this.c[2].style.top = this.h-2 + 'px';
         //this.c[6].style.top = this.h + 'px';
     }
 
     this.listIn = UIL.DOM( null, 'div', UIL.BASIC + 'left:0; top:0; width:100%; background:rgba(0,0,0,0.2);');
     this.listIn.name = 'list';
 
-    this.c[2].style.height = this.maxHeight + 'px';
+    
     this.c[2].appendChild( this.listIn );
-
     this.c[2].appendChild( this.scroller );
 
     // populate list
@@ -2802,11 +2795,17 @@ UIL.List.prototype.setList = function( list, value ) {
     this.list = list;
     this.length = this.list.length;
 
-    if( this.full ) this.maxItem = this.length;
-    this.max = this.length * (this.itemHeight+1);
+    this.maxItem = this.full ? this.length : 5;
+    this.maxItem = this.length < this.maxItem ? this.length : this.maxItem;
+
+    this.maxHeight = this.maxItem * (this.itemHeight+1) + 2;
+
+    this.max = this.length * (this.itemHeight+1) + 2;
     this.ratio = this.maxHeight / this.max;
     this.sh = this.maxHeight * this.ratio;
     this.range = this.maxHeight - this.sh;
+
+    this.c[2].style.height = this.maxHeight + 'px';
     this.scroller.style.height = this.sh + 'px';
 
     if( this.max > this.maxHeight ){ 
@@ -2831,7 +2830,7 @@ UIL.List.prototype.setList = function( list, value ) {
         this.value = this.list[0];
     }
     
-    this.c[5].textContent = this.value;
+    this.c[3].textContent = this.value;
 
 }
 
@@ -2858,15 +2857,15 @@ UIL.List.prototype.mode = function( mode ){
 
     switch(mode){
         case 0: // base
-            s[5].color = this.fontColor;
+            s[3].color = this.fontColor;
             s[3].background = this.buttonColor;
         break;
         case 1: // over
-            s[5].color = '#FFF';
+            s[3].color = '#FFF';
             s[3].background = UIL.SELECT;
         break;
         case 2: // edit / down
-            s[5].color = this.fontColor;
+            s[3].color = this.fontColor;
             s[3].background = UIL.SELECTDOWN;
         break;
 
@@ -2909,7 +2908,7 @@ UIL.List.prototype.listdown = function( e ){
     var name = e.target.name;
     if( name !== 'list' && name !== undefined ){
         this.value = e.target.textContent;//name;
-        this.c[5].textContent = this.value;
+        this.c[3].textContent = this.value;
         this.send();
        // this.listHide();
     } else if ( name ==='list' && this.scroll ){
@@ -3032,7 +3031,7 @@ UIL.List.prototype.listHide = function(){
 
 UIL.List.prototype.text = function( txt ){
 
-    this.c[5].textContent = txt;
+    this.c[3].textContent = txt;
 
 };
 
@@ -3048,20 +3047,22 @@ UIL.List.prototype.rSize = function(){
     UIL.Proto.prototype.rSize.call( this );
 
     var s = this.s;
+    var w = this.sb;
+    var d = this.sa;
 
-    s[2].width = this.sb + 'px';
-    s[2].left = this.sa +'px';
+    s[2].width = w + 'px';
+    s[2].left = d +'px';
 
-    s[3].width = this.sb + 'px';
-    s[3].left = this.sa + 'px';
+    s[3].width = w + 'px';
+    s[3].left = d + 'px';
 
-    s[4].left = this.sa + this.sb - 17 + 'px';
+    s[4].left = d + w - 17 + 'px';
 
-    s[5].width = this.sb + 'px';
-    s[5].left = this.sa + 'px';
+    //s[5].width = w + 'px';
+    //s[5].left = d + 'px';
 
-    this.w = this.sb;
-    if(this.max > this.maxHeight) this.w = this.sb-20;
+    this.w = w;
+    if( this.max > this.maxHeight ) this.w = w-20;
 
     if(this.isShow) this.rSizeContent();
 
@@ -3171,7 +3172,7 @@ UIL.Button = function( o ){
     this.isLoadButton = o.loader || false;
     this.isDragButton = o.drag || false;
     if(this.isDragButton )this.isLoadButton=true;
-    this.r = o.r || 0;
+    this.r = o.r || 3;
 
     this.lng = this.value.length;
 
@@ -3188,7 +3189,10 @@ UIL.Button = function( o ){
     
 
     if( this.isLoadButton ) this.initLoader();
-    if( this.isDragButton ) this.initDrager();
+    if( this.isDragButton ){ 
+        this.lng ++;
+        this.initDrager();
+    }
 
     this.init();
 
@@ -3337,28 +3341,26 @@ UIL.Button.prototype.rSize = function(){
     var w = this.sb;
     var d = this.sa;
 
+    var i = this.lng;
+    var dc =  3;
+    var size = Math.floor( ( w-(dc*(i-1)) ) / i );
+
+    while(i--){
+        
+        s[i+2].width = size + 'px';
+        s[i+2].left = d + ( size * i ) + ( dc * i) + 'px';
+
+    }
 
     if( this.isDragButton ){ 
-        w = ~~ w * 0.5;
-        s[4].left = (d+w) + 'px';
-        s[4].width = w-4 + 'px';
+        s[4].left = (d+size+dc) + 'px';
+        s[4].width = size + 'px';
     }
 
     if( this.isLoadButton ){
         s[3].left = d + 'px';
-        s[3].width = w + 'px';
+        s[3].width = size + 'px';
     }
-
-    var tt = ~~ (w / this.lng);
-
-    for(var i = 0; i < this.lng; i++){
-
-        s[i+2].left = d + (tt*i) + 'px';
-        s[i+2].width = (tt-4) + 'px';
-
-    }
-
-    
 
 };
 UIL.Circular = function( o ){
