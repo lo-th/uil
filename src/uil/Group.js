@@ -10,24 +10,32 @@ UIL.Group = function( o ){
 
     //this.h = 25;
     this.baseH = this.h;
+    var fltop = Math.floor(this.h*0.5)-6;
 
     this.isOpen = o.open || false;
 
     this.c[2] = UIL.DOM( null, 'div', UIL.BASIC + 'width:100%; left:0; height:auto; overflow:hidden; top:'+this.h+'px');
-    this.c[3] = UIL.DOM( null, 'div', UIL.BASIC + 'top:2px; left:2px; height:'+(this.h-4)+'px; width:6px; background-image:'+ UIL.GroupBG );
-    this.c[4] = UIL.DOM( null, 'div', UIL.BASIC + 'position:absolute; width:10px; height:10px; top:'+(~~(this.h*0.5)-5)+'px; pointer-events:none; background:'+ UIL.F0 );
-    if(o.line) this.c[5] = UIL.DOM( null, 'div', UIL.BASIC +  'background:'+this.fontColor+'; width:100%; left:0; height:1px; bottom:0px');
+    //this.c[3] = UIL.DOM( null, 'div', UIL.BASIC + 'top:2px; left:2px; height:'+(this.h-4)+'px; width:6px; background-image:'+ UIL.GroupBG );
+    //this.c[4] = UIL.DOM( null, 'div', UIL.BASIC + 'position:absolute; width:10px; height:10px; top:'+(~~(this.h*0.5)-5)+'px; pointer-events:none; background:'+ UIL.F0 );
+    this.c[3] = UIL.DOM(null, 'path', UIL.BASIC + 'position:absolute; width:10px; height:10px; left:0; top:'+fltop+'px;', { d:UIL.GPATH, fill:this.fontColor, stroke:'none'});
+
+    this.c[4] = UIL.DOM(null, 'path', UIL.BASIC + 'position:absolute; width:10px; height:10px; left:4px; top:'+fltop+'px;', { d:'M 3 8 L 8 5 3 2 3 8 Z', fill:this.fontColor, stroke:'none'});
+
+    // bottom line
+    this.c[5] = UIL.DOM( null, 'div', UIL.BASIC +  'background:rgba(255, 255, 255, 0.2); width:100%; left:0; height:1px; bottom:0px');
 
     var s = this.s;
 
     s[0].height = this.h + 'px';
     s[1].height = this.h + 'px';
-    s[1].top = 4 + 'px';
-    s[1].left = 4 + 'px';
+    //s[1].top = 4 + 'px';
+    //s[1].left = 4 + 'px';
     s[1].pointerEvents = 'auto';
     s[1].cursor = 'pointer';
     this.c[1].name = 'group';
 
+    this.s[1].marginLeft = '10px';
+    this.s[1].lineHeight = this.h-4;
     this.s[1].color = this.fontColor;
     this.s[1].fontWeight = 'bold';
 
@@ -101,7 +109,8 @@ UIL.Group.prototype.add = function( ){
 UIL.Group.prototype.open = function(){
 
     this.isOpen = true;
-    this.s[4].background = UIL.F1;
+    UIL.setSvg( this.c[4], 'd','M 5 8 L 8 3 2 3 5 8 Z');
+    //this.s[4].background = UIL.F1;
     this.rSizeContent();
 
     if( this.isUI ) this.main.calc( this.h - this.baseH );
@@ -113,7 +122,8 @@ UIL.Group.prototype.close = function(){
     if( this.isUI ) this.main.calc(-(this.h-this.baseH ));
 
     this.isOpen = false;
-    this.s[4].background = UIL.F0;
+    //this.s[4].background = UIL.F0;
+    UIL.setSvg( this.c[4], 'd','M 3 8 L 8 5 3 2 3 8 Z');
     this.h = this.baseH;
 
     this.s[0].height = this.h + 'px';
@@ -191,7 +201,7 @@ UIL.Group.prototype.rSize = function(){
 
     var s = this.s;
 
-    s[4].left = ( this.sa + this.sb - 17 ) + 'px';
+    s[3].left = ( this.sa + this.sb - 17 ) + 'px';
     s[1].width = this.width + 'px';
     s[2].width = this.width + 'px';
 

@@ -376,8 +376,8 @@ var UIL = ( function () {
         SVGC : 'rgba(120,120,120,0.6)',
         Border : '#4f4f4f',
         BorderSelect : '#308AFF',
-        PNG : 'url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAA',
-        PNGP : 'oAAAAKAgMAAADwXCcuAAAACVBMVEVMaXHi4uLi4uLDusitAAAAAnRSTlMAgJsrThgAAAA',
+        //PNG : 'url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAA',
+        //PNGP : 'oAAAAKAgMAAADwXCcuAAAACVBMVEVMaXHi4uLi4uLDusitAAAAAnRSTlMAgJsrThgAAAA',
         /*GroupBG : UIL.PNG + 'MAAAADAQMAAABs5if8AAAABlBMVEVMaXH///+a4ocPAAAAAnRSTlMAM8lDrC4AAAAOSURBVHicY2BgcGBgAAAAxgBBOTEMSwAAAABJRU5ErkJggg==)',
         SlideBG : UIL.PNG + 'UAAAAFAQMAAAC3obSmAAAABlBMVEVMaXH///+a4ocPAAAAAnRSTlMAM8lDrC4AAAASSURBVHicY3BgaGDgYBBgUAAABkIA+fbHMRYAAAAASUVORK5CYII=)',
         SlideBG_NN : UIL.PNG + 'UAAAAFCAYAAACNbyblAAAALElEQVQImV3MsQ0AIAwDwUsmYTRGyeg0SAi7eekKF8bbwu4ETCdAJ0Ddfr8H+wEEqTj7jz0AAAAASUVORK5CYII=)',
@@ -401,13 +401,15 @@ var UIL = ( function () {
         },
     };
 
-    UIL.GroupBG = UIL.PNG + 'MAAAADAQMAAABs5if8AAAABlBMVEVMaXH///+a4ocPAAAAAnRSTlMAM8lDrC4AAAAOSURBVHicY2BgcGBgAAAAxgBBOTEMSwAAAABJRU5ErkJggg==)';
-    UIL.SlideBG = UIL.PNG + 'UAAAAFAQMAAAC3obSmAAAABlBMVEVMaXH///+a4ocPAAAAAnRSTlMAM8lDrC4AAAASSURBVHicY3BgaGDgYBBgUAAABkIA+fbHMRYAAAAASUVORK5CYII=)';
-    UIL.SlideBG_NN = UIL.PNG + 'UAAAAFCAYAAACNbyblAAAALElEQVQImV3MsQ0AIAwDwUsmYTRGyeg0SAi7eekKF8bbwu4ETCdAJ0Ddfr8H+wEEqTj7jz0AAAAASUVORK5CYII=)';
+    //UIL.GroupBG = UIL.PNG + 'MAAAADAQMAAABs5if8AAAABlBMVEVMaXH///+a4ocPAAAAAnRSTlMAM8lDrC4AAAAOSURBVHicY2BgcGBgAAAAxgBBOTEMSwAAAABJRU5ErkJggg==)';
+    //UIL.SlideBG = UIL.PNG + 'UAAAAFAQMAAAC3obSmAAAABlBMVEVMaXH///+a4ocPAAAAAnRSTlMAM8lDrC4AAAASSURBVHicY3BgaGDgYBBgUAAABkIA+fbHMRYAAAAASUVORK5CYII=)';
+    //UIL.SlideBG_NN = UIL.PNG + 'UAAAAFCAYAAACNbyblAAAALElEQVQImV3MsQ0AIAwDwUsmYTRGyeg0SAi7eekKF8bbwu4ETCdAJ0Ddfr8H+wEEqTj7jz0AAAAASUVORK5CYII=)';
 
-    UIL.F0 = UIL.PNG + UIL.PNGP + 'kSURBVHicY2BkYGBgc2BgYJwAZKSwMDBIckIwkA0SA8sxMAAAN24CxaaVoKMAAAAASUVORK5CYII=)';
-    UIL.F1 = UIL.PNG + UIL.PNGP + 'kSURBVHicY2CAAgEGB4YUxokMkmxuDGyRnAyMS1gYGAJgsgwAPlADDRCT8ZwAAAAASUVORK5CYII=)';
-    UIL.X0 = UIL.PNG + UIL.PNGP + 'lSURBVHicYxBgcGBIYZzIIMnmxsAWycnAuIQFjEFskBhIDqgGAGxoBXlOWpMvAAAAAElFTkSuQmCC)';
+    //UIL.F0 = UIL.PNG + UIL.PNGP + 'kSURBVHicY2BkYGBgc2BgYJwAZKSwMDBIckIwkA0SA8sxMAAAN24CxaaVoKMAAAAASUVORK5CYII=)';
+    //UIL.F1 = UIL.PNG + UIL.PNGP + 'kSURBVHicY2CAAgEGB4YUxokMkmxuDGyRnAyMS1gYGAJgsgwAPlADDRCT8ZwAAAAASUVORK5CYII=)';
+    //UIL.X0 = UIL.PNG + UIL.PNGP + 'lSURBVHicYxBgcGBIYZzIIMnmxsAWycnAuIQFjEFskBhIDqgGAGxoBXlOWpMvAAAAAElFTkSuQmCC)';
+
+    UIL.GPATH = 'M 7 7 L 7 8 8 8 8 7 7 7 M 5 7 L 5 8 6 8 6 7 5 7 M 3 7 L 3 8 4 8 4 7 3 7 M 7 5 L 7 6 8 6 8 5 7 5 M 6 6 L 6 5 5 5 5 6 6 6 M 7 3 L 7 4 8 4 8 3 7 3 M 6 4 L 6 3 5 3 5 4 6 4 M 3 5 L 3 6 4 6 4 5 3 5 M 3 3 L 3 4 4 4 4 3 3 3 Z'
     
     UIL.setText();
 
@@ -1500,24 +1502,32 @@ UIL.Group = function( o ){
 
     //this.h = 25;
     this.baseH = this.h;
+    var fltop = Math.floor(this.h*0.5)-6;
 
     this.isOpen = o.open || false;
 
     this.c[2] = UIL.DOM( null, 'div', UIL.BASIC + 'width:100%; left:0; height:auto; overflow:hidden; top:'+this.h+'px');
-    this.c[3] = UIL.DOM( null, 'div', UIL.BASIC + 'top:2px; left:2px; height:'+(this.h-4)+'px; width:6px; background-image:'+ UIL.GroupBG );
-    this.c[4] = UIL.DOM( null, 'div', UIL.BASIC + 'position:absolute; width:10px; height:10px; top:'+(~~(this.h*0.5)-5)+'px; pointer-events:none; background:'+ UIL.F0 );
-    if(o.line) this.c[5] = UIL.DOM( null, 'div', UIL.BASIC +  'background:'+this.fontColor+'; width:100%; left:0; height:1px; bottom:0px');
+    //this.c[3] = UIL.DOM( null, 'div', UIL.BASIC + 'top:2px; left:2px; height:'+(this.h-4)+'px; width:6px; background-image:'+ UIL.GroupBG );
+    //this.c[4] = UIL.DOM( null, 'div', UIL.BASIC + 'position:absolute; width:10px; height:10px; top:'+(~~(this.h*0.5)-5)+'px; pointer-events:none; background:'+ UIL.F0 );
+    this.c[3] = UIL.DOM(null, 'path', UIL.BASIC + 'position:absolute; width:10px; height:10px; left:0; top:'+fltop+'px;', { d:UIL.GPATH, fill:this.fontColor, stroke:'none'});
+
+    this.c[4] = UIL.DOM(null, 'path', UIL.BASIC + 'position:absolute; width:10px; height:10px; left:4px; top:'+fltop+'px;', { d:'M 3 8 L 8 5 3 2 3 8 Z', fill:this.fontColor, stroke:'none'});
+
+    // bottom line
+    this.c[5] = UIL.DOM( null, 'div', UIL.BASIC +  'background:rgba(255, 255, 255, 0.2); width:100%; left:0; height:1px; bottom:0px');
 
     var s = this.s;
 
     s[0].height = this.h + 'px';
     s[1].height = this.h + 'px';
-    s[1].top = 4 + 'px';
-    s[1].left = 4 + 'px';
+    //s[1].top = 4 + 'px';
+    //s[1].left = 4 + 'px';
     s[1].pointerEvents = 'auto';
     s[1].cursor = 'pointer';
     this.c[1].name = 'group';
 
+    this.s[1].marginLeft = '10px';
+    this.s[1].lineHeight = this.h-4;
     this.s[1].color = this.fontColor;
     this.s[1].fontWeight = 'bold';
 
@@ -1591,7 +1601,8 @@ UIL.Group.prototype.add = function( ){
 UIL.Group.prototype.open = function(){
 
     this.isOpen = true;
-    this.s[4].background = UIL.F1;
+    UIL.setSvg( this.c[4], 'd','M 5 8 L 8 3 2 3 5 8 Z');
+    //this.s[4].background = UIL.F1;
     this.rSizeContent();
 
     if( this.isUI ) this.main.calc( this.h - this.baseH );
@@ -1603,7 +1614,8 @@ UIL.Group.prototype.close = function(){
     if( this.isUI ) this.main.calc(-(this.h-this.baseH ));
 
     this.isOpen = false;
-    this.s[4].background = UIL.F0;
+    //this.s[4].background = UIL.F0;
+    UIL.setSvg( this.c[4], 'd','M 3 8 L 8 5 3 2 3 8 Z');
     this.h = this.baseH;
 
     this.s[0].height = this.h + 'px';
@@ -1681,7 +1693,7 @@ UIL.Group.prototype.rSize = function(){
 
     var s = this.s;
 
-    s[4].left = ( this.sa + this.sb - 17 ) + 'px';
+    s[3].left = ( this.sa + this.sb - 17 ) + 'px';
     s[1].width = this.width + 'px';
     s[2].width = this.width + 'px';
 
@@ -2098,7 +2110,7 @@ UIL.Color = function( o ){
 
     this.baseH = this.h;
 
-    this.c[2] = UIL.DOM( null, 'div',  UIL.TXT + 'height:'+(this.h-4)+'px;' + 'border-radius:6px; pointer-events:auto; cursor:pointer; border:1px solid '+ UIL.Border + '; line-height:'+(this.h-8)+'px;' );
+    this.c[2] = UIL.DOM( null, 'div',  UIL.TXT + 'height:'+(this.h-4)+'px;' + 'border-radius:3px; pointer-events:auto; cursor:pointer; border:1px solid '+ UIL.Border + '; line-height:'+(this.h-8)+'px;' );
 
     this.s[2] = this.c[2].style;
 
@@ -2531,8 +2543,9 @@ UIL.Slide.prototype.mode = function( mode ){
         break;
         case 1: // over
             s[2].color = this.colorPlus;
-            if( !s[6] ) s[4].background = UIL.SlideBG;
-            else s[4].background = 'rgba(0,0,0,0.6)';
+           // if( !s[6] ) s[4].background = UIL.SlideBG;
+           // else 
+            s[4].background = 'rgba(0,0,0,0.6)';
             s[5].background = this.colorPlus;
         break;
     }
@@ -2708,9 +2721,11 @@ UIL.List = function( o ){
     
     this.c[2] = UIL.DOM( null, 'div', UIL.BASIC + 'top:0; height:90px; cursor:s-resize; pointer-events:auto; display:none; overflow:hidden; border:1px solid '+UIL.Border+';' );
     this.c[3] = UIL.DOM( null, 'div', UIL.TXT + UIL.BASIC + 'text-align:'+align+'; line-height:'+(this.h-4)+'px; border:1px solid '+UIL.Border+'; top:1px; pointer-events:auto; cursor:pointer; background:'+this.buttonColor+'; height:'+(this.h-2)+'px;' );
-    this.c[4] = UIL.DOM( null, 'div', UIL.BASIC + 'position:absolute; width:10px; height:10px; left:'+((this.sa+this.sb)-5)+'px; top:'+fltop+'px; background:'+ UIL.F0 );
-    //this.c[5] = UIL.DOM( null, 'div', UIL.TXT   + 'text-align:'+align+'; height:'+(this.h-4)+'px; line-height:'+(this.h-8)+'px;');
-    //this.c[6] = UIL.DOM( null, 'div', UIL.BASIC + 'right:14px; top:'+this.h+'px; height:16px; width:10px; pointer-events:none; background:#666; display:none;');
+    //this.c[4] = UIL.DOM( null, 'div', UIL.BASIC + 'position:absolute; width:10px; height:10px; left:'+((this.sa+this.sb)-5)+'px; top:'+fltop+'px; background:'+ UIL.F0 );
+
+    this.c[4] = UIL.DOM(null, 'path', UIL.BASIC + 'position:absolute; width:10px; height:10px; top:'+fltop+'px;', { d:'M 3 8 L 8 5 3 2 3 8 Z', fill:this.fontColor, stroke:'none'});
+
+
 
     this.scroller = UIL.DOM( null, 'div', UIL.BASIC + 'right:5px;  width:10px; pointer-events:none; background:#666; display:none;');
 
@@ -3002,8 +3017,8 @@ UIL.List.prototype.listShow = function(){
     }
     this.s[0].height = this.h + 'px';
     this.s[2].display = 'block';
-    if( this.side === 'up' ) this.s[4].background = UIL.F0;
-    else this.s[4].background = UIL.F1;
+    if( this.side === 'up' ) UIL.setSvg( this.c[4], 'd','M 5 2 L 2 7 8 7 5 2 Z');//this.c[4].setAttributeNS(null, "d", "M 5 3 L 2 8 8 8 5 3 Z");//this.s[4].background = UIL.F0;
+    else UIL.setSvg( this.c[4], 'd','M 5 8 L 8 3 2 3 5 8 Z');//this.c[4].setAttributeNS(null, "d", "M 5 8 L 8 3 2 3 5 8 Z");//this.s[4].background = UIL.F1;
 
     this.rSizeContent();
 
@@ -3023,7 +3038,9 @@ UIL.List.prototype.listHide = function(){
     this.h = this.baseH;
     this.s[0].height = this.h + 'px';
     this.s[2].display = 'none';
-    this.s[4].background = UIL.F0;
+    UIL.setSvg( this.c[4], 'd','M 3 8 L 8 5 3 2 3 8 Z');
+    //this.c[4].setAttributeNS(null, "d", "M 3 8 L 8 5 3 2 3 8 Z")
+    //this.s[4].background = UIL.F0;
     
 };
 
@@ -3970,6 +3987,8 @@ UIL.Fps = function( o ){
         this.pa3.push(50);
     }
 
+    var fltop = Math.floor(this.h*0.5)-6;
+
     this.c[1].textContent = 'FPS';
     this.c[0].style.cursor = 'pointer';
     this.c[0].style.pointerEvents = 'auto';
@@ -3990,7 +4009,11 @@ UIL.Fps = function( o ){
     // bottom line
     this.c[3] = UIL.DOM( null, 'div', UIL.BASIC + 'width:100%; bottom:0px; height:1px; background: rgba(255, 255, 255, 0.2);');
 
+    this.c[4] = UIL.DOM(null, 'path', UIL.BASIC + 'position:absolute; width:10px; height:10px; left:4px; top:'+fltop+'px;', { d:'M 3 8 L 8 5 3 2 3 8 Z', fill:this.fontColor, stroke:'none'});
+
     this.isShow = o.show || false;
+
+    this.c[1].style.marginLeft = '10px';
 
     this.now = ( self.performance && self.performance.now ) ? self.performance.now.bind( performance ) : Date.now;
     this.startTime = this.now()
@@ -4041,15 +4064,15 @@ UIL.Fps.prototype.mode = function( mode ){
     switch(mode){
         case 0: // base
             s[1].color = this.fontColor;
-            s[1].background = 'none';
+            //s[1].background = 'none';
         break;
         case 1: // over
             s[1].color = '#FFF';
-            s[1].background = UIL.SELECT;
+            //s[1].background = UIL.SELECT;
         break;
         case 2: // edit / down
             s[1].color = this.fontColor;
-            s[1].background = UIL.SELECTDOWN;
+            //s[1].background = UIL.SELECTDOWN;
         break;
 
     }
@@ -4096,6 +4119,8 @@ UIL.Fps.prototype.show = function(){
 
     this.h = this.hplus + this.baseH;
 
+    UIL.setSvg( this.c[4], 'd','M 5 8 L 8 3 2 3 5 8 Z');
+
 
     if( this.parentGroup !== null ){ this.parentGroup.calc( this.hplus );}
     else if( this.isUI ) this.main.calc( this.hplus );
@@ -4111,6 +4136,8 @@ UIL.Fps.prototype.show = function(){
 UIL.Fps.prototype.hide = function(){
 
     this.h = this.baseH;
+
+    UIL.setSvg( this.c[4], 'd','M 3 8 L 8 5 3 2 3 8 Z');
 
     if( this.parentGroup !== null ){ this.parentGroup.calc( -this.hplus );}
     else if( this.isUI ) this.main.calc( -this.hplus );

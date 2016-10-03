@@ -76,7 +76,7 @@ var w = UIL.add('number', { target:document.body, callback:null, name:' ', width
 
 // in GUI element
 //var ui = new UIL.Gui( { size:300, center:true, css:'top:145px; left:50%;' } ).onChange( callback );
-var ui = new UIL.Gui( { width:280 } ).onChange( callback );
+var ui = new UIL.Gui( { width:300 } ).onChange( callback );
 var ui2 = new UIL.Gui( {  css:'top:0px; left:10px;', width:100 } ).onChange( callback );
 populate();
 
@@ -114,7 +114,7 @@ function populate(){
 
         ui.add('button', { name:'MULTY', callback:callbackButton, fontColor:'#D4B87B', height:30, value:[1, 2, 3, 4] }).onChange( callback );;
 
-        gr0 = ui.add('group', { name:'Group', fontColor:'#D4B87B', height:30 });
+        gr0 = ui.add('group', { name:'Group', height:30 });
 
         gr0.add('color',  { name:'color', type:'hex', value:[0,1,1,1], h:40 });
         gr0.add('list',   { name:'listH', list:list, fontColor:'#D4B87B', height:30}).onChange( callback );;
@@ -128,21 +128,21 @@ function populate(){
 
         //gr0.clear();
 
-        gr1 = ui.add('group', { name:'circulars', fontColor:'#D4B87B', bg:'rgba(99,44,99,0.3)' });
+        gr1 = ui.add('group', { name:'Circulars', fontColor:'#D4B87B', bg:'rgba(99,44,99,0.3)' });
 
         gr1.add('circular', { name:'circular', width:75, min:0, max:100, step:10, value:20, precision:0 , fontColor:'#D4B87B' });
         gr1.add('circular', { name:'circular', width:75, min:0, max:100, value:50, precision:2 , fontColor:'#D4B87B' });
         gr1.add('circular', { name:'circular', width:75, min:0, max:100, value:75, precision:2 , fontColor:'#D4B87B' });
         gr1.add('circular', { name:'circular', width:75, min:0, max:100, value:100, precision:0 , fontColor:'#D4B87B' });
 
-        gr2 = ui.add('group', { name:'knobs', fontColor:'#D4B87B', bg:'rgba(99,99,44,0.3)' });
+        gr2 = ui.add('group', { name:'Knobs', fontColor:'#D4B87B', bg:'rgba(99,99,44,0.3)' });
 
         gr2.add('knob', { name:'knob', width:75, min:0, max:100, step:10, value:20, precision:0 , fontColor:'#D4B87B' });
         gr2.add('knob', { name:'knob', width:75, min:0, max:100, value:50, precision:2 , fontColor:'#D4B87B' });
         gr2.add('knob', { name:'knob', width:75, min:0, max:100, value:75, precision:2 , fontColor:'#D4B87B' });
         gr2.add('knob', { name:'knob', width:75, min:0, max:100, value:100, step:1, precision:0 , fontColor:'#D4B87B' });
 
-        gr3 = ui.add('group', { name:'joysticks', fontColor:'#D4B87B', bg:'rgba(44,99,99,0.3)' });
+        gr3 = ui.add('group', { name:'Joysticks', fontColor:'#D4B87B', bg:'rgba(44,99,99,0.3)' });
 
         gr3.add('joystick', { name:'joystick', width:150, multiplicator:1, precision:2, fontColor:'#D4B87B' });
         gr3.add('joystick', { name:'joystick', width:150, multiplicator:1, precision:2, fontColor:'#D4B87B' });

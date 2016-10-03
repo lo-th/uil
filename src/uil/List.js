@@ -13,9 +13,11 @@ UIL.List = function( o ){
     
     this.c[2] = UIL.DOM( null, 'div', UIL.BASIC + 'top:0; height:90px; cursor:s-resize; pointer-events:auto; display:none; overflow:hidden; border:1px solid '+UIL.Border+';' );
     this.c[3] = UIL.DOM( null, 'div', UIL.TXT + UIL.BASIC + 'text-align:'+align+'; line-height:'+(this.h-4)+'px; border:1px solid '+UIL.Border+'; top:1px; pointer-events:auto; cursor:pointer; background:'+this.buttonColor+'; height:'+(this.h-2)+'px;' );
-    this.c[4] = UIL.DOM( null, 'div', UIL.BASIC + 'position:absolute; width:10px; height:10px; left:'+((this.sa+this.sb)-5)+'px; top:'+fltop+'px; background:'+ UIL.F0 );
-    //this.c[5] = UIL.DOM( null, 'div', UIL.TXT   + 'text-align:'+align+'; height:'+(this.h-4)+'px; line-height:'+(this.h-8)+'px;');
-    //this.c[6] = UIL.DOM( null, 'div', UIL.BASIC + 'right:14px; top:'+this.h+'px; height:16px; width:10px; pointer-events:none; background:#666; display:none;');
+    //this.c[4] = UIL.DOM( null, 'div', UIL.BASIC + 'position:absolute; width:10px; height:10px; left:'+((this.sa+this.sb)-5)+'px; top:'+fltop+'px; background:'+ UIL.F0 );
+
+    this.c[4] = UIL.DOM(null, 'path', UIL.BASIC + 'position:absolute; width:10px; height:10px; top:'+fltop+'px;', { d:'M 3 8 L 8 5 3 2 3 8 Z', fill:this.fontColor, stroke:'none'});
+
+
 
     this.scroller = UIL.DOM( null, 'div', UIL.BASIC + 'right:5px;  width:10px; pointer-events:none; background:#666; display:none;');
 
@@ -307,8 +309,8 @@ UIL.List.prototype.listShow = function(){
     }
     this.s[0].height = this.h + 'px';
     this.s[2].display = 'block';
-    if( this.side === 'up' ) this.s[4].background = UIL.F0;
-    else this.s[4].background = UIL.F1;
+    if( this.side === 'up' ) UIL.setSvg( this.c[4], 'd','M 5 2 L 2 7 8 7 5 2 Z');//this.c[4].setAttributeNS(null, "d", "M 5 3 L 2 8 8 8 5 3 Z");//this.s[4].background = UIL.F0;
+    else UIL.setSvg( this.c[4], 'd','M 5 8 L 8 3 2 3 5 8 Z');//this.c[4].setAttributeNS(null, "d", "M 5 8 L 8 3 2 3 5 8 Z");//this.s[4].background = UIL.F1;
 
     this.rSizeContent();
 
@@ -328,7 +330,9 @@ UIL.List.prototype.listHide = function(){
     this.h = this.baseH;
     this.s[0].height = this.h + 'px';
     this.s[2].display = 'none';
-    this.s[4].background = UIL.F0;
+    UIL.setSvg( this.c[4], 'd','M 3 8 L 8 5 3 2 3 8 Z');
+    //this.c[4].setAttributeNS(null, "d", "M 3 8 L 8 5 3 2 3 8 Z")
+    //this.s[4].background = UIL.F0;
     
 };
 

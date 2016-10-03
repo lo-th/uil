@@ -22,7 +22,7 @@ UIL.Color = function( o ){
 
     this.baseH = this.h;
 
-    this.c[2] = UIL.DOM( null, 'div',  UIL.TXT + 'height:'+(this.h-4)+'px;' + 'border-radius:6px; pointer-events:auto; cursor:pointer; border:1px solid '+ UIL.Border + '; line-height:'+(this.h-8)+'px;' );
+    this.c[2] = UIL.DOM( null, 'div',  UIL.TXT + 'height:'+(this.h-4)+'px;' + 'border-radius:3px; pointer-events:auto; cursor:pointer; border:1px solid '+ UIL.Border + '; line-height:'+(this.h-8)+'px;' );
 
     this.s[2] = this.c[2].style;
 

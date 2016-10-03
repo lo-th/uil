@@ -23,6 +23,8 @@ UIL.Fps = function( o ){
         this.pa3.push(50);
     }
 
+    var fltop = Math.floor(this.h*0.5)-6;
+
     this.c[1].textContent = 'FPS';
     this.c[0].style.cursor = 'pointer';
     this.c[0].style.pointerEvents = 'auto';
@@ -43,7 +45,11 @@ UIL.Fps = function( o ){
     // bottom line
     this.c[3] = UIL.DOM( null, 'div', UIL.BASIC + 'width:100%; bottom:0px; height:1px; background: rgba(255, 255, 255, 0.2);');
 
+    this.c[4] = UIL.DOM(null, 'path', UIL.BASIC + 'position:absolute; width:10px; height:10px; left:4px; top:'+fltop+'px;', { d:'M 3 8 L 8 5 3 2 3 8 Z', fill:this.fontColor, stroke:'none'});
+
     this.isShow = o.show || false;
+
+    this.c[1].style.marginLeft = '10px';
 
     this.now = ( self.performance && self.performance.now ) ? self.performance.now.bind( performance ) : Date.now;
     this.startTime = this.now()
@@ -94,15 +100,15 @@ UIL.Fps.prototype.mode = function( mode ){
     switch(mode){
         case 0: // base
             s[1].color = this.fontColor;
-            s[1].background = 'none';
+            //s[1].background = 'none';
         break;
         case 1: // over
             s[1].color = '#FFF';
-            s[1].background = UIL.SELECT;
+            //s[1].background = UIL.SELECT;
         break;
         case 2: // edit / down
             s[1].color = this.fontColor;
-            s[1].background = UIL.SELECTDOWN;
+            //s[1].background = UIL.SELECTDOWN;
         break;
 
     }
@@ -149,6 +155,8 @@ UIL.Fps.prototype.show = function(){
 
     this.h = this.hplus + this.baseH;
 
+    UIL.setSvg( this.c[4], 'd','M 5 8 L 8 3 2 3 5 8 Z');
+
 
     if( this.parentGroup !== null ){ this.parentGroup.calc( this.hplus );}
     else if( this.isUI ) this.main.calc( this.hplus );
@@ -164,6 +172,8 @@ UIL.Fps.prototype.show = function(){
 UIL.Fps.prototype.hide = function(){
 
     this.h = this.baseH;
+
+    UIL.setSvg( this.c[4], 'd','M 3 8 L 8 5 3 2 3 8 Z');
 
     if( this.parentGroup !== null ){ this.parentGroup.calc( -this.hplus );}
     else if( this.isUI ) this.main.calc( -this.hplus );

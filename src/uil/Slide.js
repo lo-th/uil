@@ -93,8 +93,9 @@ UIL.Slide.prototype.mode = function( mode ){
         break;
         case 1: // over
             s[2].color = this.colorPlus;
-            if( !s[6] ) s[4].background = UIL.SlideBG;
-            else s[4].background = 'rgba(0,0,0,0.6)';
+           // if( !s[6] ) s[4].background = UIL.SlideBG;
+           // else 
+            s[4].background = 'rgba(0,0,0,0.6)';
             s[5].background = this.colorPlus;
         break;
     }
