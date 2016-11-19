@@ -116,8 +116,9 @@ function populate(){
 
         gr0 = ui.add('group', { name:'Group', height:30 });
 
+        gr0.add('button', { name:'LOAD', callback:callbackButton, fontColor:'#D4B87B', height:30, p:0 });
         gr0.add('color',  { name:'color', type:'hex', value:[0,1,1,1], h:40 });
-        gr0.add('list',   { name:'listH', list:list, fontColor:'#D4B87B', height:30}).onChange( callback );;
+        gr0.add('list',   { name:'listH', list:list, fontColor:'#D4B87B', height:30, p:0  }).onChange( callback );;
         gr0.add('slide',  { name:'slide', min:-100, max:100, value:0, precision:0 }).onChange( callback );;
         gr0.add('slide',  { name:'slide', min:-100, max:100, value:0, precision:0 });
         gr0.add('slide',  { name:'slide', min:-100, max:100, value:0, precision:0 });

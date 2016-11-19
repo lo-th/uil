@@ -8,7 +8,7 @@ UIL.Button = function( o ){
 
     this.isLoadButton = o.loader || false;
     this.isDragButton = o.drag || false;
-    if(this.isDragButton )this.isLoadButton=true;
+    if(this.isDragButton ) this.isLoadButton = true;
     this.r = o.r || 3;
 
     this.lng = this.value.length;
@@ -125,22 +125,24 @@ UIL.Button.prototype.fileSelect = function( file ){
 
     //var file = e.target.files[0];
    
-    this.c[3].type = "null";
+    //this.c[3].type = "null";
     // console.log( this.c[4] )
 
     if( file === undefined ) return;
 
     var reader = new FileReader();
     var fname = file.name;
-    var type = fname.substring(fname.indexOf('.')+1, fname.length );
+    var type = fname.substring(fname.lastIndexOf('.')+1, fname.length );
 
     if( type === 'png' || type === 'jpg' ) reader.readAsDataURL( file );
-    else if(type === 'z') reader.readAsBinaryString( file );
+    else if( type === 'z' ) reader.readAsBinaryString( file );
+    else if( type === 'sea' ) reader.readAsArrayBuffer( file );
     else reader.readAsText( file );
 
-    reader.onload = function(e) { 
-        this.callback( e.target.result, fname, type );
-         this.c[3].type = "file";
+    reader.onload = function(e) {
+        
+        if( this.callback ) this.callback( e.target.result, fname, type );
+        //this.c[3].type = "file";
         //this.send( e.target.result ); 
     }.bind(this);
 
