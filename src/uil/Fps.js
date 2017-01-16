@@ -69,6 +69,8 @@ UIL.Fps = function( o ){
 
     this.init();
 
+    //if( this.isShow ) this.show();
+
 }
 
 UIL.Fps.prototype = Object.create( UIL.Proto.prototype );
@@ -233,7 +235,7 @@ UIL.Fps.prototype.end = function(){
     }
 
     this.drawGraph();
-    this.c[1].innerHTML = 'FPS ' + this.fps + ' . <font color="yellow"> MS '+ ( this.ms | 0 ) + '</font> . <font color="cyan"> MB '+ this.mem + '</font>';
+    this.c[1].innerHTML = 'FPS ' + this.fps + '<font color="yellow"> MS '+ ( this.ms | 0 ) + '</font><font color="cyan"> MB '+ this.mem + '</font>';
 
     return time;
 

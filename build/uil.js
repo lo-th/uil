@@ -3722,6 +3722,8 @@ UIL.Joystick = function( o ){
 
     this.value = [0,0];
 
+    this.joyType = 'analogique';
+
     this.precision = o.precision || 2;
     this.multiplicator = o.multiplicator || 1;
 
@@ -3739,7 +3741,7 @@ UIL.Joystick = function( o ){
 
     if(o.width !== undefined){
         this.width = o.width;
-        this.radius = ~~ (this.width-20)*0.5;
+        this.radius = ~~ (( this.width-20 )*0.5);
     }
     if(o.size !== undefined){
         this.width = o.size;
@@ -3785,26 +3787,23 @@ UIL.Joystick = function( o ){
     UIL.DOM( null, 'stop', null, { offset:'100%', style:'stop-color:rgb(0,0,0); stop-opacity:0;' }, svg, [1,0] );
 
     // gradian stick
-    var color0 = 'rgb(40,40,40)';
-    var color1 = 'rgb(48,48,48)';
-    var color2 = 'rgb(30,30,30)';
 
-    var color3 = 'rgb(1,90,197)';
-    var color4 = 'rgb(3,95,207)';
-    var color5 = 'rgb(0,65,167)';
+    var cc0 = ['rgb(40,40,40)', 'rgb(48,48,48)', 'rgb(30,30,30)'];
+    var cc1 = ['rgb(1,90,197)', 'rgb(3,95,207)', 'rgb(0,65,167)'];
+
     svg = this.c[4];
     UIL.DOM( null, 'defs', null, {}, svg );
     UIL.DOM( null, 'radialGradient', null, {id:'gradIn', cx:'50%', cy:'50%', r:'50%', fx:'50%', fy:'50%' }, svg, 1 );
-    UIL.DOM( null, 'stop', null, { offset:'30%', style:'stop-color:'+color0+'; stop-opacity:1;' }, svg, [1,0] );
-    UIL.DOM( null, 'stop', null, { offset:'60%', style:'stop-color:'+color1+'; stop-opacity:1;' }, svg, [1,0]  );
-    UIL.DOM( null, 'stop', null, { offset:'80%', style:'stop-color:'+color1+'; stop-opacity:1;' }, svg, [1,0]  );
-    UIL.DOM( null, 'stop', null, { offset:'100%', style:'stop-color:'+color2+'; stop-opacity:1;' }, svg, [1,0]  );
+    UIL.DOM( null, 'stop', null, { offset:'30%', style:'stop-color:'+cc0[0]+'; stop-opacity:1;' }, svg, [1,0] );
+    UIL.DOM( null, 'stop', null, { offset:'60%', style:'stop-color:'+cc0[1]+'; stop-opacity:1;' }, svg, [1,0]  );
+    UIL.DOM( null, 'stop', null, { offset:'80%', style:'stop-color:'+cc0[1]+'; stop-opacity:1;' }, svg, [1,0]  );
+    UIL.DOM( null, 'stop', null, { offset:'100%', style:'stop-color:'+cc0[2]+'; stop-opacity:1;' }, svg, [1,0]  );
 
     UIL.DOM( null, 'radialGradient', null, {id:'gradIn2', cx:'50%', cy:'50%', r:'50%', fx:'50%', fy:'50%' }, this.c[4], 1 );
-    UIL.DOM( null, 'stop', null, { offset:'30%', style:'stop-color:'+color3+'; stop-opacity:1;' }, svg, [1,1]  );
-    UIL.DOM( null, 'stop', null, { offset:'60%', style:'stop-color:'+color4+'; stop-opacity:1;' }, svg, [1,1] );
-    UIL.DOM( null, 'stop', null, { offset:'80%', style:'stop-color:'+color4+'; stop-opacity:1;' }, svg, [1,1] );
-    UIL.DOM( null, 'stop', null, { offset:'100%', style:'stop-color:'+color5+'; stop-opacity:1;' }, svg, [1,1] );
+    UIL.DOM( null, 'stop', null, { offset:'30%', style:'stop-color:'+cc1[0]+'; stop-opacity:1;' }, svg, [1,1]  );
+    UIL.DOM( null, 'stop', null, { offset:'60%', style:'stop-color:'+cc1[1]+'; stop-opacity:1;' }, svg, [1,1] );
+    UIL.DOM( null, 'stop', null, { offset:'80%', style:'stop-color:'+cc1[1]+'; stop-opacity:1;' }, svg, [1,1] );
+    UIL.DOM( null, 'stop', null, { offset:'100%', style:'stop-color:'+cc1[2]+'; stop-opacity:1;' }, svg, [1,1] );
 
     //console.log( this.c[4] )
 
@@ -3828,7 +3827,6 @@ UIL.Joystick.prototype.handleEvent = function( e ) {
         case 'mouseover': this.over( e ); break;
         case 'mousedown': this.down( e ); break;
         case 'mouseout':  this.out( e );  break;
-
         case 'mouseup':   this.up( e );   break;
         case 'mousemove': this.move( e ); break;
     }
@@ -3839,12 +3837,10 @@ UIL.Joystick.prototype.mode = function( mode ){
 
     switch(mode){
         case 0: // base
-            //UIL.setSvg( this.c[3], 'fill','rgba(0,0,0,0.2)');
             UIL.setSvg( this.c[4], 'fill','url(#gradIn)');
             UIL.setSvg( this.c[4], 'stroke', '#000' );
         break;
         case 1: // over
-            //UIL.setSvg( this.c[3], 'fill','rgba(0,0,0,0.6)');
             UIL.setSvg( this.c[4], 'fill', 'url(#gradIn2)' );
             UIL.setSvg( this.c[4], 'stroke', 'rgba(0,0,0,0)' );
         break;
@@ -3880,22 +3876,17 @@ UIL.Joystick.prototype.up = function( e ){
     if(this.isOver) this.mode(1);
     else this.mode(0);
     
-
 };
 
 UIL.Joystick.prototype.down = function( e ){
-
-  
 
     this.isDown = true;
     document.addEventListener( 'mouseup', this, false );
     document.addEventListener( 'mousemove', this, false );
 
     this.rect = this.c[2].getBoundingClientRect();
-    //this.old = this.value;
-    //this.oldr = null;
     this.move( e );
-    this.mode(2);
+    this.mode( 2 );
 
 };
 
@@ -3903,12 +3894,12 @@ UIL.Joystick.prototype.move = function( e ){
 
     if( !this.isDown ) return;
 
-    var x = this.radius - (e.clientX - this.rect.left);
-    var y = this.radius - (e.clientY - this.rect.top);
+    var x = this.radius - ( e.clientX - this.rect.left );
+    var y = this.radius - ( e.clientY - this.rect.top );
 
-    var distance = Math.sqrt(x * x + y * y);
+    var distance = Math.sqrt( x * x + y * y );
 
-    if (distance > this.maxDistance) {
+    if ( distance > this.maxDistance ) {
         var angle = Math.atan2(x, y);
         x = Math.sin(angle) * this.maxDistance;
         y = Math.cos(angle) * this.maxDistance;
@@ -3921,11 +3912,20 @@ UIL.Joystick.prototype.move = function( e ){
 
 };
 
-UIL.Joystick.prototype.update = function(up){
+UIL.Joystick.prototype.setValue = function( x, y ){
+
+    this.x = x || 0;
+    this.y = y || 0;
+
+    this.updateSVG();
+
+};
+
+UIL.Joystick.prototype.update = function( up ){
 
     if(up === undefined) up = true;
 
-    if(this.interval !== null){
+    if( this.interval !== null ){
 
         if( !this.isDown ){
             this.x += (0 - this.x)/3;
@@ -3940,18 +3940,25 @@ UIL.Joystick.prototype.update = function(up){
 
     }
 
-    var rx = this.x * this.maxDistance
-    var ry = this.y * this.maxDistance
+    this.updateSVG();
 
+    if( up ) this.send();
+
+    if( this.interval !== null && this.x === 0 && this.y === 0 ){
+        clearInterval( this.interval );
+        this.interval = null;
+    }
+
+};
+
+UIL.Joystick.prototype.updateSVG = function(){
+
+    var rx = this.x * this.maxDistance;
+    var ry = this.y * this.maxDistance;
     var x = this.radius - rx;
     var y = this.radius - ry;
     var sx = x + ((1-this.x)*5) + 5;
     var sy = y + ((1-this.y)*5) + 10;
-
-    this.value[0] = -(this.x*this.multiplicator).toFixed(this.precision) * 1;
-    this.value[1] =  (this.y*this.multiplicator).toFixed(this.precision) * 1;
-
-    this.c[5].textContent = 'x'+ this.value[0] +' y' + this.value[1];
 
     UIL.setSvg( this.c[3], 'cx', sx );
     UIL.setSvg( this.c[3], 'cy', sy );
@@ -3961,12 +3968,10 @@ UIL.Joystick.prototype.update = function(up){
     this.oldx = this.x;
     this.oldy = this.y;
 
-    if(up) this.send();
+    this.value[0] = -( this.x * this.multiplicator ).toFixed( this.precision ) * 1;
+    this.value[1] =  ( this.y * this.multiplicator ).toFixed( this.precision ) * 1;
 
-    if( this.interval !== null && this.x === 0 && this.y === 0 ){
-        clearInterval(this.interval);
-        this.interval = null;
-    }
+    this.c[5].textContent = 'x'+ this.value[0] +' y' + this.value[1];
 
 };
 UIL.Fps = function( o ){
@@ -4039,6 +4044,8 @@ UIL.Fps = function( o ){
     this.c[0].events = [ 'click', 'mousedown', 'mouseover', 'mouseout' ];
 
     this.init();
+
+    //if( this.isShow ) this.show();
 
 }
 
@@ -4204,7 +4211,7 @@ UIL.Fps.prototype.end = function(){
     }
 
     this.drawGraph();
-    this.c[1].innerHTML = 'FPS ' + this.fps + ' . <font color="yellow"> MS '+ ( this.ms | 0 ) + '</font> . <font color="cyan"> MB '+ this.mem + '</font>';
+    this.c[1].innerHTML = 'FPS ' + this.fps + '<font color="yellow"> MS '+ ( this.ms | 0 ) + '</font><font color="cyan"> MB '+ this.mem + '</font>';
 
     return time;
 

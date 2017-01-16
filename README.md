@@ -15,7 +15,7 @@ ui.add('color', { name:'Color', callback:callback, type:'html', value:0xff0000})
 ui.add('color', { name:'Color', callback:callback, type:'rgba', value:[0,1,1,1]});
 ui.add('slide', { name:'Slide', callback:callback, value:50});
 ui.add('string', { name:'String', callback:callback, value:'welcome to uil'});
-ui.add('list', { name:'List', callback:callback, list:[item1, item2, ...]});
+ui.add('list', { name:'List', callback:callback, list:['item1', 'item2', ...]});
 ui.add('number', { name:'Number', callback:callback, value:20, min:0, max:10, precision:2, step:0.01 });
 ui.add('number', { name:'Vector2', callback:callback, value:[0,0] });
 ui.add('number', { name:'Vector3', callback:callback, value:[0,0,0] });

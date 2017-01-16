@@ -74,6 +74,7 @@ var c = UIL.add('color', { target:document.body, callback:callbackLogo, name:' '
 var c = UIL.add('list', { target:document.body, callback:null, name:' ', width:100, list:list, pos:{left:'120px', top:'auto', bottom:'10px' }, simple:true, side:'up', full:true });
 var w = UIL.add('number', { target:document.body, callback:null, name:' ', width:100, pos:{left:'290px', top:'auto', bottom:'10px' }, simple:true });
 
+var j = UIL.add('joystick', {  target:document.body, pos:{left:'400px', top:'auto', bottom:'10px' }, name:'JOY', width:100, multiplicator:1, precision:2, fontColor:'#D4B87B' });
 // in GUI element
 //var ui = new UIL.Gui( { size:300, center:true, css:'top:145px; left:50%;' } ).onChange( callback );
 var ui = new UIL.Gui( { width:300 } ).onChange( callback );
