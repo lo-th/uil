@@ -38,7 +38,7 @@ var list2 = ['item-0', 'item-1', 'item-2'];
 document.getElementById('version').innerHTML = 'il '+ UIL.REVISION;
 
 var debug = document.getElementById('debug');
-var callback = function( v ){  console.log('input'); debug.innerHTML = v; }
+var callback = function( v ){  debug.innerHTML = v; }
 var callbackButton = function( v ){ debug.innerHTML = "i'm a button !! " + v; }
 var callbackSize = function( v ){ ui.setWidth( v ); }
 var callbackLogo = function( v ){ 
@@ -61,7 +61,7 @@ var j = UIL.add('joystick', {  target:document.body, pos:{left:'400px', top:'aut
 // in GUI element
 //var ui = new UIL.Gui( { size:300, center:true, css:'top:145px; left:50%;' } ).onChange( callback );
 var ui = new UIL.Gui( { width:300 } ).onChange( callback );
-var ui2 = new UIL.Gui( {  css:'top:0px; left:10px;', width:100 } ).onChange( callback );
+var ui2 = new UIL.Gui( {  css:'top:0px; left:10px;', width:200 } ).onChange( callback );
 populate();
 
 ///ui.toCanvas();

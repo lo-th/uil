@@ -223,18 +223,6 @@ var Tools = {
 
     },
 
-    /*autoType : function(){
-
-        var a = arguments;
-
-        var type = 'Slide';
-
-        if(a[2].type) type = a[2].type;
-
-        return type;
-
-    },*/
-
     // ----------------------
     //   Color function
     // ----------------------

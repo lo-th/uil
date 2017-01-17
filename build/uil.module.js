@@ -308,18 +308,6 @@ var Tools = {
 
     },
 
-    /*autoType : function(){
-
-        var a = arguments;
-
-        var type = 'Slide';
-
-        if(a[2].type) type = a[2].type;
-
-        return type;
-
-    },*/
-
     // ----------------------
     //   Color function
     // ----------------------
@@ -3630,6 +3618,7 @@ Title.prototype.text2 = function(txt){
 
 };
 
+//import { Tools } from './Tools';
 function getType( name, o ) {
 
         var n = null;
@@ -3670,7 +3659,9 @@ function add (){
 
         ref = true;
         if( a[2] === undefined ) [].push.call(a, {});
-        type = Tools.autoType.apply( Tools, a );
+
+        type = autoType.apply( this, a );
+
         o = a[2];
 
         o.name = a[1];
@@ -3685,6 +3676,18 @@ function add (){
         return n;
     }
     
+
+}
+
+function autoType () {
+
+    var a = arguments;
+
+    var type = 'Slide';
+
+    if(a[2].type) type = a[2].type;
+
+    return type;
 
 }
 
