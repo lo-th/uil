@@ -31,6 +31,7 @@ ui.add('number', { name:'Vector4', value:[0,0,0,0] }).onChange( function(v){ deb
 ```sh
 ui.clear();
 ```
+**5 - other examples**
 
 [**uil_listen**](http://lo-th.github.io/uil/examples/uil_listen.html)
 
