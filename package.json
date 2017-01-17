@@ -1,6 +1,6 @@
 {
   "name": "uil",
-  "version": "0.01.1",
+  "version": "1.0.0",
   "description": "JavaScript 3D library",
   "main": "build/uil.js",
   "repository": "lo-th/uil",
