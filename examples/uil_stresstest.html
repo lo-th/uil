@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Uil stress test</title>
+<link rel="shortcut icon" href="img/favicon.ico">
+<style>
+*{ margin: 0; padding: 0; border: 0; } 
+html{  }
+body { font-family:monospace; background:#222; font-size:12px; color:#fff;}
+#debug { position:absolute; top:2px; left:10px; width:200px; height:10px; pointer-events:none;}
+#content1 { position:absolute; top:30px; left:0px; pointer-events:none; width:200px;}
+#content2 { position:absolute; top:30px; left:210px; pointer-events:none; width:200px;}
+#content3 { position:absolute; top:30px; left:420px; pointer-events:none; width:375px;}
+#content4 { position:absolute; top:30px; left:830px; pointer-events:none; width:375px;}
+</style>
+
+<script type="text/javascript" src="../build/uil.js"></script>
+
+</head>
+
+<body>
+<div id='content1'></div>
+<div id='content2'></div>
+<div id='content3'></div>
+<div id='content4'></div>
+<div id='debug'>debug</div>
+
+<script>
+var display = false;
+
+var b = new UIL.Button({target:document.body, callback:populate, name:'populate', size:100, pos:{left:'200px', top:'5px'}, simple:true });
+var w = new UIL.Numeric({target:document.body, callback:null, name:'', value:200, size:70, precision:0, pos:{left:'310px', top:'5px' }, simple:true });
+
+function populate(){
+
+    if(!display){ 
+        add()
+        display = true;
+        b.label('clear');
+    }else{ 
+        remove()
+        display = false;
+        b.label('populate');
+    }
+}
+var callback = function(v){ debug.innerHTML = v; }
+
+var list = ['cool', 'gool', 'tool', 'fool', 'mool']
+var sl = [];
+var n = 0
+var content1 = document.getElementById('content1');
+var content2 = document.getElementById('content2');
+var content3 = document.getElementById('content3');
+var content4 = document.getElementById('content4');
+
+
+function addElement(id, name, min, max, precision){
+
+    if(id === 0 )  return new UIL.List({target:content1, name:name, value:'cool', list:list, size:200, callback:callback });
+    if(id === 1 )  return new UIL.Slide({target:content2, name:name, value:Math.random().toFixed(3), min:min, max:max, precision:precision, size:200, callback:callback });
+    if(id === 2 )  return new UIL.Knob({target:content3, name:name, value:Math.random().toFixed(3), min:min, max:max, precision:precision, size:75, callback:callback });
+    if(id === 3 )  return new UIL.Circular({target:content4, name:name, value:Math.random().toFixed(3), min:min, max:max, precision:precision, size:75, callback:callback });
+  
+};
+
+function add(){
+    for(var i = 0; i<w.value[0]; i++){
+        sl.push( addElement(0,'yoo',0,1,2) );
+        sl.push( addElement(1,'yoo',0,1,2) );
+        sl.push( addElement(2,'yoo',0,1,2) );
+        sl.push( addElement(3,'yoo',0,1,2) );
+    }
+}
+
+function remove(){
+    while(sl.length){ 
+        sl.pop().clear();
+    }
+}
+
+//b.dispose()
+//w.dispose()
+//console.log(b)     
+
+</script>
+</body>
+</html>
