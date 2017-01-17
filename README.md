@@ -33,8 +33,8 @@ ui.clear();
 ```
 **5 - other examples**
 
-[**uil_listen**](http://lo-th.github.io/uil/examples/uil_listen.html)
+[**uil listen**](http://lo-th.github.io/uil/examples/uil_listen.html)
 
-[**uil_stresstest**](http://lo-th.github.io/uil/examples/uil_stresstest.html)
+[**uil stresstest**](http://lo-th.github.io/uil/examples/uil_stresstest.html)
 
-[**uil_test**](http://lo-th.github.io/uil/examples/uil_test.html)
+[**uil advanced**](http://lo-th.github.io/uil/examples/uil_test.html)
