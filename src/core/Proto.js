@@ -1,15 +1,26 @@
 import { Tools } from './Tools';
 
+/**
+ * @author lo-th / https://github.com/lo-th
+ */
+
 function Proto( o ){
 
     o = o || {};
 
     this.main = o.main || null;
+    // if is on ui pannel
+    this.isUI = o.isUI || false;
 
-    //this.type = '';
     // percent of title
-    this.p = Tools.base.P;//o.tPercent || 0;
-    if(o.p !== undefined ) this.p = o.p;
+    this.p = o.p !== undefined ? o.p : Tools.size.p;
+
+    this.width = this.isUI ? this.main.size.w : Tools.size.w;
+    if( o.w !== undefined ) this.width = o.w;
+
+    this.h = this.isUI ? this.main.size.h : Tools.size.h;
+    if( o.h !== undefined ) this.h = o.h;
+    this.h = this.h < 11 ? 11 : this.h;
 
     // if need resize width
     this.autoWidth = true;
@@ -20,8 +31,7 @@ function Proto( o ){
     // if height can change
     this.autoHeight = false;
 
-    // if is on ui pannel
-    this.isUI = o.isUI || false;
+    
 
     // only for number
     this.isNumber = false;
@@ -36,9 +46,9 @@ function Proto( o ){
     this.simple = o.simple || false;
     if( this.simple ) this.sa = 0;
 
-    this.width = this.isUI ? this.main.width : Tools.base.WIDTH;
-    if(o.width !== undefined ) this.width = o.width;
-    if(o.size !== undefined ) this.width = o.size;
+    
+    //if(o.width !== undefined ) this.width = o.width;
+    //if(o.size !== undefined ) this.width = o.size;
 
     //console.log(this.width)
 
@@ -59,19 +69,13 @@ function Proto( o ){
     this.val = null;
     this.isSend = false;
 
-    var h = 20;
-    if( this.isUI ) h = Tools.base.HEIGHT;//this.main.height;
-    this.h = o.h || o.height || h;
-    this.h = this.h < 11 ? 11 : this.h;
     
-    this.bgcolor = o.bgcolor || Tools.colors.background;
+    
+    // Background
+    this.bg = this.isUI ? this.main.bg : Tools.colors.background;
+    if( o.bg !== undefined ) this.bg = o.bg;
 
-    this.bg = this.isUI ? this.main.bg : 'rgba(44,44,44,0.3)';
-    if(o.bg !== undefined ) this.bg = o.bg;
-
-
-
-    //this.fontColor = o.fontColor === undefined ? UIL.BASECOLOR : o.fontColor;
+    // Font Color;
     this.titleColor = o.titleColor || Tools.colors.text;
     this.fontColor = o.fontColor || Tools.colors.text;
     this.colorPlus = Tools.ColorLuma( this.fontColor, 0.3 );
@@ -133,38 +137,36 @@ Proto.prototype = {
     init: function (){
 
         var s = this.s; // style cached
+        var c = this.c; // div cached
 
-        //s[0] = this.c[0].style;
         s[0].height = this.h + 'px';
 
-        if( this.isUI ) this.s[0].background = this.bg;//this.isUI ? this.main.bg : UIL.bgcolor(this.bgcolor);
-        if( this.autoHeight ) this.s[0].transition = 'height 0.1s ease-out';
-        if( this.c[1] !== undefined && this.autoWidth ){
-            s[1] = this.c[1].style;
+        if( this.isUI ) s[0].background = this.bg;
+        if( this.autoHeight ) s[0].transition = 'height 0.1s ease-out';
+        if( c[1] !== undefined && this.autoWidth ){
+            s[1] = c[1].style;
             s[1].height = (this.h-4) + 'px';
             s[1].lineHeight = (this.h-8) + 'px';
         }
 
         var frag = Tools.frag;
 
-        for( var i=1, lng = this.c.length; i !== lng; i++ ){
-            if( this.c[i] !== undefined ) {
-                frag.appendChild( this.c[i] );
-                s[i] = this.c[i].style;
+        for( var i=1, lng = c.length; i !== lng; i++ ){
+            if( c[i] !== undefined ) {
+                frag.appendChild( c[i] );
+                s[i] = c[i].style;
             }
         }
 
 
         if( this.target !== null ){ 
-            this.target.appendChild( this.c[0] );
+            this.target.appendChild( c[0] );
         } else {
-            if( this.isUI ) this.main.inner.appendChild( this.c[0] );
-            else document.body.appendChild( this.c[0] );
+            if( this.isUI ) this.main.inner.appendChild( c[0] );
+            else document.body.appendChild( c[0] );
         }
 
-        this.c[0].appendChild( frag );
-
-        //this.s = s;
+        c[0].appendChild( frag );
 
         this.rSize();
         this.addEvent();
@@ -280,7 +282,7 @@ Proto.prototype = {
 
         this.width = sx;// || UIL.WIDTH;
 
-        this.p = this.p === undefined ? Tools.base.P : this.p;
+        //this.p = this.p === undefined ? Tools.base.P : this.p;
 
 
         //if( !this.p ) this.p = UIL.P;

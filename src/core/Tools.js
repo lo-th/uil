@@ -1,3 +1,6 @@
+/**
+ * @author lo-th / https://github.com/lo-th
+ */
 
 var Tools = {
 
@@ -16,13 +19,13 @@ var Tools = {
     SVG_TYPE_D: [ 'pattern', 'defs', 'transform', 'stop', 'animate', 'radialGradient', 'linearGradient', 'animateMotion' ],
     SVG_TYPE_G: [ 'rect', 'circle', 'path', 'polygon', 'text', 'g', 'line', 'foreignObject' ],
 
-    base: {
+    size: {
         
-        DEF: false,
-        WIDTH: 240,
-        HEIGHT: 20,
-        P: 30,
-        BW:5, //number ? 
+        w: 240,
+        h: 20,
+        p: 30,
+        s: 20,
+
     },
 
     // colors
@@ -30,7 +33,7 @@ var Tools = {
     colors: {
 
         text : '#C0C0C0',
-        background: 'rgba(0,0,0,0.3)',
+        background: 'rgba(44,44,44,0.3)',
 
         border : '#4f4f4f',
         borderSelect : '#308AFF',
@@ -42,7 +45,8 @@ var Tools = {
         moving : '#03afff',
         down : '#024699',
 
-        stroke: 'rgba(120,120,120,0.6)',
+        stroke: '#606060',//'rgba(120,120,120,0.6)',
+        scroll: '#333333',
 
     },
 
@@ -51,22 +55,10 @@ var Tools = {
     css : {
         basic: '-o-user-select:none; -ms-user-select:none; -khtml-user-select:none; -webkit-user-select:none; -moz-user-select:none;' + 'position:absolute; pointer-events:none; box-sizing:border-box; margin:0; padding:0; border:none; overflow:hidden; background:none;',
     },
-    //Tools.css.unselect = '-o-user-select:none; -ms-user-select:none; -khtml-user-select:none; -webkit-user-select:none; -moz-user-select:none;';
-    //Tools.css.basic = Tools.css.unselect + 'position:absolute; pointer-events:none; box-sizing:border-box; margin:0; padding:0; border:none; overflow:hidden; background:none;';
-
-    //Tools.setText();
-
 
     // svg path
 
     GPATH: 'M 7 7 L 7 8 8 8 8 7 7 7 M 5 7 L 5 8 6 8 6 7 5 7 M 3 7 L 3 8 4 8 4 7 3 7 M 7 5 L 7 6 8 6 8 5 7 5 M 6 6 L 6 5 5 5 5 6 6 6 M 7 3 L 7 4 8 4 8 3 7 3 M 6 4 L 6 3 5 3 5 4 6 4 M 3 5 L 3 6 4 6 4 5 3 5 M 3 3 L 3 4 4 4 4 3 3 3 Z',
-
-//}
-
-
-//Tools.prototype = {
-
-//    constructor: Tools,
 
     setText : function( size, color, font ){
 
@@ -335,6 +327,8 @@ var Tools = {
         }
 
     },
+
+    // svg to canvas test 
 
     toCanvas: function( canvas, content, w, h ){
 

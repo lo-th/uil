@@ -22,7 +22,9 @@ function Joystick ( o ) {
 
     this.interval = null;
 
-    this.radius = o.radius || 50;
+    this.radius = Math.floor((this.width-20)*0.5);
+
+    /*this.radius = o.radius || 50;
 
     this.width = (this.radius*2)+20;
 
@@ -33,7 +35,7 @@ function Joystick ( o ) {
     if(o.size !== undefined){
         this.width = o.size;
         this.radius = ~~ (this.width-20)*0.5;
-    }
+    }*/
 
     this.innerRadius = o.innerRadius || this.radius*0.6;
     this.maxDistance = this.radius - this.innerRadius - 5;

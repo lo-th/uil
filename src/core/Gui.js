@@ -2,29 +2,55 @@
 import { Tools } from './Tools';
 import { add } from './add';
 
+/**
+ * @author lo-th / https://github.com/lo-th
+ */
+
 function Gui ( o ) {
 
     o = o || {};
 
-    //this.height = o.height || 20;
+    // css plus
+    this.css = o.css !== undefined ? o.css : '';
 
-    if( o.Tpercent !== undefined ) Tools.base.P = o.Tpercent;
-    if( o.css === undefined ) o.css = '';
+    // size define
+    this.size = Tools.size;
+    if( o.p !== undefined ) this.size.p = o.p;
+    if( o.w !== undefined ) this.size.w = o.w;
+    if( o.h !== undefined ) this.size.h = o.h;
+    if( o.s !== undefined ) this.size.s = o.s;
 
-    this.height = 20;
-    this.width = o.width !== undefined ? o.width : Tools.base.WIDTH;
-    this.width = o.size !== undefined ? o.size : this.width;
+    this.size.h = this.size.h < 11 ? 11 : this.size.h;
 
+    this.width = this.size.w;
+
+    // bottom height
+    this.bh = this.size.h;
+
+
+
+
+    //this.width = o.width !== undefined ? o.width : Tools.size.width;
+    //this.width = o.size !== undefined ? o.size : this.width;
+
+
+    // tmp variable
+    this.height = 0;
     this.left = 0;
-    this.top = o.top || 0;
-
-
-    this.h = 0;//this.height;
+    this.h = 0;
     this.prevY = -1;
+    this.sw = 0;
+
+
+    // color
+    this.colors = Tools.colors;
+    this.bg = o.bg || Tools.colors.background;
 
     // bottom and close height
     this.isWithClose = true;
-    this.bh = o.bh || 20;
+    
+
+    //this.baseH = Tools.size.height;
 
     if(o.close !== undefined ){
         this.isWithClose = o.close;
@@ -33,15 +59,13 @@ function Gui ( o ) {
 
 
 
-    // scroll width
-    this.sw = o.sw || 10;
+    
 
     Tools.main = this;
 
     this.callback = o.callback  === undefined ? null : o.callback;
 
-    //this.color = o.color || UIL.COLOR;
-    this.bg = o.bg || 'rgba(44,44,44,0.3)';
+   
     
     this.isCenter = o.center || false;
     this.lockwheel = false;
@@ -50,26 +74,26 @@ function Gui ( o ) {
 
     this.uis = [];
 
-    this.content = Tools.dom( 'div', Tools.css.basic + 'display:block; width:'+this.width+'px; height:auto; top:0; right:10px; transition:height 0.1s ease-out;' + o.css );
+    this.content = Tools.dom( 'div', Tools.css.basic + 'display:block; width:'+this.width+'px; height:auto; top:0; right:10px; transition:height 0.1s ease-out;' + this.css );
     document.body.appendChild( this.content );
 
-    this.innerContent = Tools.dom( 'div', Tools.css.basic + 'width:100%; top:0; left:0; height:auto;overflow:hidden;');
+    this.innerContent = Tools.dom( 'div', Tools.css.basic + 'width:100%; top:0; left:0; height:auto; overflow:hidden;');
     this.content.appendChild(this.innerContent);
 
     this.inner = Tools.dom( 'div', Tools.css.basic + 'width:100%; top:0; left:0; height:auto;');
     this.innerContent.appendChild(this.inner);
     this.inner.name = 'inner';
 
-    //this.scrollBG = Tools.dom('UIL scroll-bg');
-    this.scrollBG = Tools.dom( 'div', Tools.css.basic + 'right:0; top:0; width:10px; height:10px; cursor:s-resize; pointer-events:auto; display:none;');
-    this.content.appendChild(this.scrollBG);
+    // scroll background
+    this.scrollBG = Tools.dom( 'div', Tools.css.basic + 'right:0; top:0; width:'+this.size.s+'px; height:10px; cursor:s-resize; pointer-events:auto; display:none; background:'+this.bg+'; border-left:1px solid '+this.colors.stroke+';');
+    this.content.appendChild( this.scrollBG );
     this.scrollBG.name = 'scroll';
 
-    //this.scroll = Tools.dom('UIL scroll');
-    this.scroll = Tools.dom( 'div', Tools.css.basic + 'background:#666; right:0; top:0; width:5px; height:10px;');
+    // scroll
+    this.scroll = Tools.dom( 'div', Tools.css.basic + 'background:'+this.colors.scroll+'; right:0px; top:0; width:'+this.size.s+'px; height:10px;');
     this.scrollBG.appendChild( this.scroll );
 
-    this.bottom = Tools.dom( 'div',  Tools.css.txt + 'width:100%; top:auto; bottom:0; left:0; border-bottom-right-radius:10px;  border-bottom-left-radius:10px; text-align:center; pointer-events:auto; cursor:pointer; height:'+this.bh+'px; line-height:'+(this.bh-5)+'px;');
+    this.bottom = Tools.dom( 'div',  Tools.css.txt + 'width:100%; top:auto; bottom:0; left:0; border-bottom-right-radius:10px;  border-bottom-left-radius:10px; text-align:center; pointer-events:auto; cursor:pointer; height:'+this.bh+'px; line-height:'+(this.bh-5)+'px; border-top:1px solid '+Tools.colors.stroke+';');
     this.content.appendChild(this.bottom);
     this.bottom.textContent = 'close';
     this.bottom.name = 'bottom';
@@ -85,10 +109,13 @@ function Gui ( o ) {
     this.content.addEventListener( 'mouseout',  this, false );
     this.content.addEventListener( 'mouseup',   this, false );
     this.content.addEventListener( 'mouseover', this, false );
+
+    //console.log(this.content.getBoundingClientRect().top);
+
+    this.top = this.content.getBoundingClientRect().top;
     //this.content.addEventListener( 'mousewheel', this, false );
 
     document.addEventListener( 'mousewheel', function(e){this.wheel(e)}.bind(this), false );
-    
     window.addEventListener("resize", function(e){this.resize(e)}.bind(this), false );
 
     //
@@ -174,7 +201,7 @@ Gui.prototype = {
     move: function( e ){
 
         if(!this.isDown) return;
-        this.scroll.style.background = '#AAA';
+        this.scroll.style.background = this.colors.down;
         this.update( (e.clientY-this.top)-(this.sh*0.5) );
 
     },
@@ -186,7 +213,7 @@ Gui.prototype = {
         if( !e.target.name ) return;
 
         if(e.target.name === 'scroll'){
-            this.scroll.style.background = '#666';
+            this.scroll.style.background = this.colors.scroll;
         }
 
         if(e.target.name === 'bottom'){
@@ -198,7 +225,7 @@ Gui.prototype = {
     up: function( e ){
 
         this.isDown = false;
-        this.scroll.style.background = '#666';
+        this.scroll.style.background = this.colors.scroll;
         document.removeEventListener( 'mouseup', this, false );
         document.removeEventListener( 'mousemove', this, false );
 
@@ -208,7 +235,7 @@ Gui.prototype = {
 
         if( !e.target.name ) return;
         if(e.target.name === 'scroll'){
-            this.scroll.style.background = '#888';
+            this.scroll.style.background = this.colors.select;
         }
         if(e.target.name === 'bottom'){
             this.bottom.style.color = '#FFF';
@@ -236,7 +263,7 @@ Gui.prototype = {
         var delta = 0;
         if(e.wheelDeltaY) delta = -e.wheelDeltaY*0.04;
         else if(e.wheelDelta) delta = -e.wheelDelta*0.2;
-        else if(e.detail) delta =e.detail*4.0;
+        else if(e.detail) delta = e.detail*4.0;
 
         this.py += delta;
 
@@ -332,8 +359,8 @@ Gui.prototype = {
         y = y < 0 ? 0 :y;
         y = y > this.range ? this.range : y;
 
-        this.inner.style.top = -( ~~ ( y / this.ratio ) ) + 'px';
-        this.scroll.style.top = ( ~~ y ) + 'px';
+        this.inner.style.top = - Math.floor( y / this.ratio ) + 'px';
+        this.scroll.style.top = Math.floor( y ) + 'px';
 
         this.py = y;
 
@@ -344,6 +371,7 @@ Gui.prototype = {
     showScroll:function(h){
 
         this.isScroll = true;
+        this.sw = this.size.s;
 
         this.total = this.h;
         this.maxView = this.maxHeight;// - this.height;
@@ -359,12 +387,22 @@ Gui.prototype = {
         this.scrollBG.style.height = this.maxView + 'px';
         this.scroll.style.height = this.sh + 'px';
 
+        
+
+        this.setItemWidth( this.width - this.sw );
+
         this.update( 0 );
+
     },
 
     hideScroll:function(){
 
         this.isScroll = false;
+        this.sw = 0;
+        
+
+        this.setItemWidth( this.width - this.sw );
+
         this.update( 0 );
 
         this.scrollBG.style.display = 'none';
@@ -411,6 +449,7 @@ Gui.prototype = {
 
         } else {
 
+            this.height = this.bh;
             this.hideScroll();
 
         }
@@ -418,11 +457,10 @@ Gui.prototype = {
         this.innerContent.style.height = this.height - this.bh + 'px';
         this.content.style.height = this.height + 'px';
         this.bottom.style.top = this.height - this.bh + 'px';
-        //this.zone.h = this.height;
 
     },
 
-    setWidth:function( w ) {
+    setWidth: function( w ) {
 
         if( w ) this.width = w;
         this.content.style.width = this.width + 'px';
@@ -432,7 +470,9 @@ Gui.prototype = {
 
         if( this.isCenter ) this.content.style.marginLeft = -(~~ (this.width*0.5)) + 'px';
 
-        var l = this.uis.length;
+        this.setItemWidth( this.width - this.sw );
+
+        /*var l = this.uis.length;
         var i = l;
         while(i--){
             this.uis[i].setSize( this.width );
@@ -441,9 +481,19 @@ Gui.prototype = {
         i = l;
         while(i--){
             this.uis[i].rSize();
-        }
+        }*/
 
         this.resize();
+
+    },
+
+    setItemWidth: function( w ){
+
+        var i = this.uis.length;
+        while(i--){
+            this.uis[i].setSize( w );
+            this.uis[i].rSize()
+        }
 
     },
 

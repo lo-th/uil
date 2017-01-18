@@ -1,6 +1,4 @@
 
-
-//import { Tools } from './Tools';
 import { Bool } from '../proto/Bool.js';
 import { Button } from '../proto/Button.js';
 import { Circular } from '../proto/Circular.js';
@@ -21,19 +19,19 @@ function getType( name, o ) {
 
         switch( name ){
 
-            case 'Bool': n = new Bool(o); break;
-            case 'Button': n = new Button(o); break;
-            case 'Circular': n = new Circular(o); break;
-            case 'Color': n = new Color(o); break;
-            case 'Fps': n = new Fps(o); break;
-            case 'Group': n = new Group(o); break;
-            case 'Joystick': n = new Joystick(o); break;
-            case 'Knob': n = new Knob(o); break;
-            case 'List': n = new List(o); break;
-            case 'Numeric':case 'Number': n = new Numeric(o); break;
-            case 'Slide': n = new Slide(o); break;
-            case 'TextInput':case 'String': n = new TextInput(o); break;
-            case 'Title': n = new Title(o); break;
+            case 'Bool': case 'bool': n = new Bool(o); break;
+            case 'Button': case 'button': n = new Button(o); break;
+            case 'Circular': case 'circular': n = new Circular(o); break;
+            case 'Color': case 'color': n = new Color(o); break;
+            case 'Fps': case 'fps': n = new Fps(o); break;
+            case 'Group': case 'group': n = new Group(o); break;
+            case 'Joystick': case 'joystick': n = new Joystick(o); break;
+            case 'Knob': case 'knob': n = new Knob(o); break;
+            case 'List': case 'list': n = new List(o); break;
+            case 'Numeric':case 'Number': case 'numeric':case 'number': n = new Numeric(o); break;
+            case 'Slide': case 'slide': n = new Slide(o); break;
+            case 'TextInput':case 'String': case 'textInput':case 'string': n = new TextInput(o); break;
+            case 'Title': case 'title': n = new Title(o); break;
 
         }
 
@@ -48,7 +46,7 @@ function add (){
 
     if( typeof a[0] === 'string' ){ 
 
-        type = a[0][0].toUpperCase() + a[0].slice(1);
+        type = a[0];//[0].toUpperCase() + a[0].slice(1);
         o = a[1] || {};
 
     } else if ( typeof a[0] === 'object' ){ // like dat gui

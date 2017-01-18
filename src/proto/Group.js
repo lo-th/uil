@@ -105,18 +105,18 @@ Group.prototype.add = function( ){
     var n = add.apply( this, a );
     this.uis.push( n );
 
-    n.py = this.h;
+    /*n.py = this.h;
 
-        if( !n.autoWidth ){
-            var y = n.c[0].getBoundingClientRect().top;
-            if( this.prevY !== y ){
-                this.calc( n.h + 1 );
-                this.prevY = y;
-            }
-        }else{
-            this.prevY = -1;
+    if( !n.autoWidth ){
+        var y = n.c[0].getBoundingClientRect().top;
+        if( this.prevY !== y ){
             this.calc( n.h + 1 );
+            this.prevY = y;
         }
+    }else{
+        this.prevY = -1;
+        this.calc( n.h + 1 );
+    }*/
 
     if( n.autoHeight ) n.parentGroup = this;
 

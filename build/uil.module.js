@@ -84,6 +84,10 @@ if ( Object.assign === undefined ) {
 
 }
 
+/**
+ * @author lo-th / https://github.com/lo-th
+ */
+
 var Tools = {
 
     main: null,
@@ -101,13 +105,13 @@ var Tools = {
     SVG_TYPE_D: [ 'pattern', 'defs', 'transform', 'stop', 'animate', 'radialGradient', 'linearGradient', 'animateMotion' ],
     SVG_TYPE_G: [ 'rect', 'circle', 'path', 'polygon', 'text', 'g', 'line', 'foreignObject' ],
 
-    base: {
+    size: {
         
-        DEF: false,
-        WIDTH: 240,
-        HEIGHT: 20,
-        P: 30,
-        BW:5, //number ? 
+        w: 240,
+        h: 20,
+        p: 30,
+        s: 20,
+
     },
 
     // colors
@@ -115,7 +119,7 @@ var Tools = {
     colors: {
 
         text : '#C0C0C0',
-        background: 'rgba(0,0,0,0.3)',
+        background: 'rgba(44,44,44,0.3)',
 
         border : '#4f4f4f',
         borderSelect : '#308AFF',
@@ -127,7 +131,8 @@ var Tools = {
         moving : '#03afff',
         down : '#024699',
 
-        stroke: 'rgba(120,120,120,0.6)',
+        stroke: '#606060',//'rgba(120,120,120,0.6)',
+        scroll: '#333333',
 
     },
 
@@ -136,22 +141,10 @@ var Tools = {
     css : {
         basic: '-o-user-select:none; -ms-user-select:none; -khtml-user-select:none; -webkit-user-select:none; -moz-user-select:none;' + 'position:absolute; pointer-events:none; box-sizing:border-box; margin:0; padding:0; border:none; overflow:hidden; background:none;',
     },
-    //Tools.css.unselect = '-o-user-select:none; -ms-user-select:none; -khtml-user-select:none; -webkit-user-select:none; -moz-user-select:none;';
-    //Tools.css.basic = Tools.css.unselect + 'position:absolute; pointer-events:none; box-sizing:border-box; margin:0; padding:0; border:none; overflow:hidden; background:none;';
-
-    //Tools.setText();
-
 
     // svg path
 
     GPATH: 'M 7 7 L 7 8 8 8 8 7 7 7 M 5 7 L 5 8 6 8 6 7 5 7 M 3 7 L 3 8 4 8 4 7 3 7 M 7 5 L 7 6 8 6 8 5 7 5 M 6 6 L 6 5 5 5 5 6 6 6 M 7 3 L 7 4 8 4 8 3 7 3 M 6 4 L 6 3 5 3 5 4 6 4 M 3 5 L 3 6 4 6 4 5 3 5 M 3 3 L 3 4 4 4 4 3 3 3 Z',
-
-//}
-
-
-//Tools.prototype = {
-
-//    constructor: Tools,
 
     setText : function( size, color, font ){
 
@@ -421,6 +414,8 @@ var Tools = {
 
     },
 
+    // svg to canvas test 
+
     toCanvas: function( canvas, content, w, h ){
 
         var ctx = canvas.getContext("2d");
@@ -467,16 +462,27 @@ var Tools = {
 
 Tools.setText();
 
+/**
+ * @author lo-th / https://github.com/lo-th
+ */
+
 function Proto( o ){
 
     o = o || {};
 
     this.main = o.main || null;
+    // if is on ui pannel
+    this.isUI = o.isUI || false;
 
-    //this.type = '';
     // percent of title
-    this.p = Tools.base.P;//o.tPercent || 0;
-    if(o.p !== undefined ) this.p = o.p;
+    this.p = o.p !== undefined ? o.p : Tools.size.p;
+
+    this.width = this.isUI ? this.main.size.w : Tools.size.w;
+    if( o.w !== undefined ) this.width = o.w;
+
+    this.h = this.isUI ? this.main.size.h : Tools.size.h;
+    if( o.h !== undefined ) this.h = o.h;
+    this.h = this.h < 11 ? 11 : this.h;
 
     // if need resize width
     this.autoWidth = true;
@@ -487,8 +493,7 @@ function Proto( o ){
     // if height can change
     this.autoHeight = false;
 
-    // if is on ui pannel
-    this.isUI = o.isUI || false;
+    
 
     // only for number
     this.isNumber = false;
@@ -503,9 +508,9 @@ function Proto( o ){
     this.simple = o.simple || false;
     if( this.simple ) this.sa = 0;
 
-    this.width = this.isUI ? this.main.width : Tools.base.WIDTH;
-    if(o.width !== undefined ) this.width = o.width;
-    if(o.size !== undefined ) this.width = o.size;
+    
+    //if(o.width !== undefined ) this.width = o.width;
+    //if(o.size !== undefined ) this.width = o.size;
 
     //console.log(this.width)
 
@@ -526,19 +531,13 @@ function Proto( o ){
     this.val = null;
     this.isSend = false;
 
-    var h = 20;
-    if( this.isUI ) h = Tools.base.HEIGHT;//this.main.height;
-    this.h = o.h || o.height || h;
-    this.h = this.h < 11 ? 11 : this.h;
     
-    this.bgcolor = o.bgcolor || Tools.colors.background;
+    
+    // Background
+    this.bg = this.isUI ? this.main.bg : Tools.colors.background;
+    if( o.bg !== undefined ) this.bg = o.bg;
 
-    this.bg = this.isUI ? this.main.bg : 'rgba(44,44,44,0.3)';
-    if(o.bg !== undefined ) this.bg = o.bg;
-
-
-
-    //this.fontColor = o.fontColor === undefined ? UIL.BASECOLOR : o.fontColor;
+    // Font Color;
     this.titleColor = o.titleColor || Tools.colors.text;
     this.fontColor = o.fontColor || Tools.colors.text;
     this.colorPlus = Tools.ColorLuma( this.fontColor, 0.3 );
@@ -600,38 +599,36 @@ Proto.prototype = {
     init: function (){
 
         var s = this.s; // style cached
+        var c = this.c; // div cached
 
-        //s[0] = this.c[0].style;
         s[0].height = this.h + 'px';
 
-        if( this.isUI ) this.s[0].background = this.bg;//this.isUI ? this.main.bg : UIL.bgcolor(this.bgcolor);
-        if( this.autoHeight ) this.s[0].transition = 'height 0.1s ease-out';
-        if( this.c[1] !== undefined && this.autoWidth ){
-            s[1] = this.c[1].style;
+        if( this.isUI ) s[0].background = this.bg;
+        if( this.autoHeight ) s[0].transition = 'height 0.1s ease-out';
+        if( c[1] !== undefined && this.autoWidth ){
+            s[1] = c[1].style;
             s[1].height = (this.h-4) + 'px';
             s[1].lineHeight = (this.h-8) + 'px';
         }
 
         var frag = Tools.frag;
 
-        for( var i=1, lng = this.c.length; i !== lng; i++ ){
-            if( this.c[i] !== undefined ) {
-                frag.appendChild( this.c[i] );
-                s[i] = this.c[i].style;
+        for( var i=1, lng = c.length; i !== lng; i++ ){
+            if( c[i] !== undefined ) {
+                frag.appendChild( c[i] );
+                s[i] = c[i].style;
             }
         }
 
 
         if( this.target !== null ){ 
-            this.target.appendChild( this.c[0] );
+            this.target.appendChild( c[0] );
         } else {
-            if( this.isUI ) this.main.inner.appendChild( this.c[0] );
-            else document.body.appendChild( this.c[0] );
+            if( this.isUI ) this.main.inner.appendChild( c[0] );
+            else document.body.appendChild( c[0] );
         }
 
-        this.c[0].appendChild( frag );
-
-        //this.s = s;
+        c[0].appendChild( frag );
 
         this.rSize();
         this.addEvent();
@@ -747,7 +744,7 @@ Proto.prototype = {
 
         this.width = sx;// || UIL.WIDTH;
 
-        this.p = this.p === undefined ? Tools.base.P : this.p;
+        //this.p = this.p === undefined ? Tools.base.P : this.p;
 
 
         //if( !this.p ) this.p = UIL.P;
@@ -1164,7 +1161,9 @@ function Circular ( o ) {
 
     this.setTypeNumber( o );
 
-    this.radius = o.radius || 15;
+    this.radius = Math.floor((this.width-20)*0.5);
+
+    /*this.radius = o.radius || 15;
     
     this.width = (this.radius*2)+20;
 
@@ -1176,7 +1175,7 @@ function Circular ( o ) {
     if(o.size !== undefined){
         this.width = o.size;
         this.radius = ~~ (this.width-20)*0.5;
-    }
+    }*/
 
     this.w = this.height = this.radius * 2;
     this.h = o.height || (this.height + 40);
@@ -1198,7 +1197,6 @@ function Circular ( o ) {
     this.percent = 0;
 
     this.c[2] = Tools.dom( 'div', Tools.css.txtnumber + 'text-align:center; top:'+(this.height+24)+'px; width:'+this.width+'px; color:'+ this.fontColor );
-
     this.c[3] = Tools.dom( 'circle', Tools.css.basic + 'left:10px; top:'+this.top+'px; width:'+this.w+'px; height:'+this.height+'px; pointer-events:auto; cursor:pointer;', { cx:this.radius, cy:this.radius, r:this.radius, fill:'rgba(0,0,0,0.3)' });
     this.c[4] = Tools.dom( 'path', Tools.css.basic + 'left:10px; top:'+this.top+'px; width:'+this.w+'px; height:'+this.height+'px;', { d:this.makePath(), fill:this.fontColor });
     this.c[5] = Tools.dom( 'circle', Tools.css.basic + 'left:10px; top:'+this.top+'px; width:'+this.w+'px; height:'+this.height+'px;', { cx:this.radius, cy:this.radius, r:this.radius*0.5, fill:this.buttonColor, 'stroke-width':1, stroke:Tools.colors.stroke });
@@ -2064,18 +2062,18 @@ Group.prototype.add = function( ){
     var n = add.apply( this, a );
     this.uis.push( n );
 
-    n.py = this.h;
+    /*n.py = this.h;
 
-        if( !n.autoWidth ){
-            var y = n.c[0].getBoundingClientRect().top;
-            if( this.prevY !== y ){
-                this.calc( n.h + 1 );
-                this.prevY = y;
-            }
-        }else{
-            this.prevY = -1;
+    if( !n.autoWidth ){
+        var y = n.c[0].getBoundingClientRect().top;
+        if( this.prevY !== y ){
             this.calc( n.h + 1 );
+            this.prevY = y;
         }
+    }else{
+        this.prevY = -1;
+        this.calc( n.h + 1 );
+    }*/
 
     if( n.autoHeight ) n.parentGroup = this;
 
@@ -2231,7 +2229,9 @@ function Joystick ( o ) {
 
     this.interval = null;
 
-    this.radius = o.radius || 50;
+    this.radius = Math.floor((this.width-20)*0.5);
+
+    /*this.radius = o.radius || 50;
 
     this.width = (this.radius*2)+20;
 
@@ -2242,7 +2242,7 @@ function Joystick ( o ) {
     if(o.size !== undefined){
         this.width = o.size;
         this.radius = ~~ (this.width-20)*0.5;
-    }
+    }*/
 
     this.innerRadius = o.innerRadius || this.radius*0.6;
     this.maxDistance = this.radius - this.innerRadius - 5;
@@ -2486,7 +2486,9 @@ function Knob ( o ) {
     this.toDeg = 180 / Math.PI;
     this.cirRange = this.mPI * 2;
 
-    this.radius = o.radius || 15;
+    this.radius = Math.floor((this.width-20)*0.5);
+
+    /*this.radius = o.radius || 15;
     
     this.width = (this.radius*2)+20;
 
@@ -2498,7 +2500,7 @@ function Knob ( o ) {
     if(o.size !== undefined){
         this.width = o.size;
         this.radius = ~~ (this.width-20)*0.5;
-    }
+    }*/
 
     this.w = this.height = this.radius * 2;
     this.h = o.height || (this.height + 40);
@@ -3618,26 +3620,25 @@ Title.prototype.text2 = function(txt){
 
 };
 
-//import { Tools } from './Tools';
 function getType( name, o ) {
 
         var n = null;
 
         switch( name ){
 
-            case 'Bool': n = new Bool(o); break;
-            case 'Button': n = new Button(o); break;
-            case 'Circular': n = new Circular(o); break;
-            case 'Color': n = new Color(o); break;
-            case 'Fps': n = new Fps(o); break;
-            case 'Group': n = new Group(o); break;
-            case 'Joystick': n = new Joystick(o); break;
-            case 'Knob': n = new Knob(o); break;
-            case 'List': n = new List(o); break;
-            case 'Numeric':case 'Number': n = new Numeric(o); break;
-            case 'Slide': n = new Slide(o); break;
-            case 'TextInput':case 'String': n = new TextInput(o); break;
-            case 'Title': n = new Title(o); break;
+            case 'Bool': case 'bool': n = new Bool(o); break;
+            case 'Button': case 'button': n = new Button(o); break;
+            case 'Circular': case 'circular': n = new Circular(o); break;
+            case 'Color': case 'color': n = new Color(o); break;
+            case 'Fps': case 'fps': n = new Fps(o); break;
+            case 'Group': case 'group': n = new Group(o); break;
+            case 'Joystick': case 'joystick': n = new Joystick(o); break;
+            case 'Knob': case 'knob': n = new Knob(o); break;
+            case 'List': case 'list': n = new List(o); break;
+            case 'Numeric':case 'Number': case 'numeric':case 'number': n = new Numeric(o); break;
+            case 'Slide': case 'slide': n = new Slide(o); break;
+            case 'TextInput':case 'String': case 'textInput':case 'string': n = new TextInput(o); break;
+            case 'Title': case 'title': n = new Title(o); break;
 
         }
 
@@ -3652,7 +3653,7 @@ function add (){
 
     if( typeof a[0] === 'string' ){ 
 
-        type = a[0][0].toUpperCase() + a[0].slice(1);
+        type = a[0];//[0].toUpperCase() + a[0].slice(1);
         o = a[1] || {};
 
     } else if ( typeof a[0] === 'object' ){ // like dat gui
@@ -3693,29 +3694,55 @@ function autoType () {
 
 var REVISION = '1.0';
 
+/**
+ * @author lo-th / https://github.com/lo-th
+ */
+
 function Gui ( o ) {
 
     o = o || {};
 
-    //this.height = o.height || 20;
+    // css plus
+    this.css = o.css !== undefined ? o.css : '';
 
-    if( o.Tpercent !== undefined ) Tools.base.P = o.Tpercent;
-    if( o.css === undefined ) o.css = '';
+    // size define
+    this.size = Tools.size;
+    if( o.p !== undefined ) this.size.p = o.p;
+    if( o.w !== undefined ) this.size.w = o.w;
+    if( o.h !== undefined ) this.size.h = o.h;
+    if( o.s !== undefined ) this.size.s = o.s;
 
-    this.height = 20;
-    this.width = o.width !== undefined ? o.width : Tools.base.WIDTH;
-    this.width = o.size !== undefined ? o.size : this.width;
+    this.size.h = this.size.h < 11 ? 11 : this.size.h;
 
+    this.width = this.size.w;
+
+    // bottom height
+    this.bh = this.size.h;
+
+
+
+
+    //this.width = o.width !== undefined ? o.width : Tools.size.width;
+    //this.width = o.size !== undefined ? o.size : this.width;
+
+
+    // tmp variable
+    this.height = 0;
     this.left = 0;
-    this.top = o.top || 0;
-
-
-    this.h = 0;//this.height;
+    this.h = 0;
     this.prevY = -1;
+    this.sw = 0;
+
+
+    // color
+    this.colors = Tools.colors;
+    this.bg = o.bg || Tools.colors.background;
 
     // bottom and close height
     this.isWithClose = true;
-    this.bh = o.bh || 20;
+    
+
+    //this.baseH = Tools.size.height;
 
     if(o.close !== undefined ){
         this.isWithClose = o.close;
@@ -3724,15 +3751,13 @@ function Gui ( o ) {
 
 
 
-    // scroll width
-    this.sw = o.sw || 10;
+    
 
     Tools.main = this;
 
     this.callback = o.callback  === undefined ? null : o.callback;
 
-    //this.color = o.color || UIL.COLOR;
-    this.bg = o.bg || 'rgba(44,44,44,0.3)';
+   
     
     this.isCenter = o.center || false;
     this.lockwheel = false;
@@ -3741,26 +3766,26 @@ function Gui ( o ) {
 
     this.uis = [];
 
-    this.content = Tools.dom( 'div', Tools.css.basic + 'display:block; width:'+this.width+'px; height:auto; top:0; right:10px; transition:height 0.1s ease-out;' + o.css );
+    this.content = Tools.dom( 'div', Tools.css.basic + 'display:block; width:'+this.width+'px; height:auto; top:0; right:10px; transition:height 0.1s ease-out;' + this.css );
     document.body.appendChild( this.content );
 
-    this.innerContent = Tools.dom( 'div', Tools.css.basic + 'width:100%; top:0; left:0; height:auto;overflow:hidden;');
+    this.innerContent = Tools.dom( 'div', Tools.css.basic + 'width:100%; top:0; left:0; height:auto; overflow:hidden;');
     this.content.appendChild(this.innerContent);
 
     this.inner = Tools.dom( 'div', Tools.css.basic + 'width:100%; top:0; left:0; height:auto;');
     this.innerContent.appendChild(this.inner);
     this.inner.name = 'inner';
 
-    //this.scrollBG = Tools.dom('UIL scroll-bg');
-    this.scrollBG = Tools.dom( 'div', Tools.css.basic + 'right:0; top:0; width:10px; height:10px; cursor:s-resize; pointer-events:auto; display:none;');
-    this.content.appendChild(this.scrollBG);
+    // scroll background
+    this.scrollBG = Tools.dom( 'div', Tools.css.basic + 'right:0; top:0; width:'+this.size.s+'px; height:10px; cursor:s-resize; pointer-events:auto; display:none; background:'+this.bg+'; border-left:1px solid '+this.colors.stroke+';');
+    this.content.appendChild( this.scrollBG );
     this.scrollBG.name = 'scroll';
 
-    //this.scroll = Tools.dom('UIL scroll');
-    this.scroll = Tools.dom( 'div', Tools.css.basic + 'background:#666; right:0; top:0; width:5px; height:10px;');
+    // scroll
+    this.scroll = Tools.dom( 'div', Tools.css.basic + 'background:'+this.colors.scroll+'; right:0px; top:0; width:'+this.size.s+'px; height:10px;');
     this.scrollBG.appendChild( this.scroll );
 
-    this.bottom = Tools.dom( 'div',  Tools.css.txt + 'width:100%; top:auto; bottom:0; left:0; border-bottom-right-radius:10px;  border-bottom-left-radius:10px; text-align:center; pointer-events:auto; cursor:pointer; height:'+this.bh+'px; line-height:'+(this.bh-5)+'px;');
+    this.bottom = Tools.dom( 'div',  Tools.css.txt + 'width:100%; top:auto; bottom:0; left:0; border-bottom-right-radius:10px;  border-bottom-left-radius:10px; text-align:center; pointer-events:auto; cursor:pointer; height:'+this.bh+'px; line-height:'+(this.bh-5)+'px; border-top:1px solid '+Tools.colors.stroke+';');
     this.content.appendChild(this.bottom);
     this.bottom.textContent = 'close';
     this.bottom.name = 'bottom';
@@ -3776,10 +3801,13 @@ function Gui ( o ) {
     this.content.addEventListener( 'mouseout',  this, false );
     this.content.addEventListener( 'mouseup',   this, false );
     this.content.addEventListener( 'mouseover', this, false );
+
+    //console.log(this.content.getBoundingClientRect().top);
+
+    this.top = this.content.getBoundingClientRect().top;
     //this.content.addEventListener( 'mousewheel', this, false );
 
     document.addEventListener( 'mousewheel', function(e){this.wheel(e);}.bind(this), false );
-    
     window.addEventListener("resize", function(e){this.resize(e);}.bind(this), false );
 
     //
@@ -3865,7 +3893,7 @@ Gui.prototype = {
     move: function( e ){
 
         if(!this.isDown) return;
-        this.scroll.style.background = '#AAA';
+        this.scroll.style.background = this.colors.down;
         this.update( (e.clientY-this.top)-(this.sh*0.5) );
 
     },
@@ -3877,7 +3905,7 @@ Gui.prototype = {
         if( !e.target.name ) return;
 
         if(e.target.name === 'scroll'){
-            this.scroll.style.background = '#666';
+            this.scroll.style.background = this.colors.scroll;
         }
 
         if(e.target.name === 'bottom'){
@@ -3889,7 +3917,7 @@ Gui.prototype = {
     up: function( e ){
 
         this.isDown = false;
-        this.scroll.style.background = '#666';
+        this.scroll.style.background = this.colors.scroll;
         document.removeEventListener( 'mouseup', this, false );
         document.removeEventListener( 'mousemove', this, false );
 
@@ -3899,7 +3927,7 @@ Gui.prototype = {
 
         if( !e.target.name ) return;
         if(e.target.name === 'scroll'){
-            this.scroll.style.background = '#888';
+            this.scroll.style.background = this.colors.select;
         }
         if(e.target.name === 'bottom'){
             this.bottom.style.color = '#FFF';
@@ -3927,7 +3955,7 @@ Gui.prototype = {
         var delta = 0;
         if(e.wheelDeltaY) delta = -e.wheelDeltaY*0.04;
         else if(e.wheelDelta) delta = -e.wheelDelta*0.2;
-        else if(e.detail) delta =e.detail*4.0;
+        else if(e.detail) delta = e.detail*4.0;
 
         this.py += delta;
 
@@ -4023,8 +4051,8 @@ Gui.prototype = {
         y = y < 0 ? 0 :y;
         y = y > this.range ? this.range : y;
 
-        this.inner.style.top = -( ~~ ( y / this.ratio ) ) + 'px';
-        this.scroll.style.top = ( ~~ y ) + 'px';
+        this.inner.style.top = - Math.floor( y / this.ratio ) + 'px';
+        this.scroll.style.top = Math.floor( y ) + 'px';
 
         this.py = y;
 
@@ -4035,6 +4063,7 @@ Gui.prototype = {
     showScroll:function(h){
 
         this.isScroll = true;
+        this.sw = this.size.s;
 
         this.total = this.h;
         this.maxView = this.maxHeight;// - this.height;
@@ -4050,12 +4079,22 @@ Gui.prototype = {
         this.scrollBG.style.height = this.maxView + 'px';
         this.scroll.style.height = this.sh + 'px';
 
+        
+
+        this.setItemWidth( this.width - this.sw );
+
         this.update( 0 );
+
     },
 
     hideScroll:function(){
 
         this.isScroll = false;
+        this.sw = 0;
+        
+
+        this.setItemWidth( this.width - this.sw );
+
         this.update( 0 );
 
         this.scrollBG.style.display = 'none';
@@ -4102,6 +4141,7 @@ Gui.prototype = {
 
         } else {
 
+            this.height = this.bh;
             this.hideScroll();
 
         }
@@ -4109,11 +4149,10 @@ Gui.prototype = {
         this.innerContent.style.height = this.height - this.bh + 'px';
         this.content.style.height = this.height + 'px';
         this.bottom.style.top = this.height - this.bh + 'px';
-        //this.zone.h = this.height;
 
     },
 
-    setWidth:function( w ) {
+    setWidth: function( w ) {
 
         if( w ) this.width = w;
         this.content.style.width = this.width + 'px';
@@ -4123,7 +4162,9 @@ Gui.prototype = {
 
         if( this.isCenter ) this.content.style.marginLeft = -(~~ (this.width*0.5)) + 'px';
 
-        var l = this.uis.length;
+        this.setItemWidth( this.width - this.sw );
+
+        /*var l = this.uis.length;
         var i = l;
         while(i--){
             this.uis[i].setSize( this.width );
@@ -4132,9 +4173,19 @@ Gui.prototype = {
         i = l;
         while(i--){
             this.uis[i].rSize();
-        }
+        }*/
 
         this.resize();
+
+    },
+
+    setItemWidth: function( w ){
+
+        var i = this.uis.length;
+        while(i--){
+            this.uis[i].setSize( w );
+            this.uis[i].rSize();
+        }
 
     },
 

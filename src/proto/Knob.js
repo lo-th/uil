@@ -17,7 +17,9 @@ function Knob ( o ) {
     this.toDeg = 180 / Math.PI;
     this.cirRange = this.mPI * 2;
 
-    this.radius = o.radius || 15;
+    this.radius = Math.floor((this.width-20)*0.5);
+
+    /*this.radius = o.radius || 15;
     
     this.width = (this.radius*2)+20;
 
@@ -29,7 +31,7 @@ function Knob ( o ) {
     if(o.size !== undefined){
         this.width = o.size;
         this.radius = ~~ (this.width-20)*0.5;
-    }
+    }*/
 
     this.w = this.height = this.radius * 2;
     this.h = o.height || (this.height + 40);

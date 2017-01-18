@@ -12,7 +12,9 @@ function Circular ( o ) {
 
     this.setTypeNumber( o );
 
-    this.radius = o.radius || 15;
+    this.radius = Math.floor((this.width-20)*0.5);
+
+    /*this.radius = o.radius || 15;
     
     this.width = (this.radius*2)+20;
 
@@ -24,7 +26,7 @@ function Circular ( o ) {
     if(o.size !== undefined){
         this.width = o.size;
         this.radius = ~~ (this.width-20)*0.5;
-    }
+    }*/
 
     this.w = this.height = this.radius * 2;
     this.h = o.height || (this.height + 40);
@@ -46,7 +48,6 @@ function Circular ( o ) {
     this.percent = 0;
 
     this.c[2] = Tools.dom( 'div', Tools.css.txtnumber + 'text-align:center; top:'+(this.height+24)+'px; width:'+this.width+'px; color:'+ this.fontColor );
-
     this.c[3] = Tools.dom( 'circle', Tools.css.basic + 'left:10px; top:'+this.top+'px; width:'+this.w+'px; height:'+this.height+'px; pointer-events:auto; cursor:pointer;', { cx:this.radius, cy:this.radius, r:this.radius, fill:'rgba(0,0,0,0.3)' });
     this.c[4] = Tools.dom( 'path', Tools.css.basic + 'left:10px; top:'+this.top+'px; width:'+this.w+'px; height:'+this.height+'px;', { d:this.makePath(), fill:this.fontColor });
     this.c[5] = Tools.dom( 'circle', Tools.css.basic + 'left:10px; top:'+this.top+'px; width:'+this.w+'px; height:'+this.height+'px;', { cx:this.radius, cy:this.radius, r:this.radius*0.5, fill:this.buttonColor, 'stroke-width':1, stroke:Tools.colors.stroke });
