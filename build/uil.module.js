@@ -462,10 +462,6 @@ var Tools = {
 
 Tools.setText();
 
-/**
- * @author lo-th / https://github.com/lo-th
- */
-
 function Proto( o ){
 
     o = o || {};
@@ -1959,7 +1955,6 @@ Fps.prototype.listening = function(){
     
 };
 
-//import { add } from '../core/Gui';
 function Group ( o ) {
  
     Proto.call( this, o );
@@ -3693,10 +3688,6 @@ function autoType () {
 }
 
 var REVISION = '1.0';
-
-/**
- * @author lo-th / https://github.com/lo-th
- */
 
 function Gui ( o ) {
 
