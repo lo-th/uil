@@ -19,11 +19,13 @@ import { add } from '../core/add';
 
     this.isOpen = o.open || false;
 
+    this.isLine = o.line !== undefined ? o.line : true;
+
     this.c[2] = Tools.dom( 'div', Tools.css.basic + 'width:100%; left:0; height:auto; overflow:hidden; top:'+this.h+'px');
     this.c[3] = Tools.dom( 'path', Tools.css.basic + 'position:absolute; width:10px; height:10px; left:0; top:'+fltop+'px;', { d:Tools.GPATH, fill:this.fontColor, stroke:'none'});
     this.c[4] = Tools.dom( 'path', Tools.css.basic + 'position:absolute; width:10px; height:10px; left:4px; top:'+fltop+'px;', { d:'M 3 8 L 8 5 3 2 3 8 Z', fill:this.fontColor, stroke:'none'});
     // bottom line
-    this.c[5] = Tools.dom( 'div', Tools.css.basic +  'background:rgba(255, 255, 255, 0.2); width:100%; left:0; height:1px; bottom:0px');
+    if(this.isLine) this.c[5] = Tools.dom( 'div', Tools.css.basic +  'background:rgba(255, 255, 255, 0.2); width:100%; left:0; height:1px; bottom:0px');
 
     var s = this.s;
 
@@ -98,7 +100,7 @@ Group.prototype.add = function( ){
         else{ 
             a[2].isUI = true;
             a[2].target = this.c[2];
-            a[1].main = this.main;
+            a[2].main = this.main;
         }
     }
 

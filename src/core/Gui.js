@@ -75,10 +75,11 @@ function Gui ( o ) {
     this.uis = [];
 
     this.content = Tools.dom( 'div', Tools.css.basic + 'display:block; width:'+this.width+'px; height:auto; top:0; right:10px; transition:height 0.1s ease-out;' + this.css );
-    document.body.appendChild( this.content );
+    if( o.parent !== undefined ) o.parent.appendChild( this.content );
+    else document.body.appendChild( this.content );
 
     this.innerContent = Tools.dom( 'div', Tools.css.basic + 'width:100%; top:0; left:0; height:auto; overflow:hidden;');
-    this.content.appendChild(this.innerContent);
+    this.content.appendChild( this.innerContent );
 
     this.inner = Tools.dom( 'div', Tools.css.basic + 'width:100%; top:0; left:0; height:auto;');
     this.innerContent.appendChild(this.inner);
@@ -112,7 +113,7 @@ function Gui ( o ) {
 
     //console.log(this.content.getBoundingClientRect().top);
 
-    this.top = this.content.getBoundingClientRect().top;
+    this.top = o.top || this.content.getBoundingClientRect().top;
     //this.content.addEventListener( 'mousewheel', this, false );
 
     document.addEventListener( 'mousewheel', function(e){this.wheel(e)}.bind(this), false );

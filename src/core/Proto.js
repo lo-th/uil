@@ -79,8 +79,9 @@ function Proto( o ){
     this.titleColor = o.titleColor || Tools.colors.text;
     this.fontColor = o.fontColor || Tools.colors.text;
     this.colorPlus = Tools.ColorLuma( this.fontColor, 0.3 );
-    
 
+    this.name = o.name || 'Proto';
+    
     this.txt = o.name || 'Proto';
     this.rename = o.rename || '';
     this.target = o.target || null;

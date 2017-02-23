@@ -124,6 +124,9 @@ Button.prototype.initLoader = function(){
 
 Button.prototype.fileSelect = function( file ){
 
+    var dataUrl = [ 'png', 'jpg', 'mp4', 'webm', 'ogg' ];
+    var dataBuf = [ 'sea', 'bvh', 'BVH', 'z' ];
+
     //if( ! e.target.files ) return;
 
     //var file = e.target.files[0];
@@ -137,10 +140,15 @@ Button.prototype.fileSelect = function( file ){
     var fname = file.name;
     var type = fname.substring(fname.lastIndexOf('.')+1, fname.length );
 
-    if( type === 'png' || type === 'jpg' ) reader.readAsDataURL( file );
-    else if( type === 'z' ) reader.readAsBinaryString( file );
-    else if( type === 'sea' ) reader.readAsArrayBuffer( file );
+    if( dataUrl.indexOf( type ) !== -1 ) reader.readAsDataURL( file );
+    else if( dataBuf.indexOf( type ) !== -1 ) reader.readAsArrayBuffer( file );
     else reader.readAsText( file );
+
+    // if( type === 'png' || type === 'jpg' || type === 'mp4' || type === 'webm' || type === 'ogg' ) reader.readAsDataURL( file );
+    //else if( type === 'z' ) reader.readAsBinaryString( file );
+    //else if( type === 'sea' || type === 'bvh' || type === 'BVH' || type === 'z') reader.readAsArrayBuffer( file );
+    //else if(  ) reader.readAsArrayBuffer( file );
+    //else reader.readAsText( file );
 
     reader.onload = function(e) {
         

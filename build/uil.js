@@ -468,6 +468,10 @@
 
 	Tools.setText();
 
+	/**
+	 * @author lo-th / https://github.com/lo-th
+	 */
+
 	function Proto( o ){
 
 	    o = o || {};
@@ -543,8 +547,9 @@
 	    this.titleColor = o.titleColor || Tools.colors.text;
 	    this.fontColor = o.fontColor || Tools.colors.text;
 	    this.colorPlus = Tools.ColorLuma( this.fontColor, 0.3 );
-	    
 
+	    this.name = o.name || 'Proto';
+	    
 	    this.txt = o.name || 'Proto';
 	    this.rename = o.rename || '';
 	    this.target = o.target || null;
@@ -1070,6 +1075,9 @@
 
 	Button.prototype.fileSelect = function( file ){
 
+	    var dataUrl = [ 'png', 'jpg', 'mp4', 'webm', 'ogg' ];
+	    var dataBuf = [ 'sea', 'bvh', 'BVH', 'z' ];
+
 	    //if( ! e.target.files ) return;
 
 	    //var file = e.target.files[0];
@@ -1083,10 +1091,15 @@
 	    var fname = file.name;
 	    var type = fname.substring(fname.lastIndexOf('.')+1, fname.length );
 
-	    if( type === 'png' || type === 'jpg' ) reader.readAsDataURL( file );
-	    else if( type === 'z' ) reader.readAsBinaryString( file );
-	    else if( type === 'sea' ) reader.readAsArrayBuffer( file );
+	    if( dataUrl.indexOf( type ) !== -1 ) reader.readAsDataURL( file );
+	    else if( dataBuf.indexOf( type ) !== -1 ) reader.readAsArrayBuffer( file );
 	    else reader.readAsText( file );
+
+	    // if( type === 'png' || type === 'jpg' || type === 'mp4' || type === 'webm' || type === 'ogg' ) reader.readAsDataURL( file );
+	    //else if( type === 'z' ) reader.readAsBinaryString( file );
+	    //else if( type === 'sea' || type === 'bvh' || type === 'BVH' || type === 'z') reader.readAsArrayBuffer( file );
+	    //else if(  ) reader.readAsArrayBuffer( file );
+	    //else reader.readAsText( file );
 
 	    reader.onload = function(e) {
 	        
@@ -1961,6 +1974,7 @@
 	    
 	};
 
+	//import { add } from '../core/Gui';
 	function Group ( o ) {
 	 
 	    Proto.call( this, o );
@@ -1977,11 +1991,13 @@
 
 	    this.isOpen = o.open || false;
 
+	    this.isLine = o.line !== undefined ? o.line : true;
+
 	    this.c[2] = Tools.dom( 'div', Tools.css.basic + 'width:100%; left:0; height:auto; overflow:hidden; top:'+this.h+'px');
 	    this.c[3] = Tools.dom( 'path', Tools.css.basic + 'position:absolute; width:10px; height:10px; left:0; top:'+fltop+'px;', { d:Tools.GPATH, fill:this.fontColor, stroke:'none'});
 	    this.c[4] = Tools.dom( 'path', Tools.css.basic + 'position:absolute; width:10px; height:10px; left:4px; top:'+fltop+'px;', { d:'M 3 8 L 8 5 3 2 3 8 Z', fill:this.fontColor, stroke:'none'});
 	    // bottom line
-	    this.c[5] = Tools.dom( 'div', Tools.css.basic +  'background:rgba(255, 255, 255, 0.2); width:100%; left:0; height:1px; bottom:0px');
+	    if(this.isLine) this.c[5] = Tools.dom( 'div', Tools.css.basic +  'background:rgba(255, 255, 255, 0.2); width:100%; left:0; height:1px; bottom:0px');
 
 	    var s = this.s;
 
@@ -2056,7 +2072,7 @@
 	        else{ 
 	            a[2].isUI = true;
 	            a[2].target = this.c[2];
-	            a[1].main = this.main;
+	            a[2].main = this.main;
 	        }
 	    }
 
@@ -3695,6 +3711,10 @@
 
 	var REVISION = '1.0';
 
+	/**
+	 * @author lo-th / https://github.com/lo-th
+	 */
+
 	function Gui ( o ) {
 
 	    o = o || {};
@@ -3764,10 +3784,11 @@
 	    this.uis = [];
 
 	    this.content = Tools.dom( 'div', Tools.css.basic + 'display:block; width:'+this.width+'px; height:auto; top:0; right:10px; transition:height 0.1s ease-out;' + this.css );
-	    document.body.appendChild( this.content );
+	    if( o.parent !== undefined ) o.parent.appendChild( this.content );
+	    else document.body.appendChild( this.content );
 
 	    this.innerContent = Tools.dom( 'div', Tools.css.basic + 'width:100%; top:0; left:0; height:auto; overflow:hidden;');
-	    this.content.appendChild(this.innerContent);
+	    this.content.appendChild( this.innerContent );
 
 	    this.inner = Tools.dom( 'div', Tools.css.basic + 'width:100%; top:0; left:0; height:auto;');
 	    this.innerContent.appendChild(this.inner);
@@ -3801,7 +3822,7 @@
 
 	    //console.log(this.content.getBoundingClientRect().top);
 
-	    this.top = this.content.getBoundingClientRect().top;
+	    this.top = o.top || this.content.getBoundingClientRect().top;
 	    //this.content.addEventListener( 'mousewheel', this, false );
 
 	    document.addEventListener( 'mousewheel', function(e){this.wheel(e);}.bind(this), false );
