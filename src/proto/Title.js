@@ -1,7 +1,7 @@
 import { Tools } from '../core/Tools';
 import { Proto } from '../core/Proto';
 
-function Title ( o ){
+function Title ( o ) {
     
     Proto.call( this, o );
 
@@ -25,28 +25,30 @@ function Title ( o ){
 
 };
 
-Title.prototype = Object.create( Proto.prototype );
-Title.prototype.constructor = Title;
+Title.prototype = Object.assign( Object.create( Proto.prototype ), {
 
+    constructor: Title,
 
-Title.prototype.rSize = function(){
+    text: function ( txt ) {
 
-    Proto.prototype.rSize.call( this );
-    this.s[1].width = this.width-50 + 'px';
-    this.s[2].left = this.width-(50+26) + 'px';
+        this.c[1].textContent = txt;
 
-};
+    },
 
-Title.prototype.text = function(txt){
+    text2: function ( txt ) {
 
-    this.c[1].textContent = txt;
+        this.c[2].textContent = txt;
 
-};
+    },
 
-Title.prototype.text2 = function(txt){
+    rSize: function () {
 
-    this.c[2].textContent = txt;
+        Proto.prototype.rSize.call( this );
+        this.s[1].width = this.width-50 + 'px';
+        this.s[2].left = this.width-(50+26) + 'px';
 
-};
+    },
+
+} );
 
 export { Title };

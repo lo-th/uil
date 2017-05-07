@@ -31,6 +31,9 @@ function Proto( o ){
     // if height can change
     this.autoHeight = false;
 
+    // radius for toolbox
+    this.radius = o.radius || 0;
+
     
 
     // only for number
@@ -142,7 +145,7 @@ Proto.prototype = {
 
         s[0].height = this.h + 'px';
 
-        if( this.isUI ) s[0].background = this.bg;
+        //if( this.isUI ) s[0].background = this.bg;
         if( this.autoHeight ) s[0].transition = 'height 0.1s ease-out';
         if( c[1] !== undefined && this.autoWidth ){
             s[1] = c[1].style;

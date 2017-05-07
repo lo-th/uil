@@ -17,7 +17,6 @@ function Numeric( o ){
     this.isNumber = true;
     this.isAngle = false;
     this.isVector = false;
-
     this.isSelect = false;
 
     if( o.value !== undefined ){
@@ -61,190 +60,185 @@ function Numeric( o ){
     this.init();
 }
 
-Numeric.prototype = Object.create( Proto.prototype );
-Numeric.prototype.constructor = Numeric;
+Numeric.prototype = Object.assign( Object.create( Proto.prototype ), {
 
-Numeric.prototype.handleEvent = function( e ) {
+    constructor: Numeric,
 
-    //e.preventDefault();
-    //e.stopPropagation();
+    handleEvent: function( e ) {
 
-    switch( e.type ) {
-        //case 'click': this.click( e ); break;
-        case 'mousedown': this.down( e ); break;
-        case 'keydown': this.keydown( e ); break;
-        case 'keyup': this.keyup( e ); break;
+        //e.preventDefault();
+        //e.stopPropagation();
 
-        case 'blur': this.blur( e ); break;
-        case 'focus': this.focus( e ); break;
+        switch( e.type ) {
+            //case 'click': this.click( e ); break;
+            case 'mousedown': this.down( e ); break;
+            case 'keydown': this.keydown( e ); break;
+            case 'keyup': this.keyup( e ); break;
 
-        // document
-        case 'mouseup': this.up( e ); break;
-        case 'mousemove': this.move( e ); break;
+            case 'blur': this.blur( e ); break;
+            case 'focus': this.focus( e ); break;
 
-    }
+            // document
+            case 'mouseup': this.up( e ); break;
+            case 'mousemove': this.move( e ); break;
 
-};
-
-Numeric.prototype.setValue = function( v, n ){
-
-    n = n || 0;
-    this.value[n] = this.numValue( v );
-    this.c[2+n].textContent = this.value[n];
-
-};
-
-Numeric.prototype.keydown = function( e ){
-
-    e.stopPropagation();
-
-    if( e.keyCode === 13 ){
-        e.preventDefault();
-        this.testValue( parseFloat(e.target.name) );
-        this.validate();
-        e.target.blur();
-    }
-
-};
-
-Numeric.prototype.keyup = function( e ){
-    
-    e.stopPropagation();
-
-    if( this.allway ){ 
-        this.testValue( parseFloat(e.target.name) );
-        this.validate();
-    }
-
-};
-
-Numeric.prototype.blur = function( e ){
-
-    this.isSelect = false;
-    e.target.style.borderColor = Tools.colors.border;
-    e.target.contentEditable = false;
-    //e.target.style.border = '1px solid rgba(255,255,255,0.1)';
-    if(this.isDrag) e.target.style.cursor = 'move';
-    else  e.target.style.cursor = 'pointer';
-
-};
-
-Numeric.prototype.focus = function( e ){
-
-    this.isSelect = true;
-    this.current = undefined;
-    e.target.style.borderColor = Tools.colors.borderSelect;
-    
-    //e.target.style.border = '1px solid ' + UIL.BorderSelect;
-    if(this.isDrag) e.target.style.cursor = 'auto';
-
-};
-
-Numeric.prototype.down = function( e ){
-
-    if(this.isSelect) return;
-
-    e.preventDefault();
-
-    
-
-    //e.target.style.border = '1px solid rgba(255,255,255,0.2)';
-    this.current = parseFloat(e.target.name);
-
-    this.prev = { x:e.clientX, y:e.clientY, d:0, id:(this.current+2)};
-    if( this.isNumber ) this.prev.v = parseFloat(this.value);
-    else this.prev.v = parseFloat( this.value[this.current] );
-
-
-
-    document.addEventListener( 'mouseup', this, false );
-    if(this.isDrag) document.addEventListener( 'mousemove', this, false );
-
-};
-
-////
-
-Numeric.prototype.up = function( e ){
-
-    e.preventDefault();
-
-    document.removeEventListener( 'mouseup', this, false );
-    if(this.isDrag) document.removeEventListener( 'mousemove', this, false );
-
-    if(this.current !== undefined){ 
-
-        if( this.current === parseFloat(e.target.name) ){ 
-            e.target.contentEditable = true;
-            e.target.focus();
         }
 
-       // else e.target.style.borderColor = UIL.BorderSelect;;//this.c[2+this.current].style.border = '1px solid rgba(255,255,255,0.1)';
+    },
 
+    setValue: function ( v, n ) {
 
-        //this.c[2+this.current].style.cursor = 'move';
-    }
-
-    
-
-};
-
-Numeric.prototype.move = function( e ){
-
-    e.preventDefault();
-
-    if( this.current === undefined ) return;
-
-    this.prev.d += ( e.clientX - this.prev.x ) - ( e.clientY - this.prev.y );
-    var n = this.prev.v + ( this.prev.d * this.step);
-
-    this.value[this.current] = this.numValue(n);
-    //this.c[2+this.current].value = this.value[this.current];
-
-    this.c[2+this.current].textContent = this.value[this.current];
-
-    this.validate();
-
-    this.prev.x = e.clientX;
-    this.prev.y = e.clientY;
-
-};
-
-/////
-
-Numeric.prototype.testValue = function( n ){
-
-    if(!isNaN( this.c[2+n].textContent )){ 
-        var nx = this.numValue( this.c[2+n].textContent );
-        this.c[2+n].textContent = nx;
-        this.value[n] = nx;
-    } else { // not number
+        n = n || 0;
+        this.value[n] = this.numValue( v );
         this.c[2+n].textContent = this.value[n];
+
+    },
+
+    keydown: function ( e ) {
+
+        e.stopPropagation();
+
+        if( e.keyCode === 13 ){
+            e.preventDefault();
+            this.testValue( parseFloat(e.target.name) );
+            this.validate();
+            e.target.blur();
+        }
+
+    },
+
+    keyup: function ( e ) {
+        
+        e.stopPropagation();
+
+        if( this.allway ){ 
+            this.testValue( parseFloat(e.target.name) );
+            this.validate();
+        }
+
+    },
+
+    blur: function ( e ) {
+
+        this.isSelect = false;
+        e.target.style.borderColor = Tools.colors.border;
+        e.target.contentEditable = false;
+        //e.target.style.border = '1px solid rgba(255,255,255,0.1)';
+        if(this.isDrag) e.target.style.cursor = 'move';
+        else  e.target.style.cursor = 'pointer';
+
+    },
+
+    focus: function ( e ) {
+
+        this.isSelect = true;
+        this.current = undefined;
+        e.target.style.borderColor = Tools.colors.borderSelect;
+        
+        //e.target.style.border = '1px solid ' + UIL.BorderSelect;
+        if(this.isDrag) e.target.style.cursor = 'auto';
+
+    },
+
+    down: function ( e ) {
+
+        if(this.isSelect) return;
+
+        e.preventDefault();
+
+        this.current = parseFloat(e.target.name);
+
+        this.prev = { x:e.clientX, y:e.clientY, d:0, id:(this.current+2)};
+        if( this.isNumber ) this.prev.v = parseFloat(this.value);
+        else this.prev.v = parseFloat( this.value[this.current] );
+
+
+
+        document.addEventListener( 'mouseup', this, false );
+        if(this.isDrag) document.addEventListener( 'mousemove', this, false );
+
+    },
+
+    ////
+
+    up: function( e ){
+
+        e.preventDefault();
+
+        document.removeEventListener( 'mouseup', this, false );
+        if(this.isDrag) document.removeEventListener( 'mousemove', this, false );
+
+        if(this.current !== undefined){ 
+
+            if( this.current === parseFloat(e.target.name) ){ 
+                e.target.contentEditable = true;
+                e.target.focus();
+            }
+
+        }
+
+    },
+
+    move: function( e ){
+
+        e.preventDefault();
+
+        if( this.current === undefined ) return;
+
+        this.prev.d += ( e.clientX - this.prev.x ) - ( e.clientY - this.prev.y );
+        var n = this.prev.v + ( this.prev.d * this.step);
+
+        this.value[this.current] = this.numValue(n);
+        //this.c[2+this.current].value = this.value[this.current];
+
+        this.c[2+this.current].textContent = this.value[this.current];
+
+        this.validate();
+
+        this.prev.x = e.clientX;
+        this.prev.y = e.clientY;
+
+    },
+
+    /////
+
+    testValue: function( n ){
+
+        if(!isNaN( this.c[2+n].textContent )){ 
+            var nx = this.numValue( this.c[2+n].textContent );
+            this.c[2+n].textContent = nx;
+            this.value[n] = nx;
+        } else { // not number
+            this.c[2+n].textContent = this.value[n];
+        }
+
+    },
+
+    validate: function(){
+
+        var ar = [];
+        var i = this.length;
+        while(i--) ar[i] = this.value[i]*this.toRad;
+
+        if( this.isNumber ) this.send( ar[0] );
+        else this.send( ar );
+
+    },
+
+    rSize: function(){
+
+        Proto.prototype.rSize.call( this );
+
+        this.w = ~~( ( this.sb + 5 ) / this.length )-5;
+        var s = this.s;
+        var i = this.length;
+        while(i--){
+            s[2+i].left = (~~( this.sa + ( this.w * i )+( 5 * i ))) + 'px';
+            s[2+i].width = this.w + 'px';
+        }
+
     }
 
-};
-
-Numeric.prototype.validate = function(){
-
-    var ar = [];
-    var i = this.length;
-    while(i--) ar[i] = this.value[i]*this.toRad;
-
-    if( this.isNumber ) this.send( ar[0] );
-    else this.send( ar );
-
-};
-
-Numeric.prototype.rSize = function(){
-
-    Proto.prototype.rSize.call( this );
-    this.w = ~~( ( this.sb + 5 ) / this.length )-5;
-    var s = this.s;
-    var i = this.length;
-    while(i--){
-        s[2+i].left = (~~( this.sa + ( this.w * i )+( 5 * i ))) + 'px';
-        s[2+i].width = this.w + 'px';
-    }
-
-};
+} );
 
 export { Numeric };

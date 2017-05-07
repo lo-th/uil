@@ -74,181 +74,188 @@ function Fps ( o ) {
 
     //if( this.isShow ) this.show();
 
-}
-
-Fps.prototype = Object.create( Proto.prototype );
-Fps.prototype.constructor = Fps;
-
-Fps.prototype.handleEvent = function( e ) {
-
-    e.preventDefault();
-    switch( e.type ) {
-        case 'click': this.click(e); break;
-        case 'mouseover': this.mode(1); break;
-        case 'mousedown': this.mode(2); break;
-        case 'mouseout':  this.mode(0); break;
-    }
-
-}
-
-Fps.prototype.click = function( e ){
-
-    if( this.isShow ) this.hide();
-    else this.show();
-
 };
 
-Fps.prototype.mode = function( mode ){
 
-    var s = this.s;
+Fps.prototype = Object.assign( Object.create( Proto.prototype ), {
 
-    switch(mode){
-        case 0: // base
-            s[1].color = this.fontColor;
-            //s[1].background = 'none';
-        break;
-        case 1: // over
-            s[1].color = '#FFF';
-            //s[1].background = UIL.SELECT;
-        break;
-        case 2: // edit / down
-            s[1].color = this.fontColor;
-            //s[1].background = UIL.SELECTDOWN;
-        break;
+    constructor: Fps,
 
-    }
-}
+    handleEvent: function ( e ) {
 
-Fps.prototype.makePath = function ( point ) {
+        e.preventDefault();
 
-    var p = '';
-    p += 'M ' + (-1) + ' ' + 50;
-    for ( var i = 0; i < this.res + 1; i ++ ) { p += ' L ' + i + ' ' + point[i]; }
-    p += ' L ' + (this.res + 1) + ' ' + 50;
+        switch( e.type ) {
+            case 'click': this.click(e); break;
+            case 'mouseover': this.mode(1); break;
+            case 'mousedown': this.mode(2); break;
+            case 'mouseout':  this.mode(0); break;
+        }
 
-    return p;
+    },
 
-};
+    mode: function ( mode ) {
 
-Fps.prototype.drawGraph = function( ){
+        var s = this.s;
 
-    var svg = this.c[2];
+        switch(mode){
+            case 0: // base
+                s[1].color = this.fontColor;
+                //s[1].background = 'none';
+            break;
+            case 1: // over
+                s[1].color = '#FFF';
+                //s[1].background = UIL.SELECT;
+            break;
+            case 2: // edit / down
+                s[1].color = this.fontColor;
+                //s[1].background = UIL.SELECTDOWN;
+            break;
 
-    this.pa1.shift();
-    this.pa1.push( 8.5 + this.round( ( 1 - (this.fps / 100)) * 30 ) );
+        }
+    },
 
-    Tools.setSvg( svg, 'd', this.makePath( this.pa1 ), 0 );
+    click: function ( e ) {
 
-    this.pa2.shift();
-    this.pa2.push( 8.5 + this.round( ( 1 - (this.ms / 200)) * 30 ) );
+        if( this.isShow ) this.hide();
+        else this.show();
 
-    Tools.setSvg( svg, 'd', this.makePath( this.pa2 ), 1 );
+    },
 
-    if ( this.isMem ) {
+    makePath: function ( point ) {
 
-        this.pa3.shift();
-        this.pa3.push( 8.5 + this.round( ( 1 - this.mm) * 30 ) );
+        var p = '';
+        p += 'M ' + (-1) + ' ' + 50;
+        for ( var i = 0; i < this.res + 1; i ++ ) { p += ' L ' + i + ' ' + point[i]; }
+        p += ' L ' + (this.res + 1) + ' ' + 50;
 
-        Tools.setSvg( svg, 'd', this.makePath( this.pa3 ), 2 );
+        return p;
 
-    }
+    },
 
-}
+    drawGraph: function( ){
 
+        var svg = this.c[2];
 
-Fps.prototype.show = function(){
+        this.pa1.shift();
+        this.pa1.push( 8.5 + this.round( ( 1 - (this.fps / 100)) * 30 ) );
 
-    this.h = this.hplus + this.baseH;
+        Tools.setSvg( svg, 'd', this.makePath( this.pa1 ), 0 );
 
-    Tools.setSvg( this.c[4], 'd','M 5 8 L 8 3 2 3 5 8 Z');
+        this.pa2.shift();
+        this.pa2.push( 8.5 + this.round( ( 1 - (this.ms / 200)) * 30 ) );
 
-
-    if( this.parentGroup !== null ){ this.parentGroup.calc( this.hplus );}
-    else if( this.isUI ) this.main.calc( this.hplus );
-
-    this.s[0].height = this.h +'px';
-    this.s[2].display = 'block'; 
-    this.isShow = true;
-
-    Tools.addListen( this );
-
-}
-
-Fps.prototype.hide = function(){
-
-    this.h = this.baseH;
-
-    Tools.setSvg( this.c[4], 'd','M 3 8 L 8 5 3 2 3 8 Z');
-
-    if( this.parentGroup !== null ){ this.parentGroup.calc( -this.hplus );}
-    else if( this.isUI ) this.main.calc( -this.hplus );
-    
-    this.s[0].height = this.h +'px';
-    this.s[2].display = 'none';
-    this.isShow = false;
-
-    Tools.removeListen( this );
-    this.c[1].textContent = 'FPS';
-    
-}
-
-Fps.prototype.rSize = function(){
-
-    this.s[0].width = this.width + 'px';
-    this.s[1].width = this.width + 'px';
-    this.s[2].left = 10 + 'px';
-    this.s[2].width = (this.width-20) + 'px';
-    
-}
-
-//////////////////
-
-Fps.prototype.begin = function(){
-
-    this.startTime = this.now();
-    
-}
-
-Fps.prototype.end = function(){
-
-
-    var time = this.now();
-    this.ms = time - this.startTime;
-
-    this.frames ++;
-
-    if ( time > this.prevTime + 1000 ) {
-
-        this.fps = this.round( ( this.frames * 1000 ) / ( time - this.prevTime ) );
-
-        this.prevTime = time;
-        this.frames = 0;
+        Tools.setSvg( svg, 'd', this.makePath( this.pa2 ), 1 );
 
         if ( this.isMem ) {
 
-            var heapSize = performance.memory.usedJSHeapSize;
-            var heapSizeLimit = performance.memory.jsHeapSizeLimit;
+            this.pa3.shift();
+            this.pa3.push( 8.5 + this.round( ( 1 - this.mm) * 30 ) );
 
-            this.mem = this.round( heapSize * 0.000000954 );
-
-            this.mm = heapSize / heapSizeLimit;
+            Tools.setSvg( svg, 'd', this.makePath( this.pa3 ), 2 );
 
         }
 
-    }
+    },
 
-    this.drawGraph();
-    this.c[1].innerHTML = 'FPS ' + this.fps + '<font color="yellow"> MS '+ ( this.ms | 0 ) + '</font><font color="cyan"> MB '+ this.mem + '</font>';
+    show: function(){
 
-    return time;
+        this.h = this.hplus + this.baseH;
 
+        Tools.setSvg( this.c[4], 'd','M 5 8 L 8 3 2 3 5 8 Z');
+
+
+        if( this.parentGroup !== null ){ this.parentGroup.calc( this.hplus );}
+        else if( this.isUI ) this.main.calc( this.hplus );
+
+        this.s[0].height = this.h +'px';
+        this.s[2].display = 'block'; 
+        this.isShow = true;
+
+        Tools.addListen( this );
+
+    },
+
+    hide: function(){
+
+        this.h = this.baseH;
+
+        Tools.setSvg( this.c[4], 'd','M 3 8 L 8 5 3 2 3 8 Z');
+
+        if( this.parentGroup !== null ){ this.parentGroup.calc( -this.hplus );}
+        else if( this.isUI ) this.main.calc( -this.hplus );
+        
+        this.s[0].height = this.h +'px';
+        this.s[2].display = 'none';
+        this.isShow = false;
+
+        Tools.removeListen( this );
+        this.c[1].textContent = 'FPS';
+        
+    },
+
+
+
+    //////////////////
+
+    begin: function(){
+
+        this.startTime = this.now();
+        
+    },
+
+    end: function(){
+
+
+        var time = this.now();
+        this.ms = time - this.startTime;
+
+        this.frames ++;
+
+        if ( time > this.prevTime + 1000 ) {
+
+            this.fps = this.round( ( this.frames * 1000 ) / ( time - this.prevTime ) );
+
+            this.prevTime = time;
+            this.frames = 0;
+
+            if ( this.isMem ) {
+
+                var heapSize = performance.memory.usedJSHeapSize;
+                var heapSizeLimit = performance.memory.jsHeapSizeLimit;
+
+                this.mem = this.round( heapSize * 0.000000954 );
+
+                this.mm = heapSize / heapSizeLimit;
+
+            }
+
+        }
+
+        this.drawGraph();
+        this.c[1].innerHTML = 'FPS ' + this.fps + '<font color="yellow"> MS '+ ( this.ms | 0 ) + '</font><font color="cyan"> MB '+ this.mem + '</font>';
+
+        return time;
+
+        
+    },
+
+    listening: function(){
+
+        this.startTime = this.end();
+        
+    },
+
+
+    rSize: function(){
+
+        this.s[0].width = this.width + 'px';
+        this.s[1].width = this.width + 'px';
+        this.s[2].left = 10 + 'px';
+        this.s[2].width = (this.width-20) + 'px';
+        
+    },
     
-}
-
-Fps.prototype.listening = function(){
-
-    this.startTime = this.end();
-    
-}
+} );
 
 export { Fps };

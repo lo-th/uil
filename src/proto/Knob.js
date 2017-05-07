@@ -67,77 +67,80 @@ function Knob ( o ) {
 
 };
 
-Knob.prototype = Object.create( Circular.prototype );
-Knob.prototype.constructor = Knob;
+Knob.prototype = Object.assign( Object.create( Circular.prototype ), {
 
-Knob.prototype.move = function( e ){
+    constructor: Knob,
 
-    if( !this.isDown ) return;
+    move: function( e ){
 
-    var x = this.radius - (e.clientX - this.rect.left);
-    var y = this.radius - (e.clientY - this.rect.top);
-    this.r = - Math.atan2( x, y );
+        if( !this.isDown ) return;
 
-    if( this.oldr !== null ) this.r = Math.abs(this.r - this.oldr) > Math.PI ? this.oldr : this.r;
+        var x = this.radius - (e.clientX - this.rect.left);
+        var y = this.radius - (e.clientY - this.rect.top);
+        this.r = - Math.atan2( x, y );
 
-    this.r = this.r > this.mPI ? this.mPI : this.r;
-    this.r = this.r < -this.mPI ? -this.mPI : this.r;
+        if( this.oldr !== null ) this.r = Math.abs(this.r - this.oldr) > Math.PI ? this.oldr : this.r;
 
-    var steps = 1 / this.cirRange;
-    var value = (this.r + this.mPI) * steps;
+        this.r = this.r > this.mPI ? this.mPI : this.r;
+        this.r = this.r < -this.mPI ? -this.mPI : this.r;
 
-    var n = ( ( this.range * value ) + this.min ) - this.old;
+        var steps = 1 / this.cirRange;
+        var value = (this.r + this.mPI) * steps;
 
-    if(n >= this.step || n <= this.step){ 
-        n = ~~ ( n / this.step );
-        this.value = this.numValue( this.old + ( n * this.step ) );
-        this.update( true );
-        this.old = this.value;
-        this.oldr = this.r;
-    }
+        var n = ( ( this.range * value ) + this.min ) - this.old;
 
-};
+        if(n >= this.step || n <= this.step){ 
+            n = ~~ ( n / this.step );
+            this.value = this.numValue( this.old + ( n * this.step ) );
+            this.update( true );
+            this.old = this.value;
+            this.oldr = this.r;
+        }
 
-Knob.prototype.makeGrad = function(){
+    },
 
-    var d = '', step, range, a, x, y, x2, y2, r = this.radius;
-    var startangle = Math.PI + this.mPI;
-    var endangle = Math.PI - this.mPI;
+    makeGrad: function () {
 
-    if(this.step>5){
-        range =  this.range / this.step;
-        step = ( startangle - endangle ) / range;
-    } else {
-        step = ( startangle - endangle ) / r;
-        range = r;
-    }
+        var d = '', step, range, a, x, y, x2, y2, r = this.radius;
+        var startangle = Math.PI + this.mPI;
+        var endangle = Math.PI - this.mPI;
 
-    for ( var i = 0; i <= range; ++i ) {
+        if(this.step>5){
+            range =  this.range / this.step;
+            step = ( startangle - endangle ) / range;
+        } else {
+            step = ( startangle - endangle ) / r;
+            range = r;
+        }
 
-        a = startangle - ( step * i );
-        x = r + Math.sin( a ) * r;
-        y = r + Math.cos( a ) * r;
-        x2 = r + Math.sin( a ) * ( r - 3 );
-        y2 = r + Math.cos( a ) * ( r - 3 );
-        d += 'M' + x + ' ' + y + ' L' + x2 + ' '+y2 + ' ';
+        for ( var i = 0; i <= range; ++i ) {
 
-    }
+            a = startangle - ( step * i );
+            x = r + Math.sin( a ) * r;
+            y = r + Math.cos( a ) * r;
+            x2 = r + Math.sin( a ) * ( r - 3 );
+            y2 = r + Math.cos( a ) * ( r - 3 );
+            d += 'M' + x + ' ' + y + ' L' + x2 + ' '+y2 + ' ';
 
-    return d;
+        }
 
-};
+        return d;
 
-Knob.prototype.update = function( up ){
+    },
 
-    this.c[2].textContent = this.value;
-    this.percent = (this.value - this.min) / this.range;
+    update: function ( up ) {
 
-    var r = ( (this.percent * this.cirRange) - (this.mPI)) * this.toDeg;
+        this.c[2].textContent = this.value;
+        this.percent = (this.value - this.min) / this.range;
 
-    Tools.setSvg( this.c[4], 'transform', 'rotate('+ r +' '+this.radius+' '+this.radius+')' );
+        var r = ( (this.percent * this.cirRange) - (this.mPI)) * this.toDeg;
 
-    if( up ) this.send();
-    
-};
+        Tools.setSvg( this.c[4], 'transform', 'rotate('+ r +' '+this.radius+' '+this.radius+')' );
+
+        if( up ) this.send();
+        
+    },
+
+} );
 
 export { Knob };

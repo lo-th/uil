@@ -60,139 +60,144 @@ function Circular ( o ) {
 
 };
 
-Circular.prototype = Object.create( Proto.prototype );
-Circular.prototype.constructor = Circular;
+Circular.prototype = Object.assign( Object.create( Proto.prototype ), {
 
-Circular.prototype.handleEvent = function( e ) {
+    constructor: Circular,
 
-    e.preventDefault();
+    handleEvent: function ( e ) {
 
-    switch( e.type ) {
-        case 'mouseover': this.over( e ); break;
-        case 'mousedown': this.down( e ); break;
-        case 'mouseout':  this.out( e );  break;
+        e.preventDefault();
 
-        case 'mouseup':   this.up( e );   break;
-        case 'mousemove': this.move( e ); break;
-    }
+        switch( e.type ) {
+            case 'mouseover': this.over( e ); break;
+            case 'mousedown': this.down( e ); break;
+            case 'mouseout':  this.out( e );  break;
 
-};
+            case 'mouseup':   this.up( e );   break;
+            case 'mousemove': this.move( e ); break;
+        }
 
-Circular.prototype.mode = function( mode ){
+    },
 
-    switch(mode){
-        case 0: // base
-            this.s[2].color = this.fontColor;
-            Tools.setSvg( this.c[3], 'fill','rgba(0,0,0,0.2)');
-            Tools.setSvg( this.c[4], 'fill', this.fontColor );
-        break;
-        case 1: // over
-            this.s[2].color = this.colorPlus;
-            Tools.setSvg( this.c[3], 'fill','rgba(0,0,0,0.6)');
-            Tools.setSvg( this.c[4], 'fill', this.colorPlus );
-        break;
+    mode: function ( mode ) {
 
-    }
-}
+        switch(mode){
+            case 0: // base
+                this.s[2].color = this.fontColor;
+                Tools.setSvg( this.c[3], 'fill','rgba(0,0,0,0.2)');
+                Tools.setSvg( this.c[4], 'fill', this.fontColor );
+            break;
+            case 1: // over
+                this.s[2].color = this.colorPlus;
+                Tools.setSvg( this.c[3], 'fill','rgba(0,0,0,0.6)');
+                Tools.setSvg( this.c[4], 'fill', this.colorPlus );
+            break;
+        }
 
-Circular.prototype.over = function( e ){
+    },
 
-    this.isOver = true;
-    this.mode(1);
+    // ACTION
 
-};
+    over: function ( e ) {
 
-Circular.prototype.out = function( e ){
+        this.isOver = true;
+        this.mode(1);
 
-    this.isOver = false;
-    if(this.isDown) return;
-    this.mode(0);
+    },
 
-};
+    out: function ( e ) {
 
-Circular.prototype.up = function( e ){
+        this.isOver = false;
+        if(this.isDown) return;
+        this.mode(0);
 
-    this.isDown = false;
-    document.removeEventListener( 'mouseup', this, false );
-    document.removeEventListener( 'mousemove', this, false );
+    },
 
-    if(this.isOver) this.mode(1);
-    else this.mode(0);
+    up: function ( e ) {
 
-    this.sendEnd();
+        this.isDown = false;
+        document.removeEventListener( 'mouseup', this, false );
+        document.removeEventListener( 'mousemove', this, false );
 
-};
+        if(this.isOver) this.mode(1);
+        else this.mode(0);
 
-Circular.prototype.down = function( e ){
+        this.sendEnd();
 
-    this.isDown = true;
-    document.addEventListener( 'mouseup', this, false );
-    document.addEventListener( 'mousemove', this, false );
+    },
 
-    this.rect = this.c[3].getBoundingClientRect();
-    this.old = this.value;
-    this.oldr = null;
-    this.move( e );
+    down: function ( e ) {
 
-};
+        this.isDown = true;
+        document.addEventListener( 'mouseup', this, false );
+        document.addEventListener( 'mousemove', this, false );
 
-Circular.prototype.move = function( e ){
-
-    if( !this.isDown ) return;
-
-    var x = this.radius - (e.clientX - this.rect.left);
-    var y = this.radius - (e.clientY - this.rect.top);
-
-    this.r = Math.atan2( y, x ) - (Math.PI * 0.5);
-    this.r = (((this.r%this.twoPi)+this.twoPi)%this.twoPi);
-
-    if( this.oldr !== null ){ 
-
-        var dif = this.r - this.oldr;
-        this.r = Math.abs(dif) > Math.PI ? this.oldr : this.r;
-
-        if(dif > 6) this.r = 0;
-        if(dif < -6) this.r = this.twoPi;
-
-    }
-
-    var steps = 1 / this.twoPi;
-    var value = this.r * steps;
-
-    var n = ( ( this.range * value ) + this.min ) - this.old;
-
-    if(n >= this.step || n <= this.step){ 
-        n = ~~ ( n / this.step );
-        this.value = this.numValue( this.old + ( n * this.step ) );
-        this.update( true );
+        this.rect = this.c[3].getBoundingClientRect();
         this.old = this.value;
-        this.oldr = this.r;
-    }
+        this.oldr = null;
+        this.move( e );
 
-};
+    },
 
-Circular.prototype.makePath = function(){
+    move: function ( e ) {
 
-    var r = this.radius;
-    //var start = 0;
-    var end = this.percent * this.twoPi - 0.001;
-    //var x1 = r + r * Math.sin(start);
-    //var y1 = r - r * Math.cos(start);
-    var x2 = r + r * Math.sin(end);
-    var y2 = r - r * Math.cos(end);
-    //var big = end - start > Math.PI ? 1 : 0;
-    var big = end > Math.PI ? 1 : 0;
-    return "M " + r + "," + r + " L " + r + "," + 0 + " A " + r + "," + r + " 0 " + big + " 1 " + x2 + "," + y2 + " Z";
+        if( !this.isDown ) return;
 
-};
+        var x = this.radius - (e.clientX - this.rect.left);
+        var y = this.radius - (e.clientY - this.rect.top);
 
-Circular.prototype.update = function( up ){
+        this.r = Math.atan2( y, x ) - (Math.PI * 0.5);
+        this.r = (((this.r%this.twoPi)+this.twoPi)%this.twoPi);
 
-    this.c[2].textContent = this.value;
-    this.percent = ( this.value - this.min ) / this.range;
-    Tools.setSvg( this.c[4], 'd', this.makePath() );
-    if( up ) this.send();
-    
-};
+        if( this.oldr !== null ){ 
+
+            var dif = this.r - this.oldr;
+            this.r = Math.abs(dif) > Math.PI ? this.oldr : this.r;
+
+            if(dif > 6) this.r = 0;
+            if(dif < -6) this.r = this.twoPi;
+
+        }
+
+        var steps = 1 / this.twoPi;
+        var value = this.r * steps;
+
+        var n = ( ( this.range * value ) + this.min ) - this.old;
+
+        if(n >= this.step || n <= this.step){ 
+            n = ~~ ( n / this.step );
+            this.value = this.numValue( this.old + ( n * this.step ) );
+            this.update( true );
+            this.old = this.value;
+            this.oldr = this.r;
+        }
+
+    },
+
+    makePath: function () {
+
+        var r = this.radius;
+        //var start = 0;
+        var end = this.percent * this.twoPi - 0.001;
+        //var x1 = r + r * Math.sin(start);
+        //var y1 = r - r * Math.cos(start);
+        var x2 = r + r * Math.sin(end);
+        var y2 = r - r * Math.cos(end);
+        //var big = end - start > Math.PI ? 1 : 0;
+        var big = end > Math.PI ? 1 : 0;
+        return "M " + r + "," + r + " L " + r + "," + 0 + " A " + r + "," + r + " 0 " + big + " 1 " + x2 + "," + y2 + " Z";
+
+    },
+
+    update: function ( up ) {
+
+        this.c[2].textContent = this.value;
+        this.percent = ( this.value - this.min ) / this.range;
+        Tools.setSvg( this.c[4], 'd', this.makePath() );
+        if( up ) this.send();
+        
+    },
+
+} );
 
 export { Circular };

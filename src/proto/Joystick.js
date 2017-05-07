@@ -105,163 +105,166 @@ function Joystick ( o ) {
     this.update(false);
 }
 
-Joystick.prototype = Object.create( Proto.prototype );
-Joystick.prototype.constructor = Joystick;
+Joystick.prototype = Object.assign( Object.create( Proto.prototype ), {
 
-Joystick.prototype.handleEvent = function( e ) {
+    constructor: Joystick,
 
-    e.preventDefault();
+    handleEvent: function ( e ) {
 
-    switch( e.type ) {
-        case 'mouseover': this.over( e ); break;
-        case 'mousedown': this.down( e ); break;
-        case 'mouseout':  this.out( e );  break;
-        case 'mouseup':   this.up( e );   break;
-        case 'mousemove': this.move( e ); break;
-    }
+        e.preventDefault();
 
-};
-
-Joystick.prototype.mode = function( mode ){
-
-    switch(mode){
-        case 0: // base
-            Tools.setSvg( this.c[4], 'fill','url(#gradIn)');
-            Tools.setSvg( this.c[4], 'stroke', '#000' );
-        break;
-        case 1: // over
-            Tools.setSvg( this.c[4], 'fill', 'url(#gradIn2)' );
-            Tools.setSvg( this.c[4], 'stroke', 'rgba(0,0,0,0)' );
-        break;
-        case 2: // edit
-        break;
-
-    }
-}
-
-Joystick.prototype.over = function( e ){
-
-    this.isOver = true;
-    this.mode(1);
-
-};
-
-Joystick.prototype.out = function( e ){
-
-    this.isOver = false;
-    if(this.isDown) return;
-    this.mode(0);
-
-};
-
-Joystick.prototype.up = function( e ){
-
-    this.isDown = false;
-    document.removeEventListener( 'mouseup', this, false );
-    document.removeEventListener( 'mousemove', this, false );
-
-    this.interval = setInterval(this.update.bind(this), 10);
-
-    if(this.isOver) this.mode(1);
-    else this.mode(0);
-    
-};
-
-Joystick.prototype.down = function( e ){
-
-    this.isDown = true;
-    document.addEventListener( 'mouseup', this, false );
-    document.addEventListener( 'mousemove', this, false );
-
-    this.rect = this.c[2].getBoundingClientRect();
-    this.move( e );
-    this.mode( 2 );
-
-};
-
-Joystick.prototype.move = function( e ){
-
-    if( !this.isDown ) return;
-
-    var x = this.radius - ( e.clientX - this.rect.left );
-    var y = this.radius - ( e.clientY - this.rect.top );
-
-    var distance = Math.sqrt( x * x + y * y );
-
-    if ( distance > this.maxDistance ) {
-        var angle = Math.atan2(x, y);
-        x = Math.sin(angle) * this.maxDistance;
-        y = Math.cos(angle) * this.maxDistance;
-    }
-
-    this.x = x / this.maxDistance;
-    this.y = y / this.maxDistance;
-
-    this.update();
-
-};
-
-Joystick.prototype.setValue = function( x, y ){
-
-    this.x = x || 0;
-    this.y = y || 0;
-
-    this.updateSVG();
-
-};
-
-Joystick.prototype.update = function( up ){
-
-    if(up === undefined) up = true;
-
-    if( this.interval !== null ){
-
-        if( !this.isDown ){
-            this.x += (0 - this.x)/3;
-            this.y += (0 - this.y)/3;
+        switch( e.type ) {
+            case 'mouseover': this.over( e ); break;
+            case 'mousedown': this.down( e ); break;
+            case 'mouseout':  this.out( e );  break;
+            case 'mouseup':   this.up( e );   break;
+            case 'mousemove': this.move( e ); break;
         }
 
-        if ( this.x.toFixed(2) === this.oldx.toFixed(2) && this.y.toFixed(2) === this.oldy.toFixed(2)){
-            
-            this.x = 0;
-            this.y = 0;
+    },
+
+    mode: function ( mode ) {
+
+        switch(mode){
+            case 0: // base
+                Tools.setSvg( this.c[4], 'fill','url(#gradIn)');
+                Tools.setSvg( this.c[4], 'stroke', '#000' );
+            break;
+            case 1: // over
+                Tools.setSvg( this.c[4], 'fill', 'url(#gradIn2)' );
+                Tools.setSvg( this.c[4], 'stroke', 'rgba(0,0,0,0)' );
+            break;
+            case 2: // edit
+            break;
+
+        }
+    },
+
+    over: function( e ){
+
+        this.isOver = true;
+        this.mode(1);
+
+    },
+
+    out: function( e ){
+
+        this.isOver = false;
+        if(this.isDown) return;
+        this.mode(0);
+
+    },
+
+    up: function( e ){
+
+        this.isDown = false;
+        document.removeEventListener( 'mouseup', this, false );
+        document.removeEventListener( 'mousemove', this, false );
+
+        this.interval = setInterval(this.update.bind(this), 10);
+
+        if(this.isOver) this.mode(1);
+        else this.mode(0);
+        
+    },
+
+    down: function( e ){
+
+        this.isDown = true;
+        document.addEventListener( 'mouseup', this, false );
+        document.addEventListener( 'mousemove', this, false );
+
+        this.rect = this.c[2].getBoundingClientRect();
+        this.move( e );
+        this.mode( 2 );
+
+    },
+
+    move: function ( e ) {
+
+        if( !this.isDown ) return;
+
+        var x = this.radius - ( e.clientX - this.rect.left );
+        var y = this.radius - ( e.clientY - this.rect.top );
+
+        var distance = Math.sqrt( x * x + y * y );
+
+        if ( distance > this.maxDistance ) {
+            var angle = Math.atan2(x, y);
+            x = Math.sin(angle) * this.maxDistance;
+            y = Math.cos(angle) * this.maxDistance;
         }
 
-    }
+        this.x = x / this.maxDistance;
+        this.y = y / this.maxDistance;
 
-    this.updateSVG();
+        this.update();
 
-    if( up ) this.send();
+    },
 
-    if( this.interval !== null && this.x === 0 && this.y === 0 ){
-        clearInterval( this.interval );
-        this.interval = null;
-    }
+    setValue: function ( x, y ) {
 
-};
+        this.x = x || 0;
+        this.y = y || 0;
 
-Joystick.prototype.updateSVG = function(){
+        this.updateSVG();
 
-    var rx = this.x * this.maxDistance;
-    var ry = this.y * this.maxDistance;
-    var x = this.radius - rx;
-    var y = this.radius - ry;
-    var sx = x + ((1-this.x)*5) + 5;
-    var sy = y + ((1-this.y)*5) + 10;
+    },
 
-    Tools.setSvg( this.c[3], 'cx', sx );
-    Tools.setSvg( this.c[3], 'cy', sy );
-    Tools.setSvg( this.c[4], 'cx', x );
-    Tools.setSvg( this.c[4], 'cy', y );
+    update: function ( up ) {
 
-    this.oldx = this.x;
-    this.oldy = this.y;
+        if(up === undefined) up = true;
 
-    this.value[0] = -( this.x * this.multiplicator ).toFixed( this.precision ) * 1;
-    this.value[1] =  ( this.y * this.multiplicator ).toFixed( this.precision ) * 1;
+        if( this.interval !== null ){
 
-    this.c[5].textContent = 'x'+ this.value[0] +' y' + this.value[1];
+            if( !this.isDown ){
+                this.x += (0 - this.x)/3;
+                this.y += (0 - this.y)/3;
+            }
 
-};
+            if ( this.x.toFixed(2) === this.oldx.toFixed(2) && this.y.toFixed(2) === this.oldy.toFixed(2)){
+                
+                this.x = 0;
+                this.y = 0;
+            }
+
+        }
+
+        this.updateSVG();
+
+        if( up ) this.send();
+
+        if( this.interval !== null && this.x === 0 && this.y === 0 ){
+            clearInterval( this.interval );
+            this.interval = null;
+        }
+
+    },
+
+    updateSVG: function () {
+
+        var rx = this.x * this.maxDistance;
+        var ry = this.y * this.maxDistance;
+        var x = this.radius - rx;
+        var y = this.radius - ry;
+        var sx = x + ((1-this.x)*5) + 5;
+        var sy = y + ((1-this.y)*5) + 10;
+
+        Tools.setSvg( this.c[3], 'cx', sx );
+        Tools.setSvg( this.c[3], 'cy', sy );
+        Tools.setSvg( this.c[4], 'cx', x );
+        Tools.setSvg( this.c[4], 'cy', y );
+
+        this.oldx = this.x;
+        this.oldy = this.y;
+
+        this.value[0] = -( this.x * this.multiplicator ).toFixed( this.precision ) * 1;
+        this.value[1] =  ( this.y * this.multiplicator ).toFixed( this.precision ) * 1;
+
+        this.c[5].textContent = 'x'+ this.value[0] +' y' + this.value[1];
+
+    },
+
+} );
 
 export { Joystick };

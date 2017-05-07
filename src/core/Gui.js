@@ -81,7 +81,7 @@ function Gui ( o ) {
     this.innerContent = Tools.dom( 'div', Tools.css.basic + 'width:100%; top:0; left:0; height:auto; overflow:hidden;');
     this.content.appendChild( this.innerContent );
 
-    this.inner = Tools.dom( 'div', Tools.css.basic + 'width:100%; top:0; left:0; height:auto;');
+    this.inner = Tools.dom( 'div', Tools.css.basic + 'width:100%; top:0; left:0; height:auto; background:'+this.bg+';');
     this.innerContent.appendChild(this.inner);
     this.inner.name = 'inner';
 
@@ -129,6 +129,12 @@ Gui.prototype = {
 
     constructor: Gui,
 
+    setText: function ( size, color, font ) {
+
+        Tools.setText( size, color, font );
+
+    },
+
     hide : function (b) {
 
         if(b) this.content.style.display = 'none';
@@ -140,12 +146,13 @@ Gui.prototype = {
 
         this.bg = c;
 
-        var i = this.uis.length;
+        /*var i = this.uis.length;
         while(i--){
             this.uis[i].setBG(c);
-        }
+        }*/
 
-        this.bottom.style.background = c;
+        this.innerstyle.background = this.bg;
+        this.bottom.style.background = this.bg;
 
     },
 
@@ -422,7 +429,7 @@ Gui.prototype = {
 
         this.h += y;
         clearTimeout( this.tmp );
-        this.tmp = setTimeout( this.testHeight.bind(this), 10);
+        this.tmp = setTimeout( this.testHeight.bind(this), 10 );
 
     },
 
