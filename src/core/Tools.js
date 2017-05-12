@@ -9,6 +9,8 @@ var Tools = {
     doc: document,
     frag: document.createDocumentFragment(),
 
+    URL: window.URL || window.webkitURL,
+
     isLoop: false,
     listens: [],
 
@@ -361,16 +363,37 @@ var Tools = {
         svg.childNodes[0].setAttribute('width', '100%' );
         svg.childNodes[0].setAttribute('height', '100%' );
 
+        //console.log(svg)
+
+        var img = new Image();
+        
+
         var data = 'data:image/svg+xml;base64,'+ window.btoa((new XMLSerializer).serializeToString(svg));
         dcopy = null;
-        
-        var img = new Image();
-        img.src = data;
 
-        setTimeout(function() {
+        img.onload = function() {
             ctx.clearRect( 0, 0, w, h );
             ctx.drawImage( img, 0, 0, w, h, 0, 0, w, h );
-        }, 0);
+        };
+        
+        img.src = data;
+
+        /*setTimeout(function() {
+            ctx.clearRect( 0, 0, w, h );
+            ctx.drawImage( img, 0, 0, w, h, 0, 0, w, h );
+        }, 0);*/
+
+        // blob
+
+        /*var svgBlob = new Blob([(new XMLSerializer).serializeToString(svg)], {type: "image/svg+xml;charset=utf-8"});
+        var url = URL.createObjectURL(svgBlob);
+
+        img.onload = function() {
+            ctx.clearRect( 0, 0, w, h );
+            ctx.drawImage( img, 0, 0, w, h, 0, 0, w, h );
+            URL.revokeObjectURL(url);
+        };
+        img.src = url;*/
 
     },
 

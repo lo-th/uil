@@ -34,7 +34,6 @@ function List ( o ) {
 
     this.baseH = this.h;
 
-    this.isShow = false;
     //this.maxItem = o.maxItem || 5;
     this.itemHeight = o.itemHeight || (this.h-3);
     //this.length = this.list.length;
@@ -80,9 +79,9 @@ function List ( o ) {
     this.setList( this.list, o.value );
 
    
-    
-
     this.init();
+
+    if( o.open !== undefined ) this.open();
 
 }
 
@@ -191,7 +190,7 @@ List.prototype = Object.assign( Object.create( Proto.prototype ), {
 
     titleClick: function( e ){
 
-        if( this.isShow ) this.close();
+        if( this.isOpen ) this.close();
         else {
             this.open(); 
             this.mode(2);
@@ -298,10 +297,11 @@ List.prototype = Object.assign( Object.create( Proto.prototype ), {
 
     open: function(){
 
+        Proto.prototype.open.call( this );
+
         document.addEventListener( 'click', this, false );
 
         this.update( 0 );
-        this.isShow = true;
         this.h = this.maxHeight + this.baseH + 10;
         if( !this.scroll ){
             this.h = this.baseH + 10 + this.max;
@@ -323,12 +323,13 @@ List.prototype = Object.assign( Object.create( Proto.prototype ), {
 
     close: function(){
 
+        Proto.prototype.close.call( this );
+
         document.removeEventListener( 'click', this, false );
 
         if( this.parentGroup !== null ) this.parentGroup.calc( -(this.h-this.baseH) );
         else if( this.isUI ) this.main.calc(-(this.h-this.baseH));
 
-        this.isShow = false;
         this.h = this.baseH;
         this.s[0].height = this.h + 'px';
         this.s[2].display = 'none';
@@ -373,7 +374,7 @@ List.prototype = Object.assign( Object.create( Proto.prototype ), {
         this.w = w;
         if( this.max > this.maxHeight ) this.w = w-20;
 
-        if(this.isShow) this.rSizeContent();
+        if(this.isOpen) this.rSizeContent();
 
     }
 

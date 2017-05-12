@@ -4,7 +4,7 @@ import { Tools } from './Tools';
  * @author lo-th / https://github.com/lo-th
  */
 
-function Proto( o ){
+function Proto ( o ) {
 
     o = o || {};
 
@@ -24,6 +24,9 @@ function Proto( o ){
 
     // if need resize width
     this.autoWidth = true;
+
+    // if need resize height
+    this.isOpen = false;
 
     this.isGroup = false;
     this.parentGroup = null;
@@ -48,12 +51,6 @@ function Proto( o ){
     // no title 
     this.simple = o.simple || false;
     if( this.simple ) this.sa = 0;
-
-    
-    //if(o.width !== undefined ) this.width = o.width;
-    //if(o.size !== undefined ) this.width = o.size;
-
-    //console.log(this.width)
 
     // define obj size
     this.setSize( this.width );
@@ -135,13 +132,14 @@ Proto.prototype = {
 
     constructor: Proto,
 
+    // ----------------------
     // make de node
+    // ----------------------
 
+    init: function () {
 
-    init: function (){
-
-        var s = this.s; // style cached
-        var c = this.c; // div cached
+        var s = this.s; // style cache
+        var c = this.c; // div cache
 
         s[0].height = this.h + 'px';
 
@@ -177,27 +175,28 @@ Proto.prototype = {
 
     },
 
-    rename:function(s){
+    rename: function ( s ) {
+
         this.c[1].textContent = s;
+
     },
 
-    setBG : function(c){
+    setBG: function ( c ) {
 
         this.bg = c;
         this.s[0].background = c;
 
     },
 
-    listen : function( ){
+    listen: function () {
 
         Tools.addListen( this );
-
         Tools.listens.push( this );
         return this;
 
     },
 
-    listening : function(){
+    listening: function () {
 
         if( this.parent === null ) return;
         if( this.isSend ) return;
@@ -207,30 +206,34 @@ Proto.prototype = {
 
     },
 
-    setValue : function( v ){
+    setValue: function ( v ) {
+
         if( this.isNumber ) this.value = this.numValue( v );
         else this.value = v;
-
         this.update();
 
     },
 
-    update: function( ) {
+    update: function () {
         
     },
 
+    // ----------------------
     // update every change
+    // ----------------------
 
-    onChange : function( f ){
+    onChange: function ( f ) {
 
         this.callback = f;
         return this;
 
     },
 
+    // ----------------------
     // update only on end
+    // ----------------------
 
-    onFinishChange : function( f ){
+    onFinishChange: function ( f ) {
 
         this.callback = null;
         this.endCallback = f;
@@ -238,28 +241,27 @@ Proto.prototype = {
 
     },
 
-    send:function( v ){
-        this.isSend = true;
+    send: function ( v ) {
 
+        this.isSend = true;
         if( this.parent !== null ) this.parent[ this.val ] = v || this.value;
         if( this.callback ) this.callback( v || this.value );
-        
         this.isSend = false;
 
     },
 
-    sendEnd:function( v ){
+    sendEnd: function ( v ) {
 
         if( this.endCallback ) this.endCallback( v || this.value );
         if( this.parent !== null ) this.parent[ this.val ] = v || this.value;
 
     },
 
-    
-
+    // ----------------------
     // clear node
+    // ----------------------
     
-    clear:function(){
+    clear: function () {
 
         this.clearEvent();
         Tools.clear( this.c[0] );
@@ -267,7 +269,7 @@ Proto.prototype = {
         if( this.target !== null ){ 
             this.target.removeChild( this.c[0] );
         } else {
-            if( this.isUI ) this.main.clearOne( this );//this.main.inner.removeChild( this.c[0] );
+            if( this.isUI ) this.main.clearOne( this );
             else document.body.removeChild( this.c[0] );
         }
 
@@ -278,23 +280,20 @@ Proto.prototype = {
 
     },
 
+    // ----------------------
     // change size 
+    // ----------------------
 
-    setSize:function( sx ){
+    setSize: function ( sx ) {
 
         if( !this.autoWidth ) return;
 
-        this.width = sx;// || UIL.WIDTH;
-
-        //this.p = this.p === undefined ? Tools.base.P : this.p;
-
-
-        //if( !this.p ) this.p = UIL.P;
+        this.width = sx;
 
         if( this.simple ){
             //this.sa = 0;
             this.sb = this.width - this.sa;
-        }else{
+        } else {
             var pp = this.width * ( this.p / 100 );
             this.sa = ~~ pp + 10;
             this.sb = ~~ this.width - pp - 20;
@@ -302,7 +301,7 @@ Proto.prototype = {
 
     },
 
-    rSize:function(){
+    rSize: function () {
 
         if( !this.autoWidth ) return;
 
@@ -311,9 +310,11 @@ Proto.prototype = {
     
     },
 
+    // ----------------------
     // for numeric value
+    // ----------------------
 
-    setTypeNumber:function( o ){
+    setTypeNumber: function ( o ) {
 
         this.isNumber = true;
 
@@ -345,7 +346,7 @@ Proto.prototype = {
         
     },
 
-    numValue:function( n ){
+    numValue: function ( n ) {
 
         return Math.min( this.max, Math.max( this.min, n ) ).toFixed( this.precision ) * 1;
 
@@ -355,7 +356,7 @@ Proto.prototype = {
     //   Events dispatch
     // ----------------------
 
-    addEvent: function(){
+    addEvent: function () {
 
         var i = this.c.length, j, c;
         while( i-- ){
@@ -370,7 +371,7 @@ Proto.prototype = {
 
     },
 
-    clearEvent: function(){
+    clearEvent: function () {
 
         var i = this.c.length, j, c;
         while( i-- ){
@@ -385,7 +386,7 @@ Proto.prototype = {
 
     },
 
-    handleEvent: function( e ) {
+    handleEvent: function ( e ) {
         
     },
 
@@ -393,16 +394,34 @@ Proto.prototype = {
     // object referency
     // ----------------------
 
-    setReferency: function(obj, val){
+    setReferency: function ( obj, val ) {
 
         this.parent = obj;
         this.val = val;
 
     },
 
-    display:function(v){
+    display: function ( v ) {
 
         this.s[0].display = v ? 'block' : 'none';
+
+    },
+
+    // ----------------------
+    // resize height 
+    // ----------------------
+
+    open: function () {
+
+        if( this.isOpen ) return;
+        this.isOpen = true;
+
+    },
+
+    close: function () {
+
+        if( !this.isOpen ) return;
+        this.isOpen = false;
 
     },
 

@@ -62,7 +62,6 @@ function Color ( o ) {
     }
     this.bcolor = null;
     this.isDown = false;
-    this.isopen = false;
     this.isDraw = false;
 
     this.c[2].events = [ 'click' ];
@@ -71,6 +70,8 @@ function Color ( o ) {
     this.setColor( this.value );
 
     this.init();
+
+    if( o.open !== undefined ) this.open();
 
 };
 
@@ -161,14 +162,14 @@ Color.prototype = Object.assign( Object.create( Proto.prototype ), {
 
 	open: function(){
 
-	    this.isopen = true;
+		Proto.prototype.open.call( this );
 
 	    if( this.oldWidth !== this.ww ) this.redraw();
 
 	    this.h = this.ww + this.baseH + 10;
 	    this.s[0].height = this.h + 'px';
 
-	    if(this.side==='up'){ 
+	    if( this.side === 'up' ){ 
 	        this.holdTop = this.s[0].top.substring(0,this.s[0].top.length-2) * 1 || 'auto';
 	        if(!isNaN(this.holdTop)) this.s[0].top = (this.holdTop-(this.h-20))+'px';
 	        setTimeout(function(){this.s[5].pointerEvents = 'auto';}.bind(this), 100);
@@ -187,7 +188,7 @@ Color.prototype = Object.assign( Object.create( Proto.prototype ), {
 
 	close: function(){
 
-	    this.isopen = false;
+	    Proto.prototype.close.call( this );
 
 	    var t = this.h - this.baseH;
 

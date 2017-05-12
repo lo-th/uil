@@ -101,6 +101,8 @@
 	    doc: document,
 	    frag: document.createDocumentFragment(),
 
+	    URL: window.URL || window.webkitURL,
+
 	    isLoop: false,
 	    listens: [],
 
@@ -453,16 +455,37 @@
 	        svg.childNodes[0].setAttribute('width', '100%' );
 	        svg.childNodes[0].setAttribute('height', '100%' );
 
+	        //console.log(svg)
+
+	        var img = new Image();
+	        
+
 	        var data = 'data:image/svg+xml;base64,'+ window.btoa((new XMLSerializer).serializeToString(svg));
 	        dcopy = null;
-	        
-	        var img = new Image();
-	        img.src = data;
 
-	        setTimeout(function() {
+	        img.onload = function() {
 	            ctx.clearRect( 0, 0, w, h );
 	            ctx.drawImage( img, 0, 0, w, h, 0, 0, w, h );
-	        }, 0);
+	        };
+	        
+	        img.src = data;
+
+	        /*setTimeout(function() {
+	            ctx.clearRect( 0, 0, w, h );
+	            ctx.drawImage( img, 0, 0, w, h, 0, 0, w, h );
+	        }, 0);*/
+
+	        // blob
+
+	        /*var svgBlob = new Blob([(new XMLSerializer).serializeToString(svg)], {type: "image/svg+xml;charset=utf-8"});
+	        var url = URL.createObjectURL(svgBlob);
+
+	        img.onload = function() {
+	            ctx.clearRect( 0, 0, w, h );
+	            ctx.drawImage( img, 0, 0, w, h, 0, 0, w, h );
+	            URL.revokeObjectURL(url);
+	        };
+	        img.src = url;*/
 
 	    },
 
@@ -474,7 +497,7 @@
 	 * @author lo-th / https://github.com/lo-th
 	 */
 
-	function Proto( o ){
+	function Proto ( o ) {
 
 	    o = o || {};
 
@@ -494,6 +517,9 @@
 
 	    // if need resize width
 	    this.autoWidth = true;
+
+	    // if need resize height
+	    this.isOpen = false;
 
 	    this.isGroup = false;
 	    this.parentGroup = null;
@@ -518,12 +544,6 @@
 	    // no title 
 	    this.simple = o.simple || false;
 	    if( this.simple ) this.sa = 0;
-
-	    
-	    //if(o.width !== undefined ) this.width = o.width;
-	    //if(o.size !== undefined ) this.width = o.size;
-
-	    //console.log(this.width)
 
 	    // define obj size
 	    this.setSize( this.width );
@@ -605,13 +625,14 @@
 
 	    constructor: Proto,
 
+	    // ----------------------
 	    // make de node
+	    // ----------------------
 
+	    init: function () {
 
-	    init: function (){
-
-	        var s = this.s; // style cached
-	        var c = this.c; // div cached
+	        var s = this.s; // style cache
+	        var c = this.c; // div cache
 
 	        s[0].height = this.h + 'px';
 
@@ -647,27 +668,28 @@
 
 	    },
 
-	    rename:function(s){
+	    rename: function ( s ) {
+
 	        this.c[1].textContent = s;
+
 	    },
 
-	    setBG : function(c){
+	    setBG: function ( c ) {
 
 	        this.bg = c;
 	        this.s[0].background = c;
 
 	    },
 
-	    listen : function( ){
+	    listen: function () {
 
 	        Tools.addListen( this );
-
 	        Tools.listens.push( this );
 	        return this;
 
 	    },
 
-	    listening : function(){
+	    listening: function () {
 
 	        if( this.parent === null ) return;
 	        if( this.isSend ) return;
@@ -677,30 +699,34 @@
 
 	    },
 
-	    setValue : function( v ){
+	    setValue: function ( v ) {
+
 	        if( this.isNumber ) this.value = this.numValue( v );
 	        else this.value = v;
-
 	        this.update();
 
 	    },
 
-	    update: function( ) {
+	    update: function () {
 	        
 	    },
 
+	    // ----------------------
 	    // update every change
+	    // ----------------------
 
-	    onChange : function( f ){
+	    onChange: function ( f ) {
 
 	        this.callback = f;
 	        return this;
 
 	    },
 
+	    // ----------------------
 	    // update only on end
+	    // ----------------------
 
-	    onFinishChange : function( f ){
+	    onFinishChange: function ( f ) {
 
 	        this.callback = null;
 	        this.endCallback = f;
@@ -708,28 +734,27 @@
 
 	    },
 
-	    send:function( v ){
-	        this.isSend = true;
+	    send: function ( v ) {
 
+	        this.isSend = true;
 	        if( this.parent !== null ) this.parent[ this.val ] = v || this.value;
 	        if( this.callback ) this.callback( v || this.value );
-	        
 	        this.isSend = false;
 
 	    },
 
-	    sendEnd:function( v ){
+	    sendEnd: function ( v ) {
 
 	        if( this.endCallback ) this.endCallback( v || this.value );
 	        if( this.parent !== null ) this.parent[ this.val ] = v || this.value;
 
 	    },
 
-	    
-
+	    // ----------------------
 	    // clear node
+	    // ----------------------
 	    
-	    clear:function(){
+	    clear: function () {
 
 	        this.clearEvent();
 	        Tools.clear( this.c[0] );
@@ -737,7 +762,7 @@
 	        if( this.target !== null ){ 
 	            this.target.removeChild( this.c[0] );
 	        } else {
-	            if( this.isUI ) this.main.clearOne( this );//this.main.inner.removeChild( this.c[0] );
+	            if( this.isUI ) this.main.clearOne( this );
 	            else document.body.removeChild( this.c[0] );
 	        }
 
@@ -748,23 +773,20 @@
 
 	    },
 
+	    // ----------------------
 	    // change size 
+	    // ----------------------
 
-	    setSize:function( sx ){
+	    setSize: function ( sx ) {
 
 	        if( !this.autoWidth ) return;
 
-	        this.width = sx;// || UIL.WIDTH;
-
-	        //this.p = this.p === undefined ? Tools.base.P : this.p;
-
-
-	        //if( !this.p ) this.p = UIL.P;
+	        this.width = sx;
 
 	        if( this.simple ){
 	            //this.sa = 0;
 	            this.sb = this.width - this.sa;
-	        }else{
+	        } else {
 	            var pp = this.width * ( this.p / 100 );
 	            this.sa = ~~ pp + 10;
 	            this.sb = ~~ this.width - pp - 20;
@@ -772,7 +794,7 @@
 
 	    },
 
-	    rSize:function(){
+	    rSize: function () {
 
 	        if( !this.autoWidth ) return;
 
@@ -781,9 +803,11 @@
 	    
 	    },
 
+	    // ----------------------
 	    // for numeric value
+	    // ----------------------
 
-	    setTypeNumber:function( o ){
+	    setTypeNumber: function ( o ) {
 
 	        this.isNumber = true;
 
@@ -815,7 +839,7 @@
 	        
 	    },
 
-	    numValue:function( n ){
+	    numValue: function ( n ) {
 
 	        return Math.min( this.max, Math.max( this.min, n ) ).toFixed( this.precision ) * 1;
 
@@ -825,7 +849,7 @@
 	    //   Events dispatch
 	    // ----------------------
 
-	    addEvent: function(){
+	    addEvent: function () {
 
 	        var i = this.c.length, j, c;
 	        while( i-- ){
@@ -840,7 +864,7 @@
 
 	    },
 
-	    clearEvent: function(){
+	    clearEvent: function () {
 
 	        var i = this.c.length, j, c;
 	        while( i-- ){
@@ -855,7 +879,7 @@
 
 	    },
 
-	    handleEvent: function( e ) {
+	    handleEvent: function ( e ) {
 	        
 	    },
 
@@ -863,16 +887,34 @@
 	    // object referency
 	    // ----------------------
 
-	    setReferency: function(obj, val){
+	    setReferency: function ( obj, val ) {
 
 	        this.parent = obj;
 	        this.val = val;
 
 	    },
 
-	    display:function(v){
+	    display: function ( v ) {
 
 	        this.s[0].display = v ? 'block' : 'none';
+
+	    },
+
+	    // ----------------------
+	    // resize height 
+	    // ----------------------
+
+	    open: function () {
+
+	        if( this.isOpen ) return;
+	        this.isOpen = true;
+
+	    },
+
+	    close: function () {
+
+	        if( !this.isOpen ) return;
+	        this.isOpen = false;
 
 	    },
 
@@ -1445,7 +1487,6 @@
 	    }
 	    this.bcolor = null;
 	    this.isDown = false;
-	    this.isopen = false;
 	    this.isDraw = false;
 
 	    this.c[2].events = [ 'click' ];
@@ -1454,6 +1495,8 @@
 	    this.setColor( this.value );
 
 	    this.init();
+
+	    if( o.open !== undefined ) this.open();
 
 	}
 
@@ -1544,14 +1587,14 @@
 
 		open: function(){
 
-		    this.isopen = true;
+			Proto.prototype.open.call( this );
 
 		    if( this.oldWidth !== this.ww ) this.redraw();
 
 		    this.h = this.ww + this.baseH + 10;
 		    this.s[0].height = this.h + 'px';
 
-		    if(this.side==='up'){ 
+		    if( this.side === 'up' ){ 
 		        this.holdTop = this.s[0].top.substring(0,this.s[0].top.length-2) * 1 || 'auto';
 		        if(!isNaN(this.holdTop)) this.s[0].top = (this.holdTop-(this.h-20))+'px';
 		        setTimeout(function(){this.s[5].pointerEvents = 'auto';}.bind(this), 100);
@@ -1570,7 +1613,7 @@
 
 		close: function(){
 
-		    this.isopen = false;
+		    Proto.prototype.close.call( this );
 
 		    var t = this.h - this.baseH;
 
@@ -2047,7 +2090,6 @@
 	    this.baseH = this.h;
 	    var fltop = Math.floor(this.h*0.5)-6;
 
-	    this.isOpen = o.open || false;
 
 	    this.isLine = o.line !== undefined ? o.line : false;
 
@@ -2079,8 +2121,7 @@
 	    this.init();
 
 	    if( o.bg !== undefined ) this.setBG(o.bg);
-
-	    if( this.isOpen ) this.open();
+	    if( o.open !== undefined ) this.open();
 
 	}
 
@@ -2144,9 +2185,10 @@
 
 	    },
 
-	    open: function(){
+	    open: function () {
 
-	        this.isOpen = true;
+	        Proto.prototype.open.call( this );
+
 	        Tools.setSvg( this.c[4], 'd','M 5 8 L 8 3 2 3 5 8 Z');
 	        //this.s[4].background = UIL.F1;
 	        this.rSizeContent();
@@ -2155,15 +2197,14 @@
 
 	    },
 
-	    close: function(){
+	    close: function () {
 
-	        if( this.isUI ) this.main.calc(-(this.h-this.baseH ));
+	        Proto.prototype.close.call( this );
 
-	        this.isOpen = false;
-	        //this.s[4].background = UIL.F0;
+	        if( this.isUI ) this.main.calc( -( this.h - this.baseH ) );
+
 	        Tools.setSvg( this.c[4], 'd','M 3 8 L 8 5 3 2 3 8 Z');
 	        this.h = this.baseH;
-
 	        this.s[0].height = this.h + 'px';
 
 	    },
@@ -2671,7 +2712,6 @@
 
 	    this.baseH = this.h;
 
-	    this.isShow = false;
 	    //this.maxItem = o.maxItem || 5;
 	    this.itemHeight = o.itemHeight || (this.h-3);
 	    //this.length = this.list.length;
@@ -2717,9 +2757,9 @@
 	    this.setList( this.list, o.value );
 
 	   
-	    
-
 	    this.init();
+
+	    if( o.open !== undefined ) this.open();
 
 	}
 
@@ -2828,7 +2868,7 @@
 
 	    titleClick: function( e ){
 
-	        if( this.isShow ) this.close();
+	        if( this.isOpen ) this.close();
 	        else {
 	            this.open(); 
 	            this.mode(2);
@@ -2935,10 +2975,11 @@
 
 	    open: function(){
 
+	        Proto.prototype.open.call( this );
+
 	        document.addEventListener( 'click', this, false );
 
 	        this.update( 0 );
-	        this.isShow = true;
 	        this.h = this.maxHeight + this.baseH + 10;
 	        if( !this.scroll ){
 	            this.h = this.baseH + 10 + this.max;
@@ -2960,12 +3001,13 @@
 
 	    close: function(){
 
+	        Proto.prototype.close.call( this );
+
 	        document.removeEventListener( 'click', this, false );
 
 	        if( this.parentGroup !== null ) this.parentGroup.calc( -(this.h-this.baseH) );
 	        else if( this.isUI ) this.main.calc(-(this.h-this.baseH));
 
-	        this.isShow = false;
 	        this.h = this.baseH;
 	        this.s[0].height = this.h + 'px';
 	        this.s[2].display = 'none';
@@ -3010,7 +3052,7 @@
 	        this.w = w;
 	        if( this.max > this.maxHeight ) this.w = w-20;
 
-	        if(this.isShow) this.rSizeContent();
+	        if(this.isOpen) this.rSizeContent();
 
 	    }
 

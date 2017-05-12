@@ -16,7 +16,6 @@ function Group ( o ) {
     this.baseH = this.h;
     var fltop = Math.floor(this.h*0.5)-6;
 
-    this.isOpen = o.open || false;
 
     this.isLine = o.line !== undefined ? o.line : false;
 
@@ -48,8 +47,7 @@ function Group ( o ) {
     this.init();
 
     if( o.bg !== undefined ) this.setBG(o.bg);
-
-    if( this.isOpen ) this.open();
+    if( o.open !== undefined ) this.open();
 
 };
 
@@ -113,9 +111,10 @@ Group.prototype = Object.assign( Object.create( Proto.prototype ), {
 
     },
 
-    open: function(){
+    open: function () {
 
-        this.isOpen = true;
+        Proto.prototype.open.call( this );
+
         Tools.setSvg( this.c[4], 'd','M 5 8 L 8 3 2 3 5 8 Z');
         //this.s[4].background = UIL.F1;
         this.rSizeContent();
@@ -124,15 +123,14 @@ Group.prototype = Object.assign( Object.create( Proto.prototype ), {
 
     },
 
-    close: function(){
+    close: function () {
 
-        if( this.isUI ) this.main.calc(-(this.h-this.baseH ));
+        Proto.prototype.close.call( this );
 
-        this.isOpen = false;
-        //this.s[4].background = UIL.F0;
+        if( this.isUI ) this.main.calc( -( this.h - this.baseH ) );
+
         Tools.setSvg( this.c[4], 'd','M 3 8 L 8 5 3 2 3 8 Z');
         this.h = this.baseH;
-
         this.s[0].height = this.h + 'px';
 
     },
