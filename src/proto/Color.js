@@ -98,7 +98,7 @@ Color.prototype = Object.assign( Object.create( Proto.prototype ), {
 
 	click: function( e ){
 
-	    if( !this.isopen ) this.open();
+	    if( !this.isOpen ) this.open();
 	    else this.close();
 
 	},
@@ -111,13 +111,13 @@ Color.prototype = Object.assign( Object.create( Proto.prototype ), {
 
 	out: function( e ){
 
-	    if( this.isopen ) this.close();
+	    if( this.isOpen ) this.close();
 
 	},
 
 	down: function( e ){
 
-	    if(!this.isopen) return;
+	    if(!this.isOpen) return;
 	    this.isDown = true;
 	    this.move( e );
 	    //return false;
@@ -156,7 +156,7 @@ Color.prototype = Object.assign( Object.create( Proto.prototype ), {
 	    this.oldWidth = this.ww;
 	    this.isDraw = true;
 
-	    console.log(this.isDraw)
+	    //console.log(this.isDraw)
 
 	},
 
@@ -184,6 +184,8 @@ Color.prototype = Object.assign( Object.create( Proto.prototype ), {
 	    if ( this.parentGroup !== null ) this.parentGroup.calc( t );
 	    else if ( this.isUI ) this.main.calc( t );
 
+	    console.log('open')
+
 	},
 
 	close: function(){
@@ -205,6 +207,8 @@ Color.prototype = Object.assign( Object.create( Proto.prototype ), {
 	    this.s[3].display = 'none';
 	    this.s[4].display = 'none';
 	    this.s[5].display = 'none';
+
+	    console.log('close')
 	    
 	},
 
@@ -381,7 +385,7 @@ Color.prototype = Object.assign( Object.create( Proto.prototype ), {
 	    this.ctxMask.translate(this.mid, this.mid);
 	    this.ctxOverlay.translate(this.mid, this.mid);
 
-	    if( this.isopen ){ 
+	    if( this.isOpen ){ 
 	        this.redraw();
 
 	        //this.open();
