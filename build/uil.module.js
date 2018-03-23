@@ -2319,7 +2319,12 @@ Color.prototype = Object.assign( Object.create( Proto.prototype ), {
 		}
 	    	
 
+<<<<<<< HEAD
     },
+=======
+	    if( !this.isOpen ) this.open();
+	    else this.close();
+>>>>>>> origin/gh-pages
 
 	// ----------------------
     //   EVENTS
@@ -2333,7 +2338,11 @@ Color.prototype = Object.assign( Object.create( Proto.prototype ), {
 
 	mousedown: function ( e ) {
 
+<<<<<<< HEAD
 		var name = this.testZone( e.clientX, e.clientY );
+=======
+	    if( this.isOpen ) this.close();
+>>>>>>> origin/gh-pages
 
 		//if( !name ) return;
 		if(name === 'title'){
@@ -2342,10 +2351,17 @@ Color.prototype = Object.assign( Object.create( Proto.prototype ), {
 	        return true;
 		}
 
+<<<<<<< HEAD
 		if( name === 'color' ){
 			this.isDown = true;
 	        this.mousemove( e );
 		}
+=======
+	    if(!this.isOpen) return;
+	    this.isDown = true;
+	    this.move( e );
+	    //return false;
+>>>>>>> origin/gh-pages
 
 	},
 
@@ -2401,8 +2417,12 @@ Color.prototype = Object.assign( Object.create( Proto.prototype ), {
 
 	parentHeight: function ( t ) {
 
+<<<<<<< HEAD
 		if ( this.parentGroup !== null ) this.parentGroup.calc( t );
 	    else if ( this.isUI ) this.main.calc( t );
+=======
+	    //console.log(this.isDraw)
+>>>>>>> origin/gh-pages
 
 	},
 
@@ -2424,7 +2444,13 @@ Color.prototype = Object.assign( Object.create( Proto.prototype ), {
 
 	close: function () {
 
+<<<<<<< HEAD
 		Proto.prototype.close.call( this );
+=======
+	    console.log('open');
+
+	},
+>>>>>>> origin/gh-pages
 
 		if( this.up ) this.zone.y += this.wfixe + 5;
 
@@ -2436,6 +2462,22 @@ Color.prototype = Object.assign( Object.create( Proto.prototype ), {
 	    //this.s[3].display = 'none';
 	    this.parentHeight( -t );
 
+<<<<<<< HEAD
+=======
+	    
+	    this.h = this.baseH;
+	    if(this.side === 'up'){ 
+	        if(!isNaN(this.holdTop)) this.s[0].top = (this.holdTop)+'px';
+	        this.s[5].pointerEvents = 'none';
+	    }
+	    this.s[0].height = this.h+'px';
+	    this.s[3].display = 'none';
+	    this.s[4].display = 'none';
+	    this.s[5].display = 'none';
+
+	    console.log('close');
+	    
+>>>>>>> origin/gh-pages
 	},
 
 	update: function ( up ) {
@@ -2519,11 +2561,29 @@ Color.prototype = Object.assign( Object.create( Proto.prototype ), {
 	    this.decal.y = this.side === 'up' ? 2 : this.baseH + 2;
 	    this.mid = Math.floor( this.wfixe * 0.5 );
 
+<<<<<<< HEAD
 	    this.setSvg( this.c[3], 'viewBox', '0 0 '+this.wfixe+' '+this.wfixe );
 	    s[3].width = this.wfixe + 'px';
 	    s[3].height = this.wfixe + 'px';
     	s[3].left = this.decal.x + 'px';
 	    s[3].top = this.decal.y + 'px';
+=======
+	    this.c[5].width = this.c[5].height = this.ww;
+	    s[5].left = this.sa + 'px';
+	    s[5].top = this.decal + 'px';
+
+	    this.ctxMask.translate(this.mid, this.mid);
+	    this.ctxOverlay.translate(this.mid, this.mid);
+
+	    if( this.isOpen ){ 
+	        this.redraw();
+
+	        //this.open();
+	        //this.h = this.ww+30;
+	        //this.c[0].height = this.h + 'px';
+	        //if( this.isUI ) this.main.calc();
+	    }
+>>>>>>> origin/gh-pages
 
 	    this.ratio = 256/this.wfixe;
 	    this.square = 1 / (60*(this.wfixe/256));
