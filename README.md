@@ -1,4 +1,4 @@
-<img src="http://lo-th.github.io/uil/examples/img/uil.png"/> uil v1.0
+<img src="http://lo-th.github.io/uil/examples/img/uil.png"/> uil v2.0
 
 uil.js is a lightweight ui for javascript with some svg.
 [**example**](http://lo-th.github.io/uil/index.html)
@@ -38,3 +38,9 @@ ui.clear();
 [**uil stresstest**](http://lo-th.github.io/uil/examples/uil_stresstest.html)
 
 [**uil advanced**](http://lo-th.github.io/uil/examples/uil_test.html)
+
+[**uil to canvas**](http://lo-th.github.io/uil/examples/uil_to_canvas.html)
+
+[**uil to three**](http://lo-th.github.io/uil/examples/uil_3d.html)
+
+[**uil to three 2**](http://lo-th.github.io/uil/examples/uil_3d_2.html)
