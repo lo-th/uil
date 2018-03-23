@@ -5,7 +5,7 @@
 <title>Uil stress test 2</title>
 <link rel="shortcut icon" href="img/favicon.ico">
 <style>
-body {  background-color:#161616; }
+body {  background-color:#050608; }
 </style>
 
 <script type="text/javascript" src="../build/uil.js"></script>
@@ -16,8 +16,8 @@ body {  background-color:#161616; }
 var obj = { speed: 5 };
 var gui = new UIL.Gui();
 
-for(var i=0; i<100;i++){
-    gui.add('slide', {name:'speed', min:-5, max:5, value:5, height:27 });
+for(var i=0; i<1000;i++){
+    gui.add('slide', {name:'n-'+i, min:-5, max:5, value:5, h:20 });
 }
 </script>
 </body>

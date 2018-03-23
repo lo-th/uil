@@ -1,10 +1,11 @@
 import './polyfills.js';
 
+export var REVISION = '2.0';
+
 export { Tools } from './core/Tools.js';
 export { Gui } from './core/Gui.js';
 export { Proto } from './core/Proto.js';
-//export { add } from './core/add.js';
-export * from './core/add.js';
+export { add } from './core/add.js';
 //
 export { Bool } from './proto/Bool.js';
 export { Button } from './proto/Button.js';

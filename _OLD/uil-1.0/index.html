@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Uil</title>
+<link rel="shortcut icon" href="./examples/img/favicon.ico">
+<style>
+html{ overflow:hidden; width:100%; height:100%; }
+body{ font-family:"Lucida Console", Monaco, monospace; background-color:#161616; font-size:12px; color:#fff;}
+
+
+@keyframes octocat-wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(-25deg)}40%,80%{transform:rotate(10deg)}}
+#octo-arm{pointer-events:none;}
+#octo-body{pointer-events:none;}
+#octo{cursor:pointer;pointer-events:auto;}
+
+#version { position:absolute; top:60px; left:50%; width:100px; height:10px; margin-left:23px; pointer-events:none; font-size:12px;}
+#debug { position:absolute; top:10px; left:10px; width:300px; pointer-events:none;}
+#logo{ position:absolute; left:50%; margin-left:-128px;  margin-top:-90px; transform: scale(0.33,0.33); }
+</style>
+<script type="text/javascript" src="build/uil.js"></script>
+</head>
+
+<body>
+<div id='content'></div>
+
+<svg xmlns='http://www.w3.org/2000/svg' version='1.1' xmlns:xlink='http://www.w3.org/1999/xlink' preserveAspectRatio='none' x='0px' y='0px' width='256px' height='256px' viewBox='0 0 256 256' id='logo'><path id='logoin' fill='#FFFFFF' stroke='none' d='M 183 52 L 170 52 170 167.05 Q 170 184.4 157.75 196.65 145.4 209 128 209 110.6 209 98.35 196.65 86 184.4 86 167.05 L 86 52 73 52 73 167.05 Q 73 189.8 89.15 205.85 105.2 222 128 222 150.75 222 166.95 205.85 183 189.8 183 167.05 L 183 52 M 111 52 L 98 52 98 167.05 Q 98 179.4 106.85 188.15 115.6 197 128 197 140.45 197 149.25 188.15 158 179.4 158 167.05 L 158 52 145 52 145 167.05 Q 145 174 140.05 179 135.05 184 128 184 121 184 116 179 111 174 111 167.05 L 111 52 Z'></path></svg>
+
+<svg xmlns='http://www.w3.org/2000/svg' version='1.1' xmlns:xlink='http://www.w3.org/1999/xlink' width='80' height='80' viewBox='0 0 250 250' style='fill:rgba(255,255,255,0.2); color:#161616; position: absolute; top: 0; border: 0; right: 0;'><path d='M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z' id='octo'></path>
+<path d='M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2' fill='currentColor' style='transform-origin: 130px 106px;' id='octo-arm'></path>
+<path d='M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z' fill='currentColor' id='octo-body'></path></svg>
+
+<div id='version'></div>
+<div id='debug'></div>
+
+<script>
+
+// svg github link
+var octo = document.getElementById('octo');
+var octoArm = document.getElementById('octo-arm');
+octo.addEventListener('mouseover',function(e){ octo.setAttribute('fill', '#3998d6'); octoArm.style.animationName='octocat-wave'; octoArm.style.animationDuration='560ms';}, false );
+octo.addEventListener('mouseout',function(e){ octo.setAttribute('fill','rgba(255,255,255,0.2)');  octoArm.style.animationName='none'; }, false );
+octo.addEventListener('mousedown',function(e){ window.open('https://github.com/lo-th/uil','_blank'); }, false );
+
+
+var gr0, gr1, gr2, gr3;
+var timer = null;
+var display = false;
+var list = ['item-0', 'item-1', 'item-2', 'item-3', 'item-4', 'item-5', 'item-6', 'item-7', 'item-8', 'item-9', 'item-10', 'item-11', 'item-12'];
+var list2 = ['item-0', 'item-1', 'item-2'];
+
+document.getElementById('version').innerHTML = 'il '+UIL.REVISION;
+var debug = document.getElementById('debug');
+
+var callback = function(v){ debug.innerHTML = v; }
+var callbackButton = function(){ debug.innerHTML = "i'm a button !!" ; }
+var callbackSize = function(v){  ui.setWidth( v ); }
+var callbackLogo = function(v){ document.getElementById('logoin').setAttributeNS(null, 'fill', v ); document.getElementById('version').style.color = v;  }
+
+// single UI element
+var s = UIL.add('slide', {target:document.body, callback:callbackSize, name:'ui size', min:100, max:400, value:300, step:10, color:'no', w:100, pos:{left:'10px', top:'40px' }, simple:true });
+var b = UIL.add('button', {target:document.body, callback:populate, name:'populate', color:'no', w:100, pos:{left:'10px', top:'60px'}, simple:true });
+var c = UIL.add('color', {target:document.body, callback:callbackLogo, name:' ', color:'no', w:100, pos:{left:'10px', top:'auto', bottom:'10px' }, simple:true, side:'up', ctype:'html' });
+
+// init gui and define global callback
+var ui = new UIL.Gui( { css:'top:98px; left:50%;', w:320, h:20, center:true } ).onChange( callback );
+
+populate();
+
+function populate(){
+    if(!display){
+        ui.add('title',  { name:'Title', color:'N'});
+        //ui.add('fps',    { height:30 });
+        ui.add('bool',   { name:'bool', h:20 });
+        ui.add('color',  { name:'color', type:'html', value:0xffffff});
+        ui.add('color',  { name:'color', type:'html', value:[0,1,1,1], h:20});
+        ui.add('slide',  { name:'slide', min:-100, max:100, value:0, precision:0 });
+        ui.add('slide',  { name:'slide', min:-1, max:1, value:0, step:0.01, precision:2, stype:1 });
+        ui.add('slide',  { name:'slide', min:-1, max:1, value:0, step:0.01, precision:2, stype:2 });
+        ui.add('string', { name:'string', value:'welcome to uil'});
+        ui.add('list',   { name:'list', list:list});
+        ui.add('list',   { name:'list', list:list2, itemHeight:40 });
+        ui.add('number', { name:'number', value:20});
+        ui.add('number', { name:'vector2', value:[0,0] });
+        ui.add('number', { name:'vector3', value:[0,0,0] });
+        ui.add('number', { name:'vector4', value:[0,0,0,0], step:1, precision:0, h:36 });
+        ui.add('button', { name:'button', callback:callbackButton });
+
+        gr0 = ui.add('group', { name:'Group', h:36 });
+
+        gr0.add('list',   { name:'list', list:list });
+
+        gr0.add('slide',  { name:'slide', min:-100, max:100, value:0, precision:0, fontColor:'#B0CC99', h:20 });
+        gr0.add('slide',  { name:'slide', min:-100, max:100, value:0, precision:0, fontColor:'#F6E497', h:20  });
+        gr0.add('slide',  { name:'slide', min:-100, max:100, value:0, precision:0, fontColor:'#C79F4B', h:20  });
+        gr0.add('slide',  { name:'slide', min:-100, max:100, value:0, precision:0, fontColor:'#FF5B2B', h:20  });
+        gr0.add('slide',  { name:'slide', min:-100, max:100, value:0, precision:0, fontColor:'#E70739', h:20  });
+
+        gr1 = ui.add('group', { name:'circulars', fontColor:'#D4B87B' });
+
+        gr1.add('circular', { name:'circular', w:50, h:120, min:0, max:100, value:25, precision:2 , fontColor:'#B0CC99' });
+        gr1.add('circular', { name:'circular', w:66, h:120, min:0, max:100, value:50, precision:2 , fontColor:'#F6E497' });
+        gr1.add('circular', { name:'circular', w:84, h:120, min:0, max:100, value:70, precision:0, step:10, fontColor:'#C79F4B' });
+        gr1.add('circular', { name:'circular', w:100, min:0, max:100, value:100, precision:0, step:1, fontColor:'#FF5B2B' });
+
+        gr2 = ui.add('group', { name:'knobs', fontColor:'#D4B87B' });
+
+        gr2.add('knob', { name:'knob', w:50, h:120, min:0, max:100, value:25, precision:2 , fontColor:'#D4B87B' });
+        gr2.add('knob', { name:'knob', w:66, h:120, min:0, max:100, value:50, precision:2 , fontColor:'#D4B87B' });
+        gr2.add('knob', { name:'knob', w:84, h:120, min:0, max:100, value:70, precision:0, step:10, fontColor:'#D4B87B' });
+        gr2.add('knob', { name:'knob', w:100, min:0, max:100, value:100, precision:0, step:1, fontColor:'#D4B87B' });
+
+        gr3 = ui.add('group', { name:'joysticks', fontColor:'#D4B87B' });
+
+        gr3.add('joystick', { name:'joystick', w:100, multiplicator:1, precision:2, fontColor:'#D4B87B' });
+        gr3.add('joystick', { name:'joystick', w:100, multiplicator:1, precision:2, fontColor:'#D4B87B' });
+        gr3.add('joystick', { name:'joystick', w:100, multiplicator:1, precision:2, fontColor:'#D4B87B' });
+        
+        //gr0.open();
+
+        display = true;
+        b.label('clear');
+    } else {
+        ui.clear();
+        display = false;
+        b.label('populate');
+    }
+}
+</script>
+</body>
+</html>
+

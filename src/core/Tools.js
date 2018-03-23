@@ -1,43 +1,42 @@
 /**
- * @author lo-th / https://github.com/lo-th
+ * @author lth / https://github.com/lo-th
  */
 
-var Tools = {
+var T = {
 
-    main: null,
-
-    doc: document,
     frag: document.createDocumentFragment(),
 
-    URL: window.URL || window.webkitURL,
-
-    isLoop: false,
-    listens: [],
+    colorRing: null,
+    joystick: null,
+    circular: null,
+    knob: null,
+    //graph: null,
 
     svgns: "http://www.w3.org/2000/svg",
     htmls: "http://www.w3.org/1999/xhtml",
 
     DOM_SIZE: [ 'height', 'width', 'top', 'left', 'bottom', 'right', 'margin-left', 'margin-right', 'margin-top', 'margin-bottom'],
     SVG_TYPE_D: [ 'pattern', 'defs', 'transform', 'stop', 'animate', 'radialGradient', 'linearGradient', 'animateMotion' ],
-    SVG_TYPE_G: [ 'rect', 'circle', 'path', 'polygon', 'text', 'g', 'line', 'foreignObject' ],
+    SVG_TYPE_G: [ 'svg', 'rect', 'circle', 'path', 'polygon', 'text', 'g', 'line', 'foreignObject' ],
 
-    size: {
-        
-        w: 240,
-        h: 20,
-        p: 30,
-        s: 20,
+    TwoPI: 6.283185307179586,
 
-    },
+    size: {  w: 240, h: 20, p: 30, s: 20 },
 
-    // colors
+    // ----------------------
+    //   COLOR
+    // ----------------------
 
     colors: {
 
         text : '#C0C0C0',
         background: 'rgba(44,44,44,0.3)',
+        backgroundOver: 'rgba(11,11,11,0.5)',
 
-        border : '#4f4f4f',
+        input: '#005AAA',
+
+        border : '#454545',
+        borderOver : '#5050AA',
         borderSelect : '#308AFF',
 
         button : '#404040',
@@ -47,34 +46,49 @@ var Tools = {
         moving : '#03afff',
         down : '#024699',
 
-        stroke: '#606060',//'rgba(120,120,120,0.6)',
+        stroke: 'rgba(11,11,11,0.5)',
         scroll: '#333333',
+
+        hide: 'rgba(0,0,0,0)',
 
     },
 
     // style css
 
     css : {
-        basic: '-o-user-select:none; -ms-user-select:none; -khtml-user-select:none; -webkit-user-select:none; -moz-user-select:none;' + 'position:absolute; pointer-events:none; box-sizing:border-box; margin:0; padding:0; border:none; overflow:hidden; background:none;',
+        //unselect: '-o-user-select:none; -ms-user-select:none; -khtml-user-select:none; -webkit-user-select:none; -moz-user-select:none;', 
+        basic: 'position:absolute; pointer-events:none; box-sizing:border-box; margin:0; padding:0; overflow:hidden; ',// + '-o-user-select:none; -ms-user-select:none; -khtml-user-select:none; -webkit-user-select:none; -moz-user-select:none;',
     },
 
     // svg path
 
-    GPATH: 'M 7 7 L 7 8 8 8 8 7 7 7 M 5 7 L 5 8 6 8 6 7 5 7 M 3 7 L 3 8 4 8 4 7 3 7 M 7 5 L 7 6 8 6 8 5 7 5 M 6 6 L 6 5 5 5 5 6 6 6 M 7 3 L 7 4 8 4 8 3 7 3 M 6 4 L 6 3 5 3 5 4 6 4 M 3 5 L 3 6 4 6 4 5 3 5 M 3 3 L 3 4 4 4 4 3 3 3 Z',
+    svgs: {
+
+        group:'M 7 7 L 7 8 8 8 8 7 7 7 M 5 7 L 5 8 6 8 6 7 5 7 M 3 7 L 3 8 4 8 4 7 3 7 M 7 5 L 7 6 8 6 8 5 7 5 M 6 6 L 6 5 5 5 5 6 6 6 M 7 3 L 7 4 8 4 8 3 7 3 M 6 4 L 6 3 5 3 5 4 6 4 M 3 5 L 3 6 4 6 4 5 3 5 M 3 3 L 3 4 4 4 4 3 3 3 Z',
+        arrow:'M 3 8 L 8 5 3 2 3 8 Z',
+        arrowDown:'M 5 8 L 8 3 2 3 5 8 Z',
+        arrowUp:'M 5 2 L 2 7 8 7 5 2 Z',
+
+    },
+
+    // custom text
 
     setText : function( size, color, font ){
 
         size = size || 11;
         color = color || '#CCC';
-        font = font || '"Consolas", "Lucida Console", Monaco, monospace';
+        font = font || 'Monospace';//'"Consolas", "Lucida Console", Monaco, monospace';
 
-        Tools.colors.text = color;
+        T.colors.text = color;
+        T.css.txt = T.css.basic + 'font-family:'+font+'; font-size:'+size+'px; color:'+color+'; padding:2px 10px; left:0; top:2px; height:16px; width:100px; overflow:hidden; white-space: nowrap;';
+        T.css.txtselect = T.css.txt + 'padding:2px 5px; border:1px dashed ' + T.colors.border+';';
+        T.css.item = T.css.txt + 'position:relative; background:rgba(0,0,0,0.2); margin-bottom:1px;';
 
-        Tools.css.txt = Tools.css.basic + 'font-family:'+font+'; font-size:'+size+'px; color:'+color+'; padding:2px 10px; left:0; top:2px; height:16px; width:100px; overflow:hidden; white-space: nowrap;';
-        Tools.css.txtedit = Tools.css.txt + 'pointer-events:auto; padding:2px 5px; outline:none; -webkit-appearance:none; -moz-appearance:none; border:1px dashed #4f4f4f; -ms-user-select:element;'
-        Tools.css.txtselect = Tools.css.txt + 'pointer-events:auto; padding:2px 5px; outline:none; -webkit-appearance:none; -moz-appearance:none; border:1px dashed ' + Tools.colors.border+'; -ms-user-select:element;';
-        Tools.css.txtnumber = Tools.css.txt + 'letter-spacing:-1px; padding:2px 5px;';
-        Tools.css.item = Tools.css.txt + 'position:relative; background:rgba(0,0,0,0.2); margin-bottom:1px; pointer-events:auto; cursor:pointer;';
+    },
+
+    clone: function ( o ) {
+
+        return o.cloneNode( true );
 
     },
 
@@ -82,6 +96,15 @@ var Tools = {
 
         if( id === -1 ) dom.setAttributeNS( null, type, value );
         else dom.childNodes[ id || 0 ].setAttributeNS( null, type, value );
+
+    },
+
+    setCss: function( dom, css ){
+
+        for( var r in css ){
+            if( T.DOM_SIZE.indexOf(r) !== -1 ) dom.style[r] = css[r] + 'px';
+            else dom.style[r] = css[r];
+        }
 
     },
 
@@ -105,28 +128,28 @@ var Tools = {
 
     },
 
-    /*setDom : function( dom, type, value ){
-
-        var ext = Tools.DOM_SIZE.indexOf(type) !== -1 ? 'px' : '';
-        dom.style[type] = value + ext;
-
-    },*/
-
     dom : function ( type, css, obj, dom, id ) {
 
         type = type || 'div';
 
-        if( Tools.SVG_TYPE_D.indexOf(type) !== -1 || Tools.SVG_TYPE_G.indexOf(type) !== -1 ){ // is svg element
+        if( T.SVG_TYPE_D.indexOf(type) !== -1 || T.SVG_TYPE_G.indexOf(type) !== -1 ){ // is svg element
 
-            // create new svg if not def
-            if( dom === undefined ) dom = Tools.doc.createElementNS( Tools.svgns, 'svg' );
+            if( type ==='svg' ){
 
-            Tools.addAttributes( dom, type, obj, id );
+                dom = document.createElementNS( T.svgns, 'svg' );
+                T.set( dom, obj );
+
+            } else {
+                // create new svg if not def
+                if( dom === undefined ) dom = document.createElementNS( T.svgns, 'svg' );
+                T.addAttributes( dom, type, obj, id );
+
+            }
             
         } else { // is html element
 
-            if( dom === undefined ) dom = Tools.doc.createElementNS( Tools.htmls, type );
-            else dom = dom.appendChild( Tools.doc.createElementNS( Tools.htmls, type ) );
+            if( dom === undefined ) dom = document.createElementNS( T.htmls, type );
+            else dom = dom.appendChild( document.createElementNS( T.htmls, type ) );
 
         }
 
@@ -139,19 +162,19 @@ var Tools = {
 
     addAttributes : function( dom, type, o, id ){
 
-        var g = Tools.doc.createElementNS( Tools.svgns, type );
-        Tools.set( g, o );
-        Tools.get( dom, id ).appendChild( g );
-        if( Tools.SVG_TYPE_G.indexOf(type) !== -1 ) g.style.pointerEvents = 'none';
+        var g = document.createElementNS( T.svgns, type );
+        T.set( g, o );
+        T.get( dom, id ).appendChild( g );
+        if( T.SVG_TYPE_G.indexOf(type) !== -1 ) g.style.pointerEvents = 'none';
         return g;
 
     },
 
     clear : function( dom ){
 
-        Tools.purge( dom );
+        T.purge( dom );
         while (dom.firstChild) {
-            if ( dom.firstChild.firstChild ) Tools.clear( dom.firstChild );
+            if ( dom.firstChild.firstChild ) T.clear( dom.firstChild );
             dom.removeChild( dom.firstChild ); 
         }
 
@@ -171,51 +194,17 @@ var Tools = {
         if (a) {
             i = a.length;
             while(i--){ 
-                Tools.purge( dom.childNodes[i] ); 
+                T.purge( dom.childNodes[i] ); 
             }
         }
 
     },
 
+    clamp: function ( value, min, max ) {
 
-
-    // LOOP
-
-    loop : function(){
-
-        if( Tools.isLoop ) requestAnimationFrame( Tools.loop );
-        Tools.update();
-
-    },
-
-    update : function(){
-
-        var i = Tools.listens.length;
-        while(i--) Tools.listens[i].listening();
-
-    },
-
-    removeListen : function ( proto ){
-
-        var id = Tools.listens.indexOf( proto );
-        Tools.listens.splice(id, 1);
-
-        if( Tools.listens.length === 0 ) Tools.isLoop = false;
-
-    },
-
-    addListen : function ( proto ){
-
-        var id = Tools.listens.indexOf( proto );
-
-        if( id !== -1 ) return; 
-
-        Tools.listens.push( proto );
-
-        if( !Tools.isLoop ){
-            Tools.isLoop = true;
-            Tools.loop();
-        }
+        //return value <= min ? min : value >= max ? max : value;
+        return value < min ? min : value > max ? max : value;
+        //return Math.max( min, Math.min( max, value ) );
 
     },
 
@@ -223,20 +212,20 @@ var Tools = {
     //   Color function
     // ----------------------
 
-    ColorLuma : function ( hex, lum ) {
+    ColorLuma : function ( hex, l ) {
 
         // validate hex string
         hex = String(hex).replace(/[^0-9a-f]/gi, '');
         if (hex.length < 6) {
             hex = hex[0]+hex[0]+hex[1]+hex[1]+hex[2]+hex[2];
         }
-        lum = lum || 0;
+        l = l || 0;
 
         // convert to decimal and change luminosity
         var rgb = "#", c, i;
         for (i = 0; i < 3; i++) {
             c = parseInt(hex.substr(i*2,2), 16);
-            c = Math.round(Math.min(Math.max(0, c + (c * lum)), 255)).toString(16);
+            c = Math.round(Math.min(Math.max(0, c + (c * l)), 255)).toString(16);
             rgb += ("00"+c).substr(c.length);
         }
 
@@ -244,53 +233,53 @@ var Tools = {
 
     },
 
-    findDeepInver: function( rgb ){ 
+    findDeepInver: function ( c ) { 
 
-        return (rgb[0] * 0.3 + rgb[1] * .59 + rgb[2] * .11) <= 0.6;
+        return (c[0] * 0.3 + c[1] * .59 + c[2] * .11) <= 0.6;
         
     },
 
 
-    hexToHtml: function(v){ 
+    hexToHtml: function ( v ) { 
         v = v === undefined ? 0x000000 : v;
         return "#" + ("000000" + v.toString(16)).substr(-6);
         
     },
 
-    htmlToHex: function(v){ 
+    htmlToHex: function ( v ) { 
 
         return v.toUpperCase().replace("#", "0x");
 
     },
 
-    u255: function(color, i){
+    u255: function (c, i) {
 
-        return parseInt(color.substring(i, i + 2), 16) / 255;
-
-    },
-
-    u16: function( color, i ){
-
-        return parseInt(color.substring(i, i + 1), 16) / 15;
+        return parseInt(c.substring(i, i + 2), 16) / 255;
 
     },
 
-    unpack: function( color ){
+    u16: function ( c, i ) {
 
-        if (color.length == 7) return [ Tools.u255(color, 1), Tools.u255(color, 3), Tools.u255(color, 5) ];
-        else if (color.length == 4) return [ Tools.u16(color,1), Tools.u16(color,2), Tools.u16(color,3) ];
-
-    },
-
-    htmlRgb: function( rgb ){
-
-        return 'rgb(' + Math.round(rgb[0] * 255) + ','+ Math.round(rgb[1] * 255) + ','+ Math.round(rgb[2] * 255) + ')';
+        return parseInt(c.substring(i, i + 1), 16) / 15;
 
     },
 
-    rgbToHex : function( rgb ){
+    unpack: function( c ){
 
-        return '#' + ( '000000' + ( ( rgb[0] * 255 ) << 16 ^ ( rgb[1] * 255 ) << 8 ^ ( rgb[2] * 255 ) << 0 ).toString( 16 ) ).slice( - 6 );
+        if (c.length == 7) return [ T.u255(c, 1), T.u255(c, 3), T.u255(c, 5) ];
+        else if (c.length == 4) return [ T.u16(c,1), T.u16(c,2), T.u16(c,3) ];
+
+    },
+
+    htmlRgb: function( c ){
+
+        return 'rgb(' + Math.round(c[0] * 255) + ','+ Math.round(c[1] * 255) + ','+ Math.round(c[2] * 255) + ')';
+
+    },
+
+    rgbToHex : function( c ){
+
+        return '#' + ( '000000' + ( ( c[0] * 255 ) << 16 ^ ( c[1] * 255 ) << 8 ^ ( c[2] * 255 ) << 0 ).toString( 16 ) ).slice( - 6 );
 
     },
 
@@ -305,9 +294,9 @@ var Tools = {
 
     },
 
-    rgbToHsl: function(rgb){
+    rgbToHsl: function ( c ) {
 
-        var r = rgb[0], g = rgb[1], b = rgb[2], min = Math.min(r, g, b), max = Math.max(r, g, b), delta = max - min, h = 0, s = 0, l = (min + max) / 2;
+        var r = c[0], g = c[1], b = c[2], min = Math.min(r, g, b), max = Math.max(r, g, b), delta = max - min, h = 0, s = 0, l = (min + max) / 2;
         if (l > 0 && l < 1) s = delta / (l < 0.5 ? (2 * l) : (2 - 2 * l));
         if (delta > 0) {
             if (max == r && max != g) h += (g - b) / delta;
@@ -319,86 +308,209 @@ var Tools = {
 
     },
 
-    hslToRgb: function( hsl ){
+    hslToRgb: function ( c ) {
 
-        var p, q, h = hsl[0], s = hsl[1], l = hsl[2];
+        var p, q, h = c[0], s = c[1], l = c[2];
 
         if ( s === 0 ) return [ l, l, l ];
         else {
             q = l <= 0.5 ? l * (s + 1) : l + s - ( l * s );
             p = l * 2 - q;
-            return [ Tools.hueToRgb(p, q, h + 0.33333), Tools.hueToRgb(p, q, h), Tools.hueToRgb(p, q, h - 0.33333) ];
+            return [ T.hueToRgb(p, q, h + 0.33333), T.hueToRgb(p, q, h), T.hueToRgb(p, q, h - 0.33333) ];
         }
 
     },
 
-    // svg to canvas test 
+    // ----------------------
+    //   SVG MODEL
+    // ----------------------
 
-    toCanvas: function( canvas, content, w, h ){
+    makeGradiant: function ( type, settings, parent, colors ) {
 
-        var ctx = canvas.getContext("2d");
+        T.dom( type, null, settings, parent, 0 );
 
-        var dcopy = null;
+        var n = parent.childNodes[0].childNodes.length - 1, c;
 
-        if( typeof content === 'string' ){
+        for( var i = 0; i < colors.length; i++ ){
 
-            dcopy = Tools.dom( 'iframe', 'position:abolute; left:0; top:0; width:'+w+'px; height:'+h+'px;' );
-            dcopy.src = content;
+            c = colors[i];
+            T.dom( 'stop', null, { offset:c[0]+'%', style:'stop-color:'+c[1]+'; stop-opacity:'+c[2]+';' }, parent, [0,n] );
 
-        }else{
-            dcopy = content.cloneNode(true);
-            dcopy.style.left = 0;
         }
 
-        var svg = Tools.dom( 'foreignObject', 'position:abolute; left:0; top:0;', { width:w, height:h });
+    },
 
-        svg.childNodes[0].appendChild( dcopy );
+    /*makeGraph: function () {
+
+        var w = 128;
+        var radius = 34;
+        var svg = T.dom( 'svg', T.css.basic , { viewBox:'0 0 '+w+' '+w, width:w, height:w, preserveAspectRatio:'none' } );
+        T.dom( 'path', '', { d:'', stroke:T.colors.text, 'stroke-width':4, fill:'none', 'stroke-linecap':'butt' }, svg );//0
+        //T.dom( 'rect', '', { x:10, y:10, width:108, height:108, stroke:'rgba(0,0,0,0.3)', 'stroke-width':2 , fill:'none'}, svg );//1
+        //T.dom( 'circle', '', { cx:64, cy:64, r:radius, fill:T.colors.button, stroke:'rgba(0,0,0,0.3)', 'stroke-width':8 }, svg );//0
         
-        svg.setAttribute("version", "1.1");
-        svg.setAttribute('xmlns', 'http://www.w3.org/2000/svg' );
-        svg.setAttribute("xmlns:xlink", "http://www.w3.org/1999/xlink");
+        //T.dom( 'circle', '', { cx:64, cy:64, r:radius+7, stroke:'rgba(0,0,0,0.3)', 'stroke-width':7 , fill:'none'}, svg );//2
+        //T.dom( 'path', '', { d:'', stroke:'rgba(255,255,255,0.3)', 'stroke-width':2, fill:'none', 'stroke-linecap':'round', 'stroke-opacity':0.5 }, svg );//3
+        T.graph = svg;
 
-        svg.setAttribute('width', w );
-        svg.setAttribute('height', h );
-        svg.childNodes[0].setAttribute('width', '100%' );
-        svg.childNodes[0].setAttribute('height', '100%' );
+    },*/
 
-        //console.log(svg)
+    makeKnob: function () {
 
-        var img = new Image();
+        var w = 128;
+        var radius = 34;
+        var svg = T.dom( 'svg', T.css.basic , { viewBox:'0 0 '+w+' '+w, width:w, height:w, preserveAspectRatio:'none' } );
+        T.dom( 'circle', '', { cx:64, cy:64, r:radius, fill:T.colors.button, stroke:'rgba(0,0,0,0.3)', 'stroke-width':8 }, svg );//0
+        T.dom( 'path', '', { d:'', stroke:T.colors.text, 'stroke-width':4, fill:'none', 'stroke-linecap':'round' }, svg );//1
+        T.dom( 'circle', '', { cx:64, cy:64, r:radius+7, stroke:'rgba(0,0,0,0.1)', 'stroke-width':7 , fill:'none'}, svg );//2
+        T.dom( 'path', '', { d:'', stroke:'rgba(255,255,255,0.3)', 'stroke-width':2, fill:'none', 'stroke-linecap':'round', 'stroke-opacity':0.5 }, svg );//3
+        T.knob = svg;
+
+    },
+
+    makeCircular: function () {
+
+        var w = 128;
+        var radius = 40;
+        var svg = T.dom( 'svg', T.css.basic , { viewBox:'0 0 '+w+' '+w, width:w, height:w, preserveAspectRatio:'none' } );
+        T.dom( 'circle', '', { cx:64, cy:64, r:radius, stroke:'rgba(0,0,0,0.1)', 'stroke-width':10, fill:'none' }, svg );//0
+        T.dom( 'path', '', { d:'', stroke:T.colors.text, 'stroke-width':7, fill:'none', 'stroke-linecap':'butt' }, svg );//1
+        T.circular = svg;
+
+    },
+
+    makeJoystick: function () {
+
+        //+' background:#f00;'
+
+        var w = 128;
+        var radius = Math.floor((w-30)*0.5);
+        var innerRadius = Math.floor(radius*0.6);
+        var svg = T.dom( 'svg', T.css.basic , { viewBox:'0 0 '+w+' '+w, width:w, height:w, preserveAspectRatio:'none' } );
+        T.dom( 'defs', null, {}, svg );
+        T.dom( 'g', null, {}, svg );
+
+        // gradian background
+        var ccc = [ [40, 'rgb(0,0,0)', 0.3], [80, 'rgb(0,0,0)', 0], [90, 'rgb(50,50,50)', 0.4], [100, 'rgb(50,50,50)', 0] ];
+        T.makeGradiant( 'radialGradient', { id:'grad', cx:'50%', cy:'50%', r:'50%', fx:'50%', fy:'50%' }, svg, ccc );
+
+        // gradian shadow
+        ccc = [ [60, 'rgb(0,0,0)', 0.5], [100, 'rgb(0,0,0)', 0] ];
+        T.makeGradiant( 'radialGradient', { id:'gradS', cx:'50%', cy:'50%', r:'50%', fx:'50%', fy:'50%' }, svg, ccc );
+
+        // gradian stick
+        var cc0 = ['rgb(40,40,40)', 'rgb(48,48,48)', 'rgb(30,30,30)'];
+        var cc1 = ['rgb(1,90,197)', 'rgb(3,95,207)', 'rgb(0,65,167)'];
+
+        ccc = [ [30, cc0[0], 1], [60, cc0[1], 1], [80, cc0[1], 1], [100, cc0[2], 1] ];
+        T.makeGradiant( 'radialGradient', { id:'gradIn', cx:'50%', cy:'50%', r:'50%', fx:'50%', fy:'50%' }, svg, ccc );
+
+        ccc = [ [30, cc1[0], 1], [60, cc1[1], 1], [80, cc1[1], 1], [100, cc1[2], 1] ];
+        T.makeGradiant( 'radialGradient', { id:'gradIn2', cx:'50%', cy:'50%', r:'50%', fx:'50%', fy:'50%' }, svg, ccc );
+
+        // graph
+
+        T.dom( 'circle', '', { cx:64, cy:64, r:radius, fill:'url(#grad)' }, svg );//2
+        T.dom( 'circle', '', { cx:64+5, cy:64+10, r:innerRadius+10, fill:'url(#gradS)' }, svg );//3
+        T.dom( 'circle', '', { cx:64, cy:64, r:innerRadius, fill:'url(#gradIn)' }, svg );//4
+
+        T.joystick = svg;
+
+    },
+
+    makeColorRing: function () {
+
+        var w = 256;
+        var svg = T.dom( 'svg', T.css.basic , { viewBox:'0 0 '+w+' '+w, width:w, height:w, preserveAspectRatio:'none' } );
+        T.dom( 'defs', null, {}, svg );
+        T.dom( 'g', null, {}, svg );
+
+        var s = 40;//stroke
+        var r =( w-s )*0.5;
+        var mid = w*0.5;
+        var n = 24, nudge = 8 / r / n * Math.PI, a1 = 0, d1;
+        var am, tan, d2, a2, ar, i, j, path, ccc;
+        var color = [];
         
+        for ( i = 0; i <= n; ++i) {
 
-        var data = 'data:image/svg+xml;base64,'+ window.btoa((new XMLSerializer).serializeToString(svg));
-        dcopy = null;
+            d2 = i / n;
+            a2 = d2 * T.TwoPI;
+            am = (a1 + a2) * 0.5;
+            tan = 1 / Math.cos((a2 - a1) * 0.5);
 
-        img.onload = function() {
-            ctx.clearRect( 0, 0, w, h );
-            ctx.drawImage( img, 0, 0, w, h, 0, 0, w, h );
-        };
-        
-        img.src = data;
+            ar = [
+                Math.sin(a1), -Math.cos(a1), 
+                Math.sin(am) * tan, -Math.cos(am) * tan, 
+                Math.sin(a2), -Math.cos(a2)
+            ];
+            
+            color[1] = T.rgbToHex( T.hslToRgb([d2, 1, 0.5]) );
 
-        /*setTimeout(function() {
-            ctx.clearRect( 0, 0, w, h );
-            ctx.drawImage( img, 0, 0, w, h, 0, 0, w, h );
-        }, 0);*/
+            if (i > 0) {
 
-        // blob
+                j = 6;
+                while(j--){
+                   ar[j] = ((ar[j]*r)+mid).toFixed(2);
+                }
 
-        /*var svgBlob = new Blob([(new XMLSerializer).serializeToString(svg)], {type: "image/svg+xml;charset=utf-8"});
-        var url = URL.createObjectURL(svgBlob);
+                path = ' M' + ar[0] + ' ' + ar[1] + ' Q' + ar[2] + ' ' + ar[3] + ' ' + ar[4] + ' ' + ar[5];
 
-        img.onload = function() {
-            ctx.clearRect( 0, 0, w, h );
-            ctx.drawImage( img, 0, 0, w, h, 0, 0, w, h );
-            URL.revokeObjectURL(url);
-        };
-        img.src = url;*/
+                ccc = [ [0,color[0],1], [100,color[1],1] ];
+                T.makeGradiant( 'linearGradient', { id:'G'+i, x1:ar[0], y1:ar[1], x2:ar[4], y2:ar[5], gradientUnits:"userSpaceOnUse" }, svg, ccc );
+
+                T.dom( 'path', '', { d:path, 'stroke-width':s, stroke:'url(#G'+i+')', 'stroke-linecap':"butt" }, svg, 1 );
+                
+            }
+            a1 = a2 - nudge; 
+            color[0] = color[1];
+            d1 = d2;
+        }
+
+        var br = (128 - s ) + 2;
+        var bw = 60;
+
+        // black / white
+        ccc = [ [0, '#FFFFFF', 1], [50, '#FFFFFF', 0], [50, '#000000', 0], [100, '#000000', 1] ];
+        T.makeGradiant( 'linearGradient', { id:'GL1', x1:mid-bw, y1:mid-bw, x2:mid-bw, y2:mid+bw, gradientUnits:"userSpaceOnUse" }, svg, ccc );
+
+        // saturation
+        ccc = [ [0, '#7f7f7f', 0], [50, '#7f7f7f', 0.5], [100, '#7f7f7f', 1] ];
+        T.makeGradiant( 'linearGradient', { id:'GL2', x1:mid-bw, y1:mid-bw, x2:mid+bw, y2:mid-bw, gradientUnits:"userSpaceOnUse" }, svg, ccc );
+
+        T.dom( 'circle', '', { cx:128, cy:128, r:br, fill:'red' }, svg );//2
+        T.dom( 'circle', '', { cx:128, cy:128, r:br, fill:'url(#GL2)' }, svg );//3
+        T.dom( 'circle', '', { cx:128, cy:128, r:br, fill:'url(#GL1)' }, svg );//4
+
+        T.dom( 'circle', '', { cx:0, cy:0, r:6, 'stroke-width':3, stroke:'#FFF', fill:'none' }, svg );//5
+        T.dom( 'circle', '', { cx:0, cy:0, r:6, 'stroke-width':3, stroke:'#000', fill:'none' }, svg );//6
+
+        T.colorRing = svg;
+
+    },
+
+    icon: function ( type, color, w ){
+
+        w = w || 40;
+        color = color || '#DEDEDE';
+        var viewBox = '0 0 256 256';
+        var t = ["<svg xmlns='"+T.svgns+"' version='1.1' xmlns:xlink='"+T.htmls+"' style='pointer-events:none;' preserveAspectRatio='xMinYMax meet' x='0px' y='0px' width='"+w+"px' height='"+w+"px' viewBox='"+viewBox+"'><g>"];
+        switch(type){
+            case 'logo':
+            t[1]="<path id='logoin' stroke='"+color+"' stroke-width='16' stroke-linejoin='round' stroke-linecap='square' fill='none' d='M 192 44 L 192 148 Q 192 174.5 173.3 193.25 154.55 212 128 212 101.5 212 82.75 193.25 64 174.5 64 148 L 64 44 M 160 44 L 160 148 Q 160 161.25 150.65 170.65 141.25 180 128 180 114.75 180 105.35 170.65 96 161.25 96 148 L 96 44'/>";
+            break;
+            case 'save':
+            t[1]="<path stroke='"+color+"' stroke-width='4' stroke-linejoin='round' stroke-linecap='round' fill='none' d='M 26.125 17 L 20 22.95 14.05 17 M 20 9.95 L 20 22.95'/><path stroke='"+color+"' stroke-width='2.5' stroke-linejoin='round' stroke-linecap='round' fill='none' d='M 32.6 23 L 32.6 25.5 Q 32.6 28.5 29.6 28.5 L 10.6 28.5 Q 7.6 28.5 7.6 25.5 L 7.6 23'/>";
+            break;
+        }
+        t[2] = "</g></svg>";
+        return t.join("\n");
 
     },
 
 }
 
-Tools.setText();
+T.setText();
 
+var Tools = T;
 export { Tools };

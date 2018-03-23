@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Uil stress test 2</title>
+<link rel="shortcut icon" href="img/favicon.ico">
+<style>
+body {  background-color:#161616; }
+</style>
+
+<script type="text/javascript" src="../build/uil.js"></script>
+
+</head>
+<body>
+<script type="text/javascript">
+var obj = { speed: 5 };
+var gui = new UIL.Gui();
+
+for(var i=0; i<100;i++){
+    gui.add('slide', {name:'speed', min:-5, max:5, value:5, height:27 });
+}
+</script>
+</body>
+</html>

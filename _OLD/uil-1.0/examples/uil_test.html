@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Uil test</title>
+<link rel="shortcut icon" href="img/favicon.ico">
+<style>
+
+body { font-family: "Consolas", "Lucida Console", Monaco, monospace; background-color:#161616; font-size:12px; color:#fff; }
+
+#version { position:absolute; top:98px; left:50%; width:90px; height:10px; pointer-events:none; text-align:right;  font-size:14px;}
+#debug { position:absolute; top:10px; left:0; width:100%; pointer-events:none; text-align:center; }
+#logo { position:absolute; left:50%; margin-left:-128px;  margin-top:-60px; transform: scale(0.5,0.5);}
+</style>
+
+
+<script type="text/javascript" src="../build/uil.js"></script>
+
+</head>
+
+<body>
+<svg xmlns='http://www.w3.org/2000/svg' version='1.1' xmlns:xlink='http://www.w3.org/1999/xlink' preserveAspectRatio='none' x='0px' y='0px' width='256px' height='256px' viewBox='0 0 256 256' id='logo'><path id='logoin' fill='#FFFFFF' stroke='none' d='M 183 52 L 170 52 170 167.05 Q 170 184.4 157.75 196.65 145.4 209 128 209 110.6 209 98.35 196.65 86 184.4 86 167.05 L 86 52 73 52 73 167.05 Q 73 189.8 89.15 205.85 105.2 222 128 222 150.75 222 166.95 205.85 183 189.8 183 167.05 L 183 52 M 111 52 L 98 52 98 167.05 Q 98 179.4 106.85 188.15 115.6 197 128 197 140.45 197 149.25 188.15 158 179.4 158 167.05 L 158 52 145 52 145 167.05 Q 145 174 140.05 179 135.05 184 128 184 121 184 116 179 111 174 111 167.05 L 111 52 Z'></path></svg>
+<div id='version'></div>
+<div id='debug'></div>
+<script>
+
+
+UIL.Tools.setText(10);
+
+
+var testList;
+
+var timer = null;
+var display = false;
+var list = ['item-0', 'item-1', 'item-2', 'item-3', 'item-4', 'item-5', 'item-6', 'item-7', 'item-8', 'item-9', 'item-10', 'item-11', 'item-12'];
+var list2 = ['item-0', 'item-1', 'item-2'];
+
+document.getElementById('version').innerHTML = 'il '+ UIL.REVISION;
+
+var debug = document.getElementById('debug');
+var callback = function( v ){  debug.innerHTML = v; }
+var callbackButton = function( v ){ debug.innerHTML = "i'm a button !! " + v; }
+var callbackSize = function( v ){ ui.setWidth( v ); }
+var callbackLogo = function( v ){ 
+    document.getElementById('logoin').setAttributeNS(null, 'fill', UIL.hexToHtml(v)); 
+    document.getElementById('version').style.color = UIL.hexToHtml(v); 
+
+    ui.setBG( UIL.hexToHtml(v) ) 
+}
+
+
+// single UI element
+var s = UIL.add('slide', { target:document.body,  name:'ui size', min:100, max:400, value:300, step:10, width:100, pos:{ left:'10px', top:'440px' }, simple:true }).onChange( callbackSize );
+var b = UIL.add('button', { target:document.body, callback:populate, name:'populate', width:100, pos:{left:'10px', top:'460px'}, simple:true });
+var h = UIL.add('string', { target:document.body, callback:null, name:' ', value:'YOO', width:60, pos:{left:'10px', top:'490px' }, simple:true });
+var c = UIL.add('color', { target:document.body, callback:callbackLogo, name:' ', value:0x000000, width:100, pos:{left:'10px', top:'auto', bottom:'10px' }, simple:true, side:'up', type:'html' });
+var c = UIL.add('list', { target:document.body, callback:null, name:' ', width:100, list:list, pos:{left:'120px', top:'auto', bottom:'10px' }, simple:true, side:'up', full:true });
+var w = UIL.add('number', { target:document.body, callback:null, name:' ', width:100, pos:{left:'290px', top:'auto', bottom:'10px' }, simple:true });
+
+var j = UIL.add('joystick', {  target:document.body, pos:{left:'400px', top:'auto', bottom:'10px' }, name:'JOY', width:100, multiplicator:1, precision:2, fontColor:'#D4B87B' });
+// in GUI element
+//var ui = new UIL.Gui( { size:300, center:true, css:'top:145px; left:50%;' } ).onChange( callback );
+var ui = new UIL.Gui( { width:300 } ).onChange( callback );
+var ui2 = new UIL.Gui( {  css:'top:0px; left:10px;', width:200 } ).onChange( callback );
+populate();
+
+///ui.toCanvas();
+
+function populate(){
+    if(!display){
+        ui2.add('title',  { name:'Title', titleColor:'#D4B87B', height:30});
+        ui2.add('slide',  { name:'slide',  min:-100, max:100, value:0, precision:0, fontColor:'#D4B87B', stype:0, allway:true });
+        ui2.add('slide',  { name:'slide',  min:-100, max:100, value:0, precision:0, fontColor:'#D4B87B', stype:1 });
+        ui2.add('slide',  { name:'slide',  min:-1, max:1, value:0, step:0.01, precision:2, height:20, stype :3 });
+
+        ui.add('title',  { name:'Title', titleColor:'#D4B87B', height:30});
+
+        ui.add('fps',  { res:70 });
+        
+        var bb = ui.add('bool',   { name:'bool', titleColor:'#D4B87B', h:30, inh:20, bg:'rgba(99,44,44,0.3)' }).onChange( callback );;
+        bb.setValue(true);
+        ui.add('color',  { name:'color', type:'html', value:0x000000, fontColor:'#D4B87B'});
+        ui.add('color',  { name:'color', type:'hex', value:[0,1,1,1], height:40 });
+        ui.add('color',  { name:'color', type:'rgb', value:[0,1,1,1], height:40 });
+        ui.add('slide',  { name:'slide',  min:-100, max:100, value:0, precision:0, fontColor:'#D4B87B', stype:0 }).onChange( callback );;
+        ui.add('slide',  { name:'slide',  min:-100, max:100, value:0, precision:0, fontColor:'#D4B87B', stype:1 });
+        ui.add('slide',  { name:'slide',  min:-1, max:1, value:0, step:0.01, precision:2, height:20, stype :2 });
+        ui.add('string', { name:'string',  value:'welcome to uil', fontColor:'#D4B87B', height:40}).onChange( callback );
+        testList = ui.add('list',   { name:'list',  list:list, fontColor:'#D4B87B' });
+        ui.add('list',   { name:'list',  list:list2, height:40 });
+        ui.add('button', { name:'TEST' });
+        ui.add('number', { name:'number',  value:20});
+        ui.add('number', { name:'vec2', value:[0,0], fontColor:'#D4B87B' });
+        ui.add('number', { name:'vec3', value:[0,0,0] });
+        ui.add('number', { name:'vec4', value:[0,0,0,0], step:1, precision:0, height:30 });
+        ui.add('button', { name:'LOAD', callback:callbackButton, fontColor:'#D4B87B', height:30, loader:true });
+        ui.add('button', { name:'LOAD', callback:callbackButton, fontColor:'#D4B87B', height:30, drag:true });
+
+        ui.add('button', { name:'MULTY', callback:callbackButton, fontColor:'#D4B87B', height:30, value:[1, 2, 3, 4] }).onChange( callback );;
+
+        gr0 = ui.add('group', { name:'Group', height:30 });
+
+        gr0.add('button', { name:'LOAD', callback:callbackButton, fontColor:'#D4B87B', height:30, p:0 });
+        gr0.add('color',  { name:'color', type:'hex', value:[0,1,1,1], h:40 });
+        gr0.add('list',   { name:'listH', list:list, fontColor:'#D4B87B', height:30, p:0  }).onChange( callback );;
+        gr0.add('slide',  { name:'slide', min:-100, max:100, value:0, precision:0 }).onChange( callback );;
+        gr0.add('slide',  { name:'slide', min:-100, max:100, value:0, precision:0 });
+        gr0.add('slide',  { name:'slide', min:-100, max:100, value:0, precision:0 });
+        gr0.add('slide',  { name:'slide', min:-100, max:100, value:0, precision:0 });
+        gr0.add('slide',  { name:'slide', min:-100, max:100, value:0, precision:0 });
+
+        //gr0.open();
+
+        //gr0.clear();
+
+        gr1 = ui.add('group', { name:'Circulars', fontColor:'#D4B87B', bg:'rgba(99,44,99,0.3)' });
+
+        gr1.add('circular', { name:'circular', width:75, min:0, max:100, step:10, value:20, precision:0 , fontColor:'#D4B87B' });
+        gr1.add('circular', { name:'circular', width:75, min:0, max:100, value:50, precision:2 , fontColor:'#D4B87B' });
+        gr1.add('circular', { name:'circular', width:75, min:0, max:100, value:75, precision:2 , fontColor:'#D4B87B' });
+        gr1.add('circular', { name:'circular', width:75, min:0, max:100, value:100, precision:0 , fontColor:'#D4B87B' });
+
+        gr2 = ui.add('group', { name:'Knobs', fontColor:'#D4B87B', bg:'rgba(99,99,44,0.3)' });
+
+        gr2.add('knob', { name:'knob', width:75, min:0, max:100, step:10, value:20, precision:0 , fontColor:'#D4B87B' });
+        gr2.add('knob', { name:'knob', width:75, min:0, max:100, value:50, precision:2 , fontColor:'#D4B87B' });
+        gr2.add('knob', { name:'knob', width:75, min:0, max:100, value:75, precision:2 , fontColor:'#D4B87B' });
+        gr2.add('knob', { name:'knob', width:75, min:0, max:100, value:100, step:1, precision:0 , fontColor:'#D4B87B' });
+
+        gr3 = ui.add('group', { name:'Joysticks', fontColor:'#D4B87B', bg:'rgba(44,99,99,0.3)' });
+
+        gr3.add('joystick', { name:'joystick', width:150, multiplicator:1, precision:2, fontColor:'#D4B87B' });
+        gr3.add('joystick', { name:'joystick', width:150, multiplicator:1, precision:2, fontColor:'#D4B87B' });
+
+        //gr0.open();
+
+        
+
+        display = true;
+        b.label('clear');
+    } else {
+        ui.clear();
+        ui2.clear();
+        display = false;
+        b.label('populate');
+    }
+
+
+}
+
+setTimeout(function(){ testList.setList(['item-A', 'item-B', 'item-C', 'item-D', 'item-E', 'item-F', 'item-G', 'item-H', 'item-I', 'item-J', 'item-K', 'item-L', 'item-M'], 0); }, 3000);
+
+
+
+</script>
+</body>
+</html>

@@ -1,56 +1,51 @@
-import { Tools } from '../core/Tools';
 import { Proto } from '../core/Proto';
 
 function List ( o ) {
 
     Proto.call( this, o );
 
-    this.autoHeight = true;
+    this.autoHeight = false;
     var align = o.align || 'center';
 
-    this.buttonColor = o.bColor || Tools.colors.button;
+    this.sMode = 0;
+    this.tMode = 0;
+
+    this.buttonColor = o.bColor || this.colors.button;
 
     var fltop = Math.floor(this.h*0.5)-5;
 
-    //this.c[2] = Tools.dom( 'div', Tools.css.basic + 'top:0; height:90px; cursor:s-resize; pointer-events:auto; display:none; overflow:hidden; border:1px solid '+Tools.colors.border+';' );
-    //this.c[3] = Tools.dom( 'div', Tools.css.txt + 'text-align:'+align+'; line-height:'+(this.h-4)+'px; border:1px solid '+Tools.colors.border+'; top:1px; pointer-events:auto; cursor:pointer; background:'+this.buttonColor+'; height:'+(this.h-2)+'px;' );
+    this.c[2] = this.dom( 'div', this.css.basic + 'top:0; display:none;' );
+    this.c[3] = this.dom( 'div', this.css.txt + 'text-align:'+align+'; line-height:'+(this.h-4)+'px; top:1px;  background:'+this.buttonColor+'; height:'+(this.h-2)+'px; border-radius:'+this.radius+'px;' );
+    this.c[4] = this.dom( 'path', this.css.basic + 'position:absolute; width:10px; height:10px; top:'+fltop+'px;', { d:this.svgs.arrow, fill:this.fontColor, stroke:'none'});
 
-    this.c[2] = Tools.dom( 'div', Tools.css.basic + 'top:0; height:90px; cursor:s-resize; pointer-events:auto; display:none; overflow:hidden;' );
-    this.c[3] = Tools.dom( 'div', Tools.css.txt + 'text-align:'+align+'; line-height:'+(this.h-4)+'px; top:1px; pointer-events:auto; cursor:pointer; background:'+this.buttonColor+'; height:'+(this.h-2)+'px; border-radius:'+this.radius+'px;' );
-    this.c[4] = Tools.dom( 'path', Tools.css.basic + 'position:absolute; width:10px; height:10px; top:'+fltop+'px;', { d:'M 3 8 L 8 5 3 2 3 8 Z', fill:this.fontColor, stroke:'none'});
+    this.scroller = this.dom( 'div', this.css.basic + 'right:5px;  width:10px; background:#666; display:none;');
 
-    this.scroller = Tools.dom( 'div', Tools.css.basic + 'right:5px;  width:10px; pointer-events:none; background:#666; display:none;');
-
-    this.c[2].name = 'list';
-    this.c[3].name = 'title';
-
-    //this.c[2].style.borderTop = this.h + 'px solid transparent';
     this.c[3].style.color = this.fontColor;
 
-    this.c[2].events = [ 'mousedown', 'mousemove', 'mouseup', 'mousewheel', 'mouseout', 'mouseover' ];
-    this.c[3].events = [ 'mousedown', 'mouseover' ,'mouseout']; 
-
     this.list = o.list || [];
+    this.items = [];
+
+    this.prevName = '';
 
     this.baseH = this.h;
 
-    //this.maxItem = o.maxItem || 5;
     this.itemHeight = o.itemHeight || (this.h-3);
-    //this.length = this.list.length;
 
     // force full list 
     this.full = o.full || false;
 
     this.py = 0;
-    this.w = this.sb;
+    this.ww = this.sb;
     this.scroll = false;
     this.isDown = false;
 
+    this.current = null;
+
     // list up or down
     this.side = o.side || 'down';
-    this.holdTop = 0;
+    this.up = this.side === 'down' ? 0 : 1;
 
-    if( this.side === 'up' ){
+    if( this.up ){
 
         this.c[2].style.top = 'auto';
         this.c[3].style.top = 'auto';
@@ -63,13 +58,14 @@ function List ( o ) {
         //this.c[5].style.bottom = '2px';
 
     } else {
-        this.c[2].style.top = this.h-2 + 'px';
+        this.c[2].style.top = this.baseH + 'px';
         //this.c[6].style.top = this.h + 'px';
     }
 
-    this.listIn = Tools.dom( 'div', Tools.css.basic + 'left:0; top:0; width:100%; background:rgba(0,0,0,0.2);');
+    this.listIn = this.dom( 'div', this.css.basic + 'left:0; top:0; width:100%; background:rgba(0,0,0,0.2);');
     this.listIn.name = 'list';
 
+    this.topList = 0;
     
     this.c[2].appendChild( this.listIn );
     this.c[2].appendChild( this.scroller );
@@ -78,7 +74,8 @@ function List ( o ) {
 
     this.setList( this.list, o.value );
 
-   
+    //this.c[0].style.background = '#FF0000'
+
     this.init();
 
     if( o.open !== undefined ) this.open();
@@ -89,24 +86,198 @@ List.prototype = Object.assign( Object.create( Proto.prototype ), {
 
     constructor: List,
 
-    handleEvent: function( e ) {
+    testZone: function ( e ) {
 
-        e.preventDefault();
+        var l = this.local;
+        if( l.x === -1 && l.y === -1 ) return '';
 
-        var name = e.target.name || '';
-        switch( e.type ) {
-            case 'click': this.click(e); break;
-            case 'mouseover': if(name === 'title') this.mode(1); else this.listover(e); break;
-            case 'mousedown': if(name === 'title') this.titleClick(e); else this.listdown(e); break;
-            case 'mouseup':   if(name === 'title') this.mode(0); else this.listup(e); break;
-            case 'mouseout':  if(name === 'title') this.mode(0);  else this.listout(e); break;
-            case 'mousemove': this.listmove(e); break;
-            case 'mousewheel': this.listwheel(e); break;
+        if( this.up && this.isOpen ){
+            if( l.y > this.h - this.baseH ) return 'title';
+            else{
+                if( this.scroll && ( l.x > (this.sa+this.sb-20)) ) return 'scroll';
+                if(l.x > this.sa) return this.testItems( l.y-this.baseH );
+            }
+
+        } else {
+            if( l.y < this.baseH+2 ) return 'title';
+            else{
+                if( this.isOpen ){
+                    if( this.scroll && ( l.x > (this.sa+this.sb-20)) ) return 'scroll';
+                    if(l.x > this.sa) return this.testItems( l.y-this.baseH );
+                }
+            }
+
+        }
+
+        return '';
+
+    },
+
+    testItems: function ( y ) {
+
+        var name = '';
+
+        var i = this.items.length, item, a, b;
+        while(i--){
+            item = this.items[i];
+            a = item.posy + this.topList;
+            b = item.posy + this.itemHeight + 1 + this.topList;
+            if( y >= a && y <= b ){ 
+                name = 'item' + i;
+                this.unSelected();
+                this.current = item;
+                this.selected();
+                return name;
+            }
+
+        }
+
+        return name;
+
+    },
+
+    unSelected: function () {
+
+        if( this.current ){
+            this.current.style.background = 'rgba(0,0,0,0.2)';
+            this.current.style.color = this.fontColor;
+            this.current = null;
         }
 
     },
 
-    mode: function( mode ){
+    selected: function () {
+
+        this.current.style.background = this.colors.select;
+        this.current.style.color = '#FFF';
+
+    },
+
+    // ----------------------
+    //   EVENTS
+    // ----------------------
+
+    mouseup: function ( e ) {
+
+        this.isDown = false;
+
+    },
+
+    mousedown: function ( e ) {
+
+        var name = this.testZone( e );
+
+        if( !name ) return false;
+
+        if( name === 'scroll' ){
+
+            this.isDown = true;
+            this.mousemove( e );
+
+        } else if( name === 'title' ){
+
+            this.modeTitle(2);
+            if( !this.isOpen ) this.open();
+            else this.close();
+        
+        } else {
+            if( this.current ){
+                this.value = this.current.textContent;
+                this.c[3].textContent = this.value;
+                this.send();
+                this.close();
+            }
+            
+        }
+
+        return true;
+
+    },
+
+    mousemove: function ( e ) {
+
+        var nup = false;
+        var name = this.testZone( e );
+
+        if( !name ) return nup;
+
+        if( name === 'title' ){
+            this.unSelected();
+            this.modeTitle(1);
+            this.cursor('pointer');
+
+        } else if( name === 'scroll' ){
+
+            this.cursor('s-resize');
+            this.modeScroll(1);
+            if( this.isDown ){
+                this.modeScroll(2);
+                var top = this.zone.y+this.baseH-2;
+                this.update( ( e.clientY - top  ) - ( this.sh*0.5 ) );
+            }
+            //if(this.isDown) this.listmove(e);
+        } else {
+
+            // is item
+            this.modeTitle(0);
+            this.modeScroll(0);
+            this.cursor('pointer');
+        
+        }
+
+        if( name !== this.prevName ) nup = true;
+        this.prevName = name;
+
+        return nup;
+
+    },
+
+    wheel: function ( e ) {
+
+        var name = this.testZone( e );
+        if( name === 'title' ) return false; 
+        this.py += e.delta*10;
+        this.update(this.py);
+        return true;
+
+    },
+
+
+
+    // ----------------------
+
+    reset: function () {
+
+        this.prevName = '';
+        this.unSelected();
+        this.modeTitle(0);
+        this.modeScroll(0);
+        
+    },
+
+    modeScroll: function ( mode ) {
+
+        if( mode === this.sMode ) return;
+
+        switch(mode){
+            case 0: // base
+                this.scroller.style.background = this.buttonColor;
+            break;
+            case 1: // over
+                this.scroller.style.background = this.colors.select;
+            break;
+            case 2: // edit / down
+                this.scroller.style.background = this.colors.down;
+            break;
+
+        }
+
+        this.sMode = mode;
+    },
+
+    modeTitle: function ( mode ) {
+
+        if( mode === this.tMode ) return;
 
         var s = this.s;
 
@@ -117,23 +288,27 @@ List.prototype = Object.assign( Object.create( Proto.prototype ), {
             break;
             case 1: // over
                 s[3].color = '#FFF';
-                s[3].background = Tools.colors.select;
+                s[3].background = this.colors.select;
             break;
             case 2: // edit / down
                 s[3].color = this.fontColor;
-                s[3].background = Tools.colors.down;
+                s[3].background = this.colors.down;
             break;
 
         }
+
+        this.tMode = mode;
+
     },
 
-    clearList: function() {
+    clearList: function () {
 
         while ( this.listIn.children.length ) this.listIn.removeChild( this.listIn.lastChild );
+        this.items = [];
 
     },
 
-    setList: function( list, value ) {
+    setList: function ( list, value ) {
 
         this.clearList();
 
@@ -154,18 +329,19 @@ List.prototype = Object.assign( Object.create( Proto.prototype ), {
         this.scroller.style.height = this.sh + 'px';
 
         if( this.max > this.maxHeight ){ 
-            this.w = this.sb - 20;
+            this.ww = this.sb - 20;
             this.scroll = true;
         }
 
         var item, n;//, l = this.sb;
         for( var i=0; i<this.length; i++ ){
             n = this.list[i];
-            item = Tools.dom( 'div', Tools.css.item + 'width:'+this.w+'px; height:'+this.itemHeight+'px; line-height:'+(this.itemHeight-5)+'px;');
+            item = this.dom( 'div', this.css.item + 'width:'+this.ww+'px; height:'+this.itemHeight+'px; line-height:'+(this.itemHeight-5)+'px; color:'+this.fontColor+';' );
             item.textContent = n;
-            item.style.color = this.fontColor;
-            item.name = 'item';
+            item.name = 'item'+i;
+            item.posy = (this.itemHeight+1)*i;
             this.listIn.appendChild( item );
+            this.items.push( item );
         }
 
         if( value !== undefined ){
@@ -179,167 +355,87 @@ List.prototype = Object.assign( Object.create( Proto.prototype ), {
 
     },
 
-    // -----
-
-    click: function( e ){
-
-        var name = e.target.name;
-        if( name !== 'title' && name !== 'list' ) this.close();
-
-    },
-
-    titleClick: function( e ){
-
-        if( this.isOpen ) this.close();
-        else {
-            this.open(); 
-            this.mode(2);
-        }
-
-    },
 
     // ----- LIST
 
-    listover: function( e ){
-
-        var name = e.target.name;
-        //console.log(name)
-        if( name === 'item' ){
-            e.target.style.background = Tools.colors.select;
-            e.target.style.color = '#FFF'; 
-        }
-
-    },
-
-    listdown: function( e ){
-
-        var name = e.target.name;
-        if( name !== 'list' && name !== undefined ){
-            this.value = e.target.textContent;//name;
-            this.c[3].textContent = this.value;
-            this.send();
-           // this.close();
-        } else if ( name ==='list' && this.scroll ){
-            this.isDown = true;
-            this.listmove( e );
-            this.listIn.style.background = 'rgba(0,0,0,0.6)';
-            this.scroller.style.background = '#AAA';
-        }
-
-    },
-
-    listmove: function( e ){
-
-        if( this.isDown ){
-            var rect = this.c[2].getBoundingClientRect();
-            this.update( ( e.clientY - rect.top  ) - ( this.sh*0.5 ) );
-        }
-
-    },
-
-    listup: function( e ){
-
-        this.isDown = false;
-        this.listIn.style.background = 'rgba(0,0,0,0.2)';
-        this.scroller.style.background = '#666';
-
-    },
-
-    listout: function( e ){
-
-        var n = e.target.name;
-        if( n === 'item' ){
-            e.target.style.background ='rgba(0,0,0,0.2)';
-            e.target.style.color = this.fontColor; 
-        }
-
-
-        if( this.isUI ) this.main.lockwheel = false;
-        this.listup();
-        //var name = e.relatedTarget.name;
-        //if( name === undefined ) this.close();
-
-        
-
-    },
-
-    listwheel: function( e ){
-
-        if( !this.scroll ) return;
-        if( this.isUI ) this.main.lockwheel = true;
-        var delta = 0;
-        if( e.wheelDeltaY ) delta = -e.wheelDeltaY*0.04;
-        else if( e.wheelDelta ) delta = -e.wheelDelta*0.2;
-        else if( e.detail ) delta = e.detail*4.0;
-
-        this.py += delta;
-
-        this.update(this.py);
-
-    },
-
-
-    // ----- LIST
-
-    update: function( y ){
+    update: function ( y ) {
 
         if( !this.scroll ) return;
 
         y = y < 0 ? 0 : y;
         y = y > this.range ? this.range : y;
 
-        this.listIn.style.top = -Math.floor( y / this.ratio )+'px';
+        this.topList = -Math.floor( y / this.ratio );
+
+        this.listIn.style.top = this.topList+'px';
         this.scroller.style.top = Math.floor( y )  + 'px';
 
         this.py = y;
 
     },
 
-    open: function(){
+    parentHeight: function ( t ) {
+
+        if ( this.parentGroup !== null ) this.parentGroup.calc( t );
+        else if ( this.isUI ) this.main.calc( t );
+
+    },
+
+    open: function () {
 
         Proto.prototype.open.call( this );
 
-        document.addEventListener( 'click', this, false );
-
         this.update( 0 );
-        this.h = this.maxHeight + this.baseH + 10;
+        this.h = this.maxHeight + this.baseH + 5;
         if( !this.scroll ){
-            this.h = this.baseH + 10 + this.max;
+            this.topList = 0;
+            this.h = this.baseH + 5 + this.max;
             this.scroller.style.display = 'none';
         } else {
             this.scroller.style.display = 'block';
         }
         this.s[0].height = this.h + 'px';
         this.s[2].display = 'block';
-        if( this.side === 'up' ) Tools.setSvg( this.c[4], 'd','M 5 2 L 2 7 8 7 5 2 Z');
-        else Tools.setSvg( this.c[4], 'd','M 5 8 L 8 3 2 3 5 8 Z');
+
+        if( this.up ){ 
+            this.zone.y -= this.h - (this.baseH-10);
+            this.setSvg( this.c[4], 'd', this.svgs.arrowUp );
+        } else {
+            this.setSvg( this.c[4], 'd', this.svgs.arrowDown );
+        }
 
         this.rSizeContent();
 
-        if( this.parentGroup !== null ) this.parentGroup.calc( this.h - this.baseH );
-        else if( this.isUI ) this.main.calc( this.h - this.baseH );
+        var t = this.h - this.baseH;
+
+        this.zone.h = this.h;
+
+        this.parentHeight( t );
 
     },
 
-    close: function(){
+    close: function () {
 
         Proto.prototype.close.call( this );
 
-        document.removeEventListener( 'click', this, false );
+        if( this.up ) this.zone.y += this.h - (this.baseH-10);
 
-        if( this.parentGroup !== null ) this.parentGroup.calc( -(this.h-this.baseH) );
-        else if( this.isUI ) this.main.calc(-(this.h-this.baseH));
+        var t = this.h - this.baseH;
 
         this.h = this.baseH;
         this.s[0].height = this.h + 'px';
         this.s[2].display = 'none';
-        Tools.setSvg( this.c[4], 'd','M 3 8 L 8 5 3 2 3 8 Z');
-        
+        this.setSvg( this.c[4], 'd', this.svgs.arrow );
+
+        this.zone.h = this.h;
+
+        this.parentHeight( -t );
+
     },
 
     // -----
 
-    text: function( txt ){
+    text: function ( txt ) {
 
         this.c[3].textContent = txt;
 
@@ -348,7 +444,7 @@ List.prototype = Object.assign( Object.create( Proto.prototype ), {
     rSizeContent: function () {
 
         var i = this.length;
-        while(i--) this.listIn.children[i].style.width = this.w + 'px';
+        while(i--) this.listIn.children[i].style.width = this.ww + 'px';
 
     },
 
@@ -368,12 +464,8 @@ List.prototype = Object.assign( Object.create( Proto.prototype ), {
 
         s[4].left = d + w - 17 + 'px';
 
-        //s[5].width = w + 'px';
-        //s[5].left = d + 'px';
-
-        this.w = w;
-        if( this.max > this.maxHeight ) this.w = w-20;
-
+        this.ww = w;
+        if( this.max > this.maxHeight ) this.ww = w-20;
         if(this.isOpen) this.rSizeContent();
 
     }

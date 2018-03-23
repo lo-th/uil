@@ -1,4 +1,3 @@
-import { Tools } from '../core/Tools';
 import { Proto } from '../core/Proto';
 
 function Button ( o ) {
@@ -7,27 +6,27 @@ function Button ( o ) {
 
     this.value = o.value || [this.txt];
 
-    this.buttonColor = o.bColor || Tools.colors.button;
+    //this.selected = null;
+    this.isDown = false;
+
+    this.buttonColor = o.bColor || this.colors.button;
 
     this.isLoadButton = o.loader || false;
     this.isDragButton = o.drag || false;
-    if(this.isDragButton ) this.isLoadButton = true;
-    //this.r = o.r || 3;
+    if( this.isDragButton ) this.isLoadButton = true;
 
     this.lng = this.value.length;
+    this.tmp = [];
+    this.stat = [];
 
     for(var i = 0; i < this.lng; i++){
-        //this.c[i+2] = Tools.dom( 'div', Tools.css.txt + 'text-align:center; border:1px solid ' + Tools.colors.border+'; top:1px; pointer-events:auto; cursor:pointer; background:'+this.buttonColor+'; height:'+(this.h-2)+'px; border-radius:'+this.r+'px; line-height:'+(this.h-4)+'px;' );
-        this.c[i+2] = Tools.dom( 'div', Tools.css.txt + 'text-align:center; top:1px; pointer-events:auto; cursor:pointer; background:'+this.buttonColor+'; height:'+(this.h-2)+'px; border-radius:'+this.radius+'px; line-height:'+(this.h-4)+'px;' );
+        this.c[i+2] = this.dom( 'div', this.css.txt + 'text-align:center; top:1px; background:'+this.buttonColor+'; height:'+(this.h-2)+'px; border-radius:'+this.radius+'px; line-height:'+(this.h-4)+'px;' );
         this.c[i+2].style.color = this.fontColor;
-
-        this.c[i+2].events = [ 'click', 'mouseover', 'mousedown', 'mouseup', 'mouseout' ];
-        this.c[i+2].innerHTML = this.value[i];//this.txt;
-        this.c[i+2].name = i;
+        this.c[i+2].innerHTML = this.value[i];
+        this.stat[i] = 1;
     }
 
     if( this.c[1] !== undefined ) this.c[1].textContent = '';
-    
 
     if( this.isLoadButton ) this.initLoader();
     if( this.isDragButton ){ 
@@ -37,59 +36,152 @@ function Button ( o ) {
 
     this.init();
 
-};
+}
 
 Button.prototype = Object.assign( Object.create( Proto.prototype ), {
 
     constructor: Button,
 
-    handleEvent: function ( e ) {
+    testZone: function ( e ) {
 
-        e.preventDefault();
+        var l = this.local;
+        if( l.x === -1 && l.y === -1 ) return '';
 
-        switch( e.type ) {
-            case 'click': this.click( e ); break;
-            case 'mouseover': this.mode( 1, e ); break;
-            case 'mousedown': this.mode( 2, e ); break;
-            case 'mouseup': this.mode( 0, e ); break;
-            case 'mouseout': this.mode( 0, e ); break;
-            case 'change': this.fileSelect( e.target.files[0] ); break;
-
-            case 'dragover': this.dragover(); break;
-            case 'dragend': this.dragend(); break;
-            case 'dragleave': this.dragend(); break;
-            case 'drop': this.drop( e ); break;
+        var i = this.lng;
+        var t = this.tmp;
+        
+        while( i-- ){
+        	if( l.x>t[i][0] && l.x<t[i][2] ) return i+2;
         }
+
+        return ''
 
     },
 
-    mode: function ( mode, e ) {
+    // ----------------------
+    //   EVENTS
+    // ----------------------
 
-        var s = this.s;
-        var i = e.target.name || 0;
-        if(i==='loader') i = 0;
+    mouseup: function ( e ) {
+    
+        if( this.isDown ){
+            this.isDown = false;
+            return this.mousemove( e );
+        }
 
-        switch( mode ){
-            case 0: // base
-                s[i+2].color = this.fontColor;
-                s[i+2].background = this.buttonColor;
-            break;
-            case 1: // over
-                s[i+2].color = '#FFF';
-                s[i+2].background = Tools.colors.select;
-            break;
-            case 2: // edit / down
-                s[i+2].color = this.fontColor;
-                s[i+2].background = Tools.colors.down;
-            break;
+        return false;
+
+    },
+
+    mousedown: function ( e ) {
+
+    	var name = this.testZone( e );
+
+        if( !name ) return false;
+
+    	this.isDown = true;
+        this.send( this.value[name-2] );
+    	return this.mousemove( e );
+ 
+        // true;
+
+    },
+
+    mousemove: function ( e ) {
+
+        var up = false;
+
+        var name = this.testZone( e );
+
+        if( name !== '' ){
+            this.cursor('pointer');
+            up = this.modes( this.isDown ? 3 : 2, name );
+        } else {
+        	up = this.reset();
+        }
+
+        //console.log(up)
+
+        return up;
+
+    },
+
+    // ----------------------
+
+    modes: function ( n, name ) {
+
+        var v, r = false;
+
+        for( var i = 0; i < this.lng; i++ ){
+
+            if( i === name-2 ) v = this.mode( n, i+2 );
+            else v = this.mode( 1, i+2 );
+
+            if(v) r = true;
 
         }
+
+        return r;
+
     },
+
+    mode: function ( n, name ) {
+
+        var change = false;
+
+        var i = name - 2;
+
+        if( this.stat[i] !== n ){
+        
+            switch( n ){
+
+                case 1: this.stat[i] = 1; this.s[ i+2 ].color = this.fontColor; this.s[ i+2 ].background = this.buttonColor; break;
+                case 2: this.stat[i] = 2; this.s[ i+2 ].color = '#FFF';         this.s[ i+2 ].background = this.colors.select; break;
+                case 3: this.stat[i] = 3; this.s[ i+2 ].color = '#FFF';         this.s[ i+2 ].background = this.colors.down; break;
+
+            }
+
+            change = true;
+
+        }
+        
+
+        return change;
+
+    },
+
+    // ----------------------
+
+    reset: function () {
+
+        this.cursor();
+
+        /*var v, r = false;
+
+        for( var i = 0; i < this.lng; i++ ){
+            v = this.mode( 1, i+2 );
+            if(v) r = true;
+        }*/
+
+        return this.modes( 1 , 2 );
+
+    	/*if( this.selected ){
+    		this.s[ this.selected ].color = this.fontColor;
+            this.s[ this.selected ].background = this.buttonColor;
+            this.selected = null;
+            
+            return true;
+    	}
+        return false;*/
+
+    },
+
+    // ----------------------
 
     dragover: function () {
 
-        this.s[4].borderColor = Tools.colors.select;
-        this.s[4].color = Tools.colors.select;
+        this.s[4].borderColor = this.colors.select;
+        this.s[4].color = this.colors.select;
 
     },
 
@@ -97,6 +189,7 @@ Button.prototype = Object.assign( Object.create( Proto.prototype ), {
 
         this.s[4].borderColor = this.fontColor;
         this.s[4].color = this.fontColor;
+
     },
 
     drop: function ( e ) {
@@ -106,11 +199,9 @@ Button.prototype = Object.assign( Object.create( Proto.prototype ), {
 
     },
 
-    
-
     initDrager: function () {
 
-        this.c[4] = Tools.dom( 'div', Tools.css.txt +' text-align:center; line-height:'+(this.h-8)+'px; border:1px dashed '+this.fontColor+'; top:2px; pointer-events:auto; cursor:default; height:'+(this.h-4)+'px; border-radius:'+this.r+'px;' );
+        this.c[4] = this.dom( 'div', this.css.txt +' text-align:center; line-height:'+(this.h-8)+'px; border:1px dashed '+this.fontColor+'; top:2px;  height:'+(this.h-4)+'px; border-radius:'+this.r+'px;' );//pointer-events:auto; cursor:default;
         this.c[4].textContent = 'DRAG';
 
         this.c[2].events = [  ];
@@ -121,7 +212,7 @@ Button.prototype = Object.assign( Object.create( Proto.prototype ), {
 
     initLoader: function () {
 
-        this.c[3] = Tools.dom( 'input', Tools.css.basic +'border:1px solid '+Tools.colors.border+'; top:1px; opacity:0; pointer-events:auto; cursor:pointer; height:'+(this.h-2)+'px;' );
+        this.c[3] = this.dom( 'input', this.css.basic +'border:1px solid '+this.colors.border+'; top:1px; opacity:0;  height:'+(this.h-2)+'px;' );//pointer-events:auto; cursor:pointer;
         this.c[3].name = 'loader';
         this.c[3].type = "file";
 
@@ -160,21 +251,12 @@ Button.prototype = Object.assign( Object.create( Proto.prototype ), {
         //else if(  ) reader.readAsArrayBuffer( file );
         //else reader.readAsText( file );
 
-        reader.onload = function(e) {
+        reader.onload = function (e) {
             
             if( this.callback ) this.callback( e.target.result, fname, type );
             //this.c[3].type = "file";
             //this.send( e.target.result ); 
         }.bind(this);
-
-    },
-
-    click: function ( e ) {
-
-        var i = e.target.name || 0;
-        var v = this.value[i];
-
-        this.send( v );
 
     },
 
@@ -206,9 +288,11 @@ Button.prototype = Object.assign( Object.create( Proto.prototype ), {
         var size = Math.floor( ( w-(dc*(i-1)) ) / i );
 
         while(i--){
-            
-            s[i+2].width = size + 'px';
-            s[i+2].left = d + ( size * i ) + ( dc * i) + 'px';
+
+        	this.tmp[i] = [ Math.floor( d + ( size * i ) + ( dc * i )), size ];
+        	this.tmp[i][2] = this.tmp[i][0] + this.tmp[i][1];
+            s[i+2].left = this.tmp[i][0] + 'px';
+            s[i+2].width = this.tmp[i][1] + 'px';
 
         }
 

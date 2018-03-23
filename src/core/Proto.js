@@ -1,43 +1,48 @@
+
+import { Roots } from './Roots';
 import { Tools } from './Tools';
+import { V2 } from './V2';
 
 /**
- * @author lo-th / https://github.com/lo-th
+ * @author lth / https://github.com/lo-th
  */
 
 function Proto ( o ) {
 
     o = o || {};
 
+    this.css = Tools.css;
+    this.colors = Tools.colors;
+    this.svgs = Tools.svgs;
+
+    this.zone = { x:0, y:0, w:0, h:0 };
+    this.local = new V2().neg();
+
+    this.isCanvasOnly = false;
+
+    // if is on gui or group
     this.main = o.main || null;
-    // if is on ui pannel
     this.isUI = o.isUI || false;
+    this.parentGroup = null;
 
     // percent of title
     this.p = o.p !== undefined ? o.p : Tools.size.p;
 
-    this.width = this.isUI ? this.main.size.w : Tools.size.w;
-    if( o.w !== undefined ) this.width = o.w;
+    this.w = this.isUI ? this.main.size.w : Tools.size.w;
+    if( o.w !== undefined ) this.w = o.w;
 
     this.h = this.isUI ? this.main.size.h : Tools.size.h;
     if( o.h !== undefined ) this.h = o.h;
     this.h = this.h < 11 ? 11 : this.h;
 
     // if need resize width
-    this.autoWidth = true;
+    this.autoWidth = o.auto || true;
 
-    // if need resize height
+    // open statu
     this.isOpen = false;
-
-    this.isGroup = false;
-    this.parentGroup = null;
-
-    // if height can change
-    this.autoHeight = false;
 
     // radius for toolbox
     this.radius = o.radius || 0;
-
-    
 
     // only for number
     this.isNumber = false;
@@ -45,7 +50,7 @@ function Proto ( o ) {
     // only most simple 
     this.mono = false;
 
-    // stop listening for edite slide text
+    // stop listening for edit slide text
     this.isEdit = false;
 
     // no title 
@@ -53,35 +58,33 @@ function Proto ( o ) {
     if( this.simple ) this.sa = 0;
 
     // define obj size
-    this.setSize( this.width );
+    this.setSize( this.w );
 
     // title size
     if(o.sa !== undefined ) this.sa = o.sa;
     if(o.sb !== undefined ) this.sb = o.sb;
 
-    if( this.simple ) this.sb = this.width - this.sa;
+    if( this.simple ) this.sb = this.w - this.sa;
 
     // last number size for slide
     this.sc = o.sc === undefined ? 47 : o.sc;
 
-    // like dat gui
-    this.parent = null;
-    this.val = null;
+    // for listening object
+    this.objectLink = null;
     this.isSend = false;
-
-    
+    this.val = null;
     
     // Background
     this.bg = this.isUI ? this.main.bg : Tools.colors.background;
-    if( o.bg !== undefined ) this.bg = o.bg;
+    this.bgOver = Tools.colors.backgroundOver;
+    if( o.bg !== undefined ){ this.bg = o.bg; this.bgOver = o.bg; }
+    if( o.bgOver !== undefined ){ this.bgOver = o.bgOver; }
 
     // Font Color;
     this.titleColor = o.titleColor || Tools.colors.text;
     this.fontColor = o.fontColor || Tools.colors.text;
     this.colorPlus = Tools.ColorLuma( this.fontColor, 0.3 );
 
-    this.name = o.name || 'Proto';
-    
     this.txt = o.name || 'Proto';
     this.rename = o.rename || '';
     this.target = o.target || null;
@@ -92,29 +95,25 @@ function Proto ( o ) {
     if( this.callback === null && this.isUI && this.main.callback !== null ) this.callback = this.main.callback;
 
     // elements
-
     this.c = [];
 
     // style 
-
     this.s = [];
 
-    //this.c[0] = Tools.dom('UIL', 'div', 'position:relative; height:20px; float:left;');
     this.c[0] = Tools.dom( 'div', Tools.css.basic + 'position:relative; height:20px; float:left; overflow:hidden;');
     this.s[0] = this.c[0].style;
 
     if( this.isUI ) this.s[0].marginBottom = '1px';
-    
 
+    // with title
     if( !this.simple ){ 
-        //this.c[1] = Tools.dom('UIL text');
         this.c[1] = Tools.dom( 'div', Tools.css.txt );
         this.s[1] = this.c[1].style;
         this.c[1].textContent = this.rename === '' ? this.txt : this.rename;
         this.s[1].color = this.titleColor;
     }
 
-    if(o.pos){
+    if( o.pos ){
         this.s[0].position = 'absolute';
         for(var p in o.pos){
             this.s[0][p] = o.pos[p];
@@ -122,29 +121,30 @@ function Proto ( o ) {
         this.mono = true;
     }
 
-    if(o.css){
-        this.s[0].cssText = o.css; 
-    }
+    if( o.css ) this.s[0].cssText = o.css; 
+    
 
-};
+}
 
-Proto.prototype = {
+Object.assign( Proto.prototype, {
 
     constructor: Proto,
 
     // ----------------------
     // make de node
     // ----------------------
-
+    
     init: function () {
 
         var s = this.s; // style cache
         var c = this.c; // div cache
 
         s[0].height = this.h + 'px';
+        this.zone.h = this.h;
 
-        //if( this.isUI ) s[0].background = this.bg;
-        if( this.autoHeight ) s[0].transition = 'height 0.1s ease-out';
+        if( this.isUI ) s[0].background = this.bg;
+
+        //if( this.autoHeight ) s[0].transition = 'height 0.01s ease-out';
         if( c[1] !== undefined && this.autoWidth ){
             s[1] = c[1].style;
             s[1].height = (this.h-4) + 'px';
@@ -153,13 +153,12 @@ Proto.prototype = {
 
         var frag = Tools.frag;
 
-        for( var i=1, lng = c.length; i !== lng; i++ ){
+        for( var i = 1, lng = c.length; i !== lng; i++ ){
             if( c[i] !== undefined ) {
                 frag.appendChild( c[i] );
                 s[i] = c[i].style;
             }
         }
-
 
         if( this.target !== null ){ 
             this.target.appendChild( c[0] );
@@ -171,38 +170,139 @@ Proto.prototype = {
         c[0].appendChild( frag );
 
         this.rSize();
-        this.addEvent();
+
+        // ! solo proto
+        if( !this.isUI ){
+
+            this.c[0].style.pointerEvents = 'auto';
+            Roots.add( this );
+            
+        }
+
+    },
+
+    // TRANS FUNCTIONS from Tools
+
+    dom: function ( type, css, obj, dom, id ) {
+
+        return Tools.dom( type, css, obj, dom, id );
+
+    },
+
+    setSvg: function ( dom, type, value, id ) {
+
+        Tools.setSvg( dom, type, value, id );
+
+    },
+
+    setCss: function ( dom, css ) {
+
+        Tools.setCss( dom, css );
+
+    },
+
+    clamp: function ( value, min, max ) {
+
+        return Tools.clamp( value, min, max );
+
+    },
+
+    getColorRing: function () {
+
+        if( !Tools.colorRing ) Tools.makeColorRing();
+        return Tools.clone( Tools.colorRing );
+
+    },
+
+    getJoystick: function () {
+
+        if( !Tools.joystick ) Tools.makeJoystick();
+        return Tools.clone( Tools.joystick );
+
+    },
+
+    getCircular: function () {
+
+        if( !Tools.circular ) Tools.makeCircular();
+        return Tools.clone( Tools.circular );
+
+    },
+
+    getKnob: function () {
+
+        if( !Tools.knob ) Tools.makeKnob();
+        return Tools.clone( Tools.knob );
+
+    },
+
+    /*getGraph: function () {
+
+         if( !Tools.graph ) Tools.makeGraph();
+         return Tools.clone( Tools.graph );
+
+    },*/
+
+    // TRANS FUNCTIONS from Roots
+
+    cursor: function ( name ) {
+
+         Roots.cursor( name );
+
+    },
+
+    setInput: function ( Input, Callback ) {
+
+        Roots.setInput( Input, Callback, Tools.colors.input );
+
+    },
+
+    /////////
+
+    update: function () {},
+
+    reset:  function () {},
+
+    /////////
+
+    getDom: function () {
+
+        return this.c[0];
+
+    },
+
+    uiout: function () {
+
+        this.s[0].background = this.bg;
+
+    },
+
+    uiover: function () {
+
+        this.s[0].background = this.bgOver;
 
     },
 
     rename: function ( s ) {
 
-        this.c[1].textContent = s;
-
-    },
-
-    setBG: function ( c ) {
-
-        this.bg = c;
-        this.s[0].background = c;
+        if( this.c[1] !== undefined) this.c[1].textContent = s;
 
     },
 
     listen: function () {
 
-        Tools.addListen( this );
-        Tools.listens.push( this );
+        Roots.addListen( this );
+        Roots.listens.push( this );
         return this;
 
     },
 
     listening: function () {
 
-        if( this.parent === null ) return;
+        if( this.objectLink === null ) return;
         if( this.isSend ) return;
         if( this.isEdit ) return;
 
-        this.setValue( this.parent[ this.val ] );
+        this.setValue( this.objectLink[ this.val ] );
 
     },
 
@@ -214,9 +314,6 @@ Proto.prototype = {
 
     },
 
-    update: function () {
-        
-    },
 
     // ----------------------
     // update every change
@@ -244,7 +341,7 @@ Proto.prototype = {
     send: function ( v ) {
 
         this.isSend = true;
-        if( this.parent !== null ) this.parent[ this.val ] = v || this.value;
+        if( this.objectLink !== null ) this.objectLink[ this.val ] = v || this.value;
         if( this.callback ) this.callback( v || this.value );
         this.isSend = false;
 
@@ -253,7 +350,7 @@ Proto.prototype = {
     sendEnd: function ( v ) {
 
         if( this.endCallback ) this.endCallback( v || this.value );
-        if( this.parent !== null ) this.parent[ this.val ] = v || this.value;
+        if( this.objectLink !== null ) this.objectLink[ this.val ] = v || this.value;
 
     },
 
@@ -263,7 +360,6 @@ Proto.prototype = {
     
     clear: function () {
 
-        this.clearEvent();
         Tools.clear( this.c[0] );
 
         if( this.target !== null ){ 
@@ -288,15 +384,15 @@ Proto.prototype = {
 
         if( !this.autoWidth ) return;
 
-        this.width = sx;
+        this.w = sx;
 
         if( this.simple ){
             //this.sa = 0;
-            this.sb = this.width - this.sa;
+            this.sb = this.w - this.sa;
         } else {
-            var pp = this.width * ( this.p / 100 );
-            this.sa = ~~ pp + 10;
-            this.sb = ~~ this.width - pp - 20;
+            var pp = this.w * ( this.p / 100 );
+            this.sa = Math.floor( pp + 10 );
+            this.sb = Math.floor( this.w - pp - 20 );
         }
 
     },
@@ -304,8 +400,7 @@ Proto.prototype = {
     rSize: function () {
 
         if( !this.autoWidth ) return;
-
-        this.s[0].width = this.width + 'px';
+        this.s[0].width = this.w + 'px';
         if( !this.simple ) this.s[1].width = this.sa + 'px';
     
     },
@@ -339,9 +434,7 @@ Proto.prototype = {
         }
 
         this.step = o.step === undefined ?  s : o.step;
-
         this.range = this.max - this.min;
-
         this.value = this.numValue( this.value );
         
     },
@@ -352,43 +445,27 @@ Proto.prototype = {
 
     },
 
+
     // ----------------------
-    //   Events dispatch
+    //   EVENTS DEFAULT
     // ----------------------
 
-    addEvent: function () {
+    handleEvent: function ( e ){
 
-        var i = this.c.length, j, c;
-        while( i-- ){
-            c = this.c[i];
-            if( c !== undefined ){
-                if( c.events !== undefined ){
-                    j = c.events.length;
-                    while( j-- ) c.addEventListener( c.events[j], this, false );
-                }
-            }
-        }
-
+        return this[e.type](e);
+    
     },
 
-    clearEvent: function () {
+    wheel: function ( e ) { return false; },
 
-        var i = this.c.length, j, c;
-        while( i-- ){
-            c = this.c[i];
-            if( c !== undefined ){
-                if( c.events !== undefined ){
-                    j = c.events.length;
-                    while( j-- ) c.removeEventListener( c.events[j], this, false );
-                }
-            }
-        }
+    mousedown: function( e ) { return false; },
 
-    },
+    mousemove: function( e ) { return false; },
 
-    handleEvent: function ( e ) {
-        
-    },
+    mouseup: function( e ) { return false; },
+
+    keydown: function( e ) { return false; },
+
 
     // ----------------------
     // object referency
@@ -396,14 +473,16 @@ Proto.prototype = {
 
     setReferency: function ( obj, val ) {
 
-        this.parent = obj;
+        this.objectLink = obj;
         this.val = val;
 
     },
 
     display: function ( v ) {
-
+        
+        v = v || false;
         this.s[0].display = v ? 'block' : 'none';
+        //this.isReady = v ? false : true;
 
     },
 
@@ -425,7 +504,13 @@ Proto.prototype = {
 
     },
 
+    needZone: function () {
 
-}
+        Roots.needReZone = true;
+
+    },
+
+
+} );
 
 export { Proto };

@@ -1,18 +1,40 @@
 
+import { Roots } from './Roots';
 import { Tools } from './Tools';
 import { add } from './add';
+import { V2 } from './V2';
 
 /**
- * @author lo-th / https://github.com/lo-th
+ * @author lth / https://github.com/lo-th
  */
 
 function Gui ( o ) {
 
+    this.canvas = null;
+
     o = o || {};
 
-    // css plus
-    this.css = o.css !== undefined ? o.css : '';
+    if( o.transparent !== undefined ){
+        Tools.colors.background = 'none';
+        Tools.colors.backgroundOver = 'none';
+    }
 
+    //if( o.callback ) this.callback =  o.callback;
+
+    this.isReset = true;
+
+    this.tmpAdd = null;
+    this.tmpH = 0;
+
+    this.isCanvas = o.isCanvas || false;
+    this.isCanvasOnly = false;
+    this.css = o.css !== undefined ? o.css : '';
+    this.callback = o.callback  === undefined ? null : o.callback;
+
+    this.forceHeight = o.maxHeight || 0;
+
+    this.cn = '';
+    
     // size define
     this.size = Tools.size;
     if( o.p !== undefined ) this.size.p = o.p;
@@ -22,112 +44,131 @@ function Gui ( o ) {
 
     this.size.h = this.size.h < 11 ? 11 : this.size.h;
 
-    this.width = this.size.w;
+    // local mouse and zone
+    this.local = new V2().neg();
+    this.zone = { x:0, y:0, w:this.size.w, h:0 };
 
-    // bottom height
-    this.bh = this.size.h;
+    // virtual mouse
+    this.mouse = new V2().neg();
 
-
-
-
-    //this.width = o.width !== undefined ? o.width : Tools.size.width;
-    //this.width = o.size !== undefined ? o.size : this.width;
-
-
-    // tmp variable
-    this.height = 0;
-    this.left = 0;
     this.h = 0;
     this.prevY = -1;
     this.sw = 0;
-
 
     // color
     this.colors = Tools.colors;
     this.bg = o.bg || Tools.colors.background;
 
     // bottom and close height
-    this.isWithClose = true;
-    
+    this.isWithClose = o.close !== undefined ? o.close : true;
+    this.bh = !this.isWithClose ? 0 : this.size.h;
 
-    //this.baseH = Tools.size.height;
-
-    if(o.close !== undefined ){
-        this.isWithClose = o.close;
-        this.bh = !this.isWithClose ? 0 : this.bh;
-    }
-
-
-
-    
-
-    Tools.main = this;
-
-    this.callback = o.callback  === undefined ? null : o.callback;
-
-   
+    this.autoResize = o.autoResize === undefined ? true : o.autoResize;
     
     this.isCenter = o.center || false;
-    this.lockwheel = false;
-    this.onWheel = false;
     this.isOpen = true;
+    this.isDown = false;
+    this.isScroll = false;
 
     this.uis = [];
 
-    this.content = Tools.dom( 'div', Tools.css.basic + 'display:block; width:'+this.width+'px; height:auto; top:0; right:10px; transition:height 0.1s ease-out;' + this.css );
-    if( o.parent !== undefined ) o.parent.appendChild( this.content );
-    else document.body.appendChild( this.content );
+    this.current = -1;
+    this.target = null;
+    this.decal = 0;
+    this.ratio = 1;
+    this.oy = 0;
+
+    this.content = Tools.dom( 'div', Tools.css.basic + ' width:0px; height:auto; top:0px; ' + this.css );
 
     this.innerContent = Tools.dom( 'div', Tools.css.basic + 'width:100%; top:0; left:0; height:auto; overflow:hidden;');
     this.content.appendChild( this.innerContent );
 
-    this.inner = Tools.dom( 'div', Tools.css.basic + 'width:100%; top:0; left:0; height:auto; background:'+this.bg+';');
+    this.inner = Tools.dom( 'div', Tools.css.basic + 'width:100%; left:0; ');
     this.innerContent.appendChild(this.inner);
-    this.inner.name = 'inner';
-
-    // scroll background
-    this.scrollBG = Tools.dom( 'div', Tools.css.basic + 'right:0; top:0; width:'+this.size.s+'px; height:10px; cursor:s-resize; pointer-events:auto; display:none; background:'+this.bg+'; border-left:1px solid '+this.colors.stroke+';');
-    this.content.appendChild( this.scrollBG );
-    this.scrollBG.name = 'scroll';
 
     // scroll
-    this.scroll = Tools.dom( 'div', Tools.css.basic + 'background:'+this.colors.scroll+'; right:0px; top:0; width:'+this.size.s+'px; height:10px;');
+    this.scrollBG = Tools.dom( 'div', Tools.css.basic + 'right:0; top:0; width:'+ (this.size.s - 1) +'px; height:10px; display:none; background:'+this.bg+';');
+    this.content.appendChild( this.scrollBG );
+
+    this.scroll = Tools.dom( 'div', Tools.css.basic + 'background:'+this.colors.scroll+'; right:2px; top:0; width:'+(this.size.s-4)+'px; height:10px;');
     this.scrollBG.appendChild( this.scroll );
 
-    this.bottom = Tools.dom( 'div',  Tools.css.txt + 'width:100%; top:auto; bottom:0; left:0; border-bottom-right-radius:10px;  border-bottom-left-radius:10px; text-align:center; pointer-events:auto; cursor:pointer; height:'+this.bh+'px; line-height:'+(this.bh-5)+'px; border-top:1px solid '+Tools.colors.stroke+';');
-    this.content.appendChild(this.bottom);
+    // bottom button
+    this.bottom = Tools.dom( 'div',  Tools.css.txt + 'width:100%; top:auto; bottom:0; left:0; border-bottom-right-radius:10px;  border-bottom-left-radius:10px; text-align:center; height:'+this.bh+'px; line-height:'+(this.bh-5)+'px; border-top:1px solid '+Tools.colors.stroke+';');
+    this.content.appendChild( this.bottom );
     this.bottom.textContent = 'close';
-    this.bottom.name = 'bottom';
     this.bottom.style.background = this.bg;
-    
-    this.isDown = false;
-    this.isScroll = false;
-
-    this.callbackClose = function(){};
-
-    this.content.addEventListener( 'mousedown', this, false );
-    this.content.addEventListener( 'mousemove', this, false );
-    this.content.addEventListener( 'mouseout',  this, false );
-    this.content.addEventListener( 'mouseup',   this, false );
-    this.content.addEventListener( 'mouseover', this, false );
-
-    //console.log(this.content.getBoundingClientRect().top);
-
-    this.top = o.top || this.content.getBoundingClientRect().top;
-    //this.content.addEventListener( 'mousewheel', this, false );
-
-    document.addEventListener( 'mousewheel', function(e){this.wheel(e)}.bind(this), false );
-    window.addEventListener("resize", function(e){this.resize(e)}.bind(this), false );
 
     //
 
-    this.setWidth( this.width );
+    this.parent = o.parent !== undefined ? o.parent : null;
+    
+    if( this.parent === null && !this.isCanvas ){ 
+    	this.parent = document.body;
+        // default position
+    	if( !this.isCenter ) this.content.style.right = '10px'; 
+    }
+
+    if( this.parent !== null ) this.parent.appendChild( this.content );
+
+    if( this.isCanvas && this.parent === null ) this.isCanvasOnly = true;
+
+    if( !this.isCanvasOnly ) this.content.style.pointerEvents = 'auto';
+
+
+    this.setWidth();
+
+    if( this.isCanvas ) this.makeCanvas();
+
+    Roots.add( this );
 
 }
 
-Gui.prototype = {
+Object.assign( Gui.prototype, {
 
     constructor: Gui,
+
+    isGui: true,
+
+    //callback: function () {},
+
+    // ----------------------
+    //   CANVAS
+    // ----------------------
+
+    onDraw: function () { },
+
+    makeCanvas: function () {
+
+    	this.canvas = document.createElementNS( 'http://www.w3.org/1999/xhtml', "canvas" );
+    	this.canvas.width = this.zone.w;
+    	this.canvas.height = this.forceHeight ? this.forceHeight : this.zone.h;
+
+    },
+
+    draw: function ( force ) {
+
+    	if( this.canvas === null ) return;
+
+    	var w = this.zone.w;
+    	var h = this.forceHeight ? this.forceHeight : this.zone.h;
+    	Roots.toCanvas( this, w, h, force );
+
+    },
+
+    //////
+
+    getDom: function () {
+
+        return this.content;
+
+    },
+
+    setMouse: function( m ){
+
+        this.mouse.set( m.x, m.y );
+
+    },
 
     setText: function ( size, color, font ) {
 
@@ -135,155 +176,214 @@ Gui.prototype = {
 
     },
 
-    hide : function (b) {
+    hide: function ( b ) {
 
-        if(b) this.content.style.display = 'none';
-        else this.content.style.display = 'block';
+        this.content.style.display = b ? 'none' : 'block';
         
     },
 
-    setBG : function(c){
-
-        this.bg = c;
-
-        /*var i = this.uis.length;
-        while(i--){
-            this.uis[i].setBG(c);
-        }*/
-
-        this.innerstyle.background = this.bg;
-        this.bottom.style.background = this.bg;
-
-    },
-
-    getHTML : function(){
-
-        return this.content;
-
-    },
-
-    onChange : function( f ){
+    onChange: function ( f ) {
 
         this.callback = f;
         return this;
 
     },
 
-    handleEvent : function( e ) {
+    // ----------------------
+    //   STYLES
+    // ----------------------
 
-        //e.preventDefault();
-        //e.stopPropagation();
+    mode: function ( n ) {
 
-        switch( e.type ) {
-            case 'mousedown': this.down( e ); break;
-            case 'mouseout': this.out( e ); break;
-            case 'mouseover': this.over( e ); break;
-            //case 'mousewheel': this.wheel( e ); break;
+    	var needChange = false;
 
-            case 'mouseup': this.up( e ); break;
-            case 'mousemove': this.move( e ); break;
-        }
+    	if( n !== this.cn ){
+
+	    	this.cn = n;
+
+	    	switch( n ){
+
+	    		case 'def': 
+	    		   this.scroll.style.background = this.colors.scroll; 
+	    		   this.bottom.style.background = this.colors.background;
+	    		   this.bottom.style.color = '#CCC';
+	    		break;
+
+	    		//case 'scrollDef': this.scroll.style.background = this.colors.scroll; break;
+	    		case 'scrollOver': this.scroll.style.background = this.colors.select; break;
+	    		case 'scrollDown': this.scroll.style.background = this.colors.down; break;
+
+	    		//case 'bottomDef': this.bottom.style.background = this.colors.background; break;
+	    		case 'bottomOver': this.bottom.style.background = this.colors.backgroundOver; this.bottom.style.color = '#FFF'; break;
+	    		//case 'bottomDown': this.bottom.style.background = this.colors.select; this.bottom.style.color = '#000'; break;
+
+	    	}
+
+	    	needChange = true;
+
+	    }
+
+    	return needChange;
 
     },
 
-    // Mouse event
+    // ----------------------
+    //   TARGET
+    // ----------------------
 
-    down: function( e ){
+    clearTarget: function () {
 
-        if( !e.target.name ) return;
+    	if( this.current === -1 ) return false;
+        //if(!this.target) return;
+        this.target.uiout();
+        this.target.reset();
+        this.target = null;
+        this.current = -1;
+        Roots.cursor();
+        return true;
 
-        if(e.target.name === 'scroll'){
-            this.isDown = true;
-            this.move( e );
-            document.addEventListener( 'mouseup', this, false );
-            document.addEventListener( 'mousemove', this, false );
-        }
-        if(e.target.name === 'bottom'){
-            this.isOpen = this.isOpen ? false : true;
-            this.bottom.textContent = this.isOpen ? 'close' : 'open';
-            this.testHeight();
-        }
+    },
+
+    // ----------------------
+    //   ZONE TEST
+    // ----------------------
+
+    testZone: function ( e ) {
+
+        var l = this.local;
+        if( l.x === -1 && l.y === -1 ) return '';
+
+        this.isReset = false;
+
+        var name = '';
+
+        var s = this.isScroll ?  this.zone.w  - this.size.s : this.zone.w;
         
-    },
+        if( l.y > this.zone.h - this.bh &&  l.y < this.zone.h ) name = 'bottom';
+        else name = l.x > s ? 'scroll' : 'content';
 
-    move: function( e ){
-
-        if(!this.isDown) return;
-        this.scroll.style.background = this.colors.down;
-        this.update( (e.clientY-this.top)-(this.sh*0.5) );
+        return name;
 
     },
 
-    
+    // ----------------------
+    //   EVENTS
+    // ----------------------
 
-    out: function( e ){
+    handleEvent: function ( e ) {
 
-        if( !e.target.name ) return;
+    	var type = e.type;
 
-        if(e.target.name === 'scroll'){
-            this.scroll.style.background = this.colors.scroll;
-        }
+    	var change = false;
+    	var targetChange = false;
 
-        if(e.target.name === 'bottom'){
-            this.bottom.style.color = '#CCC';
-        }
+    	var name = this.testZone( e );
+
+        
+
+    	if( type === 'mouseup' && this.isDown ) this.isDown = false;
+    	if( type === 'mousedown' && !this.isDown ) this.isDown = true;
+
+    	if( !name ) return;
+
+    	switch( name ){
+
+    		case 'content':
+
+                e.clientY = this.isScroll ?  e.clientY + this.decal : e.clientY;
+
+	    		if( this.target ) targetChange = this.target.handleEvent( e );
+
+	    		if( type === 'mousemove' ) change = this.mode('def');
+                if( type === 'wheel' && !targetChange && this.isScroll ) change = this.onWheel( e );
+
+	    		if( !Roots.lock ){
+
+	    			var next = Roots.findTarget( this.uis, e );
+
+	    			if( next !== this.current ){
+		                this.clearTarget();
+		                this.current = next;
+		                change = true;
+		            }
+
+		            if( next !== -1 ){ 
+		                this.target = this.uis[this.current];
+		                this.target.uiover();
+		            }
+
+	    		}
+
+    		break;
+    		case 'bottom':
+
+	    		this.clearTarget();
+	    		if( type === 'mousemove' ) change = this.mode('bottomOver');
+	    		if( type === 'mousedown' ) {
+	    			this.isOpen = this.isOpen ? false : true;
+		            this.bottom.textContent = this.isOpen ? 'close' : 'open';
+		            this.setHeight();
+		            this.mode('def');
+		            change = true;
+	    		}
+
+    		break;
+    		case 'scroll':
+
+	    		this.clearTarget();
+	    		if( type === 'mousemove' ) change = this.mode('scrollOver');
+	    		if( type === 'mousedown' ) change = this.mode('scrollDown'); 
+                if( type === 'wheel' ) change = this.onWheel( e ); 
+	    		if( this.isDown ) this.update( (e.clientY-this.zone.y)-(this.sh*0.5) );
+
+    		break;
+
+
+    	}
+
+    	if( this.isDown ) change = true;
+    	if( targetChange ) change = true;
+
+    	if( change ) this.draw();
 
     },
 
-    up: function( e ){
+    onWheel: function ( e ) {
 
+        this.oy += 20*e.delta;
+        this.update( this.oy );
+        return true;
+
+    },
+
+    // ----------------------
+    //   RESET
+    // ----------------------
+
+    reset: function ( force ) {
+
+        if( this.isReset ) return;
+
+        this.mouse.neg();
         this.isDown = false;
-        this.scroll.style.background = this.colors.scroll;
-        document.removeEventListener( 'mouseup', this, false );
-        document.removeEventListener( 'mousemove', this, false );
+
+        Roots.clearInput();
+        var r = this.mode('def');
+        var r2 = this.clearTarget();
+
+        if( r || r2 ) this.draw( true );
+
+        this.isReset = true;
+
+        //Roots.lock = false;
 
     },
 
-    over: function( e ){
+    // ----------------------
+    //   ADD NODE
+    // ----------------------
 
-        if( !e.target.name ) return;
-        if(e.target.name === 'scroll'){
-            this.scroll.style.background = this.colors.select;
-        }
-        if(e.target.name === 'bottom'){
-            this.bottom.style.color = '#FFF';
-        }
-
-    },
-
-    // Wheel event
-
-    wheel: function ( e ){
-
-        //e.preventDefault();
-        //e.stopPropagation();
-
-        if( this.lockwheel || !this.isScroll ) return;
-
-        //this.onWheel = true;
-
-        var x = e.clientX;
-        var px = this.content.getBoundingClientRect().left;
-
-        if(x<px) return;
-        if(x>(px+this.width)) return;
-
-        var delta = 0;
-        if(e.wheelDeltaY) delta = -e.wheelDeltaY*0.04;
-        else if(e.wheelDelta) delta = -e.wheelDelta*0.2;
-        else if(e.detail) delta = e.detail*4.0;
-
-        this.py += delta;
-
-        this.update( this.py );
-
-    },
-
-    // -----------------------------------
-
-    // Add node to gui
-
-    add:function(){
+    add: function () {
 
         var a = arguments;
 
@@ -302,25 +402,46 @@ Gui.prototype = {
             
         } 
 
+        var u = add.apply( this, a );
 
-        var n = add.apply( this, a );
+        if( u === null ) return;
+
+
+        //var n = add.apply( this, a );
         //var n = UIL.add( ...args );
 
-        this.uis.push( n );
-        n.py = this.h;
+        this.uis.push( u );
+        //n.py = this.h;
 
-        if( !n.autoWidth ){
-            var y = n.c[0].getBoundingClientRect().top;
+        if( !u.autoWidth ){
+            var y = u.c[0].getBoundingClientRect().top;
             if( this.prevY !== y ){
-                this.calc( n.h + 1 );
+                this.calc( u.h + 1 );
                 this.prevY = y;
             }
         }else{
-            this.prevY = -1;
-            this.calc( n.h + 1 );
+            this.prevY = 0;//-1;
+            this.calc( u.h + 1 );
         }
 
-        return n;
+        return u;
+
+    },
+
+    applyCalc: function () {
+
+        //console.log(this.uis.length, this.tmpH )
+
+        this.calc( this.tmpH );
+        //this.tmpH = 0;
+        this.tmpAdd = null;
+
+    },
+
+    calcUis: function () {
+
+        Roots.calcUis( this.uis, this.zone, this.zone.y );
+
     },
 
     // remove one node
@@ -346,156 +467,137 @@ Gui.prototype = {
 
     // clear all gui
 
-    clear:function(){
+    clear: function () {
 
         var i = this.uis.length;
         while(i--) this.uis[i].clear();
 
         this.uis = [];
-        Tools.listens = [];
+        Roots.listens = [];
 
-        this.calc( - this.h );
+        this.calc( -this.h );
 
     },
 
-    // -----------------------------------
+    // ----------------------
+    //   SCROLL
+    // ----------------------
 
-    // Scroll
+    upScroll: function ( b ) {
 
-    update: function ( y ){
+        this.sw = b ? this.size.s : 0;
+        this.oy = b ? this.oy : 0;
+        this.scrollBG.style.display = b ? 'block' : 'none';
 
-        y = y < 0 ? 0 :y;
-        y = y > this.range ? this.range : y;
+        if( b ){
 
-        this.inner.style.top = - Math.floor( y / this.ratio ) + 'px';
+            this.total = this.h;
+
+            this.maxView = this.maxHeight;
+
+            this.ratio = this.maxView / this.total;
+            this.sh = this.maxView * this.ratio;
+
+            //if( this.sh < 20 ) this.sh = 20;
+
+            this.range = this.maxView - this.sh;
+
+            this.oy = Tools.clamp( this.oy, 0, this.range );
+
+            this.scrollBG.style.height = this.maxView + 'px';
+            this.scroll.style.height = this.sh + 'px';
+
+        }
+
+        this.setItemWidth( this.zone.w - this.sw );
+        this.update( this.oy );
+
+    },
+
+    update: function ( y ) {
+
+        y = Tools.clamp( y, 0, this.range );
+
+        this.decal = Math.floor( y / this.ratio );
+        this.inner.style.top = - this.decal + 'px';
         this.scroll.style.top = Math.floor( y ) + 'px';
-
-        this.py = y;
-
-        //this.onWheel = false;
+        this.oy = y;
 
     },
 
-    showScroll:function(h){
+    // ----------------------
+    //   RESIZE FUNCTION
+    // ----------------------
 
-        this.isScroll = true;
-        this.sw = this.size.s;
-
-        this.total = this.h;
-        this.maxView = this.maxHeight;// - this.height;
-
-        this.ratio = this.maxView / this.total;
-        this.sh = this.maxView * this.ratio;
-
-        if( this.sh < 20 ) this.sh = 20;
-
-        this.range = this.maxView - this.sh;
-
-        this.scrollBG.style.display = 'block';
-        this.scrollBG.style.height = this.maxView + 'px';
-        this.scroll.style.height = this.sh + 'px';
-
-        
-
-        this.setItemWidth( this.width - this.sw );
-
-        this.update( 0 );
-
-    },
-
-    hideScroll:function(){
-
-        this.isScroll = false;
-        this.sw = 0;
-        
-
-        this.setItemWidth( this.width - this.sw );
-
-        this.update( 0 );
-
-        this.scrollBG.style.display = 'none';
-
-    },
-
-    // -----------------------------------
-
-    resize:function(e){
-
-        this.testHeight();
-
-    },
-
-    calc:function( y ) {
+    calc: function ( y ) {
 
         this.h += y;
         clearTimeout( this.tmp );
-        this.tmp = setTimeout( this.testHeight.bind(this), 10 );
+        this.tmp = setTimeout( this.setHeight.bind(this), 10 );
 
     },
 
-    testHeight:function(){
+    setHeight: function () {
 
         if( this.tmp ) clearTimeout( this.tmp );
 
-        this.height = this.top + this.bh;
+        //console.log(this.h )
+
+        this.zone.h = this.bh;
+        this.isScroll = false;
 
         if( this.isOpen ){
 
-            this.maxHeight = window.innerHeight - this.top - this.bh;
+            var hhh = this.forceHeight ? this.forceHeight : window.innerHeight;
 
-            if( this.h > this.maxHeight ){
+            this.maxHeight = hhh - this.zone.y - this.bh;
 
-                this.height = this.maxHeight + this.bh;
-                this.showScroll();
+            var diff = this.h - this.maxHeight;
 
-            }else{
+            //console.log(diff)
 
-                this.height = this.h + this.bh;
-                this.hideScroll();
+            if( diff > 1 ){ //this.h > this.maxHeight ){
 
+                this.isScroll = true;
+                this.zone.h = this.maxHeight + this.bh;
+
+            } else {
+
+                this.zone.h = this.h + this.bh;
+                
             }
 
-        } else {
-
-            this.height = this.bh;
-            this.hideScroll();
-
         }
 
-        this.innerContent.style.height = this.height - this.bh + 'px';
-        this.content.style.height = this.height + 'px';
-        this.bottom.style.top = this.height - this.bh + 'px';
+        this.upScroll( this.isScroll );
+
+        this.innerContent.style.height = this.zone.h - this.bh + 'px';
+        this.content.style.height = this.zone.h + 'px';
+        this.bottom.style.top = this.zone.h - this.bh + 'px';
+
+        if( this.isOpen ) this.calcUis();
+        if( this.isCanvas ) this.draw( true );
 
     },
 
-    setWidth: function( w ) {
+    setWidth: function ( w ) {
 
-        if( w ) this.width = w;
-        this.content.style.width = this.width + 'px';
+        if( w ) this.zone.w = w;
 
-        //console.log(this.width)
+        this.content.style.width = this.zone.w + 'px';
 
+        if( this.isCenter ) this.content.style.marginLeft = -(Math.floor(this.zone.w*0.5)) + 'px';
 
-        if( this.isCenter ) this.content.style.marginLeft = -(~~ (this.width*0.5)) + 'px';
+        this.setItemWidth( this.zone.w - this.sw );
 
-        this.setItemWidth( this.width - this.sw );
+        this.setHeight();
 
-        /*var l = this.uis.length;
-        var i = l;
-        while(i--){
-            this.uis[i].setSize( this.width );
-        }
-
-        i = l;
-        while(i--){
-            this.uis[i].rSize();
-        }*/
-
-        this.resize();
+        if( !this.isCanvasOnly ) Roots.needReZone = true;
+        //this.resize();
 
     },
 
-    setItemWidth: function( w ){
+    setItemWidth: function ( w ) {
 
         var i = this.uis.length;
         while(i--){
@@ -506,7 +608,7 @@ Gui.prototype = {
     },
 
 
-};
+} );
 
 
 export { Gui };

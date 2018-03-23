@@ -91,45 +91,44 @@
 	}
 
 	/**
-	 * @author lo-th / https://github.com/lo-th
+	 * @author lth / https://github.com/lo-th
 	 */
 
-	var Tools = {
+	var T = {
 
-	    main: null,
-
-	    doc: document,
 	    frag: document.createDocumentFragment(),
 
-	    URL: window.URL || window.webkitURL,
-
-	    isLoop: false,
-	    listens: [],
+	    colorRing: null,
+	    joystick: null,
+	    circular: null,
+	    knob: null,
+	    //graph: null,
 
 	    svgns: "http://www.w3.org/2000/svg",
 	    htmls: "http://www.w3.org/1999/xhtml",
 
 	    DOM_SIZE: [ 'height', 'width', 'top', 'left', 'bottom', 'right', 'margin-left', 'margin-right', 'margin-top', 'margin-bottom'],
 	    SVG_TYPE_D: [ 'pattern', 'defs', 'transform', 'stop', 'animate', 'radialGradient', 'linearGradient', 'animateMotion' ],
-	    SVG_TYPE_G: [ 'rect', 'circle', 'path', 'polygon', 'text', 'g', 'line', 'foreignObject' ],
+	    SVG_TYPE_G: [ 'svg', 'rect', 'circle', 'path', 'polygon', 'text', 'g', 'line', 'foreignObject' ],
 
-	    size: {
-	        
-	        w: 240,
-	        h: 20,
-	        p: 30,
-	        s: 20,
+	    TwoPI: 6.283185307179586,
 
-	    },
+	    size: {  w: 240, h: 20, p: 30, s: 20 },
 
-	    // colors
+	    // ----------------------
+	    //   COLOR
+	    // ----------------------
 
 	    colors: {
 
 	        text : '#C0C0C0',
 	        background: 'rgba(44,44,44,0.3)',
+	        backgroundOver: 'rgba(11,11,11,0.5)',
 
-	        border : '#4f4f4f',
+	        input: '#005AAA',
+
+	        border : '#454545',
+	        borderOver : '#5050AA',
 	        borderSelect : '#308AFF',
 
 	        button : '#404040',
@@ -139,34 +138,49 @@
 	        moving : '#03afff',
 	        down : '#024699',
 
-	        stroke: '#606060',//'rgba(120,120,120,0.6)',
+	        stroke: 'rgba(11,11,11,0.5)',
 	        scroll: '#333333',
+
+	        hide: 'rgba(0,0,0,0)',
 
 	    },
 
 	    // style css
 
 	    css : {
-	        basic: '-o-user-select:none; -ms-user-select:none; -khtml-user-select:none; -webkit-user-select:none; -moz-user-select:none;' + 'position:absolute; pointer-events:none; box-sizing:border-box; margin:0; padding:0; border:none; overflow:hidden; background:none;',
+	        //unselect: '-o-user-select:none; -ms-user-select:none; -khtml-user-select:none; -webkit-user-select:none; -moz-user-select:none;', 
+	        basic: 'position:absolute; pointer-events:none; box-sizing:border-box; margin:0; padding:0; overflow:hidden; ',// + '-o-user-select:none; -ms-user-select:none; -khtml-user-select:none; -webkit-user-select:none; -moz-user-select:none;',
 	    },
 
 	    // svg path
 
-	    GPATH: 'M 7 7 L 7 8 8 8 8 7 7 7 M 5 7 L 5 8 6 8 6 7 5 7 M 3 7 L 3 8 4 8 4 7 3 7 M 7 5 L 7 6 8 6 8 5 7 5 M 6 6 L 6 5 5 5 5 6 6 6 M 7 3 L 7 4 8 4 8 3 7 3 M 6 4 L 6 3 5 3 5 4 6 4 M 3 5 L 3 6 4 6 4 5 3 5 M 3 3 L 3 4 4 4 4 3 3 3 Z',
+	    svgs: {
+
+	        group:'M 7 7 L 7 8 8 8 8 7 7 7 M 5 7 L 5 8 6 8 6 7 5 7 M 3 7 L 3 8 4 8 4 7 3 7 M 7 5 L 7 6 8 6 8 5 7 5 M 6 6 L 6 5 5 5 5 6 6 6 M 7 3 L 7 4 8 4 8 3 7 3 M 6 4 L 6 3 5 3 5 4 6 4 M 3 5 L 3 6 4 6 4 5 3 5 M 3 3 L 3 4 4 4 4 3 3 3 Z',
+	        arrow:'M 3 8 L 8 5 3 2 3 8 Z',
+	        arrowDown:'M 5 8 L 8 3 2 3 5 8 Z',
+	        arrowUp:'M 5 2 L 2 7 8 7 5 2 Z',
+
+	    },
+
+	    // custom text
 
 	    setText : function( size, color, font ){
 
 	        size = size || 11;
 	        color = color || '#CCC';
-	        font = font || '"Consolas", "Lucida Console", Monaco, monospace';
+	        font = font || 'Monospace';//'"Consolas", "Lucida Console", Monaco, monospace';
 
-	        Tools.colors.text = color;
+	        T.colors.text = color;
+	        T.css.txt = T.css.basic + 'font-family:'+font+'; font-size:'+size+'px; color:'+color+'; padding:2px 10px; left:0; top:2px; height:16px; width:100px; overflow:hidden; white-space: nowrap;';
+	        T.css.txtselect = T.css.txt + 'padding:2px 5px; border:1px dashed ' + T.colors.border+';';
+	        T.css.item = T.css.txt + 'position:relative; background:rgba(0,0,0,0.2); margin-bottom:1px;';
 
-	        Tools.css.txt = Tools.css.basic + 'font-family:'+font+'; font-size:'+size+'px; color:'+color+'; padding:2px 10px; left:0; top:2px; height:16px; width:100px; overflow:hidden; white-space: nowrap;';
-	        Tools.css.txtedit = Tools.css.txt + 'pointer-events:auto; padding:2px 5px; outline:none; -webkit-appearance:none; -moz-appearance:none; border:1px dashed #4f4f4f; -ms-user-select:element;';
-	        Tools.css.txtselect = Tools.css.txt + 'pointer-events:auto; padding:2px 5px; outline:none; -webkit-appearance:none; -moz-appearance:none; border:1px dashed ' + Tools.colors.border+'; -ms-user-select:element;';
-	        Tools.css.txtnumber = Tools.css.txt + 'letter-spacing:-1px; padding:2px 5px;';
-	        Tools.css.item = Tools.css.txt + 'position:relative; background:rgba(0,0,0,0.2); margin-bottom:1px; pointer-events:auto; cursor:pointer;';
+	    },
+
+	    clone: function ( o ) {
+
+	        return o.cloneNode( true );
 
 	    },
 
@@ -174,6 +188,15 @@
 
 	        if( id === -1 ) dom.setAttributeNS( null, type, value );
 	        else dom.childNodes[ id || 0 ].setAttributeNS( null, type, value );
+
+	    },
+
+	    setCss: function( dom, css ){
+
+	        for( var r in css ){
+	            if( T.DOM_SIZE.indexOf(r) !== -1 ) dom.style[r] = css[r] + 'px';
+	            else dom.style[r] = css[r];
+	        }
 
 	    },
 
@@ -197,28 +220,28 @@
 
 	    },
 
-	    /*setDom : function( dom, type, value ){
-
-	        var ext = Tools.DOM_SIZE.indexOf(type) !== -1 ? 'px' : '';
-	        dom.style[type] = value + ext;
-
-	    },*/
-
 	    dom : function ( type, css, obj, dom, id ) {
 
 	        type = type || 'div';
 
-	        if( Tools.SVG_TYPE_D.indexOf(type) !== -1 || Tools.SVG_TYPE_G.indexOf(type) !== -1 ){ // is svg element
+	        if( T.SVG_TYPE_D.indexOf(type) !== -1 || T.SVG_TYPE_G.indexOf(type) !== -1 ){ // is svg element
 
-	            // create new svg if not def
-	            if( dom === undefined ) dom = Tools.doc.createElementNS( Tools.svgns, 'svg' );
+	            if( type ==='svg' ){
 
-	            Tools.addAttributes( dom, type, obj, id );
+	                dom = document.createElementNS( T.svgns, 'svg' );
+	                T.set( dom, obj );
+
+	            } else {
+	                // create new svg if not def
+	                if( dom === undefined ) dom = document.createElementNS( T.svgns, 'svg' );
+	                T.addAttributes( dom, type, obj, id );
+
+	            }
 	            
 	        } else { // is html element
 
-	            if( dom === undefined ) dom = Tools.doc.createElementNS( Tools.htmls, type );
-	            else dom = dom.appendChild( Tools.doc.createElementNS( Tools.htmls, type ) );
+	            if( dom === undefined ) dom = document.createElementNS( T.htmls, type );
+	            else dom = dom.appendChild( document.createElementNS( T.htmls, type ) );
 
 	        }
 
@@ -231,19 +254,19 @@
 
 	    addAttributes : function( dom, type, o, id ){
 
-	        var g = Tools.doc.createElementNS( Tools.svgns, type );
-	        Tools.set( g, o );
-	        Tools.get( dom, id ).appendChild( g );
-	        if( Tools.SVG_TYPE_G.indexOf(type) !== -1 ) g.style.pointerEvents = 'none';
+	        var g = document.createElementNS( T.svgns, type );
+	        T.set( g, o );
+	        T.get( dom, id ).appendChild( g );
+	        if( T.SVG_TYPE_G.indexOf(type) !== -1 ) g.style.pointerEvents = 'none';
 	        return g;
 
 	    },
 
 	    clear : function( dom ){
 
-	        Tools.purge( dom );
+	        T.purge( dom );
 	        while (dom.firstChild) {
-	            if ( dom.firstChild.firstChild ) Tools.clear( dom.firstChild );
+	            if ( dom.firstChild.firstChild ) T.clear( dom.firstChild );
 	            dom.removeChild( dom.firstChild ); 
 	        }
 
@@ -263,51 +286,17 @@
 	        if (a) {
 	            i = a.length;
 	            while(i--){ 
-	                Tools.purge( dom.childNodes[i] ); 
+	                T.purge( dom.childNodes[i] ); 
 	            }
 	        }
 
 	    },
 
+	    clamp: function ( value, min, max ) {
 
-
-	    // LOOP
-
-	    loop : function(){
-
-	        if( Tools.isLoop ) requestAnimationFrame( Tools.loop );
-	        Tools.update();
-
-	    },
-
-	    update : function(){
-
-	        var i = Tools.listens.length;
-	        while(i--) Tools.listens[i].listening();
-
-	    },
-
-	    removeListen : function ( proto ){
-
-	        var id = Tools.listens.indexOf( proto );
-	        Tools.listens.splice(id, 1);
-
-	        if( Tools.listens.length === 0 ) Tools.isLoop = false;
-
-	    },
-
-	    addListen : function ( proto ){
-
-	        var id = Tools.listens.indexOf( proto );
-
-	        if( id !== -1 ) return; 
-
-	        Tools.listens.push( proto );
-
-	        if( !Tools.isLoop ){
-	            Tools.isLoop = true;
-	            Tools.loop();
-	        }
+	        //return value <= min ? min : value >= max ? max : value;
+	        return value < min ? min : value > max ? max : value;
+	        //return Math.max( min, Math.min( max, value ) );
 
 	    },
 
@@ -315,20 +304,20 @@
 	    //   Color function
 	    // ----------------------
 
-	    ColorLuma : function ( hex, lum ) {
+	    ColorLuma : function ( hex, l ) {
 
 	        // validate hex string
 	        hex = String(hex).replace(/[^0-9a-f]/gi, '');
 	        if (hex.length < 6) {
 	            hex = hex[0]+hex[0]+hex[1]+hex[1]+hex[2]+hex[2];
 	        }
-	        lum = lum || 0;
+	        l = l || 0;
 
 	        // convert to decimal and change luminosity
 	        var rgb = "#", c, i;
 	        for (i = 0; i < 3; i++) {
 	            c = parseInt(hex.substr(i*2,2), 16);
-	            c = Math.round(Math.min(Math.max(0, c + (c * lum)), 255)).toString(16);
+	            c = Math.round(Math.min(Math.max(0, c + (c * l)), 255)).toString(16);
 	            rgb += ("00"+c).substr(c.length);
 	        }
 
@@ -336,53 +325,53 @@
 
 	    },
 
-	    findDeepInver: function( rgb ){ 
+	    findDeepInver: function ( c ) { 
 
-	        return (rgb[0] * 0.3 + rgb[1] * .59 + rgb[2] * .11) <= 0.6;
+	        return (c[0] * 0.3 + c[1] * .59 + c[2] * .11) <= 0.6;
 	        
 	    },
 
 
-	    hexToHtml: function(v){ 
+	    hexToHtml: function ( v ) { 
 	        v = v === undefined ? 0x000000 : v;
 	        return "#" + ("000000" + v.toString(16)).substr(-6);
 	        
 	    },
 
-	    htmlToHex: function(v){ 
+	    htmlToHex: function ( v ) { 
 
 	        return v.toUpperCase().replace("#", "0x");
 
 	    },
 
-	    u255: function(color, i){
+	    u255: function (c, i) {
 
-	        return parseInt(color.substring(i, i + 2), 16) / 255;
-
-	    },
-
-	    u16: function( color, i ){
-
-	        return parseInt(color.substring(i, i + 1), 16) / 15;
+	        return parseInt(c.substring(i, i + 2), 16) / 255;
 
 	    },
 
-	    unpack: function( color ){
+	    u16: function ( c, i ) {
 
-	        if (color.length == 7) return [ Tools.u255(color, 1), Tools.u255(color, 3), Tools.u255(color, 5) ];
-	        else if (color.length == 4) return [ Tools.u16(color,1), Tools.u16(color,2), Tools.u16(color,3) ];
-
-	    },
-
-	    htmlRgb: function( rgb ){
-
-	        return 'rgb(' + Math.round(rgb[0] * 255) + ','+ Math.round(rgb[1] * 255) + ','+ Math.round(rgb[2] * 255) + ')';
+	        return parseInt(c.substring(i, i + 1), 16) / 15;
 
 	    },
 
-	    rgbToHex : function( rgb ){
+	    unpack: function( c ){
 
-	        return '#' + ( '000000' + ( ( rgb[0] * 255 ) << 16 ^ ( rgb[1] * 255 ) << 8 ^ ( rgb[2] * 255 ) << 0 ).toString( 16 ) ).slice( - 6 );
+	        if (c.length == 7) return [ T.u255(c, 1), T.u255(c, 3), T.u255(c, 5) ];
+	        else if (c.length == 4) return [ T.u16(c,1), T.u16(c,2), T.u16(c,3) ];
+
+	    },
+
+	    htmlRgb: function( c ){
+
+	        return 'rgb(' + Math.round(c[0] * 255) + ','+ Math.round(c[1] * 255) + ','+ Math.round(c[2] * 255) + ')';
+
+	    },
+
+	    rgbToHex : function( c ){
+
+	        return '#' + ( '000000' + ( ( c[0] * 255 ) << 16 ^ ( c[1] * 255 ) << 8 ^ ( c[2] * 255 ) << 0 ).toString( 16 ) ).slice( - 6 );
 
 	    },
 
@@ -397,9 +386,9 @@
 
 	    },
 
-	    rgbToHsl: function(rgb){
+	    rgbToHsl: function ( c ) {
 
-	        var r = rgb[0], g = rgb[1], b = rgb[2], min = Math.min(r, g, b), max = Math.max(r, g, b), delta = max - min, h = 0, s = 0, l = (min + max) / 2;
+	        var r = c[0], g = c[1], b = c[2], min = Math.min(r, g, b), max = Math.max(r, g, b), delta = max - min, h = 0, s = 0, l = (min + max) / 2;
 	        if (l > 0 && l < 1) s = delta / (l < 0.5 ? (2 * l) : (2 - 2 * l));
 	        if (delta > 0) {
 	            if (max == r && max != g) h += (g - b) / delta;
@@ -411,126 +400,826 @@
 
 	    },
 
-	    hslToRgb: function( hsl ){
+	    hslToRgb: function ( c ) {
 
-	        var p, q, h = hsl[0], s = hsl[1], l = hsl[2];
+	        var p, q, h = c[0], s = c[1], l = c[2];
 
 	        if ( s === 0 ) return [ l, l, l ];
 	        else {
 	            q = l <= 0.5 ? l * (s + 1) : l + s - ( l * s );
 	            p = l * 2 - q;
-	            return [ Tools.hueToRgb(p, q, h + 0.33333), Tools.hueToRgb(p, q, h), Tools.hueToRgb(p, q, h - 0.33333) ];
+	            return [ T.hueToRgb(p, q, h + 0.33333), T.hueToRgb(p, q, h), T.hueToRgb(p, q, h - 0.33333) ];
 	        }
 
 	    },
 
-	    // svg to canvas test 
+	    // ----------------------
+	    //   SVG MODEL
+	    // ----------------------
 
-	    toCanvas: function( canvas, content, w, h ){
+	    makeGradiant: function ( type, settings, parent, colors ) {
 
-	        var ctx = canvas.getContext("2d");
+	        T.dom( type, null, settings, parent, 0 );
 
-	        var dcopy = null;
+	        var n = parent.childNodes[0].childNodes.length - 1, c;
 
-	        if( typeof content === 'string' ){
+	        for( var i = 0; i < colors.length; i++ ){
 
-	            dcopy = Tools.dom( 'iframe', 'position:abolute; left:0; top:0; width:'+w+'px; height:'+h+'px;' );
-	            dcopy.src = content;
+	            c = colors[i];
+	            T.dom( 'stop', null, { offset:c[0]+'%', style:'stop-color:'+c[1]+'; stop-opacity:'+c[2]+';' }, parent, [0,n] );
 
-	        }else{
-	            dcopy = content.cloneNode(true);
-	            dcopy.style.left = 0;
 	        }
 
-	        var svg = Tools.dom( 'foreignObject', 'position:abolute; left:0; top:0;', { width:w, height:h });
+	    },
 
-	        svg.childNodes[0].appendChild( dcopy );
+	    /*makeGraph: function () {
+
+	        var w = 128;
+	        var radius = 34;
+	        var svg = T.dom( 'svg', T.css.basic , { viewBox:'0 0 '+w+' '+w, width:w, height:w, preserveAspectRatio:'none' } );
+	        T.dom( 'path', '', { d:'', stroke:T.colors.text, 'stroke-width':4, fill:'none', 'stroke-linecap':'butt' }, svg );//0
+	        //T.dom( 'rect', '', { x:10, y:10, width:108, height:108, stroke:'rgba(0,0,0,0.3)', 'stroke-width':2 , fill:'none'}, svg );//1
+	        //T.dom( 'circle', '', { cx:64, cy:64, r:radius, fill:T.colors.button, stroke:'rgba(0,0,0,0.3)', 'stroke-width':8 }, svg );//0
 	        
-	        svg.setAttribute("version", "1.1");
-	        svg.setAttribute('xmlns', 'http://www.w3.org/2000/svg' );
-	        svg.setAttribute("xmlns:xlink", "http://www.w3.org/1999/xlink");
+	        //T.dom( 'circle', '', { cx:64, cy:64, r:radius+7, stroke:'rgba(0,0,0,0.3)', 'stroke-width':7 , fill:'none'}, svg );//2
+	        //T.dom( 'path', '', { d:'', stroke:'rgba(255,255,255,0.3)', 'stroke-width':2, fill:'none', 'stroke-linecap':'round', 'stroke-opacity':0.5 }, svg );//3
+	        T.graph = svg;
 
-	        svg.setAttribute('width', w );
-	        svg.setAttribute('height', h );
-	        svg.childNodes[0].setAttribute('width', '100%' );
-	        svg.childNodes[0].setAttribute('height', '100%' );
+	    },*/
 
-	        //console.log(svg)
+	    makeKnob: function () {
 
-	        var img = new Image();
+	        var w = 128;
+	        var radius = 34;
+	        var svg = T.dom( 'svg', T.css.basic , { viewBox:'0 0 '+w+' '+w, width:w, height:w, preserveAspectRatio:'none' } );
+	        T.dom( 'circle', '', { cx:64, cy:64, r:radius, fill:T.colors.button, stroke:'rgba(0,0,0,0.3)', 'stroke-width':8 }, svg );//0
+	        T.dom( 'path', '', { d:'', stroke:T.colors.text, 'stroke-width':4, fill:'none', 'stroke-linecap':'round' }, svg );//1
+	        T.dom( 'circle', '', { cx:64, cy:64, r:radius+7, stroke:'rgba(0,0,0,0.1)', 'stroke-width':7 , fill:'none'}, svg );//2
+	        T.dom( 'path', '', { d:'', stroke:'rgba(255,255,255,0.3)', 'stroke-width':2, fill:'none', 'stroke-linecap':'round', 'stroke-opacity':0.5 }, svg );//3
+	        T.knob = svg;
+
+	    },
+
+	    makeCircular: function () {
+
+	        var w = 128;
+	        var radius = 40;
+	        var svg = T.dom( 'svg', T.css.basic , { viewBox:'0 0 '+w+' '+w, width:w, height:w, preserveAspectRatio:'none' } );
+	        T.dom( 'circle', '', { cx:64, cy:64, r:radius, stroke:'rgba(0,0,0,0.1)', 'stroke-width':10, fill:'none' }, svg );//0
+	        T.dom( 'path', '', { d:'', stroke:T.colors.text, 'stroke-width':7, fill:'none', 'stroke-linecap':'butt' }, svg );//1
+	        T.circular = svg;
+
+	    },
+
+	    makeJoystick: function () {
+
+	        //+' background:#f00;'
+
+	        var w = 128;
+	        var radius = Math.floor((w-30)*0.5);
+	        var innerRadius = Math.floor(radius*0.6);
+	        var svg = T.dom( 'svg', T.css.basic , { viewBox:'0 0 '+w+' '+w, width:w, height:w, preserveAspectRatio:'none' } );
+	        T.dom( 'defs', null, {}, svg );
+	        T.dom( 'g', null, {}, svg );
+
+	        // gradian background
+	        var ccc = [ [40, 'rgb(0,0,0)', 0.3], [80, 'rgb(0,0,0)', 0], [90, 'rgb(50,50,50)', 0.4], [100, 'rgb(50,50,50)', 0] ];
+	        T.makeGradiant( 'radialGradient', { id:'grad', cx:'50%', cy:'50%', r:'50%', fx:'50%', fy:'50%' }, svg, ccc );
+
+	        // gradian shadow
+	        ccc = [ [60, 'rgb(0,0,0)', 0.5], [100, 'rgb(0,0,0)', 0] ];
+	        T.makeGradiant( 'radialGradient', { id:'gradS', cx:'50%', cy:'50%', r:'50%', fx:'50%', fy:'50%' }, svg, ccc );
+
+	        // gradian stick
+	        var cc0 = ['rgb(40,40,40)', 'rgb(48,48,48)', 'rgb(30,30,30)'];
+	        var cc1 = ['rgb(1,90,197)', 'rgb(3,95,207)', 'rgb(0,65,167)'];
+
+	        ccc = [ [30, cc0[0], 1], [60, cc0[1], 1], [80, cc0[1], 1], [100, cc0[2], 1] ];
+	        T.makeGradiant( 'radialGradient', { id:'gradIn', cx:'50%', cy:'50%', r:'50%', fx:'50%', fy:'50%' }, svg, ccc );
+
+	        ccc = [ [30, cc1[0], 1], [60, cc1[1], 1], [80, cc1[1], 1], [100, cc1[2], 1] ];
+	        T.makeGradiant( 'radialGradient', { id:'gradIn2', cx:'50%', cy:'50%', r:'50%', fx:'50%', fy:'50%' }, svg, ccc );
+
+	        // graph
+
+	        T.dom( 'circle', '', { cx:64, cy:64, r:radius, fill:'url(#grad)' }, svg );//2
+	        T.dom( 'circle', '', { cx:64+5, cy:64+10, r:innerRadius+10, fill:'url(#gradS)' }, svg );//3
+	        T.dom( 'circle', '', { cx:64, cy:64, r:innerRadius, fill:'url(#gradIn)' }, svg );//4
+
+	        T.joystick = svg;
+
+	    },
+
+	    makeColorRing: function () {
+
+	        var w = 256;
+	        var svg = T.dom( 'svg', T.css.basic , { viewBox:'0 0 '+w+' '+w, width:w, height:w, preserveAspectRatio:'none' } );
+	        T.dom( 'defs', null, {}, svg );
+	        T.dom( 'g', null, {}, svg );
+
+	        var s = 40;//stroke
+	        var r =( w-s )*0.5;
+	        var mid = w*0.5;
+	        var n = 24, nudge = 8 / r / n * Math.PI, a1 = 0, d1;
+	        var am, tan, d2, a2, ar, i, j, path, ccc;
+	        var color = [];
 	        
+	        for ( i = 0; i <= n; ++i) {
 
-	        var data = 'data:image/svg+xml;base64,'+ window.btoa((new XMLSerializer).serializeToString(svg));
-	        dcopy = null;
+	            d2 = i / n;
+	            a2 = d2 * T.TwoPI;
+	            am = (a1 + a2) * 0.5;
+	            tan = 1 / Math.cos((a2 - a1) * 0.5);
 
-	        img.onload = function() {
-	            ctx.clearRect( 0, 0, w, h );
-	            ctx.drawImage( img, 0, 0, w, h, 0, 0, w, h );
-	        };
-	        
-	        img.src = data;
+	            ar = [
+	                Math.sin(a1), -Math.cos(a1), 
+	                Math.sin(am) * tan, -Math.cos(am) * tan, 
+	                Math.sin(a2), -Math.cos(a2)
+	            ];
+	            
+	            color[1] = T.rgbToHex( T.hslToRgb([d2, 1, 0.5]) );
 
-	        /*setTimeout(function() {
-	            ctx.clearRect( 0, 0, w, h );
-	            ctx.drawImage( img, 0, 0, w, h, 0, 0, w, h );
-	        }, 0);*/
+	            if (i > 0) {
 
-	        // blob
+	                j = 6;
+	                while(j--){
+	                   ar[j] = ((ar[j]*r)+mid).toFixed(2);
+	                }
 
-	        /*var svgBlob = new Blob([(new XMLSerializer).serializeToString(svg)], {type: "image/svg+xml;charset=utf-8"});
-	        var url = URL.createObjectURL(svgBlob);
+	                path = ' M' + ar[0] + ' ' + ar[1] + ' Q' + ar[2] + ' ' + ar[3] + ' ' + ar[4] + ' ' + ar[5];
 
-	        img.onload = function() {
-	            ctx.clearRect( 0, 0, w, h );
-	            ctx.drawImage( img, 0, 0, w, h, 0, 0, w, h );
-	            URL.revokeObjectURL(url);
-	        };
-	        img.src = url;*/
+	                ccc = [ [0,color[0],1], [100,color[1],1] ];
+	                T.makeGradiant( 'linearGradient', { id:'G'+i, x1:ar[0], y1:ar[1], x2:ar[4], y2:ar[5], gradientUnits:"userSpaceOnUse" }, svg, ccc );
+
+	                T.dom( 'path', '', { d:path, 'stroke-width':s, stroke:'url(#G'+i+')', 'stroke-linecap':"butt" }, svg, 1 );
+	                
+	            }
+	            a1 = a2 - nudge; 
+	            color[0] = color[1];
+	            d1 = d2;
+	        }
+
+	        var br = (128 - s ) + 2;
+	        var bw = 60;
+
+	        // black / white
+	        ccc = [ [0, '#FFFFFF', 1], [50, '#FFFFFF', 0], [50, '#000000', 0], [100, '#000000', 1] ];
+	        T.makeGradiant( 'linearGradient', { id:'GL1', x1:mid-bw, y1:mid-bw, x2:mid-bw, y2:mid+bw, gradientUnits:"userSpaceOnUse" }, svg, ccc );
+
+	        // saturation
+	        ccc = [ [0, '#7f7f7f', 0], [50, '#7f7f7f', 0.5], [100, '#7f7f7f', 1] ];
+	        T.makeGradiant( 'linearGradient', { id:'GL2', x1:mid-bw, y1:mid-bw, x2:mid+bw, y2:mid-bw, gradientUnits:"userSpaceOnUse" }, svg, ccc );
+
+	        T.dom( 'circle', '', { cx:128, cy:128, r:br, fill:'red' }, svg );//2
+	        T.dom( 'circle', '', { cx:128, cy:128, r:br, fill:'url(#GL2)' }, svg );//3
+	        T.dom( 'circle', '', { cx:128, cy:128, r:br, fill:'url(#GL1)' }, svg );//4
+
+	        T.dom( 'circle', '', { cx:0, cy:0, r:6, 'stroke-width':3, stroke:'#FFF', fill:'none' }, svg );//5
+	        T.dom( 'circle', '', { cx:0, cy:0, r:6, 'stroke-width':3, stroke:'#000', fill:'none' }, svg );//6
+
+	        T.colorRing = svg;
+
+	    },
+
+	    icon: function ( type, color, w ){
+
+	        w = w || 40;
+	        color = color || '#DEDEDE';
+	        var viewBox = '0 0 256 256';
+	        var t = ["<svg xmlns='"+T.svgns+"' version='1.1' xmlns:xlink='"+T.htmls+"' style='pointer-events:none;' preserveAspectRatio='xMinYMax meet' x='0px' y='0px' width='"+w+"px' height='"+w+"px' viewBox='"+viewBox+"'><g>"];
+	        switch(type){
+	            case 'logo':
+	            t[1]="<path id='logoin' stroke='"+color+"' stroke-width='16' stroke-linejoin='round' stroke-linecap='square' fill='none' d='M 192 44 L 192 148 Q 192 174.5 173.3 193.25 154.55 212 128 212 101.5 212 82.75 193.25 64 174.5 64 148 L 64 44 M 160 44 L 160 148 Q 160 161.25 150.65 170.65 141.25 180 128 180 114.75 180 105.35 170.65 96 161.25 96 148 L 96 44'/>";
+	            break;
+	            case 'save':
+	            t[1]="<path stroke='"+color+"' stroke-width='4' stroke-linejoin='round' stroke-linecap='round' fill='none' d='M 26.125 17 L 20 22.95 14.05 17 M 20 9.95 L 20 22.95'/><path stroke='"+color+"' stroke-width='2.5' stroke-linejoin='round' stroke-linecap='round' fill='none' d='M 32.6 23 L 32.6 25.5 Q 32.6 28.5 29.6 28.5 L 10.6 28.5 Q 7.6 28.5 7.6 25.5 L 7.6 23'/>";
+	            break;
+	        }
+	        t[2] = "</g></svg>";
+	        return t.join("\n");
 
 	    },
 
 	};
 
-	Tools.setText();
+	T.setText();
+
+	var Tools = T;
 
 	/**
-	 * @author lo-th / https://github.com/lo-th
+	 * @author lth / https://github.com/lo-th
+	 */
+
+	// INTENAL FUNCTION
+
+	var R = {
+
+		ui: [],
+
+		ID: null,
+	    lock:false,
+	    wlock:false,
+	    current:-1,
+
+		needReZone: true,
+		isEventsInit: false,
+
+		xmlserializer: new XMLSerializer(),
+		tmpTime: null,
+	    tmpImage: null,
+
+	    oldCursor:'auto',
+
+	    input: null,
+	    firstImput: true,
+	    callbackImput: null,
+
+	    isLoop: false,
+	    listens: [],
+
+	    e:{
+	        type:null,
+	        clientX:0,
+	        clientY:0,
+	        keyCode:NaN,
+	        key:null,
+	        delta:0,
+	    },
+
+	    
+
+		add: function ( o ) {
+
+	        R.ui.push( o );
+	        R.getZone( o );
+
+	        if( !R.isEventsInit ) R.initEvents();
+
+	    },
+
+	    // ----------------------
+	    //   EVENTS
+	    // ----------------------
+
+	    initEvents: function () {
+
+	        if( R.isEventsInit ) return;
+
+	        var domElement = document.body;
+
+	        domElement.addEventListener( 'contextmenu', function( e ){ e.preventDefault(); }, false );
+
+	        domElement.addEventListener( 'mousedown', R, false );
+	        domElement.addEventListener( 'wheel', R, false );
+
+	        domElement.addEventListener( 'touchstart', R, false );
+	        domElement.addEventListener( 'touchend', R, false );
+	        domElement.addEventListener( 'touchmove', R, false );
+
+	        document.addEventListener( 'mousemove', R, false );
+	        document.addEventListener( 'mouseup', R, false );
+
+	        window.addEventListener( 'keydown', R, false );
+	        window.addEventListener( 'resize', R.resize , false );
+
+	        R.isEventsInit = true;
+
+	    },
+
+	    resize: function () {
+
+	        R.needReZone = true;
+
+	        var i = R.ui.length, u;
+	        
+	        while( i-- ){
+
+	            u = R.ui[i];
+	            if( u.isGui && !u.isCanvasOnly && u.autoResize ) u.setHeight();
+	        
+	        }
+
+	    },
+
+	    // ----------------------
+	    //   HANDLE EVENTS
+	    // ----------------------
+
+	    handleEvent: function ( event ) {
+
+	        event.preventDefault();
+	        //event.stopPropagation();
+
+	        R.findZone();
+	       
+	        var e = R.e;
+
+
+
+	        if( event.type === 'keydown') R.editText( event );
+
+	        if( event.type === 'wheel' ) e.delta = event.deltaY > 0 ? 1 : -1;
+	        else e.delta = 0;
+	        
+	        e.clientX = event.clientX || 0;
+	        e.clientY = event.clientY || 0;
+	        e.type = event.type;
+
+	        if( e.type === 'mousedown' ) R.lock = true;
+	        if( e.type === 'mouseup' ) R.lock = false;
+
+	        if( (e.type === 'mousemove') && (!R.lock) ){ 
+	            R.findID( e );
+	        }
+
+	        if( R.ID !== null ){
+
+	            if( R.ID.isCanvasOnly ) {
+
+	                e.clientX = R.ID.mouse.x;
+	                e.clientY = R.ID.mouse.y;
+	            }
+
+	            R.ID.handleEvent( e );
+
+	        }
+
+	    },
+
+	    // ----------------------
+	    //   ID
+	    // ----------------------
+
+	    findID: function ( e ) {
+
+	        var i = R.ui.length, next = -1, u, x, y;
+
+	        while( i-- ){
+
+	            u = R.ui[i];
+
+	            if( u.isCanvasOnly ) {
+
+	                x = u.mouse.x;
+	                y = u.mouse.y;
+
+	            } else {
+
+	                x = e.clientX;
+	                y = e.clientY;
+
+	            }
+
+	            if( R.onZone( u, x, y ) ){ 
+	                
+	                next = i;
+	                
+	                if( next !== R.current ){
+	                    R.clearOldID();
+	                    R.current = next;
+	                    R.ID = u;
+	                }
+	                break;
+	            }
+	                
+	        }
+
+	        if( next === -1 ) R.clearOldID();
+
+	    },
+
+	    clearOldID: function () {
+
+	        if( !R.ID ) return;
+	        R.current = -1;
+	        R.ID.reset();
+	        R.ID = null;
+	        R.cursor();
+
+	    },
+
+	    // ----------------------
+	    //   GUI / GROUP FUNCTION
+	    // ----------------------
+
+	    calcUis: function ( uis, zone, py ) {
+
+	        var lng = uis.length, u, i, px = 0, my = 0;
+
+	        for( i = 0; i < lng; i++ ){
+
+	            u = uis[i];
+
+	            u.zone.w = u.w;
+	            u.zone.h = u.h;
+
+	            if( !u.autoWidth ){
+
+	                if( px === 0 ) py += u.h + 1;
+
+	                u.zone.x = zone.x + px;
+	                u.zone.y = px === 0 ? py - u.h : my;
+
+	                my = u.zone.y;
+	                
+	                px += u.w;
+	                if( px + u.w > zone.w ) px = 0;
+
+	            } else {
+
+	                u.zone.x = zone.x;
+	                u.zone.y = py;
+	                py += u.h + 1;
+
+	            }
+
+	            if( u.isGroup ) u.calcUis();
+
+	        }
+
+	    },
+
+
+		findTarget: function ( uis, e ) {
+
+	        var i = uis.length;
+
+	        while( i-- ){
+	            if( R.onZone( uis[i], e.clientX, e.clientY ) ) return i;
+	        }
+
+	        return -1;
+
+	    },
+
+	    // ----------------------
+	    //   ZONE
+	    // ----------------------
+
+	    findZone: function ( force ) {
+
+	        if( !R.needReZone && !force ) return;
+
+	        var i = R.ui.length, u;
+
+	        while( i-- ){ 
+
+	            u = R.ui[i];
+	            R.getZone( u );
+	            if( u.isGui ) u.calcUis();
+
+	        }
+
+	        R.needReZone = false;
+
+	    },
+
+	    onZone: function ( o, x, y ) {
+
+	        if( x === undefined || y === undefined ) return false;
+
+	        var z = o.zone;
+	        var mx = x - z.x;
+	        var my = y - z.y;
+
+	        var over = ( mx >= 0 ) && ( my >= 0 ) && ( mx <= z.w ) && ( my <= z.h );
+
+	        if( over ) o.local.set( mx, my );
+	        else o.local.neg();
+
+	        return over;
+
+	    },
+
+	    getZone: function ( o ) {
+
+	        if( o.isCanvasOnly ) return;
+	        var r = o.getDom().getBoundingClientRect();
+	        o.zone = { x:r.left, y:r.top, w:r.width, h:r.height };
+
+	    },
+
+	    // ----------------------
+	    //   CURSOR
+	    // ----------------------
+
+	    cursor: function ( name ) {
+
+	        name = name ? name : 'auto';
+	        if( name !== R.oldCursor ){
+	            document.body.style.cursor = name;
+	            R.oldCursor = name;
+	        }
+
+	    },
+
+	    // ----------------------
+	    //   CANVAS
+	    // ----------------------
+
+	    toCanvas: function ( o, w, h, force ) {
+
+	        // prevent exesive redraw
+
+	        if( force && R.tmpTime !== null ) { clearTimeout(R.tmpTime); R.tmpTime = null;  }
+
+	        if( R.tmpTime !== null ) return;
+
+	        if( R.lock ) R.tmpTime = setTimeout( function(){ R.tmpTime = null; }, 10 );
+
+	        ///
+
+	        var isNewSize = false;
+	        if( w !== o.canvas.width || h !== o.canvas.height ) isNewSize = true;
+
+	        if( R.tmpImage === null ) R.tmpImage = new Image();
+
+	        var img = R.tmpImage; //new Image();
+
+	        var htmlString = R.xmlserializer.serializeToString( o.content );
+	        
+	        var svg = '<svg xmlns="http://www.w3.org/2000/svg" width="'+w+'" height="'+h+'"><foreignObject style="pointer-events: none; left:0;" width="100%" height="100%">'+ htmlString +'</foreignObject></svg>';
+
+	        img.onload = function() {
+
+	            var ctx = o.canvas.getContext("2d");
+
+	            if( isNewSize ){ 
+	                o.canvas.width = w;
+	                o.canvas.height = h;
+	            }else{
+	                ctx.clearRect( 0, 0, w, h );
+	            }
+	            ctx.drawImage( this, 0, 0 );
+
+	            o.onDraw();
+
+	        };
+
+	        img.src = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svg);
+	        //img.src = 'data:image/svg+xml;base64,'+ window.btoa( svg );
+	        img.crossOrigin = '';
+
+
+	    },
+
+	    // ----------------------
+	    //   INPUT
+	    // ----------------------
+
+	    clearInput: function () {
+
+	        if( R.input === null ) return;
+	        if( !R.firstImput ) R.callbackImput();
+
+	        R.input.style.background = 'none';
+	        R.callbackImput = null;
+	        R.input = null;
+	        R.firstImput = true;
+
+	    },
+
+	    setInput: function ( Input, Callback, color ) {
+
+	        R.clearInput();
+	        
+	        R.callbackImput = Callback;
+	        R.input = Input;
+	        R.input.style.background = color;
+
+	    },
+
+	    select: function () {
+
+	        document.execCommand( "selectall", null, false );
+
+	    },
+
+	    editText: function ( e ) {
+
+	        if( R.input === null ) return;
+
+	        if( e.keyCode === 13 ){ //enter
+
+	            R.callbackImput();
+	            R.clearInput();
+
+	        } else {
+
+	            if( R.input.isNum ){
+	                if ( ((e.keyCode > 95) && (e.keyCode < 106)) || e.keyCode === 110 || e.keyCode === 109 ){
+	                    if( R.firstImput ){ R.input.textContent = e.key; R.firstImput = false; }
+	                    else R.input.textContent += e.key;
+	                }
+	            } else {
+	                if( R.firstImput ){ R.input.textContent = e.key; R.firstImput = false; }
+	                else R.input.textContent += e.key;
+	            }
+
+	        }
+
+	    },
+
+	    // ----------------------
+	    //   LISTENING
+	    // ----------------------
+
+	    loop: function () {
+
+	        if( R.isLoop ) requestAnimationFrame( R.loop );
+	        R.update();
+
+	    },
+
+	    update: function () {
+
+	        var i = R.listens.length;
+	        while(i--) R.listens[i].listening();
+
+	    },
+
+	    removeListen: function ( proto ) {
+
+	        var id = R.listens.indexOf( proto );
+	        R.listens.splice(id, 1);
+
+	        if( R.listens.length === 0 ) R.isLoop = false;
+
+	    },
+
+	    addListen: function ( proto ) {
+
+	        var id = R.listens.indexOf( proto );
+
+	        if( id !== -1 ) return; 
+
+	        R.listens.push( proto );
+
+	        if( !R.isLoop ){
+	            R.isLoop = true;
+	            R.loop();
+	        }
+
+	    },
+
+	};
+
+	var Roots = R;
+
+	// minimal vector 2
+
+	function V2 ( x, y ){
+
+		this.x = x || 0;
+		this.y = y || 0;
+
+	}
+
+	Object.assign( V2.prototype, {
+
+		set: function ( x, y ) {
+
+			this.x = x;
+			this.y = y;
+
+			return this;
+
+		},
+
+		divide: function ( v ) {
+
+			this.x /= v.x;
+			this.y /= v.y;
+
+			return this;
+
+		},
+
+		multiply: function ( v ) {
+
+			this.x *= v.x;
+			this.y *= v.y;
+
+			return this;
+
+		},
+
+		multiplyScalar: function ( scalar ) {
+
+			this.x *= scalar;
+			this.y *= scalar;
+
+			return this;
+
+		},
+
+		divideScalar: function ( scalar ) {
+
+			return this.multiplyScalar( 1 / scalar );
+
+		},
+
+		length: function () {
+
+			return Math.sqrt( this.x * this.x + this.y * this.y );
+
+		},
+
+		angle: function () {
+
+			// computes the angle in radians with respect to the positive x-axis
+
+			var angle = Math.atan2( this.y, this.x );
+
+			if ( angle < 0 ) angle += 2 * Math.PI;
+
+			return angle;
+
+		},
+
+		addScalar: function ( s ) {
+
+			this.x += s;
+			this.y += s;
+
+			return this;
+
+		},
+
+		neg: function () {
+
+			this.x = -1;
+			this.y = -1;
+
+			return this;
+
+		},
+
+		copy: function ( v ) {
+
+			this.x = v.x;
+			this.y = v.y;
+
+			return this;
+
+		},
+
+		equals: function ( v ) {
+
+			return ( ( v.x === this.x ) && ( v.y === this.y ) );
+
+		},
+
+		nearEquals: function ( v, n ) {
+
+			return ( ( v.x.toFixed(n) === this.x.toFixed(n) ) && ( v.y.toFixed(n) === this.y.toFixed(n) ) );
+
+		},
+
+
+
+	} );
+
+	/**
+	 * @author lth / https://github.com/lo-th
 	 */
 
 	function Proto ( o ) {
 
 	    o = o || {};
 
+	    this.css = Tools.css;
+	    this.colors = Tools.colors;
+	    this.svgs = Tools.svgs;
+
+	    this.zone = { x:0, y:0, w:0, h:0 };
+	    this.local = new V2().neg();
+
+	    this.isCanvasOnly = false;
+
+	    // if is on gui or group
 	    this.main = o.main || null;
-	    // if is on ui pannel
 	    this.isUI = o.isUI || false;
+	    this.parentGroup = null;
 
 	    // percent of title
 	    this.p = o.p !== undefined ? o.p : Tools.size.p;
 
-	    this.width = this.isUI ? this.main.size.w : Tools.size.w;
-	    if( o.w !== undefined ) this.width = o.w;
+	    this.w = this.isUI ? this.main.size.w : Tools.size.w;
+	    if( o.w !== undefined ) this.w = o.w;
 
 	    this.h = this.isUI ? this.main.size.h : Tools.size.h;
 	    if( o.h !== undefined ) this.h = o.h;
 	    this.h = this.h < 11 ? 11 : this.h;
 
 	    // if need resize width
-	    this.autoWidth = true;
+	    this.autoWidth = o.auto || true;
 
-	    // if need resize height
+	    // open statu
 	    this.isOpen = false;
-
-	    this.isGroup = false;
-	    this.parentGroup = null;
-
-	    // if height can change
-	    this.autoHeight = false;
 
 	    // radius for toolbox
 	    this.radius = o.radius || 0;
-
-	    
 
 	    // only for number
 	    this.isNumber = false;
@@ -538,7 +1227,7 @@
 	    // only most simple 
 	    this.mono = false;
 
-	    // stop listening for edite slide text
+	    // stop listening for edit slide text
 	    this.isEdit = false;
 
 	    // no title 
@@ -546,35 +1235,33 @@
 	    if( this.simple ) this.sa = 0;
 
 	    // define obj size
-	    this.setSize( this.width );
+	    this.setSize( this.w );
 
 	    // title size
 	    if(o.sa !== undefined ) this.sa = o.sa;
 	    if(o.sb !== undefined ) this.sb = o.sb;
 
-	    if( this.simple ) this.sb = this.width - this.sa;
+	    if( this.simple ) this.sb = this.w - this.sa;
 
 	    // last number size for slide
 	    this.sc = o.sc === undefined ? 47 : o.sc;
 
-	    // like dat gui
-	    this.parent = null;
-	    this.val = null;
+	    // for listening object
+	    this.objectLink = null;
 	    this.isSend = false;
-
-	    
+	    this.val = null;
 	    
 	    // Background
 	    this.bg = this.isUI ? this.main.bg : Tools.colors.background;
-	    if( o.bg !== undefined ) this.bg = o.bg;
+	    this.bgOver = Tools.colors.backgroundOver;
+	    if( o.bg !== undefined ){ this.bg = o.bg; this.bgOver = o.bg; }
+	    if( o.bgOver !== undefined ){ this.bgOver = o.bgOver; }
 
 	    // Font Color;
 	    this.titleColor = o.titleColor || Tools.colors.text;
 	    this.fontColor = o.fontColor || Tools.colors.text;
 	    this.colorPlus = Tools.ColorLuma( this.fontColor, 0.3 );
 
-	    this.name = o.name || 'Proto';
-	    
 	    this.txt = o.name || 'Proto';
 	    this.rename = o.rename || '';
 	    this.target = o.target || null;
@@ -585,29 +1272,25 @@
 	    if( this.callback === null && this.isUI && this.main.callback !== null ) this.callback = this.main.callback;
 
 	    // elements
-
 	    this.c = [];
 
 	    // style 
-
 	    this.s = [];
 
-	    //this.c[0] = Tools.dom('UIL', 'div', 'position:relative; height:20px; float:left;');
 	    this.c[0] = Tools.dom( 'div', Tools.css.basic + 'position:relative; height:20px; float:left; overflow:hidden;');
 	    this.s[0] = this.c[0].style;
 
 	    if( this.isUI ) this.s[0].marginBottom = '1px';
-	    
 
+	    // with title
 	    if( !this.simple ){ 
-	        //this.c[1] = Tools.dom('UIL text');
 	        this.c[1] = Tools.dom( 'div', Tools.css.txt );
 	        this.s[1] = this.c[1].style;
 	        this.c[1].textContent = this.rename === '' ? this.txt : this.rename;
 	        this.s[1].color = this.titleColor;
 	    }
 
-	    if(o.pos){
+	    if( o.pos ){
 	        this.s[0].position = 'absolute';
 	        for(var p in o.pos){
 	            this.s[0][p] = o.pos[p];
@@ -615,29 +1298,30 @@
 	        this.mono = true;
 	    }
 
-	    if(o.css){
-	        this.s[0].cssText = o.css; 
-	    }
+	    if( o.css ) this.s[0].cssText = o.css; 
+	    
 
 	}
 
-	Proto.prototype = {
+	Object.assign( Proto.prototype, {
 
 	    constructor: Proto,
 
 	    // ----------------------
 	    // make de node
 	    // ----------------------
-
+	    
 	    init: function () {
 
 	        var s = this.s; // style cache
 	        var c = this.c; // div cache
 
 	        s[0].height = this.h + 'px';
+	        this.zone.h = this.h;
 
-	        //if( this.isUI ) s[0].background = this.bg;
-	        if( this.autoHeight ) s[0].transition = 'height 0.1s ease-out';
+	        if( this.isUI ) s[0].background = this.bg;
+
+	        //if( this.autoHeight ) s[0].transition = 'height 0.01s ease-out';
 	        if( c[1] !== undefined && this.autoWidth ){
 	            s[1] = c[1].style;
 	            s[1].height = (this.h-4) + 'px';
@@ -646,13 +1330,12 @@
 
 	        var frag = Tools.frag;
 
-	        for( var i=1, lng = c.length; i !== lng; i++ ){
+	        for( var i = 1, lng = c.length; i !== lng; i++ ){
 	            if( c[i] !== undefined ) {
 	                frag.appendChild( c[i] );
 	                s[i] = c[i].style;
 	            }
 	        }
-
 
 	        if( this.target !== null ){ 
 	            this.target.appendChild( c[0] );
@@ -664,38 +1347,139 @@
 	        c[0].appendChild( frag );
 
 	        this.rSize();
-	        this.addEvent();
+
+	        // ! solo proto
+	        if( !this.isUI ){
+
+	            this.c[0].style.pointerEvents = 'auto';
+	            Roots.add( this );
+	            
+	        }
+
+	    },
+
+	    // TRANS FUNCTIONS from Tools
+
+	    dom: function ( type, css, obj, dom, id ) {
+
+	        return Tools.dom( type, css, obj, dom, id );
+
+	    },
+
+	    setSvg: function ( dom, type, value, id ) {
+
+	        Tools.setSvg( dom, type, value, id );
+
+	    },
+
+	    setCss: function ( dom, css ) {
+
+	        Tools.setCss( dom, css );
+
+	    },
+
+	    clamp: function ( value, min, max ) {
+
+	        return Tools.clamp( value, min, max );
+
+	    },
+
+	    getColorRing: function () {
+
+	        if( !Tools.colorRing ) Tools.makeColorRing();
+	        return Tools.clone( Tools.colorRing );
+
+	    },
+
+	    getJoystick: function () {
+
+	        if( !Tools.joystick ) Tools.makeJoystick();
+	        return Tools.clone( Tools.joystick );
+
+	    },
+
+	    getCircular: function () {
+
+	        if( !Tools.circular ) Tools.makeCircular();
+	        return Tools.clone( Tools.circular );
+
+	    },
+
+	    getKnob: function () {
+
+	        if( !Tools.knob ) Tools.makeKnob();
+	        return Tools.clone( Tools.knob );
+
+	    },
+
+	    /*getGraph: function () {
+
+	         if( !Tools.graph ) Tools.makeGraph();
+	         return Tools.clone( Tools.graph );
+
+	    },*/
+
+	    // TRANS FUNCTIONS from Roots
+
+	    cursor: function ( name ) {
+
+	         Roots.cursor( name );
+
+	    },
+
+	    setInput: function ( Input, Callback ) {
+
+	        Roots.setInput( Input, Callback, Tools.colors.input );
+
+	    },
+
+	    /////////
+
+	    update: function () {},
+
+	    reset:  function () {},
+
+	    /////////
+
+	    getDom: function () {
+
+	        return this.c[0];
+
+	    },
+
+	    uiout: function () {
+
+	        this.s[0].background = this.bg;
+
+	    },
+
+	    uiover: function () {
+
+	        this.s[0].background = this.bgOver;
 
 	    },
 
 	    rename: function ( s ) {
 
-	        this.c[1].textContent = s;
-
-	    },
-
-	    setBG: function ( c ) {
-
-	        this.bg = c;
-	        this.s[0].background = c;
+	        if( this.c[1] !== undefined) this.c[1].textContent = s;
 
 	    },
 
 	    listen: function () {
 
-	        Tools.addListen( this );
-	        Tools.listens.push( this );
+	        Roots.addListen( this );
+	        Roots.listens.push( this );
 	        return this;
 
 	    },
 
 	    listening: function () {
 
-	        if( this.parent === null ) return;
+	        if( this.objectLink === null ) return;
 	        if( this.isSend ) return;
 	        if( this.isEdit ) return;
 
-	        this.setValue( this.parent[ this.val ] );
+	        this.setValue( this.objectLink[ this.val ] );
 
 	    },
 
@@ -707,9 +1491,6 @@
 
 	    },
 
-	    update: function () {
-	        
-	    },
 
 	    // ----------------------
 	    // update every change
@@ -737,7 +1518,7 @@
 	    send: function ( v ) {
 
 	        this.isSend = true;
-	        if( this.parent !== null ) this.parent[ this.val ] = v || this.value;
+	        if( this.objectLink !== null ) this.objectLink[ this.val ] = v || this.value;
 	        if( this.callback ) this.callback( v || this.value );
 	        this.isSend = false;
 
@@ -746,7 +1527,7 @@
 	    sendEnd: function ( v ) {
 
 	        if( this.endCallback ) this.endCallback( v || this.value );
-	        if( this.parent !== null ) this.parent[ this.val ] = v || this.value;
+	        if( this.objectLink !== null ) this.objectLink[ this.val ] = v || this.value;
 
 	    },
 
@@ -756,7 +1537,6 @@
 	    
 	    clear: function () {
 
-	        this.clearEvent();
 	        Tools.clear( this.c[0] );
 
 	        if( this.target !== null ){ 
@@ -781,15 +1561,15 @@
 
 	        if( !this.autoWidth ) return;
 
-	        this.width = sx;
+	        this.w = sx;
 
 	        if( this.simple ){
 	            //this.sa = 0;
-	            this.sb = this.width - this.sa;
+	            this.sb = this.w - this.sa;
 	        } else {
-	            var pp = this.width * ( this.p / 100 );
-	            this.sa = ~~ pp + 10;
-	            this.sb = ~~ this.width - pp - 20;
+	            var pp = this.w * ( this.p / 100 );
+	            this.sa = Math.floor( pp + 10 );
+	            this.sb = Math.floor( this.w - pp - 20 );
 	        }
 
 	    },
@@ -797,8 +1577,7 @@
 	    rSize: function () {
 
 	        if( !this.autoWidth ) return;
-
-	        this.s[0].width = this.width + 'px';
+	        this.s[0].width = this.w + 'px';
 	        if( !this.simple ) this.s[1].width = this.sa + 'px';
 	    
 	    },
@@ -832,9 +1611,7 @@
 	        }
 
 	        this.step = o.step === undefined ?  s : o.step;
-
 	        this.range = this.max - this.min;
-
 	        this.value = this.numValue( this.value );
 	        
 	    },
@@ -845,43 +1622,27 @@
 
 	    },
 
+
 	    // ----------------------
-	    //   Events dispatch
+	    //   EVENTS DEFAULT
 	    // ----------------------
 
-	    addEvent: function () {
+	    handleEvent: function ( e ){
 
-	        var i = this.c.length, j, c;
-	        while( i-- ){
-	            c = this.c[i];
-	            if( c !== undefined ){
-	                if( c.events !== undefined ){
-	                    j = c.events.length;
-	                    while( j-- ) c.addEventListener( c.events[j], this, false );
-	                }
-	            }
-	        }
-
+	        return this[e.type](e);
+	    
 	    },
 
-	    clearEvent: function () {
+	    wheel: function ( e ) { return false; },
 
-	        var i = this.c.length, j, c;
-	        while( i-- ){
-	            c = this.c[i];
-	            if( c !== undefined ){
-	                if( c.events !== undefined ){
-	                    j = c.events.length;
-	                    while( j-- ) c.removeEventListener( c.events[j], this, false );
-	                }
-	            }
-	        }
+	    mousedown: function( e ) { return false; },
 
-	    },
+	    mousemove: function( e ) { return false; },
 
-	    handleEvent: function ( e ) {
-	        
-	    },
+	    mouseup: function( e ) { return false; },
+
+	    keydown: function( e ) { return false; },
+
 
 	    // ----------------------
 	    // object referency
@@ -889,14 +1650,16 @@
 
 	    setReferency: function ( obj, val ) {
 
-	        this.parent = obj;
+	        this.objectLink = obj;
 	        this.val = val;
 
 	    },
 
 	    display: function ( v ) {
-
+	        
+	        v = v || false;
 	        this.s[0].display = v ? 'block' : 'none';
+	        //this.isReady = v ? false : true;
 
 	    },
 
@@ -918,34 +1681,32 @@
 
 	    },
 
+	    needZone: function () {
 
-	};
+	        Roots.needReZone = true;
+
+	    },
+
+
+	} );
 
 	function Bool ( o ){
 
 	    Proto.call( this, o );
-
+	    
 	    this.value = o.value || false;
 
-	    this.buttonColor = o.bColor || Tools.colors.button;
+	    this.buttonColor = o.bColor || this.colors.button;
 
 	    this.inh = o.inh || this.h;
 
-	    var t = ~~ (this.h*0.5)-((this.inh-2)*0.5);
+	    var t = Math.floor(this.h*0.5)-((this.inh-2)*0.5);
 
-	    this.c[2] = Tools.dom( 'div', Tools.css.basic + 'background:'+ Tools.colors.boolbg +'; height:'+(this.inh-2)+'px; width:36px; top:'+t+'px; border-radius:20px; pointer-events:auto; cursor:pointer; transition:0.1s ease-out;' );
-	    this.c[3] = Tools.dom( 'div', Tools.css.basic + 'opasity:0, background:'+ Tools.colors.boolbg +'; height:'+(this.inh-6)+'px; width:'+(this.inh-6)+'px; top:'+(t+2)+'px; border-radius:20px; ' );
-	    this.c[4] = Tools.dom( 'div', Tools.css.basic + 'border:1px solid '+this.buttonColor+'; height:'+(this.inh-4)+'px; width:16px; top:'+(t+1)+'px; border-radius:20px; background:'+this.buttonColor+'; transition:margin 0.1s ease-out;' );
-
-	    if(this.value){
-	        this.c[4].style.marginLeft = '18px';
-	        this.c[2].style.background = this.fontColor;
-	        this.c[2].style.borderColor = this.fontColor;
-	    }
-
-	    this.c[2].events = [ 'click' ];
+	    this.c[2] = this.dom( 'div', this.css.basic + 'background:'+ this.colors.boolbg +'; height:'+(this.inh-2)+'px; width:36px; top:'+t+'px; border-radius:10px; border:2px solid '+this.boolbg );
+	    this.c[3] = this.dom( 'div', this.css.basic + 'height:'+(this.inh-6)+'px; width:16px; top:'+(t+2)+'px; border-radius:10px; background:'+this.buttonColor+';' );
 
 	    this.init();
+	    this.update();
 
 	}
 
@@ -953,50 +1714,51 @@
 
 	    constructor: Bool,
 
-	    handleEvent: function ( e ) {
+	    // ----------------------
+	    //   EVENTS
+	    // ----------------------
 
-	        e.preventDefault();
+	    mousemove: function ( e ) {
 
-	        switch( e.type ) {
-	            case 'click': this.click(e); break;
-	        }
+	        this.cursor('pointer');
 
 	    },
 
-	    click: function( e ){
+	    mousedown: function ( e ) {
 
-	        if(this.value) this.value = false;
-	        else this.value = true;
+	        this.value = this.value ? false : true;
 	        this.update();
 	        this.send();
+	        return true;
 
 	    },
 
-	    update: function() {
+	    update: function () {
 
 	        var s = this.s;
 
-	        if(this.value){
-	            s[4].marginLeft = '18px';
+	        if( this.value ){
+	            
 	            s[2].background = this.fontColor;
 	            s[2].borderColor = this.fontColor;
-	            s[4].borderColor = this.fontColor;
+	            s[3].marginLeft = '17px';
+
 	        } else {
-	            s[4].marginLeft = '0px';
-	            s[2].background = Tools.colors.boolbg;
-	            s[2].borderColor = Tools.colors.boolbg;
-	            s[4].borderColor = Tools.colors.border;
+	            
+	            s[2].background = this.colors.boolbg;
+	            s[2].borderColor = this.colors.boolbg;
+	            s[3].marginLeft = '2px';
+
 	        }
 	            
 	    },
 
-	    rSize: function(){
+	    rSize: function () {
 
 	        Proto.prototype.rSize.call( this );
 	        var s = this.s;
 	        s[2].left = this.sa + 'px';
 	        s[3].left = this.sa+1+ 'px';
-	        s[4].left = this.sa+1 + 'px';
 
 	    }
 
@@ -1008,27 +1770,27 @@
 
 	    this.value = o.value || [this.txt];
 
-	    this.buttonColor = o.bColor || Tools.colors.button;
+	    //this.selected = null;
+	    this.isDown = false;
+
+	    this.buttonColor = o.bColor || this.colors.button;
 
 	    this.isLoadButton = o.loader || false;
 	    this.isDragButton = o.drag || false;
-	    if(this.isDragButton ) this.isLoadButton = true;
-	    //this.r = o.r || 3;
+	    if( this.isDragButton ) this.isLoadButton = true;
 
 	    this.lng = this.value.length;
+	    this.tmp = [];
+	    this.stat = [];
 
 	    for(var i = 0; i < this.lng; i++){
-	        //this.c[i+2] = Tools.dom( 'div', Tools.css.txt + 'text-align:center; border:1px solid ' + Tools.colors.border+'; top:1px; pointer-events:auto; cursor:pointer; background:'+this.buttonColor+'; height:'+(this.h-2)+'px; border-radius:'+this.r+'px; line-height:'+(this.h-4)+'px;' );
-	        this.c[i+2] = Tools.dom( 'div', Tools.css.txt + 'text-align:center; top:1px; pointer-events:auto; cursor:pointer; background:'+this.buttonColor+'; height:'+(this.h-2)+'px; border-radius:'+this.radius+'px; line-height:'+(this.h-4)+'px;' );
+	        this.c[i+2] = this.dom( 'div', this.css.txt + 'text-align:center; top:1px; background:'+this.buttonColor+'; height:'+(this.h-2)+'px; border-radius:'+this.radius+'px; line-height:'+(this.h-4)+'px;' );
 	        this.c[i+2].style.color = this.fontColor;
-
-	        this.c[i+2].events = [ 'click', 'mouseover', 'mousedown', 'mouseup', 'mouseout' ];
-	        this.c[i+2].innerHTML = this.value[i];//this.txt;
-	        this.c[i+2].name = i;
+	        this.c[i+2].innerHTML = this.value[i];
+	        this.stat[i] = 1;
 	    }
 
 	    if( this.c[1] !== undefined ) this.c[1].textContent = '';
-	    
 
 	    if( this.isLoadButton ) this.initLoader();
 	    if( this.isDragButton ){ 
@@ -1044,53 +1806,146 @@
 
 	    constructor: Button,
 
-	    handleEvent: function ( e ) {
+	    testZone: function ( e ) {
 
-	        e.preventDefault();
+	        var l = this.local;
+	        if( l.x === -1 && l.y === -1 ) return '';
 
-	        switch( e.type ) {
-	            case 'click': this.click( e ); break;
-	            case 'mouseover': this.mode( 1, e ); break;
-	            case 'mousedown': this.mode( 2, e ); break;
-	            case 'mouseup': this.mode( 0, e ); break;
-	            case 'mouseout': this.mode( 0, e ); break;
-	            case 'change': this.fileSelect( e.target.files[0] ); break;
-
-	            case 'dragover': this.dragover(); break;
-	            case 'dragend': this.dragend(); break;
-	            case 'dragleave': this.dragend(); break;
-	            case 'drop': this.drop( e ); break;
+	        var i = this.lng;
+	        var t = this.tmp;
+	        
+	        while( i-- ){
+	        	if( l.x>t[i][0] && l.x<t[i][2] ) return i+2;
 	        }
+
+	        return ''
 
 	    },
 
-	    mode: function ( mode, e ) {
+	    // ----------------------
+	    //   EVENTS
+	    // ----------------------
 
-	        var s = this.s;
-	        var i = e.target.name || 0;
-	        if(i==='loader') i = 0;
+	    mouseup: function ( e ) {
+	    
+	        if( this.isDown ){
+	            this.isDown = false;
+	            return this.mousemove( e );
+	        }
 
-	        switch( mode ){
-	            case 0: // base
-	                s[i+2].color = this.fontColor;
-	                s[i+2].background = this.buttonColor;
-	            break;
-	            case 1: // over
-	                s[i+2].color = '#FFF';
-	                s[i+2].background = Tools.colors.select;
-	            break;
-	            case 2: // edit / down
-	                s[i+2].color = this.fontColor;
-	                s[i+2].background = Tools.colors.down;
-	            break;
+	        return false;
+
+	    },
+
+	    mousedown: function ( e ) {
+
+	    	var name = this.testZone( e );
+
+	        if( !name ) return false;
+
+	    	this.isDown = true;
+	        this.send( this.value[name-2] );
+	    	return this.mousemove( e );
+	 
+	        // true;
+
+	    },
+
+	    mousemove: function ( e ) {
+
+	        var up = false;
+
+	        var name = this.testZone( e );
+
+	        if( name !== '' ){
+	            this.cursor('pointer');
+	            up = this.modes( this.isDown ? 3 : 2, name );
+	        } else {
+	        	up = this.reset();
+	        }
+
+	        //console.log(up)
+
+	        return up;
+
+	    },
+
+	    // ----------------------
+
+	    modes: function ( n, name ) {
+
+	        var v, r = false;
+
+	        for( var i = 0; i < this.lng; i++ ){
+
+	            if( i === name-2 ) v = this.mode( n, i+2 );
+	            else v = this.mode( 1, i+2 );
+
+	            if(v) r = true;
 
 	        }
+
+	        return r;
+
 	    },
+
+	    mode: function ( n, name ) {
+
+	        var change = false;
+
+	        var i = name - 2;
+
+	        if( this.stat[i] !== n ){
+	        
+	            switch( n ){
+
+	                case 1: this.stat[i] = 1; this.s[ i+2 ].color = this.fontColor; this.s[ i+2 ].background = this.buttonColor; break;
+	                case 2: this.stat[i] = 2; this.s[ i+2 ].color = '#FFF';         this.s[ i+2 ].background = this.colors.select; break;
+	                case 3: this.stat[i] = 3; this.s[ i+2 ].color = '#FFF';         this.s[ i+2 ].background = this.colors.down; break;
+
+	            }
+
+	            change = true;
+
+	        }
+	        
+
+	        return change;
+
+	    },
+
+	    // ----------------------
+
+	    reset: function () {
+
+	        this.cursor();
+
+	        /*var v, r = false;
+
+	        for( var i = 0; i < this.lng; i++ ){
+	            v = this.mode( 1, i+2 );
+	            if(v) r = true;
+	        }*/
+
+	        return this.modes( 1 , 2 );
+
+	    	/*if( this.selected ){
+	    		this.s[ this.selected ].color = this.fontColor;
+	            this.s[ this.selected ].background = this.buttonColor;
+	            this.selected = null;
+	            
+	            return true;
+	    	}
+	        return false;*/
+
+	    },
+
+	    // ----------------------
 
 	    dragover: function () {
 
-	        this.s[4].borderColor = Tools.colors.select;
-	        this.s[4].color = Tools.colors.select;
+	        this.s[4].borderColor = this.colors.select;
+	        this.s[4].color = this.colors.select;
 
 	    },
 
@@ -1098,6 +1953,7 @@
 
 	        this.s[4].borderColor = this.fontColor;
 	        this.s[4].color = this.fontColor;
+
 	    },
 
 	    drop: function ( e ) {
@@ -1107,11 +1963,9 @@
 
 	    },
 
-	    
-
 	    initDrager: function () {
 
-	        this.c[4] = Tools.dom( 'div', Tools.css.txt +' text-align:center; line-height:'+(this.h-8)+'px; border:1px dashed '+this.fontColor+'; top:2px; pointer-events:auto; cursor:default; height:'+(this.h-4)+'px; border-radius:'+this.r+'px;' );
+	        this.c[4] = this.dom( 'div', this.css.txt +' text-align:center; line-height:'+(this.h-8)+'px; border:1px dashed '+this.fontColor+'; top:2px;  height:'+(this.h-4)+'px; border-radius:'+this.r+'px;' );//pointer-events:auto; cursor:default;
 	        this.c[4].textContent = 'DRAG';
 
 	        this.c[2].events = [  ];
@@ -1122,7 +1976,7 @@
 
 	    initLoader: function () {
 
-	        this.c[3] = Tools.dom( 'input', Tools.css.basic +'border:1px solid '+Tools.colors.border+'; top:1px; opacity:0; pointer-events:auto; cursor:pointer; height:'+(this.h-2)+'px;' );
+	        this.c[3] = this.dom( 'input', this.css.basic +'border:1px solid '+this.colors.border+'; top:1px; opacity:0;  height:'+(this.h-2)+'px;' );//pointer-events:auto; cursor:pointer;
 	        this.c[3].name = 'loader';
 	        this.c[3].type = "file";
 
@@ -1161,21 +2015,12 @@
 	        //else if(  ) reader.readAsArrayBuffer( file );
 	        //else reader.readAsText( file );
 
-	        reader.onload = function(e) {
+	        reader.onload = function (e) {
 	            
 	            if( this.callback ) this.callback( e.target.result, fname, type );
 	            //this.c[3].type = "file";
 	            //this.send( e.target.result ); 
 	        }.bind(this);
-
-	    },
-
-	    click: function ( e ) {
-
-	        var i = e.target.name || 0;
-	        var v = this.value[i];
-
-	        this.send( v );
 
 	    },
 
@@ -1207,9 +2052,11 @@
 	        var size = Math.floor( ( w-(dc*(i-1)) ) / i );
 
 	        while(i--){
-	            
-	            s[i+2].width = size + 'px';
-	            s[i+2].left = d + ( size * i ) + ( dc * i) + 'px';
+
+	        	this.tmp[i] = [ Math.floor( d + ( size * i ) + ( dc * i )), size ];
+	        	this.tmp[i][2] = this.tmp[i][0] + this.tmp[i][1];
+	            s[i+2].left = this.tmp[i][0] + 'px';
+	            s[i+2].width = this.tmp[i][1] + 'px';
 
 	        }
 
@@ -1234,54 +2081,52 @@
 	    //this.type = 'circular';
 	    this.autoWidth = false;
 
-	    this.buttonColor = Tools.colors.button;
+	    this.buttonColor = this.colors.button;
 
 	    this.setTypeNumber( o );
 
-	    this.radius = Math.floor((this.width-20)*0.5);
+	    this.radius = this.w * 0.5;//Math.floor((this.w-20)*0.5);
 
-	    /*this.radius = o.radius || 15;
-	    
-	    this.width = (this.radius*2)+20;
 
-	    if(o.width !== undefined){
-	        this.width = o.width;
-	        this.radius = ~~ (this.width-20)*0.5;
-	    }
+	    //this.ww = this.radius * 2;
 
-	    if(o.size !== undefined){
-	        this.width = o.size;
-	        this.radius = ~~ (this.width-20)*0.5;
-	    }*/
+	   // this.h = this.height + 40;
 
-	    this.w = this.height = this.radius * 2;
-	    this.h = o.height || (this.height + 40);
+
 
 	    this.twoPi = Math.PI * 2;
+	    this.pi90 = Math.PI * 0.5;
 
+	    this.offset = new V2();
+
+	    this.h = o.h || this.w + 10;
 	    this.top = 0;
 
-	    this.c[0].style.width = this.width +'px';
+	    this.c[0].style.width = this.w +'px';
 
 	    if(this.c[1] !== undefined) {
 
-	        this.c[1].style.width = this.width +'px';
+	        this.c[1].style.width = this.w +'px';
 	        this.c[1].style.textAlign = 'center';
-	        this.top = 20;
+	        this.top = 10;
+	        this.h += 10;
 
 	    }
 
 	    this.percent = 0;
 
-	    this.c[2] = Tools.dom( 'div', Tools.css.txtnumber + 'text-align:center; top:'+(this.height+24)+'px; width:'+this.width+'px; color:'+ this.fontColor );
-	    this.c[3] = Tools.dom( 'circle', Tools.css.basic + 'left:10px; top:'+this.top+'px; width:'+this.w+'px; height:'+this.height+'px; pointer-events:auto; cursor:pointer;', { cx:this.radius, cy:this.radius, r:this.radius, fill:'rgba(0,0,0,0.3)' });
-	    this.c[4] = Tools.dom( 'path', Tools.css.basic + 'left:10px; top:'+this.top+'px; width:'+this.w+'px; height:'+this.height+'px;', { d:this.makePath(), fill:this.fontColor });
-	    this.c[5] = Tools.dom( 'circle', Tools.css.basic + 'left:10px; top:'+this.top+'px; width:'+this.w+'px; height:'+this.height+'px;', { cx:this.radius, cy:this.radius, r:this.radius*0.5, fill:this.buttonColor, 'stroke-width':1, stroke:Tools.colors.stroke });
+	    this.cmode = 0;
 
-	    this.c[3].events = [ 'mouseover', 'mousedown', 'mouseout' ];
+	    this.c[2] = this.dom( 'div', this.css.txt + 'text-align:center; top:'+(this.h-20)+'px; width:'+this.w+'px; color:'+ this.fontColor );
+	    this.c[3] = this.getCircular();
+
+	    this.setSvg( this.c[3], 'd', this.makePath(), 1 );
+	    this.setSvg( this.c[3], 'stroke', this.fontColor, 1 );
+
+	    this.setSvg( this.c[3], 'viewBox', '0 0 '+this.w+' '+this.w );
+	    this.setCss( this.c[3], { width:this.w, height:this.w, left:0, top:this.top });
 
 	    this.init();
-
 	    this.update();
 
 	}
@@ -1290,89 +2135,70 @@
 
 	    constructor: Circular,
 
-	    handleEvent: function ( e ) {
-
-	        e.preventDefault();
-
-	        switch( e.type ) {
-	            case 'mouseover': this.over( e ); break;
-	            case 'mousedown': this.down( e ); break;
-	            case 'mouseout':  this.out( e );  break;
-
-	            case 'mouseup':   this.up( e );   break;
-	            case 'mousemove': this.move( e ); break;
-	        }
-
-	    },
-
 	    mode: function ( mode ) {
 
-	        switch(mode){
+	        if( this.cmode === mode ) return false;
+
+	        switch( mode ){
 	            case 0: // base
 	                this.s[2].color = this.fontColor;
-	                Tools.setSvg( this.c[3], 'fill','rgba(0,0,0,0.2)');
-	                Tools.setSvg( this.c[4], 'fill', this.fontColor );
+	                this.setSvg( this.c[3], 'stroke','rgba(0,0,0,0.1)', 0);
+	                this.setSvg( this.c[3], 'stroke', this.fontColor, 1 );
 	            break;
 	            case 1: // over
 	                this.s[2].color = this.colorPlus;
-	                Tools.setSvg( this.c[3], 'fill','rgba(0,0,0,0.6)');
-	                Tools.setSvg( this.c[4], 'fill', this.colorPlus );
+	                this.setSvg( this.c[3], 'stroke','rgba(0,0,0,0.3)', 0);
+	                this.setSvg( this.c[3], 'stroke', this.colorPlus, 1 );
 	            break;
 	        }
 
-	    },
-
-	    // ACTION
-
-	    over: function ( e ) {
-
-	        this.isOver = true;
-	        this.mode(1);
+	        this.cmode = mode;
+	        return true;
 
 	    },
 
-	    out: function ( e ) {
 
-	        this.isOver = false;
-	        if(this.isDown) return;
-	        this.mode(0);
-
-	    },
-
-	    up: function ( e ) {
+	    reset: function () {
 
 	        this.isDown = false;
-	        document.removeEventListener( 'mouseup', this, false );
-	        document.removeEventListener( 'mousemove', this, false );
-
-	        if(this.isOver) this.mode(1);
-	        else this.mode(0);
-
-	        this.sendEnd();
+	        
 
 	    },
 
-	    down: function ( e ) {
+	    // ----------------------
+	    //   EVENTS
+	    // ----------------------
+
+	    mouseup: function ( e ) {
+
+	        this.isDown = false;
+	        this.sendEnd();
+	        return this.mode(0);
+
+	    },
+
+	    mousedown: function ( e ) {
 
 	        this.isDown = true;
-	        document.addEventListener( 'mouseup', this, false );
-	        document.addEventListener( 'mousemove', this, false );
-
-	        this.rect = this.c[3].getBoundingClientRect();
 	        this.old = this.value;
 	        this.oldr = null;
-	        this.move( e );
+	        this.mousemove( e );
+	        return this.mode(1);
 
 	    },
 
-	    move: function ( e ) {
+	    mousemove: function ( e ) {
+
+	        //this.mode(1);
 
 	        if( !this.isDown ) return;
 
-	        var x = this.radius - (e.clientX - this.rect.left);
-	        var y = this.radius - (e.clientY - this.rect.top);
+	        var off = this.offset;
 
-	        this.r = Math.atan2( y, x ) - (Math.PI * 0.5);
+	        off.x = this.radius - (e.clientX - this.zone.x );
+	        off.y = this.radius - (e.clientY - this.zone.y - this.top );
+
+	        this.r = off.angle() - this.pi90;
 	        this.r = (((this.r%this.twoPi)+this.twoPi)%this.twoPi);
 
 	        if( this.oldr !== null ){ 
@@ -1380,8 +2206,8 @@
 	            var dif = this.r - this.oldr;
 	            this.r = Math.abs(dif) > Math.PI ? this.oldr : this.r;
 
-	            if(dif > 6) this.r = 0;
-	            if(dif < -6) this.r = this.twoPi;
+	            if( dif > 6 ) this.r = 0;
+	            if( dif < -6 ) this.r = this.twoPi;
 
 	        }
 
@@ -1402,16 +2228,13 @@
 
 	    makePath: function () {
 
-	        var r = this.radius;
-	        //var start = 0;
-	        var end = this.percent * this.twoPi - 0.001;
-	        //var x1 = r + r * Math.sin(start);
-	        //var y1 = r - r * Math.cos(start);
-	        var x2 = r + r * Math.sin(end);
-	        var y2 = r - r * Math.cos(end);
-	        //var big = end - start > Math.PI ? 1 : 0;
-	        var big = end > Math.PI ? 1 : 0;
-	        return "M " + r + "," + r + " L " + r + "," + 0 + " A " + r + "," + r + " 0 " + big + " 1 " + x2 + "," + y2 + " Z";
+	        var r = 40;
+	        var d = 24;
+	        var a = this.percent * this.twoPi - 0.001;
+	        var x2 = (r + r * Math.sin(a)) + d;
+	        var y2 = (r - r * Math.cos(a)) + d;
+	        var big = a > Math.PI ? 1 : 0;
+	        return "M " + (r+d) + "," + d + " A " + r + "," + r + " 0 " + big + " 1 " + x2 + "," + y2;
 
 	    },
 
@@ -1419,7 +2242,8 @@
 
 	        this.c[2].textContent = this.value;
 	        this.percent = ( this.value - this.min ) / this.range;
-	        Tools.setSvg( this.c[4], 'd', this.makePath() );
+
+	        this.setSvg( this.c[3], 'd', this.makePath(), 1 );
 	        if( up ) this.send();
 	        
 	    },
@@ -1430,67 +2254,46 @@
 	    
 	    Proto.call( this, o );
 
-	    this.autoHeight = true;
+	    //this.autoHeight = true;
 
 	    this.ctype = o.ctype || 'array';
-	    this.ww = this.sb;
-	    this.oldWidth = 0;
+
+	    this.wfixe = this.sb > 256 ? 256 : this.sb;
 
 	    // color up or down
 	    this.side = o.side || 'down';
-	    this.holdTop = 0;
+	    this.up = this.side === 'down' ? 0 : 1;
 	    
-	    this.wheelWidth = this.ww*0.1;
-	    this.decal = this.h + 2;
-	    
-	    this.colorRadius = (this.ww - this.wheelWidth) * 0.5 - 1;
-	    this.square = Math.floor((this.colorRadius - this.wheelWidth * 0.5) * 0.7) - 1;
-	    this.mid = Math.floor(this.ww * 0.5 );
-	    this.markerSize = this.wheelWidth * 0.3;
-
 	    this.baseH = this.h;
 
-	    //this.c[2] = Tools.dom( 'div',  Tools.css.txt + 'height:'+(this.h-4)+'px;' + 'border-radius:3px; pointer-events:auto; cursor:pointer; border:1px solid '+ Tools.colors.border + '; line-height:'+(this.h-8)+'px;' );
-	    this.c[2] = Tools.dom( 'div',  Tools.css.txt + 'height:'+(this.h-4)+'px;' + 'border-radius:'+this.radius+'px; pointer-events:auto; cursor:pointer; line-height:'+(this.h-8)+'px;' );
+	    this.offset = new V2();
+	    this.decal = new V2();
 
+	    this.pi90 = Math.PI * 0.5;
+
+	    //this.c[0].style.background = '#FF0000'
+
+	    this.c[2] = this.dom( 'div',  this.css.txt + 'height:'+(this.h-4)+'px;' + 'border-radius:'+this.radius+'px; line-height:'+(this.h-8)+'px;' );
 	    this.s[2] = this.c[2].style;
 
-	    if(this.side === 'up'){
-	        this.decal = 5;
+	    if( this.up ){
 	        this.s[2].top = 'auto';
 	        this.s[2].bottom = '2px';
 	    }
 
-	    this.c[3] = Tools.dom( 'div', Tools.css.basic + 'display:none' );
-	    this.c[4] = Tools.dom( 'canvas', Tools.css.basic + 'display:none;');
-	    this.c[5] = Tools.dom( 'canvas', Tools.css.basic + 'pointer-events:auto; cursor:pointer; display:none;');
-
-	    this.s[3] = this.c[3].style;
-	    this.s[5] = this.c[5].style;
-
-	    if(this.side === 'up') this.s[5].pointerEvents = 'none';
-
-	    this.c[4].width = this.c[4].height = this.ww;
-	    this.c[5].width = this.c[5].height = this.ww;
-
-	    this.ctxMask = this.c[4].getContext('2d');
-	    this.ctxOverlay = this.c[5].getContext('2d');
-	    this.ctxMask.translate(this.mid, this.mid);
-	    this.ctxOverlay.translate(this.mid, this.mid);
+	    this.c[3] = this.getColorRing();
+	    this.c[3].style.visibility  = 'hidden';
 
 	    this.hsl = null;
 	    this.value = '#ffffff';
 	    if( o.value !== undefined ){
-	        if(o.value instanceof Array) this.value = Tools.rgbToHex( o.value );
+	        if( o.value instanceof Array ) this.value = Tools.rgbToHex( o.value );
 	        else if(!isNaN(o.value)) this.value = Tools.hexToHtml( o.value );
 	        else this.value = o.value;
 	    }
+
 	    this.bcolor = null;
 	    this.isDown = false;
-	    this.isDraw = false;
-
-	    this.c[2].events = [ 'click' ];
-	    this.c[5].events = [ 'mousedown', 'mousemove', 'mouseup', 'mouseout' ];
 
 	    this.setColor( this.value );
 
@@ -1504,142 +2307,152 @@
 
 	    constructor: Color,
 
-		handleEvent: function( e ) {
+		testZone: function ( mx, my ) {
 
-		    e.preventDefault();
-		    e.stopPropagation();
+			var l = this.local;
+			if( l.x === -1 && l.y === -1 ) return '';
 
-		    switch( e.type ) {
-		        case 'click': this.click(e); break;
-		        case 'mousedown': this.down(e); break;
-		        case 'mousemove': this.move(e); break;
-		        case 'mouseup': this.up(e); break;
-		        case 'mouseout': this.out(e); break;
-		    }
+			if( this.up && this.isOpen ){
 
-		},
+				if( l.y > this.wfixe ) return 'title';
+			    else return 'color';
 
-		// ACTION
+			} else {
 
-		click: function( e ){
+				if( l.y < this.baseH+2 ) return 'title';
+		    	else if( this.isOpen ) return 'color';
 
-		    if( !this.isopen ) this.open();
-		    else this.close();
+			}
+		    	
 
-		},
+	    },
 
-		up: function( e ){
+		// ----------------------
+	    //   EVENTS
+	    // ----------------------
+
+		mouseup: function ( e ) {
 
 		    this.isDown = false;
 
 		},
 
-		out: function( e ){
+		mousedown: function ( e ) {
 
-		    if( this.isopen ) this.close();
+			var name = this.testZone( e.clientX, e.clientY );
+
+			//if( !name ) return;
+			if(name === 'title'){
+				if( !this.isOpen ) this.open();
+		        else this.close();
+		        return true;
+			}
+
+			if( name === 'color' ){
+				this.isDown = true;
+		        this.mousemove( e );
+			}
 
 		},
 
-		down: function( e ){
+		mousemove: function ( e ) {
 
-		    if(!this.isopen) return;
-		    this.isDown = true;
-		    this.move( e );
-		    //return false;
+		    var name = this.testZone( e.clientX, e.clientY );
 
-		},
+		    var off, d, hue, sat, lum;
 
-		move: function( e ){
+		    if( name === 'title' ){
 
-		    if(!this.isDown) return;
+		        this.cursor('pointer');
 
-		    this.offset = this.c[5].getBoundingClientRect();
-		    var pos = { x: e.pageX - this.offset.left - this.mid, y: e.pageY - this.offset.top - this.mid };
-		    this.circleDrag = Math.max(Math.abs(pos.x), Math.abs(pos.y)) > (this.square + 2);
-
-		    if ( this.circleDrag ) {
-		        var hue = Math.atan2(pos.x, -pos.y) / 6.28;
-		        this.setHSL([(hue + 1) % 1, this.hsl[1], this.hsl[2]]);
-		    } else {
-		        var sat = Math.max(0, Math.min(1, -( pos.x / this.square * 0.5) + .5) );
-		        var lum = Math.max(0, Math.min(1, -( pos.y / this.square * 0.5) + .5) );
-		        this.setHSL([this.hsl[0], sat, lum]);
 		    }
 
+		    if( name === 'color' ){
+
+		    	this.cursor('crosshair');
+
+		    	if( this.isDown ){
+
+		    		off = this.offset;
+			    	off.x = e.clientX - ( this.zone.x + this.decal.x + this.mid );
+			    	off.y = e.clientY - ( this.zone.y + this.decal.y + this.mid );
+				    d = off.length() * this.ratio;
+
+				    if ( d < 128 ) {
+					    if ( d > 88 ) {
+
+					        hue = ( off.angle() + this.pi90 ) / 6.28;
+					        this.setHSL([(hue + 1) % 1, this.hsl[1], this.hsl[2]]);
+
+					    } else {
+
+					    	sat = Math.max( 0, Math.min( 1, 0.5 - ( off.x * this.square * 0.5 ) ) );
+					        lum = Math.max( 0, Math.min( 1, 0.5 - ( off.y * this.square * 0.5 ) ) );
+					        this.setHSL([this.hsl[0], sat, lum]);
+
+					    }
+					}
+				}
+			}
+
 		},
 
+		setHeight: function () {
 
-		//////
-
-		redraw: function(){
-
-		    
-		    this.drawCircle();
-		    this.drawMask();
-		    this.drawMarkers();
-
-		    this.oldWidth = this.ww;
-		    this.isDraw = true;
-
-		    console.log(this.isDraw);
+			this.h = this.isOpen ? this.wfixe + this.baseH + 5 : this.baseH;
+			this.s[0].height = this.h + 'px';
+			this.zone.h = this.h;
 
 		},
 
-		open: function(){
+		parentHeight: function ( t ) {
 
-			Proto.prototype.open.call( this );
-
-		    if( this.oldWidth !== this.ww ) this.redraw();
-
-		    this.h = this.ww + this.baseH + 10;
-		    this.s[0].height = this.h + 'px';
-
-		    if( this.side === 'up' ){ 
-		        this.holdTop = this.s[0].top.substring(0,this.s[0].top.length-2) * 1 || 'auto';
-		        if(!isNaN(this.holdTop)) this.s[0].top = (this.holdTop-(this.h-20))+'px';
-		        setTimeout(function(){this.s[5].pointerEvents = 'auto';}.bind(this), 100);
-		    }
-
-		    this.s[3].display = 'block';
-		    this.s[4].display = 'block';
-		    this.s[5].display = 'block';
-
-		    var t = this.h - this.baseH;
-
-		    if ( this.parentGroup !== null ) this.parentGroup.calc( t );
+			if ( this.parentGroup !== null ) this.parentGroup.calc( t );
 		    else if ( this.isUI ) this.main.calc( t );
 
 		},
 
-		close: function(){
+		open: function () {
 
-		    Proto.prototype.close.call( this );
+			Proto.prototype.open.call( this );
 
-		    var t = this.h - this.baseH;
+			this.setHeight();
 
-		    if ( this.parentGroup !== null ) this.parentGroup.calc( -t );
-		    else if ( this.isUI ) this.main.calc( -t ); 
+			if( this.up ) this.zone.y -= this.wfixe + 5;
 
-		    
-		    this.h = this.baseH;
-		    if(this.side === 'up'){ 
-		        if(!isNaN(this.holdTop)) this.s[0].top = (this.holdTop)+'px';
-		        this.s[5].pointerEvents = 'none';
-		    }
-		    this.s[0].height = this.h+'px';
-		    this.s[3].display = 'none';
-		    this.s[4].display = 'none';
-		    this.s[5].display = 'none';
-		    
+			var t = this.h - this.baseH;
+
+		    this.s[3].visibility = 'visible';
+		    //this.s[3].display = 'block';
+		    this.parentHeight( t );
+
 		},
 
-		update: function( up ){
+		close: function () {
 
-		    this.s[3].background = Tools.rgbToHex( Tools.hslToRgb([this.hsl[0], 1, 0.5]) );
+			Proto.prototype.close.call( this );
 
-		    this.drawMarkers();
+			if( this.up ) this.zone.y += this.wfixe + 5;
+
+			var t = this.h - this.baseH;
+
+			this.setHeight();
+
+		    this.s[3].visibility  = 'hidden';
+		    //this.s[3].display = 'none';
+		    this.parentHeight( -t );
+
+		},
+
+		update: function ( up ) {
+
+		    var cc = Tools.rgbToHex( Tools.hslToRgb([ this.hsl[0], 1, 0.5 ]) );
+
+		    this.moveMarkers();
 		    
 		    this.value = this.bcolor;
+
+		    this.setSvg( this.c[3], 'fill', cc, 2 );
 
 		    this.s[2].background = this.bcolor;
 		    this.c[2].textContent = Tools.htmlToHex( this.bcolor );
@@ -1656,7 +2469,7 @@
 
 		},
 
-		setColor: function( color ){
+		setColor: function ( color ) {
 
 		    var unpack = Tools.unpack(color);
 		    if (this.bcolor != color && unpack) {
@@ -1669,7 +2482,7 @@
 
 		},
 
-		setHSL: function( hsl ){
+		setHSL: function ( hsl ) {
 
 		    this.hsl = hsl;
 		    this.rgb = Tools.hslToRgb( hsl );
@@ -1679,142 +2492,50 @@
 
 		},
 
-		calculateMask: function( sizex, sizey, outputPixel ){
+		moveMarkers: function () {
 
-		    var isx = 1 / sizex, isy = 1 / sizey;
-		    for (var y = 0; y <= sizey; ++y) {
-		        var l = 1 - y * isy;
-		        for (var x = 0; x <= sizex; ++x) {
-		            var s = 1 - x * isx;
-		            var a = 1 - 2 * Math.min(l * s, (1 - l) * s);
-		            var c = (a > 0) ? ((2 * l - 1 + a) * .5 / a) : 0;
-		            outputPixel(x, y, c, a);
-		        }
-		    }
+		    var sr = 60;
+		    var ra = 128-20; 
+		    var c1 = this.invert ? '#fff' : '#000';
+		    var a = this.hsl[0] * 6.28;
 
-		},
+		    var p = new V2( Math.sin(a) * ra, -Math.cos(a) * ra ).addScalar(128);
 
-		drawMask: function(){
+		    this.setSvg( this.c[3], 'cx', p.x, 5 );
+		    this.setSvg( this.c[3], 'cy', p.y, 5 );
+		    
+		    p.set( 2 * sr * (.5 - this.hsl[1]), 2 * sr * (.5 - this.hsl[2]) ).addScalar(128);
 
-		    var size = this.square * 2, sq = this.square;
-		    var sz = Math.floor(size / 2);
-		    var buffer = document.createElement('canvas');
-		    buffer.width = buffer.height = sz + 1;
-		    var ctx = buffer.getContext('2d');
-		    var frame = ctx.getImageData(0, 0, sz + 1, sz + 1);
-
-		    var i = 0;
-		    this.calculateMask(sz, sz, function (x, y, c, a) {
-		        frame.data[i++] = frame.data[i++] = frame.data[i++] = c * 255;
-		        frame.data[i++] = a * 255;
-		    });
-
-		    ctx.putImageData(frame, 0, 0);
-		    this.ctxMask.drawImage(buffer, 0, 0, sz + 1, sz + 1, -sq, -sq, sq * 2, sq * 2);
+		    this.setSvg( this.c[3], 'cx', p.x, 6 );
+		    this.setSvg( this.c[3], 'cy', p.y, 6 );
+		    this.setSvg( this.c[3], 'stroke', c1, 6 );
 
 		},
 
-		drawCircle: function(){
-
-		    var n = 24,r = this.colorRadius, w = this.wheelWidth, nudge = 8 / r / n * Math.PI, m = this.ctxMask, a1 = 0, color1, d1;
-		    var ym, am, tan, xm, color2, d2, a2, ar;
-		    m.save();
-		    m.lineWidth = w / r;
-		    m.scale(r, r);
-		    for (var i = 0; i <= n; ++i) {
-		        d2 = i / n;
-		        a2 = d2 * Math.PI * 2;
-		        ar = [Math.sin(a1), -Math.cos(a1), Math.sin(a2), -Math.cos(a2)];
-		        am = (a1 + a2) * 0.5;
-		        tan = 1 / Math.cos((a2 - a1) * 0.5);
-		        xm = Math.sin(am) * tan, ym = -Math.cos(am) * tan;
-		        color2 = Tools.rgbToHex( Tools.hslToRgb([d2, 1, 0.5]) );
-		        if (i > 0) {
-		            var grad = m.createLinearGradient(ar[0], ar[1], ar[2], ar[3]);
-		            grad.addColorStop(0, color1);
-		            grad.addColorStop(1, color2);
-		            m.strokeStyle = grad;
-		            m.beginPath();
-		            m.moveTo(ar[0], ar[1]);
-		            m.quadraticCurveTo(xm, ym, ar[2], ar[3]);
-		            m.stroke();
-		        }
-		        a1 = a2 - nudge; 
-		        color1 = color2;
-		        d1 = d2;
-		    }
-		    m.restore();
-
-		},
-
-		drawMarkers: function(){
-
-		    var m = this.markerSize, ra=this.colorRadius, sz = this.ww, lw = Math.ceil(m/ 4), r = m - lw + 1, c1 = this.invert ? '#fff' : '#000', c2 = this.invert ? '#000' : '#fff';
-		    var angle = this.hsl[0] * 6.28;
-		    var ar = [Math.sin(angle) * ra, -Math.cos(angle) * ra, 2 * this.square * (.5 - this.hsl[1]), 2 * this.square * (.5 - this.hsl[2]) ];
-		  
-		    var circles = [
-		        { x: ar[2], y: ar[3], r: m, c: c1,     lw: lw },
-		        { x: ar[2], y: ar[3], r: r, c: c2,     lw: lw + 1 },
-		        { x: ar[0], y: ar[1], r: m, c: '#fff', lw: lw },
-		        { x: ar[0], y: ar[1], r: r, c: '#000', lw: lw + 1 },
-		    ];
-		    this.ctxOverlay.clearRect(-this.mid, -this.mid, sz, sz);
-		    var i = circles.length;
-		    while(i--){
-		        var c = circles[i];
-		        this.ctxOverlay.lineWidth = c.lw;
-		        this.ctxOverlay.strokeStyle = c.c;
-		        this.ctxOverlay.beginPath();
-		        this.ctxOverlay.arc(c.x, c.y, c.r, 0, Math.PI * 2, true);
-		        this.ctxOverlay.stroke();
-		    }
-
-		},
-
-		rSize: function(){
+		rSize: function () {
 
 		    Proto.prototype.rSize.call( this );
-
-		    this.ww = this.sb;
-		    this.wheelWidth = this.ww*0.1;
-
-		    if( this.side === 'up' ) this.decal = 5;
-		    this.colorRadius = (this.ww - this.wheelWidth) * 0.5 - 1;
-		    this.square = Math.floor((this.colorRadius - this.wheelWidth * 0.5) * 0.7) - 1;
-		    this.mid = Math.floor(this.ww * 0.5 );
-		    this.markerSize = this.wheelWidth * 0.3;
 
 		    var s = this.s;
 
 		    s[2].width = this.sb + 'px';
 		    s[2].left = this.sa + 'px';
 
-		    s[3].width = (this.square * 2 - 1) + 'px';
-		    s[3].height = (this.square * 2 - 1) + 'px';
-		    s[3].top = (this.mid+this.decal )-this.square + 'px';
-		    s[3].left = (this.mid+this.sa )-this.square + 'px';
+		    this.decal.x = Math.floor((this.w - this.wfixe) * 0.5);
+		    this.decal.y = this.side === 'up' ? 2 : this.baseH + 2;
+		    this.mid = Math.floor( this.wfixe * 0.5 );
 
-		    this.c[4].width = this.c[4].height = this.ww;
-		    s[4].left = this.sa + 'px';
-		    s[4].top = this.decal + 'px';
+		    this.setSvg( this.c[3], 'viewBox', '0 0 '+this.wfixe+' '+this.wfixe );
+		    s[3].width = this.wfixe + 'px';
+		    s[3].height = this.wfixe + 'px';
+	    	s[3].left = this.decal.x + 'px';
+		    s[3].top = this.decal.y + 'px';
 
-		    this.c[5].width = this.c[5].height = this.ww;
-		    s[5].left = this.sa + 'px';
-		    s[5].top = this.decal + 'px';
-
-		    this.ctxMask.translate(this.mid, this.mid);
-		    this.ctxOverlay.translate(this.mid, this.mid);
-
-		    if( this.isopen ){ 
-		        this.redraw();
-
-		        //this.open();
-		        //this.h = this.ww+30;
-		        //this.c[0].height = this.h + 'px';
-		        //if( this.isUI ) this.main.calc();
-		    }
-
+		    this.ratio = 256/this.wfixe;
+		    this.square = 1 / (60*(this.wfixe/256));
+		    
+		    this.setHeight();
+		    
 		}
 
 	} );
@@ -1852,21 +2573,21 @@
 
 	    var panelCss = 'display:none; left:10px; top:'+ this.h + 'px; height:'+(this.hplus - 8)+'px; background: rgba(0, 0, 0, 0.2);' + 'border:1px solid rgba(255, 255, 255, 0.2); ';
 
-	    this.c[2] = Tools.dom( 'path', Tools.css.basic + panelCss , { fill:'rgba(200,200,200,0.3)', 'stroke-width':1, stroke:this.fontColor, 'vector-effect':'non-scaling-stroke' });
+	    this.c[2] = this.dom( 'path', this.css.basic + panelCss , { fill:'rgba(200,200,200,0.3)', 'stroke-width':1, stroke:this.fontColor, 'vector-effect':'non-scaling-stroke' });
 
 	    this.c[2].setAttribute('viewBox', '0 0 '+this.res+' 42' );
 	    this.c[2].setAttribute('height', '100%' );
 	    this.c[2].setAttribute('width', '100%' );
 	    this.c[2].setAttribute('preserveAspectRatio', 'none' );
 
-	    Tools.dom( 'path', null, { fill:'rgba(255,255,0,0.3)', 'stroke-width':1, stroke:'#FF0', 'vector-effect':'non-scaling-stroke' }, this.c[2] );
-	    Tools.dom( 'path', null, { fill:'rgba(0,255,255,0.3)', 'stroke-width':1, stroke:'#0FF', 'vector-effect':'non-scaling-stroke' }, this.c[2] );
+	    this.dom( 'path', null, { fill:'rgba(255,255,0,0.3)', 'stroke-width':1, stroke:'#FF0', 'vector-effect':'non-scaling-stroke' }, this.c[2] );
+	    this.dom( 'path', null, { fill:'rgba(0,255,255,0.3)', 'stroke-width':1, stroke:'#0FF', 'vector-effect':'non-scaling-stroke' }, this.c[2] );
 
 
 	    // bottom line
-	    this.c[3] = Tools.dom( 'div', Tools.css.basic + 'width:100%; bottom:0px; height:1px; background: rgba(255, 255, 255, 0.2);');
+	    this.c[3] = this.dom( 'div', this.css.basic + 'width:100%; bottom:0px; height:1px; background: rgba(255, 255, 255, 0.2);');
 
-	    this.c[4] = Tools.dom( 'path', Tools.css.basic + 'position:absolute; width:10px; height:10px; left:4px; top:'+fltop+'px;', { d:'M 3 8 L 8 5 3 2 3 8 Z', fill:this.fontColor, stroke:'none'});
+	    this.c[4] = this.dom( 'path', this.css.basic + 'position:absolute; width:10px; height:10px; left:4px; top:'+fltop+'px;', { d:'M 3 8 L 8 5 3 2 3 8 Z', fill:this.fontColor, stroke:'none'});
 
 	    this.isShow = o.show || false;
 
@@ -1886,7 +2607,7 @@
 
 	    if ( self.performance && self.performance.memory ) this.isMem = true;
 
-	    this.c[0].events = [ 'click', 'mousedown', 'mouseover', 'mouseout' ];
+	    //this.c[0].events = [ 'click', 'mousedown', 'mouseover', 'mouseout' ];
 
 	    this.init();
 
@@ -1899,18 +2620,18 @@
 
 	    constructor: Fps,
 
-	    handleEvent: function ( e ) {
+	    // ----------------------
+	    //   EVENTS
+	    // ----------------------
 
-	        e.preventDefault();
+	    mousedown: function ( e ) {
 
-	        switch( e.type ) {
-	            case 'click': this.click(e); break;
-	            case 'mouseover': this.mode(1); break;
-	            case 'mousedown': this.mode(2); break;
-	            case 'mouseout':  this.mode(0); break;
-	        }
+	        if( this.isShow ) this.hide();
+	        else this.show();
 
 	    },
+
+	    // ----------------------
 
 	    mode: function ( mode ) {
 
@@ -1933,12 +2654,7 @@
 	        }
 	    },
 
-	    click: function ( e ) {
-
-	        if( this.isShow ) this.hide();
-	        else this.show();
-
-	    },
+	    
 
 	    makePath: function ( point ) {
 
@@ -1958,19 +2674,19 @@
 	        this.pa1.shift();
 	        this.pa1.push( 8.5 + this.round( ( 1 - (this.fps / 100)) * 30 ) );
 
-	        Tools.setSvg( svg, 'd', this.makePath( this.pa1 ), 0 );
+	        this.setSvg( svg, 'd', this.makePath( this.pa1 ), 0 );
 
 	        this.pa2.shift();
 	        this.pa2.push( 8.5 + this.round( ( 1 - (this.ms / 200)) * 30 ) );
 
-	        Tools.setSvg( svg, 'd', this.makePath( this.pa2 ), 1 );
+	        this.setSvg( svg, 'd', this.makePath( this.pa2 ), 1 );
 
 	        if ( this.isMem ) {
 
 	            this.pa3.shift();
 	            this.pa3.push( 8.5 + this.round( ( 1 - this.mm) * 30 ) );
 
-	            Tools.setSvg( svg, 'd', this.makePath( this.pa3 ), 2 );
+	            this.setSvg( svg, 'd', this.makePath( this.pa3 ), 2 );
 
 	        }
 
@@ -1980,7 +2696,7 @@
 
 	        this.h = this.hplus + this.baseH;
 
-	        Tools.setSvg( this.c[4], 'd','M 5 8 L 8 3 2 3 5 8 Z');
+	        this.setSvg( this.c[4], 'd','M 5 8 L 8 3 2 3 5 8 Z');
 
 
 	        if( this.parentGroup !== null ){ this.parentGroup.calc( this.hplus );}
@@ -1990,7 +2706,7 @@
 	        this.s[2].display = 'block'; 
 	        this.isShow = true;
 
-	        Tools.addListen( this );
+	        Roots.addListen( this );
 
 	    },
 
@@ -1998,7 +2714,7 @@
 
 	        this.h = this.baseH;
 
-	        Tools.setSvg( this.c[4], 'd','M 3 8 L 8 5 3 2 3 8 Z');
+	        this.setSvg( this.c[4], 'd','M 3 8 L 8 5 3 2 3 8 Z');
 
 	        if( this.parentGroup !== null ){ this.parentGroup.calc( -this.hplus );}
 	        else if( this.isUI ) this.main.calc( -this.hplus );
@@ -2007,7 +2723,7 @@
 	        this.s[2].display = 'none';
 	        this.isShow = false;
 
-	        Tools.removeListen( this );
+	        Roots.removeListen( this );
 	        this.c[1].textContent = 'FPS';
 	        
 	    },
@@ -2064,60 +2780,279 @@
 	        
 	    },
 
-
 	    rSize: function(){
 
-	        this.s[0].width = this.width + 'px';
-	        this.s[1].width = this.width + 'px';
+	        this.s[0].width = this.w + 'px';
+	        this.s[1].width = this.w + 'px';
 	        this.s[2].left = 10 + 'px';
-	        this.s[2].width = (this.width-20) + 'px';
+	        this.s[2].width = (this.w-20) + 'px';
 	        
 	    },
 	    
+	} );
+
+	function Graph ( o ) {
+
+		Proto.call( this, o );
+
+		this.value = o.value !== undefined ? o.value : [0,0,0];
+	    this.lng = this.value.length;
+
+	    this.precision = o.precision || 2;
+	    this.multiplicator = o.multiplicator || 1;
+
+	    this.autoWidth = false;
+	    this.isNumber = false;
+
+	    this.isDown = false;
+
+	    this.h = o.h || 128 + 10;
+	    this.rh = this.h - 10;
+	    this.top = 0;
+
+	    this.c[0].style.width = this.w +'px';
+
+	    if( this.c[1] !== undefined ) { // with title
+
+	        this.c[1].style.width = this.w +'px';
+	        this.c[1].style.textAlign = 'center';
+	        this.top = 10;
+	        this.h += 10;
+
+	    }
+
+	    this.gh = this.rh - 28;
+	    this.gw = this.w - 28;
+
+	    this.c[2] = this.dom( 'div', this.css.txt + 'text-align:center; top:'+(this.h-20)+'px; width:'+this.w+'px; color:'+ this.fontColor );
+	    this.c[2].textContent = this.value;
+
+	    var svg = this.dom( 'svg', this.css.basic , { viewBox:'0 0 '+this.w+' '+this.rh, width:this.w, height:this.rh, preserveAspectRatio:'none' } );
+	    this.setCss( svg, { width:this.w, height:this.rh, left:0, top:this.top });
+	    this.dom( 'path', '', { d:'', stroke:this.colors.text, 'stroke-width':2, fill:'none', 'stroke-linecap':'butt' }, svg );
+	    this.dom( 'rect', '', { x:10, y:10, width:this.gw+8, height:this.gh+8, stroke:'rgba(0,0,0,0.3)', 'stroke-width':1 , fill:'none'}, svg );
+
+	    this.iw = ((this.gw-(4*(this.lng-1)))/this.lng);
+	    var t = [];
+	    this.cMode = [];
+
+	    this.v = [];
+
+	    for( var i = 0; i < this.lng; i++ ){
+
+	    	t[i] = [ 14 + (i*this.iw) + (i*4), this.iw ];
+	    	t[i][2] = t[i][0] + t[i][1];
+	    	this.cMode[i] = 0;
+	    	this.v[i] = this.value[i] / this.multiplicator;
+
+	    	this.dom( 'rect', '', { x:t[i][0], y:14, width:t[i][1], height:1, fill:this.fontColor, 'fill-opacity':0.3 }, svg );
+
+	    }
+
+	    this.tmp = t;
+	    this.c[3] = svg;
+
+	    this.init();
+
+	    this.update( false );
+
+	}
+
+	Graph.prototype = Object.assign( Object.create( Proto.prototype ), {
+
+	    constructor: Graph,
+
+	    testZone: function ( e ) {
+
+	        var l = this.local;
+	        if( l.x === -1 && l.y === -1 ) return '';
+
+	        var i = this.lng;
+	        var t = this.tmp;
+	        
+		    if( l.y>this.top && l.y<this.h-20 ){
+		        while( i-- ){
+		            if( l.x>t[i][0] && l.x<t[i][2] ) return i;
+		        }
+		    }
+
+	        return ''
+
+	    },
+
+	    mode: function ( n, name ) {
+
+	    	if( n === this.cMode[name] ) return false;
+
+	    	var a;
+
+	        switch(n){
+	            case 0: a=0.3; break;
+	            case 1: a=0.6; break;
+	            case 2: a=1; break;
+	        }
+
+	        this.reset();
+
+	        this.setSvg( this.c[3], 'fill-opacity', a, name + 2 );
+	        this.cMode[name] = n;
+
+	        return true;
+
+
+
+	    },
+
+	    // ----------------------
+	    //   EVENTS
+	    // ----------------------
+
+	    reset: function () {
+
+	    	var nup = false;
+	        //this.isDown = false;
+
+	        var i = this.lng;
+	        while(i--){ 
+	            if( this.cMode[i] !== 0 ){
+	                this.cMode[i] = 0;
+	                this.setSvg( this.c[3], 'fill-opacity', 0.3, i + 2 );
+	                nup = true;
+	            }
+	        }
+
+	        return nup;
+
+	    },
+
+	    mouseup: function ( e ) {
+
+	        this.isDown = false;
+	        if( this.current !== -1 ) return this.reset();
+	        
+	    },
+
+	    mousedown: function ( e ) {
+
+	    	this.isDown = true;
+	        return this.mousemove( e );
+
+	    },
+
+	    mousemove: function ( e ) {
+
+	    	var nup = false;
+
+	    	var name = this.testZone(e);
+
+	    	if( name === '' ){
+
+	            nup = this.reset();
+	            //this.cursor();
+
+	        } else { 
+
+	            nup = this.mode( this.isDown ? 2 : 1, name );
+	            //this.cursor( this.current !== -1 ? 'move' : 'pointer' );
+	            if(this.isDown){
+	            	this.v[name] = this.clamp( 1 - (( e.clientY - this.zone.y - this.top - 10 ) / this.gh) , 0, 1 );
+	            	this.update( true );
+	            }
+
+	        }
+
+	        return nup;
+
+	    },
+
+	    update: function ( up ) {
+
+	    	this.updateSVG();
+
+	        if( up ) this.send();
+
+	    },
+
+	    makePath: function () {
+
+	    	var p = "", h, w, wn, wm, ow, oh;
+	    	var g = this.iw*0.5;
+
+	    	for(var i = 0; i<this.lng; i++ ){
+
+	    		h = 14 + (this.gh - this.v[i]*this.gh);
+	    		w = (14 + (i*this.iw) + (i*4));
+
+	    		wm = w + this.iw*0.5;
+	    		wn = w + this.iw;
+
+	    		if(i===0) p+='M '+w+' '+ h + ' T ' + wm +' '+ h;
+	    		else p += ' C ' + ow +' '+ oh + ',' + w +' '+ h + ',' + wm +' '+ h;
+	    		if(i === this.lng-1) p+=' T ' + wn +' '+ h;
+
+	    		ow = wn;
+	    		oh = h; 
+
+	    	}
+
+	    	return p;
+
+	    },
+
+
+	    updateSVG: function () {
+
+	    	for(var i = 0; i<this.lng; i++ ){
+
+	    		this.setSvg( this.c[3], 'd', this.makePath(), 0 );
+	    		this.setSvg( this.c[3], 'height', this.v[i]*this.gh, i+2 );
+	    		this.setSvg( this.c[3], 'y', 14 + (this.gh - this.v[i]*this.gh), i+2 );
+	    		this.value[i] = (this.v[i] * this.multiplicator).toFixed( this.precision ) * 1;
+
+		    }
+
+		    this.c[2].textContent = this.value;
+
+	    }
+
 	} );
 
 	function Group ( o ) {
 	 
 	    Proto.call( this, o );
 
+	    this.uis = [];
+
 	    this.autoHeight = true;
-	    this.isGroup = true;
+	    this.current = -1;
+	    this.target = null;
 
-	    //this.bg = o.bg || null;
-	    
+	    this.decal = 0;
 
-	    //this.h = 25;
 	    this.baseH = this.h;
+
 	    var fltop = Math.floor(this.h*0.5)-6;
 
 
 	    this.isLine = o.line !== undefined ? o.line : false;
 
-	    this.c[2] = Tools.dom( 'div', Tools.css.basic + 'width:100%; left:0; height:auto; overflow:hidden; top:'+this.h+'px');
-	    this.c[3] = Tools.dom( 'path', Tools.css.basic + 'position:absolute; width:10px; height:10px; left:0; top:'+fltop+'px;', { d:Tools.GPATH, fill:this.fontColor, stroke:'none'});
-	    this.c[4] = Tools.dom( 'path', Tools.css.basic + 'position:absolute; width:10px; height:10px; left:4px; top:'+fltop+'px;', { d:'M 3 8 L 8 5 3 2 3 8 Z', fill:this.fontColor, stroke:'none'});
+	    this.c[2] = this.dom( 'div', this.css.basic + 'width:100%; left:0; height:auto; overflow:hidden; top:'+this.h+'px');
+	    this.c[3] = this.dom( 'path', this.css.basic + 'position:absolute; width:10px; height:10px; left:0; top:'+fltop+'px;', { d:this.svgs.group, fill:this.fontColor, stroke:'none'});
+	    this.c[4] = this.dom( 'path', this.css.basic + 'position:absolute; width:10px; height:10px; left:4px; top:'+fltop+'px;', { d:this.svgs.arrow, fill:this.fontColor, stroke:'none'});
 	    // bottom line
-	    if(this.isLine) this.c[5] = Tools.dom( 'div', Tools.css.basic +  'background:rgba(255, 255, 255, 0.2); width:100%; left:0; height:1px; bottom:0px');
+	    if(this.isLine) this.c[5] = this.dom( 'div', this.css.basic +  'background:rgba(255, 255, 255, 0.2); width:100%; left:0; height:1px; bottom:0px');
 
 	    var s = this.s;
 
 	    s[0].height = this.h + 'px';
 	    s[1].height = this.h + 'px';
-	    //s[1].top = 4 + 'px';
-	    //s[1].left = 4 + 'px';
-	    s[1].pointerEvents = 'auto';
-	    s[1].cursor = 'pointer';
 	    this.c[1].name = 'group';
 
 	    this.s[1].marginLeft = '10px';
 	    this.s[1].lineHeight = this.h-4;
 	    this.s[1].color = this.fontColor;
 	    this.s[1].fontWeight = 'bold';
-
-	    this.uis = [];
-
-	    this.c[1].events = [ 'click' ];
-
+	    
 	    this.init();
 
 	    if( o.bg !== undefined ) this.setBG(o.bg);
@@ -2129,24 +3064,138 @@
 
 	    constructor: Group,
 
-	    handleEvent: function ( e ) {
+	    isGroup: true,
 
-	        e.preventDefault();
-	        //e.stopPropagation();
+	    testZone: function ( e ) {
 
-	        switch( e.type ) {
-	            case 'click': this.click( e ); break;
+	        var l = this.local;
+	        if( l.x === -1 && l.y === -1 ) return '';
+
+	        var name = '';
+
+	        if( l.y < this.baseH ) name = 'title';
+	        else {
+	            if( this.isOpen ) name = 'content';
 	        }
 
-	    },
-
-
-	    click: function ( e ) {
-
-	        if( this.isOpen ) this.close();
-	        else this.open();
+	        return name;
 
 	    },
+
+	    clearTarget: function () {
+
+	        if( this.current === -1 ) return false;
+
+	       // if(!this.target) return;
+	        this.target.uiout();
+	        this.target.reset();
+	        this.current = -1;
+	        this.target = null;
+	        Roots.cursor();
+	        return true;
+
+	    },
+
+	    reset: function () {
+
+	        this.clearTarget();
+
+	    },
+
+	    // ----------------------
+	    //   EVENTS
+	    // ----------------------
+
+	    handleEvent: function ( e ) {
+
+	        var type = e.type;
+
+	        var change = false;
+	        var targetChange = false;
+
+	        var name = this.testZone( e );
+
+	        if( !name ) return;
+
+	        switch( name ){
+
+	            case 'content':
+
+	            if( this.target ) targetChange = this.target.handleEvent( e );
+
+	            //if( type === 'mousemove' ) change = this.styles('def');
+
+	            if( !Roots.lock ){
+
+	                //var next = this.findID( e );
+	                var next = Roots.findTarget( this.uis, e );
+
+	                if( next !== this.current ){
+	                    this.clearTarget();
+	                    this.current = next;
+	                    change = true;
+	                }
+
+	                if( next !== -1 ){ 
+	                    this.target = this.uis[this.current];
+	                    this.target.uiover();
+	                   // this.target.handleEvent( e );
+	                }
+
+	            }
+
+	            break;
+	            case 'title':
+	            if( type === 'mousedown' ){
+	                if( this.isOpen ) this.close();
+	                else this.open();
+	            }
+	            break;
+
+
+	        }
+
+	        if( this.isDown ) change = true;
+	        if( targetChange ) change = true;
+
+	        return change;
+
+	    },
+
+	    // ----------------------
+
+	    calcH: function () {
+
+	        var lng = this.uis.length, i, u,  h=0, px=0, tmph=0;
+	        for( i = 0; i < lng; i++){
+	            u = this.uis[i];
+	            if( !u.autoWidth ){
+
+	                if(px===0) h += u.h+1;
+	                else {
+	                    if(tmph<u.h) h += u.h-tmph;
+	                }
+	                tmph = u.h;
+
+	                //tmph = tmph < u.h ? u.h : tmph;
+	                px += u.w;
+	                if( px+u.w > this.w ) px = 0;
+
+	            }
+	            else h += u.h+1;
+	        }
+
+	        return h;
+	    },
+
+	    calcUis: function () {
+
+	        if( !this.isOpen ) return;
+
+	        Roots.calcUis( this.uis, this.zone, this.zone.y + this.baseH );
+
+	    },
+
 
 	    setBG: function ( c ) {
 
@@ -2159,7 +3208,7 @@
 
 	    },
 
-	    add: function( ){
+	    add: function () {
 
 	        var a = arguments;
 
@@ -2185,15 +3234,23 @@
 
 	    },
 
+	    parentHeight: function ( t ) {
+
+	        if ( this.parentGroup !== null ) this.parentGroup.calc( t );
+	        else if ( this.isUI ) this.main.calc( t );
+
+	    },
+
 	    open: function () {
 
 	        Proto.prototype.open.call( this );
 
-	        Tools.setSvg( this.c[4], 'd','M 5 8 L 8 3 2 3 5 8 Z');
-	        //this.s[4].background = UIL.F1;
+	        this.setSvg( this.c[4], 'd', this.svgs.arrowDown );
 	        this.rSizeContent();
 
-	        if( this.isUI ) this.main.calc( this.h - this.baseH );
+	        var t = this.h - this.baseH;
+
+	        this.parentHeight( t );
 
 	    },
 
@@ -2201,15 +3258,17 @@
 
 	        Proto.prototype.close.call( this );
 
-	        if( this.isUI ) this.main.calc( -( this.h - this.baseH ) );
+	        var t = this.h - this.baseH;
 
-	        Tools.setSvg( this.c[4], 'd','M 3 8 L 8 5 3 2 3 8 Z');
+	        this.setSvg( this.c[4], 'd', this.svgs.arrow );
 	        this.h = this.baseH;
 	        this.s[0].height = this.h + 'px';
 
+	        this.parentHeight( -t );
+
 	    },
 
-	    clear: function(){
+	    clear: function () {
 
 	        this.clearGroup();
 	        if( this.isUI ) this.main.calc( -(this.h +1 ));
@@ -2217,7 +3276,7 @@
 
 	    },
 
-	    clearGroup: function(){
+	    clearGroup: function () {
 
 	        this.close();
 
@@ -2231,7 +3290,7 @@
 
 	    },
 
-	    calc: function( y ){
+	    calc: function ( y ) {
 
 	        if( !this.isOpen ) return;
 
@@ -2239,34 +3298,36 @@
 	            this.h += y;
 	            if( this.isUI ) this.main.calc( y );
 	        } else {
-	            this.h = this.c[2].offsetHeight + this.baseH;
+	            this.h = this.calcH() + this.baseH;
 	        }
 	        this.s[0].height = this.h + 'px';
 
+	        //if(this.isOpen) this.calcUis();
+
 	    },
 
-	    rSizeContent: function(){
+	    rSizeContent: function () {
 
 	        var i = this.uis.length;
 	        while(i--){
-	            this.uis[i].setSize( this.width );
+	            this.uis[i].setSize( this.w );
 	            this.uis[i].rSize();
 	        }
 	        this.calc();
 
 	    },
 
-	    rSize: function(){
+	    rSize: function () {
 
 	        Proto.prototype.rSize.call( this );
 
 	        var s = this.s;
 
 	        s[3].left = ( this.sa + this.sb - 17 ) + 'px';
-	        s[1].width = this.width + 'px';
-	        s[2].width = this.width + 'px';
+	        s[1].width = this.w + 'px';
+	        s[2].width = this.w + 'px';
 
-	        if(this.isOpen) this.rSizeContent();
+	        if( this.isOpen ) this.rSizeContent();
 
 	    }
 
@@ -2285,125 +3346,59 @@
 	    this.precision = o.precision || 2;
 	    this.multiplicator = o.multiplicator || 1;
 
-	    this.x = 0;
-	    this.y = 0;
-
-	    this.oldx = 0;
-	    this.oldy = 0;
+	    this.pos = new V2();
+	    this.old = new V2();
+	    this.tmp = new V2();
 
 	    this.interval = null;
 
-	    this.radius = Math.floor((this.width-20)*0.5);
+	    this.radius = this.w * 0.5;
+	    this.distance = this.radius*0.25;
 
-	    /*this.radius = o.radius || 50;
-
-	    this.width = (this.radius*2)+20;
-
-	    if(o.width !== undefined){
-	        this.width = o.width;
-	        this.radius = ~~ (( this.width-20 )*0.5);
-	    }
-	    if(o.size !== undefined){
-	        this.width = o.size;
-	        this.radius = ~~ (this.width-20)*0.5;
-	    }*/
-
-	    this.innerRadius = o.innerRadius || this.radius*0.6;
-	    this.maxDistance = this.radius - this.innerRadius - 5;
-	    this.height = this.radius*2;
-	    this.h = o.height || (this.height + 40);
-
+	    this.h = o.h || this.w + 10;
 	    this.top = 0;
 
-	    this.c[0].style.width = this.width +'px';
+	    this.c[0].style.width = this.w +'px';
 
-	    if(this.c[1] !== undefined) {
+	    if( this.c[1] !== undefined ) { // with title
 
-	        this.c[1].style.width = this.width +'px';
+	        this.c[1].style.width = this.w +'px';
 	        this.c[1].style.textAlign = 'center';
-	        this.top = 20;
+	        this.top = 10;
+	        this.h += 10;
 
 	    }
 
-	    this.c[2] = Tools.dom( 'circle', Tools.css.basic + 'left:10px; top:'+this.top+'px; width:'+this.w+'px; height:'+this.height+'px;  pointer-events:auto; cursor:pointer;', { cx:this.radius, cy:this.radius, r:this.radius, fill:'url(#grad)' });
-	    this.c[3] = Tools.dom( 'circle', Tools.css.basic + 'left:0px; top:'+(this.top-10)+'px; width:'+(this.w+20)+'px; height:'+(this.height+20)+'px;', { cx:this.radius+10, cy:this.radius+10, r:this.innerRadius+10, fill:'url(#gradS)'});
-	    this.c[4] = Tools.dom( 'circle', Tools.css.basic + 'left:10px; top:'+this.top+'px; width:'+this.w+'px; height:'+this.height+'px;', { cx:this.radius, cy:this.radius, r:this.innerRadius, fill:'url(#gradIn)', 'stroke-width':1, stroke:'#000'  });
-	    this.c[5] = Tools.dom( 'div', Tools.css.txt + 'text-align:center; top:'+(this.height+20)+'px; width:'+this.width+'px; color:'+ this.fontColor );
+	    this.c[2] = this.dom( 'div', this.css.txt + 'text-align:center; top:'+(this.h-20)+'px; width:'+this.w+'px; color:'+ this.fontColor );
+	    this.c[2].textContent = this.value;
 
-	    // gradian bakground
-	    var svg = this.c[2];
-	    Tools.dom( 'defs', null, {}, svg );
-	    Tools.dom( 'radialGradient', null, {id:'grad', cx:'50%', cy:'50%', r:'50%', fx:'50%', fy:'50%' }, svg, 1 );
-	    Tools.dom( 'stop', null, { offset:'40%', style:'stop-color:rgb(0,0,0); stop-opacity:0.3;' }, svg, [1,0] );
-	    Tools.dom( 'stop', null, { offset:'80%', style:'stop-color:rgb(0,0,0); stop-opacity:0;' }, svg, [1,0] );
-	    Tools.dom( 'stop', null, { offset:'90%', style:'stop-color:rgb(50,50,50); stop-opacity:0.4;' }, svg, [1,0] );
-	    Tools.dom( 'stop', null, { offset:'100%', style:'stop-color:rgb(50,50,50); stop-opacity:0;' }, svg, [1,0] );
+	    this.c[3] = this.getJoystick();
+	    this.setSvg( this.c[3], 'viewBox', '0 0 '+this.w+' '+this.w );
+	    this.setCss( this.c[3], { width:this.w, height:this.w, left:0, top:this.top });
 
-	    // gradian shadow
-	    svg = this.c[3];
-	    Tools.dom( 'defs', null, {}, svg );
-	    Tools.dom( 'radialGradient', null, {id:'gradS', cx:'50%', cy:'50%', r:'50%', fx:'50%', fy:'50%' }, svg, 1 );
-	    Tools.dom( 'stop', null, { offset:'60%', style:'stop-color:rgb(0,0,0); stop-opacity:0.5;' }, svg, [1,0] );
-	    Tools.dom( 'stop', null, { offset:'100%', style:'stop-color:rgb(0,0,0); stop-opacity:0;' }, svg, [1,0] );
 
-	    // gradian stick
-
-	    var cc0 = ['rgb(40,40,40)', 'rgb(48,48,48)', 'rgb(30,30,30)'];
-	    var cc1 = ['rgb(1,90,197)', 'rgb(3,95,207)', 'rgb(0,65,167)'];
-
-	    svg = this.c[4];
-	    Tools.dom( 'defs', null, {}, svg );
-	    Tools.dom( 'radialGradient', null, {id:'gradIn', cx:'50%', cy:'50%', r:'50%', fx:'50%', fy:'50%' }, svg, 1 );
-	    Tools.dom( 'stop', null, { offset:'30%', style:'stop-color:'+cc0[0]+'; stop-opacity:1;' }, svg, [1,0] );
-	    Tools.dom( 'stop', null, { offset:'60%', style:'stop-color:'+cc0[1]+'; stop-opacity:1;' }, svg, [1,0]  );
-	    Tools.dom( 'stop', null, { offset:'80%', style:'stop-color:'+cc0[1]+'; stop-opacity:1;' }, svg, [1,0]  );
-	    Tools.dom( 'stop', null, { offset:'100%', style:'stop-color:'+cc0[2]+'; stop-opacity:1;' }, svg, [1,0]  );
-
-	    Tools.dom( 'radialGradient', null, {id:'gradIn2', cx:'50%', cy:'50%', r:'50%', fx:'50%', fy:'50%' }, this.c[4], 1 );
-	    Tools.dom( 'stop', null, { offset:'30%', style:'stop-color:'+cc1[0]+'; stop-opacity:1;' }, svg, [1,1]  );
-	    Tools.dom( 'stop', null, { offset:'60%', style:'stop-color:'+cc1[1]+'; stop-opacity:1;' }, svg, [1,1] );
-	    Tools.dom( 'stop', null, { offset:'80%', style:'stop-color:'+cc1[1]+'; stop-opacity:1;' }, svg, [1,1] );
-	    Tools.dom( 'stop', null, { offset:'100%', style:'stop-color:'+cc1[2]+'; stop-opacity:1;' }, svg, [1,1] );
-
-	    //console.log( this.c[4] )
-
-	    this.c[5].textContent = 'x'+ this.value[0] +' y' + this.value[1];
-
-	    this.c[2].events = [ 'mouseover', 'mousedown', 'mouseout' ];
+	    this.ratio = 128/this.w;
 
 	    this.init();
 
 	    this.update(false);
+	    
 	}
 
 	Joystick.prototype = Object.assign( Object.create( Proto.prototype ), {
 
 	    constructor: Joystick,
 
-	    handleEvent: function ( e ) {
-
-	        e.preventDefault();
-
-	        switch( e.type ) {
-	            case 'mouseover': this.over( e ); break;
-	            case 'mousedown': this.down( e ); break;
-	            case 'mouseout':  this.out( e );  break;
-	            case 'mouseup':   this.up( e );   break;
-	            case 'mousemove': this.move( e ); break;
-	        }
-
-	    },
-
 	    mode: function ( mode ) {
 
 	        switch(mode){
 	            case 0: // base
-	                Tools.setSvg( this.c[4], 'fill','url(#gradIn)');
-	                Tools.setSvg( this.c[4], 'stroke', '#000' );
+	                this.setSvg( this.c[3], 'fill', 'url(#gradIn)', 4 );
+	                this.setSvg( this.c[3], 'stroke', '#000', 4 );
 	            break;
 	            case 1: // over
-	                Tools.setSvg( this.c[4], 'fill', 'url(#gradIn2)' );
-	                Tools.setSvg( this.c[4], 'stroke', 'rgba(0,0,0,0)' );
+	                this.setSvg( this.c[3], 'fill', 'url(#gradIn2)', 4 );
+	                this.setSvg( this.c[3], 'stroke', 'rgba(0,0,0,0)', 4 );
 	            break;
 	            case 2: // edit
 	            break;
@@ -2411,93 +3406,73 @@
 	        }
 	    },
 
-	    over: function( e ){
+	    // ----------------------
+	    //   EVENTS
+	    // ----------------------
 
-	        this.isOver = true;
-	        this.mode(1);
+	    reset: function () {
 
-	    },
-
-	    out: function( e ){
-
-	        this.isOver = false;
-	        if(this.isDown) return;
 	        this.mode(0);
 
 	    },
 
-	    up: function( e ){
+	    mouseup: function ( e ) {
 
 	        this.isDown = false;
-	        document.removeEventListener( 'mouseup', this, false );
-	        document.removeEventListener( 'mousemove', this, false );
-
 	        this.interval = setInterval(this.update.bind(this), 10);
-
-	        if(this.isOver) this.mode(1);
-	        else this.mode(0);
 	        
 	    },
 
-	    down: function( e ){
+	    mousedown: function ( e ) {
 
 	        this.isDown = true;
-	        document.addEventListener( 'mouseup', this, false );
-	        document.addEventListener( 'mousemove', this, false );
-
-	        this.rect = this.c[2].getBoundingClientRect();
-	        this.move( e );
+	        this.mousemove( e );
 	        this.mode( 2 );
 
 	    },
 
-	    move: function ( e ) {
+	    mousemove: function ( e ) {
+
+	        this.mode(1);
 
 	        if( !this.isDown ) return;
 
-	        var x = this.radius - ( e.clientX - this.rect.left );
-	        var y = this.radius - ( e.clientY - this.rect.top );
+	        this.tmp.x = this.radius - ( e.clientX - this.zone.x );
+	        this.tmp.y = this.radius - ( e.clientY - this.zone.y - this.top );
 
-	        var distance = Math.sqrt( x * x + y * y );
+	        var distance = this.tmp.length();
 
-	        if ( distance > this.maxDistance ) {
-	            var angle = Math.atan2(x, y);
-	            x = Math.sin(angle) * this.maxDistance;
-	            y = Math.cos(angle) * this.maxDistance;
+	        if ( distance > this.distance ) {
+	            var angle = Math.atan2(this.tmp.x, this.tmp.y);
+	            this.tmp.x = Math.sin( angle ) * this.distance;
+	            this.tmp.y = Math.cos( angle ) * this.distance;
 	        }
 
-	        this.x = x / this.maxDistance;
-	        this.y = y / this.maxDistance;
-
+	        this.pos.copy( this.tmp ).divideScalar( this.distance );
 	        this.update();
 
 	    },
 
 	    setValue: function ( x, y ) {
 
-	        this.x = x || 0;
-	        this.y = y || 0;
-
+	        this.pos.set( x || 0, y || 0 );
 	        this.updateSVG();
 
 	    },
 
 	    update: function ( up ) {
 
-	        if(up === undefined) up = true;
+	        if( up === undefined ) up = true;
 
 	        if( this.interval !== null ){
 
 	            if( !this.isDown ){
-	                this.x += (0 - this.x)/3;
-	                this.y += (0 - this.y)/3;
+	                this.pos.x += (0 - this.pos.x)/3;
+	                this.pos.y += (0 - this.pos.y)/3;
+	                if(this.isUI && this.main.isCanvas ) this.main.draw();
 	            }
 
-	            if ( this.x.toFixed(2) === this.oldx.toFixed(2) && this.y.toFixed(2) === this.oldy.toFixed(2)){
-	                
-	                this.x = 0;
-	                this.y = 0;
-	            }
+	            if (this.pos.nearEquals( this.old, 2 )) this.pos.set( 0, 0 );
 
 	        }
 
@@ -2505,7 +3480,7 @@
 
 	        if( up ) this.send();
 
-	        if( this.interval !== null && this.x === 0 && this.y === 0 ){
+	        if( this.interval !== null && this.pos.x === 0 && this.pos.y === 0 ){
 	            clearInterval( this.interval );
 	            this.interval = null;
 	        }
@@ -2514,25 +3489,23 @@
 
 	    updateSVG: function () {
 
-	        var rx = this.x * this.maxDistance;
-	        var ry = this.y * this.maxDistance;
-	        var x = this.radius - rx;
-	        var y = this.radius - ry;
-	        var sx = x + ((1-this.x)*5) + 5;
-	        var sy = y + ((1-this.y)*5) + 10;
+	        var x = this.radius - ( this.pos.x * this.distance );
+	        var y = this.radius - ( this.pos.y * this.distance );
+	        var sx = x + ((1-this.pos.x)*5) + 5;
+	        var sy = y + ((1-this.pos.y)*5) + 10;
 
-	        Tools.setSvg( this.c[3], 'cx', sx );
-	        Tools.setSvg( this.c[3], 'cy', sy );
-	        Tools.setSvg( this.c[4], 'cx', x );
-	        Tools.setSvg( this.c[4], 'cy', y );
+	        this.setSvg( this.c[3], 'cx', sx*this.ratio, 3 );
+	        this.setSvg( this.c[3], 'cy', sy*this.ratio, 3 );
 
-	        this.oldx = this.x;
-	        this.oldy = this.y;
+	        this.setSvg( this.c[3], 'cx', x*this.ratio, 4 );
+	        this.setSvg( this.c[3], 'cy', y*this.ratio, 4 );
 
-	        this.value[0] = -( this.x * this.multiplicator ).toFixed( this.precision ) * 1;
-	        this.value[1] =  ( this.y * this.multiplicator ).toFixed( this.precision ) * 1;
+	        this.old.copy( this.pos );
 
-	        this.c[5].textContent = 'x'+ this.value[0] +' y' + this.value[1];
+	        this.value[0] =  ( this.pos.x * this.multiplicator ).toFixed( this.precision ) * 1;
+	        this.value[1] =  ( this.pos.y * this.multiplicator ).toFixed( this.precision ) * 1;
+
+	        this.c[2].textContent = this.value;
 
 	    },
 
@@ -2542,10 +3515,9 @@
 
 	    Proto.call( this, o );
 
-	    //this.type = 'knob';
 	    this.autoWidth = false;
 
-	    this.buttonColor = Tools.colors.button;
+	    this.buttonColor = this.colors.button;
 
 	    this.setTypeNumber( o );
 
@@ -2553,47 +3525,40 @@
 	    this.toDeg = 180 / Math.PI;
 	    this.cirRange = this.mPI * 2;
 
-	    this.radius = Math.floor((this.width-20)*0.5);
+	    this.offset = new V2();
 
-	    /*this.radius = o.radius || 15;
-	    
-	    this.width = (this.radius*2)+20;
+	    this.radius = this.w * 0.5;//Math.floor((this.w-20)*0.5);
 
-	    if(o.width !== undefined){
-	        this.width = o.width;
-	        this.radius = ~~ (this.width-20)*0.5;
-	    }
-
-	    if(o.size !== undefined){
-	        this.width = o.size;
-	        this.radius = ~~ (this.width-20)*0.5;
-	    }*/
-
-	    this.w = this.height = this.radius * 2;
-	    this.h = o.height || (this.height + 40);
+	    //this.ww = this.height = this.radius * 2;
+	    this.h = o.h || this.w + 10;
 	    this.top = 0;
 
-	    this.c[0].style.width = this.width +'px';
+	    this.c[0].style.width = this.w +'px';
 
 	    if(this.c[1] !== undefined) {
 
-	        this.c[1].style.width = this.width +'px';
+	        this.c[1].style.width = this.w +'px';
 	        this.c[1].style.textAlign = 'center';
-	        this.top = 20;
+	        this.top = 10;
+	        this.h += 10;
 
 	    }
 
 	    this.percent = 0;
 
-	    this.c[2] = Tools.dom( 'div', Tools.css.txtnumber + 'text-align:center; top:'+(this.height+24)+'px; width:'+this.width+'px; color:'+ this.fontColor );
+	    this.cmode = 0;
 
-	    this.c[3] = Tools.dom( 'circle', Tools.css.basic + 'left:10px; top:'+this.top+'px; width:'+this.w+'px; height:'+this.height+'px;  pointer-events:auto; cursor:pointer;', { cx:this.radius, cy:this.radius, r:this.radius-4, fill:'rgba(0,0,0,0.3)' });
-	    this.c[4] = Tools.dom( 'circle', Tools.css.basic + 'left:10px; top:'+this.top+'px; width:'+this.w+'px; height:'+this.height+'px;', { cx:this.radius, cy:this.radius*0.5, r:3, fill:this.fontColor });
-	    this.c[5] = Tools.dom( 'path', Tools.css.basic + 'left:10px; top:'+this.top+'px; width:'+this.w+'px; height:'+this.height+'px;', { d:this.makeGrad(), 'stroke-width':1, stroke:Tools.colors.stroke });
+	    this.c[2] = this.dom( 'div', this.css.txt + 'text-align:center; top:'+(this.h-20)+'px; width:'+this.w+'px; color:'+ this.fontColor );
+
+	    this.c[3] = this.getKnob();
 	    
-	    Tools.dom( 'circle', null, { cx:this.radius, cy:this.radius, r:this.radius*0.7, fill:this.buttonColor, 'stroke-width':1, stroke:Tools.colors.stroke }, this.c[3] );
+	    this.setSvg( this.c[3], 'stroke', this.fontColor, 1 );
+	    this.setSvg( this.c[3], 'stroke', this.fontColor, 3 );
+	    this.setSvg( this.c[3], 'd', this.makeGrad(), 3 );
+	    
 
-	    this.c[3].events = [ 'mouseover', 'mousedown', 'mouseout' ];
+	    this.setSvg( this.c[3], 'viewBox', '0 0 '+this.ww+' '+this.ww );
+	    this.setCss( this.c[3], { width:this.w, height:this.w, left:0, top:this.top });
 
 	    this.r = 0;
 
@@ -2607,13 +3572,44 @@
 
 	    constructor: Knob,
 
-	    move: function( e ){
+	    mode: function ( mode ) {
+
+	        if( this.cmode === mode ) return false;
+
+	        switch(mode){
+	            case 0: // base
+	                this.s[2].color = this.fontColor;
+	                this.setSvg( this.c[3], 'fill',this.colors.button, 0);
+	                //this.setSvg( this.c[3], 'stroke','rgba(0,0,0,0.2)', 2);
+	                this.setSvg( this.c[3], 'stroke', this.fontColor, 1 );
+	            break;
+	            case 1: // over
+	                this.s[2].color = this.colorPlus;
+	                this.setSvg( this.c[3], 'fill',this.colors.select, 0);
+	                //this.setSvg( this.c[3], 'stroke','rgba(0,0,0,0.6)', 2);
+	                this.setSvg( this.c[3], 'stroke', this.colorPlus, 1 );
+	            break;
+	        }
+
+	        this.cmode = mode;
+	        return true;
+
+	    },
+
+	    
+
+	    mousemove: function ( e ) {
+
+	        //this.mode(1);
 
 	        if( !this.isDown ) return;
 
-	        var x = this.radius - (e.clientX - this.rect.left);
-	        var y = this.radius - (e.clientY - this.rect.top);
-	        this.r = - Math.atan2( x, y );
+	        var off = this.offset;
+
+	        off.x = this.radius - ( e.clientX - this.zone.x );
+	        off.y = this.radius - ( e.clientY - this.zone.y - this.top );
+
+	        this.r = - Math.atan2( off.x, off.y );
 
 	        if( this.oldr !== null ) this.r = Math.abs(this.r - this.oldr) > Math.PI ? this.oldr : this.r;
 
@@ -2626,7 +3622,7 @@
 	        var n = ( ( this.range * value ) + this.min ) - this.old;
 
 	        if(n >= this.step || n <= this.step){ 
-	            n = ~~ ( n / this.step );
+	            n = Math.floor( n / this.step );
 	            this.value = this.numValue( this.old + ( n * this.step ) );
 	            this.update( true );
 	            this.old = this.value;
@@ -2637,25 +3633,26 @@
 
 	    makeGrad: function () {
 
-	        var d = '', step, range, a, x, y, x2, y2, r = this.radius;
+	        var d = '', step, range, a, x, y, x2, y2, r = 64;
 	        var startangle = Math.PI + this.mPI;
 	        var endangle = Math.PI - this.mPI;
+	        //var step = this.step>5 ? this.step : 1;
 
 	        if(this.step>5){
 	            range =  this.range / this.step;
 	            step = ( startangle - endangle ) / range;
 	        } else {
-	            step = ( startangle - endangle ) / r;
-	            range = r;
+	            step = (( startangle - endangle ) / r)*2;
+	            range = r*0.5;
 	        }
 
 	        for ( var i = 0; i <= range; ++i ) {
 
 	            a = startangle - ( step * i );
-	            x = r + Math.sin( a ) * r;
-	            y = r + Math.cos( a ) * r;
-	            x2 = r + Math.sin( a ) * ( r - 3 );
-	            y2 = r + Math.cos( a ) * ( r - 3 );
+	            x = r + Math.sin( a ) * ( r - 20 );
+	            y = r + Math.cos( a ) * ( r - 20 );
+	            x2 = r + Math.sin( a ) * ( r - 24 );
+	            y2 = r + Math.cos( a ) * ( r - 24 );
 	            d += 'M' + x + ' ' + y + ' L' + x2 + ' '+y2 + ' ';
 
 	        }
@@ -2669,9 +3666,24 @@
 	        this.c[2].textContent = this.value;
 	        this.percent = (this.value - this.min) / this.range;
 
-	        var r = ( (this.percent * this.cirRange) - (this.mPI)) * this.toDeg;
+	       // var r = 50;
+	       // var d = 64; 
+	        var r = ( (this.percent * this.cirRange) - (this.mPI));//* this.toDeg;
 
-	        Tools.setSvg( this.c[4], 'transform', 'rotate('+ r +' '+this.radius+' '+this.radius+')' );
+	        var sin = Math.sin(r);
+	        var cos = Math.cos(r);
+
+	        var x1 = (25 * sin) + 64;
+	        var y1 = -(25 * cos) + 64;
+	        var x2 = (20 * sin) + 64;
+	        var y2 = -(20 * cos) + 64;
+
+	        //this.setSvg( this.c[3], 'cx', x, 1 );
+	        //this.setSvg( this.c[3], 'cy', y, 1 );
+
+	        this.setSvg( this.c[3], 'd', 'M ' + x1 +' ' + y1 + ' L ' + x2 +' ' + y2, 1 );
+
+	        //this.setSvg( this.c[3], 'transform', 'rotate('+ r +' '+64+' '+64+')', 1 );
 
 	        if( up ) this.send();
 	        
@@ -2683,52 +3695,48 @@
 
 	    Proto.call( this, o );
 
-	    this.autoHeight = true;
+	    this.autoHeight = false;
 	    var align = o.align || 'center';
 
-	    this.buttonColor = o.bColor || Tools.colors.button;
+	    this.sMode = 0;
+	    this.tMode = 0;
+
+	    this.buttonColor = o.bColor || this.colors.button;
 
 	    var fltop = Math.floor(this.h*0.5)-5;
 
-	    //this.c[2] = Tools.dom( 'div', Tools.css.basic + 'top:0; height:90px; cursor:s-resize; pointer-events:auto; display:none; overflow:hidden; border:1px solid '+Tools.colors.border+';' );
-	    //this.c[3] = Tools.dom( 'div', Tools.css.txt + 'text-align:'+align+'; line-height:'+(this.h-4)+'px; border:1px solid '+Tools.colors.border+'; top:1px; pointer-events:auto; cursor:pointer; background:'+this.buttonColor+'; height:'+(this.h-2)+'px;' );
+	    this.c[2] = this.dom( 'div', this.css.basic + 'top:0; display:none;' );
+	    this.c[3] = this.dom( 'div', this.css.txt + 'text-align:'+align+'; line-height:'+(this.h-4)+'px; top:1px;  background:'+this.buttonColor+'; height:'+(this.h-2)+'px; border-radius:'+this.radius+'px;' );
+	    this.c[4] = this.dom( 'path', this.css.basic + 'position:absolute; width:10px; height:10px; top:'+fltop+'px;', { d:this.svgs.arrow, fill:this.fontColor, stroke:'none'});
 
-	    this.c[2] = Tools.dom( 'div', Tools.css.basic + 'top:0; height:90px; cursor:s-resize; pointer-events:auto; display:none; overflow:hidden;' );
-	    this.c[3] = Tools.dom( 'div', Tools.css.txt + 'text-align:'+align+'; line-height:'+(this.h-4)+'px; top:1px; pointer-events:auto; cursor:pointer; background:'+this.buttonColor+'; height:'+(this.h-2)+'px; border-radius:'+this.radius+'px;' );
-	    this.c[4] = Tools.dom( 'path', Tools.css.basic + 'position:absolute; width:10px; height:10px; top:'+fltop+'px;', { d:'M 3 8 L 8 5 3 2 3 8 Z', fill:this.fontColor, stroke:'none'});
+	    this.scroller = this.dom( 'div', this.css.basic + 'right:5px;  width:10px; background:#666; display:none;');
 
-	    this.scroller = Tools.dom( 'div', Tools.css.basic + 'right:5px;  width:10px; pointer-events:none; background:#666; display:none;');
-
-	    this.c[2].name = 'list';
-	    this.c[3].name = 'title';
-
-	    //this.c[2].style.borderTop = this.h + 'px solid transparent';
 	    this.c[3].style.color = this.fontColor;
 
-	    this.c[2].events = [ 'mousedown', 'mousemove', 'mouseup', 'mousewheel', 'mouseout', 'mouseover' ];
-	    this.c[3].events = [ 'mousedown', 'mouseover' ,'mouseout']; 
-
 	    this.list = o.list || [];
+	    this.items = [];
+
+	    this.prevName = '';
 
 	    this.baseH = this.h;
 
-	    //this.maxItem = o.maxItem || 5;
 	    this.itemHeight = o.itemHeight || (this.h-3);
-	    //this.length = this.list.length;
 
 	    // force full list 
 	    this.full = o.full || false;
 
 	    this.py = 0;
-	    this.w = this.sb;
+	    this.ww = this.sb;
 	    this.scroll = false;
 	    this.isDown = false;
 
+	    this.current = null;
+
 	    // list up or down
 	    this.side = o.side || 'down';
-	    this.holdTop = 0;
+	    this.up = this.side === 'down' ? 0 : 1;
 
-	    if( this.side === 'up' ){
+	    if( this.up ){
 
 	        this.c[2].style.top = 'auto';
 	        this.c[3].style.top = 'auto';
@@ -2741,13 +3749,14 @@
 	        //this.c[5].style.bottom = '2px';
 
 	    } else {
-	        this.c[2].style.top = this.h-2 + 'px';
+	        this.c[2].style.top = this.baseH + 'px';
 	        //this.c[6].style.top = this.h + 'px';
 	    }
 
-	    this.listIn = Tools.dom( 'div', Tools.css.basic + 'left:0; top:0; width:100%; background:rgba(0,0,0,0.2);');
+	    this.listIn = this.dom( 'div', this.css.basic + 'left:0; top:0; width:100%; background:rgba(0,0,0,0.2);');
 	    this.listIn.name = 'list';
 
+	    this.topList = 0;
 	    
 	    this.c[2].appendChild( this.listIn );
 	    this.c[2].appendChild( this.scroller );
@@ -2756,7 +3765,8 @@
 
 	    this.setList( this.list, o.value );
 
-	   
+	    //this.c[0].style.background = '#FF0000'
+
 	    this.init();
 
 	    if( o.open !== undefined ) this.open();
@@ -2767,24 +3777,198 @@
 
 	    constructor: List,
 
-	    handleEvent: function( e ) {
+	    testZone: function ( e ) {
 
-	        e.preventDefault();
+	        var l = this.local;
+	        if( l.x === -1 && l.y === -1 ) return '';
 
-	        var name = e.target.name || '';
-	        switch( e.type ) {
-	            case 'click': this.click(e); break;
-	            case 'mouseover': if(name === 'title') this.mode(1); else this.listover(e); break;
-	            case 'mousedown': if(name === 'title') this.titleClick(e); else this.listdown(e); break;
-	            case 'mouseup':   if(name === 'title') this.mode(0); else this.listup(e); break;
-	            case 'mouseout':  if(name === 'title') this.mode(0);  else this.listout(e); break;
-	            case 'mousemove': this.listmove(e); break;
-	            case 'mousewheel': this.listwheel(e); break;
+	        if( this.up && this.isOpen ){
+	            if( l.y > this.h - this.baseH ) return 'title';
+	            else{
+	                if( this.scroll && ( l.x > (this.sa+this.sb-20)) ) return 'scroll';
+	                if(l.x > this.sa) return this.testItems( l.y-this.baseH );
+	            }
+
+	        } else {
+	            if( l.y < this.baseH+2 ) return 'title';
+	            else{
+	                if( this.isOpen ){
+	                    if( this.scroll && ( l.x > (this.sa+this.sb-20)) ) return 'scroll';
+	                    if(l.x > this.sa) return this.testItems( l.y-this.baseH );
+	                }
+	            }
+
+	        }
+
+	        return '';
+
+	    },
+
+	    testItems: function ( y ) {
+
+	        var name = '';
+
+	        var i = this.items.length, item, a, b;
+	        while(i--){
+	            item = this.items[i];
+	            a = item.posy + this.topList;
+	            b = item.posy + this.itemHeight + 1 + this.topList;
+	            if( y >= a && y <= b ){ 
+	                name = 'item' + i;
+	                this.unSelected();
+	                this.current = item;
+	                this.selected();
+	                return name;
+	            }
+
+	        }
+
+	        return name;
+
+	    },
+
+	    unSelected: function () {
+
+	        if( this.current ){
+	            this.current.style.background = 'rgba(0,0,0,0.2)';
+	            this.current.style.color = this.fontColor;
+	            this.current = null;
 	        }
 
 	    },
 
-	    mode: function( mode ){
+	    selected: function () {
+
+	        this.current.style.background = this.colors.select;
+	        this.current.style.color = '#FFF';
+
+	    },
+
+	    // ----------------------
+	    //   EVENTS
+	    // ----------------------
+
+	    mouseup: function ( e ) {
+
+	        this.isDown = false;
+
+	    },
+
+	    mousedown: function ( e ) {
+
+	        var name = this.testZone( e );
+
+	        if( !name ) return false;
+
+	        if( name === 'scroll' ){
+
+	            this.isDown = true;
+	            this.mousemove( e );
+
+	        } else if( name === 'title' ){
+
+	            this.modeTitle(2);
+	            if( !this.isOpen ) this.open();
+	            else this.close();
+	        
+	        } else {
+	            if( this.current ){
+	                this.value = this.current.textContent;
+	                this.c[3].textContent = this.value;
+	                this.send();
+	                this.close();
+	            }
+	            
+	        }
+
+	        return true;
+
+	    },
+
+	    mousemove: function ( e ) {
+
+	        var nup = false;
+	        var name = this.testZone( e );
+
+	        if( !name ) return nup;
+
+	        if( name === 'title' ){
+	            this.unSelected();
+	            this.modeTitle(1);
+	            this.cursor('pointer');
+
+	        } else if( name === 'scroll' ){
+
+	            this.cursor('s-resize');
+	            this.modeScroll(1);
+	            if( this.isDown ){
+	                this.modeScroll(2);
+	                var top = this.zone.y+this.baseH-2;
+	                this.update( ( e.clientY - top  ) - ( this.sh*0.5 ) );
+	            }
+	            //if(this.isDown) this.listmove(e);
+	        } else {
+
+	            // is item
+	            this.modeTitle(0);
+	            this.modeScroll(0);
+	            this.cursor('pointer');
+	        
+	        }
+
+	        if( name !== this.prevName ) nup = true;
+	        this.prevName = name;
+
+	        return nup;
+
+	    },
+
+	    wheel: function ( e ) {
+
+	        var name = this.testZone( e );
+	        if( name === 'title' ) return false; 
+	        this.py += e.delta*10;
+	        this.update(this.py);
+	        return true;
+
+	    },
+
+
+
+	    // ----------------------
+
+	    reset: function () {
+
+	        this.prevName = '';
+	        this.unSelected();
+	        this.modeTitle(0);
+	        this.modeScroll(0);
+	        
+	    },
+
+	    modeScroll: function ( mode ) {
+
+	        if( mode === this.sMode ) return;
+
+	        switch(mode){
+	            case 0: // base
+	                this.scroller.style.background = this.buttonColor;
+	            break;
+	            case 1: // over
+	                this.scroller.style.background = this.colors.select;
+	            break;
+	            case 2: // edit / down
+	                this.scroller.style.background = this.colors.down;
+	            break;
+
+	        }
+
+	        this.sMode = mode;
+	    },
+
+	    modeTitle: function ( mode ) {
+
+	        if( mode === this.tMode ) return;
 
 	        var s = this.s;
 
@@ -2795,23 +3979,27 @@
 	            break;
 	            case 1: // over
 	                s[3].color = '#FFF';
-	                s[3].background = Tools.colors.select;
+	                s[3].background = this.colors.select;
 	            break;
 	            case 2: // edit / down
 	                s[3].color = this.fontColor;
-	                s[3].background = Tools.colors.down;
+	                s[3].background = this.colors.down;
 	            break;
 
 	        }
+
+	        this.tMode = mode;
+
 	    },
 
-	    clearList: function() {
+	    clearList: function () {
 
 	        while ( this.listIn.children.length ) this.listIn.removeChild( this.listIn.lastChild );
+	        this.items = [];
 
 	    },
 
-	    setList: function( list, value ) {
+	    setList: function ( list, value ) {
 
 	        this.clearList();
 
@@ -2832,18 +4020,19 @@
 	        this.scroller.style.height = this.sh + 'px';
 
 	        if( this.max > this.maxHeight ){ 
-	            this.w = this.sb - 20;
+	            this.ww = this.sb - 20;
 	            this.scroll = true;
 	        }
 
 	        var item, n;//, l = this.sb;
 	        for( var i=0; i<this.length; i++ ){
 	            n = this.list[i];
-	            item = Tools.dom( 'div', Tools.css.item + 'width:'+this.w+'px; height:'+this.itemHeight+'px; line-height:'+(this.itemHeight-5)+'px;');
+	            item = this.dom( 'div', this.css.item + 'width:'+this.ww+'px; height:'+this.itemHeight+'px; line-height:'+(this.itemHeight-5)+'px; color:'+this.fontColor+';' );
 	            item.textContent = n;
-	            item.style.color = this.fontColor;
-	            item.name = 'item';
+	            item.name = 'item'+i;
+	            item.posy = (this.itemHeight+1)*i;
 	            this.listIn.appendChild( item );
+	            this.items.push( item );
 	        }
 
 	        if( value !== undefined ){
@@ -2857,167 +4046,87 @@
 
 	    },
 
-	    // -----
-
-	    click: function( e ){
-
-	        var name = e.target.name;
-	        if( name !== 'title' && name !== 'list' ) this.close();
-
-	    },
-
-	    titleClick: function( e ){
-
-	        if( this.isOpen ) this.close();
-	        else {
-	            this.open(); 
-	            this.mode(2);
-	        }
-
-	    },
 
 	    // ----- LIST
 
-	    listover: function( e ){
-
-	        var name = e.target.name;
-	        //console.log(name)
-	        if( name === 'item' ){
-	            e.target.style.background = Tools.colors.select;
-	            e.target.style.color = '#FFF'; 
-	        }
-
-	    },
-
-	    listdown: function( e ){
-
-	        var name = e.target.name;
-	        if( name !== 'list' && name !== undefined ){
-	            this.value = e.target.textContent;//name;
-	            this.c[3].textContent = this.value;
-	            this.send();
-	           // this.close();
-	        } else if ( name ==='list' && this.scroll ){
-	            this.isDown = true;
-	            this.listmove( e );
-	            this.listIn.style.background = 'rgba(0,0,0,0.6)';
-	            this.scroller.style.background = '#AAA';
-	        }
-
-	    },
-
-	    listmove: function( e ){
-
-	        if( this.isDown ){
-	            var rect = this.c[2].getBoundingClientRect();
-	            this.update( ( e.clientY - rect.top  ) - ( this.sh*0.5 ) );
-	        }
-
-	    },
-
-	    listup: function( e ){
-
-	        this.isDown = false;
-	        this.listIn.style.background = 'rgba(0,0,0,0.2)';
-	        this.scroller.style.background = '#666';
-
-	    },
-
-	    listout: function( e ){
-
-	        var n = e.target.name;
-	        if( n === 'item' ){
-	            e.target.style.background ='rgba(0,0,0,0.2)';
-	            e.target.style.color = this.fontColor; 
-	        }
-
-
-	        if( this.isUI ) this.main.lockwheel = false;
-	        this.listup();
-	        //var name = e.relatedTarget.name;
-	        //if( name === undefined ) this.close();
-
-	        
-
-	    },
-
-	    listwheel: function( e ){
-
-	        if( !this.scroll ) return;
-	        if( this.isUI ) this.main.lockwheel = true;
-	        var delta = 0;
-	        if( e.wheelDeltaY ) delta = -e.wheelDeltaY*0.04;
-	        else if( e.wheelDelta ) delta = -e.wheelDelta*0.2;
-	        else if( e.detail ) delta = e.detail*4.0;
-
-	        this.py += delta;
-
-	        this.update(this.py);
-
-	    },
-
-
-	    // ----- LIST
-
-	    update: function( y ){
+	    update: function ( y ) {
 
 	        if( !this.scroll ) return;
 
 	        y = y < 0 ? 0 : y;
 	        y = y > this.range ? this.range : y;
 
-	        this.listIn.style.top = -Math.floor( y / this.ratio )+'px';
+	        this.topList = -Math.floor( y / this.ratio );
+
+	        this.listIn.style.top = this.topList+'px';
 	        this.scroller.style.top = Math.floor( y )  + 'px';
 
 	        this.py = y;
 
 	    },
 
-	    open: function(){
+	    parentHeight: function ( t ) {
+
+	        if ( this.parentGroup !== null ) this.parentGroup.calc( t );
+	        else if ( this.isUI ) this.main.calc( t );
+
+	    },
+
+	    open: function () {
 
 	        Proto.prototype.open.call( this );
 
-	        document.addEventListener( 'click', this, false );
-
 	        this.update( 0 );
-	        this.h = this.maxHeight + this.baseH + 10;
+	        this.h = this.maxHeight + this.baseH + 5;
 	        if( !this.scroll ){
-	            this.h = this.baseH + 10 + this.max;
+	            this.topList = 0;
+	            this.h = this.baseH + 5 + this.max;
 	            this.scroller.style.display = 'none';
 	        } else {
 	            this.scroller.style.display = 'block';
 	        }
 	        this.s[0].height = this.h + 'px';
 	        this.s[2].display = 'block';
-	        if( this.side === 'up' ) Tools.setSvg( this.c[4], 'd','M 5 2 L 2 7 8 7 5 2 Z');
-	        else Tools.setSvg( this.c[4], 'd','M 5 8 L 8 3 2 3 5 8 Z');
+
+	        if( this.up ){ 
+	            this.zone.y -= this.h - (this.baseH-10);
+	            this.setSvg( this.c[4], 'd', this.svgs.arrowUp );
+	        } else {
+	            this.setSvg( this.c[4], 'd', this.svgs.arrowDown );
+	        }
 
 	        this.rSizeContent();
 
-	        if( this.parentGroup !== null ) this.parentGroup.calc( this.h - this.baseH );
-	        else if( this.isUI ) this.main.calc( this.h - this.baseH );
+	        var t = this.h - this.baseH;
+
+	        this.zone.h = this.h;
+
+	        this.parentHeight( t );
 
 	    },
 
-	    close: function(){
+	    close: function () {
 
 	        Proto.prototype.close.call( this );
 
-	        document.removeEventListener( 'click', this, false );
+	        if( this.up ) this.zone.y += this.h - (this.baseH-10);
 
-	        if( this.parentGroup !== null ) this.parentGroup.calc( -(this.h-this.baseH) );
-	        else if( this.isUI ) this.main.calc(-(this.h-this.baseH));
+	        var t = this.h - this.baseH;
 
 	        this.h = this.baseH;
 	        this.s[0].height = this.h + 'px';
 	        this.s[2].display = 'none';
-	        Tools.setSvg( this.c[4], 'd','M 3 8 L 8 5 3 2 3 8 Z');
-	        
+	        this.setSvg( this.c[4], 'd', this.svgs.arrow );
+
+	        this.zone.h = this.h;
+
+	        this.parentHeight( -t );
+
 	    },
 
 	    // -----
 
-	    text: function( txt ){
+	    text: function ( txt ) {
 
 	        this.c[3].textContent = txt;
 
@@ -3026,7 +4135,7 @@
 	    rSizeContent: function () {
 
 	        var i = this.length;
-	        while(i--) this.listIn.children[i].style.width = this.w + 'px';
+	        while(i--) this.listIn.children[i].style.width = this.ww + 'px';
 
 	    },
 
@@ -3046,12 +4155,8 @@
 
 	        s[4].left = d + w - 17 + 'px';
 
-	        //s[5].width = w + 'px';
-	        //s[5].left = d + 'px';
-
-	        this.w = w;
-	        if( this.max > this.maxHeight ) this.w = w-20;
-
+	        this.ww = w;
+	        if( this.max > this.maxHeight ) this.ww = w-20;
 	        if(this.isOpen) this.rSizeContent();
 
 	    }
@@ -3062,19 +4167,17 @@
 
 	    Proto.call( this, o );
 
-	    this.type = 'number';
-
 	    this.setTypeNumber( o );
 
-	    this.allway = o.allway || false;
-	    this.isDrag = o.drag === undefined ? true : o.drag;
+	    //this.allway = o.allway || false;
+
+	    this.isDown = false;
 
 	    this.value = [0];
 	    this.toRad = 1;
 	    this.isNumber = true;
 	    this.isAngle = false;
 	    this.isVector = false;
-	    this.isSelect = false;
 
 	    if( o.value !== undefined ){
 	        if(!isNaN(o.value)){ this.value = [o.value];}
@@ -3089,28 +4192,29 @@
 	        }
 	    }
 
-	    this.length = this.value.length;
+	    this.lng = this.value.length;
+	    this.tmp = [];
 
 	    if(o.isAngle){
 	        this.isAngle = true;
 	        this.toRad = Math.PI/180;
 	    }
 
-	    //this.w = ((Tools.base.BW+5)/(this.length))-5;
-	    this.current = undefined;
+	    this.current = -1;
+	    this.prev = { x:0, y:0, d:0, v:0 };
+
+	    this.cMode = [];
 	    
-	    var i = this.length;
+	    var i = this.lng;
 	    while(i--){
 	        if(this.isAngle) this.value[i] = (this.value[i] * 180 / Math.PI).toFixed( this.precision );
-	        this.c[2+i] = Tools.dom( 'div', Tools.css.txtselect + 'letter-spacing:-1px; cursor:pointer; height:'+(this.h-4)+'px; line-height:'+(this.h-8)+'px;');
-	        this.c[2+i].name = i;
-	        if(this.isDrag) this.c[2+i].style.cursor = 'move';
+	        this.c[2+i] = this.dom( 'div', this.css.txtselect + 'letter-spacing:-1px; height:'+(this.h-4)+'px; line-height:'+(this.h-8)+'px;');
 	        if(o.center) this.c[2+i].style.textAlign = 'center';
-
 	        this.c[2+i].textContent = this.value[i];
 	        this.c[2+i].style.color = this.fontColor;
-	        //this.c[2+i].contentEditable = true;
-	        this.c[2+i].events = [ 'keydown', 'keyup', 'mousedown', 'blur', 'focus' ]; //'click', 
+	        this.c[2+i].isNum = true;
+
+	        this.cMode[i] = 0;
 
 	    }
 
@@ -3121,27 +4225,161 @@
 
 	    constructor: Numeric,
 
-	    handleEvent: function( e ) {
+	    testZone: function ( e ) {
 
-	        //e.preventDefault();
-	        //e.stopPropagation();
+	        var l = this.local;
+	        if( l.x === -1 && l.y === -1 ) return '';
 
-	        switch( e.type ) {
-	            //case 'click': this.click( e ); break;
-	            case 'mousedown': this.down( e ); break;
-	            case 'keydown': this.keydown( e ); break;
-	            case 'keyup': this.keyup( e ); break;
+	        var i = this.lng;
+	        var t = this.tmp;
+	        
 
-	            case 'blur': this.blur( e ); break;
-	            case 'focus': this.focus( e ); break;
+	        while( i-- ){
+	            if( l.x>t[i][0] && l.x<t[i][2] ) return i;
+	        }
 
-	            // document
-	            case 'mouseup': this.up( e ); break;
-	            case 'mousemove': this.move( e ); break;
+	        return ''
+
+	    },
+
+	    mode: function ( n, name ) {
+
+	        if( n === this.cMode[name] ) return false;
+
+	        var m;
+
+	        switch(n){
+
+	            case 0: m = this.colors.border; break;
+	            case 1: m = this.colors.borderOver; break;
+	            case 2: m = this.colors.borderSelect;  break;
+
+	        }
+
+	        this.reset();
+	        this.c[name+2].style.borderColor = m;
+	        this.cMode[name] = n;
+
+	        return true;
+
+	    },
+
+	    // ----------------------
+	    //   EVENTS
+	    // ----------------------
+
+	    mousedown: function ( e ) {
+
+	        //if( this.isSelect ) return;
+
+	        var name = this.testZone( e );
+
+	        if( name === '' ) return false;
+
+
+	        this.current = name;
+	        this.isDown = true;
+
+	        this.prev = { x:e.clientX, y:e.clientY, d:0, v: this.isNumber ? parseFloat(this.value) : parseFloat( this.value[this.current] )  };
+
+
+	        return this.mode( 2, name );
+
+	    },
+
+	    mouseup: function ( e ) {
+
+	        var name = this.testZone( e );
+	        this.isDown = false;
+
+	        if( this.current !== -1 ){ 
+
+	            //var tm = this.current;
+	            var td = this.prev.d;
+
+	            this.current = -1;
+	            this.prev = { x:0, y:0, d:0, v:0 };
+
+	            if( !td ){
+
+	                this.setInput( this.c[ name+2 ], function(){ this.testValue(); }.bind(this) );
+	                return true;//this.mode( 2, name );
+
+	            } else {
+	                return this.reset();//this.mode( 0, tm );
+	            }
 
 	        }
 
 	    },
+
+	    mousemove: function ( e ) {
+
+	        var nup = false;
+
+	        var name = this.testZone( e );
+
+	        if( name === '' ){
+
+	            nup = this.reset();
+	            this.cursor();
+
+	        } else { 
+
+	            nup = this.mode( 1, name );
+	            this.cursor( this.current !== -1 ? 'move' : 'pointer' );
+
+	        }
+
+	        
+
+	        if( this.current !== -1 ){
+
+
+	            this.prev.d += ( e.clientX - this.prev.x ) - ( e.clientY - this.prev.y );
+
+	            var n = this.prev.v + ( this.prev.d * this.step);
+
+	            this.value[this.current] = this.numValue(n);
+	            this.c[2+this.current].textContent = this.value[this.current];
+
+	            this.validate();
+
+	            this.prev.x = e.clientX;
+	            this.prev.y = e.clientY;
+
+	            nup = true;
+	        }
+
+
+	        return nup;
+
+
+
+	    },
+
+	    keydown: function ( e ) { return true; },
+
+	    // ----------------------
+
+	    reset: function () {
+
+	        var nup = false;
+	        this.isDown = false;
+
+	        var i = this.lng;
+	        while(i--){ 
+	            if(this.cMode[i]!==0){
+	                this.cMode[i] = 0;
+	                this.c[2+i].style.borderColor = this.colors.border;
+	                nup = true;
+	            }
+	        }
+
+	        return nup;
+
+	    },
+
 
 	    setValue: function ( v, n ) {
 
@@ -3151,147 +4389,47 @@
 
 	    },
 
-	    keydown: function ( e ) {
+	    testValue: function () {
 
-	        e.stopPropagation();
+	        var i = this.lng;
+	        while(i--){
 
-	        if( e.keyCode === 13 ){
-	            e.preventDefault();
-	            this.testValue( parseFloat(e.target.name) );
-	            this.validate();
-	            e.target.blur();
-	        }
-
-	    },
-
-	    keyup: function ( e ) {
-	        
-	        e.stopPropagation();
-
-	        if( this.allway ){ 
-	            this.testValue( parseFloat(e.target.name) );
-	            this.validate();
-	        }
-
-	    },
-
-	    blur: function ( e ) {
-
-	        this.isSelect = false;
-	        e.target.style.borderColor = Tools.colors.border;
-	        e.target.contentEditable = false;
-	        //e.target.style.border = '1px solid rgba(255,255,255,0.1)';
-	        if(this.isDrag) e.target.style.cursor = 'move';
-	        else  e.target.style.cursor = 'pointer';
-
-	    },
-
-	    focus: function ( e ) {
-
-	        this.isSelect = true;
-	        this.current = undefined;
-	        e.target.style.borderColor = Tools.colors.borderSelect;
-	        
-	        //e.target.style.border = '1px solid ' + UIL.BorderSelect;
-	        if(this.isDrag) e.target.style.cursor = 'auto';
-
-	    },
-
-	    down: function ( e ) {
-
-	        if(this.isSelect) return;
-
-	        e.preventDefault();
-
-	        this.current = parseFloat(e.target.name);
-
-	        this.prev = { x:e.clientX, y:e.clientY, d:0, id:(this.current+2)};
-	        if( this.isNumber ) this.prev.v = parseFloat(this.value);
-	        else this.prev.v = parseFloat( this.value[this.current] );
-
-
-
-	        document.addEventListener( 'mouseup', this, false );
-	        if(this.isDrag) document.addEventListener( 'mousemove', this, false );
-
-	    },
-
-	    ////
-
-	    up: function( e ){
-
-	        e.preventDefault();
-
-	        document.removeEventListener( 'mouseup', this, false );
-	        if(this.isDrag) document.removeEventListener( 'mousemove', this, false );
-
-	        if(this.current !== undefined){ 
-
-	            if( this.current === parseFloat(e.target.name) ){ 
-	                e.target.contentEditable = true;
-	                e.target.focus();
+	            if(!isNaN( this.c[2+i].textContent )){ 
+	                var nx = this.numValue( this.c[2+i].textContent );
+	                this.c[2+i].textContent = nx;
+	                this.value[i] = nx;
+	            } else { // not number
+	                this.c[2+i].textContent = this.value[i];
 	            }
-
 	        }
-
-	    },
-
-	    move: function( e ){
-
-	        e.preventDefault();
-
-	        if( this.current === undefined ) return;
-
-	        this.prev.d += ( e.clientX - this.prev.x ) - ( e.clientY - this.prev.y );
-	        var n = this.prev.v + ( this.prev.d * this.step);
-
-	        this.value[this.current] = this.numValue(n);
-	        //this.c[2+this.current].value = this.value[this.current];
-
-	        this.c[2+this.current].textContent = this.value[this.current];
 
 	        this.validate();
 
-	        this.prev.x = e.clientX;
-	        this.prev.y = e.clientY;
-
 	    },
 
-	    /////
-
-	    testValue: function( n ){
-
-	        if(!isNaN( this.c[2+n].textContent )){ 
-	            var nx = this.numValue( this.c[2+n].textContent );
-	            this.c[2+n].textContent = nx;
-	            this.value[n] = nx;
-	        } else { // not number
-	            this.c[2+n].textContent = this.value[n];
-	        }
-
-	    },
-
-	    validate: function(){
+	    validate: function () {
 
 	        var ar = [];
-	        var i = this.length;
-	        while(i--) ar[i] = this.value[i]*this.toRad;
+	        var i = this.lng;
+	        while(i--) ar[i] = this.value[i] * this.toRad;
 
 	        if( this.isNumber ) this.send( ar[0] );
 	        else this.send( ar );
 
 	    },
 
-	    rSize: function(){
+	    rSize: function () {
 
 	        Proto.prototype.rSize.call( this );
 
-	        this.w = ~~( ( this.sb + 5 ) / this.length )-5;
+	        var w = Math.floor( ( this.sb + 5 ) / this.lng )-5;
 	        var s = this.s;
-	        var i = this.length;
+	        var i = this.lng;
 	        while(i--){
-	            s[2+i].left = (~~( this.sa + ( this.w * i )+( 5 * i ))) + 'px';
-	            s[2+i].width = this.w + 'px';
+	            this.tmp[i] = [ Math.floor( this.sa + ( w * i )+( 5 * i )), w ];
+	            this.tmp[i][2] = this.tmp[i][0] + this.tmp[i][1];
+	            s[2+i].left = this.tmp[i][0] + 'px';
+	            s[2+i].width = this.tmp[i][1] + 'px';
 	        }
 
 	    }
@@ -3305,21 +4443,20 @@
 	    this.setTypeNumber( o );
 
 	    this.stype = o.stype || 0;
-	    this.buttonColor = o.bColor || Tools.colors.button;
+	    this.buttonColor = o.bColor || this.colors.button;
 
-	    //this.old = this.value;
 	    this.isDown = false;
 	    this.isOver = false;
 	    this.allway = o.allway || false;
 
-	    this.c[2] = Tools.dom( 'div', Tools.css.txtselect + 'letter-spacing:-1px; padding:2px 5px; text-align:right; cursor:pointer; width:47px; border:none; color:'+ this.fontColor );
-	    this.c[3] = Tools.dom( 'div', Tools.css.basic + 'pointer-events:auto; cursor:w-resize; top:0; height:'+this.h+'px;' );
-	    //this.c[4] = Tools.dom( 'div', Tools.css.basic + 'border:1px solid '+this.buttonColor+'; pointer-events:none; background:rgba(0,0,0,0.3); top:2px; height:'+(this.h-4)+'px;' );
-	    this.c[4] = Tools.dom( 'div', Tools.css.basic + 'pointer-events:none; background:rgba(0,0,0,0.3); top:2px; height:'+(this.h-4)+'px;' );
-	    this.c[5] = Tools.dom( 'div', Tools.css.basic + 'left:4px; top:5px; height:'+(this.h-10)+'px; background:' + this.fontColor +';' );
+	    this.firstImput = false;
 
-	    this.c[2].name = 'text';
-	    this.c[3].name = 'scroll';
+	    this.c[2] = this.dom( 'div', this.css.txtselect + 'letter-spacing:-1px; text-align:right; width:47px; border:1px dashed '+this.colors.hide+'; color:'+ this.fontColor );
+	    this.c[3] = this.dom( 'div', this.css.basic + ' top:0; height:'+this.h+'px;' );
+	    this.c[4] = this.dom( 'div', this.css.basic + 'background:rgba(0,0,0,0.3); top:2px; height:'+(this.h-4)+'px;' );
+	    this.c[5] = this.dom( 'div', this.css.basic + 'left:4px; top:5px; height:'+(this.h-10)+'px; background:' + this.fontColor +';' );
+
+	    this.c[2].isNum = true;
 
 	    if(this.stype !== 0){
 	        if(this.stype === 1 || this.stype === 3){
@@ -3345,11 +4482,8 @@
 	        this.c[5].style.height = h1 + 'px';
 	        this.c[5].style.top = (this.h*0.5)-(h1*0.5) + 'px';
 
-	        this.c[6] = Tools.dom( 'div', Tools.css.basic + 'border-radius:'+ra+'px; margin-left:'+(-ww*0.5)+'px; border:1px solid '+Tools.colors.border+'; background:'+this.buttonColor+'; left:4px; top:2px; height:'+(this.h-4)+'px; width:'+ww+'px;' );
+	        this.c[6] = this.dom( 'div', this.css.basic + 'border-radius:'+ra+'px; margin-left:'+(-ww*0.5)+'px; border:1px solid '+this.colors.border+'; background:'+this.buttonColor+'; left:4px; top:2px; height:'+(this.h-4)+'px; width:'+ww+'px;' );
 	    }
-
-	    this.c[3].events = [ 'mouseover', 'mousedown', 'mouseout' ];
-	    this.c[2].events = [ 'keydown', 'keyup', 'mousedown', 'blur', 'focus' ];
 
 	    this.init();
 
@@ -3359,25 +4493,102 @@
 
 	    constructor: Slide,
 
-	    handleEvent: function ( e ) {
+	    testZone: function ( e ) {
 
-	        //e.preventDefault();
+	        var l = this.local;
+	        if( l.x === -1 && l.y === -1 ) return '';
+	        
+	        if( l.x >= this.txl ) return 'text';
+	        else if( l.x >= this.sa ) return 'scroll';
+	        else return '';
 
-	        //console.log(e.target.name)
+	    },
 
-	        switch( e.type ) {
-	            case 'mouseover': this.over( e ); break;
-	            case 'mousedown': e.target.name === 'text' ? this.textdown( e ) : this.down( e ); break;
-	            case 'mouseout': this.out( e ); break;
+	    // ----------------------
+	    //   EVENTS
+	    // ----------------------
 
-	            case 'mouseup': this.up( e ); break;
-	            case 'mousemove': if(this.isDown) this.move( e ); break;
+	    mouseup: function ( e ) {
+	        
+	        if(this.isDown) this.isDown = false;
+	        
+	    },
 
-	            case 'blur': this.blur( e ); break;
-	            case 'focus': this.focus( e ); break;
-	            case 'keydown': this.keydown( e ); break;
-	            case 'keyup': this.keyup( e ); break;
+	    mousedown: function ( e ) {
+
+	        var name = this.testZone( e );
+
+	        if( !name ) return false;
+
+	        if( name === 'scroll' ){ 
+	            this.isDown = true;
+	            this.old = this.value;
+	            this.mousemove( e );
+	            
 	        }
+
+	        if( name === 'text' ){
+	            this.setInput( this.c[2], function(){ this.validate(); }.bind(this) );
+	        }
+
+	        return true;
+
+	    },
+
+	    mousemove: function ( e ) {
+
+	        var nup = false;
+
+	        var name = this.testZone( e );
+
+	        if( name === 'scroll' ) {
+	            this.mode(1);
+	            this.cursor('w-resize');
+	        } else if(name === 'text'){ 
+	            this.cursor('pointer');
+	        } else {
+	            this.cursor();
+	        }
+
+	        if( this.isDown ){
+
+	            var n = ((( e.clientX - (this.zone.x+this.sa) - 3 ) / this.ww ) * this.range + this.min ) - this.old;
+	            if(n >= this.step || n <= this.step){ 
+	                n = Math.floor( n / this.step );
+	                this.value = this.numValue( this.old + ( n * this.step ) );
+	                this.update( true );
+	                this.old = this.value;
+	            }
+	            nup = true;
+	        }
+
+	        return nup;
+
+	    },
+
+	    keydown: function ( e ) { return true; },
+
+	    // ----------------------
+
+	    validate: function () {
+	        
+	        var n = this.c[2].textContent;
+
+	        if(!isNaN( n )){ 
+	            this.value = this.numValue( n ); 
+	            this.update(true); 
+	        }
+
+	        else this.c[2].textContent = this.value;
+
+	    },
+
+
+	    reset: function () {
+
+	        //this.clearInput();
+	        this.isDown = false;
+	        this.mode(0);
 
 	    },
 
@@ -3387,112 +4598,60 @@
 
 	        switch(mode){
 	            case 0: // base
+	               // s[2].border = '1px solid ' + this.colors.hide;
 	                s[2].color = this.fontColor;
 	                s[4].background = 'rgba(0,0,0,0.3)';
 	                s[5].background = this.fontColor;
 	            break;
-	            case 1: // over
+	            case 1: // scroll over
+	                //s[2].border = '1px dashed ' + this.colors.hide;
 	                s[2].color = this.colorPlus;
-	               // if( !s[6] ) s[4].background = UIL.SlideBG;
-	               // else 
 	                s[4].background = 'rgba(0,0,0,0.6)';
 	                s[5].background = this.colorPlus;
 	            break;
+	           /* case 2: 
+	                s[2].border = '1px solid ' + this.colors.borderSelect;
+	            break;
+	            case 3: 
+	                s[2].border = '1px dashed ' + this.fontColor;//this.colors.borderSelect;
+	            break;
+	            case 4: 
+	                s[2].border = '1px dashed ' + this.colors.hide;
+	            break;*/
+
+
 	        }
 	    },
 
-	    over: function( e ){
+	    update: function ( up ) {
 
-	        e.preventDefault();
-	        e.stopPropagation();
-
-	        this.isOver = true;
-	        this.mode(1);
-
-	    },
-
-	    out: function( e ){
-
-	        e.preventDefault();
-	        e.stopPropagation();
-
-	        this.isOver = false;
-	        if(this.isDown) return;
-	        this.mode(0);
-
-	    },
-
-	    up: function( e ){
-
-	        e.preventDefault();
-	        e.stopPropagation();
-
-	        this.isDown = false;
-	        document.removeEventListener( 'mouseup', this, false );
-	        document.removeEventListener( 'mousemove', this, false );
-
-	        if(this.isOver) this.mode(1);
-	        else this.mode(0);
-
-	        this.sendEnd();
-	        
-	    },
-
-	    down: function( e ){
-
-	        e.preventDefault();
-	        e.stopPropagation();
-
-	        this.isDown = true;
-	        document.addEventListener( 'mouseup', this, false );
-	        document.addEventListener( 'mousemove', this, false );
-
-	        this.left = this.c[3].getBoundingClientRect().left;
-	        this.old = this.value;
-	        this.move( e );
-
-	    },
-
-	    move: function( e ){
-
-	        var n = ((( e.clientX - this.left - 3 ) / this.w ) * this.range + this.min ) - this.old;
-	        if(n >= this.step || n <= this.step){ 
-	            n = ~~ ( n / this.step );
-	            this.value = this.numValue( this.old + ( n * this.step ) );
-	            this.update( true );
-	            this.old = this.value;
-	        }
-
-	    },
-
-	    update: function( up ){
-
-	        var ww = this.w * (( this.value - this.min ) / this.range );
+	        var ww = Math.floor( this.ww * (( this.value - this.min ) / this.range ));
 	       
-	        if(this.stype !== 3) this.s[5].width = ~~ ww + 'px';
-	        if(this.s[6]) this.s[6].left = ~~ (this.sa +ww + 3) + 'px';
+	        if(this.stype !== 3) this.s[5].width = ww + 'px';
+	        if(this.s[6]) this.s[6].left = ( this.sa + ww + 3 ) + 'px';
 	        this.c[2].textContent = this.value;
 
 	        if( up ) this.send();
 
 	    },
 
-	    rSize: function(){
+	    rSize: function () {
 
 	        Proto.prototype.rSize.call( this );
 
 	        var w = this.sb - this.sc;
-	        this.w = w - 6;
+	        this.ww = w - 6;
 
 	        var tx = this.sc;
 	        if(this.isUI || !this.simple) tx = this.sc+10;
+	        this.txl = this.w - tx + 2;
 
-	        var ty = ~~(this.h * 0.5) - 8;
+	        var ty = Math.floor(this.h * 0.5) - 8;
 
 	        var s = this.s;
 
 	        s[2].width = (this.sc -2 )+ 'px';
-	        s[2].left = (this.width - tx +2) + 'px';
+	        s[2].left = this.txl + 'px';
 	        s[2].top = ty + 'px';
 	        s[3].left = this.sa + 'px';
 	        s[3].width = w + 'px';
@@ -3504,74 +4663,21 @@
 
 	    },
 
-	    // text
-
-	    validate: function( e ){
-
-	        if(!isNaN( this.c[2].textContent )){ 
-	            this.value = this.numValue( this.c[2].textContent ); 
-	            this.update(true); 
-	        }
-	        else this.c[2].textContent = this.value;
-
-	    },
-
-	    textdown: function( e ){
-
-	        e.target.contentEditable = true;
-	        e.target.focus();
-	        this.isEdit = true;
-
-	    },
-
-	    keydown: function( e ){
-
-	        e.stopPropagation();
-
-	        if( e.keyCode === 13 ){
-	            e.preventDefault();
-	            this.validate();
-	            e.target.blur();
-	        }
-
-	    },
-
-	    keyup: function( e ){
-	        
-	        e.stopPropagation();
-	        if( this.allway ) this.validate();
-
-	    },
-
-	    blur: function( e ){
-
-	        e.target.style.border = 'none';
-	        e.target.contentEditable = false;
-	        this.isEdit = false;
-
-	    },
-
-	    focus: function( e ){
-
-	        e.target.style.border = '1px dashed ' + Tools.colors.borderSelect;
-
-	    }
-
 	} );
 
 	function TextInput( o ){
 
 	    Proto.call( this, o );
 
+	    this.cmode = 0;
+
 	    this.value = o.value || '';
 	    this.allway = o.allway || false;
+	    this.firstImput = false;
 
-	    this.c[2] = Tools.dom( 'div',  Tools.css.txtselect );
-	    this.c[2].name = 'input';
-	    //this.c[2].style.color = ;
+	    this.c[2] = this.dom( 'div', this.css.txtselect );
 	    this.c[2].textContent = this.value;
 
-	    this.c[2].events = [ 'mousedown', 'keydown', 'keyup', 'blur', 'focus' ];
 
 	    this.init();
 
@@ -3581,71 +4687,75 @@
 
 	    constructor: TextInput,
 
-	    handleEvent: function( e ) {
+	    // ----------------------
+	    //   EVENTS
+	    // ----------------------
 
-	        switch( e.type ) {
-	            case 'mousedown': this.down( e ); break;
-	            case 'blur': this.blur( e ); break;
-	            case 'focus': this.focus( e ); break
-	            case 'keydown': this.keydown( e ); break;
-	            case 'keyup': this.keyup( e ); break;
+	    mousedown: function ( e ) {
+
+
+
+	        this.setInput( this.c[2], function(){ this.validate(); }.bind(this) );
+	        return this.mode(2);
+
+	    },
+
+	    mousemove: function ( e ) {
+
+	        return this.mode(1);
+
+	    },
+
+	    keydown: function ( e ) { return true; },
+
+	    mode: function ( n ) {
+
+	        if( n === this.cmode ) return false;
+
+	        var m;
+
+	        switch ( n ) {
+
+	            case 0: m = this.colors.border; break;
+	            case 1: m = this.colors.borderOver; break;
+	            case 2: m = this.colors.borderSelect;  break;
+
 	        }
 
-	    },
-
-	    down: function( e ){
-
-	        e.target.contentEditable = true;
-	        e.target.focus();
-	        e.target.style.cursor = 'auto';
+	        this.c[2].style.borderColor = m;
+	        this.cmode = n;
+	        return true;
 
 	    },
 
-	    blur: function( e ){
+	    reset: function () {
 
-	        e.target.style.borderColor = Tools.colors.border;
-	        e.target.contentEditable = false;
-
-	    },
-
-	    focus: function( e ){
-
-	        e.target.style.borderColor = Tools.colors.borderSelect;
+	        this.mode(0);
 
 	    },
 
-	    keydown: function( e ){
-	        
-	        e.stopPropagation();
+	    // ----------------------
 
-	        if( e.keyCode === 13 ){ 
-	            e.preventDefault();
-	            this.value = e.target.textContent;
-	            e.target.blur();
-	            this.send();
-	        }
-
-	    },
-
-	    keyup: function( e ){
-	        
-	        e.stopPropagation();
-
-	        this.value = e.target.textContent;
-	        if( this.allway ) this.send();
-	        
-	    },
-
-	    rSize: function(){
+	    rSize: function () {
 
 	        Proto.prototype.rSize.call( this );
-	        this.s[2].color = this.fontColor;
-	        this.s[2].left = this.sa + 'px';
-	        this.s[2].width = this.sb + 'px';
-	        this.s[2].height = this.h -4 + 'px';
-	        this.s[2].lineHeight = this.h - 8 + 'px';
+
+	        var s = this.s;
+	        s[2].color = this.fontColor;
+	        s[2].left = this.sa + 'px';
+	        s[2].width = this.sb + 'px';
+	        s[2].height = this.h -4 + 'px';
+	        s[2].lineHeight = this.h - 8 + 'px';
 	     
-	    }
+	    },
+
+	    validate: function () {
+
+	        this.value = this.c[2].textContent;
+	        this.send();
+
+	    },
+
 
 	} );
 
@@ -3653,10 +4763,9 @@
 	    
 	    Proto.call( this, o );
 
-	    //var id = o.id || 0;
 	    var prefix = o.prefix || '';
 
-	    this.c[2] = Tools.dom( 'div', Tools.css.txt + 'text-align:right; width:60px; line-height:'+ (this.h-8) + 'px; color:' + this.fontColor );
+	    this.c[2] = this.dom( 'div', this.css.txt + 'text-align:right; width:60px; line-height:'+ (this.h-8) + 'px; color:' + this.fontColor );
 
 	    if( this.h === 31 ){
 
@@ -3692,47 +4801,31 @@
 	    rSize: function () {
 
 	        Proto.prototype.rSize.call( this );
-	        this.s[1].width = this.width-50 + 'px';
-	        this.s[2].left = this.width-(50+26) + 'px';
+	        this.s[1].width = this.w - 50 + 'px';
+	        this.s[2].left = this.w - ( 50 + 26 ) + 'px';
 
 	    },
 
 	} );
 
-	function getType( name, o ) {
+	/*function autoType () {
 
-	        var n = null;
+	    var a = arguments;
+	    var type = 'Slide';
+	    if( a[2].type ) type = a[2].type;
+	    return type;
 
-	        switch( name ){
+	};*/
 
-	            case 'Bool': case 'bool': n = new Bool(o); break;
-	            case 'Button': case 'button': n = new Button(o); break;
-	            case 'Circular': case 'circular': n = new Circular(o); break;
-	            case 'Color': case 'color': n = new Color(o); break;
-	            case 'Fps': case 'fps': n = new Fps(o); break;
-	            case 'Group': case 'group': n = new Group(o); break;
-	            case 'Joystick': case 'joystick': n = new Joystick(o); break;
-	            case 'Knob': case 'knob': n = new Knob(o); break;
-	            case 'List': case 'list': n = new List(o); break;
-	            case 'Numeric':case 'Number': case 'numeric':case 'number': n = new Numeric(o); break;
-	            case 'Slide': case 'slide': n = new Slide(o); break;
-	            case 'TextInput':case 'String': case 'textInput':case 'string': n = new TextInput(o); break;
-	            case 'Title': case 'title': n = new Title(o); break;
-
-	        }
-
-	        return n;
-	}
-
-	function add (){
+	function add () {
 
 	    var a = arguments; 
 
-	    var type, o, ref = false;
+	    var type, o, ref = false, n = null;
 
 	    if( typeof a[0] === 'string' ){ 
 
-	        type = a[0];//[0].toUpperCase() + a[0].slice(1);
+	        type = a[0];
 	        o = a[1] || {};
 
 	    } else if ( typeof a[0] === 'object' ){ // like dat gui
@@ -3740,50 +4833,76 @@
 	        ref = true;
 	        if( a[2] === undefined ) [].push.call(a, {});
 
-	        type = autoType.apply( this, a );
+	        type = a[2].type ? a[2].type : 'slide';//autoType.apply( this, a );
 
 	        o = a[2];
-
 	        o.name = a[1];
 	        o.value = a[0][a[1]];
 
 	    }
 
-	    var n = getType( type, o );
+	    var name = type.toLowerCase();
 
-	    if(n !== null ){
+	    switch( name ){
+
+	        case 'bool': n = new Bool(o); break;
+	        case 'button': n = new Button(o); break;
+	        case 'circular': n = new Circular(o); break;
+	        case 'color': n = new Color(o); break;
+	        case 'fps': n = new Fps(o); break;
+	        case 'graph': n = new Graph(o); break;
+	        case 'group': n = new Group(o); break;
+	        case 'joystick': n = new Joystick(o); break;
+	        case 'knob': n = new Knob(o); break;
+	        case 'list': n = new List(o); break;
+	        case 'numeric': case 'number': n = new Numeric(o); break;
+	        case 'slide': n = new Slide(o); break;
+	        case 'textInput': case 'string': n = new TextInput(o); break;
+	        case 'title': n = new Title(o); break;
+
+	    }
+
+	    if( n !== null ){
+
 	        if( ref ) n.setReferency( a[0], a[1] );
 	        return n;
+
 	    }
 	    
 
 	}
 
-	function autoType () {
-
-	    var a = arguments;
-
-	    var type = 'Slide';
-
-	    if(a[2].type) type = a[2].type;
-
-	    return type;
-
-	}
-
-	var REVISION = '1.0';
-
 	/**
-	 * @author lo-th / https://github.com/lo-th
+	 * @author lth / https://github.com/lo-th
 	 */
 
 	function Gui ( o ) {
 
+	    this.canvas = null;
+
 	    o = o || {};
 
-	    // css plus
-	    this.css = o.css !== undefined ? o.css : '';
+	    if( o.transparent !== undefined ){
+	        Tools.colors.background = 'none';
+	        Tools.colors.backgroundOver = 'none';
+	    }
 
+	    //if( o.callback ) this.callback =  o.callback;
+
+	    this.isReset = true;
+
+	    this.tmpAdd = null;
+	    this.tmpH = 0;
+
+	    this.isCanvas = o.isCanvas || false;
+	    this.isCanvasOnly = false;
+	    this.css = o.css !== undefined ? o.css : '';
+	    this.callback = o.callback  === undefined ? null : o.callback;
+
+	    this.forceHeight = o.maxHeight || 0;
+
+	    this.cn = '';
+	    
 	    // size define
 	    this.size = Tools.size;
 	    if( o.p !== undefined ) this.size.p = o.p;
@@ -3793,112 +4912,131 @@
 
 	    this.size.h = this.size.h < 11 ? 11 : this.size.h;
 
-	    this.width = this.size.w;
+	    // local mouse and zone
+	    this.local = new V2().neg();
+	    this.zone = { x:0, y:0, w:this.size.w, h:0 };
 
-	    // bottom height
-	    this.bh = this.size.h;
+	    // virtual mouse
+	    this.mouse = new V2().neg();
 
-
-
-
-	    //this.width = o.width !== undefined ? o.width : Tools.size.width;
-	    //this.width = o.size !== undefined ? o.size : this.width;
-
-
-	    // tmp variable
-	    this.height = 0;
-	    this.left = 0;
 	    this.h = 0;
 	    this.prevY = -1;
 	    this.sw = 0;
-
 
 	    // color
 	    this.colors = Tools.colors;
 	    this.bg = o.bg || Tools.colors.background;
 
 	    // bottom and close height
-	    this.isWithClose = true;
-	    
+	    this.isWithClose = o.close !== undefined ? o.close : true;
+	    this.bh = !this.isWithClose ? 0 : this.size.h;
 
-	    //this.baseH = Tools.size.height;
-
-	    if(o.close !== undefined ){
-	        this.isWithClose = o.close;
-	        this.bh = !this.isWithClose ? 0 : this.bh;
-	    }
-
-
-
-	    
-
-	    Tools.main = this;
-
-	    this.callback = o.callback  === undefined ? null : o.callback;
-
-	   
+	    this.autoResize = o.autoResize === undefined ? true : o.autoResize;
 	    
 	    this.isCenter = o.center || false;
-	    this.lockwheel = false;
-	    this.onWheel = false;
 	    this.isOpen = true;
+	    this.isDown = false;
+	    this.isScroll = false;
 
 	    this.uis = [];
 
-	    this.content = Tools.dom( 'div', Tools.css.basic + 'display:block; width:'+this.width+'px; height:auto; top:0; right:10px; transition:height 0.1s ease-out;' + this.css );
-	    if( o.parent !== undefined ) o.parent.appendChild( this.content );
-	    else document.body.appendChild( this.content );
+	    this.current = -1;
+	    this.target = null;
+	    this.decal = 0;
+	    this.ratio = 1;
+	    this.oy = 0;
+
+	    this.content = Tools.dom( 'div', Tools.css.basic + ' width:0px; height:auto; top:0px; ' + this.css );
 
 	    this.innerContent = Tools.dom( 'div', Tools.css.basic + 'width:100%; top:0; left:0; height:auto; overflow:hidden;');
 	    this.content.appendChild( this.innerContent );
 
-	    this.inner = Tools.dom( 'div', Tools.css.basic + 'width:100%; top:0; left:0; height:auto; background:'+this.bg+';');
+	    this.inner = Tools.dom( 'div', Tools.css.basic + 'width:100%; left:0; ');
 	    this.innerContent.appendChild(this.inner);
-	    this.inner.name = 'inner';
-
-	    // scroll background
-	    this.scrollBG = Tools.dom( 'div', Tools.css.basic + 'right:0; top:0; width:'+this.size.s+'px; height:10px; cursor:s-resize; pointer-events:auto; display:none; background:'+this.bg+'; border-left:1px solid '+this.colors.stroke+';');
-	    this.content.appendChild( this.scrollBG );
-	    this.scrollBG.name = 'scroll';
 
 	    // scroll
-	    this.scroll = Tools.dom( 'div', Tools.css.basic + 'background:'+this.colors.scroll+'; right:0px; top:0; width:'+this.size.s+'px; height:10px;');
+	    this.scrollBG = Tools.dom( 'div', Tools.css.basic + 'right:0; top:0; width:'+ (this.size.s - 1) +'px; height:10px; display:none; background:'+this.bg+';');
+	    this.content.appendChild( this.scrollBG );
+
+	    this.scroll = Tools.dom( 'div', Tools.css.basic + 'background:'+this.colors.scroll+'; right:2px; top:0; width:'+(this.size.s-4)+'px; height:10px;');
 	    this.scrollBG.appendChild( this.scroll );
 
-	    this.bottom = Tools.dom( 'div',  Tools.css.txt + 'width:100%; top:auto; bottom:0; left:0; border-bottom-right-radius:10px;  border-bottom-left-radius:10px; text-align:center; pointer-events:auto; cursor:pointer; height:'+this.bh+'px; line-height:'+(this.bh-5)+'px; border-top:1px solid '+Tools.colors.stroke+';');
-	    this.content.appendChild(this.bottom);
+	    // bottom button
+	    this.bottom = Tools.dom( 'div',  Tools.css.txt + 'width:100%; top:auto; bottom:0; left:0; border-bottom-right-radius:10px;  border-bottom-left-radius:10px; text-align:center; height:'+this.bh+'px; line-height:'+(this.bh-5)+'px; border-top:1px solid '+Tools.colors.stroke+';');
+	    this.content.appendChild( this.bottom );
 	    this.bottom.textContent = 'close';
-	    this.bottom.name = 'bottom';
 	    this.bottom.style.background = this.bg;
-	    
-	    this.isDown = false;
-	    this.isScroll = false;
-
-	    this.callbackClose = function(){};
-
-	    this.content.addEventListener( 'mousedown', this, false );
-	    this.content.addEventListener( 'mousemove', this, false );
-	    this.content.addEventListener( 'mouseout',  this, false );
-	    this.content.addEventListener( 'mouseup',   this, false );
-	    this.content.addEventListener( 'mouseover', this, false );
-
-	    //console.log(this.content.getBoundingClientRect().top);
-
-	    this.top = o.top || this.content.getBoundingClientRect().top;
-	    //this.content.addEventListener( 'mousewheel', this, false );
-
-	    document.addEventListener( 'mousewheel', function(e){this.wheel(e);}.bind(this), false );
-	    window.addEventListener("resize", function(e){this.resize(e);}.bind(this), false );
 
 	    //
 
-	    this.setWidth( this.width );
+	    this.parent = o.parent !== undefined ? o.parent : null;
+	    
+	    if( this.parent === null && !this.isCanvas ){ 
+	    	this.parent = document.body;
+	        // default position
+	    	if( !this.isCenter ) this.content.style.right = '10px'; 
+	    }
+
+	    if( this.parent !== null ) this.parent.appendChild( this.content );
+
+	    if( this.isCanvas && this.parent === null ) this.isCanvasOnly = true;
+
+	    if( !this.isCanvasOnly ) this.content.style.pointerEvents = 'auto';
+
+
+	    this.setWidth();
+
+	    if( this.isCanvas ) this.makeCanvas();
+
+	    Roots.add( this );
 
 	}
 
-	Gui.prototype = {
+	Object.assign( Gui.prototype, {
 
 	    constructor: Gui,
+
+	    isGui: true,
+
+	    //callback: function () {},
+
+	    // ----------------------
+	    //   CANVAS
+	    // ----------------------
+
+	    onDraw: function () { },
+
+	    makeCanvas: function () {
+
+	    	this.canvas = document.createElementNS( 'http://www.w3.org/1999/xhtml', "canvas" );
+	    	this.canvas.width = this.zone.w;
+	    	this.canvas.height = this.forceHeight ? this.forceHeight : this.zone.h;
+
+	    },
+
+	    draw: function ( force ) {
+
+	    	if( this.canvas === null ) return;
+
+	    	var w = this.zone.w;
+	    	var h = this.forceHeight ? this.forceHeight : this.zone.h;
+	    	Roots.toCanvas( this, w, h, force );
+
+	    },
+
+	    //////
+
+	    getDom: function () {
+
+	        return this.content;
+
+	    },
+
+	    setMouse: function( m ){
+
+	        this.mouse.set( m.x, m.y );
+
+	    },
 
 	    setText: function ( size, color, font ) {
 
@@ -3906,155 +5044,214 @@
 
 	    },
 
-	    hide : function (b) {
+	    hide: function ( b ) {
 
-	        if(b) this.content.style.display = 'none';
-	        else this.content.style.display = 'block';
+	        this.content.style.display = b ? 'none' : 'block';
 	        
 	    },
 
-	    setBG : function(c){
-
-	        this.bg = c;
-
-	        /*var i = this.uis.length;
-	        while(i--){
-	            this.uis[i].setBG(c);
-	        }*/
-
-	        this.innerstyle.background = this.bg;
-	        this.bottom.style.background = this.bg;
-
-	    },
-
-	    getHTML : function(){
-
-	        return this.content;
-
-	    },
-
-	    onChange : function( f ){
+	    onChange: function ( f ) {
 
 	        this.callback = f;
 	        return this;
 
 	    },
 
-	    handleEvent : function( e ) {
+	    // ----------------------
+	    //   STYLES
+	    // ----------------------
 
-	        //e.preventDefault();
-	        //e.stopPropagation();
+	    mode: function ( n ) {
 
-	        switch( e.type ) {
-	            case 'mousedown': this.down( e ); break;
-	            case 'mouseout': this.out( e ); break;
-	            case 'mouseover': this.over( e ); break;
-	            //case 'mousewheel': this.wheel( e ); break;
+	    	var needChange = false;
 
-	            case 'mouseup': this.up( e ); break;
-	            case 'mousemove': this.move( e ); break;
-	        }
+	    	if( n !== this.cn ){
+
+		    	this.cn = n;
+
+		    	switch( n ){
+
+		    		case 'def': 
+		    		   this.scroll.style.background = this.colors.scroll; 
+		    		   this.bottom.style.background = this.colors.background;
+		    		   this.bottom.style.color = '#CCC';
+		    		break;
+
+		    		//case 'scrollDef': this.scroll.style.background = this.colors.scroll; break;
+		    		case 'scrollOver': this.scroll.style.background = this.colors.select; break;
+		    		case 'scrollDown': this.scroll.style.background = this.colors.down; break;
+
+		    		//case 'bottomDef': this.bottom.style.background = this.colors.background; break;
+		    		case 'bottomOver': this.bottom.style.background = this.colors.backgroundOver; this.bottom.style.color = '#FFF'; break;
+		    		//case 'bottomDown': this.bottom.style.background = this.colors.select; this.bottom.style.color = '#000'; break;
+
+		    	}
+
+		    	needChange = true;
+
+		    }
+
+	    	return needChange;
 
 	    },
 
-	    // Mouse event
+	    // ----------------------
+	    //   TARGET
+	    // ----------------------
 
-	    down: function( e ){
+	    clearTarget: function () {
 
-	        if( !e.target.name ) return;
+	    	if( this.current === -1 ) return false;
+	        //if(!this.target) return;
+	        this.target.uiout();
+	        this.target.reset();
+	        this.target = null;
+	        this.current = -1;
+	        Roots.cursor();
+	        return true;
 
-	        if(e.target.name === 'scroll'){
-	            this.isDown = true;
-	            this.move( e );
-	            document.addEventListener( 'mouseup', this, false );
-	            document.addEventListener( 'mousemove', this, false );
-	        }
-	        if(e.target.name === 'bottom'){
-	            this.isOpen = this.isOpen ? false : true;
-	            this.bottom.textContent = this.isOpen ? 'close' : 'open';
-	            this.testHeight();
-	        }
+	    },
+
+	    // ----------------------
+	    //   ZONE TEST
+	    // ----------------------
+
+	    testZone: function ( e ) {
+
+	        var l = this.local;
+	        if( l.x === -1 && l.y === -1 ) return '';
+
+	        this.isReset = false;
+
+	        var name = '';
+
+	        var s = this.isScroll ?  this.zone.w  - this.size.s : this.zone.w;
 	        
-	    },
+	        if( l.y > this.zone.h - this.bh &&  l.y < this.zone.h ) name = 'bottom';
+	        else name = l.x > s ? 'scroll' : 'content';
 
-	    move: function( e ){
-
-	        if(!this.isDown) return;
-	        this.scroll.style.background = this.colors.down;
-	        this.update( (e.clientY-this.top)-(this.sh*0.5) );
+	        return name;
 
 	    },
 
-	    
+	    // ----------------------
+	    //   EVENTS
+	    // ----------------------
 
-	    out: function( e ){
+	    handleEvent: function ( e ) {
 
-	        if( !e.target.name ) return;
+	    	var type = e.type;
 
-	        if(e.target.name === 'scroll'){
-	            this.scroll.style.background = this.colors.scroll;
-	        }
+	    	var change = false;
+	    	var targetChange = false;
 
-	        if(e.target.name === 'bottom'){
-	            this.bottom.style.color = '#CCC';
-	        }
+	    	var name = this.testZone( e );
+
+	        
+
+	    	if( type === 'mouseup' && this.isDown ) this.isDown = false;
+	    	if( type === 'mousedown' && !this.isDown ) this.isDown = true;
+
+	    	if( !name ) return;
+
+	    	switch( name ){
+
+	    		case 'content':
+
+	                e.clientY = this.isScroll ?  e.clientY + this.decal : e.clientY;
+
+		    		if( this.target ) targetChange = this.target.handleEvent( e );
+
+		    		if( type === 'mousemove' ) change = this.mode('def');
+	                if( type === 'wheel' && !targetChange && this.isScroll ) change = this.onWheel( e );
+
+		    		if( !Roots.lock ){
+
+		    			var next = Roots.findTarget( this.uis, e );
+
+		    			if( next !== this.current ){
+			                this.clearTarget();
+			                this.current = next;
+			                change = true;
+			            }
+
+			            if( next !== -1 ){ 
+			                this.target = this.uis[this.current];
+			                this.target.uiover();
+			            }
+
+		    		}
+
+	    		break;
+	    		case 'bottom':
+
+		    		this.clearTarget();
+		    		if( type === 'mousemove' ) change = this.mode('bottomOver');
+		    		if( type === 'mousedown' ) {
+		    			this.isOpen = this.isOpen ? false : true;
+			            this.bottom.textContent = this.isOpen ? 'close' : 'open';
+			            this.setHeight();
+			            this.mode('def');
+			            change = true;
+		    		}
+
+	    		break;
+	    		case 'scroll':
+
+		    		this.clearTarget();
+		    		if( type === 'mousemove' ) change = this.mode('scrollOver');
+		    		if( type === 'mousedown' ) change = this.mode('scrollDown'); 
+	                if( type === 'wheel' ) change = this.onWheel( e ); 
+		    		if( this.isDown ) this.update( (e.clientY-this.zone.y)-(this.sh*0.5) );
+
+	    		break;
+
+
+	    	}
+
+	    	if( this.isDown ) change = true;
+	    	if( targetChange ) change = true;
+
+	    	if( change ) this.draw();
 
 	    },
 
-	    up: function( e ){
+	    onWheel: function ( e ) {
 
+	        this.oy += 20*e.delta;
+	        this.update( this.oy );
+	        return true;
+
+	    },
+
+	    // ----------------------
+	    //   RESET
+	    // ----------------------
+
+	    reset: function ( force ) {
+
+	        if( this.isReset ) return;
+
+	        this.mouse.neg();
 	        this.isDown = false;
-	        this.scroll.style.background = this.colors.scroll;
-	        document.removeEventListener( 'mouseup', this, false );
-	        document.removeEventListener( 'mousemove', this, false );
+
+	        Roots.clearInput();
+	        var r = this.mode('def');
+	        var r2 = this.clearTarget();
+
+	        if( r || r2 ) this.draw( true );
+
+	        this.isReset = true;
+
+	        //Roots.lock = false;
 
 	    },
 
-	    over: function( e ){
+	    // ----------------------
+	    //   ADD NODE
+	    // ----------------------
 
-	        if( !e.target.name ) return;
-	        if(e.target.name === 'scroll'){
-	            this.scroll.style.background = this.colors.select;
-	        }
-	        if(e.target.name === 'bottom'){
-	            this.bottom.style.color = '#FFF';
-	        }
-
-	    },
-
-	    // Wheel event
-
-	    wheel: function ( e ){
-
-	        //e.preventDefault();
-	        //e.stopPropagation();
-
-	        if( this.lockwheel || !this.isScroll ) return;
-
-	        //this.onWheel = true;
-
-	        var x = e.clientX;
-	        var px = this.content.getBoundingClientRect().left;
-
-	        if(x<px) return;
-	        if(x>(px+this.width)) return;
-
-	        var delta = 0;
-	        if(e.wheelDeltaY) delta = -e.wheelDeltaY*0.04;
-	        else if(e.wheelDelta) delta = -e.wheelDelta*0.2;
-	        else if(e.detail) delta = e.detail*4.0;
-
-	        this.py += delta;
-
-	        this.update( this.py );
-
-	    },
-
-	    // -----------------------------------
-
-	    // Add node to gui
-
-	    add:function(){
+	    add: function () {
 
 	        var a = arguments;
 
@@ -4073,25 +5270,46 @@
 	            
 	        } 
 
+	        var u = add.apply( this, a );
 
-	        var n = add.apply( this, a );
+	        if( u === null ) return;
+
+
+	        //var n = add.apply( this, a );
 	        //var n = UIL.add( ...args );
 
-	        this.uis.push( n );
-	        n.py = this.h;
+	        this.uis.push( u );
+	        //n.py = this.h;
 
-	        if( !n.autoWidth ){
-	            var y = n.c[0].getBoundingClientRect().top;
+	        if( !u.autoWidth ){
+	            var y = u.c[0].getBoundingClientRect().top;
 	            if( this.prevY !== y ){
-	                this.calc( n.h + 1 );
+	                this.calc( u.h + 1 );
 	                this.prevY = y;
 	            }
 	        }else{
-	            this.prevY = -1;
-	            this.calc( n.h + 1 );
+	            this.prevY = 0;//-1;
+	            this.calc( u.h + 1 );
 	        }
 
-	        return n;
+	        return u;
+
+	    },
+
+	    applyCalc: function () {
+
+	        //console.log(this.uis.length, this.tmpH )
+
+	        this.calc( this.tmpH );
+	        //this.tmpH = 0;
+	        this.tmpAdd = null;
+
+	    },
+
+	    calcUis: function () {
+
+	        Roots.calcUis( this.uis, this.zone, this.zone.y );
+
 	    },
 
 	    // remove one node
@@ -4117,156 +5335,137 @@
 
 	    // clear all gui
 
-	    clear:function(){
+	    clear: function () {
 
 	        var i = this.uis.length;
 	        while(i--) this.uis[i].clear();
 
 	        this.uis = [];
-	        Tools.listens = [];
+	        Roots.listens = [];
 
-	        this.calc( - this.h );
+	        this.calc( -this.h );
 
 	    },
 
-	    // -----------------------------------
+	    // ----------------------
+	    //   SCROLL
+	    // ----------------------
 
-	    // Scroll
+	    upScroll: function ( b ) {
 
-	    update: function ( y ){
+	        this.sw = b ? this.size.s : 0;
+	        this.oy = b ? this.oy : 0;
+	        this.scrollBG.style.display = b ? 'block' : 'none';
 
-	        y = y < 0 ? 0 :y;
-	        y = y > this.range ? this.range : y;
+	        if( b ){
 
-	        this.inner.style.top = - Math.floor( y / this.ratio ) + 'px';
+	            this.total = this.h;
+
+	            this.maxView = this.maxHeight;
+
+	            this.ratio = this.maxView / this.total;
+	            this.sh = this.maxView * this.ratio;
+
+	            //if( this.sh < 20 ) this.sh = 20;
+
+	            this.range = this.maxView - this.sh;
+
+	            this.oy = Tools.clamp( this.oy, 0, this.range );
+
+	            this.scrollBG.style.height = this.maxView + 'px';
+	            this.scroll.style.height = this.sh + 'px';
+
+	        }
+
+	        this.setItemWidth( this.zone.w - this.sw );
+	        this.update( this.oy );
+
+	    },
+
+	    update: function ( y ) {
+
+	        y = Tools.clamp( y, 0, this.range );
+
+	        this.decal = Math.floor( y / this.ratio );
+	        this.inner.style.top = - this.decal + 'px';
 	        this.scroll.style.top = Math.floor( y ) + 'px';
-
-	        this.py = y;
-
-	        //this.onWheel = false;
+	        this.oy = y;
 
 	    },
 
-	    showScroll:function(h){
+	    // ----------------------
+	    //   RESIZE FUNCTION
+	    // ----------------------
 
-	        this.isScroll = true;
-	        this.sw = this.size.s;
-
-	        this.total = this.h;
-	        this.maxView = this.maxHeight;// - this.height;
-
-	        this.ratio = this.maxView / this.total;
-	        this.sh = this.maxView * this.ratio;
-
-	        if( this.sh < 20 ) this.sh = 20;
-
-	        this.range = this.maxView - this.sh;
-
-	        this.scrollBG.style.display = 'block';
-	        this.scrollBG.style.height = this.maxView + 'px';
-	        this.scroll.style.height = this.sh + 'px';
-
-	        
-
-	        this.setItemWidth( this.width - this.sw );
-
-	        this.update( 0 );
-
-	    },
-
-	    hideScroll:function(){
-
-	        this.isScroll = false;
-	        this.sw = 0;
-	        
-
-	        this.setItemWidth( this.width - this.sw );
-
-	        this.update( 0 );
-
-	        this.scrollBG.style.display = 'none';
-
-	    },
-
-	    // -----------------------------------
-
-	    resize:function(e){
-
-	        this.testHeight();
-
-	    },
-
-	    calc:function( y ) {
+	    calc: function ( y ) {
 
 	        this.h += y;
 	        clearTimeout( this.tmp );
-	        this.tmp = setTimeout( this.testHeight.bind(this), 10 );
+	        this.tmp = setTimeout( this.setHeight.bind(this), 10 );
 
 	    },
 
-	    testHeight:function(){
+	    setHeight: function () {
 
 	        if( this.tmp ) clearTimeout( this.tmp );
 
-	        this.height = this.top + this.bh;
+	        //console.log(this.h )
+
+	        this.zone.h = this.bh;
+	        this.isScroll = false;
 
 	        if( this.isOpen ){
 
-	            this.maxHeight = window.innerHeight - this.top - this.bh;
+	            var hhh = this.forceHeight ? this.forceHeight : window.innerHeight;
 
-	            if( this.h > this.maxHeight ){
+	            this.maxHeight = hhh - this.zone.y - this.bh;
 
-	                this.height = this.maxHeight + this.bh;
-	                this.showScroll();
+	            var diff = this.h - this.maxHeight;
 
-	            }else{
+	            //console.log(diff)
 
-	                this.height = this.h + this.bh;
-	                this.hideScroll();
+	            if( diff > 1 ){ //this.h > this.maxHeight ){
 
+	                this.isScroll = true;
+	                this.zone.h = this.maxHeight + this.bh;
+
+	            } else {
+
+	                this.zone.h = this.h + this.bh;
+	                
 	            }
 
-	        } else {
-
-	            this.height = this.bh;
-	            this.hideScroll();
-
 	        }
 
-	        this.innerContent.style.height = this.height - this.bh + 'px';
-	        this.content.style.height = this.height + 'px';
-	        this.bottom.style.top = this.height - this.bh + 'px';
+	        this.upScroll( this.isScroll );
+
+	        this.innerContent.style.height = this.zone.h - this.bh + 'px';
+	        this.content.style.height = this.zone.h + 'px';
+	        this.bottom.style.top = this.zone.h - this.bh + 'px';
+
+	        if( this.isOpen ) this.calcUis();
+	        if( this.isCanvas ) this.draw( true );
 
 	    },
 
-	    setWidth: function( w ) {
+	    setWidth: function ( w ) {
 
-	        if( w ) this.width = w;
-	        this.content.style.width = this.width + 'px';
+	        if( w ) this.zone.w = w;
 
-	        //console.log(this.width)
+	        this.content.style.width = this.zone.w + 'px';
 
+	        if( this.isCenter ) this.content.style.marginLeft = -(Math.floor(this.zone.w*0.5)) + 'px';
 
-	        if( this.isCenter ) this.content.style.marginLeft = -(~~ (this.width*0.5)) + 'px';
+	        this.setItemWidth( this.zone.w - this.sw );
 
-	        this.setItemWidth( this.width - this.sw );
+	        this.setHeight();
 
-	        /*var l = this.uis.length;
-	        var i = l;
-	        while(i--){
-	            this.uis[i].setSize( this.width );
-	        }
-
-	        i = l;
-	        while(i--){
-	            this.uis[i].rSize();
-	        }*/
-
-	        this.resize();
+	        if( !this.isCanvasOnly ) Roots.needReZone = true;
+	        //this.resize();
 
 	    },
 
-	    setItemWidth: function( w ){
+	    setItemWidth: function ( w ) {
 
 	        var i = this.uis.length;
 	        while(i--){
@@ -4277,11 +5476,15 @@
 	    },
 
 
-	};
+	} );
 
+	var REVISION = '2.0';
+
+	exports.REVISION = REVISION;
 	exports.Tools = Tools;
 	exports.Gui = Gui;
 	exports.Proto = Proto;
+	exports.add = add;
 	exports.Bool = Bool;
 	exports.Button = Button;
 	exports.Circular = Circular;
@@ -4295,8 +5498,6 @@
 	exports.Slide = Slide;
 	exports.TextInput = TextInput;
 	exports.Title = Title;
-	exports.add = add;
-	exports.REVISION = REVISION;
 
 	Object.defineProperty(exports, '__esModule', { value: true });
 

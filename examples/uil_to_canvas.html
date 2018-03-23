@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Uil to Canvas</title>
+<link rel="shortcut icon" href="../favicon.ico">
+<style>
+body { font-family: "Lucida Console", Monaco, monospace; background-color:#050608; font-size:11px; color:#fff; overflow:hidden;}
+#logo{ position:absolute; left:50%; margin-left:-64px; top:25px; }
+#version { position:absolute; top:150px; left:50%; width:128px; margin-left:-64px; height:10px; pointer-events:none; text-align:center; font-size:12px; font-weight: bold;}
+#debug { position:absolute; top:10px; left:0px; width:100%; pointer-events:none; text-align:center; }
+#debug2 { position:absolute; bottom:10px; left:50%; width:128px;  margin-left:-64px; pointer-events:none; text-align:center; color:#FFFF00;}
+
+</style>
+
+<script type="text/javascript" src="../build/uil.js"></script>
+
+</head>
+
+<body>
+<div id='logo'></div>
+<div id='version'></div>
+<div id='debug'></div>
+<div id='debug2'></div>
+<script>
+
+document.getElementById('logo').innerHTML = UIL.Tools.icon('logo', '#FFF', 128);
+document.getElementById('version').innerHTML = 'Uil '+ UIL.REVISION;
+
+var temp=0, fps=0, count=0; 
+var debug2 = document.getElementById('debug2');
+
+function animate(time) {
+
+    requestAnimationFrame( animate );
+    if ( (time - 1000) > temp ){ temp = time; debug2.textContent = 'fps: '+count; count = 0; }; count++;
+
+}
+
+var timer = null;
+var display = false;
+var list = ['item-0', 'item-1', 'item-2', 'item-3', 'item-4', 'item-5', 'item-6', 'item-7', 'item-8', 'item-9', 'item-10', 'item-11', 'item-12'];
+var list2 = ['item-0', 'item-1', 'item-2'];
+var decal = window.innerWidth - 320;
+
+
+var debug = document.getElementById('debug');
+var callback = function( v ){ 
+    debug.innerHTML = v;
+}
+
+var callbackButton = function(){ debug.innerHTML = "i'm a button !!" ; }
+var callbackSize = function( v ){ ui.setWidth( v ); }
+var callbackLogo = function( v ){ document.getElementById('logoin').setAttributeNS(null, 'fill', UIL.hexToHtml(v)); document.getElementById('version').style.color = UIL.hexToHtml(v);  }
+
+
+// single UI element
+var b = UIL.add('button', { target:document.body, callback:populate, name:'populate', w:100, pos:{left:'50%', top:'200px', marginLeft:'-50px' }, simple:true });
+
+var container = document.createElement('div');
+container.style.cssText = 'position:absolute; top:0px; right:10px; height:100%; width:300px; pointer-events:none; ';
+document.body.appendChild(container);
+
+var ui = new UIL.Gui( { w:300, parent:container, css:'left:0px; top:0px;', isCanvas:true } ).onChange( callback );
+ui.canvas.style.cssText = 'position:absolute; left:10px; top:0; border:1px dashed #840; box-sizing: border-box; -moz-box-sizing: border-box; -webkit-box-sizing: border-box; pointer-events:auto;';
+ui.canvas.style.cssText = 'position:absolute; left:10px; top:0; border:1px dashed #840; box-sizing: border-box; -moz-box-sizing: border-box; -webkit-box-sizing: border-box; pointer-events:auto;';
+document.body.appendChild( ui.canvas );
+
+//
+window.addEventListener( 'resize', resize, false );
+ui.canvas.addEventListener( 'mouseover', onMouseOver, false );
+ui.canvas.addEventListener( 'mouseout', onMouseOut, false );
+ui.canvas.addEventListener( 'mousemove', onMouseMove, false );
+
+function resize() {
+    decal = window.innerWidth - 310;
+}
+
+function onMouseOut ( e ) {
+    e.preventDefault();
+    if( !ui.isCanvasOnly ) return;
+    ui.isCanvasOnly = false;
+    ui.reset( true );
+}
+
+function onMouseOver ( e ) {
+    e.preventDefault();
+    ui.isCanvasOnly = true;
+}
+
+function onMouseMove ( e ) {
+    e.preventDefault();
+    var mouse = { x:e.clientX + decal , y:e.clientY };
+    ui.setMouse( mouse );
+}
+
+ui.onDraw = function (){
+    //console.log('ui draw')
+}
+
+
+var u;
+populate();
+animate(0);
+
+function populate(){
+
+    if(!display){
+
+        ui.add('title',  { name:'Title', titleColor:'#D4B87B', height:30});
+        ui.add('bool',   { name:'bool', titleColor:'#D4B87B', height:30 });
+        ui.add('color',  { name:'color', type:'html', value:0x000000, fontColor:'#D4B87B'});
+        ui.add('color',  { name:'color', type:'hex', value:[0,1,1,1], height:40 });
+        ui.add('color',  { name:'color', type:'rgb', value:[0,1,1,1], height:40 });
+        u = ui.add('slide',  { name:'slide',  min:-100, max:100, value:0, precision:0, fontColor:'#D4B87B' });
+        ui.add('slide',  { name:'slide',  min:-1, max:1, value:0, step:0.01, precision:2, height:40 });
+        ui.add('string', { name:'string',  value:'welcome to uil', fontColor:'#D4B87B', height:40});
+        ui.add('list',   { name:'list',  list:list, fontColor:'#D4B87B', height:30});
+        ui.add('list',   { name:'list',  list:list2, height:40});
+        ui.add('number', { name:'number',  value:20});
+        ui.add('number', { name:'vector2', value:[0,0], fontColor:'#D4B87B' });
+        ui.add('number', { name:'vector3', value:[0,0,0] });
+        ui.add('number', { name:'vector4', value:[0,0,0,0], step:1, precision:0, height:30 });
+        ui.add('button', { name:'button', callback:callbackButton, fontColor:'#D4B87B', height:30 });
+
+        gr0 = ui.add('group', { name:'Group', fontColor:'#D4B87B', height:30 });
+        gr0.add('list',   { name:'listH', list:list, fontColor:'#D4B87B', height:30});
+        gr0.add('slide',  { name:'slide', min:-100, max:100, value:0, precision:0 });
+        gr0.add('slide',  { name:'slide', min:-100, max:100, value:0, precision:0 });
+        gr0.add('slide',  { name:'slide', min:-100, max:100, value:0, precision:0 });
+        gr0.add('slide',  { name:'slide', min:-100, max:100, value:0, precision:0 });
+        gr0.add('slide',  { name:'slide', min:-100, max:100, value:0, precision:0 });
+
+        gr1 = ui.add('group', { name:'circulars', fontColor:'#D4B87B' });
+
+        gr1.add('circular', { name:'circular', w:70, min:0, max:100, step:10, value:20, precision:0 , fontColor:'#D4B87B' });
+        gr1.add('circular', { name:'circular', w:70, min:0, max:100, value:50, precision:2 , fontColor:'#D4B87B' });
+        gr1.add('circular', { name:'circular', w:70, min:0, max:100, value:75, precision:2 , fontColor:'#D4B87B' });
+        gr1.add('circular', { name:'circular', w:70, min:0, max:100, value:100, precision:0 , fontColor:'#D4B87B' });
+
+        gr2 = ui.add('group', { name:'knobs', fontColor:'#D4B87B' });
+
+        gr2.add('knob', { name:'knob', w:70, min:0, max:100, step:10, value:20, precision:0 , fontColor:'#D4B87B' });
+        gr2.add('knob', { name:'knob', w:70, min:0, max:100, value:50, precision:2 , fontColor:'#D4B87B' });
+        gr2.add('knob', { name:'knob', w:70, min:0, max:100, value:75, precision:2 , fontColor:'#D4B87B' });
+        gr2.add('knob', { name:'knob', w:70, min:0, max:100, value:100, step:1, precision:0 , fontColor:'#D4B87B' });
+
+        gr3 = ui.add('group', { name:'joysticks', fontColor:'#D4B87B' });
+
+        gr3.add('joystick', { name:'joystick', w:140, multiplicator:1, precision:2, fontColor:'#D4B87B' });
+        gr3.add('joystick', { name:'joystick', w:140, multiplicator:1, precision:2, fontColor:'#D4B87B' });
+
+        //ui.eventCallback()
+
+        //gr0.open();
+
+        display = true;
+        b.label('clear');
+    } else {
+        ui.clear();
+        display = false;
+        b.label('populate');
+        
+    }
+
+
+}
+
+
+</script>
+</body>
+</html>

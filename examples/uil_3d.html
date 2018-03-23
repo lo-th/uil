@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Uil to Three</title>
+<link rel="shortcut icon" href="../favicon.ico">
+<style>
+/**{ margin: 0; padding: 0; border: 0; -o-user-select:none; -ms-user-select:none; -khtml-user-select:none; -webkit-user-select:none; -moz-user-select:none; } */
+html{ overflow:hidden; width:100%; height:100%; }
+body { font-family: "Lucida Console", Monaco, monospace; background-color:#717b84; font-size:11px; color:#fff; margin: 0px; }
+
+#version { position:absolute; top:98px; left:50%; width:90px; height:10px; pointer-events:none; text-align:right;  font-size:16px; }
+#logo{ position:absolute; left:50%; margin-left:-128px;  margin-top:-60px; transform: scale(0.5,0.5);}
+
+</style>
+
+<script type="text/javascript" src="../build/uil.js"></script>
+<script type="text/javascript" src="./js/libs/three.min.js"></script>
+<script type="text/javascript" src="./js/libs/sea3d.min.js"></script>
+<script type="text/javascript" src="./js/controls/OrbitControls.js"></script>
+<script type="text/javascript" src="./js/SimplexNoise.js"></script>
+<script type="text/javascript" src="./js/math.js"></script>
+<script type="text/javascript" src="./js/objects/Terrain.js"></script>
+<script type="text/javascript" src="./js/objects/Lensflare.js"></script>
+<script type="text/javascript" src="./js/objects/Water.js"></script>
+<script type="text/javascript" src="./js/objects/SuperSky.js"></script>
+
+</head>
+
+<body>
+
+<script>
+
+var cw = 128*5, ch=148;
+var screen = null;
+var screen2 = null;
+var ui, ui2;
+
+var sets = {
+
+	height: 5,
+	expo:2,
+	move:[0,0],
+	level:[ 1, 0.2, 0.1 ], 
+	frequency:[ 0.016, 0.05, 0.2 ],
+
+}
+
+var sets_W = {
+
+    normal: null,
+    waterColor: 0x3b4c5a,
+    size:10,
+    alpha:0.6,
+    distortion:3.0,
+    depth:3.0,
+    py:0.8,
+
+}
+
+var sets_S = {
+
+    t:0,
+    fog:0,
+    cloud_size: .45,
+    cloud_covr: .3,
+    cloud_dens: 40,
+
+    inclination: 45,
+    azimuth: 90,
+    hour:12,
+
+}
+
+var view, terrain, water, sky, plane, plane2;
+
+var debug, debug2, camera, scene, renderer, controls, loader, mesh, mat, screen = null, interactive;
+var temp=0, fps=0, count=0; 
+
+var raycaster = new THREE.Raycaster();
+var mouse = new THREE.Vector2();
+var mouse2d = new THREE.Vector2();
+
+init();
+initInterface();
+
+animate(0);
+
+function init() {
+
+    scene = new THREE.Scene();
+    scene.background = new THREE.Color( 0x717b84 );
+
+    renderer = new THREE.WebGLRenderer({ antialias:true });
+    renderer.setPixelRatio( window.devicePixelRatio );
+    renderer.setSize( window.innerWidth, window.innerHeight );
+
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.soft = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+
+    renderer.gammaInput = true;
+    renderer.gammaOutput = true;
+
+    renderer.toneMapping = THREE.Uncharted2ToneMapping;
+    renderer.toneMappingExposure = 3;
+    renderer.toneMappingWhitePoint = 2;
+
+    document.body.appendChild( renderer.domElement );
+
+    camera = new THREE.PerspectiveCamera( 50, window.innerWidth / window.innerHeight, 1, 2000 );
+    camera.position.set( 0, 10, 30 );
+    controls = new THREE.OrbitControls( camera, renderer.domElement );
+
+
+    loader = new THREE.TextureLoader();
+
+    // terrain functions
+
+    view = {
+		loadTexture: function( name ){ return loader.load('./assets/textures/'+ name ); },
+		getAzimuthal: function(){return - controls.getAzimuthalAngle();}
+	}
+
+    // sky
+
+    sky = new SuperSky({ scene:scene, renderer:renderer, size:1000, callback:onSkyReady })
+    scene.add( sky );
+
+
+	// terrain
+
+	terrain = new Terrain({ size:[20,sets.height,20], uv:[6,6], border:true, sample:[64,64], data:sets });
+	scene.add( terrain );
+
+    // water 
+
+    sets_W.normal = loader.load( './assets/textures/water/water.png', function ( texture ) { texture.wrapS = texture.wrapT = THREE.RepeatWrapping; texture.anisotropy = 16; });
+    water = new THREE.Water( new THREE.PlaneBufferGeometry( 20, 20 ), sets_W );
+    water.rotation.x = - Math.PI / 2;
+    water.position.y = sets_W.py;
+    water.castShadow = true;
+    water.receiveShadow = true;
+    scene.add( water );
+
+	// interactives
+
+	interactive = new THREE.Group();
+    scene.add(interactive);
+
+	plane = new THREE.Mesh( new THREE.PlaneBufferGeometry( 20, 4.625 , 5, 1 ), new THREE.MeshBasicMaterial( { transparent:true } ) );
+	plane.geometry.rotateX( -Math.PI90 );
+	plane.position.z = 13;
+	plane.visible = false;
+    plane.name = 'p1';
+
+
+    plane2 = new THREE.Mesh( new THREE.PlaneBufferGeometry( 20, 4.625 , 5, 1 ), new THREE.MeshBasicMaterial( { transparent:true } ) );
+    //plane2.geometry.rotateX( -Math.PI90 );
+    plane2.position.z = -13;
+    plane2.position.y = 5;
+    plane2.name = 'p2';
+    plane2.visible = false;
+
+	interactive.add( plane );
+    interactive.add( plane2 );
+
+
+    initGUI();
+
+    setTimeout( initGUI2, 100 );
+
+    // events
+
+    window.addEventListener( 'resize', resize, false );
+    document.addEventListener( 'mouseup', onMouseUp, false );
+    document.addEventListener( 'mousedown', onMouseDown, false );
+    document.addEventListener( 'mousemove', onMouseMove, false );
+
+}
+
+function onSkyReady() {
+
+    terrain.material.envMap = sky.envMap;
+    terrain.borderMaterial.envMap = sky.envMap;
+    water.material.uniforms.sunDirection.value.copy(  sky.day > 0 ? sky.sunPosition : sky.moonPosition );
+    water.material.uniforms.sunColor.value = sky.day > 0 ? sky.sun.color : sky.moon.color;
+
+}
+
+function initInterface () {
+
+    var logo = document.createElement("div");
+    logo.style.cssText = 'position:absolute; bottom:0px; left:0px; width:64px; pointer-events:none; ';
+    document.body.appendChild( logo );
+    logo.innerHTML = UIL.Tools.icon('logo', '#FFF', 64);
+
+    var version = document.createElement("div");
+    version.style.cssText = 'position:absolute; bottom:10px; left:54px;  pointer-events:none; color:#FFF; font-size:16px; font-weight: bold;';
+    document.body.appendChild( version );
+    version.innerHTML = 'il '+ UIL.REVISION;
+
+    debug = document.createElement("div");
+    debug.style.cssText = 'position:absolute; top:10px; left:0; width:100%; pointer-events:none; text-align: center; ';
+    document.body.appendChild(debug);
+
+    debug2 = document.createElement("div");
+    debug2.style.cssText = 'position:absolute; bottom:10px; right:10px; pointer-events:none; color:#FFFF00; font-size:16px; font-weight: bold;';
+    document.body.appendChild(debug2);
+
+}
+
+function resize() {
+
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize( window.innerWidth, window.innerHeight );
+
+}
+
+function animate(time) {
+
+    requestAnimationFrame( animate );
+
+    if ( (time - 1000) > temp ){ temp = time; debug2.textContent = count; count = 0; }; count++;
+
+    
+    //terrain.setHeight( sets.height );
+    //terrain.setExpo( sets.expo );
+
+    if( sky.needsUpdate ){ 
+        sky.render();
+
+    }
+
+    
+    terrain.easing( sets.move );
+
+    water.material.uniforms.time.value += 1.0 / 60.0;
+
+    renderer.render( scene, camera );
+
+}
+
+
+function onMouseUp( e ){
+
+    e.preventDefault();
+    if(!controls.enabled) controls.enabled = true;
+  
+}
+
+function onMouseDown( e ){
+
+    e.preventDefault();
+    controls.enabled = raytest( e ) ? false : true;
+
+}
+
+function onMouseMove( e ) {
+
+    e.preventDefault();
+    raytest( e );
+
+}
+
+function raytest ( e ) {
+
+    mouse.set( (e.clientX / window.innerWidth) * 2 - 1, - ( e.clientY / window.innerHeight) * 2 + 1 );
+    raycaster.setFromCamera( mouse, camera );
+    var intersects = raycaster.intersectObjects( interactive.children );
+
+    if ( intersects.length > 0 ){
+
+       //console.log(intersects[ 0 ])
+
+        var uv = intersects[ 0 ].uv;
+        mouse2d.x = Math.round( uv.x*cw );
+        mouse2d.y = ch - Math.round( uv.y*ch );
+
+        if( intersects[ 0 ].object.name === 'p1' ) ui.setMouse( mouse2d );
+        if( intersects[ 0 ].object.name === 'p2' ) ui2.setMouse( mouse2d );
+        return true;
+
+    } else {
+
+        if(ui)ui.reset( true );
+        if(ui2)ui2.reset( true );
+        return false;
+    }
+
+   
+}
+
+function initGUI () {
+
+    // terrain
+
+    ui = new UIL.Gui( { w:cw, maxHeight:ch, parent:null, isCanvas:true, close:false, transparent:true } ).onChange( function( v ){ terrain.setData( sets ); debug.innerHTML = v; } );
+
+    ui.add( sets, 'height', { type:'Circular', min:0, max:10, w:128, precision:2, fontColor:'#D4B87B' } );
+    ui.add( sets, 'expo', { type:'Knob', min:0, max:10, w:128, precision:2, fontColor:'#D4B87B' } );
+    ui.add( sets, 'move', { type:'joystick', w:128, precision:2, fontColor:'#D4B87B' } );
+    ui.add( sets, 'level', { type:'graph', w:128, precision:2, fontColor:'#D4B87B' } );
+    ui.add( sets, 'frequency', { type:'graph', w:128, precision:2, multiplicator:0.25, fontColor:'#D4B87B' } );
+
+    ui.onDraw = function () {
+
+        if( screen === null ){
+
+            screen = new THREE.Texture( this.canvas );
+            screen.minFilter = THREE.LinearFilter;
+            screen.needsUpdate = true;
+            plane.material.map = screen;
+            plane.material.needsUpdate = true;
+            plane.visible = true;
+            
+        } else {
+
+            screen.needsUpdate = true;
+
+        }
+
+    }
+}
+
+
+function initGUI2 () {
+
+    // sky
+
+    ui2 = new UIL.Gui( { w:cw, maxHeight:ch, parent:null, isCanvas:true, close:false, transparent:true } ).onChange( function( v ){ sky.setData( sets_S ); debug.innerHTML = v; } );
+
+    ui2.add( sets_S, 'cloud_size', { type:'Circular', min:0, max:1, w:128, precision:2, fontColor:'#7BD4B8' } );
+    ui2.add( sets_S, 'cloud_covr', { type:'Circular', min:0, max:1, w:128, precision:2, fontColor:'#7BD4B8' } );
+    ui2.add( sets_S, 'cloud_dens', { type:'Circular', min:0, max:100, w:128, precision:2, fontColor:'#7BD4B8' } );
+    ui2.add( sets_S, 'azimuth', { type:'Circular',  min:0, max:360, w:128, precision:0, fontColor:'#D4B87B' } );
+    ui2.add( sets_S, 'hour', { type:'Circular', min:0, max:24, w:128, precision:2, fontColor:'#D47B7B' } );
+
+    ui2.onDraw = function () {
+
+        if( screen2 === null ){
+
+            screen2 = new THREE.Texture( this.canvas );
+            screen2.minFilter = THREE.LinearFilter;
+            screen2.needsUpdate = true;
+            plane2.material.map = screen2;
+            plane2.material.needsUpdate = true;
+            plane2.visible = true;
+            
+        } else {
+
+            screen2.needsUpdate = true;
+
+        }
+
+    }
+
+    //ui.draw( true );
+    //ui2.draw( true );
+
+}
+
+</script>
+</body>
+</html>

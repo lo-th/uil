@@ -1,4 +1,4 @@
-import { Tools } from '../core/Tools';
+import { Roots } from '../core/Roots';
 import { Proto } from '../core/Proto';
 
 function Fps ( o ) {
@@ -34,21 +34,21 @@ function Fps ( o ) {
 
     var panelCss = 'display:none; left:10px; top:'+ this.h + 'px; height:'+(this.hplus - 8)+'px; background: rgba(0, 0, 0, 0.2);' + 'border:1px solid rgba(255, 255, 255, 0.2); ';
 
-    this.c[2] = Tools.dom( 'path', Tools.css.basic + panelCss , { fill:'rgba(200,200,200,0.3)', 'stroke-width':1, stroke:this.fontColor, 'vector-effect':'non-scaling-stroke' });
+    this.c[2] = this.dom( 'path', this.css.basic + panelCss , { fill:'rgba(200,200,200,0.3)', 'stroke-width':1, stroke:this.fontColor, 'vector-effect':'non-scaling-stroke' });
 
     this.c[2].setAttribute('viewBox', '0 0 '+this.res+' 42' );
     this.c[2].setAttribute('height', '100%' );
     this.c[2].setAttribute('width', '100%' );
     this.c[2].setAttribute('preserveAspectRatio', 'none' );
 
-    Tools.dom( 'path', null, { fill:'rgba(255,255,0,0.3)', 'stroke-width':1, stroke:'#FF0', 'vector-effect':'non-scaling-stroke' }, this.c[2] );
-    Tools.dom( 'path', null, { fill:'rgba(0,255,255,0.3)', 'stroke-width':1, stroke:'#0FF', 'vector-effect':'non-scaling-stroke' }, this.c[2] );
+    this.dom( 'path', null, { fill:'rgba(255,255,0,0.3)', 'stroke-width':1, stroke:'#FF0', 'vector-effect':'non-scaling-stroke' }, this.c[2] );
+    this.dom( 'path', null, { fill:'rgba(0,255,255,0.3)', 'stroke-width':1, stroke:'#0FF', 'vector-effect':'non-scaling-stroke' }, this.c[2] );
 
 
     // bottom line
-    this.c[3] = Tools.dom( 'div', Tools.css.basic + 'width:100%; bottom:0px; height:1px; background: rgba(255, 255, 255, 0.2);');
+    this.c[3] = this.dom( 'div', this.css.basic + 'width:100%; bottom:0px; height:1px; background: rgba(255, 255, 255, 0.2);');
 
-    this.c[4] = Tools.dom( 'path', Tools.css.basic + 'position:absolute; width:10px; height:10px; left:4px; top:'+fltop+'px;', { d:'M 3 8 L 8 5 3 2 3 8 Z', fill:this.fontColor, stroke:'none'});
+    this.c[4] = this.dom( 'path', this.css.basic + 'position:absolute; width:10px; height:10px; left:4px; top:'+fltop+'px;', { d:'M 3 8 L 8 5 3 2 3 8 Z', fill:this.fontColor, stroke:'none'});
 
     this.isShow = o.show || false;
 
@@ -68,7 +68,7 @@ function Fps ( o ) {
 
     if ( self.performance && self.performance.memory ) this.isMem = true;
 
-    this.c[0].events = [ 'click', 'mousedown', 'mouseover', 'mouseout' ];
+    //this.c[0].events = [ 'click', 'mousedown', 'mouseover', 'mouseout' ];
 
     this.init();
 
@@ -81,18 +81,18 @@ Fps.prototype = Object.assign( Object.create( Proto.prototype ), {
 
     constructor: Fps,
 
-    handleEvent: function ( e ) {
+    // ----------------------
+    //   EVENTS
+    // ----------------------
 
-        e.preventDefault();
+    mousedown: function ( e ) {
 
-        switch( e.type ) {
-            case 'click': this.click(e); break;
-            case 'mouseover': this.mode(1); break;
-            case 'mousedown': this.mode(2); break;
-            case 'mouseout':  this.mode(0); break;
-        }
+        if( this.isShow ) this.hide();
+        else this.show();
 
     },
+
+    // ----------------------
 
     mode: function ( mode ) {
 
@@ -115,12 +115,7 @@ Fps.prototype = Object.assign( Object.create( Proto.prototype ), {
         }
     },
 
-    click: function ( e ) {
-
-        if( this.isShow ) this.hide();
-        else this.show();
-
-    },
+    
 
     makePath: function ( point ) {
 
@@ -140,19 +135,19 @@ Fps.prototype = Object.assign( Object.create( Proto.prototype ), {
         this.pa1.shift();
         this.pa1.push( 8.5 + this.round( ( 1 - (this.fps / 100)) * 30 ) );
 
-        Tools.setSvg( svg, 'd', this.makePath( this.pa1 ), 0 );
+        this.setSvg( svg, 'd', this.makePath( this.pa1 ), 0 );
 
         this.pa2.shift();
         this.pa2.push( 8.5 + this.round( ( 1 - (this.ms / 200)) * 30 ) );
 
-        Tools.setSvg( svg, 'd', this.makePath( this.pa2 ), 1 );
+        this.setSvg( svg, 'd', this.makePath( this.pa2 ), 1 );
 
         if ( this.isMem ) {
 
             this.pa3.shift();
             this.pa3.push( 8.5 + this.round( ( 1 - this.mm) * 30 ) );
 
-            Tools.setSvg( svg, 'd', this.makePath( this.pa3 ), 2 );
+            this.setSvg( svg, 'd', this.makePath( this.pa3 ), 2 );
 
         }
 
@@ -162,7 +157,7 @@ Fps.prototype = Object.assign( Object.create( Proto.prototype ), {
 
         this.h = this.hplus + this.baseH;
 
-        Tools.setSvg( this.c[4], 'd','M 5 8 L 8 3 2 3 5 8 Z');
+        this.setSvg( this.c[4], 'd','M 5 8 L 8 3 2 3 5 8 Z');
 
 
         if( this.parentGroup !== null ){ this.parentGroup.calc( this.hplus );}
@@ -172,7 +167,7 @@ Fps.prototype = Object.assign( Object.create( Proto.prototype ), {
         this.s[2].display = 'block'; 
         this.isShow = true;
 
-        Tools.addListen( this );
+        Roots.addListen( this );
 
     },
 
@@ -180,7 +175,7 @@ Fps.prototype = Object.assign( Object.create( Proto.prototype ), {
 
         this.h = this.baseH;
 
-        Tools.setSvg( this.c[4], 'd','M 3 8 L 8 5 3 2 3 8 Z');
+        this.setSvg( this.c[4], 'd','M 3 8 L 8 5 3 2 3 8 Z');
 
         if( this.parentGroup !== null ){ this.parentGroup.calc( -this.hplus );}
         else if( this.isUI ) this.main.calc( -this.hplus );
@@ -189,7 +184,7 @@ Fps.prototype = Object.assign( Object.create( Proto.prototype ), {
         this.s[2].display = 'none';
         this.isShow = false;
 
-        Tools.removeListen( this );
+        Roots.removeListen( this );
         this.c[1].textContent = 'FPS';
         
     },
@@ -246,13 +241,12 @@ Fps.prototype = Object.assign( Object.create( Proto.prototype ), {
         
     },
 
-
     rSize: function(){
 
-        this.s[0].width = this.width + 'px';
-        this.s[1].width = this.width + 'px';
+        this.s[0].width = this.w + 'px';
+        this.s[1].width = this.w + 'px';
         this.s[2].left = 10 + 'px';
-        this.s[2].width = (this.width-20) + 'px';
+        this.s[2].width = (this.w-20) + 'px';
         
     },
     

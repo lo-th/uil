@@ -1,14 +1,12 @@
-import { Tools } from '../core/Tools';
 import { Proto } from '../core/Proto';
 
 function Title ( o ) {
     
     Proto.call( this, o );
 
-    //var id = o.id || 0;
     var prefix = o.prefix || '';
 
-    this.c[2] = Tools.dom( 'div', Tools.css.txt + 'text-align:right; width:60px; line-height:'+ (this.h-8) + 'px; color:' + this.fontColor );
+    this.c[2] = this.dom( 'div', this.css.txt + 'text-align:right; width:60px; line-height:'+ (this.h-8) + 'px; color:' + this.fontColor );
 
     if( this.h === 31 ){
 
@@ -23,7 +21,7 @@ function Title ( o ) {
 
     this.init();
 
-};
+}
 
 Title.prototype = Object.assign( Object.create( Proto.prototype ), {
 
@@ -44,8 +42,8 @@ Title.prototype = Object.assign( Object.create( Proto.prototype ), {
     rSize: function () {
 
         Proto.prototype.rSize.call( this );
-        this.s[1].width = this.width-50 + 'px';
-        this.s[2].left = this.width-(50+26) + 'px';
+        this.s[1].width = this.w - 50 + 'px';
+        this.s[2].left = this.w - ( 50 + 26 ) + 'px';
 
     },
 

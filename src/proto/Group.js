@@ -1,4 +1,5 @@
-import { Tools } from '../core/Tools';
+
+import { Roots } from '../core/Roots';
 import { Proto } from '../core/Proto';
 import { add } from '../core/add';
 
@@ -6,73 +7,181 @@ function Group ( o ) {
  
     Proto.call( this, o );
 
+    this.uis = [];
+
     this.autoHeight = true;
-    this.isGroup = true;
+    this.current = -1;
+    this.target = null;
 
-    //this.bg = o.bg || null;
-    
+    this.decal = 0;
 
-    //this.h = 25;
     this.baseH = this.h;
+
     var fltop = Math.floor(this.h*0.5)-6;
 
 
     this.isLine = o.line !== undefined ? o.line : false;
 
-    this.c[2] = Tools.dom( 'div', Tools.css.basic + 'width:100%; left:0; height:auto; overflow:hidden; top:'+this.h+'px');
-    this.c[3] = Tools.dom( 'path', Tools.css.basic + 'position:absolute; width:10px; height:10px; left:0; top:'+fltop+'px;', { d:Tools.GPATH, fill:this.fontColor, stroke:'none'});
-    this.c[4] = Tools.dom( 'path', Tools.css.basic + 'position:absolute; width:10px; height:10px; left:4px; top:'+fltop+'px;', { d:'M 3 8 L 8 5 3 2 3 8 Z', fill:this.fontColor, stroke:'none'});
+    this.c[2] = this.dom( 'div', this.css.basic + 'width:100%; left:0; height:auto; overflow:hidden; top:'+this.h+'px');
+    this.c[3] = this.dom( 'path', this.css.basic + 'position:absolute; width:10px; height:10px; left:0; top:'+fltop+'px;', { d:this.svgs.group, fill:this.fontColor, stroke:'none'});
+    this.c[4] = this.dom( 'path', this.css.basic + 'position:absolute; width:10px; height:10px; left:4px; top:'+fltop+'px;', { d:this.svgs.arrow, fill:this.fontColor, stroke:'none'});
     // bottom line
-    if(this.isLine) this.c[5] = Tools.dom( 'div', Tools.css.basic +  'background:rgba(255, 255, 255, 0.2); width:100%; left:0; height:1px; bottom:0px');
+    if(this.isLine) this.c[5] = this.dom( 'div', this.css.basic +  'background:rgba(255, 255, 255, 0.2); width:100%; left:0; height:1px; bottom:0px');
 
     var s = this.s;
 
     s[0].height = this.h + 'px';
     s[1].height = this.h + 'px';
-    //s[1].top = 4 + 'px';
-    //s[1].left = 4 + 'px';
-    s[1].pointerEvents = 'auto';
-    s[1].cursor = 'pointer';
     this.c[1].name = 'group';
 
     this.s[1].marginLeft = '10px';
     this.s[1].lineHeight = this.h-4;
     this.s[1].color = this.fontColor;
     this.s[1].fontWeight = 'bold';
-
-    this.uis = [];
-
-    this.c[1].events = [ 'click' ];
-
+    
     this.init();
 
     if( o.bg !== undefined ) this.setBG(o.bg);
     if( o.open !== undefined ) this.open();
 
-};
+}
 
 Group.prototype = Object.assign( Object.create( Proto.prototype ), {
 
     constructor: Group,
 
-    handleEvent: function ( e ) {
+    isGroup: true,
 
-        e.preventDefault();
-        //e.stopPropagation();
+    testZone: function ( e ) {
 
-        switch( e.type ) {
-            case 'click': this.click( e ); break;
+        var l = this.local;
+        if( l.x === -1 && l.y === -1 ) return '';
+
+        var name = '';
+
+        if( l.y < this.baseH ) name = 'title';
+        else {
+            if( this.isOpen ) name = 'content';
         }
 
-    },
-
-
-    click: function ( e ) {
-
-        if( this.isOpen ) this.close();
-        else this.open();
+        return name;
 
     },
+
+    clearTarget: function () {
+
+        if( this.current === -1 ) return false;
+
+       // if(!this.target) return;
+        this.target.uiout();
+        this.target.reset();
+        this.current = -1;
+        this.target = null;
+        Roots.cursor();
+        return true;
+
+    },
+
+    reset: function () {
+
+        this.clearTarget();
+
+    },
+
+    // ----------------------
+    //   EVENTS
+    // ----------------------
+
+    handleEvent: function ( e ) {
+
+        var type = e.type;
+
+        var change = false;
+        var targetChange = false;
+
+        var name = this.testZone( e );
+
+        if( !name ) return;
+
+        switch( name ){
+
+            case 'content':
+
+            if( this.target ) targetChange = this.target.handleEvent( e );
+
+            //if( type === 'mousemove' ) change = this.styles('def');
+
+            if( !Roots.lock ){
+
+                //var next = this.findID( e );
+                var next = Roots.findTarget( this.uis, e );
+
+                if( next !== this.current ){
+                    this.clearTarget();
+                    this.current = next;
+                    change = true;
+                }
+
+                if( next !== -1 ){ 
+                    this.target = this.uis[this.current];
+                    this.target.uiover();
+                   // this.target.handleEvent( e );
+                }
+
+            }
+
+            break;
+            case 'title':
+            if( type === 'mousedown' ){
+                if( this.isOpen ) this.close();
+                else this.open();
+            }
+            break;
+
+
+        }
+
+        if( this.isDown ) change = true;
+        if( targetChange ) change = true;
+
+        return change;
+
+    },
+
+    // ----------------------
+
+    calcH: function () {
+
+        var lng = this.uis.length, i, u,  h=0, px=0, tmph=0;
+        for( i = 0; i < lng; i++){
+            u = this.uis[i];
+            if( !u.autoWidth ){
+
+                if(px===0) h += u.h+1;
+                else {
+                    if(tmph<u.h) h += u.h-tmph;
+                }
+                tmph = u.h;
+
+                //tmph = tmph < u.h ? u.h : tmph;
+                px += u.w;
+                if( px+u.w > this.w ) px = 0;
+
+            }
+            else h += u.h+1;
+        }
+
+        return h;
+    },
+
+    calcUis: function () {
+
+        if( !this.isOpen ) return;
+
+        Roots.calcUis( this.uis, this.zone, this.zone.y + this.baseH );
+
+    },
+
 
     setBG: function ( c ) {
 
@@ -85,7 +194,7 @@ Group.prototype = Object.assign( Object.create( Proto.prototype ), {
 
     },
 
-    add: function( ){
+    add: function () {
 
         var a = arguments;
 
@@ -111,15 +220,23 @@ Group.prototype = Object.assign( Object.create( Proto.prototype ), {
 
     },
 
+    parentHeight: function ( t ) {
+
+        if ( this.parentGroup !== null ) this.parentGroup.calc( t );
+        else if ( this.isUI ) this.main.calc( t );
+
+    },
+
     open: function () {
 
         Proto.prototype.open.call( this );
 
-        Tools.setSvg( this.c[4], 'd','M 5 8 L 8 3 2 3 5 8 Z');
-        //this.s[4].background = UIL.F1;
+        this.setSvg( this.c[4], 'd', this.svgs.arrowDown );
         this.rSizeContent();
 
-        if( this.isUI ) this.main.calc( this.h - this.baseH );
+        var t = this.h - this.baseH;
+
+        this.parentHeight( t );
 
     },
 
@@ -127,15 +244,17 @@ Group.prototype = Object.assign( Object.create( Proto.prototype ), {
 
         Proto.prototype.close.call( this );
 
-        if( this.isUI ) this.main.calc( -( this.h - this.baseH ) );
+        var t = this.h - this.baseH;
 
-        Tools.setSvg( this.c[4], 'd','M 3 8 L 8 5 3 2 3 8 Z');
+        this.setSvg( this.c[4], 'd', this.svgs.arrow );
         this.h = this.baseH;
         this.s[0].height = this.h + 'px';
 
+        this.parentHeight( -t );
+
     },
 
-    clear: function(){
+    clear: function () {
 
         this.clearGroup();
         if( this.isUI ) this.main.calc( -(this.h +1 ));
@@ -143,7 +262,7 @@ Group.prototype = Object.assign( Object.create( Proto.prototype ), {
 
     },
 
-    clearGroup: function(){
+    clearGroup: function () {
 
         this.close();
 
@@ -157,7 +276,7 @@ Group.prototype = Object.assign( Object.create( Proto.prototype ), {
 
     },
 
-    calc: function( y ){
+    calc: function ( y ) {
 
         if( !this.isOpen ) return;
 
@@ -165,34 +284,36 @@ Group.prototype = Object.assign( Object.create( Proto.prototype ), {
             this.h += y;
             if( this.isUI ) this.main.calc( y );
         } else {
-            this.h = this.c[2].offsetHeight + this.baseH;
+            this.h = this.calcH() + this.baseH;
         }
         this.s[0].height = this.h + 'px';
 
+        //if(this.isOpen) this.calcUis();
+
     },
 
-    rSizeContent: function(){
+    rSizeContent: function () {
 
         var i = this.uis.length;
         while(i--){
-            this.uis[i].setSize( this.width );
+            this.uis[i].setSize( this.w );
             this.uis[i].rSize();
         }
         this.calc();
 
     },
 
-    rSize: function(){
+    rSize: function () {
 
         Proto.prototype.rSize.call( this );
 
         var s = this.s;
 
         s[3].left = ( this.sa + this.sb - 17 ) + 'px';
-        s[1].width = this.width + 'px';
-        s[2].width = this.width + 'px';
+        s[1].width = this.w + 'px';
+        s[2].width = this.w + 'px';
 
-        if(this.isOpen) this.rSizeContent();
+        if( this.isOpen ) this.rSizeContent();
 
     }
 

@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg width="100%" height="100%" version="1.1" xmlns="http://www.w3.org/2000/svg" >
+<script type="text/javascript">
+    <![CDATA[
+
+    var x;
+    var y;
+    function move(e)
+    {
+    console.log(e.keyCode)
+        x = new Number(document.getElementsByTagName("circle")[0].getAttribute("cx"));
+        y = new Number (document.getElementsByTagName("circle")[0].getAttribute("cy"));
+        switch (e.keyCode)
+        {
+            case 119:
+            y--;
+            y = y.toString();
+            document.getElementsByTagName("circle")[0].setAttribute("cy",y);
+            break;
+            case 115:
+            y++;
+            y = y.toString();
+            document.getElementsByTagName("circle")[0].setAttribute("cy",y);
+            break;
+            case 97:
+            x--;
+            x = x.toString();
+            document.getElementsByTagName("circle")[0].setAttribute("cx",x);
+            break;
+            case 100:
+            x++;
+            x = x.toString();
+            document.getElementsByTagName("circle")[0].setAttribute("cx",x);
+            break;
+            default:
+        }
+    }
+    document.documentElement.addEventListener("keypress", move);
+    ]]>
+</script>
+<rect x="0" y="0" height="500" width="500" style="stroke-width:1; stroke:black; fill:white"></rect>
+<circle cx="250" cy="250" r="50" stroke="red" stroke-width="1" fill="red"></circle>
+</svg>
