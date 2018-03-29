@@ -186,7 +186,7 @@ Graph.prototype = Object.assign( Object.create( Proto.prototype ), {
     makePath: function () {
 
     	var p = "", h, w, wn, wm, ow, oh;
-    	var g = this.iw*0.5
+    	//var g = this.iw*0.5
 
     	for(var i = 0; i<this.lng; i++ ){
 

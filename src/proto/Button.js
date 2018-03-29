@@ -178,14 +178,18 @@ Button.prototype = Object.assign( Object.create( Proto.prototype ), {
 
     // ----------------------
 
-    dragover: function () {
+    dragover: function ( e ) {
+
+        e.preventDefault();
 
         this.s[4].borderColor = this.colors.select;
         this.s[4].color = this.colors.select;
 
     },
 
-    dragend: function () {
+    dragend: function ( e ) {
+
+        e.preventDefault();
 
         this.s[4].borderColor = this.fontColor;
         this.s[4].color = this.fontColor;
@@ -194,30 +198,40 @@ Button.prototype = Object.assign( Object.create( Proto.prototype ), {
 
     drop: function ( e ) {
 
-        this.dragend();
+        e.preventDefault();
+
+        this.dragend(e);
         this.fileSelect( e.dataTransfer.files[0] );
 
     },
 
     initDrager: function () {
 
-        this.c[4] = this.dom( 'div', this.css.txt +' text-align:center; line-height:'+(this.h-8)+'px; border:1px dashed '+this.fontColor+'; top:2px;  height:'+(this.h-4)+'px; border-radius:'+this.r+'px;' );//pointer-events:auto; cursor:default;
+        this.c[4] = this.dom( 'div', this.css.txt +' text-align:center; line-height:'+(this.h-8)+'px; border:1px dashed '+this.fontColor+'; top:2px;  height:'+(this.h-4)+'px; border-radius:'+this.r+'px; pointer-events:auto;' );// cursor:default;
         this.c[4].textContent = 'DRAG';
 
-        this.c[2].events = [  ];
-        this.c[4].events = [ 'dragover', 'dragend', 'dragleave', 'drop' ];
+        this.c[4].addEventListener( 'dragover', function(e){ this.dragover(e); }.bind(this), false );
+        this.c[4].addEventListener( 'dragend', function(e){ this.dragend(e); }.bind(this), false );
+        this.c[4].addEventListener( 'dragleave', function(e){ this.dragend(e); }.bind(this), false );
+        this.c[4].addEventListener( 'drop', function(e){ this.drop(e); }.bind(this), false );
+
+        //this.c[2].events = [  ];
+        //this.c[4].events = [ 'dragover', 'dragend', 'dragleave', 'drop' ];
 
 
     },
 
     initLoader: function () {
 
-        this.c[3] = this.dom( 'input', this.css.basic +'border:1px solid '+this.colors.border+'; top:1px; opacity:0;  height:'+(this.h-2)+'px;' );//pointer-events:auto; cursor:pointer;
+        this.c[3] = this.dom( 'input', this.css.basic +'top:0px; opacity:0; height:'+(this.h)+'px;pointer-events:auto;' );// cursor:pointer;
         this.c[3].name = 'loader';
         this.c[3].type = "file";
 
-        this.c[2].events = [  ];
-        this.c[3].events = [ 'change', 'mouseover', 'mousedown', 'mouseup', 'mouseout' ];
+        this.c[3].addEventListener( 'change', function(e){ this.fileSelect( e.target.files[0] ); }.bind(this), false );
+        this.c[3].addEventListener( 'mousedown', function(e){  }.bind(this), false );
+
+        //this.c[2].events = [  ];
+        //this.c[3].events = [ 'change', 'mouseover', 'mousedown', 'mouseup', 'mouseout' ];
 
         //this.hide = document.createElement('input');
 
@@ -226,7 +240,7 @@ Button.prototype = Object.assign( Object.create( Proto.prototype ), {
     fileSelect: function ( file ) {
 
         var dataUrl = [ 'png', 'jpg', 'mp4', 'webm', 'ogg' ];
-        var dataBuf = [ 'sea', 'bvh', 'BVH', 'z' ];
+        var dataBuf = [ 'sea', 'z', 'hex' ];
 
         //if( ! e.target.files ) return;
 
@@ -242,7 +256,7 @@ Button.prototype = Object.assign( Object.create( Proto.prototype ), {
         var type = fname.substring(fname.lastIndexOf('.')+1, fname.length );
 
         if( dataUrl.indexOf( type ) !== -1 ) reader.readAsDataURL( file );
-        else if( dataBuf.indexOf( type ) !== -1 ) reader.readAsArrayBuffer( file );
+        else if( dataBuf.indexOf( type ) !== -1 ) reader.readAsArrayBuffer( file );//reader.readAsArrayBuffer( file );
         else reader.readAsText( file );
 
         // if( type === 'png' || type === 'jpg' || type === 'mp4' || type === 'webm' || type === 'ogg' ) reader.readAsDataURL( file );
