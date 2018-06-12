@@ -17,7 +17,7 @@ function Slide ( o ){
 
     this.c[2] = this.dom( 'div', this.css.txtselect + 'letter-spacing:-1px; text-align:right; width:47px; border:1px dashed '+this.colors.hide+'; color:'+ this.fontColor );
     this.c[3] = this.dom( 'div', this.css.basic + ' top:0; height:'+this.h+'px;' );
-    this.c[4] = this.dom( 'div', this.css.basic + 'background:rgba(0,0,0,0.3); top:2px; height:'+(this.h-4)+'px;' );
+    this.c[4] = this.dom( 'div', this.css.basic + 'background:'+this.colors.scrollback+'; top:2px; height:'+(this.h-4)+'px;' );
     this.c[5] = this.dom( 'div', this.css.basic + 'left:4px; top:5px; height:'+(this.h-10)+'px; background:' + this.fontColor +';' );
 
     this.c[2].isNum = true;
@@ -164,13 +164,13 @@ Slide.prototype = Object.assign( Object.create( Proto.prototype ), {
             case 0: // base
                // s[2].border = '1px solid ' + this.colors.hide;
                 s[2].color = this.fontColor;
-                s[4].background = 'rgba(0,0,0,0.3)';
+                s[4].background = this.colors.scrollback;
                 s[5].background = this.fontColor;
             break;
             case 1: // scroll over
                 //s[2].border = '1px dashed ' + this.colors.hide;
                 s[2].color = this.colorPlus;
-                s[4].background = 'rgba(0,0,0,0.6)';
+                s[4].background = this.colors.scrollbackover;
                 s[5].background = this.colorPlus;
             break;
            /* case 2: 

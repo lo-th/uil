@@ -100,12 +100,16 @@ var R = {
 
     handleEvent: function ( event ) {
 
-        event.preventDefault();
+        //if( event.type === 'keydown'){ R.editText( event ); return;}
+
+        if( event.type !== 'keydown' && event.type !== 'wheel' ) event.preventDefault();
         //event.stopPropagation();
 
         R.findZone();
        
         var e = R.e;
+
+
 
 
 

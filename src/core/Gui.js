@@ -206,7 +206,7 @@ Object.assign( Gui.prototype, {
 	    		case 'def': 
 	    		   this.scroll.style.background = this.colors.scroll; 
 	    		   this.bottom.style.background = this.colors.background;
-	    		   this.bottom.style.color = '#CCC';
+	    		   this.bottom.style.color = this.colors.text;
 	    		break;
 
 	    		//case 'scrollDef': this.scroll.style.background = this.colors.scroll; break;

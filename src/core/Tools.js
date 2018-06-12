@@ -30,6 +30,8 @@ var T = {
     colors: {
 
         text : '#C0C0C0',
+        textOver : '#FFFFFF',
+
         background: 'rgba(44,44,44,0.3)',
         backgroundOver: 'rgba(11,11,11,0.5)',
 
@@ -38,6 +40,9 @@ var T = {
         border : '#454545',
         borderOver : '#5050AA',
         borderSelect : '#308AFF',
+
+        scrollback:'rgba(44,44,44,0.2)',
+        scrollbackover:'rgba(44,44,44,0.5)',
 
         button : '#404040',
         boolbg : '#181818',

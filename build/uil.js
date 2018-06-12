@@ -122,6 +122,8 @@
 	    colors: {
 
 	        text : '#C0C0C0',
+	        textOver : '#FFFFFF',
+
 	        background: 'rgba(44,44,44,0.3)',
 	        backgroundOver: 'rgba(11,11,11,0.5)',
 
@@ -130,6 +132,9 @@
 	        border : '#454545',
 	        borderOver : '#5050AA',
 	        borderSelect : '#308AFF',
+
+	        scrollback:'rgba(44,44,44,0.2)',
+	        scrollbackover:'rgba(44,44,44,0.5)',
 
 	        button : '#404040',
 	        boolbg : '#181818',
@@ -707,12 +712,16 @@
 
 	    handleEvent: function ( event ) {
 
-	        event.preventDefault();
+	        //if( event.type === 'keydown'){ R.editText( event ); return;}
+
+	        if( event.type !== 'keydown' && event.type !== 'wheel' ) event.preventDefault();
 	        //event.stopPropagation();
 
 	        R.findZone();
 	       
 	        var e = R.e;
+
+
 
 
 
@@ -4521,7 +4530,7 @@
 
 	    this.c[2] = this.dom( 'div', this.css.txtselect + 'letter-spacing:-1px; text-align:right; width:47px; border:1px dashed '+this.colors.hide+'; color:'+ this.fontColor );
 	    this.c[3] = this.dom( 'div', this.css.basic + ' top:0; height:'+this.h+'px;' );
-	    this.c[4] = this.dom( 'div', this.css.basic + 'background:rgba(0,0,0,0.3); top:2px; height:'+(this.h-4)+'px;' );
+	    this.c[4] = this.dom( 'div', this.css.basic + 'background:'+this.colors.scrollback+'; top:2px; height:'+(this.h-4)+'px;' );
 	    this.c[5] = this.dom( 'div', this.css.basic + 'left:4px; top:5px; height:'+(this.h-10)+'px; background:' + this.fontColor +';' );
 
 	    this.c[2].isNum = true;
@@ -4668,13 +4677,13 @@
 	            case 0: // base
 	               // s[2].border = '1px solid ' + this.colors.hide;
 	                s[2].color = this.fontColor;
-	                s[4].background = 'rgba(0,0,0,0.3)';
+	                s[4].background = this.colors.scrollback;
 	                s[5].background = this.fontColor;
 	            break;
 	            case 1: // scroll over
 	                //s[2].border = '1px dashed ' + this.colors.hide;
 	                s[2].color = this.colorPlus;
-	                s[4].background = 'rgba(0,0,0,0.6)';
+	                s[4].background = this.colors.scrollbackover;
 	                s[5].background = this.colorPlus;
 	            break;
 	           /* case 2: 
@@ -5142,7 +5151,7 @@
 		    		case 'def': 
 		    		   this.scroll.style.background = this.colors.scroll; 
 		    		   this.bottom.style.background = this.colors.background;
-		    		   this.bottom.style.color = '#CCC';
+		    		   this.bottom.style.color = this.colors.text;
 		    		break;
 
 		    		//case 'scrollDef': this.scroll.style.background = this.colors.scroll; break;
