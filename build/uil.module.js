@@ -656,6 +656,20 @@ var R = {
 
     },
 
+    remove: function ( o ) {
+
+        var i = R.ui.indexOf( o );
+        
+        if ( i !== -1 ) {
+            R.ui.splice( i, 1 ); 
+        }
+
+        if( R.ui.length === 0 ){
+            R.removeEvents();
+        }
+
+    },
+
     // ----------------------
     //   EVENTS
     // ----------------------
@@ -666,7 +680,7 @@ var R = {
 
         var domElement = document.body;
 
-        domElement.addEventListener( 'contextmenu', function( e ){ e.preventDefault(); }, false );
+        domElement.addEventListener( 'contextmenu', R, false );
 
         domElement.addEventListener( 'mousedown', R, false );
         domElement.addEventListener( 'wheel', R, false );
@@ -682,6 +696,31 @@ var R = {
         window.addEventListener( 'resize', R.resize , false );
 
         R.isEventsInit = true;
+
+    },
+
+    removeEvents: function () {
+
+        if( !R.isEventsInit ) return;
+
+        var domElement = document.body;
+
+        domElement.removeEventListener( 'contextmenu', R );
+
+        domElement.removeEventListener( 'mousedown', R );
+        domElement.removeEventListener( 'wheel', R );
+
+        domElement.removeEventListener( 'touchstart', R );
+        domElement.removeEventListener( 'touchend', R );
+        domElement.removeEventListener( 'touchmove', R );
+
+        document.removeEventListener( 'mousemove', R );
+        document.removeEventListener( 'mouseup', R );
+
+        window.removeEventListener( 'keydown', R );
+        window.removeEventListener( 'resize', R.resize  );
+
+        R.isEventsInit = false;
 
     },
 
@@ -705,6 +744,8 @@ var R = {
     // ----------------------
 
     handleEvent: function ( event ) {
+
+        if( event.type === 'contextmenu' ){ event.preventDefault(); return; }
 
         //if( event.type === 'keydown'){ R.editText( event ); return;}
 
@@ -1263,6 +1304,13 @@ function Proto ( o ) {
     // Font Color;
     this.titleColor = o.titleColor || Tools.colors.text;
     this.fontColor = o.fontColor || Tools.colors.text;
+    
+    if( o.color !== undefined ){ 
+        if( !isNaN(o.color) ) this.fontColor = Tools.hexToHtml(o.color);
+        else this.fontColor = o.color;
+        this.titleColor = this.fontColor;
+    }
+
     this.colorPlus = Tools.ColorLuma( this.fontColor, 0.3 );
 
     this.txt = o.name || 'Proto';
@@ -1771,7 +1819,9 @@ function Button ( o ) {
 
     Proto.call( this, o );
 
-    this.value = o.value || [this.txt];
+    this.value = false;
+
+    this.values = o.value || [this.txt];
 
     //this.selected = null;
     this.isDown = false;
@@ -1782,14 +1832,14 @@ function Button ( o ) {
     this.isDragButton = o.drag || false;
     if( this.isDragButton ) this.isLoadButton = true;
 
-    this.lng = this.value.length;
+    this.lng = this.values.length;
     this.tmp = [];
     this.stat = [];
 
     for(var i = 0; i < this.lng; i++){
         this.c[i+2] = this.dom( 'div', this.css.txt + 'text-align:center; top:1px; background:'+this.buttonColor+'; height:'+(this.h-2)+'px; border-radius:'+this.radius+'px; line-height:'+(this.h-4)+'px;' );
         this.c[i+2].style.color = this.fontColor;
-        this.c[i+2].innerHTML = this.value[i];
+        this.c[i+2].innerHTML = this.values[i];
         this.stat[i] = 1;
     }
 
@@ -1832,7 +1882,9 @@ Button.prototype = Object.assign( Object.create( Proto.prototype ), {
     mouseup: function ( e ) {
     
         if( this.isDown ){
+            this.value = false;
             this.isDown = false;
+            this.send();
             return this.mousemove( e );
         }
 
@@ -1847,7 +1899,8 @@ Button.prototype = Object.assign( Object.create( Proto.prototype ), {
         if( !name ) return false;
 
     	this.isDown = true;
-        this.send( this.value[name-2] );
+        this.value = this.values[name-2];
+        this.send();
     	return this.mousemove( e );
  
         // true;
@@ -5070,6 +5123,14 @@ Object.assign( Gui.prototype, {
     isGui: true,
 
     //callback: function () {},
+
+    dispose: function () {
+
+        this.clear();
+        if( this.parent !== null ) this.parent.removeChild( this.content );
+        Roots.remove( this );
+
+    },
 
     // ----------------------
     //   CANVAS

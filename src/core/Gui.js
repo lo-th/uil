@@ -132,6 +132,14 @@ Object.assign( Gui.prototype, {
 
     //callback: function () {},
 
+    dispose: function () {
+
+        this.clear();
+        if( this.parent !== null ) this.parent.removeChild( this.content );
+        Roots.remove( this );
+
+    },
+
     // ----------------------
     //   CANVAS
     // ----------------------

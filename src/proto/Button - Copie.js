@@ -4,9 +4,7 @@ function Button ( o ) {
 
     Proto.call( this, o );
 
-    this.value = false;
-
-    this.values = o.value || [this.txt];
+    this.value = o.value || [this.txt];
 
     //this.selected = null;
     this.isDown = false;
@@ -17,14 +15,14 @@ function Button ( o ) {
     this.isDragButton = o.drag || false;
     if( this.isDragButton ) this.isLoadButton = true;
 
-    this.lng = this.values.length;
+    this.lng = this.value.length;
     this.tmp = [];
     this.stat = [];
 
     for(var i = 0; i < this.lng; i++){
         this.c[i+2] = this.dom( 'div', this.css.txt + 'text-align:center; top:1px; background:'+this.buttonColor+'; height:'+(this.h-2)+'px; border-radius:'+this.radius+'px; line-height:'+(this.h-4)+'px;' );
         this.c[i+2].style.color = this.fontColor;
-        this.c[i+2].innerHTML = this.values[i];
+        this.c[i+2].innerHTML = this.value[i];
         this.stat[i] = 1;
     }
 
@@ -67,9 +65,7 @@ Button.prototype = Object.assign( Object.create( Proto.prototype ), {
     mouseup: function ( e ) {
     
         if( this.isDown ){
-            this.value = false;
             this.isDown = false;
-            this.send();
             return this.mousemove( e );
         }
 
@@ -84,8 +80,7 @@ Button.prototype = Object.assign( Object.create( Proto.prototype ), {
         if( !name ) return false;
 
     	this.isDown = true;
-        this.value = this.values[name-2]
-        this.send();
+        this.send( this.value[name-2] );
     	return this.mousemove( e );
  
         // true;

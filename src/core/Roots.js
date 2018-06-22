@@ -50,6 +50,20 @@ var R = {
 
     },
 
+    remove: function ( o ) {
+
+        var i = R.ui.indexOf( o );
+        
+        if ( i !== -1 ) {
+            R.ui.splice( i, 1 ); 
+        }
+
+        if( R.ui.length === 0 ){
+            R.removeEvents();
+        }
+
+    },
+
     // ----------------------
     //   EVENTS
     // ----------------------
@@ -60,7 +74,7 @@ var R = {
 
         var domElement = document.body;
 
-        domElement.addEventListener( 'contextmenu', function( e ){ e.preventDefault(); }, false );
+        domElement.addEventListener( 'contextmenu', R, false );
 
         domElement.addEventListener( 'mousedown', R, false );
         domElement.addEventListener( 'wheel', R, false );
@@ -76,6 +90,31 @@ var R = {
         window.addEventListener( 'resize', R.resize , false );
 
         R.isEventsInit = true;
+
+    },
+
+    removeEvents: function () {
+
+        if( !R.isEventsInit ) return;
+
+        var domElement = document.body;
+
+        domElement.removeEventListener( 'contextmenu', R );
+
+        domElement.removeEventListener( 'mousedown', R );
+        domElement.removeEventListener( 'wheel', R );
+
+        domElement.removeEventListener( 'touchstart', R );
+        domElement.removeEventListener( 'touchend', R );
+        domElement.removeEventListener( 'touchmove', R );
+
+        document.removeEventListener( 'mousemove', R );
+        document.removeEventListener( 'mouseup', R );
+
+        window.removeEventListener( 'keydown', R );
+        window.removeEventListener( 'resize', R.resize  );
+
+        R.isEventsInit = false;
 
     },
 
@@ -99,6 +138,8 @@ var R = {
     // ----------------------
 
     handleEvent: function ( event ) {
+
+        if( event.type === 'contextmenu' ){ event.preventDefault(); return; }
 
         //if( event.type === 'keydown'){ R.editText( event ); return;}
 
