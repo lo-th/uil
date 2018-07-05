@@ -300,23 +300,14 @@ Object.assign( Gui.prototype, {
 
                 e.clientY = this.isScroll ?  e.clientY + this.decal : e.clientY;
 
-
                 if( Roots.isMobile && type === 'mousedown' ) this.getNext( e, change );
-
-
-
 
 	    		if( this.target ) targetChange = this.target.handleEvent( e );
 
 	    		if( type === 'mousemove' ) change = this.mode('def');
                 if( type === 'wheel' && !targetChange && this.isScroll ) change = this.onWheel( e );
-
                
-	    		if( !Roots.lock ){
-
-                    this.getNext( e, change );
-
-	    		}
+	    		if( !Roots.lock ) this.getNext( e, change );
 
     		break;
     		case 'bottom':

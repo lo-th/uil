@@ -113,11 +113,7 @@ Group.prototype = Object.assign( Object.create( Proto.prototype ), {
 
             //if( type === 'mousemove' ) change = this.styles('def');
 
-            if( !Roots.lock ){
-
-                this.getNext( e, change );
-
-            }
+            if( !Roots.lock ) this.getNext( e, change );
 
             break;
             case 'title':
