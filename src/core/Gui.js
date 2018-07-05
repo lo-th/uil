@@ -300,14 +300,23 @@ Object.assign( Gui.prototype, {
 
                 e.clientY = this.isScroll ?  e.clientY + this.decal : e.clientY;
 
+
+                if( Roots.isMobile && type === 'mousedown' ) this.getNext( e, change );
+
+
+
+
 	    		if( this.target ) targetChange = this.target.handleEvent( e );
 
 	    		if( type === 'mousemove' ) change = this.mode('def');
                 if( type === 'wheel' && !targetChange && this.isScroll ) change = this.onWheel( e );
 
+               
 	    		if( !Roots.lock ){
 
-	    			var next = Roots.findTarget( this.uis, e );
+                    this.getNext( e, change );
+
+	    			/*var next = Roots.findTarget( this.uis, e );
 
 	    			if( next !== this.current ){
 		                this.clearTarget();
@@ -316,9 +325,9 @@ Object.assign( Gui.prototype, {
 		            }
 
 		            if( next !== -1 ){ 
-		                this.target = this.uis[this.current];
+		                this.target = this.uis[ this.current ];
 		                this.target.uiover();
-		            }
+		            }*/
 
 	    		}
 
@@ -353,6 +362,23 @@ Object.assign( Gui.prototype, {
     	if( targetChange ) change = true;
 
     	if( change ) this.draw();
+
+    },
+
+    getNext: function ( e, change ) {
+
+        var next = Roots.findTarget( this.uis, e );
+
+        if( next !== this.current ){
+            this.clearTarget();
+            this.current = next;
+            change = true;
+        }
+
+        if( next !== -1 ){ 
+            this.target = this.uis[ this.current ];
+            this.target.uiover();
+        }
 
     },
 

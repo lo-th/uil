@@ -39,6 +39,8 @@ var R = {
         delta:0,
     },
 
+    isMobile: false,
+
     
 
 	add: function ( o ) {
@@ -47,6 +49,14 @@ var R = {
         R.getZone( o );
 
         if( !R.isEventsInit ) R.initEvents();
+
+    },
+
+    testMobile: function () {
+
+        var n = navigator.userAgent;
+        if (n.match(/Android/i) || n.match(/webOS/i) || n.match(/iPhone/i) || n.match(/iPad/i) || n.match(/iPod/i) || n.match(/BlackBerry/i) || n.match(/Windows Phone/i)) return true;
+        else return false;  
 
     },
 
@@ -74,17 +84,19 @@ var R = {
 
         var domElement = document.body;
 
-        domElement.addEventListener( 'contextmenu', R, false );
+        R.isMobile = R.testMobile();
 
-        domElement.addEventListener( 'mousedown', R, false );
-        domElement.addEventListener( 'wheel', R, false );
-
-        domElement.addEventListener( 'touchstart', R, false );
-        domElement.addEventListener( 'touchend', R, false );
-        domElement.addEventListener( 'touchmove', R, false );
-
-        document.addEventListener( 'mousemove', R, false );
-        document.addEventListener( 'mouseup', R, false );
+        if( R.isMobile ){
+            domElement.addEventListener( 'touchstart', R, false );
+            domElement.addEventListener( 'touchend', R, false );
+            domElement.addEventListener( 'touchmove', R, false );
+        }else{
+            domElement.addEventListener( 'mousedown', R, false );
+            domElement.addEventListener( 'contextmenu', R, false );
+            domElement.addEventListener( 'wheel', R, false );
+            document.addEventListener( 'mousemove', R, false );
+            document.addEventListener( 'mouseup', R, false );
+        }
 
         window.addEventListener( 'keydown', R, false );
         window.addEventListener( 'resize', R.resize , false );
@@ -99,17 +111,17 @@ var R = {
 
         var domElement = document.body;
 
-        domElement.removeEventListener( 'contextmenu', R );
-
-        domElement.removeEventListener( 'mousedown', R );
-        domElement.removeEventListener( 'wheel', R );
-
-        domElement.removeEventListener( 'touchstart', R );
-        domElement.removeEventListener( 'touchend', R );
-        domElement.removeEventListener( 'touchmove', R );
-
-        document.removeEventListener( 'mousemove', R );
-        document.removeEventListener( 'mouseup', R );
+        if( R.isMobile ){
+            domElement.removeEventListener( 'touchstart', R, false );
+            domElement.removeEventListener( 'touchend', R, false );
+            domElement.removeEventListener( 'touchmove', R, false );
+        }else{
+            domElement.removeEventListener( 'mousedown', R, false );
+            domElement.removeEventListener( 'contextmenu', R, false );
+            domElement.removeEventListener( 'wheel', R, false );
+            document.removeEventListener( 'mousemove', R, false );
+            document.removeEventListener( 'mouseup', R, false );
+        }
 
         window.removeEventListener( 'keydown', R );
         window.removeEventListener( 'resize', R.resize  );
@@ -154,12 +166,6 @@ var R = {
        
         var e = R.e;
 
-
-
-
-
-
-
         if( event.type === 'keydown') R.editText( event );
 
         if( event.type === 'wheel' ) e.delta = event.deltaY > 0 ? 1 : -1;
@@ -175,30 +181,21 @@ var R = {
         
             e.clientX = event.touches[ 0 ].clientX || 0;
             e.clientY = event.touches[ 0 ].clientY || 0;
+
         }
 
         
         if( event.type === 'touchstart'){ e.type = 'mousedown'; R.findID( e ); }
-        if( event.type === 'touchend'){ e.type = 'mouseup'; R.findID( e ) }
+        if( event.type === 'touchend'){ e.type = 'mouseup'; R.clearOldID(); }
         if( event.type === 'touchmove'){ e.type = 'mousemove';  }
 
 
         if( e.type === 'mousedown' ) R.lock = true;
         if( e.type === 'mouseup' ) R.lock = false;
 
-        
-
-        //console.log(e)
-
-        
-
         if( ( e.type === 'mousemove'  ) && (!R.lock) ){ 
             R.findID( e );
         }
-
-       /* if( event.type === 'touchstart'){ e.type = 'mousedown'; R.findID( e ); }
-        if( event.type === 'touchend'){ e.type = 'mouseup';  R.findID( e ); }
-        if( event.type === 'touchmove') { e.type = 'mousemove'; }*/
 
         if( R.ID !== null ){
 
