@@ -80,6 +80,8 @@ Joystick.prototype = Object.assign( Object.create( Proto.prototype ), {
 
     reset: function () {
 
+        if( this.pos.x!==0 || this.pos.y!==0 ) this.interval = setInterval( this.update.bind(this), 10 );
+
         this.mode(0);
 
     },
@@ -87,7 +89,7 @@ Joystick.prototype = Object.assign( Object.create( Proto.prototype ), {
     mouseup: function ( e ) {
 
         this.isDown = false;
-        this.interval = setInterval(this.update.bind(this), 10);
+        this.interval = setInterval( this.update.bind(this), 10 );
         
     },
 

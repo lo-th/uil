@@ -798,7 +798,7 @@
 
 	        
 	        if( event.type === 'touchstart'){ e.type = 'mousedown'; R.findID( e ); }
-	        if( event.type === 'touchend'){ e.type = 'mouseup'; R.clearOldID(); }
+	        if( event.type === 'touchend'){ e.type = 'mouseup'; R.clearOldID();}
 	        if( event.type === 'touchmove'){ e.type = 'mousemove';  }
 
 
@@ -1256,6 +1256,10 @@
 
 
 	} );
+
+	/**
+	 * @author lth / https://github.com/lo-th
+	 */
 
 	function Proto ( o ) {
 
@@ -3274,26 +3278,15 @@
 
 	            case 'content':
 
+	            if( Roots.isMobile && type === 'mousedown' ) this.getNext( e, change );
+
 	            if( this.target ) targetChange = this.target.handleEvent( e );
 
 	            //if( type === 'mousemove' ) change = this.styles('def');
 
 	            if( !Roots.lock ){
 
-	                //var next = this.findID( e );
-	                var next = Roots.findTarget( this.uis, e );
-
-	                if( next !== this.current ){
-	                    this.clearTarget();
-	                    this.current = next;
-	                    change = true;
-	                }
-
-	                if( next !== -1 ){ 
-	                    this.target = this.uis[this.current];
-	                    this.target.uiover();
-	                   // this.target.handleEvent( e );
-	                }
+	                this.getNext( e, change );
 
 	            }
 
@@ -3312,6 +3305,23 @@
 	        if( targetChange ) change = true;
 
 	        return change;
+
+	    },
+
+	    getNext: function ( e, change ) {
+
+	        var next = Roots.findTarget( this.uis, e );
+
+	        if( next !== this.current ){
+	            this.clearTarget();
+	            this.current = next;
+	            change = true;
+	        }
+
+	        if( next !== -1 ){ 
+	            this.target = this.uis[ this.current ];
+	            this.target.uiover();
+	        }
 
 	    },
 
@@ -3565,6 +3575,8 @@
 
 	    reset: function () {
 
+	        if( this.pos.x!==0 || this.pos.y!==0 ) this.interval = setInterval( this.update.bind(this), 10 );
+
 	        this.mode(0);
 
 	    },
@@ -3572,7 +3584,7 @@
 	    mouseup: function ( e ) {
 
 	        this.isDown = false;
-	        this.interval = setInterval(this.update.bind(this), 10);
+	        this.interval = setInterval( this.update.bind(this), 10 );
 	        
 	    },
 
@@ -4961,6 +4973,15 @@
 
 	} );
 
+	/*function autoType () {
+
+	    var a = arguments;
+	    var type = 'Slide';
+	    if( a[2].type ) type = a[2].type;
+	    return type;
+
+	};*/
+
 	function add () {
 
 	    var a = arguments; 
@@ -5327,19 +5348,6 @@
 		    		if( !Roots.lock ){
 
 	                    this.getNext( e, change );
-
-		    			/*var next = Roots.findTarget( this.uis, e );
-
-		    			if( next !== this.current ){
-			                this.clearTarget();
-			                this.current = next;
-			                change = true;
-			            }
-
-			            if( next !== -1 ){ 
-			                this.target = this.uis[ this.current ];
-			                this.target.uiover();
-			            }*/
 
 		    		}
 

@@ -792,7 +792,7 @@ var R = {
 
         
         if( event.type === 'touchstart'){ e.type = 'mousedown'; R.findID( e ); }
-        if( event.type === 'touchend'){ e.type = 'mouseup'; R.clearOldID(); }
+        if( event.type === 'touchend'){ e.type = 'mouseup'; R.clearOldID();}
         if( event.type === 'touchmove'){ e.type = 'mousemove';  }
 
 
@@ -1250,6 +1250,10 @@ Object.assign( V2.prototype, {
 
 
 } );
+
+/**
+ * @author lth / https://github.com/lo-th
+ */
 
 function Proto ( o ) {
 
@@ -3268,26 +3272,15 @@ Group.prototype = Object.assign( Object.create( Proto.prototype ), {
 
             case 'content':
 
+            if( Roots.isMobile && type === 'mousedown' ) this.getNext( e, change );
+
             if( this.target ) targetChange = this.target.handleEvent( e );
 
             //if( type === 'mousemove' ) change = this.styles('def');
 
             if( !Roots.lock ){
 
-                //var next = this.findID( e );
-                var next = Roots.findTarget( this.uis, e );
-
-                if( next !== this.current ){
-                    this.clearTarget();
-                    this.current = next;
-                    change = true;
-                }
-
-                if( next !== -1 ){ 
-                    this.target = this.uis[this.current];
-                    this.target.uiover();
-                   // this.target.handleEvent( e );
-                }
+                this.getNext( e, change );
 
             }
 
@@ -3306,6 +3299,23 @@ Group.prototype = Object.assign( Object.create( Proto.prototype ), {
         if( targetChange ) change = true;
 
         return change;
+
+    },
+
+    getNext: function ( e, change ) {
+
+        var next = Roots.findTarget( this.uis, e );
+
+        if( next !== this.current ){
+            this.clearTarget();
+            this.current = next;
+            change = true;
+        }
+
+        if( next !== -1 ){ 
+            this.target = this.uis[ this.current ];
+            this.target.uiover();
+        }
 
     },
 
@@ -3559,6 +3569,8 @@ Joystick.prototype = Object.assign( Object.create( Proto.prototype ), {
 
     reset: function () {
 
+        if( this.pos.x!==0 || this.pos.y!==0 ) this.interval = setInterval( this.update.bind(this), 10 );
+
         this.mode(0);
 
     },
@@ -3566,7 +3578,7 @@ Joystick.prototype = Object.assign( Object.create( Proto.prototype ), {
     mouseup: function ( e ) {
 
         this.isDown = false;
-        this.interval = setInterval(this.update.bind(this), 10);
+        this.interval = setInterval( this.update.bind(this), 10 );
         
     },
 
@@ -4955,6 +4967,15 @@ Title.prototype = Object.assign( Object.create( Proto.prototype ), {
 
 } );
 
+/*function autoType () {
+
+    var a = arguments;
+    var type = 'Slide';
+    if( a[2].type ) type = a[2].type;
+    return type;
+
+};*/
+
 function add () {
 
     var a = arguments; 
@@ -5321,19 +5342,6 @@ Object.assign( Gui.prototype, {
 	    		if( !Roots.lock ){
 
                     this.getNext( e, change );
-
-	    			/*var next = Roots.findTarget( this.uis, e );
-
-	    			if( next !== this.current ){
-		                this.clearTarget();
-		                this.current = next;
-		                change = true;
-		            }
-
-		            if( next !== -1 ){ 
-		                this.target = this.uis[ this.current ];
-		                this.target.uiover();
-		            }*/
 
 	    		}
 

@@ -316,19 +316,6 @@ Object.assign( Gui.prototype, {
 
                     this.getNext( e, change );
 
-	    			/*var next = Roots.findTarget( this.uis, e );
-
-	    			if( next !== this.current ){
-		                this.clearTarget();
-		                this.current = next;
-		                change = true;
-		            }
-
-		            if( next !== -1 ){ 
-		                this.target = this.uis[ this.current ];
-		                this.target.uiover();
-		            }*/
-
 	    		}
 
     		break;

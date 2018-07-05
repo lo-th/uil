@@ -107,26 +107,15 @@ Group.prototype = Object.assign( Object.create( Proto.prototype ), {
 
             case 'content':
 
+            if( Roots.isMobile && type === 'mousedown' ) this.getNext( e, change );
+
             if( this.target ) targetChange = this.target.handleEvent( e );
 
             //if( type === 'mousemove' ) change = this.styles('def');
 
             if( !Roots.lock ){
 
-                //var next = this.findID( e );
-                var next = Roots.findTarget( this.uis, e );
-
-                if( next !== this.current ){
-                    this.clearTarget();
-                    this.current = next;
-                    change = true;
-                }
-
-                if( next !== -1 ){ 
-                    this.target = this.uis[this.current];
-                    this.target.uiover();
-                   // this.target.handleEvent( e );
-                }
+                this.getNext( e, change );
 
             }
 
@@ -145,6 +134,23 @@ Group.prototype = Object.assign( Object.create( Proto.prototype ), {
         if( targetChange ) change = true;
 
         return change;
+
+    },
+
+    getNext: function ( e, change ) {
+
+        var next = Roots.findTarget( this.uis, e );
+
+        if( next !== this.current ){
+            this.clearTarget();
+            this.current = next;
+            change = true;
+        }
+
+        if( next !== -1 ){ 
+            this.target = this.uis[ this.current ];
+            this.target.uiover();
+        }
 
     },
 

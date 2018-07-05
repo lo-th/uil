@@ -186,7 +186,7 @@ var R = {
 
         
         if( event.type === 'touchstart'){ e.type = 'mousedown'; R.findID( e ); }
-        if( event.type === 'touchend'){ e.type = 'mouseup'; R.clearOldID(); }
+        if( event.type === 'touchend'){ e.type = 'mouseup'; R.clearOldID();}
         if( event.type === 'touchmove'){ e.type = 'mousemove';  }
 
 
