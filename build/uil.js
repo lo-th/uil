@@ -766,6 +766,8 @@
 
 
 
+
+
 	        if( event.type === 'keydown') R.editText( event );
 
 	        if( event.type === 'wheel' ) e.delta = event.deltaY > 0 ? 1 : -1;
@@ -774,6 +776,19 @@
 	        e.clientX = event.clientX || 0;
 	        e.clientY = event.clientY || 0;
 	        e.type = event.type;
+
+	        // mobile
+
+	        if( event.touches ){
+	            e.clientX = event.touches[ 0 ].pageX || 0;
+	            e.clientY = event.touches[ 0 ].pageY || 0;
+	        }
+
+	        if( event.type === 'touchstart') e.type = 'mouseDown';
+	        if( event.type === 'touchend') e.type = 'mouseup';
+	        if( event.type === 'touchmove') e.type = 'mousemove';
+	        
+
 
 	        if( e.type === 'mousedown' ) R.lock = true;
 	        if( e.type === 'mouseup' ) R.lock = false;
