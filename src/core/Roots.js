@@ -139,11 +139,15 @@ var R = {
 
     handleEvent: function ( event ) {
 
+        //if(!event.type) return;
+
+      //  console.log( event.type )
+
         if( event.type === 'contextmenu' ){ event.preventDefault(); return; }
 
         //if( event.type === 'keydown'){ R.editText( event ); return;}
 
-        if( event.type !== 'keydown' && event.type !== 'wheel' ) event.preventDefault();
+        //if( event.type !== 'keydown' && event.type !== 'wheel' ) event.preventDefault();
         //event.stopPropagation();
 
         R.findZone();
@@ -167,23 +171,34 @@ var R = {
 
         // mobile
 
-        if( event.touches ){
-            e.clientX = event.touches[ 0 ].pageX || 0;
-            e.clientY = event.touches[ 0 ].pageY || 0;
+        if( event.touches && event.touches.length > 0 ){
+        
+            e.clientX = event.touches[ 0 ].clientX || 0;
+            e.clientY = event.touches[ 0 ].clientY || 0;
         }
 
-        if( event.type === 'touchstart') e.type = 'mouseDown';
-        if( event.type === 'touchend') e.type = 'mouseup';
-        if( event.type === 'touchmove') e.type = 'mousemove';
         
+        if( event.type === 'touchstart'){ e.type = 'mousedown'; R.findID( e ); }
+        if( event.type === 'touchend'){ e.type = 'mouseup'; R.findID( e ) }
+        if( event.type === 'touchmove'){ e.type = 'mousemove';  }
 
 
         if( e.type === 'mousedown' ) R.lock = true;
         if( e.type === 'mouseup' ) R.lock = false;
 
-        if( (e.type === 'mousemove') && (!R.lock) ){ 
+        
+
+        //console.log(e)
+
+        
+
+        if( ( e.type === 'mousemove'  ) && (!R.lock) ){ 
             R.findID( e );
         }
+
+       /* if( event.type === 'touchstart'){ e.type = 'mousedown'; R.findID( e ); }
+        if( event.type === 'touchend'){ e.type = 'mouseup';  R.findID( e ); }
+        if( event.type === 'touchmove') { e.type = 'mousemove'; }*/
 
         if( R.ID !== null ){
 
