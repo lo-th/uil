@@ -97,6 +97,12 @@ Object.assign( V2.prototype, {
 
 	},
 
+	isZero: function () {
+
+		return ( this.x === 0 && this.y === 0 );
+
+	},
+
 	copy: function ( v ) {
 
 		this.x = v.x;
@@ -115,6 +121,22 @@ Object.assign( V2.prototype, {
 	nearEquals: function ( v, n ) {
 
 		return ( ( v.x.toFixed(n) === this.x.toFixed(n) ) && ( v.y.toFixed(n) === this.y.toFixed(n) ) );
+
+	},
+
+	lerp: function ( v, alpha ) {
+
+		if(v===null){
+			this.x -= this.x * alpha;
+		    this.y -= this.y * alpha;
+		} else {
+			this.x += ( v.x - this.x ) * alpha;
+		    this.y += ( v.y - this.y ) * alpha;
+		}
+
+		
+
+		return this;
 
 	},
 

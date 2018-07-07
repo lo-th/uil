@@ -17,6 +17,8 @@ var R = {
 	needReZone: true,
 	isEventsInit: false,
 
+    prevDefault: ['contextmenu', 'mousedown', 'mousemove', 'mouseup'],
+
 	xmlserializer: new XMLSerializer(),
 	tmpTime: null,
     tmpImage: null,
@@ -148,6 +150,7 @@ var R = {
     // ----------------------
     //   HANDLE EVENTS
     // ----------------------
+    
 
     handleEvent: function ( event ) {
 
@@ -155,7 +158,9 @@ var R = {
 
       //  console.log( event.type )
 
-        if( event.type === 'contextmenu' ){ event.preventDefault(); return; }
+        if( event.type.indexOf( R.prevDefault ) !== -1 ) event.preventDefault(); 
+
+        if( event.type === 'contextmenu' ) return; 
 
         //if( event.type === 'keydown'){ R.editText( event ); return;}
 
@@ -183,10 +188,9 @@ var R = {
             e.clientY = event.touches[ 0 ].clientY || 0;
 
         }
-
         
         if( event.type === 'touchstart'){ e.type = 'mousedown'; R.findID( e ); }
-        if( event.type === 'touchend'){ e.type = 'mouseup'; R.clearOldID();}
+        if( event.type === 'touchend'){ e.type = 'mouseup'; R.clearOldID(); }
         if( event.type === 'touchmove'){ e.type = 'mousemove';  }
 
 

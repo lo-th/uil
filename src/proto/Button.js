@@ -69,7 +69,7 @@ Button.prototype = Object.assign( Object.create( Proto.prototype ), {
         if( this.isDown ){
             this.value = false;
             this.isDown = false;
-            this.send();
+            //this.send();
             return this.mousemove( e );
         }
 

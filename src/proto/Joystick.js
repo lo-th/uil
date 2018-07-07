@@ -16,7 +16,8 @@ function Joystick ( o ) {
     this.multiplicator = o.multiplicator || 1;
 
     this.pos = new V2();
-    this.old = new V2();
+    //this.old = new V2();
+    //this.zero = new V2();
     this.tmp = new V2();
 
     this.interval = null;
@@ -94,19 +95,33 @@ Joystick.prototype = Object.assign( Object.create( Proto.prototype ), {
     //   EVENTS
     // ----------------------
 
+    addInterval: function (){
+
+        if( this.interval !== null || this.pos.isZero() ) return;
+        this.interval = setInterval( function(){ this.update(); }.bind(this), 10 );
+
+    },
+
+    stopInterval: function (){
+
+        if( this.interval === null ) return;
+        clearInterval( this.interval );
+        this.interval = null;
+
+    },
+
     reset: function () {
 
-        if( this.pos.x!==0 || this.pos.y!==0 ) this.interval = setInterval( this.update.bind(this), 10 );
-
+        this.addInterval();
         this.mode(0);
 
     },
 
     mouseup: function ( e ) {
 
+        this.addInterval();
         this.isDown = false;
-        this.interval = setInterval( this.update.bind(this), 10 );
-        
+    
     },
 
     mousedown: function ( e ) {
@@ -135,6 +150,7 @@ Joystick.prototype = Object.assign( Object.create( Proto.prototype ), {
         }
 
         this.pos.copy( this.tmp ).divideScalar( this.distance ).negate();
+
         this.update();
 
     },
@@ -153,25 +169,28 @@ Joystick.prototype = Object.assign( Object.create( Proto.prototype ), {
         if( this.interval !== null ){
 
             if( !this.isDown ){
-                //this.pos.x += this.pos.x/3;
-                //this.pos.y += this.pos.y/3;
-                this.pos.x *= 0.9;//+= (0 - this.pos.x)/3;
-                this.pos.y *= 0.9;//+= (0 - this.pos.y)/3;
+
+                this.pos.lerp( null, 0.3 );
+
+                this.pos.x = Math.abs( this.pos.x ) < 0.001 ? 0 : this.pos.x;
+                this.pos.y = Math.abs( this.pos.x ) < 0.001 ? 0 : this.pos.y;
+
                 if(this.isUI && this.main.isCanvas ) this.main.draw();
+
             }
 
-            if (this.pos.nearEquals( this.old, 2 )) this.pos.set( 0, 0 );
-
         }
+
+        
 
         this.updateSVG();
 
-        if( up ) this.send();
-
-        if( this.interval !== null && this.pos.x === 0 && this.pos.y === 0 ){
-            clearInterval( this.interval );
-            this.interval = null;
+        if( up ){ 
+            console.log('up', this.pos.x, this.pos.y)
+            this.send();
         }
+
+        if( this.pos.isZero() ){ this.stopInterval(); }
 
     },
 
@@ -179,12 +198,9 @@ Joystick.prototype = Object.assign( Object.create( Proto.prototype ), {
 
         var x = this.radius - ( -this.pos.x * this.distance );
         var y = this.radius - ( -this.pos.y * this.distance );
-        //var x = this.radius - ( this.pos.x * this.distance );
-        //var y = this.radius - ( this.pos.y * this.distance );
-       // var sx = x + ((1-this.pos.x)*5) + 5;
-       // var sy = y + ((1-this.pos.y)*5) + 10;
 
          if(this.model === 0){
+            
             var sx = x + ((this.pos.x)*5) + 5;
             var sy = y + ((this.pos.y)*5) + 10;
 
@@ -200,8 +216,6 @@ Joystick.prototype = Object.assign( Object.create( Proto.prototype ), {
         this.setSvg( this.c[3], 'cx', x*this.ratio, 4 );
         this.setSvg( this.c[3], 'cy', y*this.ratio, 4 );
 
-        this.old.copy( this.pos );
-
         this.value[0] =  ( this.pos.x * this.multiplicator ).toFixed( this.precision ) * 1;
         this.value[1] =  ( this.pos.y * this.multiplicator ).toFixed( this.precision ) * 1;
 
@@ -211,7 +225,7 @@ Joystick.prototype = Object.assign( Object.create( Proto.prototype ), {
 
     clear: function () {
         
-        if( this.interval !== null ) clearInterval( this.interval );
+        this.stopInterval()
         Proto.prototype.clear.call( this );
 
     },

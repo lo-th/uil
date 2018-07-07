@@ -51,16 +51,12 @@ octo.addEventListener('mouseover',function(e){ octo.setAttribute('fill', '#3998d
 octo.addEventListener('mouseout',function(e){ octo.setAttribute('fill','rgba(255,255,255,0.2)');  octoArm.style.animationName='none'; }, false );
 octo.addEventListener('mousedown',function(e){ window.open('https://github.com/lo-th/uil','_blank'); }, false );
 
-
-
 var gr0, gr1, gr2, gr3;
-var timer = null;
 var display = false;
 var list = ['item-0', 'item-1', 'item-2', 'item-3', 'item-4', 'item-5', 'item-6', 'item-7', 'item-8', 'item-9', 'item-10', 'item-11', 'item-12'];
 var list2 = ['item-0', 'item-1', 'item-2'];
 
 var debug = document.getElementById('debug');
-
 
 var callback = function(v){ debug.innerHTML = v; }
 var callbackButton = function(){ debug.innerHTML = "i'm a button !!" ; }
@@ -77,8 +73,10 @@ var ui = new UIL.Gui( { css:'top:84px; left:50%;', w:320, h:20, center:true } ).
 
 populate();
 
-function populate(){
-    if(!display){
+function populate () {
+
+    if( !display ){
+
         ui.add('title',  { name:'Title'});
         ui.add('fps',    { height:30 });
         ui.add('bool',   { name:'bool', h:20, value:false });
@@ -90,7 +88,7 @@ function populate(){
         ui.add('string', { name:'string', value:'welcome to uil'});
         ui.add('list',   { name:'list', list:list});
         ui.add('list',   { name:'list', list:list2, itemHeight:40 });
-        ui.add('graph', { name:'graph', h:80, value:[0.5,1,0.5,1,0.25,0,0.5,1,0.5]});
+        ui.add('graph',  { name:'graph', h:80, value:[0.5,1,0.5,1,0.25,0,0.5,1,0.5]});
         ui.add('number', { name:'number', value:20});
         ui.add('number', { name:'vector2', value:[0,0] });
         ui.add('number', { name:'vector3', value:[0,0,0] });
@@ -132,10 +130,13 @@ function populate(){
 
         display = true;
         b.label('clear');
+        
     } else {
+
         ui.clear();
         display = false;
         b.label('populate');
+
     }
 }
 
