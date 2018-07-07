@@ -16,8 +16,6 @@ function Joystick ( o ) {
     this.multiplicator = o.multiplicator || 1;
 
     this.pos = new V2();
-    //this.old = new V2();
-    //this.zero = new V2();
     this.tmp = new V2();
 
     this.interval = null;
@@ -185,10 +183,8 @@ Joystick.prototype = Object.assign( Object.create( Proto.prototype ), {
 
         this.updateSVG();
 
-        if( up ){ 
-            console.log('up', this.pos.x, this.pos.y)
-            this.send();
-        }
+        if( up ) this.send();
+        
 
         if( this.pos.isZero() ){ this.stopInterval(); }
 
@@ -200,7 +196,7 @@ Joystick.prototype = Object.assign( Object.create( Proto.prototype ), {
         var y = this.radius - ( -this.pos.y * this.distance );
 
          if(this.model === 0){
-            
+
             var sx = x + ((this.pos.x)*5) + 5;
             var sy = y + ((this.pos.y)*5) + 10;
 
