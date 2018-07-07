@@ -1624,6 +1624,8 @@ Object.assign( Proto.prototype, {
             else document.body.removeChild( this.c[0] );
         }
 
+        if( !this.isUI ) Roots.remove( this );
+
         this.c = null;
         this.s = null;
         this.callback = null;
@@ -2952,7 +2954,7 @@ function Graph ( o ) {
     this.precision = o.precision || 2;
     this.multiplicator = o.multiplicator || 1;
 
-    this.autoWidth = false;
+    this.autoWidth = true;
     this.isNumber = false;
 
     this.isDown = false;
@@ -2966,7 +2968,10 @@ function Graph ( o ) {
     if( this.c[1] !== undefined ) { // with title
 
         this.c[1].style.width = this.w +'px';
-        this.c[1].style.textAlign = 'center';
+        
+        
+        //this.c[1].style.background = '#ff0000';
+        //this.c[1].style.textAlign = 'center';
         this.top = 10;
         this.h += 10;
 
@@ -2980,6 +2985,7 @@ function Graph ( o ) {
 
     var svg = this.dom( 'svg', this.css.basic , { viewBox:'0 0 '+this.w+' '+this.rh, width:this.w, height:this.rh, preserveAspectRatio:'none' } );
     this.setCss( svg, { width:this.w, height:this.rh, left:0, top:this.top });
+
     this.dom( 'path', '', { d:'', stroke:this.colors.text, 'stroke-width':2, fill:'none', 'stroke-linecap':'butt' }, svg );
     this.dom( 'rect', '', { x:10, y:10, width:this.gw+8, height:this.gh+8, stroke:'rgba(0,0,0,0.3)', 'stroke-width':1 , fill:'none'}, svg );
 
@@ -3004,6 +3010,12 @@ function Graph ( o ) {
     this.c[3] = svg;
 
     this.init();
+
+    if( this.c[1] !== undefined ){
+        this.c[1].style.top = 0 +'px';
+        this.c[1].style.height = 20 +'px';
+        this.s[1].lineHeight = (20-5)+'px';
+    }
 
     this.update( false );
 
@@ -3153,9 +3165,11 @@ Graph.prototype = Object.assign( Object.create( Proto.prototype ), {
 
     updateSVG: function () {
 
+        this.setSvg( this.c[3], 'd', this.makePath(), 0 );
+
     	for(var i = 0; i<this.lng; i++ ){
 
-    		this.setSvg( this.c[3], 'd', this.makePath(), 0 );
+    		
     		this.setSvg( this.c[3], 'height', this.v[i]*this.gh, i+2 );
     		this.setSvg( this.c[3], 'y', 14 + (this.gh - this.v[i]*this.gh), i+2 );
     		this.value[i] = (this.v[i] * this.multiplicator).toFixed( this.precision ) * 1;
@@ -3163,6 +3177,31 @@ Graph.prototype = Object.assign( Object.create( Proto.prototype ), {
 	    }
 
 	    this.c[2].textContent = this.value;
+
+    },
+
+    rSize: function () {
+
+        Proto.prototype.rSize.call( this );
+
+        var s = this.s;
+        if( this.c[1] !== undefined )s[1].width = this.w + 'px';
+        s[2].width = this.w + 'px';
+        s[3].width = this.w + 'px';
+
+        var gw = this.w - 28;
+        var iw = ((gw-(4*(this.lng-1)))/this.lng);
+
+        var t = [];
+
+        for( var i = 0; i < this.lng; i++ ){
+
+            t[i] = [ 14 + (i*iw) + (i*4), iw ];
+            t[i][2] = t[i][0] + t[i][1];
+
+        }
+
+        this.tmp = t;
 
     }
 
@@ -3278,11 +3317,7 @@ Group.prototype = Object.assign( Object.create( Proto.prototype ), {
 
             //if( type === 'mousemove' ) change = this.styles('def');
 
-            if( !Roots.lock ){
-
-                this.getNext( e, change );
-
-            }
+            if( !Roots.lock ) this.getNext( e, change );
 
             break;
             case 'title':
@@ -3665,6 +3700,13 @@ Joystick.prototype = Object.assign( Object.create( Proto.prototype ), {
         this.value[1] =  ( this.pos.y * this.multiplicator ).toFixed( this.precision ) * 1;
 
         this.c[2].textContent = this.value;
+
+    },
+
+    clear: function () {
+        
+        if( this.interval !== null ) clearInterval( this.interval );
+        Proto.prototype.clear.call( this );
 
     },
 
@@ -5327,23 +5369,14 @@ Object.assign( Gui.prototype, {
 
                 e.clientY = this.isScroll ?  e.clientY + this.decal : e.clientY;
 
-
                 if( Roots.isMobile && type === 'mousedown' ) this.getNext( e, change );
-
-
-
 
 	    		if( this.target ) targetChange = this.target.handleEvent( e );
 
 	    		if( type === 'mousemove' ) change = this.mode('def');
                 if( type === 'wheel' && !targetChange && this.isScroll ) change = this.onWheel( e );
-
                
-	    		if( !Roots.lock ){
-
-                    this.getNext( e, change );
-
-	    		}
+	    		if( !Roots.lock ) this.getNext( e, change );
 
     		break;
     		case 'bottom':

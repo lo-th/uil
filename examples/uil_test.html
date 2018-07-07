@@ -54,8 +54,9 @@ var c = UIL.add('color', { target:document.body, callback:callbackLogo, name:' '
 var c = UIL.add('list', { target:document.body, callback:null, name:' ', w:100, list:list, pos:{left:'120px', top:'auto', bottom:'10px' }, simple:true, side:'up', full:true });
 var w = UIL.add('number', { target:document.body, callback:null, name:' ', w:100, pos:{left:'290px', top:'auto', bottom:'10px' }, simple:true });
 
-var j = UIL.add('joystick', {  target:document.body, pos:{left:'400px', top:'auto', bottom:'10px' }, name:'JOY', w:100, multiplicator:1, precision:2, fontColor:'#D4B87B' });
+var j = UIL.add('joystick', {  target:document.body, pos:{left:'400px', top:'auto', bottom:'10px' }, name:'JOY', w:100, multiplicator:1, precision:2, fontColor:'#D4B87B' }).onChange( callback );
 
+//j.clear()
 // in GUI element
 var ui = new UIL.Gui( { w:300 } ).onChange( callback );
 var ui2 = new UIL.Gui( {  css:'top:0px; left:10px;', w:200 } ).onChange( callback );
@@ -65,6 +66,8 @@ populate();
 
 function populate(){
     if(!display){
+        
+
         ui2.add('title',  { name:'Title', titleColor:'#D4B87B', height:30});
         ui2.add('slide',  { name:'slide',  min:-100, max:100, value:0, precision:0, fontColor:'#D4B87B', stype:0, allway:true });
         ui2.add('slide',  { name:'slide',  min:-100, max:100, value:0, precision:0, fontColor:'#D4B87B', stype:1 });
@@ -136,6 +139,9 @@ function populate(){
         display = true;
         b.label('clear');
     } else {
+        j.clear()
+
+        
         ui.clear();
         ui2.clear();
         display = false;

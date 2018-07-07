@@ -376,6 +376,8 @@ Object.assign( Proto.prototype, {
             else document.body.removeChild( this.c[0] );
         }
 
+        if( !this.isUI ) Roots.remove( this );
+
         this.c = null;
         this.s = null;
         this.callback = null;

@@ -179,6 +179,13 @@ Joystick.prototype = Object.assign( Object.create( Proto.prototype ), {
 
     },
 
+    clear: function () {
+        
+        if( this.interval !== null ) clearInterval( this.interval );
+        Proto.prototype.clear.call( this );
+
+    },
+
 } );
 
 export { Joystick };
