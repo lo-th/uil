@@ -692,6 +692,7 @@ var R = {
         var i = R.ui.indexOf( o );
         
         if ( i !== -1 ) {
+            R.removeListen( o );
             R.ui.splice( i, 1 ); 
         }
 
@@ -815,7 +816,7 @@ var R = {
         }
         
         if( event.type === 'touchstart'){ e.type = 'mousedown'; R.findID( e ); }
-        if( event.type === 'touchend'){ e.type = 'mouseup'; R.clearOldID(); }
+        if( event.type === 'touchend'){ e.type = 'mouseup';  if( R.ID !== null )R.ID.handleEvent( e ); R.clearOldID(); }
         if( event.type === 'touchmove'){ e.type = 'mousemove';  }
 
 
@@ -1134,8 +1135,11 @@ var R = {
 
     removeListen: function ( proto ) {
 
+        
+
         var id = R.listens.indexOf( proto );
-        R.listens.splice(id, 1);
+        console.log('OOO', id);
+        if( id !== -1 ){ R.listens.splice(id, 1);console.log('XOO');}
 
         if( R.listens.length === 0 ) R.isLoop = false;
 
@@ -1596,7 +1600,7 @@ Object.assign( Proto.prototype, {
     listen: function () {
 
         Roots.addListen( this );
-        Roots.listens.push( this );
+        //Roots.listens.push( this );
         return this;
 
     },
@@ -3668,8 +3672,8 @@ Joystick.prototype = Object.assign( Object.create( Proto.prototype ), {
     // ----------------------
 
     addInterval: function (){
-
-        if( this.interval !== null || this.pos.isZero() ) return;
+        //if( this.interval !== null ) this.stopInterval();
+        if( this.pos.isZero() ) return;
         this.interval = setInterval( function(){ this.update(); }.bind(this), 10 );
 
     },
@@ -3692,6 +3696,7 @@ Joystick.prototype = Object.assign( Object.create( Proto.prototype ), {
     mouseup: function ( e ) {
 
         this.addInterval();
+        console.log('up');
         this.isDown = false;
     
     },
@@ -3727,9 +3732,11 @@ Joystick.prototype = Object.assign( Object.create( Proto.prototype ), {
 
     },
 
-    setValue: function ( x, y ) {
+    setValue: function ( v ) {
 
-        this.pos.set( x || 0, y || 0 );
+        if(v===undefined) v=[0,0];
+
+        this.pos.set( v[0] || 0, v[1]  || 0 );
         this.updateSVG();
 
     },

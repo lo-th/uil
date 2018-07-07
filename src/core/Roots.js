@@ -67,6 +67,7 @@ var R = {
         var i = R.ui.indexOf( o );
         
         if ( i !== -1 ) {
+            R.removeListen( o );
             R.ui.splice( i, 1 ); 
         }
 
@@ -190,7 +191,7 @@ var R = {
         }
         
         if( event.type === 'touchstart'){ e.type = 'mousedown'; R.findID( e ); }
-        if( event.type === 'touchend'){ e.type = 'mouseup'; R.clearOldID(); }
+        if( event.type === 'touchend'){ e.type = 'mouseup';  if( R.ID !== null )R.ID.handleEvent( e ); R.clearOldID(); }
         if( event.type === 'touchmove'){ e.type = 'mousemove';  }
 
 
@@ -509,8 +510,11 @@ var R = {
 
     removeListen: function ( proto ) {
 
+        
+
         var id = R.listens.indexOf( proto );
-        R.listens.splice(id, 1);
+        console.log('OOO', id)
+        if( id !== -1 ){ R.listens.splice(id, 1);console.log('XOO')}
 
         if( R.listens.length === 0 ) R.isLoop = false;
 

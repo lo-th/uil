@@ -94,8 +94,8 @@ Joystick.prototype = Object.assign( Object.create( Proto.prototype ), {
     // ----------------------
 
     addInterval: function (){
-
-        if( this.interval !== null || this.pos.isZero() ) return;
+        //if( this.interval !== null ) this.stopInterval();
+        if( this.pos.isZero() ) return;
         this.interval = setInterval( function(){ this.update(); }.bind(this), 10 );
 
     },
@@ -118,6 +118,7 @@ Joystick.prototype = Object.assign( Object.create( Proto.prototype ), {
     mouseup: function ( e ) {
 
         this.addInterval();
+        console.log('up')
         this.isDown = false;
     
     },
@@ -153,9 +154,11 @@ Joystick.prototype = Object.assign( Object.create( Proto.prototype ), {
 
     },
 
-    setValue: function ( x, y ) {
+    setValue: function ( v ) {
 
-        this.pos.set( x || 0, y || 0 );
+        if(v===undefined) v=[0,0];
+
+        this.pos.set( v[0] || 0, v[1]  || 0 );
         this.updateSVG();
 
     },

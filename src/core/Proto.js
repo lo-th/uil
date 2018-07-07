@@ -298,7 +298,7 @@ Object.assign( Proto.prototype, {
     listen: function () {
 
         Roots.addListen( this );
-        Roots.listens.push( this );
+        //Roots.listens.push( this );
         return this;
 
     },
