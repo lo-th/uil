@@ -6,7 +6,9 @@ function Slide ( o ){
 
     this.setTypeNumber( o );
 
-    this.stype = o.stype || 0;
+
+    this.model = o.stype || 0;
+    if( o.mode !== undefined ) this.model = o.mode;
     this.buttonColor = o.bColor || this.colors.button;
 
     this.isDown = false;
@@ -22,22 +24,22 @@ function Slide ( o ){
 
     this.c[2].isNum = true;
 
-    if(this.stype !== 0){
-        if(this.stype === 1 || this.stype === 3){
+    if(this.model !== 0){
+        if(this.model === 1 || this.model === 3){
             var h1 = 4;
             var h2 = 8;
             var ww = this.h-4;
             var ra = 20;
         }
 
-        if(this.stype === 2){
+        if(this.model === 2){
             h1 = 2;
             h2 = 4;
             ra = 2;
             ww = (this.h-4)*0.5
         }
 
-        if(this.stype === 3) this.c[5].style.visible = 'none';
+        if(this.model === 3) this.c[5].style.visible = 'none';
 
         this.c[4].style.borderRadius = h1 + 'px';
         this.c[4].style.height = h2 + 'px';
@@ -191,7 +193,7 @@ Slide.prototype = Object.assign( Object.create( Proto.prototype ), {
 
         var ww = Math.floor( this.ww * (( this.value - this.min ) / this.range ));
        
-        if(this.stype !== 3) this.s[5].width = ww + 'px';
+        if(this.model !== 3) this.s[5].width = ww + 'px';
         if(this.s[6]) this.s[6].left = ( this.sa + ww + 3 ) + 'px';
         this.c[2].textContent = this.value;
 

@@ -85,8 +85,8 @@ function populate(){
         ui.add('color',  { name:'color', type:'html', value:0xffffff});
         ui.add('color',  { name:'color', type:'html', value:[0,1,1,1], h:20});
         ui.add('slide',  { name:'slide', min:-100, max:100, value:0, precision:0 });
-        ui.add('slide',  { name:'slide', min:-1, max:1, value:0, step:0.01, precision:2, stype:1 });
-        ui.add('slide',  { name:'slide', min:-1, max:1, value:0, step:0.01, precision:2, stype:2 });
+        ui.add('slide',  { name:'slide', min:-1, max:1, value:0, step:0.01, precision:2, mode:1 });
+        ui.add('slide',  { name:'slide', min:-1, max:1, value:0, step:0.01, precision:2, mode:2 });
         ui.add('string', { name:'string', value:'welcome to uil'});
         ui.add('list',   { name:'list', list:list});
         ui.add('list',   { name:'list', list:list2, itemHeight:40 });
@@ -124,7 +124,7 @@ function populate(){
 
         gr3 = ui.add('group', { name:'joysticks', fontColor:'#D4B87B' });
 
-        gr3.add('joystick', { name:'joystick', w:100, multiplicator:1, precision:2, fontColor:'#D4B87B' });
+        gr3.add('joystick', { name:'joystick', w:100, multiplicator:1, precision:2, fontColor:'#D4B87B', mode:1 });
         gr3.add('joystick', { name:'joystick', w:100, multiplicator:1, precision:2, fontColor:'#D4B87B' });
         gr3.add('joystick', { name:'joystick', w:100, multiplicator:1, precision:2, fontColor:'#D4B87B' });
         

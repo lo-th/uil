@@ -99,7 +99,8 @@
 	    frag: document.createDocumentFragment(),
 
 	    colorRing: null,
-	    joystick: null,
+	    joystick_0: null,
+	    joystick_1: null,
 	    circular: null,
 	    knob: null,
 	    //graph: null,
@@ -452,7 +453,7 @@
 
 	    },*/
 
-	    makeKnob: function () {
+	    makeKnob: function ( model ) {
 
 	        var w = 128;
 	        var radius = 34;
@@ -465,7 +466,7 @@
 
 	    },
 
-	    makeCircular: function () {
+	    makeCircular: function ( model ) {
 
 	        var w = 128;
 	        var radius = 40;
@@ -476,7 +477,7 @@
 
 	    },
 
-	    makeJoystick: function () {
+	    makeJoystick: function ( model ) {
 
 	        //+' background:#f00;'
 
@@ -487,31 +488,49 @@
 	        T.dom( 'defs', null, {}, svg );
 	        T.dom( 'g', null, {}, svg );
 
-	        // gradian background
-	        var ccc = [ [40, 'rgb(0,0,0)', 0.3], [80, 'rgb(0,0,0)', 0], [90, 'rgb(50,50,50)', 0.4], [100, 'rgb(50,50,50)', 0] ];
-	        T.makeGradiant( 'radialGradient', { id:'grad', cx:'50%', cy:'50%', r:'50%', fx:'50%', fy:'50%' }, svg, ccc );
+	        if( model === 0 ){
 
-	        // gradian shadow
-	        ccc = [ [60, 'rgb(0,0,0)', 0.5], [100, 'rgb(0,0,0)', 0] ];
-	        T.makeGradiant( 'radialGradient', { id:'gradS', cx:'50%', cy:'50%', r:'50%', fx:'50%', fy:'50%' }, svg, ccc );
+	        
 
-	        // gradian stick
-	        var cc0 = ['rgb(40,40,40)', 'rgb(48,48,48)', 'rgb(30,30,30)'];
-	        var cc1 = ['rgb(1,90,197)', 'rgb(3,95,207)', 'rgb(0,65,167)'];
+	            // gradian background
+	            var ccc = [ [40, 'rgb(0,0,0)', 0.3], [80, 'rgb(0,0,0)', 0], [90, 'rgb(50,50,50)', 0.4], [100, 'rgb(50,50,50)', 0] ];
+	            T.makeGradiant( 'radialGradient', { id:'grad', cx:'50%', cy:'50%', r:'50%', fx:'50%', fy:'50%' }, svg, ccc );
 
-	        ccc = [ [30, cc0[0], 1], [60, cc0[1], 1], [80, cc0[1], 1], [100, cc0[2], 1] ];
-	        T.makeGradiant( 'radialGradient', { id:'gradIn', cx:'50%', cy:'50%', r:'50%', fx:'50%', fy:'50%' }, svg, ccc );
+	            // gradian shadow
+	            ccc = [ [60, 'rgb(0,0,0)', 0.5], [100, 'rgb(0,0,0)', 0] ];
+	            T.makeGradiant( 'radialGradient', { id:'gradS', cx:'50%', cy:'50%', r:'50%', fx:'50%', fy:'50%' }, svg, ccc );
 
-	        ccc = [ [30, cc1[0], 1], [60, cc1[1], 1], [80, cc1[1], 1], [100, cc1[2], 1] ];
-	        T.makeGradiant( 'radialGradient', { id:'gradIn2', cx:'50%', cy:'50%', r:'50%', fx:'50%', fy:'50%' }, svg, ccc );
+	            // gradian stick
+	            var cc0 = ['rgb(40,40,40)', 'rgb(48,48,48)', 'rgb(30,30,30)'];
+	            var cc1 = ['rgb(1,90,197)', 'rgb(3,95,207)', 'rgb(0,65,167)'];
 
-	        // graph
+	            ccc = [ [30, cc0[0], 1], [60, cc0[1], 1], [80, cc0[1], 1], [100, cc0[2], 1] ];
+	            T.makeGradiant( 'radialGradient', { id:'gradIn', cx:'50%', cy:'50%', r:'50%', fx:'50%', fy:'50%' }, svg, ccc );
 
-	        T.dom( 'circle', '', { cx:64, cy:64, r:radius, fill:'url(#grad)' }, svg );//2
-	        T.dom( 'circle', '', { cx:64+5, cy:64+10, r:innerRadius+10, fill:'url(#gradS)' }, svg );//3
-	        T.dom( 'circle', '', { cx:64, cy:64, r:innerRadius, fill:'url(#gradIn)' }, svg );//4
+	            ccc = [ [30, cc1[0], 1], [60, cc1[1], 1], [80, cc1[1], 1], [100, cc1[2], 1] ];
+	            T.makeGradiant( 'radialGradient', { id:'gradIn2', cx:'50%', cy:'50%', r:'50%', fx:'50%', fy:'50%' }, svg, ccc );
 
-	        T.joystick = svg;
+	            // graph
+
+	            T.dom( 'circle', '', { cx:64, cy:64, r:radius, fill:'url(#grad)' }, svg );//2
+	            T.dom( 'circle', '', { cx:64+5, cy:64+10, r:innerRadius+10, fill:'url(#gradS)' }, svg );//3
+	            T.dom( 'circle', '', { cx:64, cy:64, r:innerRadius, fill:'url(#gradIn)' }, svg );//4
+
+	            T.joystick_0 = svg;
+
+	        } else {
+	             // gradian shadow
+	            ccc = [ [69, 'rgb(0,0,0)', 0],[70, 'rgb(0,0,0)', 0.3], [100, 'rgb(0,0,0)', 0] ];
+	            T.makeGradiant( 'radialGradient', { id:'gradX', cx:'50%', cy:'50%', r:'50%', fx:'50%', fy:'50%' }, svg, ccc );
+
+	            T.dom( 'circle', '', { cx:64, cy:64, r:radius, fill:'none', stroke:'rgba(100,100,100,0.25)', 'stroke-width':'4' }, svg );//2
+	            T.dom( 'circle', '', { cx:64, cy:64, r:innerRadius+14, fill:'url(#gradX)' }, svg );//3
+	            T.dom( 'circle', '', { cx:64, cy:64, r:innerRadius, fill:'none', stroke:'rgb(100,100,100)', 'stroke-width':'4' }, svg );//4
+
+	            T.joystick_1 = svg;
+	        }
+
+	        
 
 	    },
 
@@ -1223,6 +1242,15 @@
 
 		},
 
+		negate: function () {
+
+			this.x *= -1;
+			this.y *= -1;
+
+			return this;
+
+		},
+
 		neg: function () {
 
 			this.x = -1;
@@ -1256,10 +1284,6 @@
 
 
 	} );
-
-	/**
-	 * @author lth / https://github.com/lo-th
-	 */
 
 	function Proto ( o ) {
 
@@ -1475,23 +1499,23 @@
 
 	    },
 
-	    getJoystick: function () {
+	    getJoystick: function ( model ) {
 
-	        if( !Tools.joystick ) Tools.makeJoystick();
-	        return Tools.clone( Tools.joystick );
+	        if( !Tools[ 'joystick_'+ model ] ) Tools.makeJoystick( model );
+	        return Tools.clone( Tools[ 'joystick_'+ model ] );
 
 	    },
 
-	    getCircular: function () {
+	    getCircular: function ( model ) {
 
-	        if( !Tools.circular ) Tools.makeCircular();
+	        if( !Tools.circular ) Tools.makeCircular( model );
 	        return Tools.clone( Tools.circular );
 
 	    },
 
-	    getKnob: function () {
+	    getKnob: function ( model ) {
 
-	        if( !Tools.knob ) Tools.makeKnob();
+	        if( !Tools.knob ) Tools.makeKnob( model );
 	        return Tools.clone( Tools.knob );
 
 	    },
@@ -3540,6 +3564,7 @@
 	    this.value = [0,0];
 
 	    this.joyType = 'analogique';
+	    this.model = o.mode !== undefined ? o.mode : 0;
 
 	    this.precision = o.precision || 2;
 	    this.multiplicator = o.multiplicator || 1;
@@ -3570,7 +3595,7 @@
 	    this.c[2] = this.dom( 'div', this.css.txt + 'text-align:center; top:'+(this.h-20)+'px; width:'+this.w+'px; color:'+ this.fontColor );
 	    this.c[2].textContent = this.value;
 
-	    this.c[3] = this.getJoystick();
+	    this.c[3] = this.getJoystick( this.model );
 	    this.setSvg( this.c[3], 'viewBox', '0 0 '+this.w+' '+this.w );
 	    this.setCss( this.c[3], { width:this.w, height:this.w, left:0, top:this.top });
 
@@ -3591,12 +3616,27 @@
 
 	        switch(mode){
 	            case 0: // base
-	                this.setSvg( this.c[3], 'fill', 'url(#gradIn)', 4 );
-	                this.setSvg( this.c[3], 'stroke', '#000', 4 );
+	                if(this.model===0){
+	                    this.setSvg( this.c[3], 'fill', 'url(#gradIn)', 4 );
+	                    this.setSvg( this.c[3], 'stroke', '#000', 4 );
+	                } else {
+	                    this.setSvg( this.c[3], 'stroke', 'rgba(100,100,100,0.25)', 2 );
+	                    //this.setSvg( this.c[3], 'stroke', 'rgb(0,0,0,0.1)', 3 );
+	                    this.setSvg( this.c[3], 'stroke', '#666', 4 );
+	                    this.setSvg( this.c[3], 'fill', 'none', 4 );
+	                }
+	                
 	            break;
 	            case 1: // over
-	                this.setSvg( this.c[3], 'fill', 'url(#gradIn2)', 4 );
-	                this.setSvg( this.c[3], 'stroke', 'rgba(0,0,0,0)', 4 );
+	                if(this.model===0){
+	                    this.setSvg( this.c[3], 'fill', 'url(#gradIn2)', 4 );
+	                    this.setSvg( this.c[3], 'stroke', 'rgba(0,0,0,0)', 4 );
+	                } else {
+	                    this.setSvg( this.c[3], 'stroke', 'rgba(48,138,255,0.25)', 2 );
+	                    //this.setSvg( this.c[3], 'stroke', 'rgb(0,0,0,0.3)', 3 );
+	                    this.setSvg( this.c[3], 'stroke', this.colors.select, 4 );
+	                    this.setSvg( this.c[3], 'fill', 'rgba(48,138,255,0.25)', 4 );
+	                }
 	            break;
 	            case 2: // edit
 	            break;
@@ -3648,7 +3688,7 @@
 	            this.tmp.y = Math.cos( angle ) * this.distance;
 	        }
 
-	        this.pos.copy( this.tmp ).divideScalar( this.distance );
+	        this.pos.copy( this.tmp ).divideScalar( this.distance ).negate();
 	        this.update();
 
 	    },
@@ -3667,8 +3707,10 @@
 	        if( this.interval !== null ){
 
 	            if( !this.isDown ){
-	                this.pos.x += (0 - this.pos.x)/3;
-	                this.pos.y += (0 - this.pos.y)/3;
+	                //this.pos.x += this.pos.x/3;
+	                //this.pos.y += this.pos.y/3;
+	                this.pos.x *= 0.9;//+= (0 - this.pos.x)/3;
+	                this.pos.y *= 0.9;//+= (0 - this.pos.y)/3;
 	                if(this.isUI && this.main.isCanvas ) this.main.draw();
 	            }
 
@@ -3689,13 +3731,25 @@
 
 	    updateSVG: function () {
 
-	        var x = this.radius - ( this.pos.x * this.distance );
-	        var y = this.radius - ( this.pos.y * this.distance );
-	        var sx = x + ((1-this.pos.x)*5) + 5;
-	        var sy = y + ((1-this.pos.y)*5) + 10;
+	        var x = this.radius - ( -this.pos.x * this.distance );
+	        var y = this.radius - ( -this.pos.y * this.distance );
+	        //var x = this.radius - ( this.pos.x * this.distance );
+	        //var y = this.radius - ( this.pos.y * this.distance );
+	       // var sx = x + ((1-this.pos.x)*5) + 5;
+	       // var sy = y + ((1-this.pos.y)*5) + 10;
 
-	        this.setSvg( this.c[3], 'cx', sx*this.ratio, 3 );
-	        this.setSvg( this.c[3], 'cy', sy*this.ratio, 3 );
+	         if(this.model === 0){
+	            var sx = x + ((this.pos.x)*5) + 5;
+	            var sy = y + ((this.pos.y)*5) + 10;
+
+	            this.setSvg( this.c[3], 'cx', sx*this.ratio, 3 );
+	            this.setSvg( this.c[3], 'cy', sy*this.ratio, 3 );
+	        } else {
+	            this.setSvg( this.c[3], 'cx', x*this.ratio, 3 );
+	            this.setSvg( this.c[3], 'cy', y*this.ratio, 3 );
+	        }
+
+	        
 
 	        this.setSvg( this.c[3], 'cx', x*this.ratio, 4 );
 	        this.setSvg( this.c[3], 'cy', y*this.ratio, 4 );
@@ -4649,7 +4703,9 @@
 
 	    this.setTypeNumber( o );
 
-	    this.stype = o.stype || 0;
+
+	    this.model = o.stype || 0;
+	    if( o.mode !== undefined ) this.model = o.mode;
 	    this.buttonColor = o.bColor || this.colors.button;
 
 	    this.isDown = false;
@@ -4665,22 +4721,22 @@
 
 	    this.c[2].isNum = true;
 
-	    if(this.stype !== 0){
-	        if(this.stype === 1 || this.stype === 3){
+	    if(this.model !== 0){
+	        if(this.model === 1 || this.model === 3){
 	            var h1 = 4;
 	            var h2 = 8;
 	            var ww = this.h-4;
 	            var ra = 20;
 	        }
 
-	        if(this.stype === 2){
+	        if(this.model === 2){
 	            h1 = 2;
 	            h2 = 4;
 	            ra = 2;
 	            ww = (this.h-4)*0.5;
 	        }
 
-	        if(this.stype === 3) this.c[5].style.visible = 'none';
+	        if(this.model === 3) this.c[5].style.visible = 'none';
 
 	        this.c[4].style.borderRadius = h1 + 'px';
 	        this.c[4].style.height = h2 + 'px';
@@ -4834,7 +4890,7 @@
 
 	        var ww = Math.floor( this.ww * (( this.value - this.min ) / this.range ));
 	       
-	        if(this.stype !== 3) this.s[5].width = ww + 'px';
+	        if(this.model !== 3) this.s[5].width = ww + 'px';
 	        if(this.s[6]) this.s[6].left = ( this.sa + ww + 3 ) + 'px';
 	        this.c[2].textContent = this.value;
 
@@ -5015,15 +5071,6 @@
 
 	} );
 
-	/*function autoType () {
-
-	    var a = arguments;
-	    var type = 'Slide';
-	    if( a[2].type ) type = a[2].type;
-	    return type;
-
-	};*/
-
 	function add () {
 
 	    var a = arguments; 
@@ -5078,10 +5125,6 @@
 	    
 
 	}
-
-	/**
-	 * @author lth / https://github.com/lo-th
-	 */
 
 	function Gui ( o ) {
 

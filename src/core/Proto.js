@@ -221,23 +221,23 @@ Object.assign( Proto.prototype, {
 
     },
 
-    getJoystick: function () {
+    getJoystick: function ( model ) {
 
-        if( !Tools.joystick ) Tools.makeJoystick();
-        return Tools.clone( Tools.joystick );
+        if( !Tools[ 'joystick_'+ model ] ) Tools.makeJoystick( model );
+        return Tools.clone( Tools[ 'joystick_'+ model ] );
 
     },
 
-    getCircular: function () {
+    getCircular: function ( model ) {
 
-        if( !Tools.circular ) Tools.makeCircular();
+        if( !Tools.circular ) Tools.makeCircular( model );
         return Tools.clone( Tools.circular );
 
     },
 
-    getKnob: function () {
+    getKnob: function ( model ) {
 
-        if( !Tools.knob ) Tools.makeKnob();
+        if( !Tools.knob ) Tools.makeKnob( model );
         return Tools.clone( Tools.knob );
 
     },

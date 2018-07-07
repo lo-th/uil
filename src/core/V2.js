@@ -79,6 +79,15 @@ Object.assign( V2.prototype, {
 
 	},
 
+	negate: function () {
+
+		this.x *= -1;
+		this.y *= -1;
+
+		return this;
+
+	},
+
 	neg: function () {
 
 		this.x = -1;

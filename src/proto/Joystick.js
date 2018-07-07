@@ -10,6 +10,7 @@ function Joystick ( o ) {
     this.value = [0,0];
 
     this.joyType = 'analogique';
+    this.model = o.mode !== undefined ? o.mode : 0;
 
     this.precision = o.precision || 2;
     this.multiplicator = o.multiplicator || 1;
@@ -40,7 +41,7 @@ function Joystick ( o ) {
     this.c[2] = this.dom( 'div', this.css.txt + 'text-align:center; top:'+(this.h-20)+'px; width:'+this.w+'px; color:'+ this.fontColor );
     this.c[2].textContent = this.value;
 
-    this.c[3] = this.getJoystick();
+    this.c[3] = this.getJoystick( this.model );
     this.setSvg( this.c[3], 'viewBox', '0 0 '+this.w+' '+this.w );
     this.setCss( this.c[3], { width:this.w, height:this.w, left:0, top:this.top });
 
@@ -61,12 +62,27 @@ Joystick.prototype = Object.assign( Object.create( Proto.prototype ), {
 
         switch(mode){
             case 0: // base
-                this.setSvg( this.c[3], 'fill', 'url(#gradIn)', 4 );
-                this.setSvg( this.c[3], 'stroke', '#000', 4 );
+                if(this.model===0){
+                    this.setSvg( this.c[3], 'fill', 'url(#gradIn)', 4 );
+                    this.setSvg( this.c[3], 'stroke', '#000', 4 );
+                } else {
+                    this.setSvg( this.c[3], 'stroke', 'rgba(100,100,100,0.25)', 2 );
+                    //this.setSvg( this.c[3], 'stroke', 'rgb(0,0,0,0.1)', 3 );
+                    this.setSvg( this.c[3], 'stroke', '#666', 4 );
+                    this.setSvg( this.c[3], 'fill', 'none', 4 );
+                }
+                
             break;
             case 1: // over
-                this.setSvg( this.c[3], 'fill', 'url(#gradIn2)', 4 );
-                this.setSvg( this.c[3], 'stroke', 'rgba(0,0,0,0)', 4 );
+                if(this.model===0){
+                    this.setSvg( this.c[3], 'fill', 'url(#gradIn2)', 4 );
+                    this.setSvg( this.c[3], 'stroke', 'rgba(0,0,0,0)', 4 );
+                } else {
+                    this.setSvg( this.c[3], 'stroke', 'rgba(48,138,255,0.25)', 2 );
+                    //this.setSvg( this.c[3], 'stroke', 'rgb(0,0,0,0.3)', 3 );
+                    this.setSvg( this.c[3], 'stroke', this.colors.select, 4 );
+                    this.setSvg( this.c[3], 'fill', 'rgba(48,138,255,0.25)', 4 );
+                }
             break;
             case 2: // edit
             break;
@@ -118,7 +134,7 @@ Joystick.prototype = Object.assign( Object.create( Proto.prototype ), {
             this.tmp.y = Math.cos( angle ) * this.distance;
         }
 
-        this.pos.copy( this.tmp ).divideScalar( this.distance );
+        this.pos.copy( this.tmp ).divideScalar( this.distance ).negate();
         this.update();
 
     },
@@ -137,8 +153,10 @@ Joystick.prototype = Object.assign( Object.create( Proto.prototype ), {
         if( this.interval !== null ){
 
             if( !this.isDown ){
-                this.pos.x += (0 - this.pos.x)/3;
-                this.pos.y += (0 - this.pos.y)/3;
+                //this.pos.x += this.pos.x/3;
+                //this.pos.y += this.pos.y/3;
+                this.pos.x *= 0.9;//+= (0 - this.pos.x)/3;
+                this.pos.y *= 0.9;//+= (0 - this.pos.y)/3;
                 if(this.isUI && this.main.isCanvas ) this.main.draw();
             }
 
@@ -159,13 +177,25 @@ Joystick.prototype = Object.assign( Object.create( Proto.prototype ), {
 
     updateSVG: function () {
 
-        var x = this.radius - ( this.pos.x * this.distance );
-        var y = this.radius - ( this.pos.y * this.distance );
-        var sx = x + ((1-this.pos.x)*5) + 5;
-        var sy = y + ((1-this.pos.y)*5) + 10;
+        var x = this.radius - ( -this.pos.x * this.distance );
+        var y = this.radius - ( -this.pos.y * this.distance );
+        //var x = this.radius - ( this.pos.x * this.distance );
+        //var y = this.radius - ( this.pos.y * this.distance );
+       // var sx = x + ((1-this.pos.x)*5) + 5;
+       // var sy = y + ((1-this.pos.y)*5) + 10;
 
-        this.setSvg( this.c[3], 'cx', sx*this.ratio, 3 );
-        this.setSvg( this.c[3], 'cy', sy*this.ratio, 3 );
+         if(this.model === 0){
+            var sx = x + ((this.pos.x)*5) + 5;
+            var sy = y + ((this.pos.y)*5) + 10;
+
+            this.setSvg( this.c[3], 'cx', sx*this.ratio, 3 );
+            this.setSvg( this.c[3], 'cy', sy*this.ratio, 3 );
+        } else {
+            this.setSvg( this.c[3], 'cx', x*this.ratio, 3 );
+            this.setSvg( this.c[3], 'cy', y*this.ratio, 3 );
+        }
+
+        
 
         this.setSvg( this.c[3], 'cx', x*this.ratio, 4 );
         this.setSvg( this.c[3], 'cy', y*this.ratio, 4 );
