@@ -808,24 +808,35 @@ var R = {
 
         // mobile
 
-        if( event.touches && event.touches.length > 0 ){
+        if( R.isMobile ){
+
+            if( event.touches && event.touches.length > 0 ){
         
-            e.clientX = event.touches[ 0 ].clientX || 0;
-            e.clientY = event.touches[ 0 ].clientY || 0;
+                e.clientX = event.touches[ 0 ].clientX || 0;
+                e.clientY = event.touches[ 0 ].clientY || 0;
+
+            }
+
+            if( event.type === 'touchstart') e.type = 'mousedown';
+            if( event.type === 'touchend') e.type = 'mouseup';
+            if( event.type === 'touchmove') e.type = 'mousemove';
 
         }
         
+        
+        /*
         if( event.type === 'touchstart'){ e.type = 'mousedown'; R.findID( e ); }
-        if( event.type === 'touchend'){ e.type = 'mouseup';  if( R.ID !== null )R.ID.handleEvent( e ); R.clearOldID(); }
+        if( event.type === 'touchend'){ e.type = 'mouseup';  if( R.ID !== null ) R.ID.handleEvent( e ); R.clearOldID(); }
         if( event.type === 'touchmove'){ e.type = 'mousemove';  }
+        */
 
 
         if( e.type === 'mousedown' ) R.lock = true;
         if( e.type === 'mouseup' ) R.lock = false;
 
-        if( ( e.type === 'mousemove'  ) && (!R.lock) ){ 
-            R.findID( e );
-        }
+        if( R.isMobile && e.type === 'mousedown' ) R.findID( e );
+        if( e.type === 'mousemove' && !R.lock ) R.findID( e );
+        
 
         if( R.ID !== null ){
 
@@ -833,11 +844,14 @@ var R = {
 
                 e.clientX = R.ID.mouse.x;
                 e.clientY = R.ID.mouse.y;
+
             }
 
             R.ID.handleEvent( e );
 
         }
+
+        if( R.isMobile && e.type === 'mouseup' ) R.clearOldID();
 
     },
 
@@ -1135,12 +1149,8 @@ var R = {
 
     removeListen: function ( proto ) {
 
-        
-
         var id = R.listens.indexOf( proto );
-        console.log('OOO', id);
-        if( id !== -1 ){ R.listens.splice(id, 1);console.log('XOO');}
-
+        if( id !== -1 ) R.listens.splice(id, 1);
         if( R.listens.length === 0 ) R.isLoop = false;
 
     },
@@ -3672,7 +3682,7 @@ Joystick.prototype = Object.assign( Object.create( Proto.prototype ), {
     // ----------------------
 
     addInterval: function (){
-        //if( this.interval !== null ) this.stopInterval();
+        if( this.interval !== null ) this.stopInterval();
         if( this.pos.isZero() ) return;
         this.interval = setInterval( function(){ this.update(); }.bind(this), 10 );
 
@@ -3696,7 +3706,6 @@ Joystick.prototype = Object.assign( Object.create( Proto.prototype ), {
     mouseup: function ( e ) {
 
         this.addInterval();
-        console.log('up');
         this.isDown = false;
     
     },
@@ -3751,23 +3760,21 @@ Joystick.prototype = Object.assign( Object.create( Proto.prototype ), {
 
                 this.pos.lerp( null, 0.3 );
 
-                this.pos.x = Math.abs( this.pos.x ) < 0.001 ? 0 : this.pos.x;
-                this.pos.y = Math.abs( this.pos.x ) < 0.001 ? 0 : this.pos.y;
+                this.pos.x = Math.abs( this.pos.x ) < 0.01 ? 0 : this.pos.x;
+                this.pos.y = Math.abs( this.pos.y ) < 0.01 ? 0 : this.pos.y;
 
-                if(this.isUI && this.main.isCanvas ) this.main.draw();
+                if( this.isUI && this.main.isCanvas ) this.main.draw();
 
             }
 
         }
-
-        
 
         this.updateSVG();
 
         if( up ) this.send();
         
 
-        if( this.pos.isZero() ){ this.stopInterval(); }
+        if( this.pos.isZero() ) this.stopInterval();
 
     },
 
