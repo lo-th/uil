@@ -1319,6 +1319,10 @@ Object.assign( V2.prototype, {
 
 } );
 
+/**
+ * @author lth / https://github.com/lo-th
+ */
+
 function Proto ( o ) {
 
     o = o || {};
@@ -5115,6 +5119,15 @@ Title.prototype = Object.assign( Object.create( Proto.prototype ), {
 
 } );
 
+/*function autoType () {
+
+    var a = arguments;
+    var type = 'Slide';
+    if( a[2].type ) type = a[2].type;
+    return type;
+
+};*/
+
 function add () {
 
     var a = arguments; 
@@ -5169,6 +5182,10 @@ function add () {
     
 
 }
+
+/**
+ * @author lth / https://github.com/lo-th
+ */
 
 function Gui ( o ) {
 

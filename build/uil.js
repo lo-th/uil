@@ -1325,6 +1325,10 @@
 
 	} );
 
+	/**
+	 * @author lth / https://github.com/lo-th
+	 */
+
 	function Proto ( o ) {
 
 	    o = o || {};
@@ -5121,6 +5125,15 @@
 
 	} );
 
+	/*function autoType () {
+
+	    var a = arguments;
+	    var type = 'Slide';
+	    if( a[2].type ) type = a[2].type;
+	    return type;
+
+	};*/
+
 	function add () {
 
 	    var a = arguments; 
@@ -5175,6 +5188,10 @@
 	    
 
 	}
+
+	/**
+	 * @author lth / https://github.com/lo-th
+	 */
 
 	function Gui ( o ) {
 
