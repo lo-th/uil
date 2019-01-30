@@ -215,7 +215,7 @@ Button.prototype = Object.assign( Object.create( Proto.prototype ), {
 
     initDrager: function () {
 
-        this.c[4] = this.dom( 'div', this.css.txt +' text-align:center; line-height:'+(this.h-8)+'px; border:1px dashed '+this.fontColor+'; top:2px;  height:'+(this.h-4)+'px; border-radius:'+this.r+'px; pointer-events:auto;' );// cursor:default;
+        this.c[4] = this.dom( 'div', this.css.txt +' text-align:center; line-height:'+(this.h-8)+'px; border:1px dashed '+this.fontColor+'; top:2px;  height:'+(this.h-4)+'px; border-radius:'+this.radius+'px; pointer-events:auto;' );// cursor:default;
         this.c[4].textContent = 'DRAG';
 
         this.c[4].addEventListener( 'dragover', function(e){ this.dragover(e); }.bind(this), false );
