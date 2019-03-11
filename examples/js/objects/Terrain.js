@@ -20,8 +20,8 @@ function Terrain ( o ) {
 
     this.colorBase = this.isWater ? { r:0, g:0.7, b:1 } : { r:1, g:0.7, b:0 };
 
-    this.maxspeed = 0.1;
-    this.acc = 0.01;
+    this.maxspeed = o.maxSpeed || 0.1;
+    this.acc = o.acc || 0.01;
     this.dec = 0.01;
 
     this.ease = new THREE.Vector2();
