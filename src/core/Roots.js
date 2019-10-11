@@ -26,6 +26,7 @@ var R = {
     oldCursor:'auto',
 
     input: null,
+    parent: null,
     firstImput: true,
     callbackImput: null,
 
@@ -103,6 +104,7 @@ var R = {
 
         window.addEventListener( 'keydown', R, false );
         window.addEventListener( 'resize', R.resize , false );
+        //window.addEventListener( 'mousedown', R, false );
 
         R.isEventsInit = true;
 
@@ -456,20 +458,27 @@ var R = {
         if( R.input === null ) return;
         if( !R.firstImput ) R.callbackImput();
 
-        R.input.style.background = 'none';
+        //R.input.style.background = 'none';
+        R.input.style.borderColor = R.parent.defaultBorderColor;//'rgba(0,0,0,0)';
+        R.parent.isEdit = false;
         R.callbackImput = null;
         R.input = null;
+        R.parent = null;
         R.firstImput = true;
 
     },
 
-    setInput: function ( Input, Callback, color ) {
+    setInput: function ( Input, Callback, color, parent ) {
 
         R.clearInput();
         
         R.callbackImput = Callback;
         R.input = Input;
-        R.input.style.background = color;
+        R.parent = parent;
+        R.input.style.borderColor = color;
+        //R.input.style.background = color;
+
+        //window.addEventListener( 'mousedown', function (){ if( !R.firstImput ) R.clearInput() }, false );
 
     },
 
@@ -483,10 +492,18 @@ var R = {
 
         if( R.input === null ) return;
 
+        R.parent.isEdit = true;
+
+        e.preventDefault();
+
         if( e.keyCode === 13 ){ //enter
 
             R.callbackImput();
             R.clearInput();
+
+        } else if( e.keyCode === 8 ){ //backspace
+
+            R.input.textContent = '';
 
         } else {
 

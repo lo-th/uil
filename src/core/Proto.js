@@ -13,6 +13,7 @@ function Proto ( o ) {
 
     this.css = Tools.css;
     this.colors = Tools.colors;
+    this.defaultBorderColor = this.colors.border;
     this.svgs = Tools.svgs;
 
     this.zone = { x:0, y:0, w:0, h:0 };
@@ -259,7 +260,8 @@ Object.assign( Proto.prototype, {
 
     setInput: function ( Input, Callback ) {
 
-        Roots.setInput( Input, Callback, Tools.colors.input );
+        
+        Roots.setInput( Input, Callback, Tools.colors.input, this );
 
     },
 

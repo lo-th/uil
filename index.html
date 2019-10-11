@@ -88,7 +88,7 @@ function populate () {
         ui.add('string', { name:'string', value:'welcome to uil'});
         ui.add('list',   { name:'list', list:list});
         ui.add('list',   { name:'list', list:list2, itemHeight:40 });
-        ui.add('graph',  { name:'graph', h:80, value:[0.5,1,0.5,1,0.25,0,0.5,1,0.5]});
+        ui.add('graph',  { name:'graph', h:80, value:[-0.5,1,0.5,1,0.25,0,0.5,1,0.5], neg:true, multiplicator:90 });
         ui.add('number', { name:'number', value:20});
         ui.add('number', { name:'vector2', value:[0,0] });
         ui.add('number', { name:'vector3', value:[0,0,0] });

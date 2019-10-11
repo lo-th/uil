@@ -78,6 +78,8 @@ function Gui ( o ) {
     this.ratio = 1;
     this.oy = 0;
 
+    this.isNewTarget = false;
+
     this.content = Tools.dom( 'div', Tools.css.basic + ' width:0px; height:auto; top:0px; ' + this.css );
 
     this.innerContent = Tools.dom( 'div', Tools.css.basic + 'width:100%; top:0; left:0; height:auto; overflow:hidden;');
@@ -247,6 +249,11 @@ Object.assign( Gui.prototype, {
         this.target.reset();
         this.target = null;
         this.current = -1;
+
+        ///console.log(this.isDown)//if(this.isDown)Roots.clearInput();
+
+        
+
         Roots.cursor();
         return true;
 
@@ -292,6 +299,8 @@ Object.assign( Gui.prototype, {
     	if( type === 'mouseup' && this.isDown ) this.isDown = false;
     	if( type === 'mousedown' && !this.isDown ) this.isDown = true;
 
+        if( this.isDown && this.isNewTarget ){ Roots.clearInput(); this.isNewTarget=false; }
+
     	if( !name ) return;
 
     	switch( name ){
@@ -307,7 +316,9 @@ Object.assign( Gui.prototype, {
 	    		if( type === 'mousemove' ) change = this.mode('def');
                 if( type === 'wheel' && !targetChange && this.isScroll ) change = this.onWheel( e );
                
-	    		if( !Roots.lock ) this.getNext( e, change );
+	    		if( !Roots.lock ) {
+                    this.getNext( e, change );
+                }
 
     		break;
     		case 'bottom':
@@ -345,12 +356,17 @@ Object.assign( Gui.prototype, {
 
     getNext: function ( e, change ) {
 
+
+
         var next = Roots.findTarget( this.uis, e );
 
         if( next !== this.current ){
             this.clearTarget();
             this.current = next;
             change = true;
+
+            this.isNewTarget = true;
+
         }
 
         if( next !== -1 ){ 
@@ -379,7 +395,7 @@ Object.assign( Gui.prototype, {
         this.mouse.neg();
         this.isDown = false;
 
-        Roots.clearInput();
+        //Roots.clearInput();
         var r = this.mode('def');
         var r2 = this.clearTarget();
 

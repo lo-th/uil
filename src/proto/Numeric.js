@@ -83,18 +83,18 @@ Numeric.prototype = Object.assign( Object.create( Proto.prototype ), {
 
         if( n === this.cMode[name] ) return false;
 
-        var m;
+        //var m;
 
-        switch(n){
+        /*switch(n){
 
             case 0: m = this.colors.border; break;
             case 1: m = this.colors.borderOver; break;
             case 2: m = this.colors.borderSelect;  break;
 
-        }
+        }*/
 
         this.reset();
-        this.c[name+2].style.borderColor = m;
+        //this.c[name+2].style.borderColor = m;
         this.cMode[name] = n;
 
         return true;
@@ -208,7 +208,7 @@ Numeric.prototype = Object.assign( Object.create( Proto.prototype ), {
         while(i--){ 
             if(this.cMode[i]!==0){
                 this.cMode[i] = 0;
-                this.c[2+i].style.borderColor = this.colors.border;
+                //this.c[2+i].style.borderColor = this.colors.border;
                 nup = true;
             }
         }

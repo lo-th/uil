@@ -47,17 +47,17 @@ TextInput.prototype = Object.assign( Object.create( Proto.prototype ), {
 
         if( n === this.cmode ) return false;
 
-        var m;
+        //var m;
 
-        switch ( n ) {
+        /*switch ( n ) {
 
             case 0: m = this.colors.border; break;
             case 1: m = this.colors.borderOver; break;
             case 2: m = this.colors.borderSelect;  break;
 
-        }
+        }*/
 
-        this.c[2].style.borderColor = m;
+        //this.c[2].style.borderColor = m;
         this.cmode = n;
         return true;
 

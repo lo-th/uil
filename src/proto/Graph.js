@@ -8,8 +8,11 @@ function Graph ( o ) {
 	this.value = o.value !== undefined ? o.value : [0,0,0];
     this.lng = this.value.length;
 
-    this.precision = o.precision || 2;
+    this.precision = o.precision !== undefined ? o.precision : 2;
     this.multiplicator = o.multiplicator || 1;
+    this.neg = o.neg || false;
+
+    //if(this.neg)this.multiplicator*=2;
 
     this.autoWidth = true;
     this.isNumber = false;
@@ -57,7 +60,9 @@ function Graph ( o ) {
     	t[i] = [ 14 + (i*this.iw) + (i*4), this.iw ];
     	t[i][2] = t[i][0] + t[i][1];
     	this.cMode[i] = 0;
-    	this.v[i] = this.value[i] / this.multiplicator;
+
+        if( this.neg ) this.v[i] = ((1+(this.value[i] / this.multiplicator))*0.5);
+    	else this.v[i] = this.value[i] / this.multiplicator;
 
     	this.dom( 'rect', '', { x:t[i][0], y:14, width:t[i][1], height:1, fill:this.fontColor, 'fill-opacity':0.3 }, svg );
 
@@ -81,6 +86,24 @@ function Graph ( o ) {
 Graph.prototype = Object.assign( Object.create( Proto.prototype ), {
 
     constructor: Graph,
+
+    updateSVG: function () {
+
+        this.setSvg( this.c[3], 'd', this.makePath(), 0 );
+
+        for(var i = 0; i<this.lng; i++ ){
+
+            
+            this.setSvg( this.c[3], 'height', this.v[i]*this.gh, i+2 );
+            this.setSvg( this.c[3], 'y', 14 + (this.gh - this.v[i]*this.gh), i+2 );
+            if( this.neg ) this.value[i] = ( ((this.v[i]*2)-1) * this.multiplicator ).toFixed( this.precision ) * 1;
+            else this.value[i] = ( (this.v[i] * this.multiplicator) ).toFixed( this.precision ) * 1;
+
+        }
+
+        this.c[2].textContent = this.value;
+
+    },
 
     testZone: function ( e ) {
 
@@ -220,22 +243,7 @@ Graph.prototype = Object.assign( Object.create( Proto.prototype ), {
     },
 
 
-    updateSVG: function () {
-
-        this.setSvg( this.c[3], 'd', this.makePath(), 0 );
-
-    	for(var i = 0; i<this.lng; i++ ){
-
-    		
-    		this.setSvg( this.c[3], 'height', this.v[i]*this.gh, i+2 );
-    		this.setSvg( this.c[3], 'y', 14 + (this.gh - this.v[i]*this.gh), i+2 );
-    		this.value[i] = (this.v[i] * this.multiplicator).toFixed( this.precision ) * 1;
-
-	    }
-
-	    this.c[2].textContent = this.value;
-
-    },
+    
 
     rSize: function () {
 

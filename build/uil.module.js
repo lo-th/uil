@@ -165,14 +165,16 @@ var T = {
 
     // custom text
 
-    setText : function( size, color, font ){
+    setText : function( size, color, font, Shadow ){
 
         size = size || 11;
         color = color || '#CCC';
         font = font || 'Monospace';//'"Consolas", "Lucida Console", Monaco, monospace';
 
+
         T.colors.text = color;
         T.css.txt = T.css.basic + 'font-family:'+font+'; font-size:'+size+'px; color:'+color+'; padding:2px 10px; left:0; top:2px; height:16px; width:100px; overflow:hidden; white-space: nowrap;';
+        if(Shadow) T.css.txt += ' text-shadow:'+ Shadow + '; '; //"1px 1px 1px #ff0000";
         T.css.txtselect = T.css.txt + 'padding:2px 5px; border:1px dashed ' + T.colors.border+';';
         T.css.item = T.css.txt + 'position:relative; background:rgba(0,0,0,0.2); margin-bottom:1px;';
 
@@ -651,6 +653,7 @@ var R = {
     oldCursor:'auto',
 
     input: null,
+    parent: null,
     firstImput: true,
     callbackImput: null,
 
@@ -728,6 +731,7 @@ var R = {
 
         window.addEventListener( 'keydown', R, false );
         window.addEventListener( 'resize', R.resize , false );
+        //window.addEventListener( 'mousedown', R, false );
 
         R.isEventsInit = true;
 
@@ -1081,20 +1085,27 @@ var R = {
         if( R.input === null ) return;
         if( !R.firstImput ) R.callbackImput();
 
-        R.input.style.background = 'none';
+        //R.input.style.background = 'none';
+        R.input.style.borderColor = R.parent.defaultBorderColor;//'rgba(0,0,0,0)';
+        R.parent.isEdit = false;
         R.callbackImput = null;
         R.input = null;
+        R.parent = null;
         R.firstImput = true;
 
     },
 
-    setInput: function ( Input, Callback, color ) {
+    setInput: function ( Input, Callback, color, parent ) {
 
         R.clearInput();
         
         R.callbackImput = Callback;
         R.input = Input;
-        R.input.style.background = color;
+        R.parent = parent;
+        R.input.style.borderColor = color;
+        //R.input.style.background = color;
+
+        //window.addEventListener( 'mousedown', function (){ if( !R.firstImput ) R.clearInput() }, false );
 
     },
 
@@ -1108,10 +1119,18 @@ var R = {
 
         if( R.input === null ) return;
 
+        R.parent.isEdit = true;
+
+        e.preventDefault();
+
         if( e.keyCode === 13 ){ //enter
 
             R.callbackImput();
             R.clearInput();
+
+        } else if( e.keyCode === 8 ){ //backspace
+
+            R.input.textContent = '';
 
         } else {
 
@@ -1329,6 +1348,7 @@ function Proto ( o ) {
 
     this.css = Tools.css;
     this.colors = Tools.colors;
+    this.defaultBorderColor = this.colors.border;
     this.svgs = Tools.svgs;
 
     this.zone = { x:0, y:0, w:0, h:0 };
@@ -1575,7 +1595,8 @@ Object.assign( Proto.prototype, {
 
     setInput: function ( Input, Callback ) {
 
-        Roots.setInput( Input, Callback, Tools.colors.input );
+        
+        Roots.setInput( Input, Callback, Tools.colors.input, this );
 
     },
 
@@ -3022,8 +3043,11 @@ function Graph ( o ) {
 	this.value = o.value !== undefined ? o.value : [0,0,0];
     this.lng = this.value.length;
 
-    this.precision = o.precision || 2;
+    this.precision = o.precision !== undefined ? o.precision : 2;
     this.multiplicator = o.multiplicator || 1;
+    this.neg = o.neg || false;
+
+    //if(this.neg)this.multiplicator*=2;
 
     this.autoWidth = true;
     this.isNumber = false;
@@ -3071,7 +3095,9 @@ function Graph ( o ) {
     	t[i] = [ 14 + (i*this.iw) + (i*4), this.iw ];
     	t[i][2] = t[i][0] + t[i][1];
     	this.cMode[i] = 0;
-    	this.v[i] = this.value[i] / this.multiplicator;
+
+        if( this.neg ) this.v[i] = ((1+(this.value[i] / this.multiplicator))*0.5);
+    	else this.v[i] = this.value[i] / this.multiplicator;
 
     	this.dom( 'rect', '', { x:t[i][0], y:14, width:t[i][1], height:1, fill:this.fontColor, 'fill-opacity':0.3 }, svg );
 
@@ -3095,6 +3121,24 @@ function Graph ( o ) {
 Graph.prototype = Object.assign( Object.create( Proto.prototype ), {
 
     constructor: Graph,
+
+    updateSVG: function () {
+
+        this.setSvg( this.c[3], 'd', this.makePath(), 0 );
+
+        for(var i = 0; i<this.lng; i++ ){
+
+            
+            this.setSvg( this.c[3], 'height', this.v[i]*this.gh, i+2 );
+            this.setSvg( this.c[3], 'y', 14 + (this.gh - this.v[i]*this.gh), i+2 );
+            if( this.neg ) this.value[i] = ( ((this.v[i]*2)-1) * this.multiplicator ).toFixed( this.precision ) * 1;
+            else this.value[i] = ( (this.v[i] * this.multiplicator) ).toFixed( this.precision ) * 1;
+
+        }
+
+        this.c[2].textContent = this.value;
+
+    },
 
     testZone: function ( e ) {
 
@@ -3234,22 +3278,7 @@ Graph.prototype = Object.assign( Object.create( Proto.prototype ), {
     },
 
 
-    updateSVG: function () {
-
-        this.setSvg( this.c[3], 'd', this.makePath(), 0 );
-
-    	for(var i = 0; i<this.lng; i++ ){
-
-    		
-    		this.setSvg( this.c[3], 'height', this.v[i]*this.gh, i+2 );
-    		this.setSvg( this.c[3], 'y', 14 + (this.gh - this.v[i]*this.gh), i+2 );
-    		this.value[i] = (this.v[i] * this.multiplicator).toFixed( this.precision ) * 1;
-
-	    }
-
-	    this.c[2].textContent = this.value;
-
-    },
+    
 
     rSize: function () {
 
@@ -4558,18 +4587,18 @@ Numeric.prototype = Object.assign( Object.create( Proto.prototype ), {
 
         if( n === this.cMode[name] ) return false;
 
-        var m;
+        //var m;
 
-        switch(n){
+        /*switch(n){
 
             case 0: m = this.colors.border; break;
             case 1: m = this.colors.borderOver; break;
             case 2: m = this.colors.borderSelect;  break;
 
-        }
+        }*/
 
         this.reset();
-        this.c[name+2].style.borderColor = m;
+        //this.c[name+2].style.borderColor = m;
         this.cMode[name] = n;
 
         return true;
@@ -4683,7 +4712,7 @@ Numeric.prototype = Object.assign( Object.create( Proto.prototype ), {
         while(i--){ 
             if(this.cMode[i]!==0){
                 this.cMode[i] = 0;
-                this.c[2+i].style.borderColor = this.colors.border;
+                //this.c[2+i].style.borderColor = this.colors.border;
                 nup = true;
             }
         }
@@ -4759,18 +4788,26 @@ function Slide ( o ){
     if( o.mode !== undefined ) this.model = o.mode;
     this.buttonColor = o.bColor || this.colors.button;
 
+    this.defaultBorderColor = this.colors.hide;
+
     this.isDown = false;
     this.isOver = false;
     this.allway = o.allway || false;
 
     this.firstImput = false;
 
-    this.c[2] = this.dom( 'div', this.css.txtselect + 'letter-spacing:-1px; text-align:right; width:47px; border:1px dashed '+this.colors.hide+'; color:'+ this.fontColor );
+    //this.c[2] = this.dom( 'div', this.css.txtselect + 'letter-spacing:-1px; text-align:right; width:47px; border:1px dashed '+this.defaultBorderColor+'; color:'+ this.fontColor );
+    this.c[2] = this.dom( 'div', this.css.txtselect + 'text-align:right; width:47px; border:1px dashed '+this.defaultBorderColor+'; color:'+ this.fontColor );
+    //this.c[2] = this.dom( 'div', this.css.txtselect + 'letter-spacing:-1px; text-align:right; width:47px; color:'+ this.fontColor );
     this.c[3] = this.dom( 'div', this.css.basic + ' top:0; height:'+this.h+'px;' );
     this.c[4] = this.dom( 'div', this.css.basic + 'background:'+this.colors.scrollback+'; top:2px; height:'+(this.h-4)+'px;' );
     this.c[5] = this.dom( 'div', this.css.basic + 'left:4px; top:5px; height:'+(this.h-10)+'px; background:' + this.fontColor +';' );
 
     this.c[2].isNum = true;
+    //this.c[2].style.height = (this.h-4) + 'px';
+    //this.c[2].style.lineHeight = (this.h-8) + 'px';
+    this.c[2].style.height = (this.h-2) + 'px';
+    this.c[2].style.lineHeight = (this.h-10) + 'px';
 
     if(this.model !== 0){
         if(this.model === 1 || this.model === 3){
@@ -4781,8 +4818,8 @@ function Slide ( o ){
         }
 
         if(this.model === 2){
-            h1 = 2;
-            h2 = 4;
+            h1 = 4;//2
+            h2 = 8;
             ra = 2;
             ww = (this.h-4)*0.5;
         }
@@ -4824,7 +4861,7 @@ Slide.prototype = Object.assign( Object.create( Proto.prototype ), {
 
     mouseup: function ( e ) {
         
-        if(this.isDown) this.isDown = false;
+        if( this.isDown ) this.isDown = false;
         
     },
 
@@ -4960,13 +4997,13 @@ Slide.prototype = Object.assign( Object.create( Proto.prototype ), {
         if(this.isUI || !this.simple) tx = this.sc+10;
         this.txl = this.w - tx + 2;
 
-        var ty = Math.floor(this.h * 0.5) - 8;
+        //var ty = Math.floor(this.h * 0.5) - 8;
 
         var s = this.s;
 
-        s[2].width = (this.sc -2 )+ 'px';
-        s[2].left = this.txl + 'px';
-        s[2].top = ty + 'px';
+        s[2].width = (this.sc -6 )+ 'px';
+        s[2].left = (this.txl +4) + 'px';
+        //s[2].top = ty + 'px';
         s[3].left = this.sa + 'px';
         s[3].width = w + 'px';
         s[4].left = this.sa + 'px';
@@ -5026,17 +5063,17 @@ TextInput.prototype = Object.assign( Object.create( Proto.prototype ), {
 
         if( n === this.cmode ) return false;
 
-        var m;
+        //var m;
 
-        switch ( n ) {
+        /*switch ( n ) {
 
             case 0: m = this.colors.border; break;
             case 1: m = this.colors.borderOver; break;
             case 2: m = this.colors.borderSelect;  break;
 
-        }
+        }*/
 
-        this.c[2].style.borderColor = m;
+        //this.c[2].style.borderColor = m;
         this.cmode = n;
         return true;
 
@@ -5260,6 +5297,8 @@ function Gui ( o ) {
     this.ratio = 1;
     this.oy = 0;
 
+    this.isNewTarget = false;
+
     this.content = Tools.dom( 'div', Tools.css.basic + ' width:0px; height:auto; top:0px; ' + this.css );
 
     this.innerContent = Tools.dom( 'div', Tools.css.basic + 'width:100%; top:0; left:0; height:auto; overflow:hidden;');
@@ -5429,6 +5468,11 @@ Object.assign( Gui.prototype, {
         this.target.reset();
         this.target = null;
         this.current = -1;
+
+        ///console.log(this.isDown)//if(this.isDown)Roots.clearInput();
+
+        
+
         Roots.cursor();
         return true;
 
@@ -5474,6 +5518,8 @@ Object.assign( Gui.prototype, {
     	if( type === 'mouseup' && this.isDown ) this.isDown = false;
     	if( type === 'mousedown' && !this.isDown ) this.isDown = true;
 
+        if( this.isDown && this.isNewTarget ){ Roots.clearInput(); this.isNewTarget=false; }
+
     	if( !name ) return;
 
     	switch( name ){
@@ -5489,7 +5535,9 @@ Object.assign( Gui.prototype, {
 	    		if( type === 'mousemove' ) change = this.mode('def');
                 if( type === 'wheel' && !targetChange && this.isScroll ) change = this.onWheel( e );
                
-	    		if( !Roots.lock ) this.getNext( e, change );
+	    		if( !Roots.lock ) {
+                    this.getNext( e, change );
+                }
 
     		break;
     		case 'bottom':
@@ -5527,12 +5575,17 @@ Object.assign( Gui.prototype, {
 
     getNext: function ( e, change ) {
 
+
+
         var next = Roots.findTarget( this.uis, e );
 
         if( next !== this.current ){
             this.clearTarget();
             this.current = next;
             change = true;
+
+            this.isNewTarget = true;
+
         }
 
         if( next !== -1 ){ 
@@ -5561,7 +5614,7 @@ Object.assign( Gui.prototype, {
         this.mouse.neg();
         this.isDown = false;
 
-        Roots.clearInput();
+        //Roots.clearInput();
         var r = this.mode('def');
         var r2 = this.clearTarget();
 

@@ -79,14 +79,16 @@ var T = {
 
     // custom text
 
-    setText : function( size, color, font ){
+    setText : function( size, color, font, Shadow ){
 
         size = size || 11;
         color = color || '#CCC';
         font = font || 'Monospace';//'"Consolas", "Lucida Console", Monaco, monospace';
 
+
         T.colors.text = color;
         T.css.txt = T.css.basic + 'font-family:'+font+'; font-size:'+size+'px; color:'+color+'; padding:2px 10px; left:0; top:2px; height:16px; width:100px; overflow:hidden; white-space: nowrap;';
+        if(Shadow) T.css.txt += ' text-shadow:'+ Shadow + '; '; //"1px 1px 1px #ff0000";
         T.css.txtselect = T.css.txt + 'padding:2px 5px; border:1px dashed ' + T.colors.border+';';
         T.css.item = T.css.txt + 'position:relative; background:rgba(0,0,0,0.2); margin-bottom:1px;';
 

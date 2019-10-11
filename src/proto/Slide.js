@@ -11,18 +11,26 @@ function Slide ( o ){
     if( o.mode !== undefined ) this.model = o.mode;
     this.buttonColor = o.bColor || this.colors.button;
 
+    this.defaultBorderColor = this.colors.hide;
+
     this.isDown = false;
     this.isOver = false;
     this.allway = o.allway || false;
 
     this.firstImput = false;
 
-    this.c[2] = this.dom( 'div', this.css.txtselect + 'letter-spacing:-1px; text-align:right; width:47px; border:1px dashed '+this.colors.hide+'; color:'+ this.fontColor );
+    //this.c[2] = this.dom( 'div', this.css.txtselect + 'letter-spacing:-1px; text-align:right; width:47px; border:1px dashed '+this.defaultBorderColor+'; color:'+ this.fontColor );
+    this.c[2] = this.dom( 'div', this.css.txtselect + 'text-align:right; width:47px; border:1px dashed '+this.defaultBorderColor+'; color:'+ this.fontColor );
+    //this.c[2] = this.dom( 'div', this.css.txtselect + 'letter-spacing:-1px; text-align:right; width:47px; color:'+ this.fontColor );
     this.c[3] = this.dom( 'div', this.css.basic + ' top:0; height:'+this.h+'px;' );
     this.c[4] = this.dom( 'div', this.css.basic + 'background:'+this.colors.scrollback+'; top:2px; height:'+(this.h-4)+'px;' );
     this.c[5] = this.dom( 'div', this.css.basic + 'left:4px; top:5px; height:'+(this.h-10)+'px; background:' + this.fontColor +';' );
 
     this.c[2].isNum = true;
+    //this.c[2].style.height = (this.h-4) + 'px';
+    //this.c[2].style.lineHeight = (this.h-8) + 'px';
+    this.c[2].style.height = (this.h-2) + 'px';
+    this.c[2].style.lineHeight = (this.h-10) + 'px';
 
     if(this.model !== 0){
         if(this.model === 1 || this.model === 3){
@@ -33,8 +41,8 @@ function Slide ( o ){
         }
 
         if(this.model === 2){
-            h1 = 2;
-            h2 = 4;
+            h1 = 4;//2
+            h2 = 8;
             ra = 2;
             ww = (this.h-4)*0.5
         }
@@ -76,7 +84,7 @@ Slide.prototype = Object.assign( Object.create( Proto.prototype ), {
 
     mouseup: function ( e ) {
         
-        if(this.isDown) this.isDown = false;
+        if( this.isDown ) this.isDown = false;
         
     },
 
@@ -212,13 +220,13 @@ Slide.prototype = Object.assign( Object.create( Proto.prototype ), {
         if(this.isUI || !this.simple) tx = this.sc+10;
         this.txl = this.w - tx + 2;
 
-        var ty = Math.floor(this.h * 0.5) - 8;
+        //var ty = Math.floor(this.h * 0.5) - 8;
 
         var s = this.s;
 
-        s[2].width = (this.sc -2 )+ 'px';
-        s[2].left = this.txl + 'px';
-        s[2].top = ty + 'px';
+        s[2].width = (this.sc -6 )+ 'px';
+        s[2].left = (this.txl +4) + 'px';
+        //s[2].top = ty + 'px';
         s[3].left = this.sa + 'px';
         s[3].width = w + 'px';
         s[4].left = this.sa + 'px';
