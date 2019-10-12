@@ -4,11 +4,7 @@
 <meta charset="UTF-8">
 <title>Uil to Three</title>
 <link rel="shortcut icon" href="../favicon.ico">
-<style>
-/**{ margin: 0; padding: 0; border: 0; -o-user-select:none; -ms-user-select:none; -khtml-user-select:none; -webkit-user-select:none; -moz-user-select:none; } */
-html{ overflow:hidden; width:100%; height:100%; }
-body { font-family: "Lucida Console", Monaco, monospace; background-color:#050608; font-size:11px; color:#fff; margin: 0px; }
-</style>
+<link rel="stylesheet" type="text/css" href="../style.css">
 
 <script type="text/javascript" src="../build/uil.js"></script>
 <script type="text/javascript" src="./js/libs/three.min.js"></script>
@@ -42,13 +38,15 @@ animate(0);
 function init() {
 
     scene = new THREE.Scene();
-    scene.background = new THREE.Color( 0x050608 );
+    //scene.background = new THREE.Color( 0x050608 );
 
-    renderer = new THREE.WebGLRenderer({ antialias:true });
+    renderer = new THREE.WebGLRenderer({ antialias:true, alpha:true });
     renderer.setPixelRatio( window.devicePixelRatio );
     renderer.setSize( window.innerWidth, window.innerHeight );
     renderer.gammaInput = true;
     renderer.gammaOutput = true;
+    renderer.setClearColor( 0x000000, 0 );
+    renderer.domElement.style.cssText = 'position: fixed; top:0; left:0;';
     document.body.appendChild( renderer.domElement );
 
     camera = new THREE.PerspectiveCamera( 45, window.innerWidth / window.innerHeight, 1, 1000 );

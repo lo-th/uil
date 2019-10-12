@@ -4,14 +4,8 @@
 <meta charset="UTF-8">
 <title>Uil to Canvas</title>
 <link rel="shortcut icon" href="../favicon.ico">
-<style>
-body { font-family: "Lucida Console", Monaco, monospace; background-color:#050608; font-size:11px; color:#fff; overflow:hidden;}
-#logo{ position:absolute; left:50%; margin-left:-64px; top:25px; }
-#version { position:absolute; top:150px; left:50%; width:128px; margin-left:-64px; height:10px; pointer-events:none; text-align:center; font-size:12px; font-weight: bold;}
-#debug { position:absolute; top:10px; left:0px; width:100%; pointer-events:none; text-align:center; }
-#debug2 { position:absolute; bottom:10px; left:50%; width:128px;  margin-left:-64px; pointer-events:none; text-align:center; color:#FFFF00;}
+<link rel="stylesheet" type="text/css" href="../style.css">
 
-</style>
 
 <script type="text/javascript" src="../build/uil.js"></script>
 
@@ -24,7 +18,11 @@ body { font-family: "Lucida Console", Monaco, monospace; background-color:#05060
 <div id='debug2'></div>
 <script>
 
-document.getElementById('logo').innerHTML = UIL.Tools.icon('logo', '#FFF', 128);
+var debug = document.getElementById('debug');
+debug.style.bottom = '10px'
+debug.style.top = 'auto'
+
+document.getElementById('logo').innerHTML = UIL.Tools.icon('logo', '#FFF', 64);
 document.getElementById('version').innerHTML = 'Uil '+ UIL.REVISION;
 
 var temp=0, fps=0, count=0; 
@@ -43,8 +41,6 @@ var list = ['item-0', 'item-1', 'item-2', 'item-3', 'item-4', 'item-5', 'item-6'
 var list2 = ['item-0', 'item-1', 'item-2'];
 var decal = window.innerWidth - 320;
 
-
-var debug = document.getElementById('debug');
 var callback = function( v ){ 
     debug.innerHTML = v;
 }
@@ -55,7 +51,7 @@ var callbackLogo = function( v ){ document.getElementById('logoin').setAttribute
 
 
 // single UI element
-var b = UIL.add('button', { target:document.body, callback:populate, name:'populate', w:100, pos:{left:'50%', top:'200px', marginLeft:'-50px' }, simple:true });
+var b = UIL.add('button', { target:document.body, callback:populate, name:'populate', w:100, pos:{left:'50%', top:'100px', marginLeft:'-50px' }, h:30, simple:true });
 
 var container = document.createElement('div');
 container.style.cssText = 'position:absolute; top:0px; right:10px; height:100%; width:300px; pointer-events:none; ';

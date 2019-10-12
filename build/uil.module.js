@@ -1419,12 +1419,24 @@ function Proto ( o ) {
     // Font Color;
     this.titleColor = o.titleColor || Tools.colors.text;
     this.fontColor = o.fontColor || Tools.colors.text;
-    
+
     if( o.color !== undefined ){ 
+
+        if(o.color === 'n') o.color = '#ff0000';
+
+        if( o.color !== 'no' ) {
+            if( !isNaN(o.color) ) this.fontColor = Tools.hexToHtml(o.color);
+            else this.fontColor = o.color;
+            this.titleColor = this.fontColor;
+        }
+        
+    }
+    
+    /*if( o.color !== undefined ){ 
         if( !isNaN(o.color) ) this.fontColor = Tools.hexToHtml(o.color);
         else this.fontColor = o.color;
         this.titleColor = this.fontColor;
-    }
+    }*/
 
     this.colorPlus = Tools.ColorLuma( this.fontColor, 0.3 );
 
@@ -3049,7 +3061,7 @@ function Graph ( o ) {
 
     //if(this.neg)this.multiplicator*=2;
 
-    this.autoWidth = true;
+    this.autoWidth = o.autoWidth !== undefined ? o.autoWidth : true;
     this.isNumber = false;
 
     this.isDown = false;
@@ -3105,6 +3117,8 @@ function Graph ( o ) {
 
     this.tmp = t;
     this.c[3] = svg;
+
+    console.log(this.w);
 
     this.init();
 
@@ -3285,7 +3299,7 @@ Graph.prototype = Object.assign( Object.create( Proto.prototype ), {
         Proto.prototype.rSize.call( this );
 
         var s = this.s;
-        if( this.c[1] !== undefined )s[1].width = this.w + 'px';
+        if( this.c[1] !== undefined ) s[1].width = this.w + 'px';
         s[2].width = this.w + 'px';
         s[3].width = this.w + 'px';
 
@@ -4036,6 +4050,17 @@ function List ( o ) {
 
     Proto.call( this, o );
 
+    // images
+    this.path = o.path || '';
+    this.format = o.format || '';
+    this.imageSize = o.imageSize || [20,20];
+
+    this.isWithImage = this.path !== '' ? true:false;
+    this.preLoadComplete = false;
+
+    this.tmpImage = {};
+    this.tmpUrl = [];
+
     this.autoHeight = false;
     var align = o.align || 'center';
 
@@ -4047,7 +4072,7 @@ function List ( o ) {
     var fltop = Math.floor(this.h*0.5)-5;
 
     this.c[2] = this.dom( 'div', this.css.basic + 'top:0; display:none;' );
-    this.c[3] = this.dom( 'div', this.css.txt + 'text-align:'+align+'; line-height:'+(this.h-4)+'px; top:1px;  background:'+this.buttonColor+'; height:'+(this.h-2)+'px; border-radius:'+this.radius+'px;' );
+    this.c[3] = this.dom( 'div', this.css.txt + 'text-align:'+align+'; line-height:'+(this.h-4)+'px; top:1px; background:'+this.buttonColor+'; height:'+(this.h-2)+'px; border-radius:'+this.radius+'px;' );
     this.c[4] = this.dom( 'path', this.css.basic + 'position:absolute; width:10px; height:10px; top:'+fltop+'px;', { d:this.svgs.arrow, fill:this.fontColor, stroke:'none'});
 
     this.scroller = this.dom( 'div', this.css.basic + 'right:5px;  width:10px; background:#666; display:none;');
@@ -4102,21 +4127,81 @@ function List ( o ) {
     this.c[2].appendChild( this.listIn );
     this.c[2].appendChild( this.scroller );
 
-    // populate list
+    if( o.value !== undefined ){
+        if(!isNaN(o.value)) this.value = this.list[ o.value ];
+        else this.value = o.value;
+    }else{
+        this.value = this.list[0];
+    }
 
-    this.setList( this.list, o.value );
+    this.isOpenOnStart = o.open || false;
+
+    
 
     //this.c[0].style.background = '#FF0000'
-
-    this.init();
-
-    if( o.open !== undefined ) this.open();
+    if( this.isWithImage ) this.preloadImage();
+   // } else {
+        // populate list
+        this.setList( this.list );
+        this.init();
+        if( this.isOpenOnStart ) this.open();
+   // }
 
 }
 
 List.prototype = Object.assign( Object.create( Proto.prototype ), {
 
     constructor: List,
+
+    // image list
+
+    preloadImage: function () {
+
+        this.preLoadComplete = false;
+
+        this.tmpImage = {};
+        for( var i=0; i<this.list.length; i++ ) this.tmpUrl.push( this.list[i] );
+        this.loadOne();
+        
+    },
+
+    nextImg: function () {
+
+        this.tmpUrl.shift();
+        if( this.tmpUrl.length === 0 ){ 
+
+            this.preLoadComplete = true;
+
+            this.addImages();
+            /*this.setList( this.list );
+            this.init();
+            if( this.isOpenOnStart ) this.open();*/
+
+        }
+        else this.loadOne();
+
+    },
+
+    loadOne: function(){
+
+        var self = this;
+        var name = this.tmpUrl[0];
+        var img = document.createElement('img');
+        img.style.cssText = 'position:absolute; width:'+self.imageSize[0]+'px; height:'+self.imageSize[1]+'px';
+        img.setAttribute('src', this.path + name + this.format );
+
+        img.addEventListener('load', function() {
+
+            self.imageSize[2] = img.width;
+            self.imageSize[3] = img.height;
+            self.tmpImage[name] = img;
+            self.nextImg();
+
+        });
+
+    },
+
+    //
 
     testZone: function ( e ) {
 
@@ -4214,8 +4299,9 @@ List.prototype = Object.assign( Object.create( Proto.prototype ), {
         
         } else {
             if( this.current ){
-                this.value = this.current.textContent;
-                this.c[3].textContent = this.value;
+                this.value = this.list[this.current.id];
+                //this.value = this.current.textContent;
+                this.setTopItem();
                 this.send();
                 this.close();
             }
@@ -4340,7 +4426,7 @@ List.prototype = Object.assign( Object.create( Proto.prototype ), {
 
     },
 
-    setList: function ( list, value ) {
+    setList: function ( list ) {
 
         this.clearList();
 
@@ -4367,23 +4453,52 @@ List.prototype = Object.assign( Object.create( Proto.prototype ), {
 
         var item, n;//, l = this.sb;
         for( var i=0; i<this.length; i++ ){
+
             n = this.list[i];
             item = this.dom( 'div', this.css.item + 'width:'+this.ww+'px; height:'+this.itemHeight+'px; line-height:'+(this.itemHeight-5)+'px; color:'+this.fontColor+';' );
-            item.textContent = n;
             item.name = 'item'+i;
+            item.id = i;
             item.posy = (this.itemHeight+1)*i;
             this.listIn.appendChild( item );
             this.items.push( item );
+
+            //if( this.isWithImage ) item.appendChild( this.tmpImage[n] );
+            if( !this.isWithImage ) item.textContent = n;
+
         }
 
-        if( value !== undefined ){
-            if(!isNaN(value)) this.value = this.list[ value ];
-            else this.value = value;
-        }else{
-            this.value = this.list[0];
-        }
+        this.setTopItem();
         
-        this.c[3].textContent = this.value;
+    },
+
+    addImages: function (){
+        var lng = this.list.length;
+        for( var i=0; i<lng; i++ ){
+            this.items[i].appendChild( this.tmpImage[this.list[i]] );
+        }
+        this.setTopItem();
+    },
+
+    setTopItem: function (){
+
+        if( this.isWithImage ){ 
+
+            if( !this.preLoadComplete ) return;
+
+            if(!this.c[3].children.length){
+                this.canvas = document.createElement('canvas');
+                this.canvas.width = this.imageSize[0];
+                this.canvas.height = this.imageSize[1];
+                this.canvas.style.cssText = 'position:absolute; top:0px; left:0px;';
+                this.ctx = this.canvas.getContext("2d");
+                this.c[3].appendChild( this.canvas );
+            }
+
+            var img = this.tmpImage[ this.value ];
+            this.ctx.drawImage( this.tmpImage[ this.value ], 0, 0, this.imageSize[2], this.imageSize[3], 0,0, this.imageSize[0], this.imageSize[1] );
+
+        }
+        else this.c[3].textContent = this.value;
 
     },
 
@@ -4487,6 +4602,8 @@ List.prototype = Object.assign( Object.create( Proto.prototype ), {
         var s = this.s;
         var w = this.sb;
         var d = this.sa;
+
+        if(s[2]=== undefined) return;
 
         s[2].width = w + 'px';
         s[2].left = d +'px';

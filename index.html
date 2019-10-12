@@ -8,22 +8,8 @@
 <meta http-equiv="Pragma" content="no-cache">
 
 <link rel="shortcut icon" href="./examples/img/favicon.ico">
+<link rel="stylesheet" type="text/css" href="style.css">
 
-<style>
-
-html{ overflow:hidden; width:100%; height:100%; }
-body{ font-family:"Lucida Console", Monaco, monospace; background-color:#050608; font-size:12px; color:#fff;}
-
-@keyframes octocat-wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(-25deg)}40%,80%{transform:rotate(10deg)}}
-#octo-arm{pointer-events:none;}
-#octo-body{pointer-events:none;}
-#octo{ cursor:pointer; pointer-events:auto; position: absolute; top: 0; border: 0; right: 0; }
-
-#logo{ position:absolute; left:50%; margin-left:-32px; top:0px; }
-#version { position:absolute; top:64px; left:50%; width:128px; margin-left:-64px; height:10px; pointer-events:none; text-align:center; font-size:12px; font-weight: bold;}
-#debug { position:absolute; top:10px; left:10px; width:300px; pointer-events:none;}
-
-</style>
 
 <script type="text/javascript" src="build/uil.js"></script>
 
@@ -94,7 +80,7 @@ function populate () {
         ui.add('number', { name:'vector3', value:[0,0,0] });
         ui.add('number', { name:'vector4', value:[0,0,0,0], step:1, precision:0, h:36 });
         ui.add('button', { name:'button', callback:callbackButton });
-        ui.add('button', { name:'MULTY', fontColor:'#D4B87B', height:30, value:[1, 2, 3, 4] });
+        ui.add('button', { name:'MULTY', fontColor:'#D4B87B', h:30, value:[1, 2, 3, 4] });
 
         gr0 = ui.add('group', { name:'Group', h:36 });
 

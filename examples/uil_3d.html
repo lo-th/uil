@@ -301,8 +301,8 @@ function initGUI () {
     ui.add( sets, 'height', { type:'Circular', min:0, max:10, w:128, precision:2, fontColor:'#D4B87B' } );
     ui.add( sets, 'expo', { type:'Knob', min:0, max:10, w:128, precision:2, fontColor:'#D4B87B' } );
     ui.add( sets, 'move', { type:'joystick', w:128, precision:2, fontColor:'#D4B87B' } );
-    ui.add( sets, 'level', { type:'graph', w:128, precision:2, fontColor:'#D4B87B' } );
-    ui.add( sets, 'frequency', { type:'graph', w:128, precision:2, multiplicator:0.25, fontColor:'#D4B87B' } );
+    ui.add( sets, 'level', { type:'graph', w:128, precision:2, fontColor:'#D4B87B', autoWidth:false } );
+    ui.add( sets, 'frequency', { type:'graph', w:128, precision:2, multiplicator:0.25, fontColor:'#D4B87B', autoWidth:false } );
 
     ui.onDraw = function () {
 

@@ -4,12 +4,7 @@
 <meta charset="UTF-8">
 <title>Uil listen</title>
 <link rel="shortcut icon" href="../favicon.ico">
-<style>
-body { font-family: "Lucida Console", Monaco, monospace; background-color:#050608; font-size:11px; color:#fff; }
-#version { position:absolute; top:150px; left:50%; width:128px; margin-left:-64px; height:10px; pointer-events:none; text-align:center; font-size:12px; font-weight: bold;}
-#debug { position:absolute; top:10px; left:0; width:100%; text-align: center; pointer-events:none; }
-#logo{ position:absolute; left:50%; margin-left:-64px; top:25px; }
-</style>
+<link rel="stylesheet" type="text/css" href="../style.css">
 
 <script type="text/javascript" src="../build/uil.js"></script>
 
@@ -20,11 +15,13 @@ body { font-family: "Lucida Console", Monaco, monospace; background-color:#05060
 <div id='version'></div>
 <div id='debug'></div>
 <script>
-
+var debug = document.getElementById('debug');
+debug.style.bottom = '10px'
+debug.style.top = 'auto'
 var obj1 = { speed: 5 }
 var obj2 = { speed: 5 }
 
-document.getElementById('logo').innerHTML = UIL.Tools.icon('logo', '#FFF', 128);
+document.getElementById('logo').innerHTML = UIL.Tools.icon('logo', '#FFF', 64);
 document.getElementById('version').innerHTML = 'Uil '+ UIL.REVISION;
 
 var callback = function ( v ) {

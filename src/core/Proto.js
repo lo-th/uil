@@ -84,12 +84,24 @@ function Proto ( o ) {
     // Font Color;
     this.titleColor = o.titleColor || Tools.colors.text;
     this.fontColor = o.fontColor || Tools.colors.text;
-    
+
     if( o.color !== undefined ){ 
+
+        if(o.color === 'n') o.color = '#ff0000';
+
+        if( o.color !== 'no' ) {
+            if( !isNaN(o.color) ) this.fontColor = Tools.hexToHtml(o.color);
+            else this.fontColor = o.color;
+            this.titleColor = this.fontColor;
+        }
+        
+    }
+    
+    /*if( o.color !== undefined ){ 
         if( !isNaN(o.color) ) this.fontColor = Tools.hexToHtml(o.color);
         else this.fontColor = o.color;
         this.titleColor = this.fontColor;
-    }
+    }*/
 
     this.colorPlus = Tools.ColorLuma( this.fontColor, 0.3 );
 

@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Uil image list</title>
+<link rel="shortcut icon" href="img/favicon.ico">
+<link rel="stylesheet" type="text/css" href="../style.css">
+
+<script type="text/javascript" src="../build/uil.js"></script>
+
+</head>
+
+<body>
+<div id='logo'></div>
+<div id='version'></div>
+<div id='debug'></div>
+<script>
+
+document.getElementById('logo').innerHTML = UIL.Tools.icon('logo', '#FFF', 64);
+document.getElementById('version').innerHTML = 'Uil '+ UIL.REVISION;
+
+UIL.Tools.setText(12);
+
+var testList;
+
+var timer = null;
+var display = false;
+
+var list = ["alley", "arches", "bridge", "castle", "cave", "church", "colors", "downtown", "factory", "gallery", "green", "lake", "loft", "milkyway", "mit", "night", "outside", "parking", "photo", "pisa", "place", "red", "river", "rock", "room", "snow", "street", "studio", "sunset", "tatami", "tokyo", "tonight", "tunnel", "veranda", "yellow"];
+
+var debug = document.getElementById('debug');
+var callback = function( v ){  debug.innerHTML = v; }
+
+// in GUI element
+var ui = new UIL.Gui( { w:300 } ).onChange( callback );
+ui.add('title',  { name:'Test image list', titleColor:'#D4B87B'});
+ui.add('list',   { name:'image_list',  list:list, h:64, path:'assets/mini/', format:'.jpg', imageSize: [128,64] });
+
+
+</script>
+</body>
+</html>

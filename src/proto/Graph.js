@@ -14,7 +14,7 @@ function Graph ( o ) {
 
     //if(this.neg)this.multiplicator*=2;
 
-    this.autoWidth = true;
+    this.autoWidth = o.autoWidth !== undefined ? o.autoWidth : true;
     this.isNumber = false;
 
     this.isDown = false;
@@ -70,6 +70,8 @@ function Graph ( o ) {
 
     this.tmp = t;
     this.c[3] = svg;
+
+    console.log(this.w)
 
     this.init();
 
@@ -250,7 +252,7 @@ Graph.prototype = Object.assign( Object.create( Proto.prototype ), {
         Proto.prototype.rSize.call( this );
 
         var s = this.s;
-        if( this.c[1] !== undefined )s[1].width = this.w + 'px';
+        if( this.c[1] !== undefined ) s[1].width = this.w + 'px';
         s[2].width = this.w + 'px';
         s[3].width = this.w + 'px';
 

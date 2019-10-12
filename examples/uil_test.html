@@ -4,12 +4,7 @@
 <meta charset="UTF-8">
 <title>Uil test</title>
 <link rel="shortcut icon" href="img/favicon.ico">
-<style>
-body { font-family: Monospace; background-color:#050608; font-size:12px; color:#fff; }
-#logo{ position:absolute; left:50%; margin-left:-64px; top:25px; }
-#version { position:absolute; top:150px; left:50%; width:128px; margin-left:-64px; height:10px; pointer-events:none; text-align:center; font-size:12px; font-weight: bold;}
-#debug { position:absolute; top:10px; left:0; width:100%; pointer-events:none; text-align:center; }
-</style>
+<link rel="stylesheet" type="text/css" href="../style.css">
 
 
 <script type="text/javascript" src="../build/uil.js"></script>
@@ -22,10 +17,10 @@ body { font-family: Monospace; background-color:#050608; font-size:12px; color:#
 <div id='debug'></div>
 <script>
 
-document.getElementById('logo').innerHTML = UIL.Tools.icon('logo', '#FFF', 128);
+document.getElementById('logo').innerHTML = UIL.Tools.icon('logo', '#FFF', 64);
 document.getElementById('version').innerHTML = 'Uil '+ UIL.REVISION;
 
-UIL.Tools.setText(16);
+UIL.Tools.setText(12);
 
 var testList;
 
@@ -68,42 +63,42 @@ function populate(){
     if(!display){
         
 
-        ui2.add('title',  { name:'Title', titleColor:'#D4B87B', height:30});
+        ui2.add('title',  { name:'Title', titleColor:'#D4B87B', h:30});
         ui2.add('slide',  { name:'100',  min:-100, max:100, value:0, precision:0, fontColor:'#D4B87B', stype:0, allway:true });
         ui2.add('slide',  { name:'slide',  min:-100, max:100, value:0, precision:0, fontColor:'#D4B87B', stype:1 });
         ui2.add('slide',  { name:'slide',  min:-100, max:100, value:0, precision:0, fontColor:'#D4B87B', stype:2 });
-        ui2.add('slide',  { name:'slide',  min:-1, max:1, value:0, step:0.01, precision:2, height:20, stype :3 });
+        ui2.add('slide',  { name:'slide',  min:-1, max:1, value:0, step:0.01, precision:2, h:20, stype :3 });
 
-        ui.add('title',  { name:'Title', titleColor:'#D4B87B', height:30});
+        ui.add('title',  { name:'Title', titleColor:'#D4B87B', h:30});
 
         ui.add('fps',  { res:70 });
         
         var bb = ui.add('bool',   { name:'bool', titleColor:'#D4B87B', h:30, inh:20, bg:'rgba(99,44,44,0.3)' }).onChange( callback );;
         bb.setValue(true);
         ui.add('color',  { name:'color', type:'html', value:0x000000, fontColor:'#D4B87B'});
-        ui.add('color',  { name:'color', type:'hex', value:[0,1,1,1], height:40 });
-        ui.add('color',  { name:'color', type:'rgb', value:[0,1,1,1], height:40 });
+        ui.add('color',  { name:'color', type:'hex', value:[0,1,1,1], h:40 });
+        ui.add('color',  { name:'color', type:'rgb', value:[0,1,1,1], h:40 });
         ui.add('slide',  { name:'slide',  min:-100, max:100, value:0, precision:0, fontColor:'#D4B87B', stype:0 }).onChange( callback );;
         ui.add('slide',  { name:'slide',  min:-100, max:100, value:0, precision:0, fontColor:'#D4B87B', stype:1 });
-        ui.add('slide',  { name:'slide',  min:-1, max:1, value:0, step:0.01, precision:2, height:20, stype :2 });
-        ui.add('string', { name:'string',  value:'welcome to uil', fontColor:'#D4B87B', height:40}).onChange( callback );
+        ui.add('slide',  { name:'slide',  min:-1, max:1, value:0, step:0.01, precision:2, h:20, stype :2 });
+        ui.add('string', { name:'string',  value:'welcome to uil', fontColor:'#D4B87B', h:40}).onChange( callback );
         testList = ui.add('list',   { name:'list',  list:list, fontColor:'#D4B87B' });
-        ui.add('list',   { name:'list',  list:list2, height:40 });
+        ui.add('list',   { name:'list',  list:list2, h:40 });
         ui.add('button', { name:'TEST' });
         ui.add('number', { name:'number',  value:20});
         ui.add('number', { name:'vec2', value:[0,0], fontColor:'#D4B87B' });
         ui.add('number', { name:'vec3', value:[0,0,0] });
-        ui.add('number', { name:'vec4', value:[0,0,0,0], step:1, precision:0, height:30 });
-        ui.add('button', { name:'LOAD', callback:callbackButton, fontColor:'#D4B87B', height:30, loader:true });
-        ui.add('button', { name:'LOAD', callback:callbackButton, fontColor:'#D4B87B', height:30, drag:true });
+        ui.add('number', { name:'vec4', value:[0,0,0,0], step:1, precision:0, h:30 });
+        ui.add('button', { name:'LOAD', callback:callbackButton, fontColor:'#D4B87B', h:30, loader:true });
+        ui.add('button', { name:'LOAD', callback:callbackButton, fontColor:'#D4B87B', h:30, drag:true });
 
-        ui.add('button', { name:'MULTY', callback:callbackButton, fontColor:'#D4B87B', height:30, value:[1, 2, 3, 4] }).onChange( callback );;
+        ui.add('button', { name:'MULTY', callback:callbackButton, fontColor:'#D4B87B', h:30, value:[1, 2, 3, 4] }).onChange( callback );;
 
-        gr0 = ui.add('group', { name:'Group', height:30 });
+        gr0 = ui.add('group', { name:'Group', h:30 });
 
-        gr0.add('button', { name:'LOAD', callback:callbackButton, fontColor:'#D4B87B', height:30, p:0 });
+        gr0.add('button', { name:'LOAD', callback:callbackButton, fontColor:'#D4B87B', h:30, p:0 });
         gr0.add('color',  { name:'color', type:'hex', value:[0,1,1,1], h:40 });
-        gr0.add('list',   { name:'listH', list:list, fontColor:'#D4B87B', height:30, p:0  }).onChange( callback );;
+        gr0.add('list',   { name:'listH', list:list, fontColor:'#D4B87B', h:30, p:0  }).onChange( callback );;
         gr0.add('slide',  { name:'slide', min:-100, max:100, value:0, precision:0 }).onChange( callback );;
         gr0.add('slide',  { name:'slide', min:-100, max:100, value:0, precision:0 });
         gr0.add('slide',  { name:'slide', min:-100, max:100, value:0, precision:0 });
