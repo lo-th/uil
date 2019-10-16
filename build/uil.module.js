@@ -46,8 +46,6 @@ if ( Object.assign === undefined ) {
 
 		Object.assign = function ( target ) {
 
-			'use strict';
-
 			if ( target === undefined || target === null ) {
 
 				throw new TypeError( 'Cannot convert undefined or null to object' );
@@ -167,9 +165,9 @@ var T = {
 
     setText : function( size, color, font, Shadow ){
 
-        size = size || 11;
+        size = size || 13;
         color = color || '#CCC';
-        font = font || 'Monospace';//'"Consolas", "Lucida Console", Monaco, monospace';
+        font = font || 'Consolas,monaco,monospace;';//'Monospace';//'"Consolas", "Lucida Console", Monaco, monospace';
 
 
         T.colors.text = color;
@@ -540,7 +538,7 @@ var T = {
         var s = 40;//stroke
         var r =( w-s )*0.5;
         var mid = w*0.5;
-        var n = 24, nudge = 8 / r / n * Math.PI, a1 = 0, d1;
+        var n = 24, nudge = 8 / r / n * Math.PI, a1 = 0;
         var am, tan, d2, a2, ar, i, j, path, ccc;
         var color = [];
         
@@ -576,7 +574,6 @@ var T = {
             }
             a1 = a2 - nudge; 
             color[0] = color[1];
-            d1 = d2;
         }
 
         var br = (128 - s ) + 2;
@@ -2872,7 +2869,6 @@ function Fps ( o ) {
 
 }
 
-
 Fps.prototype = Object.assign( Object.create( Proto.prototype ), {
 
     constructor: Fps,
@@ -3458,7 +3454,6 @@ Group.prototype = Object.assign( Object.create( Proto.prototype ), {
         if( next !== this.current ){
             this.clearTarget();
             this.current = next;
-            change = true;
         }
 
         if( next !== -1 ){ 
@@ -5699,7 +5694,6 @@ Object.assign( Gui.prototype, {
         if( next !== this.current ){
             this.clearTarget();
             this.current = next;
-            change = true;
 
             this.isNewTarget = true;
 
@@ -5976,4 +5970,4 @@ Object.assign( Gui.prototype, {
 
 var REVISION = '2.0';
 
-export { REVISION, Tools, Gui, Proto, add, Bool, Button, Circular, Color, Fps, Group, Joystick, Knob, List, Numeric, Slide, TextInput, Title };
+export { Bool, Button, Circular, Color, Fps, Group, Gui, Joystick, Knob, List, Numeric, Proto, REVISION, Slide, TextInput, Title, Tools, add };

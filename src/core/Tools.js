@@ -81,9 +81,9 @@ var T = {
 
     setText : function( size, color, font, Shadow ){
 
-        size = size || 11;
+        size = size || 13;
         color = color || '#CCC';
-        font = font || 'Monospace';//'"Consolas", "Lucida Console", Monaco, monospace';
+        font = font || 'Consolas,monaco,monospace;';//'Monospace';//'"Consolas", "Lucida Console", Monaco, monospace';
 
 
         T.colors.text = color;

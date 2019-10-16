@@ -1,8 +1,8 @@
 (function (global, factory) {
 	typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
 	typeof define === 'function' && define.amd ? define(['exports'], factory) :
-	(factory((global.UIL = global.UIL || {})));
-}(this, (function (exports) { 'use strict';
+	(global = global || self, factory(global.UIL = {}));
+}(this, function (exports) { 'use strict';
 
 	// Polyfills
 
@@ -51,8 +51,6 @@
 		( function () {
 
 			Object.assign = function ( target ) {
-
-				'use strict';
 
 				if ( target === undefined || target === null ) {
 
@@ -173,14 +171,14 @@
 
 	    setText : function( size, color, font, Shadow ){
 
-	        size = size || 11;
+	        size = size || 13;
 	        color = color || '#CCC';
-	        font = font || 'Monospace';//'"Consolas", "Lucida Console", Monaco, monospace';
+	        font = font || 'Consolas,monaco,monospace;';//'Monospace';//'"Consolas", "Lucida Console", Monaco, monospace';
 
 
 	        T.colors.text = color;
 	        T.css.txt = T.css.basic + 'font-family:'+font+'; font-size:'+size+'px; color:'+color+'; padding:2px 10px; left:0; top:2px; height:16px; width:100px; overflow:hidden; white-space: nowrap;';
-	        if(Shadow) T.css.txt += ' text-shadow:'+ Shadow + '; '; //"1px 1px 1px #ff0000";
+	        if(Shadow) { T.css.txt += ' text-shadow:'+ Shadow + '; '; } //"1px 1px 1px #ff0000";
 	        T.css.txtselect = T.css.txt + 'padding:2px 5px; border:1px dashed ' + T.colors.border+';';
 	        T.css.item = T.css.txt + 'position:relative; background:rgba(0,0,0,0.2); margin-bottom:1px;';
 
@@ -194,16 +192,16 @@
 
 	    setSvg: function( dom, type, value, id ){
 
-	        if( id === -1 ) dom.setAttributeNS( null, type, value );
-	        else dom.childNodes[ id || 0 ].setAttributeNS( null, type, value );
+	        if( id === -1 ) { dom.setAttributeNS( null, type, value ); }
+	        else { dom.childNodes[ id || 0 ].setAttributeNS( null, type, value ); }
 
 	    },
 
 	    setCss: function( dom, css ){
 
 	        for( var r in css ){
-	            if( T.DOM_SIZE.indexOf(r) !== -1 ) dom.style[r] = css[r] + 'px';
-	            else dom.style[r] = css[r];
+	            if( T.DOM_SIZE.indexOf(r) !== -1 ) { dom.style[r] = css[r] + 'px'; }
+	            else { dom.style[r] = css[r]; }
 	        }
 
 	    },
@@ -211,7 +209,7 @@
 	    set: function( g, o ){
 
 	        for( var att in o ){
-	            if( att === 'txt' ) g.textContent = o[ att ];
+	            if( att === 'txt' ) { g.textContent = o[ att ]; }
 	            g.setAttributeNS( null, att, o[ att ] );
 	        }
 	        
@@ -219,11 +217,11 @@
 
 	    get: function( dom, id ){
 
-	        if( id === undefined ) return dom; // root
-	        else if( !isNaN( id ) ) return dom.childNodes[ id ]; // first child
+	        if( id === undefined ) { return dom; } // root
+	        else if( !isNaN( id ) ) { return dom.childNodes[ id ]; } // first child
 	        else if( id instanceof Array ){
-	            if(id.length === 2) return dom.childNodes[ id[0] ].childNodes[ id[1] ];
-	            if(id.length === 3) return dom.childNodes[ id[0] ].childNodes[ id[1] ].childNodes[ id[2] ];
+	            if(id.length === 2) { return dom.childNodes[ id[0] ].childNodes[ id[1] ]; }
+	            if(id.length === 3) { return dom.childNodes[ id[0] ].childNodes[ id[1] ].childNodes[ id[2] ]; }
 	        }
 
 	    },
@@ -241,22 +239,22 @@
 
 	            } else {
 	                // create new svg if not def
-	                if( dom === undefined ) dom = document.createElementNS( T.svgns, 'svg' );
+	                if( dom === undefined ) { dom = document.createElementNS( T.svgns, 'svg' ); }
 	                T.addAttributes( dom, type, obj, id );
 
 	            }
 	            
 	        } else { // is html element
 
-	            if( dom === undefined ) dom = document.createElementNS( T.htmls, type );
-	            else dom = dom.appendChild( document.createElementNS( T.htmls, type ) );
+	            if( dom === undefined ) { dom = document.createElementNS( T.htmls, type ); }
+	            else { dom = dom.appendChild( document.createElementNS( T.htmls, type ) ); }
 
 	        }
 
-	        if( css ) dom.style.cssText = css; 
+	        if( css ) { dom.style.cssText = css; } 
 
-	        if( id === undefined ) return dom;
-	        else return dom.childNodes[ id || 0 ];
+	        if( id === undefined ) { return dom; }
+	        else { return dom.childNodes[ id || 0 ]; }
 
 	    },
 
@@ -265,7 +263,7 @@
 	        var g = document.createElementNS( T.svgns, type );
 	        T.set( g, o );
 	        T.get( dom, id ).appendChild( g );
-	        if( T.SVG_TYPE_G.indexOf(type) !== -1 ) g.style.pointerEvents = 'none';
+	        if( T.SVG_TYPE_G.indexOf(type) !== -1 ) { g.style.pointerEvents = 'none'; }
 	        return g;
 
 	    },
@@ -274,7 +272,7 @@
 
 	        T.purge( dom );
 	        while (dom.firstChild) {
-	            if ( dom.firstChild.firstChild ) T.clear( dom.firstChild );
+	            if ( dom.firstChild.firstChild ) { T.clear( dom.firstChild ); }
 	            dom.removeChild( dom.firstChild ); 
 	        }
 
@@ -287,7 +285,7 @@
 	            i = a.length;
 	            while(i--){
 	                n = a[i].name;
-	                if (typeof dom[n] === 'function') dom[n] = null;
+	                if (typeof dom[n] === 'function') { dom[n] = null; }
 	            }
 	        }
 	        a = dom.childNodes;
@@ -366,8 +364,8 @@
 
 	    unpack: function( c ){
 
-	        if (c.length == 7) return [ T.u255(c, 1), T.u255(c, 3), T.u255(c, 5) ];
-	        else if (c.length == 4) return [ T.u16(c,1), T.u16(c,2), T.u16(c,3) ];
+	        if (c.length == 7) { return [ T.u255(c, 1), T.u255(c, 3), T.u255(c, 5) ]; }
+	        else if (c.length == 4) { return [ T.u16(c,1), T.u16(c,2), T.u16(c,3) ]; }
 
 	    },
 
@@ -385,11 +383,11 @@
 
 	    hueToRgb: function( p, q, t ){
 
-	        if ( t < 0 ) t += 1;
-	        if ( t > 1 ) t -= 1;
-	        if ( t < 1 / 6 ) return p + ( q - p ) * 6 * t;
-	        if ( t < 1 / 2 ) return q;
-	        if ( t < 2 / 3 ) return p + ( q - p ) * 6 * ( 2 / 3 - t );
+	        if ( t < 0 ) { t += 1; }
+	        if ( t > 1 ) { t -= 1; }
+	        if ( t < 1 / 6 ) { return p + ( q - p ) * 6 * t; }
+	        if ( t < 1 / 2 ) { return q; }
+	        if ( t < 2 / 3 ) { return p + ( q - p ) * 6 * ( 2 / 3 - t ); }
 	        return p;
 
 	    },
@@ -397,11 +395,11 @@
 	    rgbToHsl: function ( c ) {
 
 	        var r = c[0], g = c[1], b = c[2], min = Math.min(r, g, b), max = Math.max(r, g, b), delta = max - min, h = 0, s = 0, l = (min + max) / 2;
-	        if (l > 0 && l < 1) s = delta / (l < 0.5 ? (2 * l) : (2 - 2 * l));
+	        if (l > 0 && l < 1) { s = delta / (l < 0.5 ? (2 * l) : (2 - 2 * l)); }
 	        if (delta > 0) {
-	            if (max == r && max != g) h += (g - b) / delta;
-	            if (max == g && max != b) h += (2 + (b - r) / delta);
-	            if (max == b && max != r) h += (4 + (r - g) / delta);
+	            if (max == r && max != g) { h += (g - b) / delta; }
+	            if (max == g && max != b) { h += (2 + (b - r) / delta); }
+	            if (max == b && max != r) { h += (4 + (r - g) / delta); }
 	            h /= 6;
 	        }
 	        return [ h, s, l ];
@@ -412,7 +410,7 @@
 
 	        var p, q, h = c[0], s = c[1], l = c[2];
 
-	        if ( s === 0 ) return [ l, l, l ];
+	        if ( s === 0 ) { return [ l, l, l ]; }
 	        else {
 	            q = l <= 0.5 ? l * (s + 1) : l + s - ( l * s );
 	            p = l * 2 - q;
@@ -546,7 +544,7 @@
 	        var s = 40;//stroke
 	        var r =( w-s )*0.5;
 	        var mid = w*0.5;
-	        var n = 24, nudge = 8 / r / n * Math.PI, a1 = 0, d1;
+	        var n = 24, nudge = 8 / r / n * Math.PI, a1 = 0;
 	        var am, tan, d2, a2, ar, i, j, path, ccc;
 	        var color = [];
 	        
@@ -582,7 +580,6 @@
 	            }
 	            a1 = a2 - nudge; 
 	            color[0] = color[1];
-	            d1 = d2;
 	        }
 
 	        var br = (128 - s ) + 2;
@@ -684,15 +681,15 @@
 	        R.ui.push( o );
 	        R.getZone( o );
 
-	        if( !R.isEventsInit ) R.initEvents();
+	        if( !R.isEventsInit ) { R.initEvents(); }
 
 	    },
 
 	    testMobile: function () {
 
 	        var n = navigator.userAgent;
-	        if (n.match(/Android/i) || n.match(/webOS/i) || n.match(/iPhone/i) || n.match(/iPad/i) || n.match(/iPod/i) || n.match(/BlackBerry/i) || n.match(/Windows Phone/i)) return true;
-	        else return false;  
+	        if (n.match(/Android/i) || n.match(/webOS/i) || n.match(/iPhone/i) || n.match(/iPad/i) || n.match(/iPod/i) || n.match(/BlackBerry/i) || n.match(/Windows Phone/i)) { return true; }
+	        else { return false; }  
 
 	    },
 
@@ -717,7 +714,7 @@
 
 	    initEvents: function () {
 
-	        if( R.isEventsInit ) return;
+	        if( R.isEventsInit ) { return; }
 
 	        var domElement = document.body;
 
@@ -745,7 +742,7 @@
 
 	    removeEvents: function () {
 
-	        if( !R.isEventsInit ) return;
+	        if( !R.isEventsInit ) { return; }
 
 	        var domElement = document.body;
 
@@ -777,7 +774,7 @@
 	        while( i-- ){
 
 	            u = R.ui[i];
-	            if( u.isGui && !u.isCanvasOnly && u.autoResize ) u.setHeight();
+	            if( u.isGui && !u.isCanvasOnly && u.autoResize ) { u.setHeight(); }
 	        
 	        }
 
@@ -794,9 +791,9 @@
 
 	      //  console.log( event.type )
 
-	        if( event.type.indexOf( R.prevDefault ) !== -1 ) event.preventDefault(); 
+	        if( event.type.indexOf( R.prevDefault ) !== -1 ) { event.preventDefault(); } 
 
-	        if( event.type === 'contextmenu' ) return; 
+	        if( event.type === 'contextmenu' ) { return; } 
 
 	        //if( event.type === 'keydown'){ R.editText( event ); return;}
 
@@ -807,10 +804,10 @@
 	       
 	        var e = R.e;
 
-	        if( event.type === 'keydown') R.editText( event );
+	        if( event.type === 'keydown') { R.editText( event ); }
 
-	        if( event.type === 'wheel' ) e.delta = event.deltaY > 0 ? 1 : -1;
-	        else e.delta = 0;
+	        if( event.type === 'wheel' ) { e.delta = event.deltaY > 0 ? 1 : -1; }
+	        else { e.delta = 0; }
 	        
 	        e.clientX = event.clientX || 0;
 	        e.clientY = event.clientY || 0;
@@ -827,9 +824,9 @@
 
 	            }
 
-	            if( event.type === 'touchstart') e.type = 'mousedown';
-	            if( event.type === 'touchend') e.type = 'mouseup';
-	            if( event.type === 'touchmove') e.type = 'mousemove';
+	            if( event.type === 'touchstart') { e.type = 'mousedown'; }
+	            if( event.type === 'touchend') { e.type = 'mouseup'; }
+	            if( event.type === 'touchmove') { e.type = 'mousemove'; }
 
 	        }
 	        
@@ -841,11 +838,11 @@
 	        */
 
 
-	        if( e.type === 'mousedown' ) R.lock = true;
-	        if( e.type === 'mouseup' ) R.lock = false;
+	        if( e.type === 'mousedown' ) { R.lock = true; }
+	        if( e.type === 'mouseup' ) { R.lock = false; }
 
-	        if( R.isMobile && e.type === 'mousedown' ) R.findID( e );
-	        if( e.type === 'mousemove' && !R.lock ) R.findID( e );
+	        if( R.isMobile && e.type === 'mousedown' ) { R.findID( e ); }
+	        if( e.type === 'mousemove' && !R.lock ) { R.findID( e ); }
 	        
 
 	        if( R.ID !== null ){
@@ -861,7 +858,7 @@
 
 	        }
 
-	        if( R.isMobile && e.type === 'mouseup' ) R.clearOldID();
+	        if( R.isMobile && e.type === 'mouseup' ) { R.clearOldID(); }
 
 	    },
 
@@ -903,13 +900,13 @@
 	                
 	        }
 
-	        if( next === -1 ) R.clearOldID();
+	        if( next === -1 ) { R.clearOldID(); }
 
 	    },
 
 	    clearOldID: function () {
 
-	        if( !R.ID ) return;
+	        if( !R.ID ) { return; }
 	        R.current = -1;
 	        R.ID.reset();
 	        R.ID = null;
@@ -934,7 +931,7 @@
 
 	            if( !u.autoWidth ){
 
-	                if( px === 0 ) py += u.h + 1;
+	                if( px === 0 ) { py += u.h + 1; }
 
 	                u.zone.x = zone.x + px;
 	                u.zone.y = px === 0 ? py - u.h : my;
@@ -942,7 +939,7 @@
 	                my = u.zone.y;
 	                
 	                px += u.w;
-	                if( px + u.w > zone.w ) px = 0;
+	                if( px + u.w > zone.w ) { px = 0; }
 
 	            } else {
 
@@ -952,7 +949,7 @@
 
 	            }
 
-	            if( u.isGroup ) u.calcUis();
+	            if( u.isGroup ) { u.calcUis(); }
 
 	        }
 
@@ -964,7 +961,7 @@
 	        var i = uis.length;
 
 	        while( i-- ){
-	            if( R.onZone( uis[i], e.clientX, e.clientY ) ) return i;
+	            if( R.onZone( uis[i], e.clientX, e.clientY ) ) { return i; }
 	        }
 
 	        return -1;
@@ -977,7 +974,7 @@
 
 	    findZone: function ( force ) {
 
-	        if( !R.needReZone && !force ) return;
+	        if( !R.needReZone && !force ) { return; }
 
 	        var i = R.ui.length, u;
 
@@ -985,7 +982,7 @@
 
 	            u = R.ui[i];
 	            R.getZone( u );
-	            if( u.isGui ) u.calcUis();
+	            if( u.isGui ) { u.calcUis(); }
 
 	        }
 
@@ -995,7 +992,7 @@
 
 	    onZone: function ( o, x, y ) {
 
-	        if( x === undefined || y === undefined ) return false;
+	        if( x === undefined || y === undefined ) { return false; }
 
 	        var z = o.zone;
 	        var mx = x - z.x;
@@ -1003,8 +1000,8 @@
 
 	        var over = ( mx >= 0 ) && ( my >= 0 ) && ( mx <= z.w ) && ( my <= z.h );
 
-	        if( over ) o.local.set( mx, my );
-	        else o.local.neg();
+	        if( over ) { o.local.set( mx, my ); }
+	        else { o.local.neg(); }
 
 	        return over;
 
@@ -1012,7 +1009,7 @@
 
 	    getZone: function ( o ) {
 
-	        if( o.isCanvasOnly ) return;
+	        if( o.isCanvasOnly ) { return; }
 	        var r = o.getDom().getBoundingClientRect();
 	        o.zone = { x:r.left, y:r.top, w:r.width, h:r.height };
 
@@ -1042,16 +1039,16 @@
 
 	        if( force && R.tmpTime !== null ) { clearTimeout(R.tmpTime); R.tmpTime = null;  }
 
-	        if( R.tmpTime !== null ) return;
+	        if( R.tmpTime !== null ) { return; }
 
-	        if( R.lock ) R.tmpTime = setTimeout( function(){ R.tmpTime = null; }, 10 );
+	        if( R.lock ) { R.tmpTime = setTimeout( function(){ R.tmpTime = null; }, 10 ); }
 
 	        ///
 
 	        var isNewSize = false;
-	        if( w !== o.canvas.width || h !== o.canvas.height ) isNewSize = true;
+	        if( w !== o.canvas.width || h !== o.canvas.height ) { isNewSize = true; }
 
-	        if( R.tmpImage === null ) R.tmpImage = new Image();
+	        if( R.tmpImage === null ) { R.tmpImage = new Image(); }
 
 	        var img = R.tmpImage; //new Image();
 
@@ -1088,8 +1085,8 @@
 
 	    clearInput: function () {
 
-	        if( R.input === null ) return;
-	        if( !R.firstImput ) R.callbackImput();
+	        if( R.input === null ) { return; }
+	        if( !R.firstImput ) { R.callbackImput(); }
 
 	        //R.input.style.background = 'none';
 	        R.input.style.borderColor = R.parent.defaultBorderColor;//'rgba(0,0,0,0)';
@@ -1123,7 +1120,7 @@
 
 	    editText: function ( e ) {
 
-	        if( R.input === null ) return;
+	        if( R.input === null ) { return; }
 
 	        R.parent.isEdit = true;
 
@@ -1143,11 +1140,11 @@
 	            if( R.input.isNum ){
 	                if ( ((e.keyCode > 95) && (e.keyCode < 106)) || e.keyCode === 110 || e.keyCode === 109 ){
 	                    if( R.firstImput ){ R.input.textContent = e.key; R.firstImput = false; }
-	                    else R.input.textContent += e.key;
+	                    else { R.input.textContent += e.key; }
 	                }
 	            } else {
 	                if( R.firstImput ){ R.input.textContent = e.key; R.firstImput = false; }
-	                else R.input.textContent += e.key;
+	                else { R.input.textContent += e.key; }
 	            }
 
 	        }
@@ -1160,7 +1157,7 @@
 
 	    loop: function () {
 
-	        if( R.isLoop ) requestAnimationFrame( R.loop );
+	        if( R.isLoop ) { requestAnimationFrame( R.loop ); }
 	        R.update();
 
 	    },
@@ -1168,15 +1165,15 @@
 	    update: function () {
 
 	        var i = R.listens.length;
-	        while(i--) R.listens[i].listening();
+	        while(i--) { R.listens[i].listening(); }
 
 	    },
 
 	    removeListen: function ( proto ) {
 
 	        var id = R.listens.indexOf( proto );
-	        if( id !== -1 ) R.listens.splice(id, 1);
-	        if( R.listens.length === 0 ) R.isLoop = false;
+	        if( id !== -1 ) { R.listens.splice(id, 1); }
+	        if( R.listens.length === 0 ) { R.isLoop = false; }
 
 	    },
 
@@ -1184,7 +1181,7 @@
 
 	        var id = R.listens.indexOf( proto );
 
-	        if( id !== -1 ) return; 
+	        if( id !== -1 ) { return; } 
 
 	        R.listens.push( proto );
 
@@ -1264,7 +1261,7 @@
 
 			var angle = Math.atan2( this.y, this.x );
 
-			if ( angle < 0 ) angle += 2 * Math.PI;
+			if ( angle < 0 ) { angle += 2 * Math.PI; }
 
 			return angle;
 
@@ -1371,10 +1368,10 @@
 	    this.p = o.p !== undefined ? o.p : Tools.size.p;
 
 	    this.w = this.isUI ? this.main.size.w : Tools.size.w;
-	    if( o.w !== undefined ) this.w = o.w;
+	    if( o.w !== undefined ) { this.w = o.w; }
 
 	    this.h = this.isUI ? this.main.size.h : Tools.size.h;
-	    if( o.h !== undefined ) this.h = o.h;
+	    if( o.h !== undefined ) { this.h = o.h; }
 	    this.h = this.h < 11 ? 11 : this.h;
 
 	    // if need resize width
@@ -1397,16 +1394,16 @@
 
 	    // no title 
 	    this.simple = o.simple || false;
-	    if( this.simple ) this.sa = 0;
+	    if( this.simple ) { this.sa = 0; }
 
 	    // define obj size
 	    this.setSize( this.w );
 
 	    // title size
-	    if(o.sa !== undefined ) this.sa = o.sa;
-	    if(o.sb !== undefined ) this.sb = o.sb;
+	    if(o.sa !== undefined ) { this.sa = o.sa; }
+	    if(o.sb !== undefined ) { this.sb = o.sb; }
 
-	    if( this.simple ) this.sb = this.w - this.sa;
+	    if( this.simple ) { this.sb = this.w - this.sa; }
 
 	    // last number size for slide
 	    this.sc = o.sc === undefined ? 47 : o.sc;
@@ -1428,11 +1425,11 @@
 
 	    if( o.color !== undefined ){ 
 
-	        if(o.color === 'n') o.color = '#ff0000';
+	        if(o.color === 'n') { o.color = '#ff0000'; }
 
 	        if( o.color !== 'no' ) {
-	            if( !isNaN(o.color) ) this.fontColor = Tools.hexToHtml(o.color);
-	            else this.fontColor = o.color;
+	            if( !isNaN(o.color) ) { this.fontColor = Tools.hexToHtml(o.color); }
+	            else { this.fontColor = o.color; }
 	            this.titleColor = this.fontColor;
 	        }
 	        
@@ -1453,7 +1450,7 @@
 	    this.callback = o.callback === undefined ? null : o.callback;
 	    this.endCallback = null;
 
-	    if( this.callback === null && this.isUI && this.main.callback !== null ) this.callback = this.main.callback;
+	    if( this.callback === null && this.isUI && this.main.callback !== null ) { this.callback = this.main.callback; }
 
 	    // elements
 	    this.c = [];
@@ -1464,7 +1461,7 @@
 	    this.c[0] = Tools.dom( 'div', Tools.css.basic + 'position:relative; height:20px; float:left; overflow:hidden;');
 	    this.s[0] = this.c[0].style;
 
-	    if( this.isUI ) this.s[0].marginBottom = '1px';
+	    if( this.isUI ) { this.s[0].marginBottom = '1px'; }
 
 	    // with title
 	    if( !this.simple ){ 
@@ -1482,7 +1479,7 @@
 	        this.mono = true;
 	    }
 
-	    if( o.css ) this.s[0].cssText = o.css; 
+	    if( o.css ) { this.s[0].cssText = o.css; } 
 	    
 
 	}
@@ -1503,7 +1500,7 @@
 	        s[0].height = this.h + 'px';
 	        this.zone.h = this.h;
 
-	        if( this.isUI ) s[0].background = this.bg;
+	        if( this.isUI ) { s[0].background = this.bg; }
 
 	        //if( this.autoHeight ) s[0].transition = 'height 0.01s ease-out';
 	        if( c[1] !== undefined && this.autoWidth ){
@@ -1524,8 +1521,8 @@
 	        if( this.target !== null ){ 
 	            this.target.appendChild( c[0] );
 	        } else {
-	            if( this.isUI ) this.main.inner.appendChild( c[0] );
-	            else document.body.appendChild( c[0] );
+	            if( this.isUI ) { this.main.inner.appendChild( c[0] ); }
+	            else { document.body.appendChild( c[0] ); }
 	        }
 
 	        c[0].appendChild( frag );
@@ -1570,28 +1567,28 @@
 
 	    getColorRing: function () {
 
-	        if( !Tools.colorRing ) Tools.makeColorRing();
+	        if( !Tools.colorRing ) { Tools.makeColorRing(); }
 	        return Tools.clone( Tools.colorRing );
 
 	    },
 
 	    getJoystick: function ( model ) {
 
-	        if( !Tools[ 'joystick_'+ model ] ) Tools.makeJoystick( model );
+	        if( !Tools[ 'joystick_'+ model ] ) { Tools.makeJoystick( model ); }
 	        return Tools.clone( Tools[ 'joystick_'+ model ] );
 
 	    },
 
 	    getCircular: function ( model ) {
 
-	        if( !Tools.circular ) Tools.makeCircular( model );
+	        if( !Tools.circular ) { Tools.makeCircular( model ); }
 	        return Tools.clone( Tools.circular );
 
 	    },
 
 	    getKnob: function ( model ) {
 
-	        if( !Tools.knob ) Tools.makeKnob( model );
+	        if( !Tools.knob ) { Tools.makeKnob( model ); }
 	        return Tools.clone( Tools.knob );
 
 	    },
@@ -1646,7 +1643,7 @@
 
 	    rename: function ( s ) {
 
-	        if( this.c[1] !== undefined) this.c[1].textContent = s;
+	        if( this.c[1] !== undefined) { this.c[1].textContent = s; }
 
 	    },
 
@@ -1660,9 +1657,9 @@
 
 	    listening: function () {
 
-	        if( this.objectLink === null ) return;
-	        if( this.isSend ) return;
-	        if( this.isEdit ) return;
+	        if( this.objectLink === null ) { return; }
+	        if( this.isSend ) { return; }
+	        if( this.isEdit ) { return; }
 
 	        this.setValue( this.objectLink[ this.val ] );
 
@@ -1670,8 +1667,8 @@
 
 	    setValue: function ( v ) {
 
-	        if( this.isNumber ) this.value = this.numValue( v );
-	        else this.value = v;
+	        if( this.isNumber ) { this.value = this.numValue( v ); }
+	        else { this.value = v; }
 	        this.update();
 
 	    },
@@ -1703,16 +1700,16 @@
 	    send: function ( v ) {
 
 	        this.isSend = true;
-	        if( this.objectLink !== null ) this.objectLink[ this.val ] = v || this.value;
-	        if( this.callback ) this.callback( v || this.value );
+	        if( this.objectLink !== null ) { this.objectLink[ this.val ] = v || this.value; }
+	        if( this.callback ) { this.callback( v || this.value ); }
 	        this.isSend = false;
 
 	    },
 
 	    sendEnd: function ( v ) {
 
-	        if( this.endCallback ) this.endCallback( v || this.value );
-	        if( this.objectLink !== null ) this.objectLink[ this.val ] = v || this.value;
+	        if( this.endCallback ) { this.endCallback( v || this.value ); }
+	        if( this.objectLink !== null ) { this.objectLink[ this.val ] = v || this.value; }
 
 	    },
 
@@ -1727,11 +1724,11 @@
 	        if( this.target !== null ){ 
 	            this.target.removeChild( this.c[0] );
 	        } else {
-	            if( this.isUI ) this.main.clearOne( this );
-	            else document.body.removeChild( this.c[0] );
+	            if( this.isUI ) { this.main.clearOne( this ); }
+	            else { document.body.removeChild( this.c[0] ); }
 	        }
 
-	        if( !this.isUI ) Roots.remove( this );
+	        if( !this.isUI ) { Roots.remove( this ); }
 
 	        this.c = null;
 	        this.s = null;
@@ -1746,7 +1743,7 @@
 
 	    setSize: function ( sx ) {
 
-	        if( !this.autoWidth ) return;
+	        if( !this.autoWidth ) { return; }
 
 	        this.w = sx;
 
@@ -1763,9 +1760,9 @@
 
 	    rSize: function () {
 
-	        if( !this.autoWidth ) return;
+	        if( !this.autoWidth ) { return; }
 	        this.s[0].width = this.w + 'px';
-	        if( !this.simple ) this.s[1].width = this.sa + 'px';
+	        if( !this.simple ) { this.s[1].width = this.sa + 'px'; }
 	    
 	    },
 
@@ -1779,8 +1776,8 @@
 
 	        this.value = 0;
 	        if(o.value !== undefined){
-	            if( typeof o.value === 'string' ) this.value = o.value * 1;
-	            else this.value = o.value;
+	            if( typeof o.value === 'string' ) { this.value = o.value * 1; }
+	            else { this.value = o.value; }
 	        }
 
 	        this.min = o.min === undefined ? -Infinity : o.min;
@@ -1856,14 +1853,14 @@
 
 	    open: function () {
 
-	        if( this.isOpen ) return;
+	        if( this.isOpen ) { return; }
 	        this.isOpen = true;
 
 	    },
 
 	    close: function () {
 
-	        if( !this.isOpen ) return;
+	        if( !this.isOpen ) { return; }
 	        this.isOpen = false;
 
 	    },
@@ -1966,7 +1963,7 @@
 
 	    this.isLoadButton = o.loader || false;
 	    this.isDragButton = o.drag || false;
-	    if( this.isDragButton ) this.isLoadButton = true;
+	    if( this.isDragButton ) { this.isLoadButton = true; }
 
 	    this.lng = this.values.length;
 	    this.tmp = [];
@@ -1979,9 +1976,9 @@
 	        this.stat[i] = 1;
 	    }
 
-	    if( this.c[1] !== undefined ) this.c[1].textContent = '';
+	    if( this.c[1] !== undefined ) { this.c[1].textContent = ''; }
 
-	    if( this.isLoadButton ) this.initLoader();
+	    if( this.isLoadButton ) { this.initLoader(); }
 	    if( this.isDragButton ){ 
 	        this.lng ++;
 	        this.initDrager();
@@ -1998,13 +1995,13 @@
 	    testZone: function ( e ) {
 
 	        var l = this.local;
-	        if( l.x === -1 && l.y === -1 ) return '';
+	        if( l.x === -1 && l.y === -1 ) { return ''; }
 
 	        var i = this.lng;
 	        var t = this.tmp;
 	        
 	        while( i-- ){
-	        	if( l.x>t[i][0] && l.x<t[i][2] ) return i+2;
+	        	if( l.x>t[i][0] && l.x<t[i][2] ) { return i+2; }
 	        }
 
 	        return ''
@@ -2032,11 +2029,11 @@
 
 	    	var name = this.testZone( e );
 
-	        if( !name ) return false;
+	        if( !name ) { return false; }
 
 	    	this.isDown = true;
 	        this.value = this.values[name-2];
-	        if( !this.isLoadButton ) this.send();
+	        if( !this.isLoadButton ) { this.send(); }
 	        //else this.fileSelect( e.target.files[0] );
 	    	return this.mousemove( e );
 	 
@@ -2073,10 +2070,10 @@
 
 	        for( var i = 0; i < this.lng; i++ ){
 
-	            if( i === name-2 ) v = this.mode( n, i+2 );
-	            else v = this.mode( 1, i+2 );
+	            if( i === name-2 ) { v = this.mode( n, i+2 ); }
+	            else { v = this.mode( 1, i+2 ); }
 
-	            if(v) r = true;
+	            if(v) { r = true; }
 
 	        }
 
@@ -2208,15 +2205,15 @@
 	        //this.c[3].type = "null";
 	        // console.log( this.c[4] )
 
-	        if( file === undefined ) return;
+	        if( file === undefined ) { return; }
 
 	        var reader = new FileReader();
 	        var fname = file.name;
 	        var type = fname.substring(fname.lastIndexOf('.')+1, fname.length );
 
-	        if( dataUrl.indexOf( type ) !== -1 ) reader.readAsDataURL( file );
-	        else if( dataBuf.indexOf( type ) !== -1 ) reader.readAsArrayBuffer( file );//reader.readAsArrayBuffer( file );
-	        else reader.readAsText( file );
+	        if( dataUrl.indexOf( type ) !== -1 ) { reader.readAsDataURL( file ); }
+	        else if( dataBuf.indexOf( type ) !== -1 ) { reader.readAsArrayBuffer( file ); }//reader.readAsArrayBuffer( file );
+	        else { reader.readAsText( file ); }
 
 	        // if( type === 'png' || type === 'jpg' || type === 'mp4' || type === 'webm' || type === 'ogg' ) reader.readAsDataURL( file );
 	        //else if( type === 'z' ) reader.readAsBinaryString( file );
@@ -2226,7 +2223,7 @@
 
 	        reader.onload = function (e) {
 	            
-	            if( this.callback ) this.callback( e.target.result, fname, type );
+	            if( this.callback ) { this.callback( e.target.result, fname, type ); }
 	            //this.c[3].type = "file";
 	            //this.send( e.target.result ); 
 	        }.bind(this);
@@ -2346,7 +2343,7 @@
 
 	    mode: function ( mode ) {
 
-	        if( this.cmode === mode ) return false;
+	        if( this.cmode === mode ) { return false; }
 
 	        switch( mode ){
 	            case 0: // base
@@ -2400,7 +2397,7 @@
 
 	        //this.mode(1);
 
-	        if( !this.isDown ) return;
+	        if( !this.isDown ) { return; }
 
 	        var off = this.offset;
 
@@ -2415,8 +2412,8 @@
 	            var dif = this.r - this.oldr;
 	            this.r = Math.abs(dif) > Math.PI ? this.oldr : this.r;
 
-	            if( dif > 6 ) this.r = 0;
-	            if( dif < -6 ) this.r = this.twoPi;
+	            if( dif > 6 ) { this.r = 0; }
+	            if( dif < -6 ) { this.r = this.twoPi; }
 
 	        }
 
@@ -2453,7 +2450,7 @@
 	        this.percent = ( this.value - this.min ) / this.range;
 
 	        this.setSvg( this.c[3], 'd', this.makePath(), 1 );
-	        if( up ) this.send();
+	        if( up ) { this.send(); }
 	        
 	    },
 
@@ -2496,9 +2493,9 @@
 	    this.hsl = null;
 	    this.value = '#ffffff';
 	    if( o.value !== undefined ){
-	        if( o.value instanceof Array ) this.value = Tools.rgbToHex( o.value );
-	        else if(!isNaN(o.value)) this.value = Tools.hexToHtml( o.value );
-	        else this.value = o.value;
+	        if( o.value instanceof Array ) { this.value = Tools.rgbToHex( o.value ); }
+	        else if(!isNaN(o.value)) { this.value = Tools.hexToHtml( o.value ); }
+	        else { this.value = o.value; }
 	    }
 
 	    this.bcolor = null;
@@ -2508,7 +2505,7 @@
 
 	    this.init();
 
-	    if( o.open !== undefined ) this.open();
+	    if( o.open !== undefined ) { this.open(); }
 
 	}
 
@@ -2519,17 +2516,17 @@
 		testZone: function ( mx, my ) {
 
 			var l = this.local;
-			if( l.x === -1 && l.y === -1 ) return '';
+			if( l.x === -1 && l.y === -1 ) { return ''; }
 
 			if( this.up && this.isOpen ){
 
-				if( l.y > this.wfixe ) return 'title';
-			    else return 'color';
+				if( l.y > this.wfixe ) { return 'title'; }
+			    else { return 'color'; }
 
 			} else {
 
-				if( l.y < this.baseH+2 ) return 'title';
-		    	else if( this.isOpen ) return 'color';
+				if( l.y < this.baseH+2 ) { return 'title'; }
+		    	else if( this.isOpen ) { return 'color'; }
 
 
 			}
@@ -2554,8 +2551,8 @@
 
 			//if( !name ) return;
 			if(name === 'title'){
-				if( !this.isOpen ) this.open();
-		        else this.close();
+				if( !this.isOpen ) { this.open(); }
+		        else { this.close(); }
 		        return true;
 			}
 
@@ -2632,8 +2629,8 @@
 
 		parentHeight: function ( t ) {
 
-			if ( this.parentGroup !== null ) this.parentGroup.calc( t );
-		    else if ( this.isUI ) this.main.calc( t );
+			if ( this.parentGroup !== null ) { this.parentGroup.calc( t ); }
+		    else if ( this.isUI ) { this.main.calc( t ); }
 
 		},
 
@@ -2643,7 +2640,7 @@
 
 			this.setHeight();
 
-			if( this.up ) this.zone.y -= this.wfixe + 5;
+			if( this.up ) { this.zone.y -= this.wfixe + 5; }
 
 			var t = this.h - this.baseH;
 
@@ -2657,7 +2654,7 @@
 
 			Proto.prototype.close.call( this );
 
-			if( this.up ) this.zone.y += this.wfixe + 5;
+			if( this.up ) { this.zone.y += this.wfixe + 5; }
 
 			var t = this.h - this.baseH;
 
@@ -2701,12 +2698,12 @@
 		    this.invert = Tools.findDeepInver( this.rgb );
 		    this.s[2].color = this.invert ? '#fff' : '#000';
 
-		    if(!up) return;
+		    if(!up) { return; }
 
-		    if( this.ctype === 'array' ) this.send( this.rgb );
-		    if( this.ctype === 'rgb' ) this.send( Tools.htmlRgb( this.rgb ) );
-		    if( this.ctype === 'hex' ) this.send( Tools.htmlToHex( this.value ) );
-		    if( this.ctype === 'html' ) this.send();
+		    if( this.ctype === 'array' ) { this.send( this.rgb ); }
+		    if( this.ctype === 'rgb' ) { this.send( Tools.htmlRgb( this.rgb ) ); }
+		    if( this.ctype === 'hex' ) { this.send( Tools.htmlToHex( this.value ) ); }
+		    if( this.ctype === 'html' ) { this.send(); }
 
 		},
 
@@ -2868,7 +2865,7 @@
 	    this.mem = 0;
 	    this.mm = 0;
 
-	    if ( self.performance && self.performance.memory ) this.isMem = true;
+	    if ( self.performance && self.performance.memory ) { this.isMem = true; }
 
 	    //this.c[0].events = [ 'click', 'mousedown', 'mouseover', 'mouseout' ];
 
@@ -2877,7 +2874,6 @@
 	    //if( this.isShow ) this.show();
 
 	}
-
 
 	Fps.prototype = Object.assign( Object.create( Proto.prototype ), {
 
@@ -2889,8 +2885,8 @@
 
 	    mousedown: function ( e ) {
 
-	        if( this.isShow ) this.hide();
-	        else this.show();
+	        if( this.isShow ) { this.hide(); }
+	        else { this.show(); }
 
 	    },
 
@@ -2963,7 +2959,7 @@
 
 
 	        if( this.parentGroup !== null ){ this.parentGroup.calc( this.hplus );}
-	        else if( this.isUI ) this.main.calc( this.hplus );
+	        else if( this.isUI ) { this.main.calc( this.hplus ); }
 
 	        this.s[0].height = this.h +'px';
 	        this.s[2].display = 'block'; 
@@ -2980,7 +2976,7 @@
 	        this.setSvg( this.c[4], 'd','M 3 8 L 8 5 3 2 3 8 Z');
 
 	        if( this.parentGroup !== null ){ this.parentGroup.calc( -this.hplus );}
-	        else if( this.isUI ) this.main.calc( -this.hplus );
+	        else if( this.isUI ) { this.main.calc( -this.hplus ); }
 	        
 	        this.s[0].height = this.h +'px';
 	        this.s[2].display = 'none';
@@ -3114,8 +3110,8 @@
 	    	t[i][2] = t[i][0] + t[i][1];
 	    	this.cMode[i] = 0;
 
-	        if( this.neg ) this.v[i] = ((1+(this.value[i] / this.multiplicator))*0.5);
-	    	else this.v[i] = this.value[i] / this.multiplicator;
+	        if( this.neg ) { this.v[i] = ((1+(this.value[i] / this.multiplicator))*0.5); }
+	    	else { this.v[i] = this.value[i] / this.multiplicator; }
 
 	    	this.dom( 'rect', '', { x:t[i][0], y:14, width:t[i][1], height:1, fill:this.fontColor, 'fill-opacity':0.3 }, svg );
 
@@ -3151,8 +3147,8 @@
 	            
 	            this.setSvg( this.c[3], 'height', this.v[i]*this.gh, i+2 );
 	            this.setSvg( this.c[3], 'y', 14 + (this.gh - this.v[i]*this.gh), i+2 );
-	            if( this.neg ) this.value[i] = ( ((this.v[i]*2)-1) * this.multiplicator ).toFixed( this.precision ) * 1;
-	            else this.value[i] = ( (this.v[i] * this.multiplicator) ).toFixed( this.precision ) * 1;
+	            if( this.neg ) { this.value[i] = ( ((this.v[i]*2)-1) * this.multiplicator ).toFixed( this.precision ) * 1; }
+	            else { this.value[i] = ( (this.v[i] * this.multiplicator) ).toFixed( this.precision ) * 1; }
 
 	        }
 
@@ -3163,14 +3159,14 @@
 	    testZone: function ( e ) {
 
 	        var l = this.local;
-	        if( l.x === -1 && l.y === -1 ) return '';
+	        if( l.x === -1 && l.y === -1 ) { return ''; }
 
 	        var i = this.lng;
 	        var t = this.tmp;
 	        
 		    if( l.y>this.top && l.y<this.h-20 ){
 		        while( i-- ){
-		            if( l.x>t[i][0] && l.x<t[i][2] ) return i;
+		            if( l.x>t[i][0] && l.x<t[i][2] ) { return i; }
 		        }
 		    }
 
@@ -3180,7 +3176,7 @@
 
 	    mode: function ( n, name ) {
 
-	    	if( n === this.cMode[name] ) return false;
+	    	if( n === this.cMode[name] ) { return false; }
 
 	    	var a;
 
@@ -3226,7 +3222,7 @@
 	    mouseup: function ( e ) {
 
 	        this.isDown = false;
-	        if( this.current !== -1 ) return this.reset();
+	        if( this.current !== -1 ) { return this.reset(); }
 	        
 	    },
 
@@ -3267,7 +3263,7 @@
 
 	    	this.updateSVG();
 
-	        if( up ) this.send();
+	        if( up ) { this.send(); }
 
 	    },
 
@@ -3284,9 +3280,9 @@
 	    		wm = w + this.iw*0.5;
 	    		wn = w + this.iw;
 
-	    		if(i===0) p+='M '+w+' '+ h + ' T ' + wm +' '+ h;
-	    		else p += ' C ' + ow +' '+ oh + ',' + w +' '+ h + ',' + wm +' '+ h;
-	    		if(i === this.lng-1) p+=' T ' + wn +' '+ h;
+	    		if(i===0) { p+='M '+w+' '+ h + ' T ' + wm +' '+ h; }
+	    		else { p += ' C ' + ow +' '+ oh + ',' + w +' '+ h + ',' + wm +' '+ h; }
+	    		if(i === this.lng-1) { p+=' T ' + wn +' '+ h; }
 
 	    		ow = wn;
 	    		oh = h; 
@@ -3305,7 +3301,7 @@
 	        Proto.prototype.rSize.call( this );
 
 	        var s = this.s;
-	        if( this.c[1] !== undefined ) s[1].width = this.w + 'px';
+	        if( this.c[1] !== undefined ) { s[1].width = this.w + 'px'; }
 	        s[2].width = this.w + 'px';
 	        s[3].width = this.w + 'px';
 
@@ -3350,7 +3346,7 @@
 	    this.c[3] = this.dom( 'path', this.css.basic + 'position:absolute; width:10px; height:10px; left:0; top:'+fltop+'px;', { d:this.svgs.group, fill:this.fontColor, stroke:'none'});
 	    this.c[4] = this.dom( 'path', this.css.basic + 'position:absolute; width:10px; height:10px; left:4px; top:'+fltop+'px;', { d:this.svgs.arrow, fill:this.fontColor, stroke:'none'});
 	    // bottom line
-	    if(this.isLine) this.c[5] = this.dom( 'div', this.css.basic +  'background:rgba(255, 255, 255, 0.2); width:100%; left:0; height:1px; bottom:0px');
+	    if(this.isLine) { this.c[5] = this.dom( 'div', this.css.basic +  'background:rgba(255, 255, 255, 0.2); width:100%; left:0; height:1px; bottom:0px'); }
 
 	    var s = this.s;
 
@@ -3365,8 +3361,8 @@
 	    
 	    this.init();
 
-	    if( o.bg !== undefined ) this.setBG(o.bg);
-	    if( o.open !== undefined ) this.open();
+	    if( o.bg !== undefined ) { this.setBG(o.bg); }
+	    if( o.open !== undefined ) { this.open(); }
 
 	}
 
@@ -3379,13 +3375,13 @@
 	    testZone: function ( e ) {
 
 	        var l = this.local;
-	        if( l.x === -1 && l.y === -1 ) return '';
+	        if( l.x === -1 && l.y === -1 ) { return ''; }
 
 	        var name = '';
 
-	        if( l.y < this.baseH ) name = 'title';
+	        if( l.y < this.baseH ) { name = 'title'; }
 	        else {
-	            if( this.isOpen ) name = 'content';
+	            if( this.isOpen ) { name = 'content'; }
 	        }
 
 	        return name;
@@ -3394,7 +3390,7 @@
 
 	    clearTarget: function () {
 
-	        if( this.current === -1 ) return false;
+	        if( this.current === -1 ) { return false; }
 
 	       // if(!this.target) return;
 	        this.target.uiout();
@@ -3425,33 +3421,33 @@
 
 	        var name = this.testZone( e );
 
-	        if( !name ) return;
+	        if( !name ) { return; }
 
 	        switch( name ){
 
 	            case 'content':
 
-	            if( Roots.isMobile && type === 'mousedown' ) this.getNext( e, change );
+	            if( Roots.isMobile && type === 'mousedown' ) { this.getNext( e, change ); }
 
-	            if( this.target ) targetChange = this.target.handleEvent( e );
+	            if( this.target ) { targetChange = this.target.handleEvent( e ); }
 
 	            //if( type === 'mousemove' ) change = this.styles('def');
 
-	            if( !Roots.lock ) this.getNext( e, change );
+	            if( !Roots.lock ) { this.getNext( e, change ); }
 
 	            break;
 	            case 'title':
 	            if( type === 'mousedown' ){
-	                if( this.isOpen ) this.close();
-	                else this.open();
+	                if( this.isOpen ) { this.close(); }
+	                else { this.open(); }
 	            }
 	            break;
 
 
 	        }
 
-	        if( this.isDown ) change = true;
-	        if( targetChange ) change = true;
+	        if( this.isDown ) { change = true; }
+	        if( targetChange ) { change = true; }
 
 	        return change;
 
@@ -3464,7 +3460,6 @@
 	        if( next !== this.current ){
 	            this.clearTarget();
 	            this.current = next;
-	            change = true;
 	        }
 
 	        if( next !== -1 ){ 
@@ -3483,18 +3478,18 @@
 	            u = this.uis[i];
 	            if( !u.autoWidth ){
 
-	                if(px===0) h += u.h+1;
+	                if(px===0) { h += u.h+1; }
 	                else {
-	                    if(tmph<u.h) h += u.h-tmph;
+	                    if(tmph<u.h) { h += u.h-tmph; }
 	                }
 	                tmph = u.h;
 
 	                //tmph = tmph < u.h ? u.h : tmph;
 	                px += u.w;
-	                if( px+u.w > this.w ) px = 0;
+	                if( px+u.w > this.w ) { px = 0; }
 
 	            }
-	            else h += u.h+1;
+	            else { h += u.h+1; }
 	        }
 
 	        return h;
@@ -3502,7 +3497,7 @@
 
 	    calcUis: function () {
 
-	        if( !this.isOpen ) return;
+	        if( !this.isOpen ) { return; }
 
 	        Roots.calcUis( this.uis, this.zone, this.zone.y + this.baseH );
 
@@ -3529,7 +3524,7 @@
 	            a[1].target = this.c[2];
 	            a[1].main = this.main;
 	        } else if( typeof arguments[1] === 'string' ){
-	            if( a[2] === undefined ) [].push.call(a, { isUI:true, target:this.c[2], main:this.main });
+	            if( a[2] === undefined ) { [].push.call(a, { isUI:true, target:this.c[2], main:this.main }); }
 	            else{ 
 	                a[2].isUI = true;
 	                a[2].target = this.c[2];
@@ -3540,7 +3535,7 @@
 	        var n = add.apply( this, a );
 	        this.uis.push( n );
 
-	        if( n.autoHeight ) n.parentGroup = this;
+	        if( n.autoHeight ) { n.parentGroup = this; }
 
 	        return n;
 
@@ -3548,8 +3543,8 @@
 
 	    parentHeight: function ( t ) {
 
-	        if ( this.parentGroup !== null ) this.parentGroup.calc( t );
-	        else if ( this.isUI ) this.main.calc( t );
+	        if ( this.parentGroup !== null ) { this.parentGroup.calc( t ); }
+	        else if ( this.isUI ) { this.main.calc( t ); }
 
 	    },
 
@@ -3583,7 +3578,7 @@
 	    clear: function () {
 
 	        this.clearGroup();
-	        if( this.isUI ) this.main.calc( -(this.h +1 ));
+	        if( this.isUI ) { this.main.calc( -(this.h +1 )); }
 	        Proto.prototype.clear.call( this );
 
 	    },
@@ -3604,11 +3599,11 @@
 
 	    calc: function ( y ) {
 
-	        if( !this.isOpen ) return;
+	        if( !this.isOpen ) { return; }
 
 	        if( y !== undefined ){ 
 	            this.h += y;
-	            if( this.isUI ) this.main.calc( y );
+	            if( this.isUI ) { this.main.calc( y ); }
 	        } else {
 	            this.h = this.calcH() + this.baseH;
 	        }
@@ -3639,7 +3634,7 @@
 	        s[1].width = this.w + 'px';
 	        s[2].width = this.w + 'px';
 
-	        if( this.isOpen ) this.rSizeContent();
+	        if( this.isOpen ) { this.rSizeContent(); }
 
 	    }
 
@@ -3738,15 +3733,15 @@
 	    // ----------------------
 
 	    addInterval: function (){
-	        if( this.interval !== null ) this.stopInterval();
-	        if( this.pos.isZero() ) return;
+	        if( this.interval !== null ) { this.stopInterval(); }
+	        if( this.pos.isZero() ) { return; }
 	        this.interval = setInterval( function(){ this.update(); }.bind(this), 10 );
 
 	    },
 
 	    stopInterval: function (){
 
-	        if( this.interval === null ) return;
+	        if( this.interval === null ) { return; }
 	        clearInterval( this.interval );
 	        this.interval = null;
 
@@ -3778,7 +3773,7 @@
 
 	        this.mode(1);
 
-	        if( !this.isDown ) return;
+	        if( !this.isDown ) { return; }
 
 	        this.tmp.x = this.radius - ( e.clientX - this.zone.x );
 	        this.tmp.y = this.radius - ( e.clientY - this.zone.y - this.top );
@@ -3799,7 +3794,7 @@
 
 	    setValue: function ( v ) {
 
-	        if(v===undefined) v=[0,0];
+	        if(v===undefined) { v=[0,0]; }
 
 	        this.pos.set( v[0] || 0, v[1]  || 0 );
 	        this.updateSVG();
@@ -3808,7 +3803,7 @@
 
 	    update: function ( up ) {
 
-	        if( up === undefined ) up = true;
+	        if( up === undefined ) { up = true; }
 
 	        if( this.interval !== null ){
 
@@ -3819,7 +3814,7 @@
 	                this.pos.x = Math.abs( this.pos.x ) < 0.01 ? 0 : this.pos.x;
 	                this.pos.y = Math.abs( this.pos.y ) < 0.01 ? 0 : this.pos.y;
 
-	                if( this.isUI && this.main.isCanvas ) this.main.draw();
+	                if( this.isUI && this.main.isCanvas ) { this.main.draw(); }
 
 	            }
 
@@ -3827,10 +3822,10 @@
 
 	        this.updateSVG();
 
-	        if( up ) this.send();
+	        if( up ) { this.send(); }
 	        
 
-	        if( this.pos.isZero() ) this.stopInterval();
+	        if( this.pos.isZero() ) { this.stopInterval(); }
 
 	    },
 
@@ -3935,7 +3930,7 @@
 
 	    mode: function ( mode ) {
 
-	        if( this.cmode === mode ) return false;
+	        if( this.cmode === mode ) { return false; }
 
 	        switch(mode){
 	            case 0: // base
@@ -3963,7 +3958,7 @@
 
 	        //this.mode(1);
 
-	        if( !this.isDown ) return;
+	        if( !this.isDown ) { return; }
 
 	        var off = this.offset;
 
@@ -3972,7 +3967,7 @@
 
 	        this.r = - Math.atan2( off.x, off.y );
 
-	        if( this.oldr !== null ) this.r = Math.abs(this.r - this.oldr) > Math.PI ? this.oldr : this.r;
+	        if( this.oldr !== null ) { this.r = Math.abs(this.r - this.oldr) > Math.PI ? this.oldr : this.r; }
 
 	        this.r = this.r > this.mPI ? this.mPI : this.r;
 	        this.r = this.r < -this.mPI ? -this.mPI : this.r;
@@ -4046,7 +4041,7 @@
 
 	        //this.setSvg( this.c[3], 'transform', 'rotate('+ r +' '+64+' '+64+')', 1 );
 
-	        if( up ) this.send();
+	        if( up ) { this.send(); }
 	        
 	    },
 
@@ -4134,8 +4129,8 @@
 	    this.c[2].appendChild( this.scroller );
 
 	    if( o.value !== undefined ){
-	        if(!isNaN(o.value)) this.value = this.list[ o.value ];
-	        else this.value = o.value;
+	        if(!isNaN(o.value)) { this.value = this.list[ o.value ]; }
+	        else { this.value = o.value; }
 	    }else{
 	        this.value = this.list[0];
 	    }
@@ -4145,12 +4140,12 @@
 	    
 
 	    //this.c[0].style.background = '#FF0000'
-	    if( this.isWithImage ) this.preloadImage();
+	    if( this.isWithImage ) { this.preloadImage(); }
 	   // } else {
 	        // populate list
 	        this.setList( this.list );
 	        this.init();
-	        if( this.isOpenOnStart ) this.open();
+	        if( this.isOpenOnStart ) { this.open(); }
 	   // }
 
 	}
@@ -4166,7 +4161,7 @@
 	        this.preLoadComplete = false;
 
 	        this.tmpImage = {};
-	        for( var i=0; i<this.list.length; i++ ) this.tmpUrl.push( this.list[i] );
+	        for( var i=0; i<this.list.length; i++ ) { this.tmpUrl.push( this.list[i] ); }
 	        this.loadOne();
 	        
 	    },
@@ -4184,7 +4179,7 @@
 	            if( this.isOpenOnStart ) this.open();*/
 
 	        }
-	        else this.loadOne();
+	        else { this.loadOne(); }
 
 	    },
 
@@ -4212,21 +4207,21 @@
 	    testZone: function ( e ) {
 
 	        var l = this.local;
-	        if( l.x === -1 && l.y === -1 ) return '';
+	        if( l.x === -1 && l.y === -1 ) { return ''; }
 
 	        if( this.up && this.isOpen ){
-	            if( l.y > this.h - this.baseH ) return 'title';
+	            if( l.y > this.h - this.baseH ) { return 'title'; }
 	            else{
-	                if( this.scroll && ( l.x > (this.sa+this.sb-20)) ) return 'scroll';
-	                if(l.x > this.sa) return this.testItems( l.y-this.baseH );
+	                if( this.scroll && ( l.x > (this.sa+this.sb-20)) ) { return 'scroll'; }
+	                if(l.x > this.sa) { return this.testItems( l.y-this.baseH ); }
 	            }
 
 	        } else {
-	            if( l.y < this.baseH+2 ) return 'title';
+	            if( l.y < this.baseH+2 ) { return 'title'; }
 	            else{
 	                if( this.isOpen ){
-	                    if( this.scroll && ( l.x > (this.sa+this.sb-20)) ) return 'scroll';
-	                    if(l.x > this.sa) return this.testItems( l.y-this.baseH );
+	                    if( this.scroll && ( l.x > (this.sa+this.sb-20)) ) { return 'scroll'; }
+	                    if(l.x > this.sa) { return this.testItems( l.y-this.baseH ); }
 	                }
 	            }
 
@@ -4290,7 +4285,7 @@
 
 	        var name = this.testZone( e );
 
-	        if( !name ) return false;
+	        if( !name ) { return false; }
 
 	        if( name === 'scroll' ){
 
@@ -4300,8 +4295,8 @@
 	        } else if( name === 'title' ){
 
 	            this.modeTitle(2);
-	            if( !this.isOpen ) this.open();
-	            else this.close();
+	            if( !this.isOpen ) { this.open(); }
+	            else { this.close(); }
 	        
 	        } else {
 	            if( this.current ){
@@ -4323,7 +4318,7 @@
 	        var nup = false;
 	        var name = this.testZone( e );
 
-	        if( !name ) return nup;
+	        if( !name ) { return nup; }
 
 	        if( name === 'title' ){
 	            this.unSelected();
@@ -4349,7 +4344,7 @@
 	        
 	        }
 
-	        if( name !== this.prevName ) nup = true;
+	        if( name !== this.prevName ) { nup = true; }
 	        this.prevName = name;
 
 	        return nup;
@@ -4359,7 +4354,7 @@
 	    wheel: function ( e ) {
 
 	        var name = this.testZone( e );
-	        if( name === 'title' ) return false; 
+	        if( name === 'title' ) { return false; } 
 	        this.py += e.delta*10;
 	        this.update(this.py);
 	        return true;
@@ -4381,7 +4376,7 @@
 
 	    modeScroll: function ( mode ) {
 
-	        if( mode === this.sMode ) return;
+	        if( mode === this.sMode ) { return; }
 
 	        switch(mode){
 	            case 0: // base
@@ -4401,7 +4396,7 @@
 
 	    modeTitle: function ( mode ) {
 
-	        if( mode === this.tMode ) return;
+	        if( mode === this.tMode ) { return; }
 
 	        var s = this.s;
 
@@ -4427,7 +4422,7 @@
 
 	    clearList: function () {
 
-	        while ( this.listIn.children.length ) this.listIn.removeChild( this.listIn.lastChild );
+	        while ( this.listIn.children.length ) { this.listIn.removeChild( this.listIn.lastChild ); }
 	        this.items = [];
 
 	    },
@@ -4469,7 +4464,7 @@
 	            this.items.push( item );
 
 	            //if( this.isWithImage ) item.appendChild( this.tmpImage[n] );
-	            if( !this.isWithImage ) item.textContent = n;
+	            if( !this.isWithImage ) { item.textContent = n; }
 
 	        }
 
@@ -4489,7 +4484,7 @@
 
 	        if( this.isWithImage ){ 
 
-	            if( !this.preLoadComplete ) return;
+	            if( !this.preLoadComplete ) { return; }
 
 	            if(!this.c[3].children.length){
 	                this.canvas = document.createElement('canvas');
@@ -4504,7 +4499,7 @@
 	            this.ctx.drawImage( this.tmpImage[ this.value ], 0, 0, this.imageSize[2], this.imageSize[3], 0,0, this.imageSize[0], this.imageSize[1] );
 
 	        }
-	        else this.c[3].textContent = this.value;
+	        else { this.c[3].textContent = this.value; }
 
 	    },
 
@@ -4513,7 +4508,7 @@
 
 	    update: function ( y ) {
 
-	        if( !this.scroll ) return;
+	        if( !this.scroll ) { return; }
 
 	        y = y < 0 ? 0 : y;
 	        y = y > this.range ? this.range : y;
@@ -4529,8 +4524,8 @@
 
 	    parentHeight: function ( t ) {
 
-	        if ( this.parentGroup !== null ) this.parentGroup.calc( t );
-	        else if ( this.isUI ) this.main.calc( t );
+	        if ( this.parentGroup !== null ) { this.parentGroup.calc( t ); }
+	        else if ( this.isUI ) { this.main.calc( t ); }
 
 	    },
 
@@ -4571,7 +4566,7 @@
 
 	        Proto.prototype.close.call( this );
 
-	        if( this.up ) this.zone.y += this.h - (this.baseH-10);
+	        if( this.up ) { this.zone.y += this.h - (this.baseH-10); }
 
 	        var t = this.h - this.baseH;
 
@@ -4597,7 +4592,7 @@
 	    rSizeContent: function () {
 
 	        var i = this.length;
-	        while(i--) this.listIn.children[i].style.width = this.ww + 'px';
+	        while(i--) { this.listIn.children[i].style.width = this.ww + 'px'; }
 
 	    },
 
@@ -4609,7 +4604,7 @@
 	        var w = this.sb;
 	        var d = this.sa;
 
-	        if(s[2]=== undefined) return;
+	        if(s[2]=== undefined) { return; }
 
 	        s[2].width = w + 'px';
 	        s[2].left = d +'px';
@@ -4620,8 +4615,8 @@
 	        s[4].left = d + w - 17 + 'px';
 
 	        this.ww = w;
-	        if( this.max > this.maxHeight ) this.ww = w-20;
-	        if(this.isOpen) this.rSizeContent();
+	        if( this.max > this.maxHeight ) { this.ww = w-20; }
+	        if(this.isOpen) { this.rSizeContent(); }
 
 	    }
 
@@ -4648,10 +4643,10 @@
 	        else if(o.value instanceof Array ){ this.value = o.value; this.isNumber=false;}
 	        else if(o.value instanceof Object ){ 
 	            this.value = [];
-	            if(o.value.x) this.value[0] = o.value.x;
-	            if(o.value.y) this.value[1] = o.value.y;
-	            if(o.value.z) this.value[2] = o.value.z;
-	            if(o.value.w) this.value[3] = o.value.w;
+	            if(o.value.x) { this.value[0] = o.value.x; }
+	            if(o.value.y) { this.value[1] = o.value.y; }
+	            if(o.value.z) { this.value[2] = o.value.z; }
+	            if(o.value.w) { this.value[3] = o.value.w; }
 	            this.isVector = true;
 	        }
 	    }
@@ -4671,9 +4666,9 @@
 	    
 	    var i = this.lng;
 	    while(i--){
-	        if(this.isAngle) this.value[i] = (this.value[i] * 180 / Math.PI).toFixed( this.precision );
+	        if(this.isAngle) { this.value[i] = (this.value[i] * 180 / Math.PI).toFixed( this.precision ); }
 	        this.c[2+i] = this.dom( 'div', this.css.txtselect + 'letter-spacing:-1px; height:'+(this.h-4)+'px; line-height:'+(this.h-8)+'px;');
-	        if(o.center) this.c[2+i].style.textAlign = 'center';
+	        if(o.center) { this.c[2+i].style.textAlign = 'center'; }
 	        this.c[2+i].textContent = this.value[i];
 	        this.c[2+i].style.color = this.fontColor;
 	        this.c[2+i].isNum = true;
@@ -4692,14 +4687,14 @@
 	    testZone: function ( e ) {
 
 	        var l = this.local;
-	        if( l.x === -1 && l.y === -1 ) return '';
+	        if( l.x === -1 && l.y === -1 ) { return ''; }
 
 	        var i = this.lng;
 	        var t = this.tmp;
 	        
 
 	        while( i-- ){
-	            if( l.x>t[i][0] && l.x<t[i][2] ) return i;
+	            if( l.x>t[i][0] && l.x<t[i][2] ) { return i; }
 	        }
 
 	        return ''
@@ -4708,7 +4703,7 @@
 
 	    mode: function ( n, name ) {
 
-	        if( n === this.cMode[name] ) return false;
+	        if( n === this.cMode[name] ) { return false; }
 
 	        //var m;
 
@@ -4738,7 +4733,7 @@
 
 	        var name = this.testZone( e );
 
-	        if( name === '' ) return false;
+	        if( name === '' ) { return false; }
 
 
 	        this.current = name;
@@ -4875,10 +4870,10 @@
 
 	        var ar = [];
 	        var i = this.lng;
-	        while(i--) ar[i] = this.value[i] * this.toRad;
+	        while(i--) { ar[i] = this.value[i] * this.toRad; }
 
-	        if( this.isNumber ) this.send( ar[0] );
-	        else this.send( ar );
+	        if( this.isNumber ) { this.send( ar[0] ); }
+	        else { this.send( ar ); }
 
 	    },
 
@@ -4908,7 +4903,7 @@
 
 
 	    this.model = o.stype || 0;
-	    if( o.mode !== undefined ) this.model = o.mode;
+	    if( o.mode !== undefined ) { this.model = o.mode; }
 	    this.buttonColor = o.bColor || this.colors.button;
 
 	    this.defaultBorderColor = this.colors.hide;
@@ -4947,7 +4942,7 @@
 	            ww = (this.h-4)*0.5;
 	        }
 
-	        if(this.model === 3) this.c[5].style.visible = 'none';
+	        if(this.model === 3) { this.c[5].style.visible = 'none'; }
 
 	        this.c[4].style.borderRadius = h1 + 'px';
 	        this.c[4].style.height = h2 + 'px';
@@ -4970,11 +4965,11 @@
 	    testZone: function ( e ) {
 
 	        var l = this.local;
-	        if( l.x === -1 && l.y === -1 ) return '';
+	        if( l.x === -1 && l.y === -1 ) { return ''; }
 	        
-	        if( l.x >= this.txl ) return 'text';
-	        else if( l.x >= this.sa ) return 'scroll';
-	        else return '';
+	        if( l.x >= this.txl ) { return 'text'; }
+	        else if( l.x >= this.sa ) { return 'scroll'; }
+	        else { return ''; }
 
 	    },
 
@@ -4984,7 +4979,7 @@
 
 	    mouseup: function ( e ) {
 	        
-	        if( this.isDown ) this.isDown = false;
+	        if( this.isDown ) { this.isDown = false; }
 	        
 	    },
 
@@ -4992,7 +4987,7 @@
 
 	        var name = this.testZone( e );
 
-	        if( !name ) return false;
+	        if( !name ) { return false; }
 
 	        if( name === 'scroll' ){ 
 	            this.isDown = true;
@@ -5053,7 +5048,7 @@
 	            this.update(true); 
 	        }
 
-	        else this.c[2].textContent = this.value;
+	        else { this.c[2].textContent = this.value; }
 
 	    },
 
@@ -5101,11 +5096,11 @@
 
 	        var ww = Math.floor( this.ww * (( this.value - this.min ) / this.range ));
 	       
-	        if(this.model !== 3) this.s[5].width = ww + 'px';
-	        if(this.s[6]) this.s[6].left = ( this.sa + ww + 3 ) + 'px';
+	        if(this.model !== 3) { this.s[5].width = ww + 'px'; }
+	        if(this.s[6]) { this.s[6].left = ( this.sa + ww + 3 ) + 'px'; }
 	        this.c[2].textContent = this.value;
 
-	        if( up ) this.send();
+	        if( up ) { this.send(); }
 
 	    },
 
@@ -5117,7 +5112,7 @@
 	        this.ww = w - 6;
 
 	        var tx = this.sc;
-	        if(this.isUI || !this.simple) tx = this.sc+10;
+	        if(this.isUI || !this.simple) { tx = this.sc+10; }
 	        this.txl = this.w - tx + 2;
 
 	        //var ty = Math.floor(this.h * 0.5) - 8;
@@ -5184,7 +5179,7 @@
 
 	    mode: function ( n ) {
 
-	        if( n === this.cmode ) return false;
+	        if( n === this.cmode ) { return false; }
 
 	        //var m;
 
@@ -5305,7 +5300,7 @@
 	    } else if ( typeof a[0] === 'object' ){ // like dat gui
 
 	        ref = true;
-	        if( a[2] === undefined ) [].push.call(a, {});
+	        if( a[2] === undefined ) { [].push.call(a, {}); }
 
 	        type = a[2].type ? a[2].type : 'slide';//autoType.apply( this, a );
 
@@ -5338,7 +5333,7 @@
 
 	    if( n !== null ){
 
-	        if( ref ) n.setReferency( a[0], a[1] );
+	        if( ref ) { n.setReferency( a[0], a[1] ); }
 	        return n;
 
 	    }
@@ -5379,10 +5374,10 @@
 	    
 	    // size define
 	    this.size = Tools.size;
-	    if( o.p !== undefined ) this.size.p = o.p;
-	    if( o.w !== undefined ) this.size.w = o.w;
-	    if( o.h !== undefined ) this.size.h = o.h;
-	    if( o.s !== undefined ) this.size.s = o.s;
+	    if( o.p !== undefined ) { this.size.p = o.p; }
+	    if( o.w !== undefined ) { this.size.w = o.w; }
+	    if( o.h !== undefined ) { this.size.h = o.h; }
+	    if( o.s !== undefined ) { this.size.s = o.s; }
 
 	    this.size.h = this.size.h < 11 ? 11 : this.size.h;
 
@@ -5450,19 +5445,19 @@
 	    if( this.parent === null && !this.isCanvas ){ 
 	    	this.parent = document.body;
 	        // default position
-	    	if( !this.isCenter ) this.content.style.right = '10px'; 
+	    	if( !this.isCenter ) { this.content.style.right = '10px'; } 
 	    }
 
-	    if( this.parent !== null ) this.parent.appendChild( this.content );
+	    if( this.parent !== null ) { this.parent.appendChild( this.content ); }
 
-	    if( this.isCanvas && this.parent === null ) this.isCanvasOnly = true;
+	    if( this.isCanvas && this.parent === null ) { this.isCanvasOnly = true; }
 
-	    if( !this.isCanvasOnly ) this.content.style.pointerEvents = 'auto';
+	    if( !this.isCanvasOnly ) { this.content.style.pointerEvents = 'auto'; }
 
 
 	    this.setWidth();
 
-	    if( this.isCanvas ) this.makeCanvas();
+	    if( this.isCanvas ) { this.makeCanvas(); }
 
 	    Roots.add( this );
 
@@ -5479,7 +5474,7 @@
 	    dispose: function () {
 
 	        this.clear();
-	        if( this.parent !== null ) this.parent.removeChild( this.content );
+	        if( this.parent !== null ) { this.parent.removeChild( this.content ); }
 	        Roots.remove( this );
 
 	    },
@@ -5500,7 +5495,7 @@
 
 	    draw: function ( force ) {
 
-	    	if( this.canvas === null ) return;
+	    	if( this.canvas === null ) { return; }
 
 	    	var w = this.zone.w;
 	    	var h = this.forceHeight ? this.forceHeight : this.zone.h;
@@ -5585,7 +5580,7 @@
 
 	    clearTarget: function () {
 
-	    	if( this.current === -1 ) return false;
+	    	if( this.current === -1 ) { return false; }
 	        //if(!this.target) return;
 	        this.target.uiout();
 	        this.target.reset();
@@ -5608,7 +5603,7 @@
 	    testZone: function ( e ) {
 
 	        var l = this.local;
-	        if( l.x === -1 && l.y === -1 ) return '';
+	        if( l.x === -1 && l.y === -1 ) { return ''; }
 
 	        this.isReset = false;
 
@@ -5616,8 +5611,8 @@
 
 	        var s = this.isScroll ?  this.zone.w  - this.size.s : this.zone.w;
 	        
-	        if( l.y > this.zone.h - this.bh &&  l.y < this.zone.h ) name = 'bottom';
-	        else name = l.x > s ? 'scroll' : 'content';
+	        if( l.y > this.zone.h - this.bh &&  l.y < this.zone.h ) { name = 'bottom'; }
+	        else { name = l.x > s ? 'scroll' : 'content'; }
 
 	        return name;
 
@@ -5638,12 +5633,12 @@
 
 	        
 
-	    	if( type === 'mouseup' && this.isDown ) this.isDown = false;
-	    	if( type === 'mousedown' && !this.isDown ) this.isDown = true;
+	    	if( type === 'mouseup' && this.isDown ) { this.isDown = false; }
+	    	if( type === 'mousedown' && !this.isDown ) { this.isDown = true; }
 
 	        if( this.isDown && this.isNewTarget ){ Roots.clearInput(); this.isNewTarget=false; }
 
-	    	if( !name ) return;
+	    	if( !name ) { return; }
 
 	    	switch( name ){
 
@@ -5651,12 +5646,12 @@
 
 	                e.clientY = this.isScroll ?  e.clientY + this.decal : e.clientY;
 
-	                if( Roots.isMobile && type === 'mousedown' ) this.getNext( e, change );
+	                if( Roots.isMobile && type === 'mousedown' ) { this.getNext( e, change ); }
 
-		    		if( this.target ) targetChange = this.target.handleEvent( e );
+		    		if( this.target ) { targetChange = this.target.handleEvent( e ); }
 
-		    		if( type === 'mousemove' ) change = this.mode('def');
-	                if( type === 'wheel' && !targetChange && this.isScroll ) change = this.onWheel( e );
+		    		if( type === 'mousemove' ) { change = this.mode('def'); }
+	                if( type === 'wheel' && !targetChange && this.isScroll ) { change = this.onWheel( e ); }
 	               
 		    		if( !Roots.lock ) {
 	                    this.getNext( e, change );
@@ -5666,7 +5661,7 @@
 	    		case 'bottom':
 
 		    		this.clearTarget();
-		    		if( type === 'mousemove' ) change = this.mode('bottomOver');
+		    		if( type === 'mousemove' ) { change = this.mode('bottomOver'); }
 		    		if( type === 'mousedown' ) {
 		    			this.isOpen = this.isOpen ? false : true;
 			            this.bottom.textContent = this.isOpen ? 'close' : 'open';
@@ -5679,20 +5674,20 @@
 	    		case 'scroll':
 
 		    		this.clearTarget();
-		    		if( type === 'mousemove' ) change = this.mode('scrollOver');
-		    		if( type === 'mousedown' ) change = this.mode('scrollDown'); 
-	                if( type === 'wheel' ) change = this.onWheel( e ); 
-		    		if( this.isDown ) this.update( (e.clientY-this.zone.y)-(this.sh*0.5) );
+		    		if( type === 'mousemove' ) { change = this.mode('scrollOver'); }
+		    		if( type === 'mousedown' ) { change = this.mode('scrollDown'); } 
+	                if( type === 'wheel' ) { change = this.onWheel( e ); } 
+		    		if( this.isDown ) { this.update( (e.clientY-this.zone.y)-(this.sh*0.5) ); }
 
 	    		break;
 
 
 	    	}
 
-	    	if( this.isDown ) change = true;
-	    	if( targetChange ) change = true;
+	    	if( this.isDown ) { change = true; }
+	    	if( targetChange ) { change = true; }
 
-	    	if( change ) this.draw();
+	    	if( change ) { this.draw(); }
 
 	    },
 
@@ -5705,7 +5700,6 @@
 	        if( next !== this.current ){
 	            this.clearTarget();
 	            this.current = next;
-	            change = true;
 
 	            this.isNewTarget = true;
 
@@ -5732,7 +5726,7 @@
 
 	    reset: function ( force ) {
 
-	        if( this.isReset ) return;
+	        if( this.isReset ) { return; }
 
 	        this.mouse.neg();
 	        this.isDown = false;
@@ -5741,7 +5735,7 @@
 	        var r = this.mode('def');
 	        var r2 = this.clearTarget();
 
-	        if( r || r2 ) this.draw( true );
+	        if( r || r2 ) { this.draw( true ); }
 
 	        this.isReset = true;
 
@@ -5764,7 +5758,7 @@
 
 	        } else if( typeof a[1] === 'string' ){
 
-	            if( a[2] === undefined ) [].push.call(a, { isUI:true, main:this });
+	            if( a[2] === undefined ) { [].push.call(a, { isUI:true, main:this }); }
 	            else {
 	                a[2].isUI = true;
 	                a[2].main = this;
@@ -5774,7 +5768,7 @@
 
 	        var u = add.apply( this, a );
 
-	        if( u === null ) return;
+	        if( u === null ) { return; }
 
 
 	        //var n = add.apply( this, a );
@@ -5819,7 +5813,7 @@
 	    remove: function ( n ) { 
 
 	        var i = this.uis.indexOf( n ); 
-	        if ( i !== -1 ) this.uis[i].clear();
+	        if ( i !== -1 ) { this.uis[i].clear(); }
 
 	    },
 
@@ -5840,7 +5834,7 @@
 	    clear: function () {
 
 	        var i = this.uis.length;
-	        while(i--) this.uis[i].clear();
+	        while(i--) { this.uis[i].clear(); }
 
 	        this.uis = [];
 	        Roots.listens = [];
@@ -5909,7 +5903,7 @@
 
 	    setHeight: function () {
 
-	        if( this.tmp ) clearTimeout( this.tmp );
+	        if( this.tmp ) { clearTimeout( this.tmp ); }
 
 	        //console.log(this.h )
 
@@ -5945,24 +5939,24 @@
 	        this.content.style.height = this.zone.h + 'px';
 	        this.bottom.style.top = this.zone.h - this.bh + 'px';
 
-	        if( this.isOpen ) this.calcUis();
-	        if( this.isCanvas ) this.draw( true );
+	        if( this.isOpen ) { this.calcUis(); }
+	        if( this.isCanvas ) { this.draw( true ); }
 
 	    },
 
 	    setWidth: function ( w ) {
 
-	        if( w ) this.zone.w = w;
+	        if( w ) { this.zone.w = w; }
 
 	        this.content.style.width = this.zone.w + 'px';
 
-	        if( this.isCenter ) this.content.style.marginLeft = -(Math.floor(this.zone.w*0.5)) + 'px';
+	        if( this.isCenter ) { this.content.style.marginLeft = -(Math.floor(this.zone.w*0.5)) + 'px'; }
 
 	        this.setItemWidth( this.zone.w - this.sw );
 
 	        this.setHeight();
 
-	        if( !this.isCanvasOnly ) Roots.needReZone = true;
+	        if( !this.isCanvasOnly ) { Roots.needReZone = true; }
 	        //this.resize();
 
 	    },
@@ -5982,25 +5976,25 @@
 
 	var REVISION = '2.0';
 
-	exports.REVISION = REVISION;
-	exports.Tools = Tools;
-	exports.Gui = Gui;
-	exports.Proto = Proto;
-	exports.add = add;
 	exports.Bool = Bool;
 	exports.Button = Button;
 	exports.Circular = Circular;
 	exports.Color = Color;
 	exports.Fps = Fps;
 	exports.Group = Group;
+	exports.Gui = Gui;
 	exports.Joystick = Joystick;
 	exports.Knob = Knob;
 	exports.List = List;
 	exports.Numeric = Numeric;
+	exports.Proto = Proto;
+	exports.REVISION = REVISION;
 	exports.Slide = Slide;
 	exports.TextInput = TextInput;
 	exports.Title = Title;
+	exports.Tools = Tools;
+	exports.add = add;
 
 	Object.defineProperty(exports, '__esModule', { value: true });
 
-})));
+}));
