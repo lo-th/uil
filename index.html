@@ -45,7 +45,7 @@ var list2 = ['item-0', 'item-1', 'item-2'];
 var debug = document.getElementById('debug');
 
 var callback = function(v){ debug.innerHTML = v; }
-var callbackButton = function(){ debug.innerHTML = "i'm a button !!" ; }
+var callbackButton = function(){ debug.innerHTML = "i'm a button !!" ; console.log(this.value) }
 var callbackSize = function(v){  ui.setWidth( v ); }
 var callbackLogo = function(v){ document.getElementById('logoin').setAttributeNS(null, 'stroke', v ); document.getElementById('version').style.color = v;  }
 
@@ -80,7 +80,7 @@ function populate () {
         ui.add('number', { name:'vector3', value:[0,0,0] });
         ui.add('number', { name:'vector4', value:[0,0,0,0], step:1, precision:0, h:36 });
         ui.add('button', { name:'button', callback:callbackButton });
-        ui.add('button', { name:'MULTY', fontColor:'#D4B87B', h:30, value:[1, 2, 3, 4] });
+        ui.add('button', { name:'MULTY', fontColor:'#D4B87B', h:30, value:[1, 2, 3, 4], callback:callbackButton });
 
         gr0 = ui.add('group', { name:'Group', h:36 });
 

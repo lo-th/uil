@@ -1948,7 +1948,9 @@ function Button ( o ) {
 
     this.value = false;
 
-    this.values = o.value || [this.txt];
+    this.values = o.value || this.txt;
+
+    if(typeof this.values === 'string' ) this.values = [this.values];
 
     //this.selected = null;
     this.isDown = false;
