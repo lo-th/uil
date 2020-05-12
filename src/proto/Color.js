@@ -210,22 +210,6 @@ Color.prototype = Object.assign( Object.create( Proto.prototype ), {
 	    //this.s[3].display = 'none';
 	    this.parentHeight( -t );
 
-
-
-	    
-	    /*this.h = this.baseH;
-	    if(this.side === 'up'){ 
-	        if(!isNaN(this.holdTop)) this.s[0].top = (this.holdTop)+'px';
-	        this.s[5].pointerEvents = 'none';
-	    }
-	    this.s[0].height = this.h+'px';
-	    this.s[3].display = 'none';
-	    this.s[4].display = 'none';
-	    this.s[5].display = 'none';
-
-	    console.log('close')*/
-	    
-
 	},
 
 	update: function ( up ) {

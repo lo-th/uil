@@ -14,9 +14,19 @@ function Gui ( o ) {
 
     o = o || {};
 
+    // color
+    this.colors = Tools.cloneColor();
+    this.css = Tools.cloneCss();
+
+
+    if( o.config ) this.setConfig( o.config );
+
+
+    this.bg = o.bg || this.colors.background;
+
     if( o.transparent !== undefined ){
-        Tools.colors.background = 'none';
-        Tools.colors.backgroundOver = 'none';
+        this.colors.background = 'none';
+        this.colors.backgroundOver = 'none';
     }
 
     //if( o.callback ) this.callback =  o.callback;
@@ -28,10 +38,13 @@ function Gui ( o ) {
 
     this.isCanvas = o.isCanvas || false;
     this.isCanvasOnly = false;
-    this.css = o.css !== undefined ? o.css : '';
+    this.cssGui = o.css !== undefined ? o.css : '';
     this.callback = o.callback  === undefined ? null : o.callback;
 
     this.forceHeight = o.maxHeight || 0;
+    this.lockHeight = o.lockHeight || false;
+
+    this.isItemMode = o.itemMode !== undefined ? o.itemMode : false;
 
     this.cn = '';
     
@@ -55,9 +68,7 @@ function Gui ( o ) {
     this.prevY = -1;
     this.sw = 0;
 
-    // color
-    this.colors = Tools.colors;
-    this.bg = o.bg || Tools.colors.background;
+    
 
     // bottom and close height
     this.isWithClose = o.close !== undefined ? o.close : true;
@@ -78,25 +89,27 @@ function Gui ( o ) {
     this.ratio = 1;
     this.oy = 0;
 
+
+
     this.isNewTarget = false;
 
-    this.content = Tools.dom( 'div', Tools.css.basic + ' width:0px; height:auto; top:0px; ' + this.css );
+    this.content = Tools.dom( 'div', this.css.basic + ' width:0px; height:auto; top:0px; ' + this.cssGui );
 
-    this.innerContent = Tools.dom( 'div', Tools.css.basic + 'width:100%; top:0; left:0; height:auto; overflow:hidden;');
+    this.innerContent = Tools.dom( 'div', this.css.basic + 'width:100%; top:0; left:0; height:auto; overflow:hidden;');
     this.content.appendChild( this.innerContent );
 
-    this.inner = Tools.dom( 'div', Tools.css.basic + 'width:100%; left:0; ');
+    this.inner = Tools.dom( 'div', this.css.basic + 'width:100%; left:0; ');
     this.innerContent.appendChild(this.inner);
 
     // scroll
-    this.scrollBG = Tools.dom( 'div', Tools.css.basic + 'right:0; top:0; width:'+ (this.size.s - 1) +'px; height:10px; display:none; background:'+this.bg+';');
+    this.scrollBG = Tools.dom( 'div', this.css.basic + 'right:0; top:0; width:'+ (this.size.s - 1) +'px; height:10px; display:none; background:'+this.bg+';');
     this.content.appendChild( this.scrollBG );
 
-    this.scroll = Tools.dom( 'div', Tools.css.basic + 'background:'+this.colors.scroll+'; right:2px; top:0; width:'+(this.size.s-4)+'px; height:10px;');
+    this.scroll = Tools.dom( 'div', this.css.basic + 'background:'+this.colors.scroll+'; right:2px; top:0; width:'+(this.size.s-4)+'px; height:10px;');
     this.scrollBG.appendChild( this.scroll );
 
     // bottom button
-    this.bottom = Tools.dom( 'div',  Tools.css.txt + 'width:100%; top:auto; bottom:0; left:0; border-bottom-right-radius:10px;  border-bottom-left-radius:10px; text-align:center; height:'+this.bh+'px; line-height:'+(this.bh-5)+'px; border-top:1px solid '+Tools.colors.stroke+';');
+    this.bottom = Tools.dom( 'div',  this.css.txt + 'width:100%; top:auto; bottom:0; left:0; border-bottom-right-radius:10px;  border-bottom-left-radius:10px; text-align:center; height:'+this.bh+'px; line-height:'+(this.bh-5)+'px; border-top:1px solid '+Tools.colors.stroke+';');
     this.content.appendChild( this.bottom );
     this.bottom.textContent = 'close';
     this.bottom.style.background = this.bg;
@@ -131,6 +144,14 @@ Object.assign( Gui.prototype, {
     constructor: Gui,
 
     isGui: true,
+
+    setTop: function ( t, h ) {
+
+        this.content.style.top = t + 'px';
+        if( h !== undefined ) this.forceHeight = h;
+        this.setHeight();
+
+    },
 
     //callback: function () {},
 
@@ -180,9 +201,24 @@ Object.assign( Gui.prototype, {
 
     },
 
-    setText: function ( size, color, font ) {
+    setConfig: function ( o ) {
 
-        Tools.setText( size, color, font );
+        this.setColors( o );
+        this.setText( o.fontSize, o.text, o.font, o.shadow );
+
+    },
+
+    setColors: function ( o ) {
+
+        for( var c in o ){
+            if( this.colors[c] ) this.colors[c] = o[c];
+        }
+
+    },
+
+    setText: function ( size, color, font, shadow ) {
+
+        Tools.setText( size, color, font, shadow, this.colors, this.css );
 
     },
 
@@ -350,6 +386,9 @@ Object.assign( Gui.prototype, {
     	if( this.isDown ) change = true;
     	if( targetChange ) change = true;
 
+        if( type === 'keyup' ) change = true;
+        if( type === 'keydown' ) change = true;
+
     	if( change ) this.draw();
 
     },
@@ -391,6 +430,8 @@ Object.assign( Gui.prototype, {
     reset: function ( force ) {
 
         if( this.isReset ) return;
+
+        //this.resetItem();
 
         this.mouse.neg();
         this.isDown = false;
@@ -508,6 +549,38 @@ Object.assign( Gui.prototype, {
     },
 
     // ----------------------
+    //   ITEMS SPECIAL
+    // ----------------------
+
+
+    resetItem: function () {
+
+        if( !this.isItemMode ) return;
+
+        var i = this.uis.length;
+        while(i--) this.uis[i].selected();
+
+    },
+
+    setItem: function ( name ) {
+
+        if( !this.isItemMode ) return;
+
+        this.resetItem();
+
+        var i = this.uis.length;
+        while(i--){ 
+            if( this.uis[i].value  === name ){ 
+                this.uis[i].selected( true );
+                if( this.isScroll ) this.update( ( i*(this.size.h+1) )*this.ratio );
+            }
+        }
+
+    },
+
+
+
+    // ----------------------
     //   SCROLL
     // ----------------------
 
@@ -576,7 +649,7 @@ Object.assign( Gui.prototype, {
 
         if( this.isOpen ){
 
-            var hhh = this.forceHeight ? this.forceHeight : window.innerHeight;
+            var hhh = this.forceHeight ? this.forceHeight + this.zone.y : window.innerHeight;
 
             this.maxHeight = hhh - this.zone.y - this.bh;
 
@@ -602,6 +675,8 @@ Object.assign( Gui.prototype, {
         this.innerContent.style.height = this.zone.h - this.bh + 'px';
         this.content.style.height = this.zone.h + 'px';
         this.bottom.style.top = this.zone.h - this.bh + 'px';
+
+        if( this.forceHeight && this.lockHeight ) this.content.style.height = this.forceHeight + 'px';
 
         if( this.isOpen ) this.calcUis();
         if( this.isCanvas ) this.draw( true );

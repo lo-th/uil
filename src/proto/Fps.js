@@ -10,65 +10,125 @@ function Fps ( o ) {
     this.autoHeight = true;
 
     this.baseH = this.h;
-    this.hplus = 50;
+    this.hplus = o.hplus || 50;
 
     this.res = o.res || 40;
     this.l = 1;
 
-    this.pa1 = [];
-    this.pa2 = [];
-    this.pa3 = [];
+    this.precision = o.precision || 0;
+    
 
-    var i = this.res+1;
-    while(i--){
-        this.pa1.push(50);
-        this.pa2.push(50);
-        this.pa3.push(50);
+    this.custom = o.custom || false;
+    this.names = o.names || ['FPS', 'MS'];
+    var cc = o.cc || ['90,90,90', '255,255,0'];
+
+   // this.divid = [ 100, 100, 100 ];
+   // this.multy = [ 30, 30, 30 ];
+
+    this.adding = o.adding || false;
+
+    this.range = o.range || [ 165, 100, 100 ];
+
+    this.alpha = o.alpha || 0.25;
+
+    this.values = [];
+    this.points = [];
+    this.textDisplay = [];
+
+    if(!this.custom){
+
+        this.now = ( self.performance && self.performance.now ) ? self.performance.now.bind( performance ) : Date.now;
+        this.startTime = 0;//this.now()
+        this.prevTime = 0;//this.startTime;
+        this.frames = 0;
+
+        this.ms = 0;
+        this.fps = 0;
+        this.mem = 0;
+        this.mm = 0;
+
+        this.isMem = ( self.performance && self.performance.memory ) ? true : false;
+
+       // this.divid = [ 100, 200, 1 ];
+       // this.multy = [ 30, 30, 30 ];
+
+        if( this.isMem ){
+
+            this.names.push('MEM');
+            cc.push('0,255,255');
+
+        }
+
+        this.txt = 'FPS'
+
     }
+
 
     var fltop = Math.floor(this.h*0.5)-6;
 
-    this.c[1].textContent = 'FPS';
+    this.c[1].textContent = this.txt;
     this.c[0].style.cursor = 'pointer';
     this.c[0].style.pointerEvents = 'auto';
 
-    var panelCss = 'display:none; left:10px; top:'+ this.h + 'px; height:'+(this.hplus - 8)+'px; background: rgba(0, 0, 0, 0.2);' + 'border:1px solid rgba(255, 255, 255, 0.2); ';
+    var panelCss = 'display:none; left:10px; top:'+ this.h + 'px; height:'+(this.hplus - 8)+'px; box-sizing:border-box; background: rgba(0, 0, 0, 0.2); border:' + (this.colors.groupBorder !== 'none'? this.colors.groupBorder+';' : '1px solid rgba(255, 255, 255, 0.2);');
 
-    this.c[2] = this.dom( 'path', this.css.basic + panelCss , { fill:'rgba(200,200,200,0.3)', 'stroke-width':1, stroke:this.fontColor, 'vector-effect':'non-scaling-stroke' });
+    if( this.radius !== 0 ) panelCss += 'border-radius:' + this.radius+'px;'; 
 
-    this.c[2].setAttribute('viewBox', '0 0 '+this.res+' 42' );
+    this.c[2] = this.dom( 'path', this.css.basic + panelCss , {} );
+
+    this.c[2].setAttribute('viewBox', '0 0 '+this.res+' 50' );
     this.c[2].setAttribute('height', '100%' );
     this.c[2].setAttribute('width', '100%' );
     this.c[2].setAttribute('preserveAspectRatio', 'none' );
 
-    this.dom( 'path', null, { fill:'rgba(255,255,0,0.3)', 'stroke-width':1, stroke:'#FF0', 'vector-effect':'non-scaling-stroke' }, this.c[2] );
-    this.dom( 'path', null, { fill:'rgba(0,255,255,0.3)', 'stroke-width':1, stroke:'#0FF', 'vector-effect':'non-scaling-stroke' }, this.c[2] );
 
+    //this.dom( 'path', null, { fill:'rgba(255,255,0,0.3)', 'stroke-width':1, stroke:'#FF0', 'vector-effect':'non-scaling-stroke' }, this.c[2] );
+    //this.dom( 'path', null, { fill:'rgba(0,255,255,0.3)', 'stroke-width':1, stroke:'#0FF', 'vector-effect':'non-scaling-stroke' }, this.c[2] );
+    
+    // arrow
+    this.c[3] = this.dom( 'path', this.css.basic + 'position:absolute; width:10px; height:10px; left:4px; top:'+fltop+'px;', { d:this.svgs.arrow, fill:this.fontColor, stroke:'none'});
+
+    // result test
+    this.c[4] = this.dom( 'div', this.css.txt + 'position:absolute; left:10px; top:'+(this.h+2) +'px; display:none; width:100%; text-align:center;' );
 
     // bottom line
-    this.c[3] = this.dom( 'div', this.css.basic + 'width:100%; bottom:0px; height:1px; background: rgba(255, 255, 255, 0.2);');
+    if( o.bottomLine ) this.c[4] = this.dom( 'div', this.css.basic + 'width:100%; bottom:0px; height:1px; background: rgba(255, 255, 255, 0.2);');
 
-    this.c[4] = this.dom( 'path', this.css.basic + 'position:absolute; width:10px; height:10px; left:4px; top:'+fltop+'px;', { d:'M 3 8 L 8 5 3 2 3 8 Z', fill:this.fontColor, stroke:'none'});
+    this.isShow = false;
 
-    this.isShow = o.show || false;
+    var s = this.s;
 
-    this.c[1].style.marginLeft = '10px';
+    s[1].marginLeft = '10px';
+    s[1].lineHeight = this.h-4;
+    s[1].color = this.fontColor;
+    s[1].fontWeight = 'bold';
 
-    this.now = ( self.performance && self.performance.now ) ? self.performance.now.bind( performance ) : Date.now;
-    this.startTime = this.now()
-    this.prevTime = this.startTime;
-    this.frames = 0
+    if( this.radius !== 0 )  s[0].borderRadius = this.radius+'px'; 
+    s[0].border = this.colors.groupBorder;
 
-    this.isMem = false;
+    
 
-    this.ms = 0;
-    this.fps = 0;
-    this.mem = 0;
-    this.mm = 0;
 
-    if ( self.performance && self.performance.memory ) this.isMem = true;
+    for( var j=0; j<this.names.length; j++ ){
 
-    //this.c[0].events = [ 'click', 'mousedown', 'mouseover', 'mouseout' ];
+        var base = [];
+        var i = this.res+1;
+        while( i-- ) base.push(50);
+
+        this.range[j] = ( 1 / this.range[j] ) * 49;
+        
+        this.points.push( base );
+        this.values.push(0);
+       //  this.dom( 'path', null, { fill:'rgba('+cc[j]+',0.5)', 'stroke-width':1, stroke:'rgba('+cc[j]+',1)', 'vector-effect':'non-scaling-stroke' }, this.c[2] );
+        this.textDisplay.push( "<span style='color:rgb("+cc[j]+")'> " + this.names[j] +" ");
+
+    }
+
+    j = this.names.length;
+    while(j--){
+        this.dom( 'path', null, { fill:'rgba('+cc[j]+','+this.alpha+')', 'stroke-width':1, stroke:'rgba('+cc[j]+',1)', 'vector-effect':'non-scaling-stroke' }, this.c[2] );
+    }
+
 
     this.init();
 
@@ -87,14 +147,14 @@ Fps.prototype = Object.assign( Object.create( Proto.prototype ), {
 
     mousedown: function ( e ) {
 
-        if( this.isShow ) this.hide();
-        else this.show();
+        if( this.isShow ) this.close();
+        else this.open();
 
     },
 
     // ----------------------
 
-    mode: function ( mode ) {
+    /*mode: function ( mode ) {
 
         var s = this.s;
 
@@ -113,9 +173,16 @@ Fps.prototype = Object.assign( Object.create( Proto.prototype ), {
             break;
 
         }
-    },
+    },*/
 
-    
+    tick: function ( v ){
+
+        this.values = v;
+        if( !this.isShow ) return;
+        this.drawGraph();
+        this.upText();
+
+    },
 
     makePath: function ( point ) {
 
@@ -123,75 +190,80 @@ Fps.prototype = Object.assign( Object.create( Proto.prototype ), {
         p += 'M ' + (-1) + ' ' + 50;
         for ( var i = 0; i < this.res + 1; i ++ ) { p += ' L ' + i + ' ' + point[i]; }
         p += ' L ' + (this.res + 1) + ' ' + 50;
-
         return p;
 
+    },
+
+    upText: function( val ){
+
+        var v = val || this.values, t = '';
+        for( var j=0, lng =this.names.length; j<lng; j++ ) t += this.textDisplay[j] + (v[j]).toFixed(this.precision) + '</span>';
+        this.c[4].innerHTML = t;
+    
     },
 
     drawGraph: function( ){
 
         var svg = this.c[2];
+        var i = this.names.length, v, old = 0, n = 0;
 
-        this.pa1.shift();
-        this.pa1.push( 8.5 + this.round( ( 1 - (this.fps / 100)) * 30 ) );
-
-        this.setSvg( svg, 'd', this.makePath( this.pa1 ), 0 );
-
-        this.pa2.shift();
-        this.pa2.push( 8.5 + this.round( ( 1 - (this.ms / 200)) * 30 ) );
-
-        this.setSvg( svg, 'd', this.makePath( this.pa2 ), 1 );
-
-        if ( this.isMem ) {
-
-            this.pa3.shift();
-            this.pa3.push( 8.5 + this.round( ( 1 - this.mm) * 30 ) );
-
-            this.setSvg( svg, 'd', this.makePath( this.pa3 ), 2 );
+        while( i-- ){
+            if( this.adding ) v = (this.values[n]+old) * this.range[n];
+            else  v = (this.values[n] * this.range[n]);
+            this.points[n].shift();
+            this.points[n].push( 50 - v );
+            this.setSvg( svg, 'd', this.makePath( this.points[n] ), i+1 );
+            old += this.values[n];
+            n++;
 
         }
 
     },
 
-    show: function(){
+    open: function(){
+
+        Proto.prototype.open.call( this );
 
         this.h = this.hplus + this.baseH;
 
-        this.setSvg( this.c[4], 'd','M 5 8 L 8 3 2 3 5 8 Z');
-
+        this.setSvg( this.c[3], 'd', this.svgs.arrowDown );
 
         if( this.parentGroup !== null ){ this.parentGroup.calc( this.hplus );}
         else if( this.isUI ) this.main.calc( this.hplus );
 
         this.s[0].height = this.h +'px';
         this.s[2].display = 'block'; 
+        this.s[4].display = 'block';
         this.isShow = true;
 
-        Roots.addListen( this );
+        if( !this.custom ) Roots.addListen( this );
 
     },
 
-    hide: function(){
+    close: function(){
+
+        Proto.prototype.close.call( this );
 
         this.h = this.baseH;
 
-        this.setSvg( this.c[4], 'd','M 3 8 L 8 5 3 2 3 8 Z');
+        this.setSvg( this.c[3], 'd', this.svgs.arrow );
 
         if( this.parentGroup !== null ){ this.parentGroup.calc( -this.hplus );}
         else if( this.isUI ) this.main.calc( -this.hplus );
         
         this.s[0].height = this.h +'px';
         this.s[2].display = 'none';
+        this.s[4].display = 'none';
         this.isShow = false;
 
-        Roots.removeListen( this );
-        this.c[1].textContent = 'FPS';
+        if( !this.custom ) Roots.removeListen( this );
+
+        this.c[4].innerHTML = '';
         
     },
 
 
-
-    //////////////////
+    ///// AUTO FPS //////
 
     begin: function(){
 
@@ -200,7 +272,6 @@ Fps.prototype = Object.assign( Object.create( Proto.prototype ), {
     },
 
     end: function(){
-
 
         var time = this.now();
         this.ms = time - this.startTime;
@@ -220,33 +291,37 @@ Fps.prototype = Object.assign( Object.create( Proto.prototype ), {
                 var heapSizeLimit = performance.memory.jsHeapSizeLimit;
 
                 this.mem = this.round( heapSize * 0.000000954 );
-
                 this.mm = heapSize / heapSizeLimit;
 
             }
 
         }
 
+        this.values = [ this.fps, this.ms , this.mm ];
+
         this.drawGraph();
-        this.c[1].innerHTML = 'FPS ' + this.fps + '<font color="yellow"> MS '+ ( this.ms | 0 ) + '</font><font color="cyan"> MB '+ this.mem + '</font>';
+        this.upText( [ this.fps, this.ms, this.mem ] );
 
         return time;
 
-        
     },
 
     listening: function(){
 
-        this.startTime = this.end();
+        if( !this.custom ) this.startTime = this.end();
         
     },
 
     rSize: function(){
 
-        this.s[0].width = this.w + 'px';
-        this.s[1].width = this.w + 'px';
-        this.s[2].left = 10 + 'px';
-        this.s[2].width = (this.w-20) + 'px';
+        var s = this.s;
+        var w = this.w;
+
+        s[0].width = w + 'px';
+        s[1].width = w + 'px';
+        s[2].left = 10 + 'px';
+        s[2].width = (w-20) + 'px';
+        s[4].width = (w-20) + 'px';
         
     },
     

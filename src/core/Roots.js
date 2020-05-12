@@ -28,7 +28,19 @@ var R = {
     input: null,
     parent: null,
     firstImput: true,
-    callbackImput: null,
+    //callbackImput: null,
+    hiddenImput:null,
+    hiddenSizer:null,
+    hasFocus:false,
+    startInput:false,
+    inputRange : [0,0],
+    cursorId : 0,
+    str:'',
+    pos:0,
+    startX:-1,
+    moveX:-1,
+
+    debugInput:false,
 
     isLoop: false,
     listens: [],
@@ -103,6 +115,7 @@ var R = {
         }
 
         window.addEventListener( 'keydown', R, false );
+        window.addEventListener( 'keyup', R, false );
         window.addEventListener( 'resize', R.resize , false );
         //window.addEventListener( 'mousedown', R, false );
 
@@ -129,6 +142,7 @@ var R = {
         }
 
         window.removeEventListener( 'keydown', R );
+        window.removeEventListener( 'keyup', R );
         window.removeEventListener( 'resize', R.resize  );
 
         R.isEventsInit = false;
@@ -174,7 +188,8 @@ var R = {
        
         var e = R.e;
 
-        if( event.type === 'keydown') R.editText( event );
+        if( event.type === 'keydown') R.keydown( event );
+        if( event.type === 'keyup') R.keyup( event );
 
         if( event.type === 'wheel' ) e.delta = event.deltaY > 0 ? 1 : -1;
         else e.delta = 0;
@@ -453,76 +468,238 @@ var R = {
     //   INPUT
     // ----------------------
 
+    setHidden: function () {
+
+        if( R.hiddenImput === null ){
+
+            var hide = R.debugInput ? '' : 'opacity:0; zIndex:0;';
+
+            var css = R.parent.css.txt + 'padding:0; width:auto; height:auto; text-shadow:none;'
+            css += 'left:10px; top:auto; border:none; color:#FFF; background:#000;' + hide;
+
+            R.hiddenImput = document.createElement('input');
+            R.hiddenImput.type = 'text';
+            R.hiddenImput.style.cssText = css + 'bottom:30px;' + (R.debugInput ? '' : 'transform:scale(0);');;
+
+            R.hiddenSizer = document.createElement('div');
+            R.hiddenSizer.style.cssText = css + 'bottom:60px;';
+            
+            document.body.appendChild( R.hiddenImput );
+            document.body.appendChild( R.hiddenSizer );
+
+        }
+
+        R.hiddenImput.style.width = R.input.clientWidth + 'px';
+        R.hiddenImput.value = R.str;
+        R.hiddenSizer.innerHTML = R.str;
+
+        R.hasFocus = true;
+
+    },
+
+    clearHidden: function ( p ) {
+
+        if( R.hiddenImput === null ) return;
+        R.hasFocus = false;
+
+    },
+
+    clickPos: function( x ){
+
+        var i = R.str.length, l = 0, n = 0;
+        while( i-- ){
+            l += R.textWidth( R.str[n] );
+            if( l >= x ) break;
+            n++;
+        }
+        return n;
+
+    },
+
+    upInput: function ( x, down ) {
+
+        if( R.parent === null ) return false;
+
+        var up = false;
+     
+        if( down ){
+
+            var id = R.clickPos( x );
+
+            R.moveX = id;
+
+            if( R.startX === -1 ){ 
+
+                R.startX = id;
+                R.cursorId = id;
+                R.inputRange = [ R.startX, R.startX ];
+
+            } else {
+            
+                var isSelection = R.moveX !== R.startX;
+
+                if( isSelection ){
+                    if( R.startX > R.moveX ) R.inputRange = [ R.moveX, R.startX ];
+                    else R.inputRange = [ R.startX, R.moveX ];    
+                }
+            }
+
+            up = true;
+            
+        } else {
+
+            if( R.startX !== -1 ){
+
+                R.hasFocus = true;
+                R.hiddenImput.focus();
+                R.hiddenImput.selectionStart = R.inputRange[0];
+                R.hiddenImput.selectionEnd = R.inputRange[1];
+                R.startX = -1;
+
+                up = true;
+
+            }
+
+        }
+
+        if( up ) R.selectParent();
+
+        return up;
+
+    },
+
+    selectParent: function (){
+
+        var c = R.textWidth( R.str.substring( 0, R.cursorId ));
+        var e = R.textWidth( R.str.substring( 0, R.inputRange[0] ));
+        var s = R.textWidth( R.str.substring( R.inputRange[0],  R.inputRange[1] ));
+
+        R.parent.select( c, e, s );
+
+    },
+
+    textWidth: function ( text ){
+
+        if( R.hiddenSizer === null ) return 0;
+        text = text.replace(/ /g, '&nbsp;');
+        R.hiddenSizer.innerHTML = text;
+        return R.hiddenSizer.clientWidth;
+
+    },
+
+
     clearInput: function () {
 
-        if( R.input === null ) return;
-        if( !R.firstImput ) R.callbackImput();
+        if( R.parent === null ) return;
+        if( !R.firstImput ) R.parent.validate();
+
+        R.clearHidden();
+        R.parent.unselect();
 
         //R.input.style.background = 'none';
-        R.input.style.borderColor = R.parent.defaultBorderColor;//'rgba(0,0,0,0)';
+        R.input.style.background = R.parent.colors.inputBg;
+        R.input.style.borderColor = R.parent.colors.inputBorder;
         R.parent.isEdit = false;
-        R.callbackImput = null;
+
         R.input = null;
         R.parent = null;
+        R.str = '',
         R.firstImput = true;
 
     },
 
-    setInput: function ( Input, Callback, color, parent ) {
+    setInput: function ( Input, parent ) {
 
         R.clearInput();
         
-        R.callbackImput = Callback;
         R.input = Input;
         R.parent = parent;
-        R.input.style.borderColor = color;
-        //R.input.style.background = color;
 
-        //window.addEventListener( 'mousedown', function (){ if( !R.firstImput ) R.clearInput() }, false );
+        R.input.style.background = R.parent.colors.inputOver;
+        R.input.style.borderColor = R.parent.colors.inputBorderSelect;
+        R.str = R.input.textContent;
+
+        R.setHidden();
 
     },
 
-    select: function () {
+    /*select: function () {
 
         document.execCommand( "selectall", null, false );
 
-    },
+    },*/
 
-    editText: function ( e ) {
+    keydown: function ( e ) {
 
-        if( R.input === null ) return;
+        if( R.parent === null ) return;
+
+        var keyCode = e.which;
+
+        R.firstImput = false;
+
+
+        if (R.hasFocus) {
+            // hack to fix touch event bug in iOS Safari
+            window.focus();
+            R.hiddenImput.focus();
+
+        }
+
 
         R.parent.isEdit = true;
 
-        e.preventDefault();
+       // e.preventDefault();
 
-        if( e.keyCode === 13 ){ //enter
+        // add support for Ctrl/Cmd+A selection
+        //if ( keyCode === 65 && (e.ctrlKey || e.metaKey )) {
+            //R.selectText();
+            //e.preventDefault();
+            //return self.render();
+        //}
 
-            R.callbackImput();
+        if( keyCode === 13 ){ //enter
+
             R.clearInput();
 
-        } else if( e.keyCode === 8 ){ //backspace
+        } else if( keyCode === 9 ){ //tab key
 
-            R.input.textContent = '';
+           // R.input.textContent = '';
 
         } else {
 
             if( R.input.isNum ){
                 if ( ((e.keyCode > 95) && (e.keyCode < 106)) || e.keyCode === 110 || e.keyCode === 109 ){
-                    if( R.firstImput ){ R.input.textContent = e.key; R.firstImput = false; }
-                    else R.input.textContent += e.key;
+                    R.hiddenImput.readOnly = false;
+                } else {
+                    R.hiddenImput.readOnly = true;
                 }
             } else {
-                if( R.firstImput ){ R.input.textContent = e.key; R.firstImput = false; }
-                else R.input.textContent += e.key;
+                R.hiddenImput.readOnly = false;
             }
 
         }
 
     },
 
+    keyup: function ( e ) {
+
+        if( R.parent === null ) return;
+
+        R.str = R.hiddenImput.value;
+        R.input.textContent = R.str;
+        R.cursorId = R.hiddenImput.selectionStart;
+        R.inputRange = [ R.hiddenImput.selectionStart, R.hiddenImput.selectionEnd ];
+
+        R.selectParent();
+
+        if( R.parent.allway ) R.parent.validate();
+
+    },
+
     // ----------------------
+    //
     //   LISTENING
+    //
     // ----------------------
 
     loop: function () {

@@ -49,8 +49,8 @@ Bool.prototype = Object.assign( Object.create( Proto.prototype ), {
 
         if( this.value ){
             
-            s[2].background = this.fontColor;
-            s[2].borderColor = this.fontColor;
+            s[2].background = this.colors.boolon;
+            s[2].borderColor = this.colors.boolon;
             s[3].marginLeft = '17px';
 
         } else {

@@ -1,6 +1,6 @@
 import './polyfills.js';
 
-export var REVISION = '2.0';
+export var REVISION = '2.66';
 
 export { Tools } from './core/Tools.js';
 export { Gui } from './core/Gui.js';

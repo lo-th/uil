@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Uil item</title>
+<link rel="shortcut icon" href="../favicon.ico">
+<link rel="stylesheet" type="text/css" href="../style.css">
+
+<script type="text/javascript" src="../build/uil.js"></script>
+
+</head>
+
+<body>
+<div id='logo'></div>
+<div id='version'></div>
+<div id='debug'></div>
+<script>
+
+document.getElementById('logo').innerHTML = UIL.Tools.icon('logo', '#FFF', 64);
+document.getElementById('version').innerHTML = 'Uil '+ UIL.REVISION;
+
+var content = document.createElement( 'div' );
+content.style.cssText = 'position: absolute; left:calc(50% - 145px); top:150px; width:290px; height:158px; border:1px solid #000; border-radius:4px; border-top-left-radius:0px; overflow:hidden;';
+document.body.appendChild( content ); 
+
+UIL.Tools.setText(12);
+
+var testList;
+
+var timer = null;
+var display = false;
+
+var itemsConfig = {
+
+    fontSize: 13,
+    font:'Consolas,monaco,monospace',
+    text: '#cccccc',
+    background:'none',
+    backgroundOver: '#101010',
+    select: '#9c88ff',
+    down:'#62549c',
+    over: "#383838",
+    button: '#646464',
+    boolbg: "#383838",
+    boolon: '#9c88ff',
+    groupBorder: '',
+    scroll:'#222222',
+
+}
+
+var b0 = UIL.add('button', { target:document.body, callback:function(){ ui.setItem('item'+0) }, name:'goto 0', w:100, pos:{left:'10px', top:'30px'}, simple:true });
+var b1 = UIL.add('button', { target:document.body, callback:function(){ ui.setItem('item'+7) }, name:'goto 7', w:100, pos:{left:'10px', top:'50px'}, simple:true });
+var b2 = UIL.add('button', { target:document.body, callback:function(){ ui.setItem('item'+15) }, name:'goto 15', w:100, pos:{left:'10px', top:'70px'}, simple:true });
+var b3 = UIL.add('button', { target:document.body, callback:function(){ ui.setItem('item'+23) }, name:'goto 23', w:100, pos:{left:'10px', top:'90px'}, simple:true });
+var b4 = UIL.add('button', { target:document.body, callback:function(){ ui.setItem('item'+29) }, name:'goto 29', w:100, pos:{left:'10px', top:'110px'}, simple:true });
+
+var debug = document.getElementById('debug');
+var callback = function( v ){  debug.innerHTML = v; }
+
+// in GUI element
+var ui = new UIL.Gui({ parent:content, w:282, h:20, close:false, autoResize:false, maxHeight:150, lockHeight:true, itemMode:true, css:'left:4px; top:4px; background:#323232; border-radius:4px; border:1px solid #3e3e3e;', config:itemsConfig }).onChange( callback );
+//ui.setTop( 4, 150 );
+var i = 30, n = 0;
+
+while(i--){
+
+	ui.add('item', { name:'item'+n, h:20, itype:'body' });
+	n++;
+}
+
+
+</script>
+</body>
+</html>

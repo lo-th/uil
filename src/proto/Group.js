@@ -1,11 +1,13 @@
 
 import { Roots } from '../core/Roots';
 import { Proto } from '../core/Proto';
-import { add } from '../core/add';
+//import { add } from '../core/add';
 
 function Group ( o ) {
  
     Proto.call( this, o );
+
+    this.ADD = o.add;
 
     this.uis = [];
 
@@ -18,7 +20,6 @@ function Group ( o ) {
     this.baseH = this.h;
 
     var fltop = Math.floor(this.h*0.5)-6;
-
 
     this.isLine = o.line !== undefined ? o.line : false;
 
@@ -34,10 +35,14 @@ function Group ( o ) {
     s[1].height = this.h + 'px';
     this.c[1].name = 'group';
 
-    this.s[1].marginLeft = '10px';
-    this.s[1].lineHeight = this.h-4;
-    this.s[1].color = this.fontColor;
-    this.s[1].fontWeight = 'bold';
+    s[1].marginLeft = '10px';
+    s[1].lineHeight = this.h-4;
+    s[1].color = this.fontColor;
+    s[1].fontWeight = 'bold';
+
+    if( this.radius !== 0 ) s[0].borderRadius = this.radius+'px'; 
+    s[0].border = this.colors.groupBorder;
+
     
     this.init();
 
@@ -77,7 +82,7 @@ Group.prototype = Object.assign( Object.create( Proto.prototype ), {
         this.target.reset();
         this.current = -1;
         this.target = null;
-        Roots.cursor();
+        this.cursor();
         return true;
 
     },
@@ -106,6 +111,7 @@ Group.prototype = Object.assign( Object.create( Proto.prototype ), {
         switch( name ){
 
             case 'content':
+            this.cursor();
 
             if( Roots.isMobile && type === 'mousedown' ) this.getNext( e, change );
 
@@ -117,6 +123,7 @@ Group.prototype = Object.assign( Object.create( Proto.prototype ), {
 
             break;
             case 'title':
+            this.cursor('pointer');
             if( type === 'mousedown' ){
                 if( this.isOpen ) this.close();
                 else this.open();
@@ -213,7 +220,8 @@ Group.prototype = Object.assign( Object.create( Proto.prototype ), {
             }
         }
 
-        var n = add.apply( this, a );
+        //var n = add.apply( this, a );
+        var n = this.ADD.apply( this, a );
         this.uis.push( n );
 
         if( n.autoHeight ) n.parentGroup = this;

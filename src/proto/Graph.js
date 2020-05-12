@@ -12,6 +12,8 @@ function Graph ( o ) {
     this.multiplicator = o.multiplicator || 1;
     this.neg = o.neg || false;
 
+    this.line = o.line !== undefined ?  o.line : true;
+
     //if(this.neg)this.multiplicator*=2;
 
     this.autoWidth = o.autoWidth !== undefined ? o.autoWidth : true;
@@ -71,7 +73,7 @@ function Graph ( o ) {
     this.tmp = t;
     this.c[3] = svg;
 
-    console.log(this.w)
+    //console.log(this.w)
 
     this.init();
 
@@ -91,7 +93,7 @@ Graph.prototype = Object.assign( Object.create( Proto.prototype ), {
 
     updateSVG: function () {
 
-        this.setSvg( this.c[3], 'd', this.makePath(), 0 );
+        if( this.line ) this.setSvg( this.c[3], 'd', this.makePath(), 0 );
 
         for(var i = 0; i<this.lng; i++ ){
 
@@ -137,7 +139,7 @@ Graph.prototype = Object.assign( Object.create( Proto.prototype ), {
             case 2: a=1; break;
         }
 
-        this.reset()
+        this.reset();
 
         this.setSvg( this.c[3], 'fill-opacity', a, name + 2 );
         this.cMode[name] = n;

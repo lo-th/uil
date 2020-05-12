@@ -11,20 +11,27 @@ function Proto ( o ) {
 
     o = o || {};
 
-    this.css = Tools.css;
-    this.colors = Tools.colors;
+
+    // if is on gui or group
+    this.main = o.main || null;
+    this.isUI = o.isUI || false;
+    this.parentGroup = null;
+
+    this.css = this.main ? this.main.css : Tools.css;
+    this.colors = this.main ? this.main.colors : Tools.colors;
+
     this.defaultBorderColor = this.colors.border;
     this.svgs = Tools.svgs;
+
+    // only space 
+    this.isEmpty = o.isEmpty || false;
 
     this.zone = { x:0, y:0, w:0, h:0 };
     this.local = new V2().neg();
 
     this.isCanvasOnly = false;
 
-    // if is on gui or group
-    this.main = o.main || null;
-    this.isUI = o.isUI || false;
-    this.parentGroup = null;
+    this.isSelect = false;
 
     // percent of title
     this.p = o.p !== undefined ? o.p : Tools.size.p;
@@ -34,7 +41,7 @@ function Proto ( o ) {
 
     this.h = this.isUI ? this.main.size.h : Tools.size.h;
     if( o.h !== undefined ) this.h = o.h;
-    this.h = this.h < 11 ? 11 : this.h;
+    if(!this.isEmpty) this.h = this.h < 11 ? 11 : this.h;
 
     // if need resize width
     this.autoWidth = o.auto || true;
@@ -58,6 +65,8 @@ function Proto ( o ) {
     this.simple = o.simple || false;
     if( this.simple ) this.sa = 0;
 
+    
+
     // define obj size
     this.setSize( this.w );
 
@@ -76,14 +85,14 @@ function Proto ( o ) {
     this.val = null;
     
     // Background
-    this.bg = this.isUI ? this.main.bg : Tools.colors.background;
-    this.bgOver = Tools.colors.backgroundOver;
+    this.bg = this.colors.background;//this.isUI ? this.main.bg : Tools.colors.background;
+    this.bgOver = this.colors.backgroundOver;
     if( o.bg !== undefined ){ this.bg = o.bg; this.bgOver = o.bg; }
     if( o.bgOver !== undefined ){ this.bgOver = o.bgOver; }
 
     // Font Color;
-    this.titleColor = o.titleColor || Tools.colors.text;
-    this.fontColor = o.fontColor || Tools.colors.text;
+    this.titleColor = o.titleColor || this.colors.text;
+    this.fontColor = o.fontColor || this.colors.text;
 
     if( o.color !== undefined ){ 
 
@@ -120,14 +129,15 @@ function Proto ( o ) {
     // style 
     this.s = [];
 
-    this.c[0] = Tools.dom( 'div', Tools.css.basic + 'position:relative; height:20px; float:left; overflow:hidden;');
+
+    this.c[0] = Tools.dom( 'div', this.css.basic + 'position:relative; height:20px; float:left; overflow:hidden;');
     this.s[0] = this.c[0].style;
 
     if( this.isUI ) this.s[0].marginBottom = '1px';
-
+    
     // with title
     if( !this.simple ){ 
-        this.c[1] = Tools.dom( 'div', Tools.css.txt );
+        this.c[1] = Tools.dom( 'div', this.css.txt );
         this.s[1] = this.c[1].style;
         this.c[1].textContent = this.rename === '' ? this.txt : this.rename;
         this.s[1].color = this.titleColor;
@@ -156,13 +166,16 @@ Object.assign( Proto.prototype, {
     
     init: function () {
 
-        var s = this.s; // style cache
-        var c = this.c; // div cache
-
-        s[0].height = this.h + 'px';
         this.zone.h = this.h;
 
-        if( this.isUI ) s[0].background = this.bg;
+
+        var s = this.s; // style cache
+        var c = this.c; // div cach
+
+        s[0].height = this.h + 'px';
+
+        if( this.isUI  ) s[0].background = this.bg;
+        if( this.isEmpty  ) s[0].background = 'none';
 
         //if( this.autoHeight ) s[0].transition = 'height 0.01s ease-out';
         if( c[1] !== undefined && this.autoWidth ){
@@ -270,12 +283,7 @@ Object.assign( Proto.prototype, {
 
     },
 
-    setInput: function ( Input, Callback ) {
-
-        
-        Roots.setInput( Input, Callback, Tools.colors.input, this );
-
-    },
+    
 
     /////////
 
@@ -293,11 +301,15 @@ Object.assign( Proto.prototype, {
 
     uiout: function () {
 
+        if( this.isEmpty ) return;
+
         this.s[0].background = this.bg;
 
     },
 
     uiover: function () {
+
+        if( this.isEmpty ) return;
 
         this.s[0].background = this.bgOver;
 
@@ -342,6 +354,8 @@ Object.assign( Proto.prototype, {
 
     onChange: function ( f ) {
 
+        if( this.isEmpty ) return;
+
         this.callback = f;
         return this;
 
@@ -352,6 +366,8 @@ Object.assign( Proto.prototype, {
     // ----------------------
 
     onFinishChange: function ( f ) {
+
+        if( this.isEmpty ) return;
 
         this.callback = null;
         this.endCallback = f;
@@ -410,7 +426,6 @@ Object.assign( Proto.prototype, {
         this.w = sx;
 
         if( this.simple ){
-            //this.sa = 0;
             this.sb = this.w - this.sa;
         } else {
             var pp = this.w * ( this.p / 100 );
@@ -475,6 +490,7 @@ Object.assign( Proto.prototype, {
 
     handleEvent: function ( e ){
 
+        if( this.isEmpty ) return;
         return this[e.type](e);
     
     },
@@ -488,6 +504,8 @@ Object.assign( Proto.prototype, {
     mouseup: function( e ) { return false; },
 
     keydown: function( e ) { return false; },
+
+    keyup: function( e ) { return false; },
 
 
     // ----------------------
@@ -531,6 +549,40 @@ Object.assign( Proto.prototype, {
 
         Roots.needReZone = true;
 
+    },
+
+    // ----------------------
+    //  INPUT
+    // ----------------------
+
+    select: function () {
+    
+    },
+
+    unselect: function () {
+
+    },
+
+    setInput: function ( Input ) {
+        
+        Roots.setInput( Input, this );
+
+    },
+
+    upInput: function ( x, down ) {
+
+        return Roots.upInput( x, down );
+
+    },
+
+    // ----------------------
+    // special item 
+    // ----------------------
+
+    selected: function ( b ){
+
+        this.isSelect = b || false;
+        
     },
 
 

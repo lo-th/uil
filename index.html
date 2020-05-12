@@ -7,7 +7,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11" />
 <meta http-equiv="Pragma" content="no-cache">
 
-<link rel="shortcut icon" href="./examples/img/favicon.ico">
+<link rel="shortcut icon" href="./favicon.ico">
 <link rel="stylesheet" type="text/css" href="style.css">
 
 
@@ -37,7 +37,7 @@ octo.addEventListener('mouseover',function(e){ octo.setAttribute('fill', '#3998d
 octo.addEventListener('mouseout',function(e){ octo.setAttribute('fill','rgba(255,255,255,0.2)');  octoArm.style.animationName='none'; }, false );
 octo.addEventListener('mousedown',function(e){ window.open('https://github.com/lo-th/uil','_blank'); }, false );
 
-var gr0, gr1, gr2, gr3;
+var gr0, gr1, gr2, gr3, ty, ny =0;
 var display = false;
 var list = ['item-0', 'item-1', 'item-2', 'item-3', 'item-4', 'item-5', 'item-6', 'item-7', 'item-8', 'item-9', 'item-10', 'item-11', 'item-12'];
 var list2 = ['item-0', 'item-1', 'item-2'];
@@ -47,7 +47,7 @@ var debug = document.getElementById('debug');
 var callback = function(v){ debug.innerHTML = v; }
 var callbackButton = function(){ debug.innerHTML = "i'm a button !!" ; console.log(this.value) }
 var callbackSize = function(v){  ui.setWidth( v ); }
-var callbackLogo = function(v){ document.getElementById('logoin').setAttributeNS(null, 'stroke', v ); document.getElementById('version').style.color = v;  }
+var callbackLogo = function(v){ document.getElementById('logoin').setAttributeNS(null, 'fill', v ); document.getElementById('version').style.color = v;  }
 
 // single UI element
 var s = UIL.add('slide', {target:document.body, callback:callbackSize, name:'ui size', min:100, max:400, value:300, step:10, w:100, pos:{left:'10px', top:'40px' }, simple:true });
@@ -64,14 +64,15 @@ function populate () {
     if( !display ){
 
         ui.add('title',  { name:'Title'});
-        ui.add('fps',    { height:30 });
+        ui.add('fps',    { h:30, hplus:100, res:80 });
+        ty = ui.add('fps', { name:'custom', h:30, hplus:100, custom:true, alpha:1, res:50, names:['Post','Step','Next'], cc:['50,160,222','222,120,50','222,222,50'], range:[25,25,25], precision:2, radius:4, fontColor:'#EEEEEE', adding:true   });
         ui.add('bool',   { name:'bool', h:20, value:false });
         ui.add('color',  { name:'color', type:'html', value:0xffffff});
         ui.add('color',  { name:'color', type:'html', value:[0,1,1,1], h:20});
         ui.add('slide',  { name:'slide', min:-100, max:100, value:0, precision:0 });
         ui.add('slide',  { name:'slide', min:-1, max:1, value:0, step:0.01, precision:2, mode:1 });
         ui.add('slide',  { name:'slide', min:-1, max:1, value:0, step:0.01, precision:2, mode:2 });
-        ui.add('string', { name:'string', value:'welcome to uil'});
+        ui.add('string', { name:'string', value:'welcome to uil', h:30});
         ui.add('list',   { name:'list', list:list});
         ui.add('list',   { name:'list', list:list2, itemHeight:40 });
         ui.add('graph',  { name:'graph', h:80, value:[-0.5,1,0.5,1,0.25,0,0.5,1,0.5], neg:true, multiplicator:90 });
@@ -80,7 +81,8 @@ function populate () {
         ui.add('number', { name:'vector3', value:[0,0,0] });
         ui.add('number', { name:'vector4', value:[0,0,0,0], step:1, precision:0, h:36 });
         ui.add('button', { name:'button', callback:callbackButton });
-        ui.add('button', { name:'MULTY', fontColor:'#D4B87B', h:30, value:[1, 2, 3, 4], callback:callbackButton });
+        ui.add('empty', { name:'button', h:2 });
+        ui.add('selector', { name:'selector', fontColor:'#D4B87B', h:30, value:1, values:[1, 2, 3, 4] });
 
         gr0 = ui.add('group', { name:'Group', h:36 });
 
@@ -124,6 +126,19 @@ function populate () {
         b.label('populate');
 
     }
+
+    //ty.open()
+    update();
+}
+
+function update (){
+    requestAnimationFrame( update );
+
+    if( ny==4 ){ 
+        ny=0;
+        if(ty.isOpen) ty.tick( [ 5*Math.random(), 5*Math.random(), 8*Math.random() ] );
+    }
+    ny++
 }
 
 </script>
