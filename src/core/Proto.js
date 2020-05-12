@@ -222,9 +222,9 @@ Object.assign( Proto.prototype, {
 
     },
 
-    setSvg: function ( dom, type, value, id ) {
+    setSvg: function ( dom, type, value, id, id2 ) {
 
-        Tools.setSvg( dom, type, value, id );
+        Tools.setSvg( dom, type, value, id, id2 );
 
     },
 

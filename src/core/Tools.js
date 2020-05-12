@@ -20,7 +20,11 @@ var T = {
     SVG_TYPE_D: [ 'pattern', 'defs', 'transform', 'stop', 'animate', 'radialGradient', 'linearGradient', 'animateMotion' ],
     SVG_TYPE_G: [ 'svg', 'rect', 'circle', 'path', 'polygon', 'text', 'g', 'line', 'foreignObject' ],
 
-    TwoPI: 6.283185307179586,
+    PI:Math.PI,
+    TwoPI: Math.PI*2,
+    pi90:Math.PI * 0.5,
+    torad: Math.PI / 180,
+    todeg: 180 / Math.PI,
 
     size: {  w: 240, h: 20, p: 30, s: 20 },
 
@@ -137,9 +141,10 @@ var T = {
 
     },
 
-    setSvg: function( dom, type, value, id ){
+    setSvg: function( dom, type, value, id, id2 ){
 
         if( id === -1 ) dom.setAttributeNS( null, type, value );
+        else if( id2 !== undefined ) dom.childNodes[ id || 0 ].childNodes[ id2 || 0 ].setAttributeNS( null, type, value );
         else dom.childNodes[ id || 0 ].setAttributeNS( null, type, value );
 
     },
@@ -322,9 +327,19 @@ var T = {
 
     },
 
+    pad: function( n ){
+        if(n.length == 1)n = '0' + n;
+        return n;
+    },
+
     rgbToHex : function( c ){
 
-        return '#' + ( '000000' + ( ( c[0] * 255 ) << 16 ^ ( c[1] * 255 ) << 8 ^ ( c[2] * 255 ) << 0 ).toString( 16 ) ).slice( - 6 );
+        var r = Math.round(c[0] * 255).toString(16);
+        var g = Math.round(c[1] * 255).toString(16);
+        var b = Math.round(c[2] * 255).toString(16);
+        return '#' + T.pad(r) + T.pad(g) + T.pad(b);
+
+       // return '#' + ( '000000' + ( ( c[0] * 255 ) << 16 ^ ( c[1] * 255 ) << 8 ^ ( c[2] * 255 ) << 0 ).toString( 16 ) ).slice( - 6 );
 
     },
 
@@ -488,7 +503,7 @@ var T = {
         T.dom( 'defs', null, {}, svg );
         T.dom( 'g', null, {}, svg );
 
-        var s = 40;//stroke
+        var s = 30;//stroke
         var r =( w-s )*0.5;
         var mid = w*0.5;
         var n = 24, nudge = 8 / r / n * Math.PI, a1 = 0, d1;
@@ -533,24 +548,26 @@ var T = {
         var br = (128 - s ) + 2;
         var bw = 60;
 
+        var tw = 83.95;
+
         // black / white
         ccc = [ [0, '#FFFFFF', 1], [50, '#FFFFFF', 0], [50, '#000000', 0], [100, '#000000', 1] ];
-        T.makeGradiant( 'linearGradient', { id:'GL1', x1:mid-bw, y1:mid-bw, x2:mid-bw, y2:mid+bw, gradientUnits:"userSpaceOnUse" }, svg, ccc );
+        T.makeGradiant( 'linearGradient', { id:'GL0', x1:0, y1:mid-tw, x2:0, y2:mid+tw, gradientUnits:"userSpaceOnUse" }, svg, ccc );
 
-        // saturation
-        ccc = [ [0, '#7f7f7f', 0], [50, '#7f7f7f', 0.5], [100, '#7f7f7f', 1] ];
-        T.makeGradiant( 'linearGradient', { id:'GL2', x1:mid-bw, y1:mid-bw, x2:mid+bw, y2:mid-bw, gradientUnits:"userSpaceOnUse" }, svg, ccc );
+        ccc = [ [0, '#7f7f7f', 1], [50, '#7f7f7f', 0.5], [100, '#7f7f7f', 0] ];
+        T.makeGradiant( 'linearGradient', { id:'GL1', x1:mid-48.55, y1:0, x2:mid+98.50, y2:0, gradientUnits:"userSpaceOnUse" }, svg, ccc );
 
-        T.dom( 'circle', '', { cx:128, cy:128, r:br, fill:'red' }, svg );//2
-        T.dom( 'circle', '', { cx:128, cy:128, r:br, fill:'url(#GL2)' }, svg );//3
-        T.dom( 'circle', '', { cx:128, cy:128, r:br, fill:'url(#GL1)' }, svg );//4
+        
 
-        //T.dom( 'polygon', '', { points:'128,0 256,190 0,210', r:br, fill:'url(#GL1)' }, svg );//4
+        T.dom( 'circle', '', { cx:0, cy:0, r:8, 'stroke-width':4, stroke:'#FFF', fill:'none' }, svg );//2
 
-        //T.dom( 'circle', '', { cx:0, cy:0, r:6, 'stroke-width':3, stroke:'#FFF', fill:'none' }, svg );//5
-        //T.dom( 'circle', '', { cx:0, cy:0, r:6, 'stroke-width':3, stroke:'#000', fill:'none' }, svg );//6
-        T.dom( 'circle', '', { cx:0, cy:0, r:8, 'stroke-width':4, stroke:'#FFF', fill:'none' }, svg );//5
-        T.dom( 'circle', '', { cx:0, cy:0, r:8, 'stroke-width':4, stroke:'#000', fill:'none' }, svg );//6
+        T.dom( 'g', null, { 'transform-origin': '128px 128px', 'transform':'rotate(0)' }, svg );//3
+        T.dom( 'polygon', '', { points:'78.95 43.1 78.95 212.85 226 128',  fill:'red'  }, svg, 3 );// 3,0
+        T.dom( 'polygon', '', { points:'78.95 43.1 78.95 212.85 226 128',  fill:'url(#GL1)','stroke-width':1, stroke:'url(#GL1)'  }, svg, 3 );// 3,1
+        T.dom( 'polygon', '', { points:'78.95 43.1 78.95 212.85 226 128',  fill:'url(#GL0)','stroke-width':1, stroke:'url(#GL0)'  }, svg, 3 );//3,2
+
+
+        T.dom( 'circle', '', { cx:128, cy:128, r:8, 'stroke-width':4, stroke:'#000', fill:'none' }, svg );//4
 
 
         T.colorRing = svg;

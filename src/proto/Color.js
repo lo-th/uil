@@ -21,8 +21,6 @@ function Color ( o ) {
     this.offset = new V2();
     this.decal = new V2();
 
-    this.pi90 = Math.PI * 0.5;
-
     //this.c[0].style.background = '#FF0000'
 
     this.c[2] = this.dom( 'div',  this.css.txt + 'height:'+(this.h-4)+'px;' + 'border-radius:'+this.radius+'px; line-height:'+(this.h-8)+'px;' );
@@ -46,6 +44,18 @@ function Color ( o ) {
 
     this.bcolor = null;
     this.isDown = false;
+    this.fistDown = false;
+
+    this.triangleRadius = 98;
+    this.triangleSideLength = Math.sqrt(3) * this.triangleRadius;
+
+    this.hue = 0;
+	//this.saturation = 0;
+	//this.lightness = 0;
+
+	this.p = new V2();
+
+    this.d = 256;
 
     this.setColor( this.value );
 
@@ -63,6 +73,8 @@ Color.prototype = Object.assign( Object.create( Proto.prototype ), {
 
 		var l = this.local;
 		if( l.x === -1 && l.y === -1 ) return '';
+
+
 
 		if( this.up && this.isOpen ){
 
@@ -86,6 +98,7 @@ Color.prototype = Object.assign( Object.create( Proto.prototype ), {
 	mouseup: function ( e ) {
 
 	    this.isDown = false;
+	    this.d = 256;
 
 	},
 
@@ -104,7 +117,9 @@ Color.prototype = Object.assign( Object.create( Proto.prototype ), {
 
 
 		if( name === 'color' ){
+
 			this.isDown = true;
+			this.fistDown = true
 			this.mousemove( e );
 		}
 	},
@@ -123,7 +138,7 @@ Color.prototype = Object.assign( Object.create( Proto.prototype ), {
 
 	    var name = this.testZone( e.clientX, e.clientY );
 
-	    var off, d, hue, sat, lum;
+	    var off, d, hue, sat, lum, rad, x, y, rr;
 
 	    if( name === 'title' ){
 
@@ -133,26 +148,76 @@ Color.prototype = Object.assign( Object.create( Proto.prototype ), {
 
 	    if( name === 'color' ){
 
-	    	this.cursor('crosshair');
+	    	off = this.offset;
+		    off.x = e.clientX - ( this.zone.x + this.decal.x + this.mid );
+		    off.y = e.clientY - ( this.zone.y + this.decal.y + this.mid );
+			d = off.length() * this.ratio;
+			rr = off.angle();
+			if(rr < 0) rr += 2 * Tools.PI;
+						
+
+	    	if ( d < 128 ) this.cursor('crosshair');
+	    	else if( !this.isDown ) this.cursor()
 
 	    	if( this.isDown ){
 
-	    		off = this.offset;
-		    	off.x = e.clientX - ( this.zone.x + this.decal.x + this.mid );
-		    	off.y = e.clientY - ( this.zone.y + this.decal.y + this.mid );
-			    d = off.length() * this.ratio;
+			    if( this.fistDown ){
+			    	this.d = d;
+			    	this.fistDown = false;
+			    }
 
-			    if ( d < 128 ) {
-				    if ( d > 88 ) {
+			    if ( this.d < 128 ) {
 
-				        hue = ( off.angle() + this.pi90 ) / 6.28;
+				    if ( this.d > this.triangleRadius ) { // outside round
+
+				        hue = ( rr + Tools.pi90 ) / Tools.TwoPI;
+				        this.hue = (hue + 1) % 1;
 				        this.setHSL([(hue + 1) % 1, this.hsl[1], this.hsl[2]]);
 
-				    } else {
+				    } else { // triangle
 
+				    	x = (off.x )* this.ratio;
+				    	y = (off.y )* this.ratio;
 
-				    	sat = Math.max( 0, Math.min( 1, 0.5 - ( off.x * this.square * 0.5 ) ) );
-				        lum = Math.max( 0, Math.min( 1, 0.5 - ( off.y * this.square * 0.5 ) ) );
+				    	var rr = (this.hue * Tools.TwoPI) + Tools.PI;
+				    	if(rr < 0) rr += 2 * Tools.PI;
+
+				    	rad = Math.atan2(-y, x);
+				    	if(rad < 0) rad += 2 * Tools.PI;
+						
+
+				    	//var rad0 = (rad - Tools.pi90 + Tools.TwoPI - this.hue) % (Tools.TwoPI),
+				    	var rad0 = ( rad + Tools.pi90 + Tools.TwoPI +rr ) % (Tools.TwoPI),
+				    	rad1 = rad0 % ((2/3) * Tools.PI) - (Tools.PI/3),
+				    	a    = 0.5 * this.triangleRadius,
+				    	b    = Math.tan(rad1) * a,
+				    	r    = Math.sqrt(x*x + y*y), // Pythagoras
+				    	maxR = Math.sqrt(a*a + b*b); // Pythagoras
+
+				    	if(r > maxR) {
+							var dx = Math.tan(rad1) * r;
+							var rad2 = Math.atan(dx / maxR);
+							if(rad2 > Tools.PI/3) {
+								rad2 = Tools.PI/3;
+							} else if(rad2 < -Tools.PI/3) {
+								rad2 = -Tools.PI/3;
+							}
+							rad += rad2 - rad1;
+
+							//rad0 = (rad + Tools.TwoPI - this.hue) % (Tools.TwoPI);
+							rad0 = (rad + Tools.pi90  + Tools.TwoPI +rr) % (Tools.TwoPI),
+							rad1 = rad0 % ((2/3) * Tools.PI) - (Tools.PI/3);
+							b = Math.tan(rad1) * a;
+							r = maxR = Math.sqrt(a*a + b*b); // Pythagoras
+						}
+
+						lum = ((Math.sin(rad0) * r) / this.triangleSideLength) + 0.5
+				
+						var widthShare = 1 - (Math.abs(lum - 0.5) * 2);
+						sat = (((Math.cos(rad0) * r) + (this.triangleRadius / 2)) / (1.5 * this.triangleRadius)) / widthShare;
+						sat = Math.max(0, sat); // cannot be lower than 0
+						sat = Math.min(1, sat); // cannot be greater than 1
+						
 				        this.setHSL([this.hsl[0], sat, lum]);
 
 				    }
@@ -220,7 +285,9 @@ Color.prototype = Object.assign( Object.create( Proto.prototype ), {
 	    
 	    this.value = this.bcolor;
 
-	    this.setSvg( this.c[3], 'fill', cc, 2 );
+	    //this.setSvg( this.c[3], 'fill', cc, 2 );
+	    this.setSvg( this.c[3], 'fill', cc, 3, 0 );
+
 
 	    this.s[2].background = this.bcolor;
 	    this.c[2].textContent = Tools.htmlToHex( this.bcolor );
@@ -244,6 +311,9 @@ Color.prototype = Object.assign( Object.create( Proto.prototype ), {
 	        this.bcolor = color;
 	        this.rgb = unpack;
 	        this.hsl = Tools.rgbToHsl( this.rgb );
+
+	        this.hue = this.hsl[0];
+
 	        this.update();
 	    }
 	    return this;
@@ -262,21 +332,52 @@ Color.prototype = Object.assign( Object.create( Proto.prototype ), {
 
 	moveMarkers: function () {
 
+		var p = this.p;
+
 	    var sr = 60
-	    var ra = 128-20; 
+	    var ra = 128-15; 
 	    var c1 = this.invert ? '#fff' : '#000';
-	    var a = this.hsl[0] * 6.28;
+	    var a = this.hsl[0] * Tools.TwoPI;
+	    var third = (2/3) * Tools.PI;
+	    var r = this.triangleRadius;
+	    var h = this.hsl[0];
+	    var s = this.hsl[1];
+	    var l = this.hsl[2];
 
-	    var p = new V2( Math.sin(a) * ra, -Math.cos(a) * ra ).addScalar(128);
+	    var angle = ( a-Tools.pi90 ) * Tools.todeg;
 
-	    this.setSvg( this.c[3], 'cx', p.x, 5 );
-	    this.setSvg( this.c[3], 'cy', p.y, 5 );
+	    this.setSvg( this.c[3], 'transform', 'rotate('+angle+' )', 3 );
+
+	    p.set( Math.sin(a) * ra, -Math.cos(a) * ra ).addScalar(128);
+	    this.setSvg( this.c[3], 'cx', p.x, 2 );
+	    this.setSvg( this.c[3], 'cy', p.y, 2 );
 	    
-	    p.set( 2 * sr * (.5 - this.hsl[1]), 2 * sr * (.5 - this.hsl[2]) ).addScalar(128);
+	    
+	    h = -a+Tools.pi90;
+        // Colored point
+		var hx = this.hx =  Math.cos(h) * r;
+		var hy = this.hy = -Math.sin(h) * r;
+		// Black point
+		var sx = this.sx =  Math.cos(h - third) * r;
+		var sy = this.sy = -Math.sin(h - third) * r;
+		// White point
+		var vx = this.vx =  Math.cos(h + third) * r;
+		var vy = this.vy = -Math.sin(h + third) * r;
+		// Current point
+		var mx = (sx + vx) / 2, my = (sy + vy) / 2, a  = (1 - 2 * Math.abs(l - .5)) * s;
+		var x = sx + (vx - sx) * l + (hx - mx) * a;
+		var y = sy + (vy - sy) * l + (hy - my) * a;
 
-	    this.setSvg( this.c[3], 'cx', p.x, 6 );
-	    this.setSvg( this.c[3], 'cy', p.y, 6 );
-	    this.setSvg( this.c[3], 'stroke', c1, 6 );
+	    p.set( x, y ).addScalar(128);
+
+
+
+	    this.setSvg( this.c[3], 'cx', p.x, 4 );
+	    this.setSvg( this.c[3], 'cy', p.y, 4 );
+	    var ff = (1-l)*255;
+	    this.setSvg( this.c[3], 'stroke', 'rgb('+ff+','+ff+','+ff+')', 4 );
+
+	    
 
 	},
 

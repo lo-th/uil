@@ -104,7 +104,11 @@ var T = {
     SVG_TYPE_D: [ 'pattern', 'defs', 'transform', 'stop', 'animate', 'radialGradient', 'linearGradient', 'animateMotion' ],
     SVG_TYPE_G: [ 'svg', 'rect', 'circle', 'path', 'polygon', 'text', 'g', 'line', 'foreignObject' ],
 
-    TwoPI: 6.283185307179586,
+    PI:Math.PI,
+    TwoPI: Math.PI*2,
+    pi90:Math.PI * 0.5,
+    torad: Math.PI / 180,
+    todeg: 180 / Math.PI,
 
     size: {  w: 240, h: 20, p: 30, s: 20 },
 
@@ -221,9 +225,10 @@ var T = {
 
     },
 
-    setSvg: function( dom, type, value, id ){
+    setSvg: function( dom, type, value, id, id2 ){
 
         if( id === -1 ) dom.setAttributeNS( null, type, value );
+        else if( id2 !== undefined ) dom.childNodes[ id || 0 ].childNodes[ id2 || 0 ].setAttributeNS( null, type, value );
         else dom.childNodes[ id || 0 ].setAttributeNS( null, type, value );
 
     },
@@ -406,9 +411,19 @@ var T = {
 
     },
 
+    pad: function( n ){
+        if(n.length == 1)n = '0' + n;
+        return n;
+    },
+
     rgbToHex : function( c ){
 
-        return '#' + ( '000000' + ( ( c[0] * 255 ) << 16 ^ ( c[1] * 255 ) << 8 ^ ( c[2] * 255 ) << 0 ).toString( 16 ) ).slice( - 6 );
+        var r = Math.round(c[0] * 255).toString(16);
+        var g = Math.round(c[1] * 255).toString(16);
+        var b = Math.round(c[2] * 255).toString(16);
+        return '#' + T.pad(r) + T.pad(g) + T.pad(b);
+
+       // return '#' + ( '000000' + ( ( c[0] * 255 ) << 16 ^ ( c[1] * 255 ) << 8 ^ ( c[2] * 255 ) << 0 ).toString( 16 ) ).slice( - 6 );
 
     },
 
@@ -572,7 +587,7 @@ var T = {
         T.dom( 'defs', null, {}, svg );
         T.dom( 'g', null, {}, svg );
 
-        var s = 40;//stroke
+        var s = 30;//stroke
         var r =( w-s )*0.5;
         var mid = w*0.5;
         var n = 24, nudge = 8 / r / n * Math.PI, a1 = 0;
@@ -613,27 +628,26 @@ var T = {
             color[0] = color[1];
         }
 
-        var br = (128 - s ) + 2;
-        var bw = 60;
+        var tw = 83.95;
 
         // black / white
         ccc = [ [0, '#FFFFFF', 1], [50, '#FFFFFF', 0], [50, '#000000', 0], [100, '#000000', 1] ];
-        T.makeGradiant( 'linearGradient', { id:'GL1', x1:mid-bw, y1:mid-bw, x2:mid-bw, y2:mid+bw, gradientUnits:"userSpaceOnUse" }, svg, ccc );
+        T.makeGradiant( 'linearGradient', { id:'GL0', x1:0, y1:mid-tw, x2:0, y2:mid+tw, gradientUnits:"userSpaceOnUse" }, svg, ccc );
 
-        // saturation
-        ccc = [ [0, '#7f7f7f', 0], [50, '#7f7f7f', 0.5], [100, '#7f7f7f', 1] ];
-        T.makeGradiant( 'linearGradient', { id:'GL2', x1:mid-bw, y1:mid-bw, x2:mid+bw, y2:mid-bw, gradientUnits:"userSpaceOnUse" }, svg, ccc );
+        ccc = [ [0, '#7f7f7f', 1], [50, '#7f7f7f', 0.5], [100, '#7f7f7f', 0] ];
+        T.makeGradiant( 'linearGradient', { id:'GL1', x1:mid-48.55, y1:0, x2:mid+98.50, y2:0, gradientUnits:"userSpaceOnUse" }, svg, ccc );
 
-        T.dom( 'circle', '', { cx:128, cy:128, r:br, fill:'red' }, svg );//2
-        T.dom( 'circle', '', { cx:128, cy:128, r:br, fill:'url(#GL2)' }, svg );//3
-        T.dom( 'circle', '', { cx:128, cy:128, r:br, fill:'url(#GL1)' }, svg );//4
+        
 
-        //T.dom( 'polygon', '', { points:'128,0 256,190 0,210', r:br, fill:'url(#GL1)' }, svg );//4
+        T.dom( 'circle', '', { cx:0, cy:0, r:8, 'stroke-width':4, stroke:'#FFF', fill:'none' }, svg );//2
 
-        //T.dom( 'circle', '', { cx:0, cy:0, r:6, 'stroke-width':3, stroke:'#FFF', fill:'none' }, svg );//5
-        //T.dom( 'circle', '', { cx:0, cy:0, r:6, 'stroke-width':3, stroke:'#000', fill:'none' }, svg );//6
-        T.dom( 'circle', '', { cx:0, cy:0, r:8, 'stroke-width':4, stroke:'#FFF', fill:'none' }, svg );//5
-        T.dom( 'circle', '', { cx:0, cy:0, r:8, 'stroke-width':4, stroke:'#000', fill:'none' }, svg );//6
+        T.dom( 'g', null, { 'transform-origin': '128px 128px', 'transform':'rotate(0)' }, svg );//3
+        T.dom( 'polygon', '', { points:'78.95 43.1 78.95 212.85 226 128',  fill:'red'  }, svg, 3 );// 3,0
+        T.dom( 'polygon', '', { points:'78.95 43.1 78.95 212.85 226 128',  fill:'url(#GL1)','stroke-width':1, stroke:'url(#GL1)'  }, svg, 3 );// 3,1
+        T.dom( 'polygon', '', { points:'78.95 43.1 78.95 212.85 226 128',  fill:'url(#GL0)','stroke-width':1, stroke:'url(#GL0)'  }, svg, 3 );//3,2
+
+
+        T.dom( 'circle', '', { cx:128, cy:128, r:8, 'stroke-width':4, stroke:'#000', fill:'none' }, svg );//4
 
 
         T.colorRing = svg;
@@ -1781,9 +1795,9 @@ Object.assign( Proto.prototype, {
 
     },
 
-    setSvg: function ( dom, type, value, id ) {
+    setSvg: function ( dom, type, value, id, id2 ) {
 
-        Tools.setSvg( dom, type, value, id );
+        Tools.setSvg( dom, type, value, id, id2 );
 
     },
 
@@ -2750,8 +2764,6 @@ function Color ( o ) {
     this.offset = new V2();
     this.decal = new V2();
 
-    this.pi90 = Math.PI * 0.5;
-
     //this.c[0].style.background = '#FF0000'
 
     this.c[2] = this.dom( 'div',  this.css.txt + 'height:'+(this.h-4)+'px;' + 'border-radius:'+this.radius+'px; line-height:'+(this.h-8)+'px;' );
@@ -2775,6 +2787,18 @@ function Color ( o ) {
 
     this.bcolor = null;
     this.isDown = false;
+    this.fistDown = false;
+
+    this.triangleRadius = 98;
+    this.triangleSideLength = Math.sqrt(3) * this.triangleRadius;
+
+    this.hue = 0;
+	//this.saturation = 0;
+	//this.lightness = 0;
+
+	this.p = new V2();
+
+    this.d = 256;
 
     this.setColor( this.value );
 
@@ -2792,6 +2816,8 @@ Color.prototype = Object.assign( Object.create( Proto.prototype ), {
 
 		var l = this.local;
 		if( l.x === -1 && l.y === -1 ) return '';
+
+
 
 		if( this.up && this.isOpen ){
 
@@ -2815,6 +2841,7 @@ Color.prototype = Object.assign( Object.create( Proto.prototype ), {
 	mouseup: function ( e ) {
 
 	    this.isDown = false;
+	    this.d = 256;
 
 	},
 
@@ -2833,7 +2860,9 @@ Color.prototype = Object.assign( Object.create( Proto.prototype ), {
 
 
 		if( name === 'color' ){
+
 			this.isDown = true;
+			this.fistDown = true;
 			this.mousemove( e );
 		}
 	},
@@ -2852,7 +2881,7 @@ Color.prototype = Object.assign( Object.create( Proto.prototype ), {
 
 	    var name = this.testZone( e.clientX, e.clientY );
 
-	    var off, d, hue, sat, lum;
+	    var off, d, hue, sat, lum, rad, x, y, rr;
 
 	    if( name === 'title' ){
 
@@ -2862,26 +2891,76 @@ Color.prototype = Object.assign( Object.create( Proto.prototype ), {
 
 	    if( name === 'color' ){
 
-	    	this.cursor('crosshair');
+	    	off = this.offset;
+		    off.x = e.clientX - ( this.zone.x + this.decal.x + this.mid );
+		    off.y = e.clientY - ( this.zone.y + this.decal.y + this.mid );
+			d = off.length() * this.ratio;
+			rr = off.angle();
+			if(rr < 0) rr += 2 * Tools.PI;
+						
+
+	    	if ( d < 128 ) this.cursor('crosshair');
+	    	else if( !this.isDown ) this.cursor();
 
 	    	if( this.isDown ){
 
-	    		off = this.offset;
-		    	off.x = e.clientX - ( this.zone.x + this.decal.x + this.mid );
-		    	off.y = e.clientY - ( this.zone.y + this.decal.y + this.mid );
-			    d = off.length() * this.ratio;
+			    if( this.fistDown ){
+			    	this.d = d;
+			    	this.fistDown = false;
+			    }
 
-			    if ( d < 128 ) {
-				    if ( d > 88 ) {
+			    if ( this.d < 128 ) {
 
-				        hue = ( off.angle() + this.pi90 ) / 6.28;
+				    if ( this.d > this.triangleRadius ) { // outside round
+
+				        hue = ( rr + Tools.pi90 ) / Tools.TwoPI;
+				        this.hue = (hue + 1) % 1;
 				        this.setHSL([(hue + 1) % 1, this.hsl[1], this.hsl[2]]);
 
-				    } else {
+				    } else { // triangle
 
+				    	x = (off.x )* this.ratio;
+				    	y = (off.y )* this.ratio;
 
-				    	sat = Math.max( 0, Math.min( 1, 0.5 - ( off.x * this.square * 0.5 ) ) );
-				        lum = Math.max( 0, Math.min( 1, 0.5 - ( off.y * this.square * 0.5 ) ) );
+				    	var rr = (this.hue * Tools.TwoPI) + Tools.PI;
+				    	if(rr < 0) rr += 2 * Tools.PI;
+
+				    	rad = Math.atan2(-y, x);
+				    	if(rad < 0) rad += 2 * Tools.PI;
+						
+
+				    	//var rad0 = (rad - Tools.pi90 + Tools.TwoPI - this.hue) % (Tools.TwoPI),
+				    	var rad0 = ( rad + Tools.pi90 + Tools.TwoPI +rr ) % (Tools.TwoPI),
+				    	rad1 = rad0 % ((2/3) * Tools.PI) - (Tools.PI/3),
+				    	a    = 0.5 * this.triangleRadius,
+				    	b    = Math.tan(rad1) * a,
+				    	r    = Math.sqrt(x*x + y*y), // Pythagoras
+				    	maxR = Math.sqrt(a*a + b*b); // Pythagoras
+
+				    	if(r > maxR) {
+							var dx = Math.tan(rad1) * r;
+							var rad2 = Math.atan(dx / maxR);
+							if(rad2 > Tools.PI/3) {
+								rad2 = Tools.PI/3;
+							} else if(rad2 < -Tools.PI/3) {
+								rad2 = -Tools.PI/3;
+							}
+							rad += rad2 - rad1;
+
+							//rad0 = (rad + Tools.TwoPI - this.hue) % (Tools.TwoPI);
+							rad0 = (rad + Tools.pi90  + Tools.TwoPI +rr) % (Tools.TwoPI),
+							rad1 = rad0 % ((2/3) * Tools.PI) - (Tools.PI/3);
+							b = Math.tan(rad1) * a;
+							r = maxR = Math.sqrt(a*a + b*b); // Pythagoras
+						}
+
+						lum = ((Math.sin(rad0) * r) / this.triangleSideLength) + 0.5;
+				
+						var widthShare = 1 - (Math.abs(lum - 0.5) * 2);
+						sat = (((Math.cos(rad0) * r) + (this.triangleRadius / 2)) / (1.5 * this.triangleRadius)) / widthShare;
+						sat = Math.max(0, sat); // cannot be lower than 0
+						sat = Math.min(1, sat); // cannot be greater than 1
+						
 				        this.setHSL([this.hsl[0], sat, lum]);
 
 				    }
@@ -2949,7 +3028,9 @@ Color.prototype = Object.assign( Object.create( Proto.prototype ), {
 	    
 	    this.value = this.bcolor;
 
-	    this.setSvg( this.c[3], 'fill', cc, 2 );
+	    //this.setSvg( this.c[3], 'fill', cc, 2 );
+	    this.setSvg( this.c[3], 'fill', cc, 3, 0 );
+
 
 	    this.s[2].background = this.bcolor;
 	    this.c[2].textContent = Tools.htmlToHex( this.bcolor );
@@ -2973,6 +3054,9 @@ Color.prototype = Object.assign( Object.create( Proto.prototype ), {
 	        this.bcolor = color;
 	        this.rgb = unpack;
 	        this.hsl = Tools.rgbToHsl( this.rgb );
+
+	        this.hue = this.hsl[0];
+
 	        this.update();
 	    }
 	    return this;
@@ -2991,21 +3075,50 @@ Color.prototype = Object.assign( Object.create( Proto.prototype ), {
 
 	moveMarkers: function () {
 
-	    var sr = 60;
-	    var ra = 128-20; 
+		var p = this.p;
+	    var ra = 128-15; 
 	    var c1 = this.invert ? '#fff' : '#000';
-	    var a = this.hsl[0] * 6.28;
+	    var a = this.hsl[0] * Tools.TwoPI;
+	    var third = (2/3) * Tools.PI;
+	    var r = this.triangleRadius;
+	    var h = this.hsl[0];
+	    var s = this.hsl[1];
+	    var l = this.hsl[2];
 
-	    var p = new V2( Math.sin(a) * ra, -Math.cos(a) * ra ).addScalar(128);
+	    var angle = ( a-Tools.pi90 ) * Tools.todeg;
 
-	    this.setSvg( this.c[3], 'cx', p.x, 5 );
-	    this.setSvg( this.c[3], 'cy', p.y, 5 );
+	    this.setSvg( this.c[3], 'transform', 'rotate('+angle+' )', 3 );
+
+	    p.set( Math.sin(a) * ra, -Math.cos(a) * ra ).addScalar(128);
+	    this.setSvg( this.c[3], 'cx', p.x, 2 );
+	    this.setSvg( this.c[3], 'cy', p.y, 2 );
 	    
-	    p.set( 2 * sr * (.5 - this.hsl[1]), 2 * sr * (.5 - this.hsl[2]) ).addScalar(128);
+	    
+	    h = -a+Tools.pi90;
+        // Colored point
+		var hx = this.hx =  Math.cos(h) * r;
+		var hy = this.hy = -Math.sin(h) * r;
+		// Black point
+		var sx = this.sx =  Math.cos(h - third) * r;
+		var sy = this.sy = -Math.sin(h - third) * r;
+		// White point
+		var vx = this.vx =  Math.cos(h + third) * r;
+		var vy = this.vy = -Math.sin(h + third) * r;
+		// Current point
+		var mx = (sx + vx) / 2, my = (sy + vy) / 2, a  = (1 - 2 * Math.abs(l - .5)) * s;
+		var x = sx + (vx - sx) * l + (hx - mx) * a;
+		var y = sy + (vy - sy) * l + (hy - my) * a;
 
-	    this.setSvg( this.c[3], 'cx', p.x, 6 );
-	    this.setSvg( this.c[3], 'cy', p.y, 6 );
-	    this.setSvg( this.c[3], 'stroke', c1, 6 );
+	    p.set( x, y ).addScalar(128);
+
+
+
+	    this.setSvg( this.c[3], 'cx', p.x, 4 );
+	    this.setSvg( this.c[3], 'cy', p.y, 4 );
+	    var ff = (1-l)*255;
+	    this.setSvg( this.c[3], 'stroke', 'rgb('+ff+','+ff+','+ff+')', 4 );
+
+	    
 
 	},
 
@@ -6886,6 +6999,6 @@ Object.assign( Gui.prototype, {
 
 } );
 
-var REVISION = '2.66';
+var REVISION = '2.7';
 
 export { Bool, Button, Circular, Color, Fps, Group, Gui, Joystick, Knob, List, Numeric, Proto, REVISION, Slide, TextInput, Title, Tools, add };
