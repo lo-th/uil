@@ -1,6 +1,6 @@
 <p align="center"><img src="http://lo-th.github.io/uil/examples/img/uil.png"/><br>uil v2.66</p>
 
-uil.js is a lightweight ui for javascript with some svg and possible 3d display.
+uil.js is a lightweight ui for javascript with a complete 3d display support.
 [**example**](http://lo-th.github.io/uil/index.html)
 
 **1 - init engine**
