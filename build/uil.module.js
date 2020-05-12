@@ -1309,8 +1309,6 @@ var R = {
 
         var keyCode = e.which, isShift = e.shiftKey;
 
-        console.log(keyCode);
-
         R.firstImput = false;
 
 
