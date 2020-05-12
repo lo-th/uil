@@ -633,7 +633,7 @@ var R = {
 
         if( R.parent === null ) return;
 
-        var keyCode = e.which;
+        var keyCode = e.which, isShift = e.shiftKey;
 
         R.firstImput = false;
 
@@ -661,14 +661,14 @@ var R = {
 
             R.clearInput();
 
-        } else if( keyCode === 9 ){ //tab key
+        //} else if( keyCode === 9 ){ //tab key
 
            // R.input.textContent = '';
 
         } else {
 
             if( R.input.isNum ){
-                if ( ((e.keyCode > 95) && (e.keyCode < 106)) || e.keyCode === 110 || e.keyCode === 109 ){
+                if ( ((e.keyCode > 47) && (e.keyCode < 58)) || ((e.keyCode > 95) && (e.keyCode < 106)) || e.keyCode === 190 || e.keyCode === 110 || e.keyCode === 109 ){
                     R.hiddenImput.readOnly = false;
                 } else {
                     R.hiddenImput.readOnly = true;
