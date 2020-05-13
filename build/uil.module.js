@@ -104,11 +104,20 @@ var T = {
     SVG_TYPE_D: [ 'pattern', 'defs', 'transform', 'stop', 'animate', 'radialGradient', 'linearGradient', 'animateMotion' ],
     SVG_TYPE_G: [ 'svg', 'rect', 'circle', 'path', 'polygon', 'text', 'g', 'line', 'foreignObject' ],
 
-    PI:Math.PI,
+    PI: Math.PI,
     TwoPI: Math.PI*2,
-    pi90:Math.PI * 0.5,
+    pi90: Math.PI * 0.5,
+    pi60: Math.PI/3,
     torad: Math.PI / 180,
     todeg: 180 / Math.PI,
+
+    clamp: function (v, min, max) {
+
+        v = v < min ? min : v;
+        v = v > max ? max : v;
+        return v;
+
+    },
 
     size: {  w: 240, h: 20, p: 30, s: 20 },
 
@@ -331,14 +340,6 @@ var T = {
                 T.purge( dom.childNodes[i] ); 
             }
         }
-
-    },
-
-    clamp: function ( value, min, max ) {
-
-        //return value <= min ? min : value >= max ? max : value;
-        return value < min ? min : value > max ? max : value;
-        //return Math.max( min, Math.min( max, value ) );
 
     },
 
@@ -628,27 +629,23 @@ var T = {
             color[0] = color[1];
         }
 
-        var tw = 83.95;
+        var tw = 84.90;
 
         // black / white
         ccc = [ [0, '#FFFFFF', 1], [50, '#FFFFFF', 0], [50, '#000000', 0], [100, '#000000', 1] ];
         T.makeGradiant( 'linearGradient', { id:'GL0', x1:0, y1:mid-tw, x2:0, y2:mid+tw, gradientUnits:"userSpaceOnUse" }, svg, ccc );
 
         ccc = [ [0, '#7f7f7f', 1], [50, '#7f7f7f', 0.5], [100, '#7f7f7f', 0] ];
-        T.makeGradiant( 'linearGradient', { id:'GL1', x1:mid-48.55, y1:0, x2:mid+98.50, y2:0, gradientUnits:"userSpaceOnUse" }, svg, ccc );
+        T.makeGradiant( 'linearGradient', { id:'GL1', x1:mid-49.05, y1:0, x2:mid+98, y2:0, gradientUnits:"userSpaceOnUse" }, svg, ccc );
 
-        
+        T.dom( 'g', null, { 'transform-origin': '128px 128px', 'transform':'rotate(0)' }, svg );//2
+        T.dom( 'polygon', '', { points:'78.95 43.1 78.95 212.85 226 128',  fill:'red'  }, svg, 2 );// 2,0
+        T.dom( 'polygon', '', { points:'78.95 43.1 78.95 212.85 226 128',  fill:'url(#GL1)','stroke-width':1, stroke:'url(#GL1)'  }, svg, 2 );//2,1
+        T.dom( 'polygon', '', { points:'78.95 43.1 78.95 212.85 226 128',  fill:'url(#GL0)','stroke-width':1, stroke:'url(#GL0)'  }, svg, 2 );//2,2
+        T.dom( 'path', '', { d:'M 255.75 136.5 Q 256 132.3 256 128 256 123.7 255.75 119.5 L 241 128 255.75 136.5 Z',  fill:'none','stroke-width':2, stroke:'#000'  }, svg, 2 );//2,3
+        //T.dom( 'circle', '', { cx:128+113, cy:128, r:6, 'stroke-width':3, stroke:'#000', fill:'none' }, svg, 2 );//2.3
 
-        T.dom( 'circle', '', { cx:0, cy:0, r:8, 'stroke-width':4, stroke:'#FFF', fill:'none' }, svg );//2
-
-        T.dom( 'g', null, { 'transform-origin': '128px 128px', 'transform':'rotate(0)' }, svg );//3
-        T.dom( 'polygon', '', { points:'78.95 43.1 78.95 212.85 226 128',  fill:'red'  }, svg, 3 );// 3,0
-        T.dom( 'polygon', '', { points:'78.95 43.1 78.95 212.85 226 128',  fill:'url(#GL1)','stroke-width':1, stroke:'url(#GL1)'  }, svg, 3 );// 3,1
-        T.dom( 'polygon', '', { points:'78.95 43.1 78.95 212.85 226 128',  fill:'url(#GL0)','stroke-width':1, stroke:'url(#GL0)'  }, svg, 3 );//3,2
-
-
-        T.dom( 'circle', '', { cx:128, cy:128, r:8, 'stroke-width':4, stroke:'#000', fill:'none' }, svg );//4
-
+        T.dom( 'circle', '', { cx:128, cy:128, r:6, 'stroke-width':2, stroke:'#000', fill:'none' }, svg );//3
 
         T.colorRing = svg;
 
@@ -2751,7 +2748,7 @@ function Color ( o ) {
 
     //this.autoHeight = true;
 
-    this.ctype = o.ctype || 'array';
+    this.ctype = o.ctype || 'hex';
 
     this.wfixe = this.sb > 256 ? 256 : this.sb;
 
@@ -2763,8 +2760,7 @@ function Color ( o ) {
 
     this.offset = new V2();
     this.decal = new V2();
-
-    //this.c[0].style.background = '#FF0000'
+    this.p = new V2();
 
     this.c[2] = this.dom( 'div',  this.css.txt + 'height:'+(this.h-4)+'px;' + 'border-radius:'+this.radius+'px; line-height:'+(this.h-8)+'px;' );
     this.s[2] = this.c[2].style;
@@ -2789,15 +2785,10 @@ function Color ( o ) {
     this.isDown = false;
     this.fistDown = false;
 
-    this.triangleRadius = 98;
-    this.triangleSideLength = Math.sqrt(3) * this.triangleRadius;
+    this.tr = 98;
+    this.tsl = Math.sqrt(3) * this.tr;
 
     this.hue = 0;
-	//this.saturation = 0;
-	//this.lightness = 0;
-
-	this.p = new V2();
-
     this.d = 256;
 
     this.setColor( this.value );
@@ -2867,21 +2858,11 @@ Color.prototype = Object.assign( Object.create( Proto.prototype ), {
 		}
 	},
 
-	/*down: function( e ){
-
-	    if(!this.isOpen) return;
-	    this.isDown = true;
-	    this.move( e );
-	    //return false;
-
-
-	},*/
-
 	mousemove: function ( e ) {
 
 	    var name = this.testZone( e.clientX, e.clientY );
 
-	    var off, d, hue, sat, lum, rad, x, y, rr;
+	    var off, d, hue, sat, lum, rad, x, y, rr, T = Tools;
 
 	    if( name === 'title' ){
 
@@ -2896,7 +2877,7 @@ Color.prototype = Object.assign( Object.create( Proto.prototype ), {
 		    off.y = e.clientY - ( this.zone.y + this.decal.y + this.mid );
 			d = off.length() * this.ratio;
 			rr = off.angle();
-			if(rr < 0) rr += 2 * Tools.PI;
+			if(rr < 0) rr += 2 * T.PI;
 						
 
 	    	if ( d < 128 ) this.cursor('crosshair');
@@ -2911,55 +2892,49 @@ Color.prototype = Object.assign( Object.create( Proto.prototype ), {
 
 			    if ( this.d < 128 ) {
 
-				    if ( this.d > this.triangleRadius ) { // outside round
+				    if ( this.d > this.tr ) { // outside hue
 
-				        hue = ( rr + Tools.pi90 ) / Tools.TwoPI;
+				        hue = ( rr + T.pi90 ) / T.TwoPI;
 				        this.hue = (hue + 1) % 1;
 				        this.setHSL([(hue + 1) % 1, this.hsl[1], this.hsl[2]]);
 
 				    } else { // triangle
 
-				    	x = (off.x )* this.ratio;
-				    	y = (off.y )* this.ratio;
+				    	x = off.x * this.ratio;
+				    	y = off.y * this.ratio;
 
-				    	var rr = (this.hue * Tools.TwoPI) + Tools.PI;
-				    	if(rr < 0) rr += 2 * Tools.PI;
+				    	var rr = (this.hue * T.TwoPI) + T.PI;
+				    	if(rr < 0) rr += 2 * T.PI;
 
 				    	rad = Math.atan2(-y, x);
-				    	if(rad < 0) rad += 2 * Tools.PI;
+				    	if(rad < 0) rad += 2 * T.PI;
 						
-
-				    	//var rad0 = (rad - Tools.pi90 + Tools.TwoPI - this.hue) % (Tools.TwoPI),
-				    	var rad0 = ( rad + Tools.pi90 + Tools.TwoPI +rr ) % (Tools.TwoPI),
-				    	rad1 = rad0 % ((2/3) * Tools.PI) - (Tools.PI/3),
-				    	a    = 0.5 * this.triangleRadius,
+				    	var rad0 = ( rad + T.pi90 + T.TwoPI + rr ) % (T.TwoPI),
+				    	rad1 = rad0 % ((2/3) * T.PI) - (T.pi60),
+				    	a    = 0.5 * this.tr,
 				    	b    = Math.tan(rad1) * a,
-				    	r    = Math.sqrt(x*x + y*y), // Pythagoras
-				    	maxR = Math.sqrt(a*a + b*b); // Pythagoras
+				    	r    = Math.sqrt(x*x + y*y),
+				    	maxR = Math.sqrt(a*a + b*b);
 
-				    	if(r > maxR) {
+				    	if( r > maxR ) {
 							var dx = Math.tan(rad1) * r;
 							var rad2 = Math.atan(dx / maxR);
-							if(rad2 > Tools.PI/3) {
-								rad2 = Tools.PI/3;
-							} else if(rad2 < -Tools.PI/3) {
-								rad2 = -Tools.PI/3;
-							}
+							if(rad2 > T.pi60)  rad2 = T.pi60;
+						    else if( rad2 < -T.pi60 ) rad2 = -T.pi60;
+						
 							rad += rad2 - rad1;
 
-							//rad0 = (rad + Tools.TwoPI - this.hue) % (Tools.TwoPI);
-							rad0 = (rad + Tools.pi90  + Tools.TwoPI +rr) % (Tools.TwoPI),
-							rad1 = rad0 % ((2/3) * Tools.PI) - (Tools.PI/3);
+							rad0 = (rad + T.pi90  + T.TwoPI + rr) % (T.TwoPI),
+							rad1 = rad0 % ((2/3) * T.PI) - (T.pi60);
 							b = Math.tan(rad1) * a;
-							r = maxR = Math.sqrt(a*a + b*b); // Pythagoras
+							r = maxR = Math.sqrt(a*a + b*b);
 						}
 
-						lum = ((Math.sin(rad0) * r) / this.triangleSideLength) + 0.5;
+						lum = ((Math.sin(rad0) * r) / this.tsl) + 0.5;
 				
-						var widthShare = 1 - (Math.abs(lum - 0.5) * 2);
-						sat = (((Math.cos(rad0) * r) + (this.triangleRadius / 2)) / (1.5 * this.triangleRadius)) / widthShare;
-						sat = Math.max(0, sat); // cannot be lower than 0
-						sat = Math.min(1, sat); // cannot be greater than 1
+						var w = 1 - (Math.abs(lum - 0.5) * 2);
+						sat = (((Math.cos(rad0) * r) + (this.tr / 2)) / (1.5 * this.tr)) / w;
+						sat = T.clamp( sat, 0, 1 );
 						
 				        this.setHSL([this.hsl[0], sat, lum]);
 
@@ -2967,9 +2942,6 @@ Color.prototype = Object.assign( Object.create( Proto.prototype ), {
 				}
 			}
 		}
-
-	    //console.log(this.isDraw)
-
 
 	},
 
@@ -3028,8 +3000,7 @@ Color.prototype = Object.assign( Object.create( Proto.prototype ), {
 	    
 	    this.value = this.bcolor;
 
-	    //this.setSvg( this.c[3], 'fill', cc, 2 );
-	    this.setSvg( this.c[3], 'fill', cc, 3, 0 );
+	    this.setSvg( this.c[3], 'fill', cc, 2, 0 );
 
 
 	    this.s[2].background = this.bcolor;
@@ -3051,6 +3022,7 @@ Color.prototype = Object.assign( Object.create( Proto.prototype ), {
 
 	    var unpack = Tools.unpack(color);
 	    if (this.bcolor != color && unpack) {
+
 	        this.bcolor = color;
 	        this.rgb = unpack;
 	        this.hsl = Tools.rgbToHsl( this.rgb );
@@ -3076,49 +3048,43 @@ Color.prototype = Object.assign( Object.create( Proto.prototype ), {
 	moveMarkers: function () {
 
 		var p = this.p;
-	    var ra = 128-15; 
+		var T = Tools;
+
 	    var c1 = this.invert ? '#fff' : '#000';
-	    var a = this.hsl[0] * Tools.TwoPI;
-	    var third = (2/3) * Tools.PI;
-	    var r = this.triangleRadius;
+	    var a = this.hsl[0] * T.TwoPI;
+	    var third = (2/3) * T.PI;
+	    var r = this.tr;
 	    var h = this.hsl[0];
 	    var s = this.hsl[1];
 	    var l = this.hsl[2];
 
-	    var angle = ( a-Tools.pi90 ) * Tools.todeg;
+	    var angle = ( a - T.pi90 ) * T.todeg;
 
-	    this.setSvg( this.c[3], 'transform', 'rotate('+angle+' )', 3 );
+	    h = - a + T.pi90;
 
-	    p.set( Math.sin(a) * ra, -Math.cos(a) * ra ).addScalar(128);
-	    this.setSvg( this.c[3], 'cx', p.x, 2 );
-	    this.setSvg( this.c[3], 'cy', p.y, 2 );
-	    
-	    
-	    h = -a+Tools.pi90;
-        // Colored point
-		var hx = this.hx =  Math.cos(h) * r;
-		var hy = this.hy = -Math.sin(h) * r;
-		// Black point
-		var sx = this.sx =  Math.cos(h - third) * r;
-		var sy = this.sy = -Math.sin(h - third) * r;
-		// White point
-		var vx = this.vx =  Math.cos(h + third) * r;
-		var vy = this.vy = -Math.sin(h + third) * r;
-		// Current point
+		var hx = Math.cos(h) * r;
+		var hy = -Math.sin(h) * r;
+		var sx = Math.cos(h - third) * r;
+		var sy = -Math.sin(h - third) * r;
+		var vx = Math.cos(h + third) * r;
+		var vy = -Math.sin(h + third) * r;
 		var mx = (sx + vx) / 2, my = (sy + vy) / 2, a  = (1 - 2 * Math.abs(l - .5)) * s;
 		var x = sx + (vx - sx) * l + (hx - mx) * a;
 		var y = sy + (vy - sy) * l + (hy - my) * a;
 
 	    p.set( x, y ).addScalar(128);
 
+	    //var ff = (1-l)*255;
+	    // this.setSvg( this.c[3], 'stroke', 'rgb('+ff+','+ff+','+ff+')', 3 );
 
+	    this.setSvg( this.c[3], 'transform', 'rotate('+angle+' )', 2 );
 
-	    this.setSvg( this.c[3], 'cx', p.x, 4 );
-	    this.setSvg( this.c[3], 'cy', p.y, 4 );
-	    var ff = (1-l)*255;
-	    this.setSvg( this.c[3], 'stroke', 'rgb('+ff+','+ff+','+ff+')', 4 );
-
+	    this.setSvg( this.c[3], 'cx', p.x, 3 );
+	    this.setSvg( this.c[3], 'cy', p.y, 3 );
 	    
+	    this.setSvg( this.c[3], 'stroke', this.invert ? '#fff' : '#000', 2, 3 );
+	    this.setSvg( this.c[3], 'stroke', this.invert ? '#fff' : '#000', 3 );
+	    this.setSvg( this.c[3], 'fill',this.bcolor, 3 );
 
 	},
 
@@ -3141,27 +3107,6 @@ Color.prototype = Object.assign( Object.create( Proto.prototype ), {
 	    s[3].height = this.wfixe + 'px';
     	s[3].left = this.decal.x + 'px';
 	    s[3].top = this.decal.y + 'px';
-
-	   /* this.c[4].width = this.c[4].height = this.ww;
-	    s[4].left = this.sa + 'px';
-	    s[4].top = this.decal + 'px';
-
-	    this.c[5].width = this.c[5].height = this.ww;
-	    s[5].left = this.sa + 'px';
-	    s[5].top = this.decal + 'px';
-
-	    this.ctxMask.translate(this.mid, this.mid);
-	    this.ctxOverlay.translate(this.mid, this.mid);
-
-	    if( this.isOpen ){ 
-	        this.redraw();
-
-	        //this.open();
-	        //this.h = this.ww+30;
-	        //this.c[0].height = this.h + 'px';
-	        //if( this.isUI ) this.main.calc();
-	    }*/
-
 
 	    this.ratio = 256/this.wfixe;
 	    this.square = 1 / (60*(this.wfixe/256));

@@ -20,11 +20,20 @@ var T = {
     SVG_TYPE_D: [ 'pattern', 'defs', 'transform', 'stop', 'animate', 'radialGradient', 'linearGradient', 'animateMotion' ],
     SVG_TYPE_G: [ 'svg', 'rect', 'circle', 'path', 'polygon', 'text', 'g', 'line', 'foreignObject' ],
 
-    PI:Math.PI,
+    PI: Math.PI,
     TwoPI: Math.PI*2,
-    pi90:Math.PI * 0.5,
+    pi90: Math.PI * 0.5,
+    pi60: Math.PI/3,
     torad: Math.PI / 180,
     todeg: 180 / Math.PI,
+
+    clamp: function (v, min, max) {
+
+        v = v < min ? min : v;
+        v = v > max ? max : v;
+        return v;
+
+    },
 
     size: {  w: 240, h: 20, p: 30, s: 20 },
 
@@ -247,14 +256,6 @@ var T = {
                 T.purge( dom.childNodes[i] ); 
             }
         }
-
-    },
-
-    clamp: function ( value, min, max ) {
-
-        //return value <= min ? min : value >= max ? max : value;
-        return value < min ? min : value > max ? max : value;
-        //return Math.max( min, Math.min( max, value ) );
 
     },
 
@@ -548,27 +549,23 @@ var T = {
         var br = (128 - s ) + 2;
         var bw = 60;
 
-        var tw = 83.95;
+        var tw = 84.90;
 
         // black / white
         ccc = [ [0, '#FFFFFF', 1], [50, '#FFFFFF', 0], [50, '#000000', 0], [100, '#000000', 1] ];
         T.makeGradiant( 'linearGradient', { id:'GL0', x1:0, y1:mid-tw, x2:0, y2:mid+tw, gradientUnits:"userSpaceOnUse" }, svg, ccc );
 
         ccc = [ [0, '#7f7f7f', 1], [50, '#7f7f7f', 0.5], [100, '#7f7f7f', 0] ];
-        T.makeGradiant( 'linearGradient', { id:'GL1', x1:mid-48.55, y1:0, x2:mid+98.50, y2:0, gradientUnits:"userSpaceOnUse" }, svg, ccc );
+        T.makeGradiant( 'linearGradient', { id:'GL1', x1:mid-49.05, y1:0, x2:mid+98, y2:0, gradientUnits:"userSpaceOnUse" }, svg, ccc );
 
-        
+        T.dom( 'g', null, { 'transform-origin': '128px 128px', 'transform':'rotate(0)' }, svg );//2
+        T.dom( 'polygon', '', { points:'78.95 43.1 78.95 212.85 226 128',  fill:'red'  }, svg, 2 );// 2,0
+        T.dom( 'polygon', '', { points:'78.95 43.1 78.95 212.85 226 128',  fill:'url(#GL1)','stroke-width':1, stroke:'url(#GL1)'  }, svg, 2 );//2,1
+        T.dom( 'polygon', '', { points:'78.95 43.1 78.95 212.85 226 128',  fill:'url(#GL0)','stroke-width':1, stroke:'url(#GL0)'  }, svg, 2 );//2,2
+        T.dom( 'path', '', { d:'M 255.75 136.5 Q 256 132.3 256 128 256 123.7 255.75 119.5 L 241 128 255.75 136.5 Z',  fill:'none','stroke-width':2, stroke:'#000'  }, svg, 2 );//2,3
+        //T.dom( 'circle', '', { cx:128+113, cy:128, r:6, 'stroke-width':3, stroke:'#000', fill:'none' }, svg, 2 );//2.3
 
-        T.dom( 'circle', '', { cx:0, cy:0, r:8, 'stroke-width':4, stroke:'#FFF', fill:'none' }, svg );//2
-
-        T.dom( 'g', null, { 'transform-origin': '128px 128px', 'transform':'rotate(0)' }, svg );//3
-        T.dom( 'polygon', '', { points:'78.95 43.1 78.95 212.85 226 128',  fill:'red'  }, svg, 3 );// 3,0
-        T.dom( 'polygon', '', { points:'78.95 43.1 78.95 212.85 226 128',  fill:'url(#GL1)','stroke-width':1, stroke:'url(#GL1)'  }, svg, 3 );// 3,1
-        T.dom( 'polygon', '', { points:'78.95 43.1 78.95 212.85 226 128',  fill:'url(#GL0)','stroke-width':1, stroke:'url(#GL0)'  }, svg, 3 );//3,2
-
-
-        T.dom( 'circle', '', { cx:128, cy:128, r:8, 'stroke-width':4, stroke:'#000', fill:'none' }, svg );//4
-
+        T.dom( 'circle', '', { cx:128, cy:128, r:6, 'stroke-width':2, stroke:'#000', fill:'none' }, svg );//3
 
         T.colorRing = svg;
 

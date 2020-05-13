@@ -58,7 +58,7 @@ function init() {
     renderer.gammaInput = true;
     renderer.gammaOutput = true;
     renderer.setClearColor( 0x000000, 0 );
-    renderer.domElement.style.cssText = 'position: fixed; top:0; left:0;';
+   // renderer.domElement.style.cssText = 'position: fixed; top:0; left:0;';
     document.getElementById('content').appendChild( renderer.domElement );
 
     camera = new THREE.PerspectiveCamera( 45, window.innerWidth / window.innerHeight, 1, 1000 );
@@ -150,7 +150,6 @@ function resize() {
     renderer.setSize( window.innerWidth, window.innerHeight );
 
 }
-
 
 
 function animate(time) {
