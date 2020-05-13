@@ -551,6 +551,12 @@ Object.assign( Proto.prototype, {
 
     },
 
+    rezone: function () {
+
+        Roots.needReZone = true;
+
+    },
+
     // ----------------------
     //  INPUT
     // ----------------------

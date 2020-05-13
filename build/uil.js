@@ -2126,6 +2126,12 @@
 
 	    },
 
+	    rezone: function () {
+
+	        Roots.needReZone = true;
+
+	    },
+
 	    // ----------------------
 	    //  INPUT
 	    // ----------------------
@@ -6917,6 +6923,10 @@
 	        if( this.isOpen ) { this.calcUis(); }
 	        if( this.isCanvas ) { this.draw( true ); }
 
+	    },
+
+	    rezone: function () {
+	        Roots.needReZone = true;
 	    },
 
 	    setWidth: function ( w ) {

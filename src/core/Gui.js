@@ -683,6 +683,10 @@ Object.assign( Gui.prototype, {
 
     },
 
+    rezone: function () {
+        Roots.needReZone = true;
+    },
+
     setWidth: function ( w ) {
 
         if( w ) this.zone.w = w;

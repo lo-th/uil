@@ -2121,6 +2121,12 @@ Object.assign( Proto.prototype, {
 
     },
 
+    rezone: function () {
+
+        Roots.needReZone = true;
+
+    },
+
     // ----------------------
     //  INPUT
     // ----------------------
@@ -6912,6 +6918,10 @@ Object.assign( Gui.prototype, {
         if( this.isOpen ) this.calcUis();
         if( this.isCanvas ) this.draw( true );
 
+    },
+
+    rezone: function () {
+        Roots.needReZone = true;
     },
 
     setWidth: function ( w ) {
