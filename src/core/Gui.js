@@ -151,6 +151,8 @@ Object.assign( Gui.prototype, {
         if( h !== undefined ) this.forceHeight = h;
         this.setHeight();
 
+        Roots.needReZone = true;
+
     },
 
     //callback: function () {},
@@ -654,8 +656,6 @@ Object.assign( Gui.prototype, {
             this.maxHeight = hhh - this.zone.y - this.bh;
 
             var diff = this.h - this.maxHeight;
-
-            //console.log(diff)
 
             if( diff > 1 ){ //this.h > this.maxHeight ){
 

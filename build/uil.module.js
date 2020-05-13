@@ -5314,6 +5314,7 @@ Numeric.prototype = Object.assign( Object.create( Proto.prototype ), {
     unselect: function () {
 
         var s = this.s;
+        if(!s) return;
         s[2].width = 0 + 'px';
         s[this.cursorId].width = 0 + 'px';
 
@@ -5729,6 +5730,7 @@ TextInput.prototype = Object.assign( Object.create( Proto.prototype ), {
     unselect: function () {
 
         var s = this.s;
+        if(!s) return;
         s[2].width = 0 + 'px';
         s[4].width = 0 + 'px';
 
@@ -5746,6 +5748,9 @@ TextInput.prototype = Object.assign( Object.create( Proto.prototype ), {
     // ----------------------
 
     rSize: function () {
+
+        
+
 
         Proto.prototype.rSize.call( this );
 
@@ -6389,6 +6394,8 @@ Object.assign( Gui.prototype, {
         if( h !== undefined ) this.forceHeight = h;
         this.setHeight();
 
+        Roots.needReZone = true;
+
     },
 
     //callback: function () {},
@@ -6891,8 +6898,6 @@ Object.assign( Gui.prototype, {
             this.maxHeight = hhh - this.zone.y - this.bh;
 
             var diff = this.h - this.maxHeight;
-
-            //console.log(diff)
 
             if( diff > 1 ){ //this.h > this.maxHeight ){
 

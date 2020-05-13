@@ -126,6 +126,7 @@ TextInput.prototype = Object.assign( Object.create( Proto.prototype ), {
     unselect: function () {
 
         var s = this.s;
+        if(!s) return;
         s[2].width = 0 + 'px';
         s[4].width = 0 + 'px';
 
@@ -143,6 +144,9 @@ TextInput.prototype = Object.assign( Object.create( Proto.prototype ), {
     // ----------------------
 
     rSize: function () {
+
+        
+
 
         Proto.prototype.rSize.call( this );
 

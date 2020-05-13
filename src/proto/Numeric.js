@@ -282,6 +282,7 @@ Numeric.prototype = Object.assign( Object.create( Proto.prototype ), {
     unselect: function () {
 
         var s = this.s;
+        if(!s) return;
         s[2].width = 0 + 'px';
         s[this.cursorId].width = 0 + 'px';
 
