@@ -152,8 +152,8 @@ var T = {
 
         inputBorder: '#454545',
         inputBorderSelect: '#005AAA',
-        inputBg: 'rgba(0,0,0,0.2)',
-        inputOver: 'rgba(80,80,170,0.2)',
+        inputBg: 'rgba(0,0,0,0.1)',
+        inputOver: 'rgba(0,0,0,0.2)',
 
         border : '#454545',
         borderOver : '#5050AA',
@@ -177,6 +177,7 @@ var T = {
         hide: 'rgba(0,0,0,0)',
 
         groupBorder: 'none',
+        buttonBorder: 'none',
 
     },
 
@@ -185,6 +186,7 @@ var T = {
     css : {
         //unselect: '-o-user-select:none; -ms-user-select:none; -khtml-user-select:none; -webkit-user-select:none; -moz-user-select:none;', 
         basic: 'position:absolute; pointer-events:none; box-sizing:border-box; margin:0; padding:0; overflow:hidden; ' + '-o-user-select:none; -ms-user-select:none; -khtml-user-select:none; -webkit-user-select:none; -moz-user-select:none;',
+        button:'display:flex; justify-content:center; align-items:center; text-align:center;',
     },
 
     // svg path
@@ -223,7 +225,7 @@ var T = {
         colors.text = color;
         css.txt = css.basic + 'font-family:'+font+'; font-size:'+size+'px; color:'+color+'; padding:2px 10px; left:0; top:2px; height:16px; width:100px; overflow:hidden; white-space: nowrap;';
         if( shadow ) css.txt += ' text-shadow:'+ shadow + '; '; //"1px 1px 1px #ff0000";
-        css.txtselect = css.txt + 'padding:2px 5px; border:1px dashed ' + colors.border + '; background:'+ colors.txtselectbg+';';
+        css.txtselect = css.txt + 'display:flex; justify-content:left; align-items:center; text-align:left;' +'padding:2px 5px; border:1px dashed ' + colors.border + '; background:'+ colors.txtselectbg+';';
         css.item = css.txt + 'position:relative; background:rgba(0,0,0,0.2); margin-bottom:1px;';
 
     },
@@ -1663,8 +1665,10 @@ function Proto ( o ) {
     // Font Color;
     this.titleColor = o.titleColor || this.colors.text;
     this.fontColor = o.fontColor || this.colors.text;
+    this.fontSelect = o.fontSelect || this.colors.textOver;
 
-    if( o.color !== undefined ){ 
+    if( o.color !== undefined ) this.fontColor = o.color;
+        /*{ 
 
         if(o.color === 'n') o.color = '#ff0000';
 
@@ -1674,7 +1678,7 @@ function Proto ( o ) {
             this.titleColor = this.fontColor;
         }
         
-    }
+    }*/
     
     /*if( o.color !== undefined ){ 
         if( !isNaN(o.color) ) this.fontColor = Tools.hexToHtml(o.color);
@@ -2264,7 +2268,7 @@ function Button ( o ) {
 
     for( var i = 0; i < this.lng; i++ ){
 
-        this.c[i+2] = this.dom( 'div', this.css.txt + 'text-align:center; top:1px; background:'+this.buttonColor+'; height:'+(this.h-2)+'px; border-radius:'+this.radius+'px; line-height:'+(this.h-4)+'px;' );
+        this.c[i+2] = this.dom( 'div', this.css.txt + this.css.button + 'top:1px; background:'+this.buttonColor+'; height:'+(this.h-2)+'px; border:'+this.colors.buttonBorder+'; border-radius:'+this.radius+'px;' );
         this.c[i+2].style.color = this.fontColor;
         this.c[i+2].innerHTML = this.values[i];
         this.stat[i] = 1;
@@ -2387,8 +2391,8 @@ Button.prototype = Object.assign( Object.create( Proto.prototype ), {
             switch( n ){
 
                 case 1: this.stat[i] = 1; this.s[ i+2 ].color = this.fontColor; this.s[ i+2 ].background = this.buttonColor; break;
-                case 2: this.stat[i] = 2; this.s[ i+2 ].color = '#FFF';         this.s[ i+2 ].background = this.colors.select; break;
-                case 3: this.stat[i] = 3; this.s[ i+2 ].color = '#FFF';         this.s[ i+2 ].background = this.colors.down; break;
+                case 2: this.stat[i] = 2; this.s[ i+2 ].color = this.fontSelect; this.s[ i+2 ].background = this.colors.select; break;
+                case 3: this.stat[i] = 3; this.s[ i+2 ].color = this.fontSelect; this.s[ i+2 ].background = this.colors.down; break;
 
             }
 
@@ -5087,7 +5091,7 @@ function Numeric( o ){
     while(i--){
 
         if(this.isAngle) this.value[i] = (this.value[i] * 180 / Math.PI).toFixed( this.precision );
-        this.c[3+i] = this.dom( 'div', this.css.txtselect + ' height:'+(this.h-4)+'px; line-height:'+(this.h-8)+'px;');//letter-spacing:-1px;
+        this.c[3+i] = this.dom( 'div', this.css.txtselect + ' height:'+(this.h-4)+'px; background:' + this.colors.inputBg + '; borderColor:' + this.colors.inputBorder+'; border-radius:'+this.radius+'px;');
         if(o.center) this.c[2+i].style.textAlign = 'center';
         this.c[3+i].textContent = this.value[i];
         this.c[3+i].style.color = this.fontColor;
@@ -5291,11 +5295,30 @@ Numeric.prototype = Object.assign( Object.create( Proto.prototype ), {
     },
 
 
-    setValue: function ( v, n ) {
+    setValue: function ( v ) {
 
-        n = n || 0;
+        this.value = v;
+        
+        this.update();
+
+        //var i = this.value.length;
+
+        /*n = n || 0;
         this.value[n] = this.numValue( v );
-        this.c[ 3 + n ].textContent = this.value[n];
+        this.c[ 3 + n ].textContent = this.value[n];*/
+
+    },
+
+    update: function ( up ) {
+
+        var i = this.value.length;
+
+        while(i--){
+             this.value[i] = this.numValue( this.value[i] );
+             this.c[ 3 + i ].textContent = this.value[i];
+        }
+
+        if( up ) this.send();
 
     },
 
@@ -5323,6 +5346,8 @@ Numeric.prototype = Object.assign( Object.create( Proto.prototype ), {
         s[this.cursorId].width = 0 + 'px';
 
     },
+
+
 
     validate: function () {
 
@@ -5386,10 +5411,13 @@ function Slide ( o ){
     this.isOver = false;
     this.allway = o.allway || false;
 
+    this.isDeg = o.isDeg || false;
+
     this.firstImput = false;
 
     //this.c[2] = this.dom( 'div', this.css.txtselect + 'letter-spacing:-1px; text-align:right; width:47px; border:1px dashed '+this.defaultBorderColor+'; color:'+ this.fontColor );
-    this.c[2] = this.dom( 'div', this.css.txtselect + 'text-align:right; width:47px; border:1px dashed '+this.defaultBorderColor+'; color:'+ this.fontColor );
+    //this.c[2] = this.dom( 'div', this.css.txtselect + 'text-align:right; width:47px; border:1px dashed '+this.defaultBorderColor+'; color:'+ this.fontColor );
+    this.c[2] = this.dom( 'div', this.css.txtselect + 'border:none; width:47px; color:'+ this.fontColor );
     //this.c[2] = this.dom( 'div', this.css.txtselect + 'letter-spacing:-1px; text-align:right; width:47px; color:'+ this.fontColor );
     this.c[3] = this.dom( 'div', this.css.basic + ' top:0; height:'+this.h+'px;' );
     this.c[4] = this.dom( 'div', this.css.basic + 'background:'+this.colors.scrollback+'; top:2px; height:'+(this.h-4)+'px;' );
@@ -5470,9 +5498,9 @@ Slide.prototype = Object.assign( Object.create( Proto.prototype ), {
             
         }
 
-        if( name === 'text' ){
-            this.setInput( this.c[2], function(){ this.validate(); }.bind(this) );
-        }
+        /*if( name === 'text' ){
+            this.setInput( this.c[2], function(){ this.validate() }.bind(this) );
+        }*/
 
         return true;
 
@@ -5487,8 +5515,8 @@ Slide.prototype = Object.assign( Object.create( Proto.prototype ), {
         if( name === 'scroll' ) {
             this.mode(1);
             this.cursor('w-resize');
-        } else if(name === 'text'){ 
-            this.cursor('pointer');
+        //} else if(name === 'text'){ 
+            //this.cursor('pointer');
         } else {
             this.cursor();
         }
@@ -5509,7 +5537,7 @@ Slide.prototype = Object.assign( Object.create( Proto.prototype ), {
 
     },
 
-    keydown: function ( e ) { return true; },
+    //keydown: function ( e ) { return true; },
 
     // ----------------------
 
@@ -5522,7 +5550,7 @@ Slide.prototype = Object.assign( Object.create( Proto.prototype ), {
             this.update(true); 
         }
 
-        else this.c[2].textContent = this.value;
+        else this.c[2].textContent = this.value + (this.isDeg ? '°':'');
 
     },
 
@@ -5572,7 +5600,7 @@ Slide.prototype = Object.assign( Object.create( Proto.prototype ), {
        
         if(this.model !== 3) this.s[5].width = ww + 'px';
         if(this.s[6]) this.s[6].left = ( this.sa + ww + 3 ) + 'px';
-        this.c[2].textContent = this.value;
+        this.c[2].textContent = this.value + (this.isDeg ? '°':'');
 
         if( up ) this.send();
 
@@ -5625,7 +5653,7 @@ function TextInput( o ){
     // bg
     this.c[2] = this.dom( 'div', this.css.basic + ' background:' + this.colors.select + '; top:4px; width:0px; height:' + (this.h-8) + 'px;' );
 
-    this.c[3] = this.dom( 'div', this.css.txtselect + 'height:' + (this.h-4) + 'px; line-height:'+(this.h-8)+'px; background:' + this.colors.inputBg + '; borderColor:' + this.colors.inputBorder+'; border-radius:'+this.radius+'px;' );
+    this.c[3] = this.dom( 'div', this.css.txtselect + 'height:' + (this.h-4) + 'px; background:' + this.colors.inputBg + '; borderColor:' + this.colors.inputBorder+'; border-radius:'+this.radius+'px;' );
     this.c[3].textContent = this.value;
 
     // cursor
@@ -5831,6 +5859,8 @@ function Selector ( o ) {
     this.isDown = false;
 
     this.buttonColor = o.bColor || this.colors.button;
+    this.buttonOver = o.bOver || this.colors.over;
+    this.buttonDown = o.bDown || this.colors.select;
 
     this.lng = this.values.length;
     this.tmp = [];
@@ -5843,16 +5873,15 @@ function Selector ( o ) {
         sel = false;
         if( this.values[i] === this.value ) sel = true;
 
-        this.c[i+2] = this.dom( 'div', this.css.txt + 'text-align:center; top:1px; background:'+(sel? this.colors.select : this.buttonColor)+'; height:'+(this.h-2)+'px; border-radius:'+this.radius+'px; line-height:'+(this.h-4)+'px;' );
-        this.c[i+2].style.color = sel ? '#FFF' : this.fontColor;
+        this.c[i+2] = this.dom( 'div', this.css.txt + this.css.button + ' top:1px; background:'+(sel? this.buttonDown : this.buttonColor)+'; height:'+(this.h-2)+'px; border:'+this.colors.buttonBorder+'; border-radius:'+this.radius+'px;' );
+        this.c[i+2].style.color = sel ? this.fontSelect : this.fontColor;
         this.c[i+2].innerHTML = this.values[i];
-        //this.c[i+2].name = this.values[i];
         
         this.stat[i] = sel ? 3:1;
     }
 
     this.init();
-
+ 
 }
 
 Selector.prototype = Object.assign( Object.create( Proto.prototype ), {
@@ -5966,9 +5995,9 @@ Selector.prototype = Object.assign( Object.create( Proto.prototype ), {
         
             switch( n ){
 
-                case 1: this.stat[i] = 1; this.s[ i+2 ].color = this.fontColor; this.s[ i+2 ].background = this.buttonColor; break;
-                case 2: this.stat[i] = 2; this.s[ i+2 ].color = '#FFF';         this.s[ i+2 ].background = this.colors.over; break;
-                case 3: this.stat[i] = 3; this.s[ i+2 ].color = '#FFF';         this.s[ i+2 ].background = this.colors.select; break;
+                case 1: this.stat[i] = 1; this.s[ i+2 ].color = this.fontColor;  this.s[ i+2 ].background = this.buttonColor; break;
+                case 2: this.stat[i] = 2; this.s[ i+2 ].color = this.fontSelect; this.s[ i+2 ].background = this.buttonOver; break;
+                case 3: this.stat[i] = 3; this.s[ i+2 ].color = this.fontSelect; this.s[ i+2 ].background = this.buttonDown; break;
 
             }
 
@@ -6195,30 +6224,26 @@ function Grid ( o ) {
     //this.selected = null;
     this.isDown = false;
 
-    this.bsizeonColor = o.bColor || this.colors.button;
-    
+    this.buttonColor = o.bColor || this.colors.button;
+    this.buttonOver = o.bOver || this.colors.over;
+    this.buttonDown = o.bDown || this.colors.select;
+
+    this.spaces = o.spaces || [10,3];
+    this.bsize = o.bsize || [90,20];
+
+
 
     this.lng = this.values.length;
     this.tmp = [];
     this.stat = [];
-
     this.grid = [2, Math.round( this.lng * 0.5 ) ];
-    this.spaces = [10,3];
-    this.bsize = [70,18];
-
     this.h = Math.round( this.lng * 0.5 ) * ( this.bsize[1] + this.spaces[1] ) + this.spaces[1]; 
-
     this.c[1].textContent = '';
 
-   
+    this.c[2] = this.dom( 'table', this.css.basic + 'width:100%; top:'+(this.spaces[1]-2)+'px; height:auto; border-collapse:separate; border:none; border-spacing: '+(this.spaces[0]-2)+'px '+(this.spaces[1]-2)+'px;' );
 
-    this.c[2] = this.dom( 'table', this.css.basic + 'width:100%; top:'+(this.spaces[1]-2)+'px; height:auto; border-collapse:separate; border: none; border-spacing: '+(this.spaces[0]-2)+'px '+(this.spaces[1]-2)+'px;' );
+    var n = 0, b, td, tr;
 
-    var n = 0, b;
-
-    /*for(var i = 0; i<this.lng; i++){
-
-    }*/
     this.buttons = [];
     this.stat = [];
     this.tmpX = [];
@@ -6226,17 +6251,17 @@ function Grid ( o ) {
 
 
     for( var i = 0; i < this.grid[1]; i++ ){
-        var tr = this.c[2].insertRow();
+        tr = this.c[2].insertRow();
         tr.style.cssText = 'pointer-events:none;';
         for( var j = 0; j < this.grid[0]; j++ ){
 
-            var td = tr.insertCell();
+            td = tr.insertCell();
             td.style.cssText = 'pointer-events:none;';
 
             if( this.values[n] ){
 
                 b = document.createElement( 'div' );
-                b.style.cssText = this.css.txt + 'position:static; width:'+this.bsize[0]+'px; height:'+this.bsize[1]+'px; text-align:center;  left:auto; right:auto; background:'+this.bsizeonColor+';  border-radius:'+this.radius+'px; line-height:'+(this.bsize[1]-4)+'px;';
+                b.style.cssText = this.css.txt + this.css.button + 'position:static; width:'+this.bsize[0]+'px; height:'+this.bsize[1]+'px; border:'+this.colors.buttonBorder+'; left:auto; right:auto; background:'+this.buttonColor+';  border-radius:'+this.radius+'px;';
                 b.innerHTML = this.values[n];
                 td.appendChild( b );
 
@@ -6258,8 +6283,6 @@ function Grid ( o ) {
 
         }
     }
-
-
 
     this.init();
 
@@ -6378,9 +6401,9 @@ Grid.prototype = Object.assign( Object.create( Proto.prototype ), {
         
             switch( n ){
 
-                case 1: this.stat[i] = 1; this.buttons[ i ].style.color = this.fontColor; this.buttons[ i ].style.background = this.bsizeonColor; break;
-                case 2: this.stat[i] = 2; this.buttons[ i ].style.color = '#FFF';       this.buttons[ i ].style.background = this.colors.select; break;
-                case 3: this.stat[i] = 3; this.buttons[ i ].style.color = '#FFF';       this.buttons[ i ].style.background = this.colors.down; break;
+                case 1: this.stat[i] = 1; this.buttons[ i ].style.color = this.fontColor;  this.buttons[ i ].style.background = this.buttonColor; break;
+                case 2: this.stat[i] = 2; this.buttons[ i ].style.color = this.fontSelect; this.buttons[ i ].style.background = this.buttonOver; break;
+                case 3: this.stat[i] = 3; this.buttons[ i ].style.color = this.fontSelect; this.buttons[ i ].style.background = this.buttonDown; break;
 
             }
 

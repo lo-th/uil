@@ -15,6 +15,8 @@ function Selector ( o ) {
     this.isDown = false;
 
     this.buttonColor = o.bColor || this.colors.button;
+    this.buttonOver = o.bOver || this.colors.over;
+    this.buttonDown = o.bDown || this.colors.select;
 
     this.lng = this.values.length;
     this.tmp = [];
@@ -27,16 +29,15 @@ function Selector ( o ) {
         sel = false;
         if( this.values[i] === this.value ) sel = true;
 
-        this.c[i+2] = this.dom( 'div', this.css.txt + 'text-align:center; top:1px; background:'+(sel? this.colors.select : this.buttonColor)+'; height:'+(this.h-2)+'px; border-radius:'+this.radius+'px; line-height:'+(this.h-4)+'px;' );
-        this.c[i+2].style.color = sel ? '#FFF' : this.fontColor;
+        this.c[i+2] = this.dom( 'div', this.css.txt + this.css.button + ' top:1px; background:'+(sel? this.buttonDown : this.buttonColor)+'; height:'+(this.h-2)+'px; border:'+this.colors.buttonBorder+'; border-radius:'+this.radius+'px;' );
+        this.c[i+2].style.color = sel ? this.fontSelect : this.fontColor;
         this.c[i+2].innerHTML = this.values[i];
-        //this.c[i+2].name = this.values[i];
         
         this.stat[i] = sel ? 3:1;
     }
 
     this.init();
-
+ 
 }
 
 Selector.prototype = Object.assign( Object.create( Proto.prototype ), {
@@ -150,9 +151,9 @@ Selector.prototype = Object.assign( Object.create( Proto.prototype ), {
         
             switch( n ){
 
-                case 1: this.stat[i] = 1; this.s[ i+2 ].color = this.fontColor; this.s[ i+2 ].background = this.buttonColor; break;
-                case 2: this.stat[i] = 2; this.s[ i+2 ].color = '#FFF';         this.s[ i+2 ].background = this.colors.over; break;
-                case 3: this.stat[i] = 3; this.s[ i+2 ].color = '#FFF';         this.s[ i+2 ].background = this.colors.select; break;
+                case 1: this.stat[i] = 1; this.s[ i+2 ].color = this.fontColor;  this.s[ i+2 ].background = this.buttonColor; break;
+                case 2: this.stat[i] = 2; this.s[ i+2 ].color = this.fontSelect; this.s[ i+2 ].background = this.buttonOver; break;
+                case 3: this.stat[i] = 3; this.s[ i+2 ].color = this.fontSelect; this.s[ i+2 ].background = this.buttonDown; break;
 
             }
 

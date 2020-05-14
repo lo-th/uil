@@ -93,8 +93,10 @@ function Proto ( o ) {
     // Font Color;
     this.titleColor = o.titleColor || this.colors.text;
     this.fontColor = o.fontColor || this.colors.text;
+    this.fontSelect = o.fontSelect || this.colors.textOver;
 
-    if( o.color !== undefined ){ 
+    if( o.color !== undefined ) this.fontColor = o.color;
+        /*{ 
 
         if(o.color === 'n') o.color = '#ff0000';
 
@@ -104,7 +106,7 @@ function Proto ( o ) {
             this.titleColor = this.fontColor;
         }
         
-    }
+    }*/
     
     /*if( o.color !== undefined ){ 
         if( !isNaN(o.color) ) this.fontColor = Tools.hexToHtml(o.color);

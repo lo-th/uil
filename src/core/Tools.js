@@ -68,8 +68,8 @@ var T = {
 
         inputBorder: '#454545',
         inputBorderSelect: '#005AAA',
-        inputBg: 'rgba(0,0,0,0.2)',
-        inputOver: 'rgba(80,80,170,0.2)',
+        inputBg: 'rgba(0,0,0,0.1)',
+        inputOver: 'rgba(0,0,0,0.2)',
 
         border : '#454545',
         borderOver : '#5050AA',
@@ -93,6 +93,7 @@ var T = {
         hide: 'rgba(0,0,0,0)',
 
         groupBorder: 'none',
+        buttonBorder: 'none',
 
     },
 
@@ -101,6 +102,7 @@ var T = {
     css : {
         //unselect: '-o-user-select:none; -ms-user-select:none; -khtml-user-select:none; -webkit-user-select:none; -moz-user-select:none;', 
         basic: 'position:absolute; pointer-events:none; box-sizing:border-box; margin:0; padding:0; overflow:hidden; ' + '-o-user-select:none; -ms-user-select:none; -khtml-user-select:none; -webkit-user-select:none; -moz-user-select:none;',
+        button:'display:flex; justify-content:center; align-items:center; text-align:center;',
     },
 
     // svg path
@@ -139,7 +141,7 @@ var T = {
         colors.text = color;
         css.txt = css.basic + 'font-family:'+font+'; font-size:'+size+'px; color:'+color+'; padding:2px 10px; left:0; top:2px; height:16px; width:100px; overflow:hidden; white-space: nowrap;';
         if( shadow ) css.txt += ' text-shadow:'+ shadow + '; '; //"1px 1px 1px #ff0000";
-        css.txtselect = css.txt + 'padding:2px 5px; border:1px dashed ' + colors.border + '; background:'+ colors.txtselectbg+';';
+        css.txtselect = css.txt + 'display:flex; justify-content:left; align-items:center; text-align:left;' +'padding:2px 5px; border:1px dashed ' + colors.border + '; background:'+ colors.txtselectbg+';';
         css.item = css.txt + 'position:relative; background:rgba(0,0,0,0.2); margin-bottom:1px;';
 
     },

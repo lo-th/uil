@@ -51,7 +51,7 @@ function Numeric( o ){
     while(i--){
 
         if(this.isAngle) this.value[i] = (this.value[i] * 180 / Math.PI).toFixed( this.precision );
-        this.c[3+i] = this.dom( 'div', this.css.txtselect + ' height:'+(this.h-4)+'px; line-height:'+(this.h-8)+'px;');//letter-spacing:-1px;
+        this.c[3+i] = this.dom( 'div', this.css.txtselect + ' height:'+(this.h-4)+'px; background:' + this.colors.inputBg + '; borderColor:' + this.colors.inputBorder+'; border-radius:'+this.radius+'px;');
         if(o.center) this.c[2+i].style.textAlign = 'center';
         this.c[3+i].textContent = this.value[i];
         this.c[3+i].style.color = this.fontColor;
@@ -255,11 +255,30 @@ Numeric.prototype = Object.assign( Object.create( Proto.prototype ), {
     },
 
 
-    setValue: function ( v, n ) {
+    setValue: function ( v ) {
 
-        n = n || 0;
+        this.value = v;
+        
+        this.update();
+
+        //var i = this.value.length;
+
+        /*n = n || 0;
         this.value[n] = this.numValue( v );
-        this.c[ 3 + n ].textContent = this.value[n];
+        this.c[ 3 + n ].textContent = this.value[n];*/
+
+    },
+
+    update: function ( up ) {
+
+        var i = this.value.length;
+
+        while(i--){
+             this.value[i] = this.numValue( this.value[i] );
+             this.c[ 3 + i ].textContent = this.value[i];
+        }
+
+        if( up ) this.send();
 
     },
 
@@ -287,6 +306,8 @@ Numeric.prototype = Object.assign( Object.create( Proto.prototype ), {
         s[this.cursorId].width = 0 + 'px';
 
     },
+
+
 
     validate: function () {
 

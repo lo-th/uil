@@ -26,7 +26,7 @@ function Button ( o ) {
 
     for( var i = 0; i < this.lng; i++ ){
 
-        this.c[i+2] = this.dom( 'div', this.css.txt + 'text-align:center; top:1px; background:'+this.buttonColor+'; height:'+(this.h-2)+'px; border-radius:'+this.radius+'px; line-height:'+(this.h-4)+'px;' );
+        this.c[i+2] = this.dom( 'div', this.css.txt + this.css.button + 'top:1px; background:'+this.buttonColor+'; height:'+(this.h-2)+'px; border:'+this.colors.buttonBorder+'; border-radius:'+this.radius+'px;' );
         this.c[i+2].style.color = this.fontColor;
         this.c[i+2].innerHTML = this.values[i];
         this.stat[i] = 1;
@@ -149,8 +149,8 @@ Button.prototype = Object.assign( Object.create( Proto.prototype ), {
             switch( n ){
 
                 case 1: this.stat[i] = 1; this.s[ i+2 ].color = this.fontColor; this.s[ i+2 ].background = this.buttonColor; break;
-                case 2: this.stat[i] = 2; this.s[ i+2 ].color = '#FFF';         this.s[ i+2 ].background = this.colors.select; break;
-                case 3: this.stat[i] = 3; this.s[ i+2 ].color = '#FFF';         this.s[ i+2 ].background = this.colors.down; break;
+                case 2: this.stat[i] = 2; this.s[ i+2 ].color = this.fontSelect; this.s[ i+2 ].background = this.colors.select; break;
+                case 3: this.stat[i] = 3; this.s[ i+2 ].color = this.fontSelect; this.s[ i+2 ].background = this.colors.down; break;
 
             }
 

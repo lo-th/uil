@@ -17,10 +17,13 @@ function Slide ( o ){
     this.isOver = false;
     this.allway = o.allway || false;
 
+    this.isDeg = o.isDeg || false;
+
     this.firstImput = false;
 
     //this.c[2] = this.dom( 'div', this.css.txtselect + 'letter-spacing:-1px; text-align:right; width:47px; border:1px dashed '+this.defaultBorderColor+'; color:'+ this.fontColor );
-    this.c[2] = this.dom( 'div', this.css.txtselect + 'text-align:right; width:47px; border:1px dashed '+this.defaultBorderColor+'; color:'+ this.fontColor );
+    //this.c[2] = this.dom( 'div', this.css.txtselect + 'text-align:right; width:47px; border:1px dashed '+this.defaultBorderColor+'; color:'+ this.fontColor );
+    this.c[2] = this.dom( 'div', this.css.txtselect + 'border:none; width:47px; color:'+ this.fontColor );
     //this.c[2] = this.dom( 'div', this.css.txtselect + 'letter-spacing:-1px; text-align:right; width:47px; color:'+ this.fontColor );
     this.c[3] = this.dom( 'div', this.css.basic + ' top:0; height:'+this.h+'px;' );
     this.c[4] = this.dom( 'div', this.css.basic + 'background:'+this.colors.scrollback+'; top:2px; height:'+(this.h-4)+'px;' );
@@ -101,9 +104,9 @@ Slide.prototype = Object.assign( Object.create( Proto.prototype ), {
             
         }
 
-        if( name === 'text' ){
+        /*if( name === 'text' ){
             this.setInput( this.c[2], function(){ this.validate() }.bind(this) );
-        }
+        }*/
 
         return true;
 
@@ -118,8 +121,8 @@ Slide.prototype = Object.assign( Object.create( Proto.prototype ), {
         if( name === 'scroll' ) {
             this.mode(1);
             this.cursor('w-resize');
-        } else if(name === 'text'){ 
-            this.cursor('pointer');
+        //} else if(name === 'text'){ 
+            //this.cursor('pointer');
         } else {
             this.cursor();
         }
@@ -140,7 +143,7 @@ Slide.prototype = Object.assign( Object.create( Proto.prototype ), {
 
     },
 
-    keydown: function ( e ) { return true; },
+    //keydown: function ( e ) { return true; },
 
     // ----------------------
 
@@ -153,7 +156,7 @@ Slide.prototype = Object.assign( Object.create( Proto.prototype ), {
             this.update(true); 
         }
 
-        else this.c[2].textContent = this.value;
+        else this.c[2].textContent = this.value + (this.isDeg ? '°':'');
 
     },
 
@@ -203,7 +206,7 @@ Slide.prototype = Object.assign( Object.create( Proto.prototype ), {
        
         if(this.model !== 3) this.s[5].width = ww + 'px';
         if(this.s[6]) this.s[6].left = ( this.sa + ww + 3 ) + 'px';
-        this.c[2].textContent = this.value;
+        this.c[2].textContent = this.value + (this.isDeg ? '°':'');
 
         if( up ) this.send();
 
