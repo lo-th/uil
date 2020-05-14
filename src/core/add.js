@@ -16,7 +16,7 @@ import { Title } from '../proto/Title.js';
 import { Selector } from '../proto/Selector.js';
 import { Empty } from '../proto/Empty.js';
 import { Item } from '../proto/Item.js';
-
+import { Grid } from '../proto/Grid.js';
 /*function autoType () {
 
     var a = arguments;
@@ -73,6 +73,7 @@ function add () {
         case 'selector': n = new Selector(o); break;
         case 'empty': case 'space': n = new Empty(o); break;
         case 'item': n = new Item(o); break;
+        case 'grid': n = new Grid(o); break;
 
     }
 

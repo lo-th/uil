@@ -8,7 +8,7 @@ function Button ( o ) {
 
     this.values = o.value || this.txt;
 
-    if(typeof this.values === 'string' ) this.values = [this.values];
+    if( typeof this.values === 'string' ) this.values = [this.values];
 
     //this.selected = null;
     this.isDown = false;
@@ -17,17 +17,20 @@ function Button ( o ) {
 
     this.isLoadButton = o.loader || false;
     this.isDragButton = o.drag || false;
+    
     if( this.isDragButton ) this.isLoadButton = true;
 
     this.lng = this.values.length;
     this.tmp = [];
     this.stat = [];
 
-    for(var i = 0; i < this.lng; i++){
+    for( var i = 0; i < this.lng; i++ ){
+
         this.c[i+2] = this.dom( 'div', this.css.txt + 'text-align:center; top:1px; background:'+this.buttonColor+'; height:'+(this.h-2)+'px; border-radius:'+this.radius+'px; line-height:'+(this.h-4)+'px;' );
         this.c[i+2].style.color = this.fontColor;
         this.c[i+2].innerHTML = this.values[i];
         this.stat[i] = 1;
+
     }
 
     if( this.c[1] !== undefined ) this.c[1].textContent = '';
@@ -311,10 +314,11 @@ Button.prototype = Object.assign( Object.create( Proto.prototype ), {
         var dc =  3;
         var size = Math.floor( ( w-(dc*(i-1)) ) / i );
 
-        while(i--){
+        while( i-- ){
 
         	this.tmp[i] = [ Math.floor( d + ( size * i ) + ( dc * i )), size ];
         	this.tmp[i][2] = this.tmp[i][0] + this.tmp[i][1];
+
             s[i+2].left = this.tmp[i][0] + 'px';
             s[i+2].width = this.tmp[i][1] + 'px';
 
