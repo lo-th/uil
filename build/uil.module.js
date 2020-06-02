@@ -108,6 +108,7 @@ var T = {
     TwoPI: Math.PI*2,
     pi90: Math.PI * 0.5,
     pi60: Math.PI/3,
+    
     torad: Math.PI / 180,
     todeg: 180 / Math.PI,
 
@@ -151,6 +152,7 @@ var T = {
         //input: '#005AAA',
 
         inputBorder: '#454545',
+        inputHolder: '#808080',
         inputBorderSelect: '#005AAA',
         inputBg: 'rgba(0,0,0,0.1)',
         inputOver: 'rgba(0,0,0,0.2)',
@@ -207,6 +209,10 @@ var T = {
         joint:'M 7.7 7.7 Q 8 7.45 8 7 8 6.6 7.7 6.3 7.45 6 7 6 6.6 6 6.3 6.3 6 6.6 6 7 6 7.45 6.3 7.7 6.6 8 7 8 7.45 8 7.7 7.7 M 3.35 8.65 L 1 11 3 13 5.35 10.65 Q 6.1 11 7 11 8.28 11 9.25 10.25 L 7.8 8.8 Q 7.45 9 7 9 6.15 9 5.55 8.4 5 7.85 5 7 5 6.54 5.15 6.15 L 3.7 4.7 Q 3 5.712 3 7 3 7.9 3.35 8.65 M 10.25 9.25 Q 11 8.28 11 7 11 6.1 10.65 5.35 L 13 3 11 1 8.65 3.35 Q 7.9 3 7 3 5.7 3 4.7 3.7 L 6.15 5.15 Q 6.54 5 7 5 7.85 5 8.4 5.55 9 6.15 9 7 9 7.45 8.8 7.8 L 10.25 9.25 Z',
         ray:'M 9 11 L 5 11 5 12 9 12 9 11 M 12 5 L 11 5 11 9 12 9 12 5 M 11.5 10 Q 10.9 10 10.45 10.45 10 10.9 10 11.5 10 12.2 10.45 12.55 10.9 13 11.5 13 12.2 13 12.55 12.55 13 12.2 13 11.5 13 10.9 12.55 10.45 12.2 10 11.5 10 M 9 10 L 10 9 2 1 1 2 9 10 Z',
         collision:'M 11 12 L 13 10 10 7 13 4 11 2 7.5 5.5 9 7 7.5 8.5 11 12 M 3 2 L 1 4 4 7 1 10 3 12 8 7 3 2 Z',
+        map:'M 13 1 L 1 1 1 13 13 13 13 1 M 12 2 L 12 7 7 7 7 12 2 12 2 7 7 7 7 2 12 2 Z',
+        material:'M 13 1 L 1 1 1 13 13 13 13 1 M 12 2 L 12 7 7 7 7 12 2 12 2 7 7 7 7 2 12 2 Z',
+        texture:'M 13 4 L 13 1 1 1 1 4 5 4 5 13 9 13 9 4 13 4 Z',
+        object:'M 10 1 L 7 4 4 1 1 1 1 13 4 13 4 5 7 8 10 5 10 13 13 13 13 1 10 1 Z',
         none:'M 9 5 L 5 5 5 9 9 9 9 5 Z',
 
     },
@@ -1278,7 +1284,7 @@ var R = {
     clearInput: function () {
 
         if( R.parent === null ) return;
-        if( !R.firstImput ) R.parent.validate();
+        if( !R.firstImput ) R.parent.validate( true );
 
         R.clearHidden();
         R.parent.unselect();
@@ -1373,13 +1379,17 @@ var R = {
         if( R.parent === null ) return;
 
         R.str = R.hiddenImput.value;
-        R.input.textContent = R.str;
+
+        if( R.parent.allEqual ) R.parent.sameStr( R.str );// numeric samùe value
+        else R.input.textContent = R.str;
+
         R.cursorId = R.hiddenImput.selectionStart;
         R.inputRange = [ R.hiddenImput.selectionStart, R.hiddenImput.selectionEnd ];
 
         R.selectParent();
 
-        if( R.parent.allway ) R.parent.validate();
+        //if( R.parent.allway ) 
+        R.parent.validate();
 
     },
 
@@ -1399,7 +1409,7 @@ var R = {
     update: function () {
 
         var i = R.listens.length;
-        while(i--) R.listens[i].listening();
+        while( i-- ) R.listens[i].listening();
 
     },
 
@@ -1626,7 +1636,9 @@ function Proto ( o ) {
 
     // only for number
     this.isNumber = false;
-
+    this.noNeg = o.noNeg || false;
+    this.allEqual = o.allEqual || false;
+    
     // only most simple 
     this.mono = false;
 
@@ -1898,7 +1910,6 @@ Object.assign( Proto.prototype, {
     listen: function () {
 
         Roots.addListen( this );
-        //Roots.listens.push( this );
         return this;
 
     },
@@ -1930,7 +1941,7 @@ Object.assign( Proto.prototype, {
 
         if( this.isEmpty ) return;
 
-        this.callback = f;
+        this.callback = f || null;
         return this;
 
     },
@@ -1953,7 +1964,7 @@ Object.assign( Proto.prototype, {
 
         this.isSend = true;
         if( this.objectLink !== null ) this.objectLink[ this.val ] = v || this.value;
-        if( this.callback ) this.callback( v || this.value );
+        if( this.callback ) this.callback( v || this.value, this.val );
         this.isSend = false;
 
     },
@@ -2053,6 +2064,7 @@ Object.assign( Proto.prototype, {
 
     numValue: function ( n ) {
 
+        if( this.noNeg ) n = Math.abs( n );
         return Math.min( this.max, Math.max( this.min, n ) ).toFixed( this.precision ) * 1;
 
     },
@@ -2255,7 +2267,13 @@ function Button ( o ) {
     //this.selected = null;
     this.isDown = false;
 
-    this.buttonColor = o.bColor || this.colors.button;
+    // custom color
+    this.cc = [ this.colors.button, this.colors.select, this.colors.down ];
+
+    if( o.cBg !== undefined ) this.cc[0] = o.cBg;
+    if( o.bColor !== undefined ) this.cc[0] = o.bColor;
+    if( o.cSelect !== undefined ) this.cc[1] = o.cSelect;
+    if( o.cDown !== undefined ) this.cc[2] = o.cDown;
 
     this.isLoadButton = o.loader || false;
     this.isDragButton = o.drag || false;
@@ -2268,7 +2286,7 @@ function Button ( o ) {
 
     for( var i = 0; i < this.lng; i++ ){
 
-        this.c[i+2] = this.dom( 'div', this.css.txt + this.css.button + 'top:1px; background:'+this.buttonColor+'; height:'+(this.h-2)+'px; border:'+this.colors.buttonBorder+'; border-radius:'+this.radius+'px;' );
+        this.c[i+2] = this.dom( 'div', this.css.txt + this.css.button + 'top:1px; background:'+this.cc[0]+'; height:'+(this.h-2)+'px; border:'+this.colors.buttonBorder+'; border-radius:'+this.radius+'px;' );
         this.c[i+2].style.color = this.fontColor;
         this.c[i+2].innerHTML = this.values[i];
         this.stat[i] = 1;
@@ -2380,6 +2398,7 @@ Button.prototype = Object.assign( Object.create( Proto.prototype ), {
 
     },
 
+
     mode: function ( n, name ) {
 
         var change = false;
@@ -2390,9 +2409,9 @@ Button.prototype = Object.assign( Object.create( Proto.prototype ), {
         
             switch( n ){
 
-                case 1: this.stat[i] = 1; this.s[ i+2 ].color = this.fontColor; this.s[ i+2 ].background = this.buttonColor; break;
-                case 2: this.stat[i] = 2; this.s[ i+2 ].color = this.fontSelect; this.s[ i+2 ].background = this.colors.select; break;
-                case 3: this.stat[i] = 3; this.s[ i+2 ].color = this.fontSelect; this.s[ i+2 ].background = this.colors.down; break;
+                case 1: this.stat[i] = 1; this.s[ i+2 ].color = this.fontColor; this.s[ i+2 ].background = this.cc[0]; break;
+                case 2: this.stat[i] = 2; this.s[ i+2 ].color = this.fontSelect; this.s[ i+2 ].background = this.cc[1]; break;
+                case 3: this.stat[i] = 3; this.s[ i+2 ].color = this.fontSelect; this.s[ i+2 ].background = this.cc[2]; break;
 
             }
 
@@ -2495,7 +2514,7 @@ Button.prototype = Object.assign( Object.create( Proto.prototype ), {
     fileSelect: function ( file ) {
 
         var dataUrl = [ 'png', 'jpg', 'mp4', 'webm', 'ogg' ];
-        var dataBuf = [ 'sea', 'z', 'hex', 'bvh', 'BVH' ];
+        var dataBuf = [ 'sea', 'z', 'hex', 'bvh', 'BVH', 'glb' ];
 
         //if( ! e.target.files ) return;
 
@@ -2765,6 +2784,8 @@ function Color ( o ) {
     this.ctype = o.ctype || 'hex';
 
     this.wfixe = this.sb > 256 ? 256 : this.sb;
+
+    if(o.cw != undefined ) this.wfixe = o.cw;
 
     // color up or down
     this.side = o.side || 'down';
@@ -4486,6 +4507,8 @@ function List ( o ) {
     this.sMode = 0;
     this.tMode = 0;
 
+    this.listOnly = o.listOnly || false;
+
     this.buttonColor = o.bColor || this.colors.button;
 
     var fltop = Math.floor(this.h*0.5)-5;
@@ -4531,11 +4554,9 @@ function List ( o ) {
         this.c[2].style.bottom = this.h-2 + 'px';
         this.c[3].style.bottom = '1px';
         this.c[4].style.bottom = fltop + 'px';
-        //this.c[5].style.bottom = '2px';
 
     } else {
         this.c[2].style.top = this.baseH + 'px';
-        //this.c[6].style.top = this.h + 'px';
     }
 
     this.listIn = this.dom( 'div', this.css.basic + 'left:0; top:0; width:100%; background:rgba(0,0,0,0.2);');
@@ -4555,6 +4576,14 @@ function List ( o ) {
 
     this.isOpenOnStart = o.open || false;
 
+    if( this.listOnly ){
+        this.baseH = 5;
+        this.c[3].style.display = 'none';
+        this.c[4].style.display = 'none';
+        this.c[2].style.top = this.baseH+'px';
+        this.isOpenOnStart = true;
+    }
+
     
 
     //this.c[0].style.background = '#FF0000'
@@ -4563,7 +4592,7 @@ function List ( o ) {
         // populate list
         this.setList( this.list );
         this.init();
-        if( this.isOpenOnStart ) this.open();
+        if( this.isOpenOnStart ) this.open( true );
    // }
 
 }
@@ -4713,16 +4742,19 @@ List.prototype = Object.assign( Object.create( Proto.prototype ), {
         } else if( name === 'title' ){
 
             this.modeTitle(2);
-            if( !this.isOpen ) this.open();
-            else this.close();
-        
+            if( !this.listOnly ){
+                if( !this.isOpen ) this.open();
+                else this.close();
+            }
         } else {
             if( this.current ){
                 this.value = this.list[this.current.id];
                 //this.value = this.current.textContent;
-                this.setTopItem();
                 this.send();
-                this.close();
+                if( !this.listOnly ) {
+                    this.close();
+                    this.setTopItem();
+                }
             }
             
         }
@@ -4947,7 +4979,7 @@ List.prototype = Object.assign( Object.create( Proto.prototype ), {
 
     },
 
-    open: function () {
+    open: function ( first ) {
 
         Proto.prototype.open.call( this );
 
@@ -4976,7 +5008,7 @@ List.prototype = Object.assign( Object.create( Proto.prototype ), {
 
         this.zone.h = this.h;
 
-        this.parentHeight( t );
+        if(!first) this.parentHeight( t );
 
     },
 
@@ -5051,33 +5083,41 @@ function Numeric( o ){
     this.isDown = false;
 
     this.value = [0];
-    this.toRad = 1;
-    this.isNumber = true;
+    this.multy = 1;
+    this.invmulty = 1;
+    this.isSingle = true;
     this.isAngle = false;
     this.isVector = false;
+
+    if( o.isAngle ){
+        this.isAngle = true;
+        this.multy = Tools.torad;
+        this.invmulty = Tools.todeg;
+    }
 
     this.isDrag = o.drag || false;
 
     if( o.value !== undefined ){
-        if(!isNaN(o.value)){ this.value = [o.value];}
-        else if(o.value instanceof Array ){ this.value = o.value; this.isNumber=false;}
-        else if(o.value instanceof Object ){ 
+        if(!isNaN(o.value)){ 
+            this.value = [o.value];
+        } else if( o.value instanceof Array ){ 
+            this.value = o.value; 
+            this.isSingle = false;
+        } else if( o.value instanceof Object ){ 
             this.value = [];
-            if(o.value.x) this.value[0] = o.value.x;
-            if(o.value.y) this.value[1] = o.value.y;
-            if(o.value.z) this.value[2] = o.value.z;
-            if(o.value.w) this.value[3] = o.value.w;
+            if( o.value.x !== undefined ) this.value[0] = o.value.x;
+            if( o.value.y !== undefined ) this.value[1] = o.value.y;
+            if( o.value.z !== undefined ) this.value[2] = o.value.z;
+            if( o.value.w !== undefined ) this.value[3] = o.value.w;
             this.isVector = true;
+            this.isSingle = false;
         }
     }
 
     this.lng = this.value.length;
     this.tmp = [];
 
-    if(o.isAngle){
-        this.isAngle = true;
-        this.toRad = Math.PI/180;
-    }
+    
 
     this.current = -1;
     this.prev = { x:0, y:0, d:0, v:0 };
@@ -5163,7 +5203,7 @@ Numeric.prototype = Object.assign( Object.create( Proto.prototype ), {
             this.isDown = true;
             if( name !== '' ){ 
             	this.current = name;
-            	this.prev = { x:e.clientX, y:e.clientY, d:0, v: this.isNumber ? parseFloat(this.value) : parseFloat( this.value[ this.current ] )  };
+            	this.prev = { x:e.clientX, y:e.clientY, d:0, v: this.isSingle ? parseFloat(this.value) : parseFloat( this.value[ this.current ] )  };
             	this.setInput( this.c[ 3 + this.current ] );
             }
             return this.mousemove( e );
@@ -5178,7 +5218,7 @@ Numeric.prototype = Object.assign( Object.create( Proto.prototype ), {
         this.current = name;
         this.isDown = true;
 
-        this.prev = { x:e.clientX, y:e.clientY, d:0, v: this.isNumber ? parseFloat(this.value) : parseFloat( this.value[ this.current ] )  };
+        this.prev = { x:e.clientX, y:e.clientY, d:0, v: this.isSingle ? parseFloat(this.value) : parseFloat( this.value[ this.current ] )  };
 
 
         return this.mode( 2, name );*/
@@ -5238,21 +5278,22 @@ Numeric.prototype = Object.assign( Object.create( Proto.prototype ), {
         
 
         if( this.isDrag ){
+
         	if( this.current !== -1 ){
 
-        	this.prev.d += ( e.clientX - this.prev.x ) - ( e.clientY - this.prev.y );
+            	this.prev.d += ( e.clientX - this.prev.x ) - ( e.clientY - this.prev.y );
 
-            var n = this.prev.v + ( this.prev.d * this.step);
+                var n = this.prev.v + ( this.prev.d * this.step);
 
-            this.value[ this.current ] = this.numValue(n);
-            this.c[ 3 + this.current ].textContent = this.value[this.current];
+                this.value[ this.current ] = this.numValue(n);
+                this.c[ 3 + this.current ].textContent = this.value[this.current];
 
-            this.validate();
+                this.validate();
 
-            this.prev.x = e.clientX;
-            this.prev.y = e.clientY;
+                this.prev.x = e.clientX;
+                this.prev.y = e.clientY;
 
-            nup = true;
+                nup = true;
              }
 
         } else {
@@ -5297,7 +5338,18 @@ Numeric.prototype = Object.assign( Object.create( Proto.prototype ), {
 
     setValue: function ( v ) {
 
-        this.value = v;
+        if( this.isVector ){
+
+            if( v.x !== undefined ) this.value[0] = v.x;
+            if( v.y !== undefined ) this.value[1] = v.y;
+            if( v.z !== undefined ) this.value[2] = v.z;
+            if( v.w !== undefined ) this.value[3] = v.w;
+
+        } else {
+            this.value = v;
+        }
+
+        
         
         this.update();
 
@@ -5309,16 +5361,52 @@ Numeric.prototype = Object.assign( Object.create( Proto.prototype ), {
 
     },
 
+    sameStr: function ( str ){
+
+        var i = this.value.length;
+        while(i--) this.c[ 3 + i ].textContent = str;
+
+    },
+
     update: function ( up ) {
 
         var i = this.value.length;
 
         while(i--){
-             this.value[i] = this.numValue( this.value[i] );
+             this.value[i] = this.numValue( this.value[i] * this.invmulty );
              this.c[ 3 + i ].textContent = this.value[i];
         }
 
         if( up ) this.send();
+
+    },
+
+    send: function ( v ) {
+
+        v = v || this.value;
+
+        this.isSend = true;
+
+        if( this.objectLink !== null ){ 
+
+            if( this.isVector ){
+
+                this.objectLink[ this.val ].fromArray( v );
+
+                /*this.objectLink[ this.val ].x = v[0];
+                this.objectLink[ this.val ].y = v[1];
+                this.objectLink[ this.val ].z = v[2];
+                if( v[3] ) this.objectLink[ this.val ].w = v[3];*/
+
+            } else {
+                this.objectLink[ this.val ] = v;
+            }
+
+        }
+
+        if( this.callback ) this.callback( v, this.val );
+
+        this.isSend = false;
 
     },
 
@@ -5347,15 +5435,14 @@ Numeric.prototype = Object.assign( Object.create( Proto.prototype ), {
 
     },
 
-
-
-    validate: function () {
+    validate: function ( force ) {
 
         var ar = [];
         var i = this.lng;
 
-        while(i--){ 
-        	
+        if( this.allway ) force = true;
+
+        while(i--){
         	if(!isNaN( this.c[ 3 + i ].textContent )){ 
                 var nx = this.numValue( this.c[ 3 + i ].textContent );
                 this.c[ 3 + i ].textContent = nx;
@@ -5364,10 +5451,12 @@ Numeric.prototype = Object.assign( Object.create( Proto.prototype ), {
                 this.c[ 3 + i ].textContent = this.value[i];
             }
 
-        	ar[i] = this.value[i] * this.toRad;
+        	ar[i] = this.value[i] * this.multy;
         }
 
-        if( this.isNumber ) this.send( ar[0] );
+        if( !force ) return;
+
+        if( this.isSingle ) this.send( ar[0] );
         else this.send( ar );
 
     },
@@ -5646,7 +5735,8 @@ function TextInput( o ){
     this.placeHolder = o.placeHolder || '';
 
     this.allway = o.allway || false;
-    //this.firstImput = false;
+    this.editable = o.edit !== undefined ? o.edit : true;
+
 
     this.isDown = false;
 
@@ -5658,6 +5748,10 @@ function TextInput( o ){
 
     // cursor
     this.c[4] = this.dom( 'div', this.css.basic + 'top:4px; height:' + (this.h-8) + 'px; width:0px; background:'+this.fontColor+';' );
+
+    // fake
+    this.c[5] = this.dom( 'div', this.css.txtselect + 'height:' + (this.h-4) + 'px; justify-content: center; font-style: italic; color:'+this.colors.inputHolder+';' );
+    if( this.value === '' ) this.c[5].textContent = this.placeHolder;
 
 
     this.init();
@@ -5683,6 +5777,8 @@ TextInput.prototype = Object.assign( Object.create( Proto.prototype ), {
 
     mouseup: function ( e ) {
 
+        if(!this.editable) return;
+
         if( this.isDown ){
             this.isDown = false;
             return this.mousemove( e );
@@ -5693,6 +5789,8 @@ TextInput.prototype = Object.assign( Object.create( Proto.prototype ), {
     },
 
     mousedown: function ( e ) {
+
+        if(!this.editable) return;
 
         var name = this.testZone( e );
 
@@ -5707,6 +5805,8 @@ TextInput.prototype = Object.assign( Object.create( Proto.prototype ), {
     },
 
     mousemove: function ( e ) {
+
+        if(!this.editable) return;
 
         var name = this.testZone( e );
 
@@ -5768,9 +5868,17 @@ TextInput.prototype = Object.assign( Object.create( Proto.prototype ), {
 
     },
 
-    validate: function () {
+    validate: function ( force ) {
+
+        if( this.allway ) force = true; 
 
         this.value = this.c[3].textContent;
+
+        if(this.value !== '') this.c[5].textContent = '';
+        else this.c[5].textContent = this.placeHolder;
+
+        if( !force ) return;
+
         this.send();
 
     },
@@ -5781,14 +5889,14 @@ TextInput.prototype = Object.assign( Object.create( Proto.prototype ), {
 
     rSize: function () {
 
-        
-
-
         Proto.prototype.rSize.call( this );
 
         var s = this.s;
         s[3].left = this.sa + 'px';
         s[3].width = this.sb + 'px';
+
+        s[5].left = this.sa + 'px';
+        s[5].width = this.sb + 'px';
      
     },
 
@@ -6102,7 +6210,10 @@ function Item ( o ){
     this.value = this.txt;
     this.status = 1;
 
-    this.graph = this.svgs[o.itype || 'none'];
+    this.itype = o.itype || 'none';
+    this.val = this.itype;
+
+    this.graph = this.svgs[ this.itype ];
 
     var fltop = Math.floor(this.h*0.5)-7;
 
@@ -6771,7 +6882,7 @@ Object.assign( Gui.prototype, {
 
     onChange: function ( f ) {
 
-        this.callback = f;
+        this.callback = f || null;
         return this;
 
     },
@@ -7078,6 +7189,8 @@ Object.assign( Gui.prototype, {
 
     clear: function () {
 
+        //this.callback = null;
+
         var i = this.uis.length;
         while(i--) this.uis[i].clear();
 
@@ -7110,9 +7223,9 @@ Object.assign( Gui.prototype, {
 
         var i = this.uis.length;
         while(i--){ 
-            if( this.uis[i].value  === name ){ 
+            if( this.uis[i].value === name ){ 
                 this.uis[i].selected( true );
-                if( this.isScroll ) this.update( ( i*(this.size.h+1) )*this.ratio );
+                if( this.isScroll ) this.update( ( i*(this.uis[i].h+1) )*this.ratio );
             }
         }
 

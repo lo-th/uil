@@ -591,7 +591,7 @@ var R = {
     clearInput: function () {
 
         if( R.parent === null ) return;
-        if( !R.firstImput ) R.parent.validate();
+        if( !R.firstImput ) R.parent.validate( true );
 
         R.clearHidden();
         R.parent.unselect();
@@ -686,13 +686,17 @@ var R = {
         if( R.parent === null ) return;
 
         R.str = R.hiddenImput.value;
-        R.input.textContent = R.str;
+
+        if( R.parent.allEqual ) R.parent.sameStr( R.str );// numeric samùe value
+        else R.input.textContent = R.str;
+
         R.cursorId = R.hiddenImput.selectionStart;
         R.inputRange = [ R.hiddenImput.selectionStart, R.hiddenImput.selectionEnd ];
 
         R.selectParent();
 
-        if( R.parent.allway ) R.parent.validate();
+        //if( R.parent.allway ) 
+        R.parent.validate();
 
     },
 
@@ -712,7 +716,7 @@ var R = {
     update: function () {
 
         var i = R.listens.length;
-        while(i--) R.listens[i].listening();
+        while( i-- ) R.listens[i].listening();
 
     },
 

@@ -232,7 +232,7 @@ Object.assign( Gui.prototype, {
 
     onChange: function ( f ) {
 
-        this.callback = f;
+        this.callback = f || null;
         return this;
 
     },
@@ -540,6 +540,8 @@ Object.assign( Gui.prototype, {
 
     clear: function () {
 
+        //this.callback = null;
+
         var i = this.uis.length;
         while(i--) this.uis[i].clear();
 
@@ -572,9 +574,9 @@ Object.assign( Gui.prototype, {
 
         var i = this.uis.length;
         while(i--){ 
-            if( this.uis[i].value  === name ){ 
+            if( this.uis[i].value === name ){ 
                 this.uis[i].selected( true );
-                if( this.isScroll ) this.update( ( i*(this.size.h+1) )*this.ratio );
+                if( this.isScroll ) this.update( ( i*(this.uis[i].h+1) )*this.ratio );
             }
         }
 

@@ -81,7 +81,7 @@ function populate(){
         ui.add('slide',  { name:'slide',  min:-100, max:100, value:0, precision:0, fontColor:'#D4B87B', stype:0 }).onChange( callback );;
         ui.add('slide',  { name:'slide',  min:-100, max:100, value:0, precision:0, fontColor:'#D4B87B', stype:1 });
         ui.add('slide',  { name:'slide',  min:-1, max:1, value:0, step:0.01, precision:2, h:20, stype :2 });
-        ui.add('string', { name:'string',  value:'welcome to uil', fontColor:'#D4B87B', h:40}).onChange( callback );
+        ui.add('string', { name:'string',  value:'',placeHolder:'welcome to uil',  fontColor:'#D4B87B', h:40}).onChange( callback );
         testList = ui.add('list',   { name:'list',  list:list, fontColor:'#D4B87B' });
         ui.add('list',   { name:'list',  list:list2, h:40 });
         ui.add('button', { name:'TEST' });

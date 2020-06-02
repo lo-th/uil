@@ -10,7 +10,8 @@ function TextInput( o ){
     this.placeHolder = o.placeHolder || '';
 
     this.allway = o.allway || false;
-    //this.firstImput = false;
+    this.editable = o.edit !== undefined ? o.edit : true;
+
 
     this.isDown = false;
 
@@ -22,6 +23,10 @@ function TextInput( o ){
 
     // cursor
     this.c[4] = this.dom( 'div', this.css.basic + 'top:4px; height:' + (this.h-8) + 'px; width:0px; background:'+this.fontColor+';' );
+
+    // fake
+    this.c[5] = this.dom( 'div', this.css.txtselect + 'height:' + (this.h-4) + 'px; justify-content: center; font-style: italic; color:'+this.colors.inputHolder+';' );
+    if( this.value === '' ) this.c[5].textContent = this.placeHolder;
 
 
     this.init();
@@ -47,6 +52,8 @@ TextInput.prototype = Object.assign( Object.create( Proto.prototype ), {
 
     mouseup: function ( e ) {
 
+        if(!this.editable) return;
+
         if( this.isDown ){
             this.isDown = false;
             return this.mousemove( e );
@@ -57,6 +64,8 @@ TextInput.prototype = Object.assign( Object.create( Proto.prototype ), {
     },
 
     mousedown: function ( e ) {
+
+        if(!this.editable) return;
 
         var name = this.testZone( e );
 
@@ -71,6 +80,8 @@ TextInput.prototype = Object.assign( Object.create( Proto.prototype ), {
     },
 
     mousemove: function ( e ) {
+
+        if(!this.editable) return;
 
         var name = this.testZone( e );
 
@@ -132,9 +143,17 @@ TextInput.prototype = Object.assign( Object.create( Proto.prototype ), {
 
     },
 
-    validate: function () {
+    validate: function ( force ) {
+
+        if( this.allway ) force = true; 
 
         this.value = this.c[3].textContent;
+
+        if(this.value !== '') this.c[5].textContent = '';
+        else this.c[5].textContent = this.placeHolder;
+
+        if( !force ) return;
+
         this.send();
 
     },
@@ -145,14 +164,14 @@ TextInput.prototype = Object.assign( Object.create( Proto.prototype ), {
 
     rSize: function () {
 
-        
-
-
         Proto.prototype.rSize.call( this );
 
         var s = this.s;
         s[3].left = this.sa + 'px';
         s[3].width = this.sb + 'px';
+
+        s[5].left = this.sa + 'px';
+        s[5].width = this.sb + 'px';
      
     },
 

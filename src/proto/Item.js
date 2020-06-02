@@ -7,7 +7,10 @@ function Item ( o ){
     this.value = this.txt;
     this.status = 1;
 
-    this.graph = this.svgs[o.itype || 'none'];
+    this.itype = o.itype || 'none';
+    this.val = this.itype;
+
+    this.graph = this.svgs[ this.itype ];
 
     var fltop = Math.floor(this.h*0.5)-7;
 

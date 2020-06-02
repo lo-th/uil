@@ -7,6 +7,7 @@
 <link rel="stylesheet" type="text/css" href="../style.css">
 
 <script type="text/javascript" src="../build/uil.js"></script>
+<script type="text/javascript" src="./js/libs/three.min.js"></script>
 
 </head>
 
@@ -15,18 +16,30 @@
 <div id='version'></div>
 <div id='debug'></div>
 <script>
+
 var debug = document.getElementById('debug');
 debug.style.bottom = '10px'
 debug.style.top = 'auto'
-var obj1 = { speed: 5 }
-var obj2 = { speed: 5 }
+var obj1 = { speed: 5 };
+var obj2 = { speed: 5 };
+
+// vector test
+/*var V = new THREE.Group();
+document.body.addEventListener( 'mousemove', mMove, false );
+
+function mMove(e){
+	V.position.x = ( e.clientX / window.innerWidth ) * 2 - 1;
+	V.position.y = - ( e.clientY / window.innerHeight ) * 2 + 1;
+}*/
 
 document.getElementById('logo').innerHTML = UIL.Tools.icon('logo', '#FFF', 64);
 document.getElementById('version').innerHTML = 'Uil '+ UIL.REVISION;
 
-var callback = function ( v ) {
+var callback = function ( v, id ) {
 
-	document.getElementById('debug').innerHTML = obj2.speed + ' | ' + obj1.speed; 
+
+
+	//document.getElementById('debug').innerHTML = obj2.speed + ' | ' + obj1.speed+ ' | ' + id; 
 
 }
 
@@ -35,7 +48,7 @@ callback();
 //
 
 var ui = new UIL.Gui().onChange( callback );
-
+//ui.add( V, 'position', { type:'number', precision:2, min:-20000, max:20000 } ).listen();
 ui.add( obj1, 'speed', { min:-5, max:5, rename:'speed R' } ).listen();
 ui.add( obj1, 'speed', { min:-5, max:5, stype:1 } ).listen();
 ui.add( obj1, 'speed', { min:-5, max:5, stype:2 } ).listen();

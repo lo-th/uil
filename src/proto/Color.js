@@ -12,6 +12,8 @@ function Color ( o ) {
 
     this.wfixe = this.sb > 256 ? 256 : this.sb;
 
+    if(o.cw != undefined ) this.wfixe = o.cw;
+
     // color up or down
     this.side = o.side || 'down';
     this.up = this.side === 'down' ? 0 : 1;

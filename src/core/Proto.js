@@ -54,7 +54,9 @@ function Proto ( o ) {
 
     // only for number
     this.isNumber = false;
-
+    this.noNeg = o.noNeg || false;
+    this.allEqual = o.allEqual || false;
+    
     // only most simple 
     this.mono = false;
 
@@ -326,7 +328,6 @@ Object.assign( Proto.prototype, {
     listen: function () {
 
         Roots.addListen( this );
-        //Roots.listens.push( this );
         return this;
 
     },
@@ -358,7 +359,7 @@ Object.assign( Proto.prototype, {
 
         if( this.isEmpty ) return;
 
-        this.callback = f;
+        this.callback = f || null;
         return this;
 
     },
@@ -381,7 +382,7 @@ Object.assign( Proto.prototype, {
 
         this.isSend = true;
         if( this.objectLink !== null ) this.objectLink[ this.val ] = v || this.value;
-        if( this.callback ) this.callback( v || this.value );
+        if( this.callback ) this.callback( v || this.value, this.val );
         this.isSend = false;
 
     },
@@ -481,6 +482,7 @@ Object.assign( Proto.prototype, {
 
     numValue: function ( n ) {
 
+        if( this.noNeg ) n = Math.abs( n );
         return Math.min( this.max, Math.max( this.min, n ) ).toFixed( this.precision ) * 1;
 
     },

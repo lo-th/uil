@@ -1,4 +1,5 @@
 import { Proto } from '../core/Proto';
+import { Tools } from '../core/Tools';
 
 function Numeric( o ){
 
@@ -11,33 +12,41 @@ function Numeric( o ){
     this.isDown = false;
 
     this.value = [0];
-    this.toRad = 1;
-    this.isNumber = true;
+    this.multy = 1;
+    this.invmulty = 1;
+    this.isSingle = true;
     this.isAngle = false;
     this.isVector = false;
+
+    if( o.isAngle ){
+        this.isAngle = true;
+        this.multy = Tools.torad;
+        this.invmulty = Tools.todeg;
+    }
 
     this.isDrag = o.drag || false;
 
     if( o.value !== undefined ){
-        if(!isNaN(o.value)){ this.value = [o.value];}
-        else if(o.value instanceof Array ){ this.value = o.value; this.isNumber=false;}
-        else if(o.value instanceof Object ){ 
+        if(!isNaN(o.value)){ 
+            this.value = [o.value];
+        } else if( o.value instanceof Array ){ 
+            this.value = o.value; 
+            this.isSingle = false;
+        } else if( o.value instanceof Object ){ 
             this.value = [];
-            if(o.value.x) this.value[0] = o.value.x;
-            if(o.value.y) this.value[1] = o.value.y;
-            if(o.value.z) this.value[2] = o.value.z;
-            if(o.value.w) this.value[3] = o.value.w;
+            if( o.value.x !== undefined ) this.value[0] = o.value.x;
+            if( o.value.y !== undefined ) this.value[1] = o.value.y;
+            if( o.value.z !== undefined ) this.value[2] = o.value.z;
+            if( o.value.w !== undefined ) this.value[3] = o.value.w;
             this.isVector = true;
+            this.isSingle = false;
         }
     }
 
     this.lng = this.value.length;
     this.tmp = [];
 
-    if(o.isAngle){
-        this.isAngle = true;
-        this.toRad = Math.PI/180;
-    }
+    
 
     this.current = -1;
     this.prev = { x:0, y:0, d:0, v:0 };
@@ -123,7 +132,7 @@ Numeric.prototype = Object.assign( Object.create( Proto.prototype ), {
             this.isDown = true;
             if( name !== '' ){ 
             	this.current = name;
-            	this.prev = { x:e.clientX, y:e.clientY, d:0, v: this.isNumber ? parseFloat(this.value) : parseFloat( this.value[ this.current ] )  };
+            	this.prev = { x:e.clientX, y:e.clientY, d:0, v: this.isSingle ? parseFloat(this.value) : parseFloat( this.value[ this.current ] )  };
             	this.setInput( this.c[ 3 + this.current ] );
             }
             return this.mousemove( e );
@@ -138,7 +147,7 @@ Numeric.prototype = Object.assign( Object.create( Proto.prototype ), {
         this.current = name;
         this.isDown = true;
 
-        this.prev = { x:e.clientX, y:e.clientY, d:0, v: this.isNumber ? parseFloat(this.value) : parseFloat( this.value[ this.current ] )  };
+        this.prev = { x:e.clientX, y:e.clientY, d:0, v: this.isSingle ? parseFloat(this.value) : parseFloat( this.value[ this.current ] )  };
 
 
         return this.mode( 2, name );*/
@@ -198,21 +207,22 @@ Numeric.prototype = Object.assign( Object.create( Proto.prototype ), {
         
 
         if( this.isDrag ){
+
         	if( this.current !== -1 ){
 
-        	this.prev.d += ( e.clientX - this.prev.x ) - ( e.clientY - this.prev.y );
+            	this.prev.d += ( e.clientX - this.prev.x ) - ( e.clientY - this.prev.y );
 
-            var n = this.prev.v + ( this.prev.d * this.step);
+                var n = this.prev.v + ( this.prev.d * this.step);
 
-            this.value[ this.current ] = this.numValue(n);
-            this.c[ 3 + this.current ].textContent = this.value[this.current];
+                this.value[ this.current ] = this.numValue(n);
+                this.c[ 3 + this.current ].textContent = this.value[this.current];
 
-            this.validate();
+                this.validate();
 
-            this.prev.x = e.clientX;
-            this.prev.y = e.clientY;
+                this.prev.x = e.clientX;
+                this.prev.y = e.clientY;
 
-            nup = true;
+                nup = true;
              }
 
         } else {
@@ -257,7 +267,18 @@ Numeric.prototype = Object.assign( Object.create( Proto.prototype ), {
 
     setValue: function ( v ) {
 
-        this.value = v;
+        if( this.isVector ){
+
+            if( v.x !== undefined ) this.value[0] = v.x;
+            if( v.y !== undefined ) this.value[1] = v.y;
+            if( v.z !== undefined ) this.value[2] = v.z;
+            if( v.w !== undefined ) this.value[3] = v.w;
+
+        } else {
+            this.value = v;
+        }
+
+        
         
         this.update();
 
@@ -269,16 +290,52 @@ Numeric.prototype = Object.assign( Object.create( Proto.prototype ), {
 
     },
 
+    sameStr: function ( str ){
+
+        var i = this.value.length;
+        while(i--) this.c[ 3 + i ].textContent = str;
+
+    },
+
     update: function ( up ) {
 
         var i = this.value.length;
 
         while(i--){
-             this.value[i] = this.numValue( this.value[i] );
+             this.value[i] = this.numValue( this.value[i] * this.invmulty );
              this.c[ 3 + i ].textContent = this.value[i];
         }
 
         if( up ) this.send();
+
+    },
+
+    send: function ( v ) {
+
+        v = v || this.value;
+
+        this.isSend = true;
+
+        if( this.objectLink !== null ){ 
+
+            if( this.isVector ){
+
+                this.objectLink[ this.val ].fromArray( v );
+
+                /*this.objectLink[ this.val ].x = v[0];
+                this.objectLink[ this.val ].y = v[1];
+                this.objectLink[ this.val ].z = v[2];
+                if( v[3] ) this.objectLink[ this.val ].w = v[3];*/
+
+            } else {
+                this.objectLink[ this.val ] = v;
+            }
+
+        }
+
+        if( this.callback ) this.callback( v, this.val );
+
+        this.isSend = false;
 
     },
 
@@ -307,15 +364,14 @@ Numeric.prototype = Object.assign( Object.create( Proto.prototype ), {
 
     },
 
-
-
-    validate: function () {
+    validate: function ( force ) {
 
         var ar = [];
         var i = this.lng;
 
-        while(i--){ 
-        	
+        if( this.allway ) force = true;
+
+        while(i--){
         	if(!isNaN( this.c[ 3 + i ].textContent )){ 
                 var nx = this.numValue( this.c[ 3 + i ].textContent );
                 this.c[ 3 + i ].textContent = nx;
@@ -324,10 +380,12 @@ Numeric.prototype = Object.assign( Object.create( Proto.prototype ), {
                 this.c[ 3 + i ].textContent = this.value[i];
             }
 
-        	ar[i] = this.value[i] * this.toRad;
+        	ar[i] = this.value[i] * this.multy;
         }
 
-        if( this.isNumber ) this.send( ar[0] );
+        if( !force ) return;
+
+        if( this.isSingle ) this.send( ar[0] );
         else this.send( ar );
 
     },

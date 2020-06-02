@@ -52,23 +52,25 @@ var b0 = UIL.add('button', { target:document.body, callback:function(){ ui.setIt
 var b1 = UIL.add('button', { target:document.body, callback:function(){ ui.setItem('item'+7) }, name:'goto 7', w:100, pos:{left:'10px', top:'50px'}, simple:true });
 var b2 = UIL.add('button', { target:document.body, callback:function(){ ui.setItem('item'+15) }, name:'goto 15', w:100, pos:{left:'10px', top:'70px'}, simple:true });
 var b3 = UIL.add('button', { target:document.body, callback:function(){ ui.setItem('item'+23) }, name:'goto 23', w:100, pos:{left:'10px', top:'90px'}, simple:true });
-var b4 = UIL.add('button', { target:document.body, callback:function(){ ui.setItem('item'+29) }, name:'goto 29', w:100, pos:{left:'10px', top:'110px'}, simple:true });
+var b4 = UIL.add('button', { target:document.body, callback:function(){ ui.setItem('item'+100) }, name:'goto 100', w:100, pos:{left:'10px', top:'110px'}, simple:true });
+var b4 = UIL.add('button', { target:document.body, callback:function(){ ui.setItem('item'+300) }, name:'goto 300', w:100, pos:{left:'10px', top:'130px'}, simple:true });
+
 
 var debug = document.getElementById('debug');
-var callback = function( v ){  debug.innerHTML = v; }
+var callback = function( v, t ){  debug.innerHTML = v + ' | ' + t; }
 
 // in GUI element
-var ui = new UIL.Gui({ parent:content, w:282, h:20, close:false, autoResize:false, maxHeight:150, lockHeight:true, itemMode:true, css:'left:4px; top:4px; background:#323232; border-radius:4px; border:1px solid #3e3e3e;', config:itemsConfig }).onChange( callback );
-//ui.setTop( 4, 150 );
-var i = 30, n = 0;
+var ui = new UIL.Gui({ parent:content, w:282, h:20, close:false, autoResize:false, maxHeight:10, lockHeight:true, itemMode:true, css:'left:4px; top:4px; background:#323232; border-radius:4px; border:1px solid #3e3e3e;', config:itemsConfig }).onChange( callback );
 
+var i = 301, n = 0;
+ui.clear();
 while(i--){
 
 	ui.add('item', { name:'item'+n, h:20, itype:'body' });
 	n++;
 }
 
-
+ui.setTop( 4, 150 );
 </script>
 </body>
 </html>

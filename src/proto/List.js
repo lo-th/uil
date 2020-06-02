@@ -21,6 +21,8 @@ function List ( o ) {
     this.sMode = 0;
     this.tMode = 0;
 
+    this.listOnly = o.listOnly || false;
+
     this.buttonColor = o.bColor || this.colors.button;
 
     var fltop = Math.floor(this.h*0.5)-5;
@@ -66,11 +68,9 @@ function List ( o ) {
         this.c[2].style.bottom = this.h-2 + 'px';
         this.c[3].style.bottom = '1px';
         this.c[4].style.bottom = fltop + 'px';
-        //this.c[5].style.bottom = '2px';
 
     } else {
         this.c[2].style.top = this.baseH + 'px';
-        //this.c[6].style.top = this.h + 'px';
     }
 
     this.listIn = this.dom( 'div', this.css.basic + 'left:0; top:0; width:100%; background:rgba(0,0,0,0.2);');
@@ -90,6 +90,14 @@ function List ( o ) {
 
     this.isOpenOnStart = o.open || false;
 
+    if( this.listOnly ){
+        this.baseH = 5;
+        this.c[3].style.display = 'none';
+        this.c[4].style.display = 'none';
+        this.c[2].style.top = this.baseH+'px'
+        this.isOpenOnStart = true;
+    }
+
     
 
     //this.c[0].style.background = '#FF0000'
@@ -98,7 +106,7 @@ function List ( o ) {
         // populate list
         this.setList( this.list );
         this.init();
-        if( this.isOpenOnStart ) this.open();
+        if( this.isOpenOnStart ) this.open( true );
    // }
 
 }
@@ -248,16 +256,19 @@ List.prototype = Object.assign( Object.create( Proto.prototype ), {
         } else if( name === 'title' ){
 
             this.modeTitle(2);
-            if( !this.isOpen ) this.open();
-            else this.close();
-        
+            if( !this.listOnly ){
+                if( !this.isOpen ) this.open();
+                else this.close();
+            }
         } else {
             if( this.current ){
                 this.value = this.list[this.current.id]
                 //this.value = this.current.textContent;
-                this.setTopItem();
                 this.send();
-                this.close();
+                if( !this.listOnly ) {
+                    this.close();
+                    this.setTopItem();
+                }
             }
             
         }
@@ -482,7 +493,7 @@ List.prototype = Object.assign( Object.create( Proto.prototype ), {
 
     },
 
-    open: function () {
+    open: function ( first ) {
 
         Proto.prototype.open.call( this );
 
@@ -511,7 +522,7 @@ List.prototype = Object.assign( Object.create( Proto.prototype ), {
 
         this.zone.h = this.h;
 
-        this.parentHeight( t );
+        if(!first) this.parentHeight( t );
 
     },
 
