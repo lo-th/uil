@@ -570,7 +570,14 @@ Object.assign( Gui.prototype, {
 
         if( !this.isItemMode ) return;
 
+        name = name || '';
+
         this.resetItem();
+
+        if( !name ){
+            this.update(0);
+            return;
+        } 
 
         var i = this.uis.length;
         while(i--){ 

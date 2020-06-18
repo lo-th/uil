@@ -1889,7 +1889,7 @@ Object.assign( Proto.prototype, {
 
         if( this.isEmpty ) return;
 
-        this.s[0].background = this.bg;
+        if(this.s) this.s[0].background = this.bg;
 
     },
 
@@ -1897,7 +1897,7 @@ Object.assign( Proto.prototype, {
 
         if( this.isEmpty ) return;
 
-        this.s[0].background = this.bgOver;
+        if(this.s) this.s[0].background = this.bgOver;
 
     },
 
@@ -1927,6 +1927,7 @@ Object.assign( Proto.prototype, {
     setValue: function ( v ) {
 
         if( this.isNumber ) this.value = this.numValue( v );
+        //else if( v instanceof Array && v.length === 1 ) v = v[0];
         else this.value = v;
         this.update();
 
@@ -1962,17 +1963,23 @@ Object.assign( Proto.prototype, {
 
     send: function ( v ) {
 
+        v = v || this.value;
+        if( v instanceof Array && v.length === 1 ) v = v[0];
+
         this.isSend = true;
-        if( this.objectLink !== null ) this.objectLink[ this.val ] = v || this.value;
-        if( this.callback ) this.callback( v || this.value, this.val );
+        if( this.objectLink !== null ) this.objectLink[ this.val ] = v;
+        if( this.callback ) this.callback( v, this.val );
         this.isSend = false;
 
     },
 
     sendEnd: function ( v ) {
 
-        if( this.endCallback ) this.endCallback( v || this.value );
-        if( this.objectLink !== null ) this.objectLink[ this.val ] = v || this.value;
+        v = v || this.value;
+        if( v instanceof Array && v.length === 1 ) v = v[0];
+
+        if( this.endCallback ) this.endCallback( v );
+        if( this.objectLink !== null ) this.objectLink[ this.val ] = v;
 
     },
 
@@ -7219,7 +7226,14 @@ Object.assign( Gui.prototype, {
 
         if( !this.isItemMode ) return;
 
+        name = name || '';
+
         this.resetItem();
+
+        if( !name ){
+            this.update(0);
+            return;
+        } 
 
         var i = this.uis.length;
         while(i--){ 
