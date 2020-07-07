@@ -1333,6 +1333,8 @@
 
 	        var keyCode = e.which, isShift = e.shiftKey;
 
+	        console.log( keyCode );
+
 	        R.firstImput = false;
 
 
@@ -1366,7 +1368,7 @@
 	        } else {
 
 	            if( R.input.isNum ){
-	                if ( ((e.keyCode > 47) && (e.keyCode < 58)) || ((e.keyCode > 95) && (e.keyCode < 106)) || e.keyCode === 190 || e.keyCode === 110 || e.keyCode === 8 ){
+	                if ( ((e.keyCode > 47) && (e.keyCode < 58)) || ((e.keyCode > 95) && (e.keyCode < 106)) || e.keyCode === 190 || e.keyCode === 110 || e.keyCode === 8 || e.keyCode === 109 ){
 	                    R.hiddenImput.readOnly = false;
 	                } else {
 	                    R.hiddenImput.readOnly = true;

@@ -76,7 +76,7 @@ function populate () {
         ui.add('list',   { name:'list', list:list});
         ui.add('list',   { name:'list', list:list2, itemHeight:30, listOnly:true });
         ui.add('graph',  { name:'graph', h:80, value:[-0.5,1,0.5,1,0.25,0,0.5,1,0.5], neg:true, multiplicator:90 });
-        ui.add('number', { name:'number', value:20});
+        ui.add('number', { name:'number', value:20, min:-60, max:200 });
         ui.add('number', { name:'vector2', value:[0,0] });
         ui.add('number', { name:'vector3', value:[0,0,0] });
         ui.add('number', { name:'vector4', value:[0,0,0,0], step:1, precision:0, h:36 });
