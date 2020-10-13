@@ -8,11 +8,12 @@ function Bool ( o ){
 
     this.buttonColor = o.bColor || this.colors.button;
 
-    this.inh = o.inh || this.h;
+    this.inh = o.inh || Math.floor( this.h*0.8 );
+    this.inw = o.inw || 36;
 
     var t = Math.floor(this.h*0.5)-((this.inh-2)*0.5);
 
-    this.c[2] = this.dom( 'div', this.css.basic + 'background:'+ this.colors.boolbg +'; height:'+(this.inh-2)+'px; width:36px; top:'+t+'px; border-radius:10px; border:2px solid '+this.boolbg );
+    this.c[2] = this.dom( 'div', this.css.basic + 'background:'+ this.colors.boolbg +'; height:'+(this.inh-2)+'px; width:'+this.inw+'px; top:'+t+'px; border-radius:10px; border:2px solid '+this.boolbg );
     this.c[3] = this.dom( 'div', this.css.basic + 'height:'+(this.inh-6)+'px; width:16px; top:'+(t+2)+'px; border-radius:10px; background:'+this.buttonColor+';' );
 
     this.init();
@@ -67,8 +68,9 @@ Bool.prototype = Object.assign( Object.create( Proto.prototype ), {
 
         Proto.prototype.rSize.call( this );
         var s = this.s;
-        s[2].left = this.sa + 'px';
-        s[3].left = this.sa+1+ 'px';
+        var w = (this.w - 10 ) - this.inw;
+        s[2].left = w + 'px';
+        s[3].left = w + 'px';
 
     }
 

@@ -13,18 +13,11 @@ import { Numeric } from '../proto/Numeric.js';
 import { Slide } from '../proto/Slide.js';
 import { TextInput } from '../proto/TextInput.js';
 import { Title } from '../proto/Title.js';
+import { Select } from '../proto/Select.js';
 import { Selector } from '../proto/Selector.js';
 import { Empty } from '../proto/Empty.js';
 import { Item } from '../proto/Item.js';
 import { Grid } from '../proto/Grid.js';
-/*function autoType () {
-
-    var a = arguments;
-    var type = 'Slide';
-    if( a[2].type ) type = a[2].type;
-    return type;
-
-};*/
 
 function add () {
 
@@ -70,6 +63,7 @@ function add () {
         case 'slide': n = new Slide(o); break;
         case 'textInput': case 'string': n = new TextInput(o); break;
         case 'title': n = new Title(o); break;
+        case 'select': n = new Select(o); break;
         case 'selector': n = new Selector(o); break;
         case 'empty': case 'space': n = new Empty(o); break;
         case 'item': n = new Item(o); break;

@@ -178,6 +178,7 @@
 	        moving : '#03afff',
 	        down : '#024699',
 	        over : '#024699',
+	        action: '#FF3300',
 
 	        stroke: 'rgba(11,11,11,0.5)',
 	        scroll: '#333333',
@@ -220,6 +221,7 @@
 	        texture:'M 13 4 L 13 1 1 1 1 4 5 4 5 13 9 13 9 4 13 4 Z',
 	        object:'M 10 1 L 7 4 4 1 1 1 1 13 4 13 4 5 7 8 10 5 10 13 13 13 13 1 10 1 Z',
 	        none:'M 9 5 L 5 5 5 9 9 9 9 5 Z',
+	        cursor:'M 4 7 L 1 10 1 12 2 13 4 13 7 10 9 14 14 0 0 5 4 7 Z',
 
 	    },
 
@@ -1333,7 +1335,7 @@
 
 	        var keyCode = e.which, isShift = e.shiftKey;
 
-	        console.log( keyCode );
+	        //console.log( keyCode )
 
 	        R.firstImput = false;
 
@@ -2202,11 +2204,12 @@
 
 	    this.buttonColor = o.bColor || this.colors.button;
 
-	    this.inh = o.inh || this.h;
+	    this.inh = o.inh || Math.floor( this.h*0.8 );
+	    this.inw = o.inw || 36;
 
 	    var t = Math.floor(this.h*0.5)-((this.inh-2)*0.5);
 
-	    this.c[2] = this.dom( 'div', this.css.basic + 'background:'+ this.colors.boolbg +'; height:'+(this.inh-2)+'px; width:36px; top:'+t+'px; border-radius:10px; border:2px solid '+this.boolbg );
+	    this.c[2] = this.dom( 'div', this.css.basic + 'background:'+ this.colors.boolbg +'; height:'+(this.inh-2)+'px; width:'+this.inw+'px; top:'+t+'px; border-radius:10px; border:2px solid '+this.boolbg );
 	    this.c[3] = this.dom( 'div', this.css.basic + 'height:'+(this.inh-6)+'px; width:16px; top:'+(t+2)+'px; border-radius:10px; background:'+this.buttonColor+';' );
 
 	    this.init();
@@ -2261,8 +2264,9 @@
 
 	        Proto.prototype.rSize.call( this );
 	        var s = this.s;
-	        s[2].left = this.sa + 'px';
-	        s[3].left = this.sa+1+ 'px';
+	        var w = (this.w - 10 ) - this.inw;
+	        s[2].left = w + 'px';
+	        s[3].left = w + 'px';
 
 	    }
 
@@ -5966,6 +5970,186 @@
 
 	} );
 
+	function Select ( o ) {
+	    
+	    Proto.call( this, o );
+
+	    this.value = o.value || '';
+
+	    this.isDown = false;
+
+	    this.onActif = o.onActif || function(){};
+
+	    this.buttonColor = o.bColor || this.colors.button;
+	    this.buttonOver = o.bOver || this.colors.over;
+	    this.buttonDown = o.bDown || this.colors.select;
+	    this.buttonAction = o.bAction || this.colors.action;
+
+	    var prefix = o.prefix || '';
+
+	    this.c[2] = this.dom( 'div', this.css.txt + this.css.button + ' top:1px; background:'+this.buttonColor+'; height:'+(this.h-2)+'px; border:'+this.colors.buttonBorder+'; border-radius:15px; width:30px; left:10px;' );
+	    this.c[2].style.color = this.fontColor;
+
+	    this.c[3] = this.dom( 'div', this.css.txtselect + 'height:' + (this.h-4) + 'px; background:' + this.colors.inputBg + '; borderColor:' + this.colors.inputBorder+'; border-radius:'+this.radius+'px;' );
+	    this.c[3].textContent = this.value;
+
+	    var fltop = Math.floor(this.h*0.5)-7;
+	    this.c[4] = this.dom( 'path', this.css.basic + 'position:absolute; width:14px; height:14px; left:5px; top:'+fltop+'px;', { d:this.svgs[ 'cursor' ], fill:this.fontColor, stroke:'none'});
+
+	    this.stat = 1;
+	    this.isActif = false;
+
+	    this.init();
+
+	}
+
+	Select.prototype = Object.assign( Object.create( Proto.prototype ), {
+
+	    constructor: Select,
+
+	    testZone: function ( e ) {
+
+	        var l = this.local;
+	        if( l.x === -1 && l.y === -1 ) { return ''; }
+	        if( l.x > this.sa && l.x < this.sa+30 ) { return 'over'; }
+	        return '0'
+
+	    },
+
+	    // ----------------------
+	    //   EVENTS
+	    // ----------------------
+
+	    mouseup: function ( e ) {
+	    
+	        if( this.isDown ){
+	            //this.value = false;
+	            this.isDown = false;
+	            //this.send();
+	            return this.mousemove( e );
+	        }
+
+	        return false;
+
+	    },
+
+	    mousedown: function ( e ) {
+
+	        var name = this.testZone( e );
+
+	        if( !name ) { return false; }
+
+	        this.isDown = true;
+	        //this.value = this.values[ name-2 ];
+	        //this.send();
+	        return this.mousemove( e );
+
+	    },
+
+	    mousemove: function ( e ) {
+
+	        var up = false;
+
+	        var name = this.testZone( e );
+	        //var sel = false;
+
+	        
+
+	        //console.log(name)
+
+	        if( name === 'over' ){
+	            this.cursor('pointer');
+	            up = this.mode( this.isDown ? 3 : 2 );
+	        } else {
+	            up = this.reset();
+	        }
+
+	        return up;
+
+	    },
+
+	    // ----------------------
+
+	    apply: function ( v ) {
+
+	        v = v || '';
+
+	        if( v !== this.value ) {
+	            this.value = v;
+	            this.c[3].textContent = this.value;
+	            this.send();
+	        }
+	        
+	        this.mode(1);
+
+	    },
+
+	    update: function () {
+
+	        this.mode( 3 );
+
+	    },
+
+	    mode: function ( n ) {
+
+	        var change = false;
+
+	        if( this.stat !== n ){
+
+	            if( n===1 ) { this.isActif = false; }
+	            if( n===3 ){ 
+	                if( !this.isActif ){ this.isActif = true; n=4; this.onActif( this ); }
+	                else { this.isActif = false; }
+	            }
+
+	            if( n===2 && this.isActif ) { n = 4; }
+
+	            switch( n ){
+
+	                case 1: this.stat = 1; this.s[ 2 ].color = this.fontColor;  this.s[ 2 ].background = this.buttonColor; break; // base
+	                case 2: this.stat = 2; this.s[ 2 ].color = this.fontSelect; this.s[ 2 ].background = this.buttonOver; break; // over
+	                case 3: this.stat = 3; this.s[ 2 ].color = this.fontSelect; this.s[ 2 ].background = this.buttonDown; break; // down
+	                case 4: this.stat = 4; this.s[ 2 ].color = this.fontSelect; this.s[ 2 ].background = this.buttonAction; break; // actif
+
+	            }
+
+	            change = true;
+
+	        }
+
+	        return change;
+
+
+
+	    },
+
+	    reset: function () {
+
+	        this.cursor();
+	        return this.mode( this.isActif ? 4 : 1 );
+
+	    },
+
+	    text: function ( txt ) {
+
+	        this.c[3].textContent = txt;
+
+	    },
+
+	    rSize: function () {
+
+	        Proto.prototype.rSize.call( this );
+
+	        var s = this.s;
+	        s[2].left = this.sa + 'px';
+	        s[3].left = (this.sa + 40) + 'px';
+	        s[3].width = (this.sb - 40) + 'px';
+	        s[4].left = (this.sa+8) + 'px';
+
+	    },
+
+	} );
+
 	function Selector ( o ) {
 
 	    Proto.call( this, o );
@@ -6598,15 +6782,6 @@
 
 	} );
 
-	/*function autoType () {
-
-	    var a = arguments;
-	    var type = 'Slide';
-	    if( a[2].type ) type = a[2].type;
-	    return type;
-
-	};*/
-
 	function add () {
 
 	    var a = arguments; 
@@ -6651,6 +6826,7 @@
 	        case 'slide': n = new Slide(o); break;
 	        case 'textInput': case 'string': n = new TextInput(o); break;
 	        case 'title': n = new Title(o); break;
+	        case 'select': n = new Select(o); break;
 	        case 'selector': n = new Selector(o); break;
 	        case 'empty': case 'space': n = new Empty(o); break;
 	        case 'item': n = new Item(o); break;
