@@ -1,52 +1,52 @@
 import { Proto } from '../core/Proto';
 
-function Bool ( o ){
+export class Bool extends Proto {
 
-    Proto.call( this, o );
-    
-    this.value = o.value || false;
+    constructor( o = {} ) {
 
-    this.buttonColor = o.bColor || this.colors.button;
+        super( o );
+        
+        this.value = o.value || false;
 
-    this.inh = o.inh || Math.floor( this.h*0.8 );
-    this.inw = o.inw || 36;
+        this.buttonColor = o.bColor || this.colors.button;
 
-    var t = Math.floor(this.h*0.5)-((this.inh-2)*0.5);
+        this.inh = o.inh || Math.floor( this.h*0.8 );
+        this.inw = o.inw || 36;
 
-    this.c[2] = this.dom( 'div', this.css.basic + 'background:'+ this.colors.boolbg +'; height:'+(this.inh-2)+'px; width:'+this.inw+'px; top:'+t+'px; border-radius:10px; border:2px solid '+this.boolbg );
-    this.c[3] = this.dom( 'div', this.css.basic + 'height:'+(this.inh-6)+'px; width:16px; top:'+(t+2)+'px; border-radius:10px; background:'+this.buttonColor+';' );
+        let t = Math.floor(this.h*0.5)-((this.inh-2)*0.5);
 
-    this.init();
-    this.update();
+        this.c[2] = this.dom( 'div', this.css.basic + 'background:'+ this.colors.boolbg +'; height:'+(this.inh-2)+'px; width:'+this.inw+'px; top:'+t+'px; border-radius:10px; border:2px solid '+this.boolbg );
+        this.c[3] = this.dom( 'div', this.css.basic + 'height:'+(this.inh-6)+'px; width:16px; top:'+(t+2)+'px; border-radius:10px; background:'+this.buttonColor+';' );
 
-}
+        this.init();
+        this.update();
 
-Bool.prototype = Object.assign( Object.create( Proto.prototype ), {
-
-    constructor: Bool,
+    }
 
     // ----------------------
     //   EVENTS
     // ----------------------
 
-    mousemove: function ( e ) {
+    mousemove ( e ) {
 
         this.cursor('pointer');
 
-    },
+    }
 
-    mousedown: function ( e ) {
+    mousedown ( e ) {
 
         this.value = this.value ? false : true;
         this.update();
         this.send();
         return true;
 
-    },
+    }
 
-    update: function () {
+    // ----------------------
 
-        var s = this.s;
+    update () {
+
+        let s = this.s;
 
         if( this.value ){
             
@@ -62,18 +62,16 @@ Bool.prototype = Object.assign( Object.create( Proto.prototype ), {
 
         }
             
-    },
+    }
 
-    rSize: function () {
+    rSize () {
 
-        Proto.prototype.rSize.call( this );
-        var s = this.s;
-        var w = (this.w - 10 ) - this.inw;
+        super.rSize();
+        let s = this.s;
+        let w = (this.w - 10 ) - this.inw;
         s[2].left = w + 'px';
         s[3].left = w + 'px';
 
     }
 
-} );
-
-export { Bool };
+}

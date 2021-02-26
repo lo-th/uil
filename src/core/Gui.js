@@ -8,144 +8,138 @@ import { V2 } from './V2';
  * @author lth / https://github.com/lo-th
  */
 
-function Gui ( o ) {
+export class Gui {
 
-    this.canvas = null;
+    constructor( o = {} ) {
 
-    o = o || {};
+        this.canvas = null;
 
-    // color
-    this.colors = Tools.cloneColor();
-    this.css = Tools.cloneCss();
-
-
-    if( o.config ) this.setConfig( o.config );
+        // color
+        this.colors = Tools.cloneColor();
+        this.css = Tools.cloneCss();
 
 
-    this.bg = o.bg || this.colors.background;
+        if( o.config ) this.setConfig( o.config );
 
-    if( o.transparent !== undefined ){
-        this.colors.background = 'none';
-        this.colors.backgroundOver = 'none';
+
+        this.bg = o.bg || this.colors.background;
+
+        if( o.transparent !== undefined ){
+            this.colors.background = 'none';
+            this.colors.backgroundOver = 'none';
+        }
+
+        //if( o.callback ) this.callback =  o.callback;
+
+        this.isReset = true;
+
+        this.tmpAdd = null;
+        this.tmpH = 0;
+
+        this.isCanvas = o.isCanvas || false;
+        this.isCanvasOnly = false;
+        this.cssGui = o.css !== undefined ? o.css : '';
+        this.callback = o.callback  === undefined ? null : o.callback;
+
+        this.forceHeight = o.maxHeight || 0;
+        this.lockHeight = o.lockHeight || false;
+
+        this.isItemMode = o.itemMode !== undefined ? o.itemMode : false;
+
+        this.cn = '';
+        
+        // size define
+        this.size = Tools.size;
+        if( o.p !== undefined ) this.size.p = o.p;
+        if( o.w !== undefined ) this.size.w = o.w;
+        if( o.h !== undefined ) this.size.h = o.h;
+        if( o.s !== undefined ) this.size.s = o.s;
+
+        this.size.h = this.size.h < 11 ? 11 : this.size.h;
+
+        // local mouse and zone
+        this.local = new V2().neg();
+        this.zone = { x:0, y:0, w:this.size.w, h:0 };
+
+        // virtual mouse
+        this.mouse = new V2().neg();
+
+        this.h = 0;
+        this.prevY = -1;
+        this.sw = 0;
+
+        
+
+        // bottom and close height
+        this.isWithClose = o.close !== undefined ? o.close : true;
+        this.bh = !this.isWithClose ? 0 : this.size.h;
+
+        this.autoResize = o.autoResize === undefined ? true : o.autoResize;
+        
+        this.isCenter = o.center || false;
+        this.isOpen = true;
+        this.isDown = false;
+        this.isScroll = false;
+
+        this.uis = [];
+
+        this.current = -1;
+        this.target = null;
+        this.decal = 0;
+        this.ratio = 1;
+        this.oy = 0;
+
+
+
+        this.isNewTarget = false;
+
+        this.content = Tools.dom( 'div', this.css.basic + ' width:0px; height:auto; top:0px; ' + this.cssGui );
+
+        this.innerContent = Tools.dom( 'div', this.css.basic + 'width:100%; top:0; left:0; height:auto; overflow:hidden;');
+        this.content.appendChild( this.innerContent );
+
+        this.inner = Tools.dom( 'div', this.css.basic + 'width:100%; left:0; ');
+        this.innerContent.appendChild(this.inner);
+
+        // scroll
+        this.scrollBG = Tools.dom( 'div', this.css.basic + 'right:0; top:0; width:'+ (this.size.s - 1) +'px; height:10px; display:none; background:'+this.bg+';');
+        this.content.appendChild( this.scrollBG );
+
+        this.scroll = Tools.dom( 'div', this.css.basic + 'background:'+this.colors.scroll+'; right:2px; top:0; width:'+(this.size.s-4)+'px; height:10px;');
+        this.scrollBG.appendChild( this.scroll );
+
+        // bottom button
+        this.bottom = Tools.dom( 'div',  this.css.txt + 'width:100%; top:auto; bottom:0; left:0; border-bottom-right-radius:10px;  border-bottom-left-radius:10px; text-align:center; height:'+this.bh+'px; line-height:'+(this.bh-5)+'px; border-top:1px solid '+Tools.colors.stroke+';');
+        this.content.appendChild( this.bottom );
+        this.bottom.textContent = 'close';
+        this.bottom.style.background = this.bg;
+
+        //
+
+        this.parent = o.parent !== undefined ? o.parent : null;
+        
+        if( this.parent === null && !this.isCanvas ){ 
+        	this.parent = document.body;
+            // default position
+        	if( !this.isCenter ) this.content.style.right = '10px'; 
+        }
+
+        if( this.parent !== null ) this.parent.appendChild( this.content );
+
+        if( this.isCanvas && this.parent === null ) this.isCanvasOnly = true;
+
+        if( !this.isCanvasOnly ) this.content.style.pointerEvents = 'auto';
+
+
+        this.setWidth();
+
+        if( this.isCanvas ) this.makeCanvas();
+
+        Roots.add( this );
+
     }
 
-    //if( o.callback ) this.callback =  o.callback;
-
-    this.isReset = true;
-
-    this.tmpAdd = null;
-    this.tmpH = 0;
-
-    this.isCanvas = o.isCanvas || false;
-    this.isCanvasOnly = false;
-    this.cssGui = o.css !== undefined ? o.css : '';
-    this.callback = o.callback  === undefined ? null : o.callback;
-
-    this.forceHeight = o.maxHeight || 0;
-    this.lockHeight = o.lockHeight || false;
-
-    this.isItemMode = o.itemMode !== undefined ? o.itemMode : false;
-
-    this.cn = '';
-    
-    // size define
-    this.size = Tools.size;
-    if( o.p !== undefined ) this.size.p = o.p;
-    if( o.w !== undefined ) this.size.w = o.w;
-    if( o.h !== undefined ) this.size.h = o.h;
-    if( o.s !== undefined ) this.size.s = o.s;
-
-    this.size.h = this.size.h < 11 ? 11 : this.size.h;
-
-    // local mouse and zone
-    this.local = new V2().neg();
-    this.zone = { x:0, y:0, w:this.size.w, h:0 };
-
-    // virtual mouse
-    this.mouse = new V2().neg();
-
-    this.h = 0;
-    this.prevY = -1;
-    this.sw = 0;
-
-    
-
-    // bottom and close height
-    this.isWithClose = o.close !== undefined ? o.close : true;
-    this.bh = !this.isWithClose ? 0 : this.size.h;
-
-    this.autoResize = o.autoResize === undefined ? true : o.autoResize;
-    
-    this.isCenter = o.center || false;
-    this.isOpen = true;
-    this.isDown = false;
-    this.isScroll = false;
-
-    this.uis = [];
-
-    this.current = -1;
-    this.target = null;
-    this.decal = 0;
-    this.ratio = 1;
-    this.oy = 0;
-
-
-
-    this.isNewTarget = false;
-
-    this.content = Tools.dom( 'div', this.css.basic + ' width:0px; height:auto; top:0px; ' + this.cssGui );
-
-    this.innerContent = Tools.dom( 'div', this.css.basic + 'width:100%; top:0; left:0; height:auto; overflow:hidden;');
-    this.content.appendChild( this.innerContent );
-
-    this.inner = Tools.dom( 'div', this.css.basic + 'width:100%; left:0; ');
-    this.innerContent.appendChild(this.inner);
-
-    // scroll
-    this.scrollBG = Tools.dom( 'div', this.css.basic + 'right:0; top:0; width:'+ (this.size.s - 1) +'px; height:10px; display:none; background:'+this.bg+';');
-    this.content.appendChild( this.scrollBG );
-
-    this.scroll = Tools.dom( 'div', this.css.basic + 'background:'+this.colors.scroll+'; right:2px; top:0; width:'+(this.size.s-4)+'px; height:10px;');
-    this.scrollBG.appendChild( this.scroll );
-
-    // bottom button
-    this.bottom = Tools.dom( 'div',  this.css.txt + 'width:100%; top:auto; bottom:0; left:0; border-bottom-right-radius:10px;  border-bottom-left-radius:10px; text-align:center; height:'+this.bh+'px; line-height:'+(this.bh-5)+'px; border-top:1px solid '+Tools.colors.stroke+';');
-    this.content.appendChild( this.bottom );
-    this.bottom.textContent = 'close';
-    this.bottom.style.background = this.bg;
-
-    //
-
-    this.parent = o.parent !== undefined ? o.parent : null;
-    
-    if( this.parent === null && !this.isCanvas ){ 
-    	this.parent = document.body;
-        // default position
-    	if( !this.isCenter ) this.content.style.right = '10px'; 
-    }
-
-    if( this.parent !== null ) this.parent.appendChild( this.content );
-
-    if( this.isCanvas && this.parent === null ) this.isCanvasOnly = true;
-
-    if( !this.isCanvasOnly ) this.content.style.pointerEvents = 'auto';
-
-
-    this.setWidth();
-
-    if( this.isCanvas ) this.makeCanvas();
-
-    Roots.add( this );
-
-}
-
-Object.assign( Gui.prototype, {
-
-    constructor: Gui,
-
-    isGui: true,
-
-    setTop: function ( t, h ) {
+    setTop ( t, h ) {
 
         this.content.style.top = t + 'px';
         if( h !== undefined ) this.forceHeight = h;
@@ -153,97 +147,97 @@ Object.assign( Gui.prototype, {
 
         Roots.needReZone = true;
 
-    },
+    }
 
     //callback: function () {},
 
-    dispose: function () {
+    dispose () {
 
         this.clear();
         if( this.parent !== null ) this.parent.removeChild( this.content );
         Roots.remove( this );
 
-    },
+    }
 
     // ----------------------
     //   CANVAS
     // ----------------------
 
-    onDraw: function () { },
+    onDraw () {}
 
-    makeCanvas: function () {
+    makeCanvas () {
 
     	this.canvas = document.createElementNS( 'http://www.w3.org/1999/xhtml', "canvas" );
     	this.canvas.width = this.zone.w;
     	this.canvas.height = this.forceHeight ? this.forceHeight : this.zone.h;
 
-    },
+    }
 
-    draw: function ( force ) {
+    draw ( force ) {
 
     	if( this.canvas === null ) return;
 
-    	var w = this.zone.w;
-    	var h = this.forceHeight ? this.forceHeight : this.zone.h;
+    	let w = this.zone.w;
+    	let h = this.forceHeight ? this.forceHeight : this.zone.h;
     	Roots.toCanvas( this, w, h, force );
 
-    },
+    }
 
     //////
 
-    getDom: function () {
+    getDom () {
 
         return this.content;
 
-    },
+    }
 
-    setMouse: function( m ){
+    setMouse ( m ) {
 
         this.mouse.set( m.x, m.y );
 
-    },
+    }
 
-    setConfig: function ( o ) {
+    setConfig ( o ) {
 
         this.setColors( o );
         this.setText( o.fontSize, o.text, o.font, o.shadow );
 
-    },
+    }
 
-    setColors: function ( o ) {
+    setColors ( o ) {
 
-        for( var c in o ){
+        for( let c in o ){
             if( this.colors[c] ) this.colors[c] = o[c];
         }
 
-    },
+    }
 
-    setText: function ( size, color, font, shadow ) {
+    setText ( size, color, font, shadow ) {
 
         Tools.setText( size, color, font, shadow, this.colors, this.css );
 
-    },
+    }
 
-    hide: function ( b ) {
+    hide ( b ) {
 
         this.content.style.display = b ? 'none' : 'block';
         
-    },
+    }
 
-    onChange: function ( f ) {
+    onChange ( f ) {
 
         this.callback = f || null;
         return this;
 
-    },
+    }
 
     // ----------------------
     //   STYLES
     // ----------------------
 
-    mode: function ( n ) {
+    mode ( n ) {
 
-    	var needChange = false;
+    	let needChange = false;
 
     	if( n !== this.cn ){
 
@@ -273,13 +267,13 @@ Object.assign( Gui.prototype, {
 
     	return needChange;
 
-    },
+    }
 
     // ----------------------
     //   TARGET
     // ----------------------
 
-    clearTarget: function () {
+    clearTarget () {
 
     	if( this.current === -1 ) return false;
         //if(!this.target) return;
@@ -295,42 +289,42 @@ Object.assign( Gui.prototype, {
         Roots.cursor();
         return true;
 
-    },
+    }
 
     // ----------------------
     //   ZONE TEST
     // ----------------------
 
-    testZone: function ( e ) {
+    testZone ( e ) {
 
-        var l = this.local;
+        let l = this.local;
         if( l.x === -1 && l.y === -1 ) return '';
 
         this.isReset = false;
 
-        var name = '';
+        let name = '';
 
-        var s = this.isScroll ?  this.zone.w  - this.size.s : this.zone.w;
+        let s = this.isScroll ?  this.zone.w  - this.size.s : this.zone.w;
         
         if( l.y > this.zone.h - this.bh &&  l.y < this.zone.h ) name = 'bottom';
         else name = l.x > s ? 'scroll' : 'content';
 
         return name;
 
-    },
+    }
 
     // ----------------------
     //   EVENTS
     // ----------------------
 
-    handleEvent: function ( e ) {
+    handleEvent ( e ) {
 
-    	var type = e.type;
+    	let type = e.type;
 
-    	var change = false;
-    	var targetChange = false;
+    	let change = false;
+    	let targetChange = false;
 
-    	var name = this.testZone( e );
+    	let name = this.testZone( e );
 
         
 
@@ -393,13 +387,13 @@ Object.assign( Gui.prototype, {
 
     	if( change ) this.draw();
 
-    },
+    }
 
-    getNext: function ( e, change ) {
+    getNext ( e, change ) {
 
 
 
-        var next = Roots.findTarget( this.uis, e );
+        let next = Roots.findTarget( this.uis, e );
 
         if( next !== this.current ){
             this.clearTarget();
@@ -415,21 +409,21 @@ Object.assign( Gui.prototype, {
             this.target.uiover();
         }
 
-    },
+    }
 
-    onWheel: function ( e ) {
+    onWheel ( e ) {
 
         this.oy += 20*e.delta;
         this.update( this.oy );
         return true;
 
-    },
+    }
 
     // ----------------------
     //   RESET
     // ----------------------
 
-    reset: function ( force ) {
+    reset ( force ) {
 
         if( this.isReset ) return;
 
@@ -439,8 +433,8 @@ Object.assign( Gui.prototype, {
         this.isDown = false;
 
         //Roots.clearInput();
-        var r = this.mode('def');
-        var r2 = this.clearTarget();
+        let r = this.mode('def');
+        let r2 = this.clearTarget();
 
         if( r || r2 ) this.draw( true );
 
@@ -448,15 +442,15 @@ Object.assign( Gui.prototype, {
 
         //Roots.lock = false;
 
-    },
+    }
 
     // ----------------------
     //   ADD NODE
     // ----------------------
 
-    add: function () {
+    add () {
 
-        var a = arguments;
+        let a = arguments;
 
         if( typeof a[1] === 'object' ){ 
 
@@ -473,19 +467,19 @@ Object.assign( Gui.prototype, {
             
         } 
 
-        var u = add.apply( this, a );
+        let u = add.apply( this, a );
 
         if( u === null ) return;
 
 
-        //var n = add.apply( this, a );
-        //var n = UIL.add( ...args );
+        //let n = add.apply( this, a );
+        //let n = UIL.add( ...args );
 
         this.uis.push( u );
         //n.py = this.h;
 
         if( !u.autoWidth ){
-            var y = u.c[0].getBoundingClientRect().top;
+            let y = u.c[0].getBoundingClientRect().top;
             if( this.prevY !== y ){
                 this.calc( u.h + 1 );
                 this.prevY = y;
@@ -497,9 +491,9 @@ Object.assign( Gui.prototype, {
 
         return u;
 
-    },
+    }
 
-    applyCalc: function () {
+    applyCalc () {
 
         //console.log(this.uis.length, this.tmpH )
 
@@ -507,42 +501,42 @@ Object.assign( Gui.prototype, {
         //this.tmpH = 0;
         this.tmpAdd = null;
 
-    },
+    }
 
-    calcUis: function () {
+    calcUis () {
 
         Roots.calcUis( this.uis, this.zone, this.zone.y );
 
-    },
+    }
 
     // remove one node
 
-    remove: function ( n ) { 
+    remove ( n ) { 
 
-        var i = this.uis.indexOf( n ); 
+        let i = this.uis.indexOf( n ); 
         if ( i !== -1 ) this.uis[i].clear();
 
-    },
+    }
 
     // call after uis clear
 
-    clearOne: function ( n ) { 
+    clearOne ( n ) { 
 
-        var i = this.uis.indexOf( n ); 
+        let i = this.uis.indexOf( n ); 
         if ( i !== -1 ) {
             this.inner.removeChild( this.uis[i].c[0] );
             this.uis.splice( i, 1 ); 
         }
 
-    },
+    }
 
     // clear all gui
 
-    clear: function () {
+    clear () {
 
         //this.callback = null;
 
-        var i = this.uis.length;
+        let i = this.uis.length;
         while(i--) this.uis[i].clear();
 
         this.uis = [];
@@ -550,23 +544,23 @@ Object.assign( Gui.prototype, {
 
         this.calc( -this.h );
 
-    },
+    }
 
     // ----------------------
     //   ITEMS SPECIAL
     // ----------------------
 
 
-    resetItem: function () {
+    resetItem () {
 
         if( !this.isItemMode ) return;
 
-        var i = this.uis.length;
+        let i = this.uis.length;
         while(i--) this.uis[i].selected();
 
-    },
+    }
 
-    setItem: function ( name ) {
+    setItem ( name ) {
 
         if( !this.isItemMode ) return;
 
@@ -579,7 +573,7 @@ Object.assign( Gui.prototype, {
             return;
         } 
 
-        var i = this.uis.length;
+        let i = this.uis.length;
         while(i--){ 
             if( this.uis[i].value === name ){ 
                 this.uis[i].selected( true );
@@ -587,7 +581,7 @@ Object.assign( Gui.prototype, {
             }
         }
 
-    },
+    }
 
 
 
@@ -595,7 +589,7 @@ Object.assign( Gui.prototype, {
     //   SCROLL
     // ----------------------
 
-    upScroll: function ( b ) {
+    upScroll ( b ) {
 
         this.sw = b ? this.size.s : 0;
         this.oy = b ? this.oy : 0;
@@ -624,9 +618,9 @@ Object.assign( Gui.prototype, {
         this.setItemWidth( this.zone.w - this.sw );
         this.update( this.oy );
 
-    },
+    }
 
-    update: function ( y ) {
+    update ( y ) {
 
         y = Tools.clamp( y, 0, this.range );
 
@@ -635,21 +629,21 @@ Object.assign( Gui.prototype, {
         this.scroll.style.top = Math.floor( y ) + 'px';
         this.oy = y;
 
-    },
+    }
 
     // ----------------------
     //   RESIZE FUNCTION
     // ----------------------
 
-    calc: function ( y ) {
+    calc ( y ) {
 
         this.h += y;
         clearTimeout( this.tmp );
         this.tmp = setTimeout( this.setHeight.bind(this), 10 );
 
-    },
+    }
 
-    setHeight: function () {
+    setHeight () {
 
         if( this.tmp ) clearTimeout( this.tmp );
 
@@ -660,11 +654,11 @@ Object.assign( Gui.prototype, {
 
         if( this.isOpen ){
 
-            var hhh = this.forceHeight ? this.forceHeight + this.zone.y : window.innerHeight;
+            let hhh = this.forceHeight ? this.forceHeight + this.zone.y : window.innerHeight;
 
             this.maxHeight = hhh - this.zone.y - this.bh;
 
-            var diff = this.h - this.maxHeight;
+            let diff = this.h - this.maxHeight;
 
             if( diff > 1 ){ //this.h > this.maxHeight ){
 
@@ -690,13 +684,13 @@ Object.assign( Gui.prototype, {
         if( this.isOpen ) this.calcUis();
         if( this.isCanvas ) this.draw( true );
 
-    },
+    }
 
-    rezone: function () {
+    rezone () {
         Roots.needReZone = true;
-    },
+    }
 
-    setWidth: function ( w ) {
+    setWidth ( w ) {
 
         if( w ) this.zone.w = w;
 
@@ -711,20 +705,18 @@ Object.assign( Gui.prototype, {
         if( !this.isCanvasOnly ) Roots.needReZone = true;
         //this.resize();
 
-    },
+    }
 
-    setItemWidth: function ( w ) {
+    setItemWidth ( w ) {
 
-        var i = this.uis.length;
+        let i = this.uis.length;
         while(i--){
             this.uis[i].setSize( w );
             this.uis[i].rSize()
         }
 
-    },
+    }
 
+}
 
-} );
-
-
-export { Gui };
+Gui.prototype.isGui = true;

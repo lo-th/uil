@@ -2,7 +2,7 @@
  * @author lth / https://github.com/lo-th
  */
 
-var T = {
+const T = {
 
     frag: document.createDocumentFragment(),
 
@@ -11,13 +11,13 @@ var T = {
     joystick_1: null,
     circular: null,
     knob: null,
-    //graph: null,
 
     svgns: "http://www.w3.org/2000/svg",
+    links: "http://www.w3.org/1999/xlink",
     htmls: "http://www.w3.org/1999/xhtml",
 
     DOM_SIZE: [ 'height', 'width', 'top', 'left', 'bottom', 'right', 'margin-left', 'margin-right', 'margin-top', 'margin-bottom'],
-    SVG_TYPE_D: [ 'pattern', 'defs', 'transform', 'stop', 'animate', 'radialGradient', 'linearGradient', 'animateMotion' ],
+    SVG_TYPE_D: [ 'pattern', 'defs', 'transform', 'stop', 'animate', 'radialGradient', 'linearGradient', 'animateMotion', 'use', 'filter', 'feColorMatrix' ],
     SVG_TYPE_G: [ 'svg', 'rect', 'circle', 'path', 'polygon', 'text', 'g', 'line', 'foreignObject' ],
 
     PI: Math.PI,
@@ -44,14 +44,14 @@ var T = {
 
     cloneColor: function () {
 
-        var cc = Object.assign({}, T.colors );
+        let cc = Object.assign({}, T.colors );
         return cc;
 
     },
 
     cloneCss: function () {
 
-        var cc = Object.assign({}, T.css );
+        let cc = Object.assign({}, T.css );
         return cc;
 
     },
@@ -170,7 +170,7 @@ var T = {
 
     setCss: function( dom, css ){
 
-        for( var r in css ){
+        for( let r in css ){
             if( T.DOM_SIZE.indexOf(r) !== -1 ) dom.style[r] = css[r] + 'px';
             else dom.style[r] = css[r];
         }
@@ -179,9 +179,10 @@ var T = {
 
     set: function( g, o ){
 
-        for( var att in o ){
+        for( let att in o ){
             if( att === 'txt' ) g.textContent = o[ att ];
-            g.setAttributeNS( null, att, o[ att ] );
+            if( att === 'link' ) g.setAttributeNS( T.links, 'xlink:href', o[ att ] );
+            else g.setAttributeNS( null, att, o[ att ] );
         }
         
     },
@@ -208,6 +209,11 @@ var T = {
                 dom = document.createElementNS( T.svgns, 'svg' );
                 T.set( dom, obj );
 
+          /*  } else if ( type === 'use' ) {
+
+                dom = document.createElementNS( T.svgns, 'use' );
+                T.set( dom, obj );
+*/
             } else {
                 // create new svg if not def
                 if( dom === undefined ) dom = document.createElementNS( T.svgns, 'svg' );
@@ -231,7 +237,7 @@ var T = {
 
     addAttributes : function( dom, type, o, id ){
 
-        var g = document.createElementNS( T.svgns, type );
+        let g = document.createElementNS( T.svgns, type );
         T.set( g, o );
         T.get( dom, id ).appendChild( g );
         if( T.SVG_TYPE_G.indexOf(type) !== -1 ) g.style.pointerEvents = 'none';
@@ -251,7 +257,7 @@ var T = {
 
     purge : function ( dom ) {
 
-        var a = dom.attributes, i, n;
+        let a = dom.attributes, i, n;
         if (a) {
             i = a.length;
             while(i--){
@@ -275,6 +281,8 @@ var T = {
 
     ColorLuma : function ( hex, l ) {
 
+        if( hex === 'n' ) hex = '#000';
+
         // validate hex string
         hex = String(hex).replace(/[^0-9a-f]/gi, '');
         if (hex.length < 6) {
@@ -283,7 +291,7 @@ var T = {
         l = l || 0;
 
         // convert to decimal and change luminosity
-        var rgb = "#", c, i;
+        let rgb = "#", c, i;
         for (i = 0; i < 3; i++) {
             c = parseInt(hex.substr(i*2,2), 16);
             c = Math.round(Math.min(Math.max(0, c + (c * l)), 255)).toString(16);
@@ -345,9 +353,9 @@ var T = {
 
     rgbToHex : function( c ){
 
-        var r = Math.round(c[0] * 255).toString(16);
-        var g = Math.round(c[1] * 255).toString(16);
-        var b = Math.round(c[2] * 255).toString(16);
+        let r = Math.round(c[0] * 255).toString(16);
+        let g = Math.round(c[1] * 255).toString(16);
+        let b = Math.round(c[2] * 255).toString(16);
         return '#' + T.pad(r) + T.pad(g) + T.pad(b);
 
        // return '#' + ( '000000' + ( ( c[0] * 255 ) << 16 ^ ( c[1] * 255 ) << 8 ^ ( c[2] * 255 ) << 0 ).toString( 16 ) ).slice( - 6 );
@@ -367,7 +375,7 @@ var T = {
 
     rgbToHsl: function ( c ) {
 
-        var r = c[0], g = c[1], b = c[2], min = Math.min(r, g, b), max = Math.max(r, g, b), delta = max - min, h = 0, s = 0, l = (min + max) / 2;
+        let r = c[0], g = c[1], b = c[2], min = Math.min(r, g, b), max = Math.max(r, g, b), delta = max - min, h = 0, s = 0, l = (min + max) / 2;
         if (l > 0 && l < 1) s = delta / (l < 0.5 ? (2 * l) : (2 - 2 * l));
         if (delta > 0) {
             if (max == r && max != g) h += (g - b) / delta;
@@ -381,7 +389,7 @@ var T = {
 
     hslToRgb: function ( c ) {
 
-        var p, q, h = c[0], s = c[1], l = c[2];
+        let p, q, h = c[0], s = c[1], l = c[2];
 
         if ( s === 0 ) return [ l, l, l ];
         else {
@@ -400,12 +408,13 @@ var T = {
 
         T.dom( type, null, settings, parent, 0 );
 
-        var n = parent.childNodes[0].childNodes.length - 1, c;
+        let n = parent.childNodes[0].childNodes.length - 1, c;
 
-        for( var i = 0; i < colors.length; i++ ){
+        for( let i = 0; i < colors.length; i++ ){
 
             c = colors[i];
-            T.dom( 'stop', null, { offset:c[0]+'%', style:'stop-color:'+c[1]+'; stop-opacity:'+c[2]+';' }, parent, [0,n] );
+            //T.dom( 'stop', null, { offset:c[0]+'%', style:'stop-color:'+c[1]+'; stop-opacity:'+c[2]+';' }, parent, [0,n] );
+            T.dom( 'stop', null, { offset:c[0]+'%', 'stop-color':c[1],  'stop-opacity':c[2] }, parent, [0,n] );
 
         }
 
@@ -413,9 +422,9 @@ var T = {
 
     /*makeGraph: function () {
 
-        var w = 128;
-        var radius = 34;
-        var svg = T.dom( 'svg', T.css.basic , { viewBox:'0 0 '+w+' '+w, width:w, height:w, preserveAspectRatio:'none' } );
+        let w = 128;
+        let radius = 34;
+        let svg = T.dom( 'svg', T.css.basic , { viewBox:'0 0 '+w+' '+w, width:w, height:w, preserveAspectRatio:'none' } );
         T.dom( 'path', '', { d:'', stroke:T.colors.text, 'stroke-width':4, fill:'none', 'stroke-linecap':'butt' }, svg );//0
         //T.dom( 'rect', '', { x:10, y:10, width:108, height:108, stroke:'rgba(0,0,0,0.3)', 'stroke-width':2 , fill:'none'}, svg );//1
         //T.dom( 'circle', '', { cx:64, cy:64, r:radius, fill:T.colors.button, stroke:'rgba(0,0,0,0.3)', 'stroke-width':8 }, svg );//0
@@ -428,9 +437,9 @@ var T = {
 
     makeKnob: function ( model ) {
 
-        var w = 128;
-        var radius = 34;
-        var svg = T.dom( 'svg', T.css.basic , { viewBox:'0 0 '+w+' '+w, width:w, height:w, preserveAspectRatio:'none' } );
+        let w = 128;
+        let radius = 34;
+        let svg = T.dom( 'svg', T.css.basic , { viewBox:'0 0 '+w+' '+w, width:w, height:w, preserveAspectRatio:'none' } );
         T.dom( 'circle', '', { cx:64, cy:64, r:radius, fill:T.colors.button, stroke:'rgba(0,0,0,0.3)', 'stroke-width':8 }, svg );//0
         T.dom( 'path', '', { d:'', stroke:T.colors.text, 'stroke-width':4, fill:'none', 'stroke-linecap':'round' }, svg );//1
         T.dom( 'circle', '', { cx:64, cy:64, r:radius+7, stroke:'rgba(0,0,0,0.1)', 'stroke-width':7 , fill:'none'}, svg );//2
@@ -441,9 +450,9 @@ var T = {
 
     makeCircular: function ( model ) {
 
-        var w = 128;
-        var radius = 40;
-        var svg = T.dom( 'svg', T.css.basic , { viewBox:'0 0 '+w+' '+w, width:w, height:w, preserveAspectRatio:'none' } );
+        let w = 128;
+        let radius = 40;
+        let svg = T.dom( 'svg', T.css.basic , { viewBox:'0 0 '+w+' '+w, width:w, height:w, preserveAspectRatio:'none' } );
         T.dom( 'circle', '', { cx:64, cy:64, r:radius, stroke:'rgba(0,0,0,0.1)', 'stroke-width':10, fill:'none' }, svg );//0
         T.dom( 'path', '', { d:'', stroke:T.colors.text, 'stroke-width':7, fill:'none', 'stroke-linecap':'butt' }, svg );//1
         T.circular = svg;
@@ -454,10 +463,10 @@ var T = {
 
         //+' background:#f00;'
 
-        var w = 128;
-        var radius = Math.floor((w-30)*0.5);
-        var innerRadius = Math.floor(radius*0.6);
-        var svg = T.dom( 'svg', T.css.basic , { viewBox:'0 0 '+w+' '+w, width:w, height:w, preserveAspectRatio:'none' } );
+        let w = 128, ccc;
+        let radius = Math.floor((w-30)*0.5);
+        let innerRadius = Math.floor(radius*0.6);
+        let svg = T.dom( 'svg', T.css.basic , { viewBox:'0 0 '+w+' '+w, width:w, height:w, preserveAspectRatio:'none' } );
         T.dom( 'defs', null, {}, svg );
         T.dom( 'g', null, {}, svg );
 
@@ -466,7 +475,7 @@ var T = {
         
 
             // gradian background
-            var ccc = [ [40, 'rgb(0,0,0)', 0.3], [80, 'rgb(0,0,0)', 0], [90, 'rgb(50,50,50)', 0.4], [100, 'rgb(50,50,50)', 0] ];
+            ccc = [ [40, 'rgb(0,0,0)', 0.3], [80, 'rgb(0,0,0)', 0], [90, 'rgb(50,50,50)', 0.4], [100, 'rgb(50,50,50)', 0] ];
             T.makeGradiant( 'radialGradient', { id:'grad', cx:'50%', cy:'50%', r:'50%', fx:'50%', fy:'50%' }, svg, ccc );
 
             // gradian shadow
@@ -474,8 +483,8 @@ var T = {
             T.makeGradiant( 'radialGradient', { id:'gradS', cx:'50%', cy:'50%', r:'50%', fx:'50%', fy:'50%' }, svg, ccc );
 
             // gradian stick
-            var cc0 = ['rgb(40,40,40)', 'rgb(48,48,48)', 'rgb(30,30,30)'];
-            var cc1 = ['rgb(1,90,197)', 'rgb(3,95,207)', 'rgb(0,65,167)'];
+            let cc0 = ['rgb(40,40,40)', 'rgb(48,48,48)', 'rgb(30,30,30)'];
+            let cc1 = ['rgb(1,90,197)', 'rgb(3,95,207)', 'rgb(0,65,167)'];
 
             ccc = [ [30, cc0[0], 1], [60, cc0[1], 1], [80, cc0[1], 1], [100, cc0[2], 1] ];
             T.makeGradiant( 'radialGradient', { id:'gradIn', cx:'50%', cy:'50%', r:'50%', fx:'50%', fy:'50%' }, svg, ccc );
@@ -509,17 +518,17 @@ var T = {
 
     makeColorRing: function () {
 
-        var w = 256;
-        var svg = T.dom( 'svg', T.css.basic , { viewBox:'0 0 '+w+' '+w, width:w, height:w, preserveAspectRatio:'none' } );
+        let w = 256;
+        let svg = T.dom( 'svg', T.css.basic , { viewBox:'0 0 '+w+' '+w, width:w, height:w, preserveAspectRatio:'none' } );
         T.dom( 'defs', null, {}, svg );
         T.dom( 'g', null, {}, svg );
 
-        var s = 30;//stroke
-        var r =( w-s )*0.5;
-        var mid = w*0.5;
-        var n = 24, nudge = 8 / r / n * Math.PI, a1 = 0, d1;
-        var am, tan, d2, a2, ar, i, j, path, ccc;
-        var color = [];
+        let s = 30;//stroke
+        let r =( w-s )*0.5;
+        let mid = w*0.5;
+        let n = 24, nudge = 8 / r / n * Math.PI, a1 = 0, d1;
+        let am, tan, d2, a2, ar, i, j, path, ccc;
+        let color = [];
         
         for ( i = 0; i <= n; ++i) {
 
@@ -556,10 +565,10 @@ var T = {
             d1 = d2;
         }
 
-        var br = (128 - s ) + 2;
-        var bw = 60;
+        let br = (128 - s ) + 2;
+        let bw = 60;
 
-        var tw = 84.90;
+        let tw = 84.90;
 
         // black / white
         ccc = [ [0, '#FFFFFF', 1], [50, '#FFFFFF', 0], [50, '#000000', 0], [100, '#000000', 1] ];
@@ -585,8 +594,8 @@ var T = {
 
         w = w || 40;
         color = color || '#DEDEDE';
-        var viewBox = '0 0 256 256';
-        var t = ["<svg xmlns='"+T.svgns+"' version='1.1' xmlns:xlink='"+T.htmls+"' style='pointer-events:none;' preserveAspectRatio='xMinYMax meet' x='0px' y='0px' width='"+w+"px' height='"+w+"px' viewBox='"+viewBox+"'><g>"];
+        let viewBox = '0 0 256 256';
+        let t = ["<svg xmlns='"+T.svgns+"' version='1.1' xmlns:xlink='"+T.htmls+"' style='pointer-events:none;' preserveAspectRatio='xMinYMax meet' x='0px' y='0px' width='"+w+"px' height='"+w+"px' viewBox='"+viewBox+"'><g>"];
         switch(type){
             case 'logo':
             //t[1]="<path id='logoin' stroke='"+color+"' stroke-width='16' stroke-linejoin='round' stroke-linecap='square' fill='none' d='M 192 44 L 192 148 Q 192 174.5 173.3 193.25 154.55 212 128 212 101.5 212 82.75 193.25 64 174.5 64 148 L 64 44 M 160 44 L 160 148 Q 160 161.25 150.65 170.65 141.25 180 128 180 114.75 180 105.35 170.65 96 161.25 96 148 L 96 44'/>";
@@ -613,5 +622,4 @@ var T = {
 
 T.setText();
 
-var Tools = T;
-export { Tools };
+export const Tools = T;

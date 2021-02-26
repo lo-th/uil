@@ -1,44 +1,43 @@
 import { Proto } from '../core/Proto';
 
-function Item ( o ){
+export class Item extends Proto {
 
-    Proto.call( this, o );
-    this.p = 100;
-    this.value = this.txt;
-    this.status = 1;
+    constructor( o = {} ) {
 
-    this.itype = o.itype || 'none';
-    this.val = this.itype;
+        super( o );
 
-    this.graph = this.svgs[ this.itype ];
+        this.p = 100;
+        this.value = this.txt;
+        this.status = 1;
 
-    var fltop = Math.floor(this.h*0.5)-7;
+        this.itype = o.itype || 'none';
+        this.val = this.itype;
 
-    this.c[2] = this.dom( 'path', this.css.basic + 'position:absolute; width:14px; height:14px; left:5px; top:'+fltop+'px;', { d:this.graph, fill:this.fontColor, stroke:'none'});
+        this.graph = this.svgs[ this.itype ];
 
-    this.s[1].marginLeft = 20 + 'px';
+        let fltop = Math.floor(this.h*0.5)-7;
 
-    this.init();
+        this.c[2] = this.dom( 'path', this.css.basic + 'position:absolute; width:14px; height:14px; left:5px; top:'+fltop+'px;', { d:this.graph, fill:this.fontColor, stroke:'none'});
 
-}
+        this.s[1].marginLeft = 20 + 'px';
 
-Item.prototype = Object.assign( Object.create( Proto.prototype ), {
+        this.init();
 
-    constructor: Item,
+    }
 
     // ----------------------
     //   EVENTS
     // ----------------------
 
-    mousemove: function ( e ) {
+    mousemove ( e ) {
 
         this.cursor('pointer');
 
         //up = this.modes( this.isDown ? 3 : 2, name );
 
-    },
+    }
 
-    mousedown: function ( e ) {
+    mousedown ( e ) {
 
         if( this.isUI ) this.main.resetItem();
 
@@ -48,35 +47,35 @@ Item.prototype = Object.assign( Object.create( Proto.prototype ), {
 
         return true;
 
-    },
+    }
 
-    uiout: function () {
+    uiout () {
 
         if( this.isSelect ) this.mode(3);
         else this.mode(1);
 
-    },
+    }
 
-    uiover: function () {
+    uiover () {
 
         if( this.isSelect ) this.mode(4);
         else this.mode(2);
 
-    },
+    }
 
-    update: function () {
+    update () {
             
-    },
+    }
 
-    rSize: function () {
+    /*rSize () {
+        
+        super.rSize();
 
-        Proto.prototype.rSize.call( this );
+    }*/
 
-    },
+    mode ( n ) {
 
-    mode: function ( n ) {
-
-        var change = false;
+        let change = false;
 
         if( this.status !== n ){
 
@@ -97,16 +96,16 @@ Item.prototype = Object.assign( Object.create( Proto.prototype ), {
 
         return change;
 
-    },
+    }
 
-    reset: function () {
+    reset () {
 
         this.cursor();
        // return this.mode( 1 );
 
-    },
+    }
 
-    selected: function ( b ){
+    selected ( b ){
 
         if( this.isSelect ) this.mode(1);
 
@@ -114,9 +113,7 @@ Item.prototype = Object.assign( Object.create( Proto.prototype ), {
 
         if( this.isSelect ) this.mode(3);
         
-    },
+    }
 
 
-} );
-
-export { Item };
+}

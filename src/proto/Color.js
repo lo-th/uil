@@ -2,72 +2,70 @@ import { Tools } from '../core/Tools';
 import { Proto } from '../core/Proto';
 import { V2 } from '../core/V2';
 
-function Color ( o ) {
-    
-    Proto.call( this, o );
+export class Color extends Proto {
 
-    //this.autoHeight = true;
+    constructor( o = {} ) {
 
-    this.ctype = o.ctype || 'hex';
+        super( o );
 
-    this.wfixe = this.sb > 256 ? 256 : this.sb;
+	    //this.autoHeight = true;
 
-    if(o.cw != undefined ) this.wfixe = o.cw;
+	    this.ctype = o.ctype || 'hex';
 
-    // color up or down
-    this.side = o.side || 'down';
-    this.up = this.side === 'down' ? 0 : 1;
-    
-    this.baseH = this.h;
+	    this.wfixe = this.sb > 256 ? 256 : this.sb;
 
-    this.offset = new V2();
-    this.decal = new V2();
-    this.p = new V2();
+	    if(o.cw != undefined ) this.wfixe = o.cw;
 
-    this.c[2] = this.dom( 'div',  this.css.txt + 'height:'+(this.h-4)+'px;' + 'border-radius:'+this.radius+'px; line-height:'+(this.h-8)+'px;' );
-    this.s[2] = this.c[2].style;
+	    // color up or down
+	    this.side = o.side || 'down';
+	    this.up = this.side === 'down' ? 0 : 1;
+	    
+	    this.baseH = this.h;
 
-    if( this.up ){
-        this.s[2].top = 'auto';
-        this.s[2].bottom = '2px';
-    }
+	    this.offset = new V2();
+	    this.decal = new V2();
+	    this.p = new V2();
 
-    this.c[3] = this.getColorRing();
-    this.c[3].style.visibility  = 'hidden';
+	    this.c[2] = this.dom( 'div',  this.css.txt + 'height:'+(this.h-4)+'px;' + 'border-radius:'+this.radius+'px; line-height:'+(this.h-8)+'px;' );
+	    this.s[2] = this.c[2].style;
 
-    this.hsl = null;
-    this.value = '#ffffff';
-    if( o.value !== undefined ){
-        if( o.value instanceof Array ) this.value = Tools.rgbToHex( o.value );
-        else if(!isNaN(o.value)) this.value = Tools.hexToHtml( o.value );
-        else this.value = o.value;
-    }
+	    if( this.up ){
+	        this.s[2].top = 'auto';
+	        this.s[2].bottom = '2px';
+	    }
 
-    this.bcolor = null;
-    this.isDown = false;
-    this.fistDown = false;
+	    this.c[3] = this.getColorRing();
+	    this.c[3].style.visibility  = 'hidden';
 
-    this.tr = 98;
-    this.tsl = Math.sqrt(3) * this.tr;
+	    this.hsl = null;
+	    this.value = '#ffffff';
+	    if( o.value !== undefined ){
+	        if( o.value instanceof Array ) this.value = Tools.rgbToHex( o.value );
+	        else if(!isNaN(o.value)) this.value = Tools.hexToHtml( o.value );
+	        else this.value = o.value;
+	    }
 
-    this.hue = 0;
-    this.d = 256;
+	    this.bcolor = null;
+	    this.isDown = false;
+	    this.fistDown = false;
 
-    this.setColor( this.value );
+	    this.tr = 98;
+	    this.tsl = Math.sqrt(3) * this.tr;
 
-    this.init();
+	    this.hue = 0;
+	    this.d = 256;
 
-    if( o.open !== undefined ) this.open();
+	    this.setColor( this.value );
 
-}
+	    this.init();
 
-Color.prototype = Object.assign( Object.create( Proto.prototype ), {
+	    if( o.open !== undefined ) this.open();
 
-    constructor: Color,
+	}
 
-	testZone: function ( mx, my ) {
+	testZone ( mx, my ) {
 
-		var l = this.local;
+		let l = this.local;
 		if( l.x === -1 && l.y === -1 ) return '';
 
 
@@ -85,23 +83,23 @@ Color.prototype = Object.assign( Object.create( Proto.prototype ), {
 
 		}
 
-    },
+    }
 
 	// ----------------------
     //   EVENTS
     // ----------------------
 
-	mouseup: function ( e ) {
+	mouseup ( e ) {
 
 	    this.isDown = false;
 	    this.d = 256;
 
-	},
+	}
 
-	mousedown: function ( e ) {
+	mousedown ( e ) {
 
 
-		var name = this.testZone( e.clientX, e.clientY );
+		let name = this.testZone( e.clientX, e.clientY );
 
 
 		//if( !name ) return;
@@ -118,19 +116,15 @@ Color.prototype = Object.assign( Object.create( Proto.prototype ), {
 			this.fistDown = true
 			this.mousemove( e );
 		}
-	},
+	}
 
-	mousemove: function ( e ) {
+	mousemove ( e ) {
 
-	    var name = this.testZone( e.clientX, e.clientY );
+	    let name = this.testZone( e.clientX, e.clientY );
 
-	    var off, d, hue, sat, lum, rad, x, y, rr, T = Tools;
+	    let off, d, hue, sat, lum, rad, x, y, rr, T = Tools;
 
-	    if( name === 'title' ){
-
-	        this.cursor('pointer');
-
-	    }
+	    if( name === 'title' ) this.cursor('pointer');
 
 	    if( name === 'color' ){
 
@@ -165,13 +159,13 @@ Color.prototype = Object.assign( Object.create( Proto.prototype ), {
 				    	x = off.x * this.ratio;
 				    	y = off.y * this.ratio;
 
-				    	var rr = (this.hue * T.TwoPI) + T.PI;
+				    	let rr = (this.hue * T.TwoPI) + T.PI;
 				    	if(rr < 0) rr += 2 * T.PI;
 
 				    	rad = Math.atan2(-y, x);
 				    	if(rad < 0) rad += 2 * T.PI;
 						
-				    	var rad0 = ( rad + T.pi90 + T.TwoPI + rr ) % (T.TwoPI),
+				    	let rad0 = ( rad + T.pi90 + T.TwoPI + rr ) % (T.TwoPI),
 				    	rad1 = rad0 % ((2/3) * T.PI) - (T.pi60),
 				    	a    = 0.5 * this.tr,
 				    	b    = Math.tan(rad1) * a,
@@ -179,8 +173,8 @@ Color.prototype = Object.assign( Object.create( Proto.prototype ), {
 				    	maxR = Math.sqrt(a*a + b*b);
 
 				    	if( r > maxR ) {
-							var dx = Math.tan(rad1) * r;
-							var rad2 = Math.atan(dx / maxR);
+							let dx = Math.tan(rad1) * r;
+							let rad2 = Math.atan(dx / maxR);
 							if(rad2 > T.pi60)  rad2 = T.pi60;
 						    else if( rad2 < -T.pi60 ) rad2 = -T.pi60;
 						
@@ -194,7 +188,7 @@ Color.prototype = Object.assign( Object.create( Proto.prototype ), {
 
 						lum = ((Math.sin(rad0) * r) / this.tsl) + 0.5;
 				
-						var w = 1 - (Math.abs(lum - 0.5) * 2);
+						let w = 1 - (Math.abs(lum - 0.5) * 2);
 						sat = (((Math.cos(rad0) * r) + (this.tr / 2)) / (1.5 * this.tr)) / w;
 						sat = T.clamp( sat, 0, 1 );
 						
@@ -205,46 +199,48 @@ Color.prototype = Object.assign( Object.create( Proto.prototype ), {
 			}
 		}
 
-	},
+	}
 
-	setHeight: function () {
+	// ----------------------
+
+	setHeight () {
 
 		this.h = this.isOpen ? this.wfixe + this.baseH + 5 : this.baseH;
 		this.s[0].height = this.h + 'px';
 		this.zone.h = this.h;
 
-	},
+	}
 
-	parentHeight: function ( t ) {
+	parentHeight ( t ) {
 
 		if ( this.parentGroup !== null ) this.parentGroup.calc( t );
 	    else if ( this.isUI ) this.main.calc( t );
 
-	},
+	}
 
-	open: function () {
+	open () {
 
-		Proto.prototype.open.call( this );
+		super.open();
 
 		this.setHeight();
 
 		if( this.up ) this.zone.y -= this.wfixe + 5;
 
-		var t = this.h - this.baseH;
+		let t = this.h - this.baseH;
 
 	    this.s[3].visibility = 'visible';
 	    //this.s[3].display = 'block';
 	    this.parentHeight( t );
 
-	},
+	}
 
-	close: function () {
+	close () {
 
-		Proto.prototype.close.call( this );
+		super.close();
 
 		if( this.up ) this.zone.y += this.wfixe + 5;
 
-		var t = this.h - this.baseH;
+		let t = this.h - this.baseH;
 
 		this.setHeight();
 
@@ -252,11 +248,11 @@ Color.prototype = Object.assign( Object.create( Proto.prototype ), {
 	    //this.s[3].display = 'none';
 	    this.parentHeight( -t );
 
-	},
+	}
 
-	update: function ( up ) {
+	update ( up ) {
 
-	    var cc = Tools.rgbToHex( Tools.hslToRgb([ this.hsl[0], 1, 0.5 ]) );
+	    let cc = Tools.rgbToHex( Tools.hslToRgb([ this.hsl[0], 1, 0.5 ]) );
 
 	    this.moveMarkers();
 	    
@@ -278,11 +274,11 @@ Color.prototype = Object.assign( Object.create( Proto.prototype ), {
 	    if( this.ctype === 'hex' ) this.send( Tools.htmlToHex( this.value ) );
 	    if( this.ctype === 'html' ) this.send();
 
-	},
+	}
 
-	setColor: function ( color ) {
+	setColor ( color ) {
 
-	    var unpack = Tools.unpack(color);
+	    let unpack = Tools.unpack(color);
 	    if (this.bcolor != color && unpack) {
 
 	        this.bcolor = color;
@@ -295,9 +291,9 @@ Color.prototype = Object.assign( Object.create( Proto.prototype ), {
 	    }
 	    return this;
 
-	},
+	}
 
-	setHSL: function ( hsl ) {
+	setHSL ( hsl ) {
 
 	    this.hsl = hsl;
 	    this.rgb = Tools.hslToRgb( hsl );
@@ -305,38 +301,39 @@ Color.prototype = Object.assign( Object.create( Proto.prototype ), {
 	    this.update( true );
 	    return this;
 
-	},
+	}
 
-	moveMarkers: function () {
+	moveMarkers () {
 
-		var p = this.p;
-		var T = Tools;
+		let p = this.p;
+		let T = Tools;
 
-	    var c1 = this.invert ? '#fff' : '#000';
-	    var a = this.hsl[0] * T.TwoPI;
-	    var third = (2/3) * T.PI;
-	    var r = this.tr;
-	    var h = this.hsl[0];
-	    var s = this.hsl[1];
-	    var l = this.hsl[2];
+	    let c1 = this.invert ? '#fff' : '#000';
+	    let a = this.hsl[0] * T.TwoPI;
+	    let third = (2/3) * T.PI;
+	    let r = this.tr;
+	    let h = this.hsl[0];
+	    let s = this.hsl[1];
+	    let l = this.hsl[2];
 
-	    var angle = ( a - T.pi90 ) * T.todeg;
+	    let angle = ( a - T.pi90 ) * T.todeg;
 
 	    h = - a + T.pi90;
 
-		var hx = Math.cos(h) * r;
-		var hy = -Math.sin(h) * r;
-		var sx = Math.cos(h - third) * r;
-		var sy = -Math.sin(h - third) * r;
-		var vx = Math.cos(h + third) * r;
-		var vy = -Math.sin(h + third) * r;
-		var mx = (sx + vx) / 2, my = (sy + vy) / 2, a  = (1 - 2 * Math.abs(l - .5)) * s;
-		var x = sx + (vx - sx) * l + (hx - mx) * a;
-		var y = sy + (vy - sy) * l + (hy - my) * a;
+		let hx = Math.cos(h) * r;
+		let hy = -Math.sin(h) * r;
+		let sx = Math.cos(h - third) * r;
+		let sy = -Math.sin(h - third) * r;
+		let vx = Math.cos(h + third) * r;
+		let vy = -Math.sin(h + third) * r;
+		let mx = (sx + vx) / 2, my = (sy + vy) / 2;
+		a  = (1 - 2 * Math.abs(l - .5)) * s;
+		let x = sx + (vx - sx) * l + (hx - mx) * a;
+		let y = sy + (vy - sy) * l + (hy - my) * a;
 
 	    p.set( x, y ).addScalar(128);
 
-	    //var ff = (1-l)*255;
+	    //let ff = (1-l)*255;
 	    // this.setSvg( this.c[3], 'stroke', 'rgb('+ff+','+ff+','+ff+')', 3 );
 
 	    this.setSvg( this.c[3], 'transform', 'rotate('+angle+' )', 2 );
@@ -348,13 +345,14 @@ Color.prototype = Object.assign( Object.create( Proto.prototype ), {
 	    this.setSvg( this.c[3], 'stroke', this.invert ? '#fff' : '#000', 3 );
 	    this.setSvg( this.c[3], 'fill',this.bcolor, 3 );
 
-	},
+	}
 
-	rSize: function () {
+	rSize () {
 
-	    Proto.prototype.rSize.call( this );
+	    //Proto.prototype.rSize.call( this );
+	    super.rSize();
 
-	    var s = this.s;
+	    let s = this.s;
 
 	    s[2].width = this.sb + 'px';
 	    s[2].left = this.sa + 'px';
@@ -377,6 +375,4 @@ Color.prototype = Object.assign( Object.create( Proto.prototype ), {
 	    
 	}
 
-} );
-
-export { Color };
+}

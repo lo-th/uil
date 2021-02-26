@@ -1,101 +1,99 @@
 import { Proto } from '../core/Proto';
 import { V2 } from '../core/V2';
 
-function Graph ( o ) {
+export class Graph extends Proto {
 
-	Proto.call( this, o );
+    constructor( o = {} ) {
 
-	this.value = o.value !== undefined ? o.value : [0,0,0];
-    this.lng = this.value.length;
+        super( o );
 
-    this.precision = o.precision !== undefined ? o.precision : 2;
-    this.multiplicator = o.multiplicator || 1;
-    this.neg = o.neg || false;
+    	this.value = o.value !== undefined ? o.value : [0,0,0];
+        this.lng = this.value.length;
 
-    this.line = o.line !== undefined ?  o.line : true;
+        this.precision = o.precision !== undefined ? o.precision : 2;
+        this.multiplicator = o.multiplicator || 1;
+        this.neg = o.neg || false;
 
-    //if(this.neg)this.multiplicator*=2;
+        this.line = o.line !== undefined ?  o.line : true;
 
-    this.autoWidth = o.autoWidth !== undefined ? o.autoWidth : true;
-    this.isNumber = false;
+        //if(this.neg)this.multiplicator*=2;
 
-    this.isDown = false;
+        this.autoWidth = o.autoWidth !== undefined ? o.autoWidth : true;
+        this.isNumber = false;
 
-    this.h = o.h || 128 + 10;
-    this.rh = this.h - 10;
-    this.top = 0;
+        this.isDown = false;
 
-    this.c[0].style.width = this.w +'px';
+        this.h = o.h || 128 + 10;
+        this.rh = this.h - 10;
+        this.top = 0;
 
-    if( this.c[1] !== undefined ) { // with title
+        this.c[0].style.width = this.w +'px';
 
-        this.c[1].style.width = this.w +'px';
-        
-        
-        //this.c[1].style.background = '#ff0000';
-        //this.c[1].style.textAlign = 'center';
-        this.top = 10;
-        this.h += 10;
+        if( this.c[1] !== undefined ) { // with title
+
+            this.c[1].style.width = this.w +'px';
+            
+            
+            //this.c[1].style.background = '#ff0000';
+            //this.c[1].style.textAlign = 'center';
+            this.top = 10;
+            this.h += 10;
+
+        }
+
+        this.gh = this.rh - 28;
+        this.gw = this.w - 28;
+
+        this.c[2] = this.dom( 'div', this.css.txt + 'text-align:center; top:'+(this.h-20)+'px; width:'+this.w+'px; color:'+ this.fontColor );
+        this.c[2].textContent = this.value;
+
+        let svg = this.dom( 'svg', this.css.basic , { viewBox:'0 0 '+this.w+' '+this.rh, width:this.w, height:this.rh, preserveAspectRatio:'none' } );
+        this.setCss( svg, { width:this.w, height:this.rh, left:0, top:this.top });
+
+        this.dom( 'path', '', { d:'', stroke:this.colors.text, 'stroke-width':2, fill:'none', 'stroke-linecap':'butt' }, svg );
+        this.dom( 'rect', '', { x:10, y:10, width:this.gw+8, height:this.gh+8, stroke:'rgba(0,0,0,0.3)', 'stroke-width':1 , fill:'none'}, svg );
+
+        this.iw = ((this.gw-(4*(this.lng-1)))/this.lng);
+        let t = [];
+        this.cMode = [];
+
+        this.v = [];
+
+        for( let i = 0; i < this.lng; i++ ){
+
+        	t[i] = [ 14 + (i*this.iw) + (i*4), this.iw ];
+        	t[i][2] = t[i][0] + t[i][1];
+        	this.cMode[i] = 0;
+
+            if( this.neg ) this.v[i] = ((1+(this.value[i] / this.multiplicator))*0.5);
+        	else this.v[i] = this.value[i] / this.multiplicator;
+
+        	this.dom( 'rect', '', { x:t[i][0], y:14, width:t[i][1], height:1, fill:this.fontColor, 'fill-opacity':0.3 }, svg );
+
+        }
+
+        this.tmp = t;
+        this.c[3] = svg;
+
+        //console.log(this.w)
+
+        this.init();
+
+        if( this.c[1] !== undefined ){
+            this.c[1].style.top = 0 +'px';
+            this.c[1].style.height = 20 +'px';
+            this.s[1].lineHeight = (20-5)+'px'
+        }
+
+        this.update( false );
 
     }
 
-    this.gh = this.rh - 28;
-    this.gw = this.w - 28;
-
-    this.c[2] = this.dom( 'div', this.css.txt + 'text-align:center; top:'+(this.h-20)+'px; width:'+this.w+'px; color:'+ this.fontColor );
-    this.c[2].textContent = this.value;
-
-    var svg = this.dom( 'svg', this.css.basic , { viewBox:'0 0 '+this.w+' '+this.rh, width:this.w, height:this.rh, preserveAspectRatio:'none' } );
-    this.setCss( svg, { width:this.w, height:this.rh, left:0, top:this.top });
-
-    this.dom( 'path', '', { d:'', stroke:this.colors.text, 'stroke-width':2, fill:'none', 'stroke-linecap':'butt' }, svg );
-    this.dom( 'rect', '', { x:10, y:10, width:this.gw+8, height:this.gh+8, stroke:'rgba(0,0,0,0.3)', 'stroke-width':1 , fill:'none'}, svg );
-
-    this.iw = ((this.gw-(4*(this.lng-1)))/this.lng);
-    var t = [];
-    this.cMode = [];
-
-    this.v = [];
-
-    for( var i = 0; i < this.lng; i++ ){
-
-    	t[i] = [ 14 + (i*this.iw) + (i*4), this.iw ];
-    	t[i][2] = t[i][0] + t[i][1];
-    	this.cMode[i] = 0;
-
-        if( this.neg ) this.v[i] = ((1+(this.value[i] / this.multiplicator))*0.5);
-    	else this.v[i] = this.value[i] / this.multiplicator;
-
-    	this.dom( 'rect', '', { x:t[i][0], y:14, width:t[i][1], height:1, fill:this.fontColor, 'fill-opacity':0.3 }, svg );
-
-    }
-
-    this.tmp = t;
-    this.c[3] = svg;
-
-    //console.log(this.w)
-
-    this.init();
-
-    if( this.c[1] !== undefined ){
-        this.c[1].style.top = 0 +'px';
-        this.c[1].style.height = 20 +'px';
-        this.s[1].lineHeight = (20-5)+'px'
-    }
-
-    this.update( false );
-
-}
-
-Graph.prototype = Object.assign( Object.create( Proto.prototype ), {
-
-    constructor: Graph,
-
-    updateSVG: function () {
+    updateSVG () {
 
         if( this.line ) this.setSvg( this.c[3], 'd', this.makePath(), 0 );
 
-        for(var i = 0; i<this.lng; i++ ){
+        for(let i = 0; i<this.lng; i++ ){
 
             
             this.setSvg( this.c[3], 'height', this.v[i]*this.gh, i+2 );
@@ -107,15 +105,15 @@ Graph.prototype = Object.assign( Object.create( Proto.prototype ), {
 
         this.c[2].textContent = this.value;
 
-    },
+    }
 
-    testZone: function ( e ) {
+    testZone ( e ) {
 
-        var l = this.local;
+        let l = this.local;
         if( l.x === -1 && l.y === -1 ) return '';
 
-        var i = this.lng;
-        var t = this.tmp;
+        let i = this.lng;
+        let t = this.tmp;
         
 	    if( l.y>this.top && l.y<this.h-20 ){
 	        while( i-- ){
@@ -125,13 +123,13 @@ Graph.prototype = Object.assign( Object.create( Proto.prototype ), {
 
         return ''
 
-    },
+    }
 
-    mode: function ( n, name ) {
+    mode ( n, name ) {
 
     	if( n === this.cMode[name] ) return false;
 
-    	var a;
+    	let a;
 
         switch(n){
             case 0: a=0.3; break;
@@ -148,18 +146,18 @@ Graph.prototype = Object.assign( Object.create( Proto.prototype ), {
 
 
 
-    },
+    }
 
     // ----------------------
     //   EVENTS
     // ----------------------
 
-    reset: function () {
+    reset () {
 
-    	var nup = false;
+    	let nup = false;
         //this.isDown = false;
 
-        var i = this.lng;
+        let i = this.lng;
         while(i--){ 
             if( this.cMode[i] !== 0 ){
                 this.cMode[i] = 0;
@@ -170,27 +168,27 @@ Graph.prototype = Object.assign( Object.create( Proto.prototype ), {
 
         return nup;
 
-    },
+    }
 
-    mouseup: function ( e ) {
+    mouseup ( e ) {
 
         this.isDown = false;
         if( this.current !== -1 ) return this.reset();
         
-    },
+    }
 
-    mousedown: function ( e ) {
+    mousedown ( e ) {
 
     	this.isDown = true;
         return this.mousemove( e );
 
-    },
+    }
 
-    mousemove: function ( e ) {
+    mousemove ( e ) {
 
-    	var nup = false;
+    	let nup = false;
 
-    	var name = this.testZone(e);
+    	let name = this.testZone(e);
 
     	if( name === '' ){
 
@@ -210,22 +208,24 @@ Graph.prototype = Object.assign( Object.create( Proto.prototype ), {
 
         return nup;
 
-    },
+    }
 
-    update: function ( up ) {
+    // ----------------------
+
+    update ( up ) {
 
     	this.updateSVG();
 
         if( up ) this.send();
 
-    },
+    }
 
-    makePath: function () {
+    makePath () {
 
-    	var p = "", h, w, wn, wm, ow, oh;
-    	//var g = this.iw*0.5
+    	let p = "", h, w, wn, wm, ow, oh;
+    	//let g = this.iw*0.5
 
-    	for(var i = 0; i<this.lng; i++ ){
+    	for(let i = 0; i<this.lng; i++ ){
 
     		h = 14 + (this.gh - this.v[i]*this.gh);
     		w = (14 + (i*this.iw) + (i*4));
@@ -244,26 +244,23 @@ Graph.prototype = Object.assign( Object.create( Proto.prototype ), {
 
     	return p;
 
-    },
+    }
 
+    rSize () {
 
-    
+        super.rSize();
 
-    rSize: function () {
-
-        Proto.prototype.rSize.call( this );
-
-        var s = this.s;
+        let s = this.s;
         if( this.c[1] !== undefined ) s[1].width = this.w + 'px';
         s[2].width = this.w + 'px';
         s[3].width = this.w + 'px';
 
-        var gw = this.w - 28;
-        var iw = ((gw-(4*(this.lng-1)))/this.lng);
+        let gw = this.w - 28;
+        let iw = ((gw-(4*(this.lng-1)))/this.lng);
 
-        var t = [];
+        let t = [];
 
-        for( var i = 0; i < this.lng; i++ ){
+        for( let i = 0; i < this.lng; i++ ){
 
             t[i] = [ 14 + (i*iw) + (i*4), iw ];
             t[i][2] = t[i][0] + t[i][1];
@@ -274,6 +271,4 @@ Graph.prototype = Object.assign( Object.create( Proto.prototype ), {
 
     }
 
-} );
-
-export { Graph };
+}

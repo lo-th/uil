@@ -1,20 +1,15 @@
 import { Proto } from '../core/Proto';
 
-function Empty ( o ){
+export class Empty extends Proto {
 
-    o.simple = true;
-    o.isEmpty = true;
+    constructor( o = {} ) {
 
-    Proto.call( this, o );
+	    o.simple = true;
+	    o.isEmpty = true;
 
-    this.init();
+        super( o );
+        this.init();
 
+    }
+    
 }
-
-Empty.prototype = Object.assign( Object.create( Proto.prototype ), {
-
-    constructor: Empty,
-
-} );
-
-export { Empty };

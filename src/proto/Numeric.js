@@ -1,93 +1,91 @@
 import { Proto } from '../core/Proto';
 import { Tools } from '../core/Tools';
 
-function Numeric( o ){
+export class Numeric extends Proto {
 
-    Proto.call( this, o );
+    constructor( o = {} ) {
 
-    this.setTypeNumber( o );
+        super( o );
 
-    this.allway = o.allway || false;
+        this.setTypeNumber( o );
 
-    this.isDown = false;
+        this.allway = o.allway || false;
 
-    this.value = [0];
-    this.multy = 1;
-    this.invmulty = 1;
-    this.isSingle = true;
-    this.isAngle = false;
-    this.isVector = false;
+        this.isDown = false;
 
-    if( o.isAngle ){
-        this.isAngle = true;
-        this.multy = Tools.torad;
-        this.invmulty = Tools.todeg;
-    }
+        this.value = [0];
+        this.multy = 1;
+        this.invmulty = 1;
+        this.isSingle = true;
+        this.isAngle = false;
+        this.isVector = false;
 
-    this.isDrag = o.drag || false;
-
-    if( o.value !== undefined ){
-        if(!isNaN(o.value)){ 
-            this.value = [o.value];
-        } else if( o.value instanceof Array ){ 
-            this.value = o.value; 
-            this.isSingle = false;
-        } else if( o.value instanceof Object ){ 
-            this.value = [];
-            if( o.value.x !== undefined ) this.value[0] = o.value.x;
-            if( o.value.y !== undefined ) this.value[1] = o.value.y;
-            if( o.value.z !== undefined ) this.value[2] = o.value.z;
-            if( o.value.w !== undefined ) this.value[3] = o.value.w;
-            this.isVector = true;
-            this.isSingle = false;
+        if( o.isAngle ){
+            this.isAngle = true;
+            this.multy = Tools.torad;
+            this.invmulty = Tools.todeg;
         }
+
+        this.isDrag = o.drag || false;
+
+        if( o.value !== undefined ){
+            if(!isNaN(o.value)){ 
+                this.value = [o.value];
+            } else if( o.value instanceof Array ){ 
+                this.value = o.value; 
+                this.isSingle = false;
+            } else if( o.value instanceof Object ){ 
+                this.value = [];
+                if( o.value.x !== undefined ) this.value[0] = o.value.x;
+                if( o.value.y !== undefined ) this.value[1] = o.value.y;
+                if( o.value.z !== undefined ) this.value[2] = o.value.z;
+                if( o.value.w !== undefined ) this.value[3] = o.value.w;
+                this.isVector = true;
+                this.isSingle = false;
+            }
+        }
+
+        this.lng = this.value.length;
+        this.tmp = [];
+
+        
+
+        this.current = -1;
+        this.prev = { x:0, y:0, d:0, v:0 };
+
+        // bg
+        this.c[2] = this.dom( 'div', this.css.basic + ' background:' + this.colors.select + '; top:4px; width:0px; height:' + (this.h-8) + 'px;' );
+
+        this.cMode = [];
+        
+        let i = this.lng;
+        while(i--){
+
+            if(this.isAngle) this.value[i] = (this.value[i] * 180 / Math.PI).toFixed( this.precision );
+            this.c[3+i] = this.dom( 'div', this.css.txtselect + ' height:'+(this.h-4)+'px; background:' + this.colors.inputBg + '; borderColor:' + this.colors.inputBorder+'; border-radius:'+this.radius+'px;');
+            if(o.center) this.c[2+i].style.textAlign = 'center';
+            this.c[3+i].textContent = this.value[i];
+            this.c[3+i].style.color = this.fontColor;
+            this.c[3+i].isNum = true;
+
+            this.cMode[i] = 0;
+
+        }
+
+        // cursor
+        this.cursorId = 3 + this.lng;
+        this.c[ this.cursorId ] = this.dom( 'div', this.css.basic + 'top:4px; height:' + (this.h-8) + 'px; width:0px; background:'+this.fontColor+';' );
+
+        this.init();
     }
 
-    this.lng = this.value.length;
-    this.tmp = [];
+    testZone ( e ) {
 
-    
-
-    this.current = -1;
-    this.prev = { x:0, y:0, d:0, v:0 };
-
-    // bg
-    this.c[2] = this.dom( 'div', this.css.basic + ' background:' + this.colors.select + '; top:4px; width:0px; height:' + (this.h-8) + 'px;' );
-
-    this.cMode = [];
-    
-    var i = this.lng;
-    while(i--){
-
-        if(this.isAngle) this.value[i] = (this.value[i] * 180 / Math.PI).toFixed( this.precision );
-        this.c[3+i] = this.dom( 'div', this.css.txtselect + ' height:'+(this.h-4)+'px; background:' + this.colors.inputBg + '; borderColor:' + this.colors.inputBorder+'; border-radius:'+this.radius+'px;');
-        if(o.center) this.c[2+i].style.textAlign = 'center';
-        this.c[3+i].textContent = this.value[i];
-        this.c[3+i].style.color = this.fontColor;
-        this.c[3+i].isNum = true;
-
-        this.cMode[i] = 0;
-
-    }
-
-    // cursor
-    this.cursorId = 3 + this.lng;
-    this.c[ this.cursorId ] = this.dom( 'div', this.css.basic + 'top:4px; height:' + (this.h-8) + 'px; width:0px; background:'+this.fontColor+';' );
-
-    this.init();
-}
-
-Numeric.prototype = Object.assign( Object.create( Proto.prototype ), {
-
-    constructor: Numeric,
-
-    testZone: function ( e ) {
-
-        var l = this.local;
+        let l = this.local;
         if( l.x === -1 && l.y === -1 ) return '';
 
-        var i = this.lng;
-        var t = this.tmp;
+        let i = this.lng;
+        let t = this.tmp;
         
 
         while( i-- ){
@@ -96,13 +94,13 @@ Numeric.prototype = Object.assign( Object.create( Proto.prototype ), {
 
         return '';
 
-    },
+    }
 
    /* mode: function ( n, name ) {
 
         if( n === this.cMode[name] ) return false;
 
-        //var m;
+        //let m;
 
         /*switch(n){
 
@@ -124,9 +122,9 @@ Numeric.prototype = Object.assign( Object.create( Proto.prototype ), {
     //   EVENTS
     // ----------------------
 
-    mousedown: function ( e ) {
+    mousedown ( e ) {
 
-        var name = this.testZone( e );
+        let name = this.testZone( e );
 
         if( !this.isDown ){
             this.isDown = true;
@@ -152,9 +150,9 @@ Numeric.prototype = Object.assign( Object.create( Proto.prototype ), {
 
         return this.mode( 2, name );*/
 
-    },
+    }
 
-    mouseup: function ( e ) {
+    mouseup ( e ) {
 
     	if( this.isDown ){
             
@@ -167,13 +165,13 @@ Numeric.prototype = Object.assign( Object.create( Proto.prototype ), {
 
         return false;
 
-        /*var name = this.testZone( e );
+        /*let name = this.testZone( e );
         this.isDown = false;
 
         if( this.current !== -1 ){ 
 
-            //var tm = this.current;
-            var td = this.prev.d;
+            //let tm = this.current;
+            let td = this.prev.d;
 
             this.current = -1;
             this.prev = { x:0, y:0, d:0, v:0 };
@@ -189,14 +187,14 @@ Numeric.prototype = Object.assign( Object.create( Proto.prototype ), {
 
         }*/
 
-    },
+    }
 
-    mousemove: function ( e ) {
+    mousemove ( e ) {
 
-        var nup = false;
-        var x = 0;
+        let nup = false;
+        let x = 0;
 
-        var name = this.testZone( e );
+        let name = this.testZone( e );
 
         if( name === '' ) this.cursor();
         else{ 
@@ -212,7 +210,7 @@ Numeric.prototype = Object.assign( Object.create( Proto.prototype ), {
 
             	this.prev.d += ( e.clientX - this.prev.x ) - ( e.clientY - this.prev.y );
 
-                var n = this.prev.v + ( this.prev.d * this.step);
+                let n = this.prev.v + ( this.prev.d * this.step);
 
                 this.value[ this.current ] = this.numValue(n);
                 this.c[ 3 + this.current ].textContent = this.value[this.current];
@@ -238,20 +236,20 @@ Numeric.prototype = Object.assign( Object.create( Proto.prototype ), {
 
         return nup;
 
-    },
+    }
 
     //keydown: function ( e ) { return true; },
 
     // ----------------------
 
-    reset: function () {
+    reset () {
 
-        var nup = false;
+        let nup = false;
         //this.isDown = false;
 
         //this.current = 0;
 
-       /* var i = this.lng;
+       /* let i = this.lng;
         while(i--){ 
             if(this.cMode[i]!==0){
                 this.cMode[i] = 0;
@@ -262,10 +260,10 @@ Numeric.prototype = Object.assign( Object.create( Proto.prototype ), {
 
         return nup;
 
-    },
+    }
 
 
-    setValue: function ( v ) {
+    setValue ( v ) {
 
         if( this.isVector ){
 
@@ -282,24 +280,24 @@ Numeric.prototype = Object.assign( Object.create( Proto.prototype ), {
         
         this.update();
 
-        //var i = this.value.length;
+        //let i = this.value.length;
 
         /*n = n || 0;
         this.value[n] = this.numValue( v );
         this.c[ 3 + n ].textContent = this.value[n];*/
 
-    },
+    }
 
-    sameStr: function ( str ){
+    sameStr ( str ){
 
-        var i = this.value.length;
+        let i = this.value.length;
         while(i--) this.c[ 3 + i ].textContent = str;
 
-    },
+    }
 
-    update: function ( up ) {
+    update ( up ) {
 
-        var i = this.value.length;
+        let i = this.value.length;
 
         while(i--){
              this.value[i] = this.numValue( this.value[i] * this.invmulty );
@@ -308,9 +306,9 @@ Numeric.prototype = Object.assign( Object.create( Proto.prototype ), {
 
         if( up ) this.send();
 
-    },
+    }
 
-    send: function ( v ) {
+    send ( v ) {
 
         v = v || this.value;
 
@@ -337,43 +335,43 @@ Numeric.prototype = Object.assign( Object.create( Proto.prototype ), {
 
         this.isSend = false;
 
-    },
+    }
 
 
     // ----------------------
     //   INPUT
     // ----------------------
 
-    select: function ( c, e, w ) {
+    select ( c, e, w ) {
 
-        var s = this.s;
-        var d = this.current !== -1 ? this.tmp[this.current][0] + 5 : 0;
+        let s = this.s;
+        let d = this.current !== -1 ? this.tmp[this.current][0] + 5 : 0;
         s[this.cursorId].width = '1px';
         s[this.cursorId].left = ( d + c ) + 'px';
         s[2].left = ( d + e ) + 'px';
         s[2].width = w + 'px';
     
-    },
+    }
 
-    unselect: function () {
+    unselect () {
 
-        var s = this.s;
+        let s = this.s;
         if(!s) return;
         s[2].width = 0 + 'px';
         s[this.cursorId].width = 0 + 'px';
 
-    },
+    }
 
-    validate: function ( force ) {
+    validate ( force ) {
 
-        var ar = [];
-        var i = this.lng;
+        let ar = [];
+        let i = this.lng;
 
         if( this.allway ) force = true;
 
         while(i--){
         	if(!isNaN( this.c[ 3 + i ].textContent )){ 
-                var nx = this.numValue( this.c[ 3 + i ].textContent );
+                let nx = this.numValue( this.c[ 3 + i ].textContent );
                 this.c[ 3 + i ].textContent = nx;
                 this.value[i] = nx;
             } else { // not number
@@ -388,19 +386,19 @@ Numeric.prototype = Object.assign( Object.create( Proto.prototype ), {
         if( this.isSingle ) this.send( ar[0] );
         else this.send( ar );
 
-    },
+    }
 
     // ----------------------
     //   REZISE
     // ----------------------
 
-    rSize: function () {
+    rSize () {
 
-        Proto.prototype.rSize.call( this );
+        super.rSize();
 
-        var w = Math.floor( ( this.sb + 5 ) / this.lng )-5;
-        var s = this.s;
-        var i = this.lng;
+        let w = Math.floor( ( this.sb + 5 ) / this.lng )-5;
+        let s = this.s;
+        let i = this.lng;
         while(i--){
             this.tmp[i] = [ Math.floor( this.sa + ( w * i )+( 5 * i )), w ];
             this.tmp[i][2] = this.tmp[i][0] + this.tmp[i][1];
@@ -410,6 +408,4 @@ Numeric.prototype = Object.assign( Object.create( Proto.prototype ), {
 
     }
 
-} );
-
-export { Numeric };
+}

@@ -1,56 +1,54 @@
 import { Proto } from '../core/Proto';
 
-function Select ( o ) {
-    
-    Proto.call( this, o );
+export class Select extends Proto {
 
-    this.value = o.value || '';
+    constructor( o = {} ) {
 
-    this.isDown = false;
+        super( o );
 
-    this.onActif = o.onActif || function(){};
+        this.value = o.value || '';
 
-    this.buttonColor = o.bColor || this.colors.button;
-    this.buttonOver = o.bOver || this.colors.over;
-    this.buttonDown = o.bDown || this.colors.select;
-    this.buttonAction = o.bAction || this.colors.action;
+        this.isDown = false;
 
-    var prefix = o.prefix || '';
+        this.onActif = o.onActif || function(){};
 
-    this.c[2] = this.dom( 'div', this.css.txt + this.css.button + ' top:1px; background:'+this.buttonColor+'; height:'+(this.h-2)+'px; border:'+this.colors.buttonBorder+'; border-radius:15px; width:30px; left:10px;' );
-    this.c[2].style.color = this.fontColor;
+        this.buttonColor = o.bColor || this.colors.button;
+        this.buttonOver = o.bOver || this.colors.over;
+        this.buttonDown = o.bDown || this.colors.select;
+        this.buttonAction = o.bAction || this.colors.action;
 
-    this.c[3] = this.dom( 'div', this.css.txtselect + 'height:' + (this.h-4) + 'px; background:' + this.colors.inputBg + '; borderColor:' + this.colors.inputBorder+'; border-radius:'+this.radius+'px;' );
-    this.c[3].textContent = this.value;
+        let prefix = o.prefix || '';
 
-    var fltop = Math.floor(this.h*0.5)-7;
-    this.c[4] = this.dom( 'path', this.css.basic + 'position:absolute; width:14px; height:14px; left:5px; top:'+fltop+'px;', { d:this.svgs[ 'cursor' ], fill:this.fontColor, stroke:'none'});
+        this.c[2] = this.dom( 'div', this.css.txt + this.css.button + ' top:1px; background:'+this.buttonColor+'; height:'+(this.h-2)+'px; border:'+this.colors.buttonBorder+'; border-radius:15px; width:30px; left:10px;' );
+        this.c[2].style.color = this.fontColor;
 
-    this.stat = 1;
-    this.isActif = false;
+        this.c[3] = this.dom( 'div', this.css.txtselect + 'height:' + (this.h-4) + 'px; background:' + this.colors.inputBg + '; borderColor:' + this.colors.inputBorder+'; border-radius:'+this.radius+'px;' );
+        this.c[3].textContent = this.value;
 
-    this.init();
+        let fltop = Math.floor(this.h*0.5)-7;
+        this.c[4] = this.dom( 'path', this.css.basic + 'position:absolute; width:14px; height:14px; left:5px; top:'+fltop+'px;', { d:this.svgs[ 'cursor' ], fill:this.fontColor, stroke:'none'});
 
-}
+        this.stat = 1;
+        this.isActif = false;
 
-Select.prototype = Object.assign( Object.create( Proto.prototype ), {
+        this.init();
 
-    constructor: Select,
+    }
 
-    testZone: function ( e ) {
+    testZone ( e ) {
 
-        var l = this.local;
+        let l = this.local;
         if( l.x === -1 && l.y === -1 ) return '';
         if( l.x > this.sa && l.x < this.sa+30 ) return 'over';
         return '0'
 
-    },
+    }
 
     // ----------------------
     //   EVENTS
     // ----------------------
 
-    mouseup: function ( e ) {
+    mouseup ( e ) {
     
         if( this.isDown ){
             //this.value = false;
@@ -61,11 +59,11 @@ Select.prototype = Object.assign( Object.create( Proto.prototype ), {
 
         return false;
 
-    },
+    }
 
-    mousedown: function ( e ) {
+    mousedown ( e ) {
 
-        var name = this.testZone( e );
+        let name = this.testZone( e );
 
         if( !name ) return false;
 
@@ -74,14 +72,14 @@ Select.prototype = Object.assign( Object.create( Proto.prototype ), {
         //this.send();
         return this.mousemove( e );
 
-    },
+    }
 
-    mousemove: function ( e ) {
+    mousemove ( e ) {
 
-        var up = false;
+        let up = false;
 
-        var name = this.testZone( e );
-        //var sel = false;
+        let name = this.testZone( e );
+        //let sel = false;
 
         
 
@@ -96,11 +94,11 @@ Select.prototype = Object.assign( Object.create( Proto.prototype ), {
 
         return up;
 
-    },
+    }
 
     // ----------------------
 
-    apply: function ( v ) {
+    apply ( v ) {
 
         v = v || '';
 
@@ -112,17 +110,17 @@ Select.prototype = Object.assign( Object.create( Proto.prototype ), {
         
         this.mode(1);
 
-    },
+    }
 
-    update: function () {
+    update () {
 
         this.mode( 3 );
 
-    },
+    }
 
-    mode: function ( n ) {
+    mode ( n ) {
 
-        var change = false;
+        let change = false;
 
         if( this.stat !== n ){
 
@@ -152,33 +150,31 @@ Select.prototype = Object.assign( Object.create( Proto.prototype ), {
 
 
 
-    },
+    }
 
-    reset: function () {
+    reset () {
 
         this.cursor();
         return this.mode( this.isActif ? 4 : 1 );
 
-    },
+    }
 
-    text: function ( txt ) {
+    text ( txt ) {
 
         this.c[3].textContent = txt;
 
-    },
+    }
 
-    rSize: function () {
+    rSize () {
 
-        Proto.prototype.rSize.call( this );
+        super.rSize();
 
-        var s = this.s;
+        let s = this.s;
         s[2].left = this.sa + 'px';
         s[3].left = (this.sa + 40) + 'px';
         s[3].width = (this.sb - 40) + 'px';
         s[4].left = (this.sa+8) + 'px';
 
-    },
+    }
 
-} );
-
-export { Select };
+}

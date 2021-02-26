@@ -1,133 +1,131 @@
 import { Proto } from '../core/Proto';
 
-function List ( o ) {
+export class List extends Proto {
 
-    Proto.call( this, o );
+    constructor( o = {} ) {
 
-    // images
-    this.path = o.path || '';
-    this.format = o.format || '';
-    this.imageSize = o.imageSize || [20,20];
+        super( o );
 
-    this.isWithImage = this.path !== '' ? true:false;
-    this.preLoadComplete = false;
+        // images
+        this.path = o.path || '';
+        this.format = o.format || '';
+        this.imageSize = o.imageSize || [20,20];
 
-    this.tmpImage = {};
-    this.tmpUrl = [];
+        this.isWithImage = this.path !== '' ? true:false;
+        this.preLoadComplete = false;
 
-    this.autoHeight = false;
-    var align = o.align || 'center';
+        this.tmpImage = {};
+        this.tmpUrl = [];
 
-    this.sMode = 0;
-    this.tMode = 0;
+        this.autoHeight = false;
+        let align = o.align || 'center';
 
-    this.listOnly = o.listOnly || false;
+        this.sMode = 0;
+        this.tMode = 0;
 
-    this.buttonColor = o.bColor || this.colors.button;
+        this.listOnly = o.listOnly || false;
 
-    var fltop = Math.floor(this.h*0.5)-5;
+        this.buttonColor = o.bColor || this.colors.button;
 
-    this.c[2] = this.dom( 'div', this.css.basic + 'top:0; display:none;' );
-    this.c[3] = this.dom( 'div', this.css.txt + 'text-align:'+align+'; line-height:'+(this.h-4)+'px; top:1px; background:'+this.buttonColor+'; height:'+(this.h-2)+'px; border-radius:'+this.radius+'px;' );
-    this.c[4] = this.dom( 'path', this.css.basic + 'position:absolute; width:10px; height:10px; top:'+fltop+'px;', { d:this.svgs.arrow, fill:this.fontColor, stroke:'none'});
+        let fltop = Math.floor(this.h*0.5)-5;
 
-    this.scroller = this.dom( 'div', this.css.basic + 'right:5px;  width:10px; background:#666; display:none;');
+        this.c[2] = this.dom( 'div', this.css.basic + 'top:0; display:none;' );
+        this.c[3] = this.dom( 'div', this.css.txt + 'text-align:'+align+'; line-height:'+(this.h-4)+'px; top:1px; background:'+this.buttonColor+'; height:'+(this.h-2)+'px; border-radius:'+this.radius+'px;' );
+        this.c[4] = this.dom( 'path', this.css.basic + 'position:absolute; width:10px; height:10px; top:'+fltop+'px;', { d:this.svgs.arrow, fill:this.fontColor, stroke:'none'});
 
-    this.c[3].style.color = this.fontColor;
+        this.scroller = this.dom( 'div', this.css.basic + 'right:5px;  width:10px; background:#666; display:none;');
 
-    this.list = o.list || [];
-    this.items = [];
+        this.c[3].style.color = this.fontColor;
 
-    this.prevName = '';
+        this.list = o.list || [];
+        this.items = [];
 
-    this.baseH = this.h;
+        this.prevName = '';
 
-    this.itemHeight = o.itemHeight || (this.h-3);
+        this.baseH = this.h;
 
-    // force full list 
-    this.full = o.full || false;
+        this.itemHeight = o.itemHeight || (this.h-3);
 
-    this.py = 0;
-    this.ww = this.sb;
-    this.scroll = false;
-    this.isDown = false;
+        // force full list 
+        this.full = o.full || false;
 
-    this.current = null;
+        this.py = 0;
+        this.ww = this.sb;
+        this.scroll = false;
+        this.isDown = false;
 
-    // list up or down
-    this.side = o.side || 'down';
-    this.up = this.side === 'down' ? 0 : 1;
+        this.current = null;
 
-    if( this.up ){
+        // list up or down
+        this.side = o.side || 'down';
+        this.up = this.side === 'down' ? 0 : 1;
 
-        this.c[2].style.top = 'auto';
-        this.c[3].style.top = 'auto';
-        this.c[4].style.top = 'auto';
-        //this.c[5].style.top = 'auto';
+        if( this.up ){
 
-        this.c[2].style.bottom = this.h-2 + 'px';
-        this.c[3].style.bottom = '1px';
-        this.c[4].style.bottom = fltop + 'px';
+            this.c[2].style.top = 'auto';
+            this.c[3].style.top = 'auto';
+            this.c[4].style.top = 'auto';
+            //this.c[5].style.top = 'auto';
 
-    } else {
-        this.c[2].style.top = this.baseH + 'px';
+            this.c[2].style.bottom = this.h-2 + 'px';
+            this.c[3].style.bottom = '1px';
+            this.c[4].style.bottom = fltop + 'px';
+
+        } else {
+            this.c[2].style.top = this.baseH + 'px';
+        }
+
+        this.listIn = this.dom( 'div', this.css.basic + 'left:0; top:0; width:100%; background:rgba(0,0,0,0.2);');
+        this.listIn.name = 'list';
+
+        this.topList = 0;
+        
+        this.c[2].appendChild( this.listIn );
+        this.c[2].appendChild( this.scroller );
+
+        if( o.value !== undefined ){
+            if(!isNaN(o.value)) this.value = this.list[ o.value ];
+            else this.value = o.value;
+        }else{
+            this.value = this.list[0];
+        }
+
+        this.isOpenOnStart = o.open || false;
+
+        if( this.listOnly ){
+            this.baseH = 5;
+            this.c[3].style.display = 'none';
+            this.c[4].style.display = 'none';
+            this.c[2].style.top = this.baseH+'px'
+            this.isOpenOnStart = true;
+        }
+
+        
+
+        //this.c[0].style.background = '#FF0000'
+        if( this.isWithImage ) this.preloadImage();
+       // } else {
+            // populate list
+            this.setList( this.list );
+            this.init();
+            if( this.isOpenOnStart ) this.open( true );
+       // }
+
     }
-
-    this.listIn = this.dom( 'div', this.css.basic + 'left:0; top:0; width:100%; background:rgba(0,0,0,0.2);');
-    this.listIn.name = 'list';
-
-    this.topList = 0;
-    
-    this.c[2].appendChild( this.listIn );
-    this.c[2].appendChild( this.scroller );
-
-    if( o.value !== undefined ){
-        if(!isNaN(o.value)) this.value = this.list[ o.value ];
-        else this.value = o.value;
-    }else{
-        this.value = this.list[0];
-    }
-
-    this.isOpenOnStart = o.open || false;
-
-    if( this.listOnly ){
-        this.baseH = 5;
-        this.c[3].style.display = 'none';
-        this.c[4].style.display = 'none';
-        this.c[2].style.top = this.baseH+'px'
-        this.isOpenOnStart = true;
-    }
-
-    
-
-    //this.c[0].style.background = '#FF0000'
-    if( this.isWithImage ) this.preloadImage();
-   // } else {
-        // populate list
-        this.setList( this.list );
-        this.init();
-        if( this.isOpenOnStart ) this.open( true );
-   // }
-
-}
-
-List.prototype = Object.assign( Object.create( Proto.prototype ), {
-
-    constructor: List,
 
     // image list
 
-    preloadImage: function () {
+    preloadImage () {
 
         this.preLoadComplete = false;
 
         this.tmpImage = {};
-        for( var i=0; i<this.list.length; i++ ) this.tmpUrl.push( this.list[i] );
+        for( let i=0; i<this.list.length; i++ ) this.tmpUrl.push( this.list[i] );
         this.loadOne();
         
-    },
+    }
 
-    nextImg: function () {
+    nextImg () {
 
         this.tmpUrl.shift();
         if( this.tmpUrl.length === 0 ){ 
@@ -142,13 +140,13 @@ List.prototype = Object.assign( Object.create( Proto.prototype ), {
         }
         else this.loadOne();
 
-    },
+    }
 
-    loadOne: function(){
+    loadOne(){
 
-        var self = this
-        var name = this.tmpUrl[0];
-        var img = document.createElement('img');
+        let self = this
+        let name = this.tmpUrl[0];
+        let img = document.createElement('img');
         img.style.cssText = 'position:absolute; width:'+self.imageSize[0]+'px; height:'+self.imageSize[1]+'px';
         img.setAttribute('src', this.path + name + this.format );
 
@@ -161,13 +159,13 @@ List.prototype = Object.assign( Object.create( Proto.prototype ), {
 
         });
 
-    },
+    }
 
     //
 
-    testZone: function ( e ) {
+    testZone ( e ) {
 
-        var l = this.local;
+        let l = this.local;
         if( l.x === -1 && l.y === -1 ) return '';
 
         if( this.up && this.isOpen ){
@@ -190,13 +188,13 @@ List.prototype = Object.assign( Object.create( Proto.prototype ), {
 
         return '';
 
-    },
+    }
 
-    testItems: function ( y ) {
+    testItems ( y ) {
 
-        var name = '';
+        let name = '';
 
-        var i = this.items.length, item, a, b;
+        let i = this.items.length, item, a, b;
         while(i--){
             item = this.items[i];
             a = item.posy + this.topList;
@@ -213,9 +211,9 @@ List.prototype = Object.assign( Object.create( Proto.prototype ), {
 
         return name;
 
-    },
+    }
 
-    unSelected: function () {
+    unSelected () {
 
         if( this.current ){
             this.current.style.background = 'rgba(0,0,0,0.2)';
@@ -223,28 +221,28 @@ List.prototype = Object.assign( Object.create( Proto.prototype ), {
             this.current = null;
         }
 
-    },
+    }
 
-    selected: function () {
+    selected () {
 
         this.current.style.background = this.colors.select;
         this.current.style.color = '#FFF';
 
-    },
+    }
 
     // ----------------------
     //   EVENTS
     // ----------------------
 
-    mouseup: function ( e ) {
+    mouseup ( e ) {
 
         this.isDown = false;
 
-    },
+    }
 
-    mousedown: function ( e ) {
+    mousedown ( e ) {
 
-        var name = this.testZone( e );
+        let name = this.testZone( e );
 
         if( !name ) return false;
 
@@ -275,12 +273,12 @@ List.prototype = Object.assign( Object.create( Proto.prototype ), {
 
         return true;
 
-    },
+    }
 
-    mousemove: function ( e ) {
+    mousemove ( e ) {
 
-        var nup = false;
-        var name = this.testZone( e );
+        let nup = false;
+        let name = this.testZone( e );
 
         if( !name ) return nup;
 
@@ -295,7 +293,7 @@ List.prototype = Object.assign( Object.create( Proto.prototype ), {
             this.modeScroll(1);
             if( this.isDown ){
                 this.modeScroll(2);
-                var top = this.zone.y+this.baseH-2;
+                let top = this.zone.y+this.baseH-2;
                 this.update( ( e.clientY - top  ) - ( this.sh*0.5 ) );
             }
             //if(this.isDown) this.listmove(e);
@@ -313,32 +311,32 @@ List.prototype = Object.assign( Object.create( Proto.prototype ), {
 
         return nup;
 
-    },
+    }
 
-    wheel: function ( e ) {
+    wheel ( e ) {
 
-        var name = this.testZone( e );
+        let name = this.testZone( e );
         if( name === 'title' ) return false; 
         this.py += e.delta*10;
         this.update(this.py);
         return true;
 
-    },
+    }
 
 
 
     // ----------------------
 
-    reset: function () {
+    reset () {
 
         this.prevName = '';
         this.unSelected();
         this.modeTitle(0);
         this.modeScroll(0);
         
-    },
+    }
 
-    modeScroll: function ( mode ) {
+    modeScroll ( mode ) {
 
         if( mode === this.sMode ) return;
 
@@ -356,13 +354,13 @@ List.prototype = Object.assign( Object.create( Proto.prototype ), {
         }
 
         this.sMode = mode;
-    },
+    }
 
-    modeTitle: function ( mode ) {
+    modeTitle ( mode ) {
 
         if( mode === this.tMode ) return;
 
-        var s = this.s;
+        let s = this.s;
 
         switch(mode){
             case 0: // base
@@ -382,16 +380,16 @@ List.prototype = Object.assign( Object.create( Proto.prototype ), {
 
         this.tMode = mode;
 
-    },
+    }
 
-    clearList: function () {
+    clearList () {
 
         while ( this.listIn.children.length ) this.listIn.removeChild( this.listIn.lastChild );
         this.items = [];
 
-    },
+    }
 
-    setList: function ( list ) {
+    setList ( list ) {
 
         this.clearList();
 
@@ -416,8 +414,8 @@ List.prototype = Object.assign( Object.create( Proto.prototype ), {
             this.scroll = true;
         }
 
-        var item, n;//, l = this.sb;
-        for( var i=0; i<this.length; i++ ){
+        let item, n;//, l = this.sb;
+        for( let i=0; i<this.length; i++ ){
 
             n = this.list[i];
             item = this.dom( 'div', this.css.item + 'width:'+this.ww+'px; height:'+this.itemHeight+'px; line-height:'+(this.itemHeight-5)+'px; color:'+this.fontColor+';' );
@@ -434,17 +432,17 @@ List.prototype = Object.assign( Object.create( Proto.prototype ), {
 
         this.setTopItem();
         
-    },
+    }
 
-    addImages: function (){
-        var lng = this.list.length;
-        for( var i=0; i<lng; i++ ){
+    addImages (){
+        let lng = this.list.length;
+        for( let i=0; i<lng; i++ ){
             this.items[i].appendChild( this.tmpImage[this.list[i]] );
         }
         this.setTopItem();
-    },
+    }
 
-    setTopItem: function (){
+    setTopItem (){
 
         if( this.isWithImage ){ 
 
@@ -459,18 +457,18 @@ List.prototype = Object.assign( Object.create( Proto.prototype ), {
                 this.c[3].appendChild( this.canvas );
             }
 
-            var img = this.tmpImage[ this.value ];
+            let img = this.tmpImage[ this.value ];
             this.ctx.drawImage( this.tmpImage[ this.value ], 0, 0, this.imageSize[2], this.imageSize[3], 0,0, this.imageSize[0], this.imageSize[1] );
 
         }
         else this.c[3].textContent = this.value;
 
-    },
+    }
 
 
     // ----- LIST
 
-    update: function ( y ) {
+    update ( y ) {
 
         if( !this.scroll ) return;
 
@@ -484,18 +482,18 @@ List.prototype = Object.assign( Object.create( Proto.prototype ), {
 
         this.py = y;
 
-    },
+    }
 
-    parentHeight: function ( t ) {
+    parentHeight ( t ) {
 
         if ( this.parentGroup !== null ) this.parentGroup.calc( t );
         else if ( this.isUI ) this.main.calc( t );
 
-    },
+    }
 
-    open: function ( first ) {
+    open ( first ) {
 
-        Proto.prototype.open.call( this );
+        super.open();
 
         this.update( 0 );
         this.h = this.maxHeight + this.baseH + 5;
@@ -518,21 +516,21 @@ List.prototype = Object.assign( Object.create( Proto.prototype ), {
 
         this.rSizeContent();
 
-        var t = this.h - this.baseH;
+        let t = this.h - this.baseH;
 
         this.zone.h = this.h;
 
         if(!first) this.parentHeight( t );
 
-    },
+    }
 
-    close: function () {
+    close () {
 
-        Proto.prototype.close.call( this );
+        super.close();
 
         if( this.up ) this.zone.y += this.h - (this.baseH-10);
 
-        var t = this.h - this.baseH;
+        let t = this.h - this.baseH;
 
         this.h = this.baseH;
         this.s[0].height = this.h + 'px';
@@ -543,30 +541,30 @@ List.prototype = Object.assign( Object.create( Proto.prototype ), {
 
         this.parentHeight( -t );
 
-    },
+    }
 
     // -----
 
-    text: function ( txt ) {
+    text ( txt ) {
 
         this.c[3].textContent = txt;
 
-    },
+    }
 
-    rSizeContent: function () {
+    rSizeContent () {
 
-        var i = this.length;
+        let i = this.length;
         while(i--) this.listIn.children[i].style.width = this.ww + 'px';
 
-    },
+    }
 
-    rSize: function () {
+    rSize () {
 
         Proto.prototype.rSize.call( this );
 
-        var s = this.s;
-        var w = this.sb;
-        var d = this.sa;
+        let s = this.s;
+        let w = this.sb;
+        let d = this.sa;
 
         if(s[2]=== undefined) return;
 
@@ -584,6 +582,4 @@ List.prototype = Object.assign( Object.create( Proto.prototype ), {
 
     }
 
-} );
-
-export { List };
+}

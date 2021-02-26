@@ -7,174 +7,169 @@ import { V2 } from './V2';
  * @author lth / https://github.com/lo-th
  */
 
-function Proto ( o ) {
+class Proto {
 
-    o = o || {};
+    constructor( o = {} ) {
 
+        // if is on gui or group
+        this.main = o.main || null;
+        this.isUI = o.isUI || false;
+        this.parentGroup = null;
 
-    // if is on gui or group
-    this.main = o.main || null;
-    this.isUI = o.isUI || false;
-    this.parentGroup = null;
+        this.css = this.main ? this.main.css : Tools.css;
+        this.colors = this.main ? this.main.colors : Tools.colors;
 
-    this.css = this.main ? this.main.css : Tools.css;
-    this.colors = this.main ? this.main.colors : Tools.colors;
+        this.defaultBorderColor = this.colors.border;
+        this.svgs = Tools.svgs;
 
-    this.defaultBorderColor = this.colors.border;
-    this.svgs = Tools.svgs;
+        // only space 
+        this.isEmpty = o.isEmpty || false;
 
-    // only space 
-    this.isEmpty = o.isEmpty || false;
+        this.zone = { x:0, y:0, w:0, h:0 };
+        this.local = new V2().neg();
 
-    this.zone = { x:0, y:0, w:0, h:0 };
-    this.local = new V2().neg();
+        this.isCanvasOnly = false;
 
-    this.isCanvasOnly = false;
+        this.isSelect = false;
 
-    this.isSelect = false;
+        // percent of title
+        this.p = o.p !== undefined ? o.p : Tools.size.p;
 
-    // percent of title
-    this.p = o.p !== undefined ? o.p : Tools.size.p;
+        this.w = this.isUI ? this.main.size.w : Tools.size.w;
+        if( o.w !== undefined ) this.w = o.w;
 
-    this.w = this.isUI ? this.main.size.w : Tools.size.w;
-    if( o.w !== undefined ) this.w = o.w;
+        this.h = this.isUI ? this.main.size.h : Tools.size.h;
+        if( o.h !== undefined ) this.h = o.h;
+        if(!this.isEmpty) this.h = this.h < 11 ? 11 : this.h;
 
-    this.h = this.isUI ? this.main.size.h : Tools.size.h;
-    if( o.h !== undefined ) this.h = o.h;
-    if(!this.isEmpty) this.h = this.h < 11 ? 11 : this.h;
+        // if need resize width
+        this.autoWidth = o.auto || true;
 
-    // if need resize width
-    this.autoWidth = o.auto || true;
+        // open statu
+        this.isOpen = false;
 
-    // open statu
-    this.isOpen = false;
+        // radius for toolbox
+        this.radius = o.radius || 0;
 
-    // radius for toolbox
-    this.radius = o.radius || 0;
+        // only for number
+        this.isNumber = false;
+        this.noNeg = o.noNeg || false;
+        this.allEqual = o.allEqual || false;
+        
+        // only most simple 
+        this.mono = false;
 
-    // only for number
-    this.isNumber = false;
-    this.noNeg = o.noNeg || false;
-    this.allEqual = o.allEqual || false;
-    
-    // only most simple 
-    this.mono = false;
+        // stop listening for edit slide text
+        this.isEdit = false;
 
-    // stop listening for edit slide text
-    this.isEdit = false;
+        // no title 
+        this.simple = o.simple || false;
+        if( this.simple ) this.sa = 0;
 
-    // no title 
-    this.simple = o.simple || false;
-    if( this.simple ) this.sa = 0;
+        
 
-    
+        // define obj size
+        this.setSize( this.w );
 
-    // define obj size
-    this.setSize( this.w );
+        // title size
+        if(o.sa !== undefined ) this.sa = o.sa;
+        if(o.sb !== undefined ) this.sb = o.sb;
 
-    // title size
-    if(o.sa !== undefined ) this.sa = o.sa;
-    if(o.sb !== undefined ) this.sb = o.sb;
+        if( this.simple ) this.sb = this.w - this.sa;
 
-    if( this.simple ) this.sb = this.w - this.sa;
+        // last number size for slide
+        this.sc = o.sc === undefined ? 47 : o.sc;
 
-    // last number size for slide
-    this.sc = o.sc === undefined ? 47 : o.sc;
+        // for listening object
+        this.objectLink = null;
+        this.isSend = false;
+        this.val = null;
+        
+        // Background
+        this.bg = this.colors.background;//this.isUI ? this.main.bg : Tools.colors.background;
+        this.bgOver = this.colors.backgroundOver;
+        if( o.bg !== undefined ){ this.bg = o.bg; this.bgOver = o.bg; }
+        if( o.bgOver !== undefined ){ this.bgOver = o.bgOver; }
 
-    // for listening object
-    this.objectLink = null;
-    this.isSend = false;
-    this.val = null;
-    
-    // Background
-    this.bg = this.colors.background;//this.isUI ? this.main.bg : Tools.colors.background;
-    this.bgOver = this.colors.backgroundOver;
-    if( o.bg !== undefined ){ this.bg = o.bg; this.bgOver = o.bg; }
-    if( o.bgOver !== undefined ){ this.bgOver = o.bgOver; }
+        // Font Color;
+        this.titleColor = o.titleColor || this.colors.text;
+        this.fontColor = o.fontColor || this.colors.text;
+        this.fontSelect = o.fontSelect || this.colors.textOver;
 
-    // Font Color;
-    this.titleColor = o.titleColor || this.colors.text;
-    this.fontColor = o.fontColor || this.colors.text;
-    this.fontSelect = o.fontSelect || this.colors.textOver;
+        if( o.color !== undefined ) this.fontColor = o.color;
+            /*{ 
 
-    if( o.color !== undefined ) this.fontColor = o.color;
-        /*{ 
+            if(o.color === 'n') o.color = '#ff0000';
 
-        if(o.color === 'n') o.color = '#ff0000';
-
-        if( o.color !== 'no' ) {
+            if( o.color !== 'no' ) {
+                if( !isNaN(o.color) ) this.fontColor = Tools.hexToHtml(o.color);
+                else this.fontColor = o.color;
+                this.titleColor = this.fontColor;
+            }
+            
+        }*/
+        
+        /*if( o.color !== undefined ){ 
             if( !isNaN(o.color) ) this.fontColor = Tools.hexToHtml(o.color);
             else this.fontColor = o.color;
             this.titleColor = this.fontColor;
-        }
+        }*/
+
+        this.colorPlus = Tools.ColorLuma( this.fontColor, 0.3 );
+
+        this.txt = o.name || 'Proto';
+        this.rename = o.rename || '';
+        this.target = o.target || null;
+
+        this.callback = o.callback === undefined ? null : o.callback;
+        this.endCallback = null;
+
+        if( this.callback === null && this.isUI && this.main.callback !== null ) this.callback = this.main.callback;
+
+        // elements
+        this.c = [];
+
+        // style 
+        this.s = [];
+
+
+        this.c[0] = Tools.dom( 'div', this.css.basic + 'position:relative; height:20px; float:left; overflow:hidden;');
+        this.s[0] = this.c[0].style;
+
+        if( this.isUI ) this.s[0].marginBottom = '1px';
         
-    }*/
-    
-    /*if( o.color !== undefined ){ 
-        if( !isNaN(o.color) ) this.fontColor = Tools.hexToHtml(o.color);
-        else this.fontColor = o.color;
-        this.titleColor = this.fontColor;
-    }*/
-
-    this.colorPlus = Tools.ColorLuma( this.fontColor, 0.3 );
-
-    this.txt = o.name || 'Proto';
-    this.rename = o.rename || '';
-    this.target = o.target || null;
-
-    this.callback = o.callback === undefined ? null : o.callback;
-    this.endCallback = null;
-
-    if( this.callback === null && this.isUI && this.main.callback !== null ) this.callback = this.main.callback;
-
-    // elements
-    this.c = [];
-
-    // style 
-    this.s = [];
-
-
-    this.c[0] = Tools.dom( 'div', this.css.basic + 'position:relative; height:20px; float:left; overflow:hidden;');
-    this.s[0] = this.c[0].style;
-
-    if( this.isUI ) this.s[0].marginBottom = '1px';
-    
-    // with title
-    if( !this.simple ){ 
-        this.c[1] = Tools.dom( 'div', this.css.txt );
-        this.s[1] = this.c[1].style;
-        this.c[1].textContent = this.rename === '' ? this.txt : this.rename;
-        this.s[1].color = this.titleColor;
-    }
-
-    if( o.pos ){
-        this.s[0].position = 'absolute';
-        for(var p in o.pos){
-            this.s[0][p] = o.pos[p];
+        // with title
+        if( !this.simple ){ 
+            this.c[1] = Tools.dom( 'div', this.css.txt );
+            this.s[1] = this.c[1].style;
+            this.c[1].textContent = this.rename === '' ? this.txt : this.rename;
+            this.s[1].color = this.titleColor;
         }
-        this.mono = true;
+
+        if( o.pos ){
+            this.s[0].position = 'absolute';
+            for(let p in o.pos){
+                this.s[0][p] = o.pos[p];
+            }
+            this.mono = true;
+        }
+
+        if( o.css ) this.s[0].cssText = o.css; 
+        
+
     }
 
-    if( o.css ) this.s[0].cssText = o.css; 
-    
-
-}
-
-Object.assign( Proto.prototype, {
-
-    constructor: Proto,
-
     // ----------------------
-    // make de node
+    // make the node
     // ----------------------
     
-    init: function () {
+    init () {
 
         this.zone.h = this.h;
 
 
-        var s = this.s; // style cache
-        var c = this.c; // div cach
+        let s = this.s; // style cache
+        let c = this.c; // div cach
 
         s[0].height = this.h + 'px';
 
@@ -188,9 +183,9 @@ Object.assign( Proto.prototype, {
             s[1].lineHeight = (this.h-8) + 'px';
         }
 
-        var frag = Tools.frag;
+        let frag = Tools.frag;
 
-        for( var i = 1, lng = c.length; i !== lng; i++ ){
+        for( let i = 1, lng = c.length; i !== lng; i++ ){
             if( c[i] !== undefined ) {
                 frag.appendChild( c[i] );
                 s[i] = c[i].style;
@@ -216,123 +211,116 @@ Object.assign( Proto.prototype, {
             
         }
 
-    },
+    }
 
-    // TRANS FUNCTIONS from Tools
+    // from Tools
 
-    dom: function ( type, css, obj, dom, id ) {
+    dom ( type, css, obj, dom, id ) {
 
         return Tools.dom( type, css, obj, dom, id );
 
-    },
+    }
 
-    setSvg: function ( dom, type, value, id, id2 ) {
+    setSvg ( dom, type, value, id, id2 ) {
 
         Tools.setSvg( dom, type, value, id, id2 );
 
-    },
+    }
 
-    setCss: function ( dom, css ) {
+    setCss ( dom, css ) {
 
         Tools.setCss( dom, css );
 
-    },
+    }
 
-    clamp: function ( value, min, max ) {
+    clamp ( value, min, max ) {
 
         return Tools.clamp( value, min, max );
 
-    },
+    }
 
-    getColorRing: function () {
+    getColorRing () {
 
         if( !Tools.colorRing ) Tools.makeColorRing();
         return Tools.clone( Tools.colorRing );
 
-    },
+    }
 
-    getJoystick: function ( model ) {
+    getJoystick ( model ) {
 
         if( !Tools[ 'joystick_'+ model ] ) Tools.makeJoystick( model );
         return Tools.clone( Tools[ 'joystick_'+ model ] );
 
-    },
+    }
 
-    getCircular: function ( model ) {
+    getCircular ( model ) {
 
         if( !Tools.circular ) Tools.makeCircular( model );
         return Tools.clone( Tools.circular );
 
-    },
+    }
 
-    getKnob: function ( model ) {
+    getKnob ( model ) {
 
         if( !Tools.knob ) Tools.makeKnob( model );
         return Tools.clone( Tools.knob );
 
-    },
+    }
 
-    /*getGraph: function () {
+    // from Roots
 
-         if( !Tools.graph ) Tools.makeGraph();
-         return Tools.clone( Tools.graph );
-
-    },*/
-
-    // TRANS FUNCTIONS from Roots
-
-    cursor: function ( name ) {
+    cursor ( name ) {
 
          Roots.cursor( name );
 
-    },
+    }
 
     
 
     /////////
 
-    update: function () {},
+    update () {}
 
-    reset:  function () {},
+    reset () {}
 
     /////////
 
-    getDom: function () {
+    getDom () {
 
         return this.c[0];
 
-    },
+    }
 
-    uiout: function () {
+    uiout () {
 
         if( this.isEmpty ) return;
 
         if(this.s) this.s[0].background = this.bg;
 
-    },
+    }
 
-    uiover: function () {
+    uiover () {
 
         if( this.isEmpty ) return;
 
         if(this.s) this.s[0].background = this.bgOver;
 
-    },
+    }
 
-    rename: function ( s ) {
+    rename ( s ) {
 
         if( this.c[1] !== undefined) this.c[1].textContent = s;
 
-    },
+    }
 
-    listen: function () {
+    listen () {
 
         Roots.addListen( this );
         return this;
 
-    },
+    }
 
-    listening: function () {
+    listening () {
 
         if( this.objectLink === null ) return;
         if( this.isSend ) return;
@@ -340,36 +328,36 @@ Object.assign( Proto.prototype, {
 
         this.setValue( this.objectLink[ this.val ] );
 
-    },
+    }
 
-    setValue: function ( v ) {
+    setValue ( v ) {
 
         if( this.isNumber ) this.value = this.numValue( v );
         //else if( v instanceof Array && v.length === 1 ) v = v[0];
         else this.value = v;
         this.update();
 
-    },
+    }
 
 
     // ----------------------
     // update every change
     // ----------------------
 
-    onChange: function ( f ) {
+    onChange ( f ) {
 
         if( this.isEmpty ) return;
 
         this.callback = f || null;
         return this;
 
-    },
+    }
 
     // ----------------------
     // update only on end
     // ----------------------
 
-    onFinishChange: function ( f ) {
+    onFinishChange ( f ) {
 
         if( this.isEmpty ) return;
 
@@ -377,9 +365,9 @@ Object.assign( Proto.prototype, {
         this.endCallback = f;
         return this;
 
-    },
+    }
 
-    send: function ( v ) {
+    send ( v ) {
 
         v = v || this.value;
         if( v instanceof Array && v.length === 1 ) v = v[0];
@@ -389,9 +377,9 @@ Object.assign( Proto.prototype, {
         if( this.callback ) this.callback( v, this.val );
         this.isSend = false;
 
-    },
+    }
 
-    sendEnd: function ( v ) {
+    sendEnd ( v ) {
 
         v = v || this.value;
         if( v instanceof Array && v.length === 1 ) v = v[0];
@@ -399,13 +387,13 @@ Object.assign( Proto.prototype, {
         if( this.endCallback ) this.endCallback( v );
         if( this.objectLink !== null ) this.objectLink[ this.val ] = v;
 
-    },
+    }
 
     // ----------------------
     // clear node
     // ----------------------
     
-    clear: function () {
+    clear () {
 
         Tools.clear( this.c[0] );
 
@@ -423,13 +411,13 @@ Object.assign( Proto.prototype, {
         this.callback = null;
         this.target = null;
 
-    },
+    }
 
     // ----------------------
     // change size 
     // ----------------------
 
-    setSize: function ( sx ) {
+    setSize ( sx ) {
 
         if( !this.autoWidth ) return;
 
@@ -438,26 +426,26 @@ Object.assign( Proto.prototype, {
         if( this.simple ){
             this.sb = this.w - this.sa;
         } else {
-            var pp = this.w * ( this.p / 100 );
+            let pp = this.w * ( this.p / 100 );
             this.sa = Math.floor( pp + 10 );
             this.sb = Math.floor( this.w - pp - 20 );
         }
 
-    },
+    }
 
-    rSize: function () {
+    rSize () {
 
         if( !this.autoWidth ) return;
         this.s[0].width = this.w + 'px';
         if( !this.simple ) this.s[1].width = this.sa + 'px';
     
-    },
+    }
 
     // ----------------------
     // for numeric value
     // ----------------------
 
-    setTypeNumber: function ( o ) {
+    setTypeNumber ( o ) {
 
         this.isNumber = true;
 
@@ -471,7 +459,7 @@ Object.assign( Proto.prototype, {
         this.max = o.max === undefined ?  Infinity : o.max;
         this.precision = o.precision === undefined ? 2 : o.precision;
 
-        var s;
+        let s;
 
         switch(this.precision){
             case 0: s = 1; break;
@@ -479,130 +467,130 @@ Object.assign( Proto.prototype, {
             case 2: s = 0.01; break;
             case 3: s = 0.001; break;
             case 4: s = 0.0001; break;
+            case 5: s = 0.00001; break;
         }
 
         this.step = o.step === undefined ?  s : o.step;
         this.range = this.max - this.min;
         this.value = this.numValue( this.value );
         
-    },
+    }
 
-    numValue: function ( n ) {
+    numValue ( n ) {
 
         if( this.noNeg ) n = Math.abs( n );
         return Math.min( this.max, Math.max( this.min, n ) ).toFixed( this.precision ) * 1;
 
-    },
+    }
 
 
     // ----------------------
     //   EVENTS DEFAULT
     // ----------------------
 
-    handleEvent: function ( e ){
+    handleEvent ( e ){
 
         if( this.isEmpty ) return;
         return this[e.type](e);
     
-    },
+    }
 
-    wheel: function ( e ) { return false; },
+    wheel ( e ) { return false; }
 
-    mousedown: function( e ) { return false; },
+    mousedown ( e ) { return false; }
 
-    mousemove: function( e ) { return false; },
+    mousemove ( e ) { return false; }
 
-    mouseup: function( e ) { return false; },
+    mouseup ( e ) { return false; }
 
-    keydown: function( e ) { return false; },
+    keydown ( e ) { return false; }
 
-    keyup: function( e ) { return false; },
+    keyup ( e ) { return false; }
 
 
     // ----------------------
     // object referency
     // ----------------------
 
-    setReferency: function ( obj, val ) {
+    setReferency ( obj, val ) {
 
         this.objectLink = obj;
         this.val = val;
 
-    },
+    }
 
-    display: function ( v ) {
+    display ( v ) {
         
         v = v || false;
         this.s[0].display = v ? 'block' : 'none';
         //this.isReady = v ? false : true;
 
-    },
+    }
 
     // ----------------------
     // resize height 
     // ----------------------
 
-    open: function () {
+    open () {
 
         if( this.isOpen ) return;
         this.isOpen = true;
 
-    },
+    }
 
-    close: function () {
+    close () {
 
         if( !this.isOpen ) return;
         this.isOpen = false;
 
-    },
+    }
 
-    needZone: function () {
-
-        Roots.needReZone = true;
-
-    },
-
-    rezone: function () {
+    needZone () {
 
         Roots.needReZone = true;
 
-    },
+    }
+
+    rezone () {
+
+        Roots.needReZone = true;
+
+    }
 
     // ----------------------
     //  INPUT
     // ----------------------
 
-    select: function () {
+    select () {
     
-    },
+    }
 
-    unselect: function () {
+    unselect () {
 
-    },
+    }
 
-    setInput: function ( Input ) {
+    setInput ( Input ) {
         
         Roots.setInput( Input, this );
 
-    },
+    }
 
-    upInput: function ( x, down ) {
+    upInput ( x, down ) {
 
         return Roots.upInput( x, down );
 
-    },
+    }
 
     // ----------------------
     // special item 
     // ----------------------
 
-    selected: function ( b ){
+    selected ( b ){
 
         this.isSelect = b || false;
         
-    },
+    }
 
-
-} );
+}
 
 export { Proto };

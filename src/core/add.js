@@ -19,66 +19,66 @@ import { Empty } from '../proto/Empty.js';
 import { Item } from '../proto/Item.js';
 import { Grid } from '../proto/Grid.js';
 
-function add () {
+export class add {
 
-    var a = arguments; 
+    constructor () {
 
-    var type, o, ref = false, n = null;
+        let a = arguments; 
 
-    if( typeof a[0] === 'string' ){ 
+        let type, o, ref = false, n = null;
 
-        type = a[0];
-        o = a[1] || {};
+        if( typeof a[0] === 'string' ){ 
 
-    } else if ( typeof a[0] === 'object' ){ // like dat gui
+            type = a[0];
+            o = a[1] || {};
 
-        ref = true;
-        if( a[2] === undefined ) [].push.call(a, {});
+        } else if ( typeof a[0] === 'object' ){ // like dat gui
 
-        type = a[2].type ? a[2].type : 'slide';//autoType.apply( this, a );
+            ref = true;
+            if( a[2] === undefined ) [].push.call(a, {});
 
-        o = a[2];
-        o.name = a[1];
-        o.value = a[0][a[1]];
+            type = a[2].type ? a[2].type : 'slide';//autoType.apply( this, a );
+
+            o = a[2];
+            o.name = a[1];
+            o.value = a[0][a[1]];
+
+        }
+
+        let name = type.toLowerCase();
+
+        if( name === 'group' ) o.add = add;
+
+        switch( name ){
+
+            case 'bool': n = new Bool(o); break;
+            case 'button': n = new Button(o); break;
+            case 'circular': n = new Circular(o); break;
+            case 'color': n = new Color(o); break;
+            case 'fps': n = new Fps(o); break;
+            case 'graph': n = new Graph(o); break;
+            case 'group': n = new Group(o); break;
+            case 'joystick': n = new Joystick(o); break;
+            case 'knob': n = new Knob(o); break;
+            case 'list': n = new List(o); break;
+            case 'numeric': case 'number': n = new Numeric(o); break;
+            case 'slide': n = new Slide(o); break;
+            case 'textInput': case 'string': n = new TextInput(o); break;
+            case 'title': n = new Title(o); break;
+            case 'select': n = new Select(o); break;
+            case 'selector': n = new Selector(o); break;
+            case 'empty': case 'space': n = new Empty(o); break;
+            case 'item': n = new Item(o); break;
+            case 'grid': n = new Grid(o); break;
+
+        }
+
+        if( n !== null ){
+
+            if( ref ) n.setReferency( a[0], a[1] );
+            return n;
+
+        }
 
     }
-
-    var name = type.toLowerCase();
-
-    if( name === 'group' ) o.add = add;
-
-    switch( name ){
-
-        case 'bool': n = new Bool(o); break;
-        case 'button': n = new Button(o); break;
-        case 'circular': n = new Circular(o); break;
-        case 'color': n = new Color(o); break;
-        case 'fps': n = new Fps(o); break;
-        case 'graph': n = new Graph(o); break;
-        case 'group': n = new Group(o); break;
-        case 'joystick': n = new Joystick(o); break;
-        case 'knob': n = new Knob(o); break;
-        case 'list': n = new List(o); break;
-        case 'numeric': case 'number': n = new Numeric(o); break;
-        case 'slide': n = new Slide(o); break;
-        case 'textInput': case 'string': n = new TextInput(o); break;
-        case 'title': n = new Title(o); break;
-        case 'select': n = new Select(o); break;
-        case 'selector': n = new Selector(o); break;
-        case 'empty': case 'space': n = new Empty(o); break;
-        case 'item': n = new Item(o); break;
-        case 'grid': n = new Grid(o); break;
-
-    }
-
-    if( n !== null ){
-
-        if( ref ) n.setReferency( a[0], a[1] );
-        return n;
-
-    }
-    
-
-};
-
-export { add };
+}

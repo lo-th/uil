@@ -5,7 +5,7 @@
 
 // INTENAL FUNCTION
 
-var R = {
+const R = {
 
 	ui: [],
 
@@ -69,7 +69,7 @@ var R = {
 
     testMobile: function () {
 
-        var n = navigator.userAgent;
+        let n = navigator.userAgent;
         if (n.match(/Android/i) || n.match(/webOS/i) || n.match(/iPhone/i) || n.match(/iPad/i) || n.match(/iPod/i) || n.match(/BlackBerry/i) || n.match(/Windows Phone/i)) return true;
         else return false;  
 
@@ -77,7 +77,7 @@ var R = {
 
     remove: function ( o ) {
 
-        var i = R.ui.indexOf( o );
+        let i = R.ui.indexOf( o );
         
         if ( i !== -1 ) {
             R.removeListen( o );
@@ -98,18 +98,18 @@ var R = {
 
         if( R.isEventsInit ) return;
 
-        var domElement = document.body;
+        let dom = document.body;
 
         R.isMobile = R.testMobile();
 
         if( R.isMobile ){
-            domElement.addEventListener( 'touchstart', R, false );
-            domElement.addEventListener( 'touchend', R, false );
-            domElement.addEventListener( 'touchmove', R, false );
+            dom.addEventListener( 'touchstart', R, false );
+            dom.addEventListener( 'touchend', R, false );
+            dom.addEventListener( 'touchmove', R, false );
         }else{
-            domElement.addEventListener( 'mousedown', R, false );
-            domElement.addEventListener( 'contextmenu', R, false );
-            domElement.addEventListener( 'wheel', R, false );
+            dom.addEventListener( 'mousedown', R, false );
+            dom.addEventListener( 'contextmenu', R, false );
+            dom.addEventListener( 'wheel', R, false );
             document.addEventListener( 'mousemove', R, false );
             document.addEventListener( 'mouseup', R, false );
         }
@@ -127,16 +127,16 @@ var R = {
 
         if( !R.isEventsInit ) return;
 
-        var domElement = document.body;
+        let dom = document.body;
 
         if( R.isMobile ){
-            domElement.removeEventListener( 'touchstart', R, false );
-            domElement.removeEventListener( 'touchend', R, false );
-            domElement.removeEventListener( 'touchmove', R, false );
+            dom.removeEventListener( 'touchstart', R, false );
+            dom.removeEventListener( 'touchend', R, false );
+            dom.removeEventListener( 'touchmove', R, false );
         }else{
-            domElement.removeEventListener( 'mousedown', R, false );
-            domElement.removeEventListener( 'contextmenu', R, false );
-            domElement.removeEventListener( 'wheel', R, false );
+            dom.removeEventListener( 'mousedown', R, false );
+            dom.removeEventListener( 'contextmenu', R, false );
+            dom.removeEventListener( 'wheel', R, false );
             document.removeEventListener( 'mousemove', R, false );
             document.removeEventListener( 'mouseup', R, false );
         }
@@ -153,7 +153,7 @@ var R = {
 
         R.needReZone = true;
 
-        var i = R.ui.length, u;
+        let i = R.ui.length, u;
         
         while( i-- ){
 
@@ -186,7 +186,7 @@ var R = {
 
         R.findZone();
        
-        var e = R.e;
+        let e = R.e;
 
         if( event.type === 'keydown') R.keydown( event );
         if( event.type === 'keyup') R.keyup( event );
@@ -253,7 +253,7 @@ var R = {
 
     findID: function ( e ) {
 
-        var i = R.ui.length, next = -1, u, x, y;
+        let i = R.ui.length, next = -1, u, x, y;
 
         while( i-- ){
 
@@ -305,7 +305,7 @@ var R = {
 
     calcUis: function ( uis, zone, py ) {
 
-        var lng = uis.length, u, i, px = 0, my = 0;
+        let lng = uis.length, u, i, px = 0, my = 0;
 
         for( i = 0; i < lng; i++ ){
 
@@ -343,7 +343,7 @@ var R = {
 
 	findTarget: function ( uis, e ) {
 
-        var i = uis.length;
+        let i = uis.length;
 
         while( i-- ){
             if( R.onZone( uis[i], e.clientX, e.clientY ) ) return i;
@@ -379,11 +379,11 @@ var R = {
 
         if( x === undefined || y === undefined ) return false;
 
-        var z = o.zone;
-        var mx = x - z.x;
-        var my = y - z.y;
+        let z = o.zone;
+        let mx = x - z.x;
+        let my = y - z.y;
 
-        var over = ( mx >= 0 ) && ( my >= 0 ) && ( mx <= z.w ) && ( my <= z.h );
+        let over = ( mx >= 0 ) && ( my >= 0 ) && ( mx <= z.w ) && ( my <= z.h );
 
         if( over ) o.local.set( mx, my );
         else o.local.neg();
@@ -395,7 +395,7 @@ var R = {
     getZone: function ( o ) {
 
         if( o.isCanvasOnly ) return;
-        var r = o.getDom().getBoundingClientRect();
+        let r = o.getDom().getBoundingClientRect();
         o.zone = { x:r.left, y:r.top, w:r.width, h:r.height };
 
     },
@@ -430,20 +430,20 @@ var R = {
 
         ///
 
-        var isNewSize = false;
+        let isNewSize = false;
         if( w !== o.canvas.width || h !== o.canvas.height ) isNewSize = true;
 
         if( R.tmpImage === null ) R.tmpImage = new Image();
 
-        var img = R.tmpImage; //new Image();
+        let img = R.tmpImage; //new Image();
 
-        var htmlString = R.xmlserializer.serializeToString( o.content );
+        let htmlString = R.xmlserializer.serializeToString( o.content );
         
-        var svg = '<svg xmlns="http://www.w3.org/2000/svg" width="'+w+'" height="'+h+'"><foreignObject style="pointer-events: none; left:0;" width="100%" height="100%">'+ htmlString +'</foreignObject></svg>';
+        let svg = '<svg xmlns="http://www.w3.org/2000/svg" width="'+w+'" height="'+h+'"><foreignObject style="pointer-events: none; left:0;" width="100%" height="100%">'+ htmlString +'</foreignObject></svg>';
 
         img.onload = function() {
 
-            var ctx = o.canvas.getContext("2d");
+            let ctx = o.canvas.getContext("2d");
 
             if( isNewSize ){ 
                 o.canvas.width = w;
@@ -472,9 +472,9 @@ var R = {
 
         if( R.hiddenImput === null ){
 
-            var hide = R.debugInput ? '' : 'opacity:0; zIndex:0;';
+            let hide = R.debugInput ? '' : 'opacity:0; zIndex:0;';
 
-            var css = R.parent.css.txt + 'padding:0; width:auto; height:auto; text-shadow:none;'
+            let css = R.parent.css.txt + 'padding:0; width:auto; height:auto; text-shadow:none;'
             css += 'left:10px; top:auto; border:none; color:#FFF; background:#000;' + hide;
 
             R.hiddenImput = document.createElement('input');
@@ -506,7 +506,7 @@ var R = {
 
     clickPos: function( x ){
 
-        var i = R.str.length, l = 0, n = 0;
+        let i = R.str.length, l = 0, n = 0;
         while( i-- ){
             l += R.textWidth( R.str[n] );
             if( l >= x ) break;
@@ -520,11 +520,11 @@ var R = {
 
         if( R.parent === null ) return false;
 
-        var up = false;
+        let up = false;
      
         if( down ){
 
-            var id = R.clickPos( x );
+            let id = R.clickPos( x );
 
             R.moveX = id;
 
@@ -536,7 +536,7 @@ var R = {
 
             } else {
             
-                var isSelection = R.moveX !== R.startX;
+                let isSelection = R.moveX !== R.startX;
 
                 if( isSelection ){
                     if( R.startX > R.moveX ) R.inputRange = [ R.moveX, R.startX ];
@@ -633,7 +633,7 @@ var R = {
 
         if( R.parent === null ) return;
 
-        var keyCode = e.which, isShift = e.shiftKey;
+        let keyCode = e.which, isShift = e.shiftKey;
 
         //console.log( keyCode )
 
@@ -717,14 +717,14 @@ var R = {
 
     update: function () {
 
-        var i = R.listens.length;
+        let i = R.listens.length;
         while( i-- ) R.listens[i].listening();
 
     },
 
     removeListen: function ( proto ) {
 
-        var id = R.listens.indexOf( proto );
+        let id = R.listens.indexOf( proto );
         if( id !== -1 ) R.listens.splice(id, 1);
         if( R.listens.length === 0 ) R.isLoop = false;
 
@@ -732,7 +732,7 @@ var R = {
 
     addListen: function ( proto ) {
 
-        var id = R.listens.indexOf( proto );
+        let id = R.listens.indexOf( proto );
 
         if( id !== -1 ) return; 
 
@@ -747,5 +747,4 @@ var R = {
 
 }
 
-var Roots = R;
-export { Roots };
+export const Roots = R;

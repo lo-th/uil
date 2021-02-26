@@ -1,68 +1,58 @@
 import { Proto } from '../core/Proto';
 import { V2 } from '../core/V2';
 
-function Circular ( o ) {
+export class Circular extends Proto {
 
-    Proto.call( this, o );
+    constructor( o = {} ) {
 
-    //this.type = 'circular';
-    this.autoWidth = false;
+        super( o );
 
-    this.buttonColor = this.colors.button;
+        this.autoWidth = false;
 
-    this.setTypeNumber( o );
+        this.buttonColor = this.colors.button;
 
-    this.radius = this.w * 0.5;//Math.floor((this.w-20)*0.5);
+        this.setTypeNumber( o );
 
+        this.radius = this.w * 0.5;//Math.floor((this.w-20)*0.5);
 
-    //this.ww = this.radius * 2;
+        this.twoPi = Math.PI * 2;
+        this.pi90 = Math.PI * 0.5;
 
-   // this.h = this.height + 40;
+        this.offset = new V2();
 
+        this.h = o.h || this.w + 10;
+        this.top = 0;
 
+        this.c[0].style.width = this.w +'px';
 
-    this.twoPi = Math.PI * 2;
-    this.pi90 = Math.PI * 0.5;
+        if(this.c[1] !== undefined) {
 
-    this.offset = new V2();
+            this.c[1].style.width = this.w +'px';
+            this.c[1].style.textAlign = 'center';
+            this.top = 10;
+            this.h += 10;
 
-    this.h = o.h || this.w + 10;
-    this.top = 0;
+        }
 
-    this.c[0].style.width = this.w +'px';
+        this.percent = 0;
 
-    if(this.c[1] !== undefined) {
+        this.cmode = 0;
 
-        this.c[1].style.width = this.w +'px';
-        this.c[1].style.textAlign = 'center';
-        this.top = 10;
-        this.h += 10;
+        this.c[2] = this.dom( 'div', this.css.txt + 'text-align:center; top:'+(this.h-20)+'px; width:'+this.w+'px; color:'+ this.fontColor );
+        this.c[3] = this.getCircular();
+
+        this.setSvg( this.c[3], 'd', this.makePath(), 1 );
+        this.setSvg( this.c[3], 'stroke', this.fontColor, 1 );
+
+        this.setSvg( this.c[3], 'viewBox', '0 0 '+this.w+' '+this.w );
+        this.setCss( this.c[3], { width:this.w, height:this.w, left:0, top:this.top });
+
+        this.init();
+        this.update();
 
     }
 
-    this.percent = 0;
-
-    this.cmode = 0;
-
-    this.c[2] = this.dom( 'div', this.css.txt + 'text-align:center; top:'+(this.h-20)+'px; width:'+this.w+'px; color:'+ this.fontColor );
-    this.c[3] = this.getCircular();
-
-    this.setSvg( this.c[3], 'd', this.makePath(), 1 );
-    this.setSvg( this.c[3], 'stroke', this.fontColor, 1 );
-
-    this.setSvg( this.c[3], 'viewBox', '0 0 '+this.w+' '+this.w );
-    this.setCss( this.c[3], { width:this.w, height:this.w, left:0, top:this.top });
-
-    this.init();
-    this.update();
-
-}
-
-Circular.prototype = Object.assign( Object.create( Proto.prototype ), {
-
-    constructor: Circular,
-
-    mode: function ( mode ) {
+    mode ( mode ) {
 
         if( this.cmode === mode ) return false;
 
@@ -82,29 +72,29 @@ Circular.prototype = Object.assign( Object.create( Proto.prototype ), {
         this.cmode = mode;
         return true;
 
-    },
+    }
 
 
-    reset: function () {
+    reset () {
 
         this.isDown = false;
         
 
-    },
+    }
 
     // ----------------------
     //   EVENTS
     // ----------------------
 
-    mouseup: function ( e ) {
+    mouseup ( e ) {
 
         this.isDown = false;
         this.sendEnd();
         return this.mode(0);
 
-    },
+    }
 
-    mousedown: function ( e ) {
+    mousedown ( e ) {
 
         this.isDown = true;
         this.old = this.value;
@@ -112,9 +102,9 @@ Circular.prototype = Object.assign( Object.create( Proto.prototype ), {
         this.mousemove( e );
         return this.mode(1);
 
-    },
+    }
 
-    mousemove: function ( e ) {
+    mousemove ( e ) {
 
         //this.mode(1);
 
@@ -151,9 +141,11 @@ Circular.prototype = Object.assign( Object.create( Proto.prototype ), {
             this.oldr = this.r;
         }
 
-    },
+    }
 
-    makePath: function () {
+    // ----------------------
+
+    makePath () {
 
         var r = 40;
         var d = 24;
@@ -163,9 +155,9 @@ Circular.prototype = Object.assign( Object.create( Proto.prototype ), {
         var big = a > Math.PI ? 1 : 0;
         return "M " + (r+d) + "," + d + " A " + r + "," + r + " 0 " + big + " 1 " + x2 + "," + y2;
 
-    },
+    }
 
-    update: function ( up ) {
+    update ( up ) {
 
         this.c[2].textContent = this.value;
         this.percent = ( this.value - this.min ) / this.range;
@@ -173,8 +165,6 @@ Circular.prototype = Object.assign( Object.create( Proto.prototype ), {
         this.setSvg( this.c[3], 'd', this.makePath(), 1 );
         if( up ) this.send();
         
-    },
+    }
 
-} );
-
-export { Circular };
+}

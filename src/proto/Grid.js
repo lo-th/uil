@@ -1,99 +1,97 @@
 import { Proto } from '../core/Proto';
 
-function Grid ( o ) {
+export class Grid extends Proto {
 
-    Proto.call( this, o );
+    constructor( o = {} ) {
 
-    this.value = false;
+        super( o );
 
-    this.values = o.values || [];
+        this.value = false;
 
-    if( typeof this.values === 'string' ) this.values = [ this.values ];
+        this.values = o.values || [];
 
-    //this.selected = null;
-    this.isDown = false;
+        if( typeof this.values === 'string' ) this.values = [ this.values ];
 
-    this.buttonColor = o.bColor || this.colors.button;
-    this.buttonOver = o.bOver || this.colors.over;
-    this.buttonDown = o.bDown || this.colors.select;
+        //this.selected = null;
+        this.isDown = false;
 
-    this.spaces = o.spaces || [10,3];
-    this.bsize = o.bsize || [90,20];
+        this.buttonColor = o.bColor || this.colors.button;
+        this.buttonOver = o.bOver || this.colors.over;
+        this.buttonDown = o.bDown || this.colors.select;
 
-
-
-    this.lng = this.values.length;
-    this.tmp = [];
-    this.stat = [];
-    this.grid = [2, Math.round( this.lng * 0.5 ) ];
-    this.h = Math.round( this.lng * 0.5 ) * ( this.bsize[1] + this.spaces[1] ) + this.spaces[1]; 
-    this.c[1].textContent = '';
-
-    this.c[2] = this.dom( 'table', this.css.basic + 'width:100%; top:'+(this.spaces[1]-2)+'px; height:auto; border-collapse:separate; border:none; border-spacing: '+(this.spaces[0]-2)+'px '+(this.spaces[1]-2)+'px;' );
-
-    var n = 0, b, mid, td, tr;
-
-    this.buttons = [];
-    this.stat = [];
-    this.tmpX = [];
-    this.tmpY = [];
+        this.spaces = o.spaces || [10,3];
+        this.bsize = o.bsize || [90,20];
 
 
-    for( var i = 0; i < this.grid[1]; i++ ){
-        tr = this.c[2].insertRow();
-        tr.style.cssText = 'pointer-events:none;';
-        for( var j = 0; j < this.grid[0]; j++ ){
 
-            td = tr.insertCell();
-            td.style.cssText = 'pointer-events:none;';
+        this.lng = this.values.length;
+        this.tmp = [];
+        this.stat = [];
+        this.grid = [2, Math.round( this.lng * 0.5 ) ];
+        this.h = Math.round( this.lng * 0.5 ) * ( this.bsize[1] + this.spaces[1] ) + this.spaces[1]; 
+        this.c[1].textContent = '';
 
-            if( this.values[n] ){
+        this.c[2] = this.dom( 'table', this.css.basic + 'width:100%; top:'+(this.spaces[1]-2)+'px; height:auto; border-collapse:separate; border:none; border-spacing: '+(this.spaces[0]-2)+'px '+(this.spaces[1]-2)+'px;' );
 
-                b = document.createElement( 'div' );
-                b.style.cssText = this.css.txt + this.css.button + 'position:static; width:'+this.bsize[0]+'px; height:'+this.bsize[1]+'px; border:'+this.colors.buttonBorder+'; left:auto; right:auto; background:'+this.buttonColor+';  border-radius:'+this.radius+'px;';
-                b.innerHTML = this.values[n];
-                td.appendChild( b );
+        let n = 0, b, mid, td, tr;
 
-                this.buttons.push(b);
-                this.stat.push(1);
+        this.buttons = [];
+        this.stat = [];
+        this.tmpX = [];
+        this.tmpY = [];
 
-            } else {
 
-                b = document.createElement( 'div' );
-                b.style.cssText = this.css.txt + 'position:static; width:'+this.bsize[0]+'px; height:'+this.bsize[1]+'px; text-align:center;  left:auto; right:auto; background:none;';
-                td.appendChild( b );
+        for( let i = 0; i < this.grid[1]; i++ ){
+            tr = this.c[2].insertRow();
+            tr.style.cssText = 'pointer-events:none;';
+            for( let j = 0; j < this.grid[0]; j++ ){
+
+                td = tr.insertCell();
+                td.style.cssText = 'pointer-events:none;';
+
+                if( this.values[n] ){
+
+                    b = document.createElement( 'div' );
+                    b.style.cssText = this.css.txt + this.css.button + 'position:static; width:'+this.bsize[0]+'px; height:'+this.bsize[1]+'px; border:'+this.colors.buttonBorder+'; left:auto; right:auto; background:'+this.buttonColor+';  border-radius:'+this.radius+'px;';
+                    b.innerHTML = this.values[n];
+                    td.appendChild( b );
+
+                    this.buttons.push(b);
+                    this.stat.push(1);
+
+                } else {
+
+                    b = document.createElement( 'div' );
+                    b.style.cssText = this.css.txt + 'position:static; width:'+this.bsize[0]+'px; height:'+this.bsize[1]+'px; text-align:center;  left:auto; right:auto; background:none;';
+                    td.appendChild( b );
+
+                }
+
+                if(j===0) b.style.cssText += 'float:right;';
+                else b.style.cssText += 'float:left;';
+            
+                n++;
 
             }
-
-            if(j===0) b.style.cssText += 'float:right;';
-            else b.style.cssText += 'float:left;';
-        
-            n++;
-
         }
+
+        this.init();
+
     }
 
-    this.init();
+    testZone ( e ) {
 
-}
-
-Grid.prototype = Object.assign( Object.create( Proto.prototype ), {
-
-    constructor: Grid,
-
-    testZone: function ( e ) {
-
-        var l = this.local;
+        let l = this.local;
         if( l.x === -1 && l.y === -1 ) return -1;
 
         
-        var tx = this.tmpX;
-        var ty = this.tmpY;
+        let tx = this.tmpX;
+        let ty = this.tmpY;
 
-        var id = -1;
-        var c = -1;
-        var line = -1;
-        var i = this.grid[0];
+        let id = -1;
+        let c = -1;
+        let line = -1;
+        let i = this.grid[0];
         while( i-- ){
         	if( l.x > tx[i][0] && l.x < tx[i][1] ) c = i;
         }
@@ -110,13 +108,13 @@ Grid.prototype = Object.assign( Object.create( Proto.prototype ), {
 
         return id;
 
-    },
+    }
 
     // ----------------------
     //   EVENTS
     // ----------------------
 
-    mouseup: function ( e ) {
+    mouseup ( e ) {
     
         if( this.isDown ){
             this.value = false;
@@ -127,11 +125,11 @@ Grid.prototype = Object.assign( Object.create( Proto.prototype ), {
 
         return false;
 
-    },
+    }
 
-    mousedown: function ( e ) {
+    mousedown ( e ) {
 
-    	var id = this.testZone( e );
+    	let id = this.testZone( e );
 
         if( id < 0 ) return false;
 
@@ -139,18 +137,16 @@ Grid.prototype = Object.assign( Object.create( Proto.prototype ), {
         this.value = this.values[id];
         this.send();
     	return this.mousemove( e );
- 
-        // true;
 
-    },
+    }
 
-    mousemove: function ( e ) {
+    mousemove ( e ) {
 
-        var up = false;
+        let up = false;
 
-        var id = this.testZone( e );
+        let id = this.testZone( e );
 
-       if( id !== -1 ){
+        if( id !== -1 ){
             this.cursor('pointer');
             up = this.modes( this.isDown ? 3 : 2, id );
         } else {
@@ -159,15 +155,15 @@ Grid.prototype = Object.assign( Object.create( Proto.prototype ), {
 
         return up;
 
-    },
+    }
 
     // ----------------------
 
-    modes: function ( n, id ) {
+    modes ( n, id ) {
 
-        var v, r = false;
+        let v, r = false;
 
-        for( var i = 0; i < this.lng; i++ ){
+        for( let i = 0; i < this.lng; i++ ){
 
             if( i === id ) v = this.mode( n, i );
             else v = this.mode( 1, i );
@@ -178,13 +174,13 @@ Grid.prototype = Object.assign( Object.create( Proto.prototype ), {
 
         return r;
 
-    },
+    }
 
-    mode: function ( n, id ) {
+    mode ( n, id ) {
 
-        var change = false;
+        let change = false;
 
-        var i = id;
+        let i = id;
 
         if( this.stat[i] !== n ){
         
@@ -203,40 +199,40 @@ Grid.prototype = Object.assign( Object.create( Proto.prototype ), {
 
         return change;
 
-    },
+    }
 
     // ----------------------
 
-    reset: function () {
+    reset () {
 
         this.cursor();
         return this.modes( 1 , 0 );
-    },
+    }
 
 
-    label: function ( string, n ) {
+    label ( string, n ) {
 
         this.buttons[n].textContent = string;
 
-    },
+    }
 
-    icon: function ( string, y, n ) {
+    icon ( string, y, n ) {
 
         this.buttons[n].style.padding = ( y || 0 ) +'px 0px';
         this.buttons[n].innerHTML = string;
 
-    },
+    }
 
-    rSize: function () {
+    rSize () {
 
-        Proto.prototype.rSize.call( this );
+        super.rSize();
 
-        var n = 0, b, mid;
+        let n = 0, b, mid;
 
         this.tmpX = [];
         this.tmpY = [];
 
-        for( var j = 0; j < this.grid[0]; j++ ){
+        for( let j = 0; j < this.grid[0]; j++ ){
 
             if(j===0){
                 mid = ( this.w*0.5 ) - ( this.spaces[0]*0.5 );
@@ -250,7 +246,7 @@ Grid.prototype = Object.assign( Object.create( Proto.prototype ), {
 
         mid = this.spaces[1];
 
-        for( var i = 0; i < this.grid[1]; i++ ){
+        for( let i = 0; i < this.grid[1]; i++ ){
 
             this.tmpY.push( [ mid, mid + this.bsize[1] ] );
 
@@ -260,6 +256,4 @@ Grid.prototype = Object.assign( Object.create( Proto.prototype ), {
 
     }
 
-} );
-
-export { Grid };
+}

@@ -1,63 +1,61 @@
 import { Proto } from '../core/Proto';
 import { V2 } from '../core/V2';
 
-function Joystick ( o ) {
+export class Joystick extends Proto {
 
-    Proto.call( this, o );
+    constructor( o = {} ) {
 
-    this.autoWidth = false;
+        super( o );
 
-    this.value = [0,0];
+        this.autoWidth = false;
 
-    this.joyType = 'analogique';
-    this.model = o.mode !== undefined ? o.mode : 0;
+        this.value = [0,0];
 
-    this.precision = o.precision || 2;
-    this.multiplicator = o.multiplicator || 1;
+        this.joyType = 'analogique';
+        this.model = o.mode !== undefined ? o.mode : 0;
 
-    this.pos = new V2();
-    this.tmp = new V2();
+        this.precision = o.precision || 2;
+        this.multiplicator = o.multiplicator || 1;
 
-    this.interval = null;
+        this.pos = new V2();
+        this.tmp = new V2();
 
-    this.radius = this.w * 0.5;
-    this.distance = this.radius*0.25;
+        this.interval = null;
 
-    this.h = o.h || this.w + 10;
-    this.top = 0;
+        this.radius = this.w * 0.5;
+        this.distance = this.radius*0.25;
 
-    this.c[0].style.width = this.w +'px';
+        this.h = o.h || this.w + 10;
+        this.top = 0;
 
-    if( this.c[1] !== undefined ) { // with title
+        this.c[0].style.width = this.w +'px';
 
-        this.c[1].style.width = this.w +'px';
-        this.c[1].style.textAlign = 'center';
-        this.top = 10;
-        this.h += 10;
+        if( this.c[1] !== undefined ) { // with title
 
+            this.c[1].style.width = this.w +'px';
+            this.c[1].style.textAlign = 'center';
+            this.top = 10;
+            this.h += 10;
+
+        }
+
+        this.c[2] = this.dom( 'div', this.css.txt + 'text-align:center; top:'+(this.h-20)+'px; width:'+this.w+'px; color:'+ this.fontColor );
+        this.c[2].textContent = this.value;
+
+        this.c[3] = this.getJoystick( this.model );
+        this.setSvg( this.c[3], 'viewBox', '0 0 '+this.w+' '+this.w );
+        this.setCss( this.c[3], { width:this.w, height:this.w, left:0, top:this.top });
+
+
+        this.ratio = 128/this.w;
+
+        this.init();
+
+        this.update(false);
+        
     }
 
-    this.c[2] = this.dom( 'div', this.css.txt + 'text-align:center; top:'+(this.h-20)+'px; width:'+this.w+'px; color:'+ this.fontColor );
-    this.c[2].textContent = this.value;
-
-    this.c[3] = this.getJoystick( this.model );
-    this.setSvg( this.c[3], 'viewBox', '0 0 '+this.w+' '+this.w );
-    this.setCss( this.c[3], { width:this.w, height:this.w, left:0, top:this.top });
-
-
-    this.ratio = 128/this.w;
-
-    this.init();
-
-    this.update(false);
-    
-}
-
-Joystick.prototype = Object.assign( Object.create( Proto.prototype ), {
-
-    constructor: Joystick,
-
-    mode: function ( mode ) {
+    mode ( mode ) {
 
         switch(mode){
             case 0: // base
@@ -87,50 +85,50 @@ Joystick.prototype = Object.assign( Object.create( Proto.prototype ), {
             break;
 
         }
-    },
+    }
 
     // ----------------------
     //   EVENTS
     // ----------------------
 
-    addInterval: function (){
+    addInterval (){
         if( this.interval !== null ) this.stopInterval();
         if( this.pos.isZero() ) return;
         this.interval = setInterval( function(){ this.update(); }.bind(this), 10 );
 
-    },
+    }
 
-    stopInterval: function (){
+    stopInterval (){
 
         if( this.interval === null ) return;
         clearInterval( this.interval );
         this.interval = null;
 
-    },
+    }
 
-    reset: function () {
+    reset () {
 
         this.addInterval();
         this.mode(0);
 
-    },
+    }
 
-    mouseup: function ( e ) {
+    mouseup ( e ) {
 
         this.addInterval();
         this.isDown = false;
     
-    },
+    }
 
-    mousedown: function ( e ) {
+    mousedown ( e ) {
 
         this.isDown = true;
         this.mousemove( e );
         this.mode( 2 );
 
-    },
+    }
 
-    mousemove: function ( e ) {
+    mousemove ( e ) {
 
         this.mode(1);
 
@@ -139,10 +137,10 @@ Joystick.prototype = Object.assign( Object.create( Proto.prototype ), {
         this.tmp.x = this.radius - ( e.clientX - this.zone.x );
         this.tmp.y = this.radius - ( e.clientY - this.zone.y - this.top );
 
-        var distance = this.tmp.length();
+        let distance = this.tmp.length();
 
         if ( distance > this.distance ) {
-            var angle = Math.atan2(this.tmp.x, this.tmp.y);
+            let angle = Math.atan2(this.tmp.x, this.tmp.y);
             this.tmp.x = Math.sin( angle ) * this.distance;
             this.tmp.y = Math.cos( angle ) * this.distance;
         }
@@ -151,18 +149,18 @@ Joystick.prototype = Object.assign( Object.create( Proto.prototype ), {
 
         this.update();
 
-    },
+    }
 
-    setValue: function ( v ) {
+    setValue ( v ) {
 
         if(v===undefined) v=[0,0];
 
         this.pos.set( v[0] || 0, v[1]  || 0 );
         this.updateSVG();
 
-    },
+    }
 
-    update: function ( up ) {
+    update ( up ) {
 
         if( up === undefined ) up = true;
 
@@ -188,17 +186,17 @@ Joystick.prototype = Object.assign( Object.create( Proto.prototype ), {
 
         if( this.pos.isZero() ) this.stopInterval();
 
-    },
+    }
 
-    updateSVG: function () {
+    updateSVG () {
 
-        var x = this.radius - ( -this.pos.x * this.distance );
-        var y = this.radius - ( -this.pos.y * this.distance );
+        let x = this.radius - ( -this.pos.x * this.distance );
+        let y = this.radius - ( -this.pos.y * this.distance );
 
          if(this.model === 0){
 
-            var sx = x + ((this.pos.x)*5) + 5;
-            var sy = y + ((this.pos.y)*5) + 10;
+            let sx = x + ((this.pos.x)*5) + 5;
+            let sy = y + ((this.pos.y)*5) + 10;
 
             this.setSvg( this.c[3], 'cx', sx*this.ratio, 3 );
             this.setSvg( this.c[3], 'cy', sy*this.ratio, 3 );
@@ -217,15 +215,13 @@ Joystick.prototype = Object.assign( Object.create( Proto.prototype ), {
 
         this.c[2].textContent = this.value;
 
-    },
+    }
 
-    clear: function () {
+    clear () {
         
-        this.stopInterval()
-        Proto.prototype.clear.call( this );
+        this.stopInterval();
+        super.clear();
 
-    },
+    }
 
-} );
-
-export { Joystick };
+}

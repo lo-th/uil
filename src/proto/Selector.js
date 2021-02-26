@@ -1,56 +1,54 @@
 import { Proto } from '../core/Proto';
 
-function Selector ( o ) {
+export class Selector extends Proto {
 
-    Proto.call( this, o );
+    constructor( o = {} ) {
 
-    this.values = o.values;
-    if(typeof this.values === 'string' ) this.values = [ this.values ];
+        super( o );
 
-    this.value = o.value || this.values[0];
+        this.values = o.values;
+        if(typeof this.values === 'string' ) this.values = [ this.values ];
+
+        this.value = o.value || this.values[0];
 
 
 
-    //this.selected = null;
-    this.isDown = false;
+        //this.selected = null;
+        this.isDown = false;
 
-    this.buttonColor = o.bColor || this.colors.button;
-    this.buttonOver = o.bOver || this.colors.over;
-    this.buttonDown = o.bDown || this.colors.select;
+        this.buttonColor = o.bColor || this.colors.button;
+        this.buttonOver = o.bOver || this.colors.over;
+        this.buttonDown = o.bDown || this.colors.select;
 
-    this.lng = this.values.length;
-    this.tmp = [];
-    this.stat = [];
+        this.lng = this.values.length;
+        this.tmp = [];
+        this.stat = [];
 
-    var sel;
+        let sel;
 
-    for(var i = 0; i < this.lng; i++){
+        for(let i = 0; i < this.lng; i++){
 
-        sel = false;
-        if( this.values[i] === this.value ) sel = true;
+            sel = false;
+            if( this.values[i] === this.value ) sel = true;
 
-        this.c[i+2] = this.dom( 'div', this.css.txt + this.css.button + ' top:1px; background:'+(sel? this.buttonDown : this.buttonColor)+'; height:'+(this.h-2)+'px; border:'+this.colors.buttonBorder+'; border-radius:'+this.radius+'px;' );
-        this.c[i+2].style.color = sel ? this.fontSelect : this.fontColor;
-        this.c[i+2].innerHTML = this.values[i];
-        
-        this.stat[i] = sel ? 3:1;
+            this.c[i+2] = this.dom( 'div', this.css.txt + this.css.button + ' top:1px; background:'+(sel? this.buttonDown : this.buttonColor)+'; height:'+(this.h-2)+'px; border:'+this.colors.buttonBorder+'; border-radius:'+this.radius+'px;' );
+            this.c[i+2].style.color = sel ? this.fontSelect : this.fontColor;
+            this.c[i+2].innerHTML = this.values[i];
+            
+            this.stat[i] = sel ? 3:1;
+        }
+
+        this.init();
+     
     }
 
-    this.init();
- 
-}
+    testZone ( e ) {
 
-Selector.prototype = Object.assign( Object.create( Proto.prototype ), {
-
-    constructor: Selector,
-
-    testZone: function ( e ) {
-
-        var l = this.local;
+        let l = this.local;
         if( l.x === -1 && l.y === -1 ) return '';
 
-        var i = this.lng;
-        var t = this.tmp;
+        let i = this.lng;
+        let t = this.tmp;
         
         while( i-- ){
         	if( l.x>t[i][0] && l.x<t[i][2] ) return i+2;
@@ -58,13 +56,13 @@ Selector.prototype = Object.assign( Object.create( Proto.prototype ), {
 
         return ''
 
-    },
+    }
 
     // ----------------------
     //   EVENTS
     // ----------------------
 
-    mouseup: function ( e ) {
+    mouseup ( e ) {
     
         if( this.isDown ){
             //this.value = false;
@@ -75,11 +73,11 @@ Selector.prototype = Object.assign( Object.create( Proto.prototype ), {
 
         return false;
 
-    },
+    }
 
-    mousedown: function ( e ) {
+    mousedown ( e ) {
 
-    	var name = this.testZone( e );
+    	let name = this.testZone( e );
 
         if( !name ) return false;
 
@@ -90,14 +88,14 @@ Selector.prototype = Object.assign( Object.create( Proto.prototype ), {
  
         // true;
 
-    },
+    }
 
-    mousemove: function ( e ) {
+    mousemove ( e ) {
 
-        var up = false;
+        let up = false;
 
-        var name = this.testZone( e );
-        //var sel = false;
+        let name = this.testZone( e );
+        //let sel = false;
 
         
 
@@ -112,15 +110,15 @@ Selector.prototype = Object.assign( Object.create( Proto.prototype ), {
 
         return up;
 
-    },
+    }
 
     // ----------------------
 
-    modes: function ( n, name ) {
+    modes ( n, name ) {
 
-        var v, r = false;
+        let v, r = false;
 
-        for( var i = 0; i < this.lng; i++ ){
+        for( let i = 0; i < this.lng; i++ ){
 
             if( i === name-2 && this.values[ i ] !== this.value ) v = this.mode( n, i+2 );
             else{ 
@@ -136,13 +134,13 @@ Selector.prototype = Object.assign( Object.create( Proto.prototype ), {
 
         return r;
 
-    },
+    }
 
-    mode: function ( n, name ) {
+    mode ( n, name ) {
 
-        var change = false;
+        let change = false;
 
-        var i = name - 2;
+        let i = name - 2;
 
 
         if( this.stat[i] !== n ){
@@ -164,17 +162,17 @@ Selector.prototype = Object.assign( Object.create( Proto.prototype ), {
 
         return change;
 
-    },
+    }
 
     // ----------------------
 
-    reset: function () {
+    reset () {
 
         this.cursor();
 
-        var v, r = false;
+        let v, r = false;
 
-        for( var i = 0; i < this.lng; i++ ){
+        for( let i = 0; i < this.lng; i++ ){
 
             if( this.values[ i ] === this.value ) v = this.mode( 3, i+2 );
             else v = this.mode( 1, i+2 );
@@ -192,34 +190,34 @@ Selector.prototype = Object.assign( Object.create( Proto.prototype ), {
     	}
         return false;*/
 
-    },
+    }
 
-    label: function ( string, n ) {
+    label ( string, n ) {
 
         n = n || 2;
         this.c[n].textContent = string;
 
-    },
+    }
 
-    icon: function ( string, y, n ) {
+    icon ( string, y, n ) {
 
         n = n || 2;
         this.s[n].padding = ( y || 0 ) +'px 0px';
         this.c[n].innerHTML = string;
 
-    },
+    }
 
-    rSize: function () {
+    rSize () {
 
-        Proto.prototype.rSize.call( this );
+        super.rSize();;
 
-        var s = this.s;
-        var w = this.sb;
-        var d = this.sa;
+        let s = this.s;
+        let w = this.sb;
+        let d = this.sa;
 
-        var i = this.lng;
-        var dc =  3;
-        var size = Math.floor( ( w-(dc*(i-1)) ) / i );
+        let i = this.lng;
+        let dc =  3;
+        let size = Math.floor( ( w-(dc*(i-1)) ) / i );
 
         while(i--){
 
@@ -232,6 +230,4 @@ Selector.prototype = Object.assign( Object.create( Proto.prototype ), {
 
     }
 
-} );
-
-export { Selector };
+}

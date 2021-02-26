@@ -2,68 +2,66 @@ import { Proto } from '../core/Proto';
 import { Circular } from './Circular';
 import { V2 } from '../core/V2';
 
-function Knob ( o ) {
+export class Knob extends Circular {
 
-    Proto.call( this, o );
+    constructor( o = {} ) {
 
-    this.autoWidth = false;
+        super( o );
 
-    this.buttonColor = this.colors.button;
+        this.autoWidth = false;
 
-    this.setTypeNumber( o );
+        this.buttonColor = this.colors.button;
 
-    this.mPI = Math.PI * 0.8;
-    this.toDeg = 180 / Math.PI;
-    this.cirRange = this.mPI * 2;
+        this.setTypeNumber( o );
 
-    this.offset = new V2();
+        this.mPI = Math.PI * 0.8;
+        this.toDeg = 180 / Math.PI;
+        this.cirRange = this.mPI * 2;
 
-    this.radius = this.w * 0.5;//Math.floor((this.w-20)*0.5);
+        this.offset = new V2();
 
-    //this.ww = this.height = this.radius * 2;
-    this.h = o.h || this.w + 10;
-    this.top = 0;
+        this.radius = this.w * 0.5;//Math.floor((this.w-20)*0.5);
 
-    this.c[0].style.width = this.w +'px';
+        //this.ww = this.height = this.radius * 2;
+        this.h = o.h || this.w + 10;
+        this.top = 0;
 
-    if(this.c[1] !== undefined) {
+        this.c[0].style.width = this.w +'px';
 
-        this.c[1].style.width = this.w +'px';
-        this.c[1].style.textAlign = 'center';
-        this.top = 10;
-        this.h += 10;
+        if(this.c[1] !== undefined) {
+
+            this.c[1].style.width = this.w +'px';
+            this.c[1].style.textAlign = 'center';
+            this.top = 10;
+            this.h += 10;
+
+        }
+
+        this.percent = 0;
+
+        this.cmode = 0;
+
+        this.c[2] = this.dom( 'div', this.css.txt + 'text-align:center; top:'+(this.h-20)+'px; width:'+this.w+'px; color:'+ this.fontColor );
+
+        this.c[3] = this.getKnob();
+        
+        this.setSvg( this.c[3], 'stroke', this.fontColor, 1 );
+        this.setSvg( this.c[3], 'stroke', this.fontColor, 3 );
+        this.setSvg( this.c[3], 'd', this.makeGrad(), 3 );
+        
+
+        this.setSvg( this.c[3], 'viewBox', '0 0 '+this.ww+' '+this.ww );
+        this.setCss( this.c[3], { width:this.w, height:this.w, left:0, top:this.top });
+
+        this.r = 0;
+
+        this.init();
+
+        this.update();
 
     }
 
-    this.percent = 0;
-
-    this.cmode = 0;
-
-    this.c[2] = this.dom( 'div', this.css.txt + 'text-align:center; top:'+(this.h-20)+'px; width:'+this.w+'px; color:'+ this.fontColor );
-
-    this.c[3] = this.getKnob();
-    
-    this.setSvg( this.c[3], 'stroke', this.fontColor, 1 );
-    this.setSvg( this.c[3], 'stroke', this.fontColor, 3 );
-    this.setSvg( this.c[3], 'd', this.makeGrad(), 3 );
-    
-
-    this.setSvg( this.c[3], 'viewBox', '0 0 '+this.ww+' '+this.ww );
-    this.setCss( this.c[3], { width:this.w, height:this.w, left:0, top:this.top });
-
-    this.r = 0;
-
-    this.init();
-
-    this.update();
-
-}
-
-Knob.prototype = Object.assign( Object.create( Circular.prototype ), {
-
-    constructor: Knob,
-
-    mode: function ( mode ) {
+    mode ( mode ) {
 
         if( this.cmode === mode ) return false;
 
@@ -85,17 +83,16 @@ Knob.prototype = Object.assign( Object.create( Circular.prototype ), {
         this.cmode = mode;
         return true;
 
-    },
+    }
 
-    
 
-    mousemove: function ( e ) {
+    mousemove ( e ) {
 
         //this.mode(1);
 
         if( !this.isDown ) return;
 
-        var off = this.offset;
+        let off = this.offset;
 
         off.x = this.radius - ( e.clientX - this.zone.x );
         off.y = this.radius - ( e.clientY - this.zone.y - this.top );
@@ -107,10 +104,10 @@ Knob.prototype = Object.assign( Object.create( Circular.prototype ), {
         this.r = this.r > this.mPI ? this.mPI : this.r;
         this.r = this.r < -this.mPI ? -this.mPI : this.r;
 
-        var steps = 1 / this.cirRange;
-        var value = (this.r + this.mPI) * steps;
+        let steps = 1 / this.cirRange;
+        let value = (this.r + this.mPI) * steps;
 
-        var n = ( ( this.range * value ) + this.min ) - this.old;
+        let n = ( ( this.range * value ) + this.min ) - this.old;
 
         if(n >= this.step || n <= this.step){ 
             n = Math.floor( n / this.step );
@@ -120,14 +117,14 @@ Knob.prototype = Object.assign( Object.create( Circular.prototype ), {
             this.oldr = this.r;
         }
 
-    },
+    }
 
-    makeGrad: function () {
+    makeGrad () {
 
-        var d = '', step, range, a, x, y, x2, y2, r = 64;
-        var startangle = Math.PI + this.mPI;
-        var endangle = Math.PI - this.mPI;
-        //var step = this.step>5 ? this.step : 1;
+        let d = '', step, range, a, x, y, x2, y2, r = 64;
+        let startangle = Math.PI + this.mPI;
+        let endangle = Math.PI - this.mPI;
+        //let step = this.step>5 ? this.step : 1;
 
         if(this.step>5){
             range =  this.range / this.step;
@@ -137,7 +134,7 @@ Knob.prototype = Object.assign( Object.create( Circular.prototype ), {
             range = r*0.5;
         }
 
-        for ( var i = 0; i <= range; ++i ) {
+        for ( let i = 0; i <= range; ++i ) {
 
             a = startangle - ( step * i );
             x = r + Math.sin( a ) * ( r - 20 );
@@ -150,24 +147,24 @@ Knob.prototype = Object.assign( Object.create( Circular.prototype ), {
 
         return d;
 
-    },
+    }
 
-    update: function ( up ) {
+    update ( up ) {
 
         this.c[2].textContent = this.value;
         this.percent = (this.value - this.min) / this.range;
 
-       // var r = 50;
-       // var d = 64; 
-        var r = ( (this.percent * this.cirRange) - (this.mPI))//* this.toDeg;
+       // let r = 50;
+       // let d = 64; 
+        let r = ( (this.percent * this.cirRange) - (this.mPI))//* this.toDeg;
 
-        var sin = Math.sin(r);
-        var cos = Math.cos(r);
+        let sin = Math.sin(r);
+        let cos = Math.cos(r);
 
-        var x1 = (25 * sin) + 64;
-        var y1 = -(25 * cos) + 64;
-        var x2 = (20 * sin) + 64;
-        var y2 = -(20 * cos) + 64;
+        let x1 = (25 * sin) + 64;
+        let y1 = -(25 * cos) + 64;
+        let x2 = (20 * sin) + 64;
+        let y2 = -(20 * cos) + 64;
 
         //this.setSvg( this.c[3], 'cx', x, 1 );
         //this.setSvg( this.c[3], 'cy', y, 1 );
@@ -178,8 +175,6 @@ Knob.prototype = Object.assign( Object.create( Circular.prototype ), {
 
         if( up ) this.send();
         
-    },
+    }
 
-} );
-
-export { Knob };
+}
