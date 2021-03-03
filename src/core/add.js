@@ -19,9 +19,8 @@ import { Empty } from '../proto/Empty.js';
 import { Item } from '../proto/Item.js';
 import { Grid } from '../proto/Grid.js';
 
-export class add {
 
-    constructor () {
+export const add = function () {
 
         let a = arguments; 
 
@@ -80,5 +79,4 @@ export class add {
 
         }
 
-    }
 }

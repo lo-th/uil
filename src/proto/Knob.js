@@ -2,7 +2,7 @@ import { Proto } from '../core/Proto';
 import { Circular } from './Circular';
 import { V2 } from '../core/V2';
 
-export class Knob extends Circular {
+export class Knob extends Proto {
 
     constructor( o = {} ) {
 
@@ -85,6 +85,27 @@ export class Knob extends Circular {
 
     }
 
+    // ----------------------
+    //   EVENTS
+    // ----------------------
+
+    mouseup ( e ) {
+
+        this.isDown = false;
+        this.sendEnd();
+        return this.mode(0);
+
+    }
+
+    mousedown ( e ) {
+
+        this.isDown = true;
+        this.old = this.value;
+        this.oldr = null;
+        this.mousemove( e );
+        return this.mode(1);
+
+    }
 
     mousemove ( e ) {
 
