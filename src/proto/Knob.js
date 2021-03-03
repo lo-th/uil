@@ -1,5 +1,4 @@
 import { Proto } from '../core/Proto';
-import { Circular } from './Circular';
 import { V2 } from '../core/V2';
 
 export class Knob extends Proto {
