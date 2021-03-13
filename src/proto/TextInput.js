@@ -100,6 +100,12 @@ export class TextInput extends Proto {
 
     }
 
+    update ( ) {
+
+        this.c[3].textContent = this.value;
+        
+    }
+
     // ----------------------
 
     render ( c, e, s ) {
