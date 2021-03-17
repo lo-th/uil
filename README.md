@@ -33,6 +33,8 @@ ui.clear();
 ```
 **5 - other examples**
 
+[**uil module**](http://lo-th.github.io/uil/index_module.html)
+
 [**uil listen**](http://lo-th.github.io/uil/examples/uil_listen.html)
 
 [**uil item**](http://lo-th.github.io/uil/examples/uil_item.html)
