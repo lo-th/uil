@@ -1482,11 +1482,13 @@
 				dom.addEventListener('wheel', R, false);
 				document.addEventListener('mousemove', R, false);
 				document.addEventListener('mouseup', R, false);
+				document.addEventListener('click', R, false);
 			}
 
 			window.addEventListener('keydown', R, false);
 			window.addEventListener('keyup', R, false);
-			window.addEventListener('resize', R.resize, false); //window.addEventListener( 'mousedown', R, false );
+			window.addEventListener('resize', R.resize, false); //window.onblur = R.out;
+			//window.onfocus = R.in;
 
 			R.isEventsInit = true;
 		},
@@ -1504,6 +1506,7 @@
 				dom.removeEventListener('wheel', R, false);
 				document.removeEventListener('mousemove', R, false);
 				document.removeEventListener('mouseup', R, false);
+				document.removeEventListener('click', R, false);
 			}
 
 			window.removeEventListener('keydown', R);
@@ -1520,6 +1523,13 @@
 				u = R.ui[i];
 				if (u.isGui && !u.isCanvasOnly && u.autoResize) u.setHeight();
 			}
+		},
+		out: function out() {
+			console.log('im am out');
+			R.clearOldID();
+		},
+		in: function _in() {
+			console.log('im am in'); //	R.clearOldID();
 		},
 		// ----------------------
 		//	 HANDLE EVENTS
@@ -2480,6 +2490,10 @@
 			return false;
 		};
 
+		_proto.click = function click(e) {
+			return false;
+		};
+
 		_proto.keyup = function keyup(e) {
 			return false;
 		} // ----------------------
@@ -2627,7 +2641,8 @@
 			_this.values = o.value || _this.txt;
 			if (typeof _this.values === 'string') _this.values = [_this.values]; //this.selected = null;
 
-			_this.isDown = false; // custom color
+			_this.isDown = false;
+			_this.isLink = o.link || false; // custom color
 
 			_this.cc = [_this.colors.button, _this.colors.select, _this.colors.down];
 			if (o.cBg !== undefined) _this.cc[0] = o.cBg;
@@ -2680,6 +2695,16 @@
 		// ----------------------
 		;
 
+		_proto.click = function click(e) {
+			if (this.isLink) {
+				var name = this.testZone(e);
+				if (!name) return false;
+				this.value = this.values[name - 2];
+				this.send();
+				return this.reset();
+			}
+		};
+
 		_proto.mouseup = function mouseup(e) {
 			if (this.isDown) {
 				this.value = false;
@@ -2692,6 +2717,7 @@
 		};
 
 		_proto.mousedown = function mousedown(e) {
+			if (this.isLink) return false;
 			var name = this.testZone(e);
 			if (!name) return false;
 			this.isDown = true;
@@ -5651,6 +5677,10 @@
 			if (name === 'text') this.cursor('text');else this.cursor();
 			if (this.isDown) x = e.clientX - this.zone.x;
 			return this.upInput(x - this.sa - 3, this.isDown);
+		};
+
+		_proto.update = function update() {
+			this.c[3].textContent = this.value;
 		} // ----------------------
 		;
 

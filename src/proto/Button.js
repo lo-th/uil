@@ -16,6 +16,8 @@ export class Button extends Proto {
         //this.selected = null;
         this.isDown = false;
 
+        this.isLink = o.link || false;
+
         // custom color
         this.cc = [ this.colors.button, this.colors.select, this.colors.down ];
 
@@ -74,6 +76,20 @@ export class Button extends Proto {
     //   EVENTS
     // ----------------------
 
+    click ( e ) {
+
+        if( this.isLink ){
+
+            let name = this.testZone( e );
+            if( !name ) return false;
+
+            this.value = this.values[name-2]
+            this.send();
+            return this.reset();
+        }
+
+    }
+
     mouseup ( e ) {
     
         if( this.isDown ){
@@ -88,6 +104,8 @@ export class Button extends Proto {
     }
 
     mousedown ( e ) {
+
+        if( this.isLink ) return false;
 
     	let name = this.testZone( e );
 

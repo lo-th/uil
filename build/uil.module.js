@@ -733,12 +733,15 @@ const R = {
             dom.addEventListener( 'wheel', R, false );
             document.addEventListener( 'mousemove', R, false );
             document.addEventListener( 'mouseup', R, false );
+            document.addEventListener( 'click', R, false );
         }
 
         window.addEventListener( 'keydown', R, false );
         window.addEventListener( 'keyup', R, false );
         window.addEventListener( 'resize', R.resize , false );
-        //window.addEventListener( 'mousedown', R, false );
+
+        //window.onblur = R.out;
+        //window.onfocus = R.in;
 
         R.isEventsInit = true;
 
@@ -760,6 +763,7 @@ const R = {
             dom.removeEventListener( 'wheel', R, false );
             document.removeEventListener( 'mousemove', R, false );
             document.removeEventListener( 'mouseup', R, false );
+            document.removeEventListener( 'click', R, false );
         }
 
         window.removeEventListener( 'keydown', R );
@@ -782,6 +786,20 @@ const R = {
             if( u.isGui && !u.isCanvasOnly && u.autoResize ) u.setHeight();
         
         }
+
+    },
+
+    out: function () {
+
+        console.log('im am out');
+        R.clearOldID();
+
+    },
+
+    in: function () {
+
+        console.log('im am in');
+      //  R.clearOldID();
 
     },
 
@@ -2003,6 +2021,8 @@ class Proto {
 
     keydown ( e ) { return false; }
 
+    click ( e ) { return false; }
+
     keyup ( e ) { return false; }
 
 
@@ -2182,6 +2202,8 @@ class Button extends Proto {
         //this.selected = null;
         this.isDown = false;
 
+        this.isLink = o.link || false;
+
         // custom color
         this.cc = [ this.colors.button, this.colors.select, this.colors.down ];
 
@@ -2240,6 +2262,20 @@ class Button extends Proto {
     //   EVENTS
     // ----------------------
 
+    click ( e ) {
+
+        if( this.isLink ){
+
+            let name = this.testZone( e );
+            if( !name ) return false;
+
+            this.value = this.values[name-2];
+            this.send();
+            return this.reset();
+        }
+
+    }
+
     mouseup ( e ) {
     
         if( this.isDown ){
@@ -2254,6 +2290,8 @@ class Button extends Proto {
     }
 
     mousedown ( e ) {
+
+        if( this.isLink ) return false;
 
     	let name = this.testZone( e );
 
@@ -5721,6 +5759,12 @@ class TextInput extends Proto {
 
         return this.upInput( x - this.sa -3, this.isDown );
 
+    }
+
+    update ( ) {
+
+        this.c[3].textContent = this.value;
+        
     }
 
     // ----------------------

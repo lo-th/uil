@@ -112,12 +112,15 @@ const R = {
             dom.addEventListener( 'wheel', R, false );
             document.addEventListener( 'mousemove', R, false );
             document.addEventListener( 'mouseup', R, false );
+            document.addEventListener( 'click', R, false );
         }
 
         window.addEventListener( 'keydown', R, false );
         window.addEventListener( 'keyup', R, false );
         window.addEventListener( 'resize', R.resize , false );
-        //window.addEventListener( 'mousedown', R, false );
+
+        //window.onblur = R.out;
+        //window.onfocus = R.in;
 
         R.isEventsInit = true;
 
@@ -139,6 +142,7 @@ const R = {
             dom.removeEventListener( 'wheel', R, false );
             document.removeEventListener( 'mousemove', R, false );
             document.removeEventListener( 'mouseup', R, false );
+            document.removeEventListener( 'click', R, false );
         }
 
         window.removeEventListener( 'keydown', R );
@@ -161,6 +165,20 @@ const R = {
             if( u.isGui && !u.isCanvasOnly && u.autoResize ) u.setHeight();
         
         }
+
+    },
+
+    out: function () {
+
+        console.log('im am out')
+        R.clearOldID();
+
+    },
+
+    in: function () {
+
+        console.log('im am in')
+      //  R.clearOldID();
 
     },
 

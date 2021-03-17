@@ -505,6 +505,8 @@ class Proto {
 
     keydown ( e ) { return false; }
 
+    click ( e ) { return false; }
+
     keyup ( e ) { return false; }
 
 
