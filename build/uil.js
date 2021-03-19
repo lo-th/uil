@@ -1413,6 +1413,7 @@
 		needReZone: true,
 		isEventsInit: false,
 		prevDefault: ['contextmenu', 'mousedown', 'mousemove', 'mouseup'],
+		pointerEvent: ['pointerdown', 'pointermove', 'pointerup'],
 		xmlserializer: new XMLSerializer(),
 		tmpTime: null,
 		tmpImage: null,
@@ -1477,12 +1478,16 @@
 				dom.addEventListener('touchend', R, false);
 				dom.addEventListener('touchmove', R, false);
 			} else {
-				dom.addEventListener('mousedown', R, false);
 				dom.addEventListener('contextmenu', R, false);
 				dom.addEventListener('wheel', R, false);
-				document.addEventListener('mousemove', R, false);
-				document.addEventListener('mouseup', R, false);
 				document.addEventListener('click', R, false);
+				/*dom.addEventListener( 'mousedown', R, false );
+				document.addEventListener( 'mousemove', R, false );
+				document.addEventListener( 'mouseup', R, false );*/
+
+				dom.addEventListener('pointerdown', R, false);
+				document.addEventListener('pointermove', R, false);
+				document.addEventListener('pointerup', R, false);
 			}
 
 			window.addEventListener('keydown', R, false);
@@ -1501,12 +1506,16 @@
 				dom.removeEventListener('touchend', R, false);
 				dom.removeEventListener('touchmove', R, false);
 			} else {
-				dom.removeEventListener('mousedown', R, false);
 				dom.removeEventListener('contextmenu', R, false);
 				dom.removeEventListener('wheel', R, false);
-				document.removeEventListener('mousemove', R, false);
-				document.removeEventListener('mouseup', R, false);
 				document.removeEventListener('click', R, false);
+				/*dom.removeEventListener( 'mousedown', R, false );
+				document.removeEventListener( 'mousemove', R, false );
+				document.removeEventListener( 'mouseup', R, false );*/
+
+				dom.removeEventListener('pointerdown', R, false);
+				document.removeEventListener('pointermove', R, false);
+				document.removeEventListener('pointerup', R, false);
 			}
 
 			window.removeEventListener('keydown', R);
@@ -1538,6 +1547,11 @@
 			//if(!event.type) return;
 			//	console.log( event.type )
 			if (event.type.indexOf(R.prevDefault) !== -1) event.preventDefault();
+
+			if (event.type.indexOf(R.pointerEvent) !== -1) {
+				if (event.pointerType !== 'mouse' || event.pointerType !== 'pen') return;
+			}
+
 			if (event.type === 'contextmenu') return; //if( event.type === 'keydown'){ R.editText( event ); return;}
 			//if( event.type !== 'keydown' && event.type !== 'wheel' ) event.preventDefault();
 			//event.stopPropagation();
@@ -1561,12 +1575,16 @@
 				if (event.type === 'touchend') e.type = 'mouseup';
 				if (event.type === 'touchmove') e.type = 'mousemove';
 			}
+
+			if (event.type === 'pointerdown') e.type = 'mousedown';
+			if (event.type === 'pointerup') e.type = 'mouseup';
+			if (event.type === 'pointermove') e.type = 'mousemove'; //if( 'pointerdown' 'pointermove', 'pointerup')
+
 			/*
 			if( event.type === 'touchstart'){ e.type = 'mousedown'; R.findID( e ); }
 			if( event.type === 'touchend'){ e.type = 'mouseup';	if( R.ID !== null ) R.ID.handleEvent( e ); R.clearOldID(); }
 			if( event.type === 'touchmove'){ e.type = 'mousemove';	}
 			*/
-
 
 			if (e.type === 'mousedown') R.lock = true;
 			if (e.type === 'mouseup') R.lock = false;

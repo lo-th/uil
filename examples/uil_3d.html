@@ -17,11 +17,11 @@ body { font-family: "Lucida Console", Monaco, monospace; background-color:#717b8
 
 <script type="text/javascript" src="../build/uil.js"></script>
 <script type="text/javascript" src="./js/libs/three.min.js"></script>
-<script type="text/javascript" src="./js/libs/sea3d.min.js"></script>
 <script type="text/javascript" src="./js/controls/OrbitControls.js"></script>
+<script type="text/javascript" src="./js/BufferGeometryUtils.js"></script>
 <script type="text/javascript" src="./js/SimplexNoise.js"></script>
 <script type="text/javascript" src="./js/math.js"></script>
-<script type="text/javascript" src="./js/objects/Terrain.js"></script>
+<script type="text/javascript" src="./js/objects/Landscape.js"></script>
 <script type="text/javascript" src="./js/objects/Lensflare.js"></script>
 <script type="text/javascript" src="./js/objects/Water.js"></script>
 <script type="text/javascript" src="./js/objects/SuperSky.js"></script>
@@ -60,11 +60,11 @@ var sets = {
 
 var sets_W = {
 
-    normal: null,
+    waterNormals: null,
     waterColor: 0x3b4c5a,
-    size:10,
+    size:6,
     alpha:0.6,
-    distortion:3.0,
+    distortionScale:3.0,
     depth:3.0,
     py:0.8,
 
@@ -108,15 +108,15 @@ function init() {
     renderer.setSize( window.innerWidth, window.innerHeight );
 
     renderer.shadowMap.enabled = true;
-    renderer.shadowMap.soft = true;
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
-    renderer.gammaInput = true;
-    renderer.gammaOutput = true;
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.2;
+    renderer.outputEncoding = THREE.sRGBEncoding;
+    //renderer.physicallyCorrectLights = true;
 
-    renderer.toneMapping = THREE.Uncharted2ToneMapping;
-    renderer.toneMappingExposure = 3;
-    renderer.toneMappingWhitePoint = 2;
+    //renderer.toneMapping = THREE.Uncharted2ToneMapping;
+    //renderer.toneMappingExposure = 3;
 
     document.getElementById('content').appendChild( renderer.domElement );
 
@@ -129,10 +129,14 @@ function init() {
 
     // terrain functions
 
-    view = {
+    /*view = {
 		loadTexture: function( name ){ return loader.load('./assets/textures/'+ name ); },
 		getAzimuthal: function(){return - controls.getAzimuthalAngle();}
-	}
+	}*/
+
+
+
+     
 
     // sky
 
@@ -140,34 +144,22 @@ function init() {
     scene.add( sky );
 
 
-	// terrain
 
-	terrain = new Terrain({ size:[20,sets.height,20], uv:[6,6], border:true, sample:[64,64], data:sets });
-	scene.add( terrain );
-
-    // water 
-
-    sets_W.normal = loader.load( './assets/textures/water/water.png', function ( texture ) { texture.wrapS = texture.wrapT = THREE.RepeatWrapping; texture.anisotropy = 16; });
-    water = new THREE.Water( new THREE.PlaneBufferGeometry( 20, 20 ), sets_W );
-    water.rotation.x = - Math.PI / 2;
-    water.position.y = sets_W.py;
-    water.castShadow = true;
-    water.receiveShadow = true;
-    scene.add( water );
+    
 
 	// interactives
 
 	interactive = new THREE.Group();
     scene.add(interactive);
 
-	plane = new THREE.Mesh( new THREE.PlaneBufferGeometry( 20, 4.625 , 5, 1 ), new THREE.MeshBasicMaterial( { transparent:true } ) );
+	plane = new THREE.Mesh( new THREE.PlaneGeometry( 20, 4.625 , 5, 1 ), new THREE.MeshBasicMaterial( { transparent:true } ) );
 	plane.geometry.rotateX( -Math.PI90 );
 	plane.position.z = 13;
 	plane.visible = false;
     plane.name = 'p1';
 
 
-    plane2 = new THREE.Mesh( new THREE.PlaneBufferGeometry( 20, 4.625 , 5, 1 ), new THREE.MeshBasicMaterial( { transparent:true } ) );
+    plane2 = new THREE.Mesh( new THREE.PlaneGeometry( 20, 4.625 , 5, 1 ), new THREE.MeshBasicMaterial( { transparent:true } ) );
     //plane2.geometry.rotateX( -Math.PI90 );
     plane2.position.z = -13;
     plane2.position.y = 5;
@@ -185,18 +177,54 @@ function init() {
     // events
 
     window.addEventListener( 'resize', resize, false );
-    document.addEventListener( 'mouseup', onMouseUp, false );
+
+    /*document.addEventListener( 'mouseup', onMouseUp, false );
     document.addEventListener( 'mousedown', onMouseDown, false );
-    document.addEventListener( 'mousemove', onMouseMove, false );
+    document.addEventListener( 'mousemove', onMouseMove, false );*/
+
+    document.addEventListener( 'pointerup', onMouseUp, false );
+    document.addEventListener( 'pointerdown', onMouseDown, false );
+    document.addEventListener( 'pointermove', onMouseMove, false );
 
 }
 
 function onSkyReady() {
 
-    terrain.material.envMap = sky.envMap;
-    terrain.borderMaterial.envMap = sky.envMap;
-    water.material.uniforms.sunDirection.value.copy(  sky.day > 0 ? sky.sunPosition : sky.moonPosition );
-    water.material.uniforms.sunColor.value = sky.day > 0 ? sky.sun.color : sky.moon.color;
+    // terrain
+
+    terrain = new Landscape({ 
+    	size:[20,sets.height,20], 
+    	uv:6, border:true, sample:[64,64], 
+    	data:sets, envMap:sky.envMap, 
+    	callback:next, 
+    	encoding:true,
+    	underWater: sets_W.py,
+    	waterColor: sets_W.waterColor,
+    });
+
+    // water 
+
+    sets_W.sunDirection = sky.day > 0 ? sky.sunPosition : sky.moonPosition;
+    sets_W.sunColor = sky.day > 0 ? sky.sun.color : sky.moon.color;
+
+    sets_W.waterNormals = loader.load( './assets/textures/water/water.png', function ( t ) { t.wrapS = t.wrapT = THREE.RepeatWrapping; t.anisotropy = 16; });
+    water = new THREE.Water( new THREE.PlaneGeometry( 20, 20, 2,2 ), sets_W );
+    water.rotation.x = - Math.PI * 0.5;
+    water.position.y = sets_W.py;
+    water.castShadow = false;
+    water.receiveShadow = true;
+    scene.add( water );
+    
+
+
+    //water.material.uniforms.sunDirection.value.copy(  sky.day > 0 ? sky.sunPosition : sky.moonPosition );
+    //water.material.uniforms.sunColor.value = sky.day > 0 ? sky.sun.color : sky.moon.color;
+
+}
+
+function next() {
+
+    scene.add( terrain );
 
 }
 
@@ -243,12 +271,17 @@ function animate(time) {
     if( sky.needsUpdate ){ 
         sky.render();
 
+        if(water){
+        	water.material.uniforms.sunDirection.value = sky.day > 0 ? sky.sunPosition : sky.moonPosition;
+        	water.material.uniforms.sunColor.value = sky.day > 0 ? sky.sun.color : sky.moon.color;
+        }
+
     }
 
     
-    terrain.easing( sets.move );
+    if( terrain ) terrain.easing( sets.move );
 
-    water.material.uniforms.time.value += 1.0 / 60.0;
+    if( water ) water.material.uniforms.time.value += 0.001
 
     renderer.render( scene, camera );
 

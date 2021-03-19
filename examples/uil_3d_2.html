@@ -55,9 +55,10 @@ function init() {
     renderer = new THREE.WebGLRenderer({ antialias:true, alpha:true });
     renderer.setPixelRatio( window.devicePixelRatio );
     renderer.setSize( window.innerWidth, window.innerHeight );
-    renderer.gammaInput = true;
-    renderer.gammaOutput = true;
-    renderer.setClearColor( 0x000000, 0 );
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.4;
+    renderer.outputEncoding = THREE.sRGBEncoding;
+    //renderer.setClearColor( 0x000000, 0 );
    // renderer.domElement.style.cssText = 'position: fixed; top:0; left:0;';
     document.getElementById('content').appendChild( renderer.domElement );
 
@@ -65,13 +66,15 @@ function init() {
     camera.position.set( 0, 24, 6 );
     controls = new THREE.OrbitControls( camera, renderer.domElement );
 
-    scene.add( new THREE.HemisphereLight( 0x808080, 0x222260, 1 ) );
+    //scene.add( new THREE.HemisphereLight( 0x202020, 0xffffff, 2 ) );
 
-    var pointLight = new THREE.PointLight( 0xaaddff,0.6 );
+    scene.add(new THREE.AmbientLight( 0x333333, 2 ));
+
+    var pointLight = new THREE.PointLight( 0xaaddff, 1 );
     pointLight.position.set( -10, -30, -20 );
     scene.add(pointLight)
 
-    var pointLight2 = new THREE.PointLight( 0xFFDDAA, 0.2 );
+    var pointLight2 = new THREE.PointLight( 0xFFDDAA, 1 );
     pointLight2.position.set( 10, 30, -20 );
     scene.add(pointLight2)
 
@@ -88,19 +91,21 @@ function init() {
 
     var env = loader.load( './assets/textures/env.jpg' );
     env.mapping = THREE.SphericalReflectionMapping;
+   env.encoding == THREE.sRGBEncoding;
 
     var s8 = loader.load( './assets/textures/s8px.png' );
     s8.flipY = false;
     s8.minFilter = THREE.LinearFilter;
+    s8.encoding == THREE.sRGBEncoding;
 
     
 
     mat = {};
-    mat['glass_f'] = new THREE.MeshStandardMaterial( { roughness:0.25, metalness:0.8, color:0x000000, opacity:0.2, transparent:true, envMap: env, depthTest:true } );
-    mat['glass_b'] = new THREE.MeshStandardMaterial( { roughness:0.25, metalness:0.8, color:0x000000 } );
+    mat['glass_f'] = new THREE.MeshStandardMaterial( { roughness:0.1, metalness:0.8, color:0x000000, opacity:0.2, transparent:true, envMap: env, depthTest:true } );
+    mat['glass_b'] = new THREE.MeshStandardMaterial( { roughness:0.1, metalness:0.8, color:0x000000 } );
     mat['glass_c'] = mat['glass_b'];
-    mat['cadre'] = new THREE.MeshStandardMaterial( { roughness:0, metalness:0.8, color:0x020202, envMap: env } );
-    mat['cadre_pl'] = new THREE.MeshStandardMaterial( { roughness:7, metalness:0.3, color:0x050505, envMap: env } );
+    mat['cadre'] = new THREE.MeshStandardMaterial( { roughness:0.7, metalness:0.2, color:0x020202, envMap: env } );
+    mat['cadre_pl'] = new THREE.MeshStandardMaterial( { roughness:0.7, metalness:0.2, color:0x050505, envMap: env } );
     mat['cadre_side'] = mat['cadre'];
     mat['bouton'] =  mat['cadre']
     mat['screen_back'] = new THREE.MeshBasicMaterial( { color:0x000000 } );
@@ -115,9 +120,9 @@ function init() {
     // events
 
     window.addEventListener( 'resize', resize, false );
-    document.addEventListener( 'mouseup', onMouseUp, false );
-    document.addEventListener( 'mousedown', onMouseDown, false );
-    document.addEventListener( 'mousemove', onMouseMove, false );
+    document.addEventListener( 'pointerup', onMouseUp, false );
+    document.addEventListener( 'pointerdown', onMouseDown, false );
+    document.addEventListener( 'pointermove', onMouseMove, false );
 
 }
 

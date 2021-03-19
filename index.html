@@ -83,7 +83,7 @@ function populate () {
         ui.add('button', { name:'button', callback:callbackButton });
 
         //ui.add('button', { name: 'Test HTML', fontColor: '#D4B87B', h: 30 } ).onChange( ( ) => { let w = window.open("about:blank", "hello", "width=200,height=200"); } );
-        ui.add('button', { name: 'Test HTML', fontColor: '#D4B87B', h: 30, link:true } ).onChange( ( ) => { let w = window.open("", ""); w.focus();} );
+        ui.add('button', { name: '3D UIL TEST', fontColor: '#D4B87B', h: 30, link:true } ).onChange( ( ) => { let w = window.open("./examples/uil_3d.html", ""); w.focus();} );
 
         ui.add('grid', { name:'button', values:['box', 'sphere', 'cylinder', 'wheel', 'convex', 'mesh'], h:100 });
 

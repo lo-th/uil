@@ -89,16 +89,20 @@ SuperSky.prototype = Object.assign( Object.create( THREE.Mesh.prototype ), {
 		var sunSprite = new THREE.Sprite( this.sunMaterial );
 		sunSprite.scale.set( 40, 40, 1 );
 				
-		this.sun = new THREE.DirectionalLight( 0xffffff, 0.8 );
+		this.sun = new THREE.DirectionalLight( 0xffffff, 4 );
 		this.sun.add( sunSprite );
 
     	var dd = 20;
-    	var camShadow = new THREE.OrthographicCamera( dd, -dd, dd, -dd,  900, 1200 );
-        this.sun.shadow = new THREE.LightShadow( camShadow );
-
-        this.sun.shadow.mapSize.width = 512;
-        this.sun.shadow.mapSize.height = 512;
-        this.sun.shadow.bias = 0.001;
+        this.sun.shadow.camera.top = dd;
+		this.sun.shadow.camera.bottom = - dd;
+		this.sun.shadow.camera.left = - dd;
+		this.sun.shadow.camera.right = dd;
+		this.sun.shadow.camera.near = 880;
+		this.sun.shadow.camera.far = 920;
+        this.sun.shadow.mapSize.width = 1024;
+        this.sun.shadow.mapSize.height = 1024;
+        //this.sun.shadow.bias = 0.001;
+        this.sun.shadow.radius = 2;
         this.sun.castShadow = true;
 
         this.moonMaterial = new THREE.SpriteMaterial( { map: this.textureLoader.load("assets/textures/sky/lensflare2.png"), opacity:0.3 } );
@@ -106,13 +110,16 @@ SuperSky.prototype = Object.assign( Object.create( THREE.Mesh.prototype ), {
 		moonSprite.scale.set( 70, 70, 1 );
 
     	this.moon = new THREE.DirectionalLight( 0xffffff, 0.8 );//new THREE.PointLight( 0x909090, 0.5, 10000, 2 );
-    	this.moon.add( moonSprite )
+    	this.moon.add( moonSprite );
 
-    	var d = new THREE.HemisphereLight(0, 0x3b4c5a, 0.1);
+    	this.ambient = new THREE.AmbientLight( 0x3b4c5a, 0.5 );
+    	//this.ambient = new THREE.HemisphereLight(0, 0x3b4c5a, 0.1);
 
     	this.scene.add( this.sun );
     	this.scene.add( this.moon );
-    	this.scene.add( d );
+
+    	//this.scene.add( new THREE.CameraHelper( this.sun.shadow.camera ) );
+    	this.scene.add( this.ambient );
 
     	this.sunSph = new THREE.Spherical(this.size-this.size*0.1);
 		this.moonSph = new THREE.Spherical(this.size-this.size*0.1);
@@ -159,13 +166,23 @@ SuperSky.prototype = Object.assign( Object.create( THREE.Mesh.prototype ), {
 		var cmesh = new THREE.Mesh( t, this.materialSky );
 		this.sceneSky.add( cmesh );
 
-		this.cubeCamera = new THREE.CubeCamera( 0.5, 2, this.skyResolution );
+		this.cubeCameraRender = new THREE.WebGLCubeRenderTarget( this.skyResolution, {
+					format: THREE.RGBFormat,
+					generateMipmaps: true,
+					minFilter: THREE.LinearMipmapLinearFilter,
+					encoding: THREE.sRGBEncoding
+				});
+
+		this.cubeCamera = new THREE.CubeCamera( 0.5, 2, this.cubeCameraRender );
 		this.sceneSky.add( this.cubeCamera );
-		this.envMap = this.cubeCamera.renderTarget.texture;
-		this.envMap.minFilter = THREE.LinearMipMapLinearFilter;
-		this.envMap.format = THREE.RGBAFormat;
+
 
 		//this.render();
+		this.envMap = this.cubeCameraRender.texture;
+		//this.envMap.minFilter = THREE.LinearMipMapLinearFilter;
+		//this.envMap.format = THREE.RGBAFormat;
+
+		
 
 		this.material = new THREE.ShaderMaterial( {
 
@@ -173,7 +190,7 @@ SuperSky.prototype = Object.assign( Object.create( THREE.Mesh.prototype ), {
 				lightdir: { value: this.sunPosition },
 				lunardir: { value: new THREE.Vector3(0, -.2, 1) },
 				tCube: { value: this.envMap },
-                tDome: { value: this.textureLoader.load( "./assets/textures/sky/milkyway.png" ) },
+                tDome: { value: this.textureLoader.load( "./assets/textures/sky/milkyway.png",  function ( t ) { t.encoding = THREE.sRGBEncoding; } ) },
 			},
 			vertexShader: this.shaders['base_vs'],
 			fragmentShader: this.shaders['dome_fs'],
@@ -182,9 +199,6 @@ SuperSky.prototype = Object.assign( Object.create( THREE.Mesh.prototype ), {
 		});
 
 		this.material.needsUpdate = true;
-
-
-		
 
 		this.update();
 
