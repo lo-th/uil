@@ -11,7 +11,11 @@ export class Button extends Proto {
 
         this.values = o.value || this.txt;
 
-        if( typeof this.values === 'string' ) this.values = [this.values];
+        this.onName = o.onName || '';
+
+        this.on = false;
+
+        if( typeof this.values === 'string' ) this.values = [ this.values ];
 
         //this.selected = null;
         this.isDown = false;
@@ -56,6 +60,13 @@ export class Button extends Proto {
 
     }
 
+    onOff ( ){
+
+        this.on = !this.on;
+        this.c[2].innerHTML = this.on ? this.onName : this.values[0];
+
+    }
+
     testZone ( e ) {
 
         let l = this.local;
@@ -77,6 +88,8 @@ export class Button extends Proto {
     // ----------------------
 
     click ( e ) {
+
+        if( this.onName!== '' ) this.onOff();
 
         if( this.isLink ){
 

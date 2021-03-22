@@ -2101,7 +2101,8 @@
 			// if is on gui or group
 			this.main = o.main || null;
 			this.isUI = o.isUI || false;
-			this.parentGroup = null;
+			this.group = null; //this.parentGroup = null;
+
 			this.css = this.main ? this.main.css : Tools.css;
 			this.colors = this.main ? this.main.colors : Tools.colors;
 			this.defaultBorderColor = this.colors.border;
@@ -2394,7 +2395,7 @@
 			Tools.clear(this.c[0]);
 
 			if (this.target !== null) {
-				this.target.removeChild(this.c[0]);
+				if (this.group !== null) this.group.clearOne(this);else this.target.removeChild(this.c[0]);
 			} else {
 				if (this.isUI) this.main.clearOne(this);else document.body.removeChild(this.c[0]);
 			}
@@ -2657,6 +2658,8 @@
 			_this = _Proto.call(this, o) || this;
 			_this.value = false;
 			_this.values = o.value || _this.txt;
+			_this.onName = o.onName || '';
+			_this.on = false;
 			if (typeof _this.values === 'string') _this.values = [_this.values]; //this.selected = null;
 
 			_this.isDown = false;
@@ -2697,6 +2700,11 @@
 
 		var _proto = Button.prototype;
 
+		_proto.onOff = function onOff() {
+			this.on = !this.on;
+			this.c[2].innerHTML = this.on ? this.onName : this.values[0];
+		};
+
 		_proto.testZone = function testZone(e) {
 			var l = this.local;
 			if (l.x === -1 && l.y === -1) return '';
@@ -2714,6 +2722,8 @@
 		;
 
 		_proto.click = function click(e) {
+			if (this.onName !== '') this.onOff();
+
 			if (this.isLink) {
 				var name = this.testZone(e);
 				if (!name) return false;
@@ -3397,8 +3407,8 @@
 			}
 
 			_this = _Proto.call(this, o) || this;
-			_this.round = Math.round;
-			_this.autoHeight = true;
+			_this.round = Math.round; //this.autoHeight = true;
+
 			_this.baseH = _this.h;
 			_this.hplus = o.hplus || 50;
 			_this.res = o.res || 40;
@@ -4114,14 +4124,34 @@
 			} //let n = add.apply( this, a );
 
 
-			var n = this.ADD.apply(this, a);
-			this.uis.push(n);
-			if (n.autoHeight) n.parentGroup = this;
-			return n;
+			var u = this.ADD.apply(this, a);
+			this.uis.push(u); //if( u.autoHeight ) u.parentGroup = this;
+			//if( u.isGroup ) 
+
+			u.group = this;
+			return u;
+		} // remove one node
+		;
+
+		_proto.remove = function remove(n) {
+			if (n.clear) n.clear();
+		} // clear one element
+		;
+
+		_proto.clearOne = function clearOne(n) {
+			var id = this.uis.indexOf(n);
+
+			if (id !== -1) {
+				this.calc(-(this.uis[id].h + 1));
+				this.c[2].removeChild(this.uis[id].c[0]);
+				this.uis.splice(id, 1);
+				if (this.uis.length === 0) this.close();
+			}
 		};
 
 		_proto.parentHeight = function parentHeight(t) {
-			if (this.parentGroup !== null) this.parentGroup.calc(t);else if (this.isUI) this.main.calc(t);
+			//if ( this.parentGroup !== null ) this.parentGroup.calc( t );
+			if (this.group !== null) this.group.calc(t);else if (this.isUI) this.main.calc(t);
 		};
 
 		_proto.open = function open() {
@@ -4154,8 +4184,7 @@
 			var i = this.uis.length;
 
 			while (i--) {
-				this.uis[i].clear();
-				this.uis.pop();
+				this.uis[i].clear(); //this.uis.pop();
 			}
 
 			this.uis = [];
@@ -4597,8 +4626,8 @@
 			_this.isWithImage = _this.path !== '' ? true : false;
 			_this.preLoadComplete = false;
 			_this.tmpImage = {};
-			_this.tmpUrl = [];
-			_this.autoHeight = false;
+			_this.tmpUrl = []; //this.autoHeight = false;
+
 			var align = o.align || 'center';
 			_this.sMode = 0;
 			_this.tMode = 0;
@@ -7031,17 +7060,17 @@
 		;
 
 		_proto.remove = function remove(n) {
-			var i = this.uis.indexOf(n);
-			if (i !== -1) this.uis[i].clear();
+			if (n.clear) n.clear();
 		} // call after uis clear
 		;
 
 		_proto.clearOne = function clearOne(n) {
-			var i = this.uis.indexOf(n);
+			var id = this.uis.indexOf(n);
 
-			if (i !== -1) {
-				this.inner.removeChild(this.uis[i].c[0]);
-				this.uis.splice(i, 1);
+			if (id !== -1) {
+				this.calc(-(this.uis[id].h + 1));
+				this.inner.removeChild(this.uis[id].c[0]);
+				this.uis.splice(id, 1);
 			}
 		} // clear all gui
 		;
@@ -7187,7 +7216,7 @@
 	}();
 	Gui.prototype.isGui = true;
 
-	var REVISION = '2.8';
+	var REVISION = '2.9';
 
 	exports.Bool = Bool;
 	exports.Button = Button;

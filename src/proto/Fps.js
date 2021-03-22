@@ -9,7 +9,7 @@ export class Fps extends Proto {
 
         this.round = Math.round;
 
-        this.autoHeight = true;
+        //this.autoHeight = true;
 
         this.baseH = this.h;
         this.hplus = o.hplus || 50;

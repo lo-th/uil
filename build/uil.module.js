@@ -1558,7 +1558,8 @@ class Proto {
         // if is on gui or group
         this.main = o.main || null;
         this.isUI = o.isUI || false;
-        this.parentGroup = null;
+        this.group = null;
+        //this.parentGroup = null;
 
         this.css = this.main ? this.main.css : Tools.css;
         this.colors = this.main ? this.main.colors : Tools.colors;
@@ -1942,10 +1943,15 @@ class Proto {
         Tools.clear( this.c[0] );
 
         if( this.target !== null ){ 
-            this.target.removeChild( this.c[0] );
+
+            if( this.group !== null ) this.group.clearOne( this );
+            else this.target.removeChild( this.c[0] );
+
         } else {
+
             if( this.isUI ) this.main.clearOne( this );
             else document.body.removeChild( this.c[0] );
+
         }
 
         if( !this.isUI ) Roots.remove( this );
@@ -2225,7 +2231,11 @@ class Button extends Proto {
 
         this.values = o.value || this.txt;
 
-        if( typeof this.values === 'string' ) this.values = [this.values];
+        this.onName = o.onName || '';
+
+        this.on = false;
+
+        if( typeof this.values === 'string' ) this.values = [ this.values ];
 
         //this.selected = null;
         this.isDown = false;
@@ -2270,6 +2280,13 @@ class Button extends Proto {
 
     }
 
+    onOff ( ){
+
+        this.on = !this.on;
+        this.c[2].innerHTML = this.on ? this.onName : this.values[0];
+
+    }
+
     testZone ( e ) {
 
         let l = this.local;
@@ -2291,6 +2308,8 @@ class Button extends Proto {
     // ----------------------
 
     click ( e ) {
+
+        if( this.onName!== '' ) this.onOff();
 
         if( this.isLink ){
 
@@ -3127,7 +3146,7 @@ class Fps extends Proto {
 
         this.round = Math.round;
 
-        this.autoHeight = true;
+        //this.autoHeight = true;
 
         this.baseH = this.h;
         this.hplus = o.hplus || 50;
@@ -3920,7 +3939,7 @@ class Group extends Proto {
             a[1].target = this.c[2];
             a[1].main = this.main;
         } else if( typeof arguments[1] === 'string' ){
-            if( a[2] === undefined ) [].push.call(a, { isUI:true, target:this.c[2], main:this.main });
+            if( a[2] === undefined ) [].push.call( a, { isUI:true, target:this.c[2], main:this.main });
             else { 
                 a[2].isUI = true;
                 a[2].target = this.c[2];
@@ -3929,18 +3948,50 @@ class Group extends Proto {
         }
 
         //let n = add.apply( this, a );
-        let n = this.ADD.apply( this, a );
-        this.uis.push( n );
+        let u = this.ADD.apply( this, a );
 
-        if( n.autoHeight ) n.parentGroup = this;
+        this.uis.push( u );
 
-        return n;
+        //if( u.autoHeight ) u.parentGroup = this;
+        //if( u.isGroup ) 
+
+        u.group = this;
+
+        return u;
 
     }
 
+    // remove one node
+
+    remove ( n ) {
+
+        if( n.clear ) n.clear();
+
+    }
+
+     // clear one element
+
+    clearOne ( n ) { 
+
+        let id = this.uis.indexOf( n ); 
+        if ( id !== -1 ) {
+
+            this.calc( - ( this.uis[ id ].h + 1 ) );
+            this.c[2].removeChild( this.uis[ id ].c[0] );
+            this.uis.splice( id, 1 ); 
+
+            if( this.uis.length === 0 ) this.close();
+        }
+
+    }
+
+
+
+
     parentHeight ( t ) {
 
-        if ( this.parentGroup !== null ) this.parentGroup.calc( t );
+        //if ( this.parentGroup !== null ) this.parentGroup.calc( t );
+        if ( this.group !== null ) this.group.calc( t );
         else if ( this.isUI ) this.main.calc( t );
 
     }
@@ -3975,7 +4026,7 @@ class Group extends Proto {
     clear () {
 
         this.clearGroup();
-        if( this.isUI ) this.main.calc( -(this.h +1 ));
+        if( this.isUI ) this.main.calc( -( this.h + 1 ));
         Proto.prototype.clear.call( this );
 
     }
@@ -3987,7 +4038,7 @@ class Group extends Proto {
         let i = this.uis.length;
         while(i--){
             this.uis[i].clear();
-            this.uis.pop();
+            //this.uis.pop();
         }
         this.uis = [];
         this.h = this.baseH;
@@ -4477,7 +4528,7 @@ class List extends Proto {
         this.tmpImage = {};
         this.tmpUrl = [];
 
-        this.autoHeight = false;
+        //this.autoHeight = false;
         let align = o.align || 'center';
 
         this.sMode = 0;
@@ -7286,10 +7337,9 @@ class Gui {
 
     // remove one node
 
-    remove ( n ) { 
+    remove ( n ) {
 
-        let i = this.uis.indexOf( n ); 
-        if ( i !== -1 ) this.uis[i].clear();
+        if( n.clear ) n.clear();
 
     }
 
@@ -7297,10 +7347,11 @@ class Gui {
 
     clearOne ( n ) { 
 
-        let i = this.uis.indexOf( n ); 
-        if ( i !== -1 ) {
-            this.inner.removeChild( this.uis[i].c[0] );
-            this.uis.splice( i, 1 ); 
+        let id = this.uis.indexOf( n ); 
+        if ( id !== -1 ) {
+            this.calc( - (this.uis[ id ].h + 1 ) );
+            this.inner.removeChild( this.uis[ id ].c[0] );
+            this.uis.splice( id, 1 ); 
         }
 
     }
@@ -7312,7 +7363,7 @@ class Gui {
         //this.callback = null;
 
         let i = this.uis.length;
-        while(i--) this.uis[i].clear();
+        while( i-- ) this.uis[i].clear();
 
         this.uis = [];
         Roots.listens = [];
@@ -7498,6 +7549,6 @@ Gui.prototype.isGui = true;
 
 //import './polyfills.js';
 
-const REVISION = '2.8';
+const REVISION = '2.9';
 
 export { Bool, Button, Circular, Color, Fps, Group, Gui, Joystick, Knob, List, Numeric, Proto, REVISION, Slide, TextInput, Title, Tools, add };

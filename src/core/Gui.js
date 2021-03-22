@@ -511,10 +511,9 @@ export class Gui {
 
     // remove one node
 
-    remove ( n ) { 
+    remove ( n ) {
 
-        let i = this.uis.indexOf( n ); 
-        if ( i !== -1 ) this.uis[i].clear();
+        if( n.clear ) n.clear();
 
     }
 
@@ -522,10 +521,11 @@ export class Gui {
 
     clearOne ( n ) { 
 
-        let i = this.uis.indexOf( n ); 
-        if ( i !== -1 ) {
-            this.inner.removeChild( this.uis[i].c[0] );
-            this.uis.splice( i, 1 ); 
+        let id = this.uis.indexOf( n ); 
+        if ( id !== -1 ) {
+            this.calc( - (this.uis[ id ].h + 1 ) );
+            this.inner.removeChild( this.uis[ id ].c[0] );
+            this.uis.splice( id, 1 ); 
         }
 
     }
@@ -537,7 +537,7 @@ export class Gui {
         //this.callback = null;
 
         let i = this.uis.length;
-        while(i--) this.uis[i].clear();
+        while( i-- ) this.uis[i].clear();
 
         this.uis = [];
         Roots.listens = [];

@@ -17,7 +17,7 @@ export class List extends Proto {
         this.tmpImage = {};
         this.tmpUrl = [];
 
-        this.autoHeight = false;
+        //this.autoHeight = false;
         let align = o.align || 'center';
 
         this.sMode = 0;

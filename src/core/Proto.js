@@ -14,7 +14,8 @@ class Proto {
         // if is on gui or group
         this.main = o.main || null;
         this.isUI = o.isUI || false;
-        this.parentGroup = null;
+        this.group = null;
+        //this.parentGroup = null;
 
         this.css = this.main ? this.main.css : Tools.css;
         this.colors = this.main ? this.main.colors : Tools.colors;
@@ -398,10 +399,15 @@ class Proto {
         Tools.clear( this.c[0] );
 
         if( this.target !== null ){ 
-            this.target.removeChild( this.c[0] );
+
+            if( this.group !== null ) this.group.clearOne( this );
+            else this.target.removeChild( this.c[0] );
+
         } else {
+
             if( this.isUI ) this.main.clearOne( this );
             else document.body.removeChild( this.c[0] );
+
         }
 
         if( !this.isUI ) Roots.remove( this );
