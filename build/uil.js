@@ -3276,7 +3276,7 @@
 		};
 
 		_proto.parentHeight = function parentHeight(t) {
-			if (this.parentGroup !== null) this.parentGroup.calc(t);else if (this.isUI) this.main.calc(t);
+			if (this.group !== null) this.group.calc(t);else if (this.isUI) this.main.calc(t);
 		};
 
 		_proto.open = function open() {
@@ -3603,8 +3603,8 @@
 			this.h = this.hplus + this.baseH;
 			this.setSvg(this.c[3], 'd', this.svgs.arrowDown);
 
-			if (this.parentGroup !== null) {
-				this.parentGroup.calc(this.hplus);
+			if (this.group !== null) {
+				this.group.calc(this.hplus);
 			} else if (this.isUI) this.main.calc(this.hplus);
 
 			this.s[0].height = this.h + 'px';
@@ -3620,8 +3620,8 @@
 			this.h = this.baseH;
 			this.setSvg(this.c[3], 'd', this.svgs.arrow);
 
-			if (this.parentGroup !== null) {
-				this.parentGroup.calc(-this.hplus);
+			if (this.group !== null) {
+				this.group.calc(-this.hplus);
 			} else if (this.isUI) this.main.calc(-this.hplus);
 
 			this.s[0].height = this.h + 'px';
@@ -5024,7 +5024,7 @@
 		};
 
 		_proto.parentHeight = function parentHeight(t) {
-			if (this.parentGroup !== null) this.parentGroup.calc(t);else if (this.isUI) this.main.calc(t);
+			if (this.group !== null) this.group.calc(t);else if (this.isUI) this.main.calc(t);
 		};
 
 		_proto.open = function open(first) {

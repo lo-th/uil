@@ -2974,7 +2974,7 @@ class Color extends Proto {
 
 	parentHeight ( t ) {
 
-		if ( this.parentGroup !== null ) this.parentGroup.calc( t );
+		if ( this.group !== null ) this.group.calc( t );
 	    else if ( this.isUI ) this.main.calc( t );
 
 	}
@@ -3364,7 +3364,7 @@ class Fps extends Proto {
 
         this.setSvg( this.c[3], 'd', this.svgs.arrowDown );
 
-        if( this.parentGroup !== null ){ this.parentGroup.calc( this.hplus );}
+        if( this.group !== null ){ this.group.calc( this.hplus );}
         else if( this.isUI ) this.main.calc( this.hplus );
 
         this.s[0].height = this.h +'px';
@@ -3384,7 +3384,7 @@ class Fps extends Proto {
 
         this.setSvg( this.c[3], 'd', this.svgs.arrow );
 
-        if( this.parentGroup !== null ){ this.parentGroup.calc( -this.hplus );}
+        if( this.group !== null ){ this.group.calc( -this.hplus );}
         else if( this.isUI ) this.main.calc( -this.hplus );
         
         this.s[0].height = this.h +'px';
@@ -4529,6 +4529,7 @@ class List extends Proto {
         this.tmpUrl = [];
 
         //this.autoHeight = false;
+
         let align = o.align || 'center';
 
         this.sMode = 0;
@@ -4997,7 +4998,7 @@ class List extends Proto {
 
     parentHeight ( t ) {
 
-        if ( this.parentGroup !== null ) this.parentGroup.calc( t );
+        if ( this.group !== null ) this.group.calc( t );
         else if ( this.isUI ) this.main.calc( t );
 
     }

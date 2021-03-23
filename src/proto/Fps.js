@@ -227,7 +227,7 @@ export class Fps extends Proto {
 
         this.setSvg( this.c[3], 'd', this.svgs.arrowDown );
 
-        if( this.parentGroup !== null ){ this.parentGroup.calc( this.hplus );}
+        if( this.group !== null ){ this.group.calc( this.hplus );}
         else if( this.isUI ) this.main.calc( this.hplus );
 
         this.s[0].height = this.h +'px';
@@ -247,7 +247,7 @@ export class Fps extends Proto {
 
         this.setSvg( this.c[3], 'd', this.svgs.arrow );
 
-        if( this.parentGroup !== null ){ this.parentGroup.calc( -this.hplus );}
+        if( this.group !== null ){ this.group.calc( -this.hplus );}
         else if( this.isUI ) this.main.calc( -this.hplus );
         
         this.s[0].height = this.h +'px';

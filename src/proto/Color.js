@@ -213,7 +213,7 @@ export class Color extends Proto {
 
 	parentHeight ( t ) {
 
-		if ( this.parentGroup !== null ) this.parentGroup.calc( t );
+		if ( this.group !== null ) this.group.calc( t );
 	    else if ( this.isUI ) this.main.calc( t );
 
 	}

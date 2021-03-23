@@ -18,6 +18,7 @@ export class List extends Proto {
         this.tmpUrl = [];
 
         //this.autoHeight = false;
+
         let align = o.align || 'center';
 
         this.sMode = 0;
@@ -486,7 +487,7 @@ export class List extends Proto {
 
     parentHeight ( t ) {
 
-        if ( this.parentGroup !== null ) this.parentGroup.calc( t );
+        if ( this.group !== null ) this.group.calc( t );
         else if ( this.isUI ) this.main.calc( t );
 
     }
