@@ -11,6 +11,8 @@ var Landscape = function  ( o ) {
 
     this.callback = o.callback || null;
 
+    this.perlin = null;
+
 
     this.p90 = Math.PI*0.5;
 
@@ -506,6 +508,31 @@ Landscape.prototype = Object.assign( Object.create( THREE.Mesh.prototype ), {
         return v;
     },
 
+    noise: function ( v, o ) {
+
+        if( this.perlin === null ) this.perlin = new SimplexNoise();
+
+        o = o || {};
+
+        var level = o.level || [ 1, 0.2, 0.05 ];
+        var frequency  = o.frequency  || [ 0.016, 0.05, 0.2 ];
+
+        var i, f, c=0, d=0;
+
+        for(i=0; i<level.length; i++){
+
+            f = frequency[i];
+            c += level[i] * ( 0.5 + this.perlin.noise3d( v.x*f, v.y*f, v.z*f ) * 0.5 );
+            d += level[i];
+
+        }
+
+        c/=d;
+
+        return c;
+
+    },
+
     update: function ( wait ) {
 
         this.size[1] = this.data.height;
@@ -535,7 +562,7 @@ Landscape.prototype = Object.assign( Object.create( THREE.Mesh.prototype ), {
 
 
             //c = math.noise( v, this.data );
-            c = Math.noise( v, this.data );
+            c = this.noise( v, this.data );
 
 
 

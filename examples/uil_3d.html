@@ -20,7 +20,7 @@ body { font-family: "Lucida Console", Monaco, monospace; background-color:#717b8
 <script type="text/javascript" src="./js/controls/OrbitControls.js"></script>
 <script type="text/javascript" src="./js/BufferGeometryUtils.js"></script>
 <script type="text/javascript" src="./js/SimplexNoise.js"></script>
-<script type="text/javascript" src="./js/math.js"></script>
+<!--<script type="text/javascript" src="./js/math.js"></script>-->
 <script type="text/javascript" src="./js/objects/Landscape.js"></script>
 <script type="text/javascript" src="./js/objects/Lensflare.js"></script>
 <script type="text/javascript" src="./js/objects/Water.js"></script>
@@ -153,7 +153,7 @@ function init() {
     scene.add(interactive);
 
 	plane = new THREE.Mesh( new THREE.PlaneGeometry( 20, 4.625 , 5, 1 ), new THREE.MeshBasicMaterial( { transparent:true } ) );
-	plane.geometry.rotateX( -Math.PI90 );
+	plane.geometry.rotateX( -Math.PI * 0.5 );
 	plane.position.z = 13;
 	plane.visible = false;
     plane.name = 'p1';
