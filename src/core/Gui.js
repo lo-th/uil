@@ -14,6 +14,8 @@ export class Gui {
 
         this.canvas = null;
 
+        this.isEmpty = true;
+
         // color
         this.colors = Tools.cloneColor();
         this.css = Tools.cloneCss();
@@ -452,10 +454,14 @@ export class Gui {
 
         let a = arguments;
 
+        let ontop = false;
+
         if( typeof a[1] === 'object' ){ 
 
             a[1].isUI = true;
             a[1].main = this;
+
+            ontop = a[1].ontop ? a[1].ontop : false;
 
         } else if( typeof a[1] === 'string' ){
 
@@ -463,6 +469,8 @@ export class Gui {
             else {
                 a[2].isUI = true;
                 a[2].main = this;
+
+                ontop = a[1].ontop ? a[1].ontop : false;
             }
             
         } 
@@ -471,12 +479,8 @@ export class Gui {
 
         if( u === null ) return;
 
-
-        //let n = add.apply( this, a );
-        //let n = UIL.add( ...args );
-
-        this.uis.push( u );
-        //n.py = this.h;
+        if(ontop) this.uis.unshift( u );
+        else this.uis.push( u );
 
         if( !u.autoWidth ){
             let y = u.c[0].getBoundingClientRect().top;
@@ -488,6 +492,8 @@ export class Gui {
             this.prevY = 0;//-1;
             this.calc( u.h + 1 );
         }
+
+        this.isEmpty = false;
 
         return u;
 
@@ -532,17 +538,39 @@ export class Gui {
 
     // clear all gui
 
+    empty () {
+
+        //this.close();
+
+        let i = this.uis.length, item;
+
+        while( i-- ){
+            item = this.uis.pop();
+            this.inner.removeChild( item.c[0] );
+            item.clear( true );
+
+            //this.uis[i].clear()
+        }
+
+        this.isEmpty = true;
+        //Roots.listens = [];
+        this.calc( -this.h );
+
+    }
+
     clear () {
+
+        this.empty();
 
         //this.callback = null;
 
-        let i = this.uis.length;
+        /*let i = this.uis.length;
         while( i-- ) this.uis[i].clear();
 
         this.uis = [];
         Roots.listens = [];
 
-        this.calc( -this.h );
+        this.calc( -this.h );*/
 
     }
 

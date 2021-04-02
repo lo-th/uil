@@ -780,7 +780,7 @@ const R = {
 
         let id = R.listens.indexOf( proto );
 
-        if( id !== -1 ) return; 
+        if( id !== -1 ) return false; 
 
         R.listens.push( proto );
 
@@ -788,6 +788,8 @@ const R = {
             R.isLoop = true;
             R.loop();
         }
+
+        return true;
 
     },
 

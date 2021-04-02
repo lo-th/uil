@@ -1955,13 +1955,15 @@
 		},
 		addListen: function addListen(proto) {
 			var id = R.listens.indexOf(proto);
-			if (id !== -1) return;
+			if (id !== -1) return false;
 			R.listens.push(proto);
 
 			if (!R.isLoop) {
 				R.isLoop = true;
 				R.loop();
 			}
+
+			return true;
 		}
 	};
 	var Roots = R;
@@ -2101,7 +2103,10 @@
 			// if is on gui or group
 			this.main = o.main || null;
 			this.isUI = o.isUI || false;
-			this.group = null; //this.parentGroup = null;
+			this.group = null;
+			this.isListen = false; //this.parentGroup = null;
+
+			this.ontop = o.ontop ? o.ontop : false; // 'beforebegin' 'afterbegin' 'beforeend' 'afterend'
 
 			this.css = this.main ? this.main.css : Tools.css;
 			this.colors = this.main ? this.main.colors : Tools.colors;
@@ -2254,11 +2259,14 @@
 				}
 			}
 
-			if (this.target !== null) {
-				this.target.appendChild(c[0]);
+			var pp = this.target !== null ? this.target : this.isUI ? this.main.inner : document.body;
+			if (this.ontop) pp.insertAdjacentElement('afterbegin', c[0]);else pp.appendChild(c[0]);
+			/*if( this.target !== null ){ 
+					this.target.appendChild( c[0] );
 			} else {
-				if (this.isUI) this.main.inner.appendChild(c[0]);else document.body.appendChild(c[0]);
-			}
+					if( this.isUI ) this.main.inner.appendChild( c[0] );
+					else document.body.appendChild( c[0] );
+			}*/
 
 			c[0].appendChild(frag);
 			this.rSize(); // ! solo proto
@@ -2336,7 +2344,7 @@
 		};
 
 		_proto.listen = function listen() {
-			Roots.addListen(this);
+			this.isListen = Roots.addListen(this);
 			return this;
 		};
 
@@ -2391,20 +2399,25 @@
 		// ----------------------
 		;
 
-		_proto.clear = function clear() {
+		_proto.clear = function clear(nofull) {
+			if (this.isListen) Roots.removeListen(this);
 			Tools.clear(this.c[0]);
 
-			if (this.target !== null) {
-				if (this.group !== null) this.group.clearOne(this);else this.target.removeChild(this.c[0]);
-			} else {
-				if (this.isUI) this.main.clearOne(this);else document.body.removeChild(this.c[0]);
+			if (!nofull) {
+				if (this.target !== null) {
+					if (this.group !== null) this.group.clearOne(this);else this.target.removeChild(this.c[0]);
+				} else {
+					if (this.isUI) this.main.clearOne(this);else document.body.removeChild(this.c[0]);
+				}
+
+				if (!this.isUI) Roots.remove(this);
 			}
 
-			if (!this.isUI) Roots.remove(this);
 			this.c = null;
 			this.s = null;
 			this.callback = null;
 			this.target = null;
+			this.isListen = false;
 		} // ----------------------
 		// change size 
 		// ----------------------
@@ -3951,6 +3964,7 @@
 			_this = _Proto.call(this, o) || this;
 			_this.ADD = o.add;
 			_this.uis = [];
+			_this.isEmpty = true;
 			_this.autoHeight = true;
 			_this.current = -1;
 			_this.target = null;
@@ -4129,12 +4143,29 @@
 			//if( u.isGroup ) 
 
 			u.group = this;
+			this.isEmpty = false;
 			return u;
 		} // remove one node
 		;
 
 		_proto.remove = function remove(n) {
 			if (n.clear) n.clear();
+		} // clear all iner 
+		;
+
+		_proto.empty = function empty() {
+			this.close();
+			var i = this.uis.length,
+					item;
+
+			while (i--) {
+				item = this.uis.pop();
+				this.c[2].removeChild(item.c[0]);
+				item.clear(true); //this.uis[i].clear()
+			}
+
+			this.isEmpty = true;
+			this.h = this.baseH;
 		} // clear one element
 		;
 
@@ -4145,7 +4176,11 @@
 				this.calc(-(this.uis[id].h + 1));
 				this.c[2].removeChild(this.uis[id].c[0]);
 				this.uis.splice(id, 1);
-				if (this.uis.length === 0) this.close();
+
+				if (this.uis.length === 0) {
+					this.isEmpty = true;
+					this.close();
+				}
 			}
 		};
 
@@ -4160,7 +4195,7 @@
 			this.setSvg(this.c[4], 'd', this.svgs.arrowDown);
 			this.rSizeContent();
 			var t = this.h - this.baseH;
-			this.parentHeight(t);
+			this.parentHeight(t); //console.log( this.uis );
 		};
 
 		_proto.close = function close() {
@@ -4170,25 +4205,24 @@
 			this.setSvg(this.c[4], 'd', this.svgs.arrow);
 			this.h = this.baseH;
 			this.s[0].height = this.h + 'px';
-			this.parentHeight(-t);
+			this.parentHeight(-t); //console.log( this.uis );
 		};
 
 		_proto.clear = function clear() {
-			this.clearGroup();
+			this.empty();
 			if (this.isUI) this.main.calc(-(this.h + 1));
 			Proto.prototype.clear.call(this);
 		};
 
 		_proto.clearGroup = function clearGroup() {
-			this.close();
-			var i = this.uis.length;
-
-			while (i--) {
-				this.uis[i].clear(); //this.uis.pop();
+			this.empty();
+			/*this.close();
+				let i = this.uis.length;
+			while(i--){
+					this.uis[i].clear();	 
 			}
-
 			this.uis = [];
-			this.h = this.baseH;
+			this.h = this.baseH;*/
 		};
 
 		_proto.calc = function calc(y) {
@@ -6682,7 +6716,8 @@
 				o = {};
 			}
 
-			this.canvas = null; // color
+			this.canvas = null;
+			this.isEmpty = true; // color
 
 			this.colors = Tools.cloneColor();
 			this.css = Tools.cloneCss();
@@ -7010,10 +7045,12 @@
 
 		_proto.add = function add$1() {
 			var a = arguments;
+			var ontop = false;
 
 			if (typeof a[1] === 'object') {
 				a[1].isUI = true;
 				a[1].main = this;
+				ontop = a[1].ontop ? a[1].ontop : false;
 			} else if (typeof a[1] === 'string') {
 				if (a[2] === undefined) [].push.call(a, {
 					isUI: true,
@@ -7021,15 +7058,14 @@
 				});else {
 					a[2].isUI = true;
 					a[2].main = this;
+					ontop = a[1].ontop ? a[1].ontop : false;
 				}
 			}
 
 			var u = add.apply(this, a);
 
-			if (u === null) return; //let n = add.apply( this, a );
-			//let n = UIL.add( ...args );
-
-			this.uis.push(u); //n.py = this.h;
+			if (u === null) return;
+			if (ontop) this.uis.unshift(u);else this.uis.push(u);
 
 			if (!u.autoWidth) {
 				var y = u.c[0].getBoundingClientRect().top;
@@ -7044,6 +7080,7 @@
 				this.calc(u.h + 1);
 			}
 
+			this.isEmpty = false;
 			return u;
 		};
 
@@ -7075,17 +7112,30 @@
 		} // clear all gui
 		;
 
-		_proto.clear = function clear() {
-			//this.callback = null;
-			var i = this.uis.length;
+		_proto.empty = function empty() {
+			//this.close();
+			var i = this.uis.length,
+					item;
 
 			while (i--) {
-				this.uis[i].clear();
+				item = this.uis.pop();
+				this.inner.removeChild(item.c[0]);
+				item.clear(true); //this.uis[i].clear()
 			}
 
-			this.uis = [];
-			Roots.listens = [];
+			this.isEmpty = true; //Roots.listens = [];
+
 			this.calc(-this.h);
+		};
+
+		_proto.clear = function clear() {
+			this.empty(); //this.callback = null;
+
+			/*let i = this.uis.length;
+			while( i-- ) this.uis[i].clear();
+				this.uis = [];
+			Roots.listens = [];
+				this.calc( -this.h );*/
 		} // ----------------------
 		//	 ITEMS SPECIAL
 		// ----------------------

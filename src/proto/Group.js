@@ -12,6 +12,8 @@ export class Group extends Proto {
 
         this.uis = [];
 
+        this.isEmpty = true;
+
         this.autoHeight = true;
         this.current = -1;
         this.target = null;
@@ -225,6 +227,8 @@ export class Group extends Proto {
 
         u.group = this;
 
+        this.isEmpty = false;
+
         return u;
 
     }
@@ -237,24 +241,45 @@ export class Group extends Proto {
 
     }
 
-     // clear one element
+    // clear all iner 
+
+    empty () {
+
+        this.close();
+
+        let i = this.uis.length, item;
+
+        while( i-- ){
+            item = this.uis.pop();
+            this.c[2].removeChild( item.c[0] );
+            item.clear( true );
+
+            //this.uis[i].clear()
+        }
+
+        this.isEmpty = true;
+        this.h = this.baseH;
+
+    }
+
+    // clear one element
 
     clearOne ( n ) { 
 
-        let id = this.uis.indexOf( n ); 
-        if ( id !== -1 ) {
+        let id = this.uis.indexOf( n );
 
+        if ( id !== -1 ) {
             this.calc( - ( this.uis[ id ].h + 1 ) );
             this.c[2].removeChild( this.uis[ id ].c[0] );
             this.uis.splice( id, 1 ); 
 
-            if( this.uis.length === 0 ) this.close();
+            if( this.uis.length === 0 ){ 
+                this.isEmpty = true;
+                this.close();
+            }
         }
 
     }
-
-
-
 
     parentHeight ( t ) {
 
@@ -275,6 +300,8 @@ export class Group extends Proto {
 
         this.parentHeight( t );
 
+        //console.log( this.uis );
+
     }
 
     close () {
@@ -289,11 +316,13 @@ export class Group extends Proto {
 
         this.parentHeight( -t );
 
+        //console.log( this.uis );
+
     }
 
     clear () {
 
-        this.clearGroup();
+        this.empty();
         if( this.isUI ) this.main.calc( -( this.h + 1 ));
         Proto.prototype.clear.call( this );
 
@@ -301,15 +330,16 @@ export class Group extends Proto {
 
     clearGroup () {
 
-        this.close();
+        this.empty();
+
+        /*this.close();
 
         let i = this.uis.length;
         while(i--){
-            this.uis[i].clear();
-            //this.uis.pop();
+            this.uis[i].clear();   
         }
         this.uis = [];
-        this.h = this.baseH;
+        this.h = this.baseH;*/
 
     }
 

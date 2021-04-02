@@ -1400,7 +1400,7 @@ const R = {
 
         let id = R.listens.indexOf( proto );
 
-        if( id !== -1 ) return; 
+        if( id !== -1 ) return false; 
 
         R.listens.push( proto );
 
@@ -1408,6 +1408,8 @@ const R = {
             R.isLoop = true;
             R.loop();
         }
+
+        return true;
 
     },
 
@@ -1559,7 +1561,11 @@ class Proto {
         this.main = o.main || null;
         this.isUI = o.isUI || false;
         this.group = null;
+
+        this.isListen = false;
         //this.parentGroup = null;
+
+        this.ontop = o.ontop ? o.ontop : false; // 'beforebegin' 'afterbegin' 'beforeend' 'afterend'
 
         this.css = this.main ? this.main.css : Tools.css;
         this.colors = this.main ? this.main.colors : Tools.colors;
@@ -1712,7 +1718,6 @@ class Proto {
 
         this.zone.h = this.h;
 
-
         let s = this.s; // style cache
         let c = this.c; // div cach
 
@@ -1737,12 +1742,19 @@ class Proto {
             }
         }
 
-        if( this.target !== null ){ 
+        let pp = this.target !== null ? this.target : (this.isUI ? this.main.inner : document.body);
+
+        if( this.ontop ) pp.insertAdjacentElement( 'afterbegin', c[0] );
+        else pp.appendChild( c[0] );
+
+        
+
+        /*if( this.target !== null ){ 
             this.target.appendChild( c[0] );
         } else {
             if( this.isUI ) this.main.inner.appendChild( c[0] );
             else document.body.appendChild( c[0] );
-        }
+        }*/
 
         c[0].appendChild( frag );
 
@@ -1860,7 +1872,7 @@ class Proto {
 
     listen () {
 
-        Roots.addListen( this );
+        this.isListen = Roots.addListen( this );
         return this;
 
     }
@@ -1938,28 +1950,35 @@ class Proto {
     // clear node
     // ----------------------
     
-    clear () {
+    clear ( nofull ) {
+
+        if( this.isListen ) Roots.removeListen( this );
 
         Tools.clear( this.c[0] );
 
-        if( this.target !== null ){ 
+        if( !nofull ){
 
-            if( this.group !== null ) this.group.clearOne( this );
-            else this.target.removeChild( this.c[0] );
+            if( this.target !== null ){ 
 
-        } else {
+                if( this.group !== null  ) this.group.clearOne( this );
+                else this.target.removeChild( this.c[0] );
 
-            if( this.isUI ) this.main.clearOne( this );
-            else document.body.removeChild( this.c[0] );
+            } else {
+
+                if( this.isUI ) this.main.clearOne( this );
+                else document.body.removeChild( this.c[0] );
+
+            }
+
+            if( !this.isUI ) Roots.remove( this );
 
         }
-
-        if( !this.isUI ) Roots.remove( this );
 
         this.c = null;
         this.s = null;
         this.callback = null;
         this.target = null;
+        this.isListen = false;
 
     }
 
@@ -3745,6 +3764,8 @@ class Group extends Proto {
 
         this.uis = [];
 
+        this.isEmpty = true;
+
         this.autoHeight = true;
         this.current = -1;
         this.target = null;
@@ -3957,6 +3978,8 @@ class Group extends Proto {
 
         u.group = this;
 
+        this.isEmpty = false;
+
         return u;
 
     }
@@ -3969,24 +3992,45 @@ class Group extends Proto {
 
     }
 
-     // clear one element
+    // clear all iner 
+
+    empty () {
+
+        this.close();
+
+        let i = this.uis.length, item;
+
+        while( i-- ){
+            item = this.uis.pop();
+            this.c[2].removeChild( item.c[0] );
+            item.clear( true );
+
+            //this.uis[i].clear()
+        }
+
+        this.isEmpty = true;
+        this.h = this.baseH;
+
+    }
+
+    // clear one element
 
     clearOne ( n ) { 
 
-        let id = this.uis.indexOf( n ); 
-        if ( id !== -1 ) {
+        let id = this.uis.indexOf( n );
 
+        if ( id !== -1 ) {
             this.calc( - ( this.uis[ id ].h + 1 ) );
             this.c[2].removeChild( this.uis[ id ].c[0] );
             this.uis.splice( id, 1 ); 
 
-            if( this.uis.length === 0 ) this.close();
+            if( this.uis.length === 0 ){ 
+                this.isEmpty = true;
+                this.close();
+            }
         }
 
     }
-
-
-
 
     parentHeight ( t ) {
 
@@ -4007,6 +4051,8 @@ class Group extends Proto {
 
         this.parentHeight( t );
 
+        //console.log( this.uis );
+
     }
 
     close () {
@@ -4021,11 +4067,13 @@ class Group extends Proto {
 
         this.parentHeight( -t );
 
+        //console.log( this.uis );
+
     }
 
     clear () {
 
-        this.clearGroup();
+        this.empty();
         if( this.isUI ) this.main.calc( -( this.h + 1 ));
         Proto.prototype.clear.call( this );
 
@@ -4033,15 +4081,16 @@ class Group extends Proto {
 
     clearGroup () {
 
-        this.close();
+        this.empty();
+
+        /*this.close();
 
         let i = this.uis.length;
         while(i--){
-            this.uis[i].clear();
-            //this.uis.pop();
+            this.uis[i].clear();   
         }
         this.uis = [];
-        this.h = this.baseH;
+        this.h = this.baseH;*/
 
     }
 
@@ -6842,6 +6891,8 @@ class Gui {
 
         this.canvas = null;
 
+        this.isEmpty = true;
+
         // color
         this.colors = Tools.cloneColor();
         this.css = Tools.cloneCss();
@@ -7279,10 +7330,14 @@ class Gui {
 
         let a = arguments;
 
+        let ontop = false;
+
         if( typeof a[1] === 'object' ){ 
 
             a[1].isUI = true;
             a[1].main = this;
+
+            ontop = a[1].ontop ? a[1].ontop : false;
 
         } else if( typeof a[1] === 'string' ){
 
@@ -7290,6 +7345,8 @@ class Gui {
             else {
                 a[2].isUI = true;
                 a[2].main = this;
+
+                ontop = a[1].ontop ? a[1].ontop : false;
             }
             
         } 
@@ -7298,12 +7355,8 @@ class Gui {
 
         if( u === null ) return;
 
-
-        //let n = add.apply( this, a );
-        //let n = UIL.add( ...args );
-
-        this.uis.push( u );
-        //n.py = this.h;
+        if(ontop) this.uis.unshift( u );
+        else this.uis.push( u );
 
         if( !u.autoWidth ){
             let y = u.c[0].getBoundingClientRect().top;
@@ -7315,6 +7368,8 @@ class Gui {
             this.prevY = 0;//-1;
             this.calc( u.h + 1 );
         }
+
+        this.isEmpty = false;
 
         return u;
 
@@ -7359,17 +7414,39 @@ class Gui {
 
     // clear all gui
 
+    empty () {
+
+        //this.close();
+
+        let i = this.uis.length, item;
+
+        while( i-- ){
+            item = this.uis.pop();
+            this.inner.removeChild( item.c[0] );
+            item.clear( true );
+
+            //this.uis[i].clear()
+        }
+
+        this.isEmpty = true;
+        //Roots.listens = [];
+        this.calc( -this.h );
+
+    }
+
     clear () {
+
+        this.empty();
 
         //this.callback = null;
 
-        let i = this.uis.length;
+        /*let i = this.uis.length;
         while( i-- ) this.uis[i].clear();
 
         this.uis = [];
         Roots.listens = [];
 
-        this.calc( -this.h );
+        this.calc( -this.h );*/
 
     }
 

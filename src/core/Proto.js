@@ -15,7 +15,11 @@ class Proto {
         this.main = o.main || null;
         this.isUI = o.isUI || false;
         this.group = null;
+
+        this.isListen = false;
         //this.parentGroup = null;
+
+        this.ontop = o.ontop ? o.ontop : false; // 'beforebegin' 'afterbegin' 'beforeend' 'afterend'
 
         this.css = this.main ? this.main.css : Tools.css;
         this.colors = this.main ? this.main.colors : Tools.colors;
@@ -168,7 +172,6 @@ class Proto {
 
         this.zone.h = this.h;
 
-
         let s = this.s; // style cache
         let c = this.c; // div cach
 
@@ -193,12 +196,19 @@ class Proto {
             }
         }
 
-        if( this.target !== null ){ 
+        let pp = this.target !== null ? this.target : (this.isUI ? this.main.inner : document.body);
+
+        if( this.ontop ) pp.insertAdjacentElement( 'afterbegin', c[0] );
+        else pp.appendChild( c[0] );
+
+        
+
+        /*if( this.target !== null ){ 
             this.target.appendChild( c[0] );
         } else {
             if( this.isUI ) this.main.inner.appendChild( c[0] );
             else document.body.appendChild( c[0] );
-        }
+        }*/
 
         c[0].appendChild( frag );
 
@@ -316,7 +326,7 @@ class Proto {
 
     listen () {
 
-        Roots.addListen( this );
+        this.isListen = Roots.addListen( this );
         return this;
 
     }
@@ -394,28 +404,35 @@ class Proto {
     // clear node
     // ----------------------
     
-    clear () {
+    clear ( nofull ) {
+
+        if( this.isListen ) Roots.removeListen( this );
 
         Tools.clear( this.c[0] );
 
-        if( this.target !== null ){ 
+        if( !nofull ){
 
-            if( this.group !== null ) this.group.clearOne( this );
-            else this.target.removeChild( this.c[0] );
+            if( this.target !== null ){ 
 
-        } else {
+                if( this.group !== null  ) this.group.clearOne( this );
+                else this.target.removeChild( this.c[0] );
 
-            if( this.isUI ) this.main.clearOne( this );
-            else document.body.removeChild( this.c[0] );
+            } else {
+
+                if( this.isUI ) this.main.clearOne( this );
+                else document.body.removeChild( this.c[0] );
+
+            }
+
+            if( !this.isUI ) Roots.remove( this );
 
         }
-
-        if( !this.isUI ) Roots.remove( this );
 
         this.c = null;
         this.s = null;
         this.callback = null;
         this.target = null;
+        this.isListen = false;
 
     }
 

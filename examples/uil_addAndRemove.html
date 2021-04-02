@@ -61,7 +61,7 @@ function addRemove_0(){
 
     } else {
 
-        tmp_0 = ui.add('color',  { name:'color', type:'html', value:0x000000, fontColor:'#D4B87B', h:40 });
+        tmp_0 = ui.add('color',  { name:'color', type:'html', value:0x000000, fontColor:'#D4B87B', h:40, ontop:true });
 
     }
 }
@@ -94,23 +94,20 @@ function addRemove_1(){
 
 function addRemove_2(){
 
-    if( tmp_2.length ){
-
-        for( let i in tmp_2 ){
-
-            gr.remove(  tmp_2[ i ] );
-
-        }
-
-        tmp_2 = [];
-
-    } else {
+    if( gr.isEmpty ){
 
         for( let o in data ){
 
-            tmp_2.push(  gr.add( data, o,  { type:'slide',  min:0, max:1, value:0, step:0.01, precision:2, h:20 }) )
+            gr.add( data, o,  { type:'slide',  min:0, max:1, value:0, step:0.01, precision:2, h:20 }) 
 
         }
+
+        gr.open();
+
+
+    } else {
+
+        gr.empty();
 
     }
 }
