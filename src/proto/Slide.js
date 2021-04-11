@@ -21,6 +21,7 @@ export class Slide extends Proto {
         this.allway = o.allway || false;
 
         this.isDeg = o.isDeg || false;
+        this.isCyclic = o.cyclic || false;
 
         this.firstImput = false;
 
@@ -136,6 +137,32 @@ export class Slide extends Proto {
 
         return nup;
 
+    }
+
+    wheel ( e ) {
+
+        let name = this.testZone( e );
+    
+        if( name === 'scroll' ) {
+    
+            let v = this.value - this.step * e.delta;
+    
+            if ( v > this.max ) {
+                v = this.isCyclic ? this.min : this.max;
+            } else if ( v < this.min ) {
+                v = this.isCyclic ? this.max : this.min;
+            }
+    
+            this.setValue(v);
+            this.old = v;
+            this.update( true );
+
+            return true;
+    
+        }
+              
+        return false;
+    
     }
 
     //keydown: function ( e ) { return true; },
