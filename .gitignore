@@ -4,4 +4,3 @@ node_modules
 src_old
 npm-debug.log
 testing
-build_local/
