@@ -22,7 +22,7 @@ export class Fps extends Proto {
 
         this.custom = o.custom || false;
         this.names = o.names || ['FPS', 'MS'];
-        let cc = o.cc || ['90,90,90', '255,255,0'];
+        let cc = o.cc || ['220,220,220', '255,255,0'];
 
        // this.divid = [ 100, 100, 100 ];
        // this.multy = [ 30, 30, 30 ];
@@ -61,7 +61,7 @@ export class Fps extends Proto {
 
             }
 
-            this.txt = 'FPS'
+            this.txt = o.name || 'Fps'
 
         }
 

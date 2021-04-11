@@ -18,7 +18,6 @@
 <body>
 <div id='content'></div>
 <div id='logo'></div>
-<div id='version'></div>
 <div id='debug'></div>
 
 <!-- GITHUB LOGO -->
@@ -29,7 +28,7 @@
 <script>
 
 document.getElementById('logo').innerHTML = UIL.Tools.icon('logo', '#FFF', 64);
-document.getElementById('version').innerHTML = 'Uil '+ UIL.REVISION;
+//document.getElementById('version').innerHTML = 'Uil '+ UIL.REVISION;
 
 // svg github link
 var octoArm = document.getElementById('octo-arm');
@@ -47,15 +46,15 @@ var debug = document.getElementById('debug');
 var callback = function(v){ debug.innerHTML = v; }
 var callbackButton = function(){ debug.innerHTML = "i'm a button !!" ; console.log(this.value) }
 var callbackSize = function(v){  ui.setWidth( v ); }
-var callbackLogo = function(v){ document.getElementById('logoin').setAttributeNS(null, 'fill', v ); document.getElementById('version').style.color = v;  }
+var callbackLogo = function(v){ document.getElementById('logoin').setAttributeNS(null, 'fill', v );   }
 
 // single UI element
-var s = UIL.add('slide', {target:document.body, callback:callbackSize, name:'ui size', min:100, max:400, value:300, step:10, w:100, pos:{left:'10px', top:'40px' }, simple:true });
+var s = UIL.add('slide', {target:document.body, callback:callbackSize, name:'ui size', min:100, max:400, value:200, step:10, w:100, pos:{left:'10px', top:'40px' }, simple:true });
 var b = UIL.add('button', {target:document.body, callback:populate, name:'populate', w:100, pos:{left:'10px', top:'60px'}, simple:true });
 var c = UIL.add('color', {target:document.body, callback:callbackLogo, name:' ', w:100, pos:{left:'10px', top:'auto', bottom:'10px' }, simple:true, side:'up', ctype:'html' });
 
 // init gui and define global callback
-var ui = new UIL.Gui( { css:'top:84px; left:50%;', w:320, h:20, center:true } ).onChange( callback );
+var ui = new UIL.Gui( { css:'top:68px; left:50%;', w:200, h:20, center:true } ).onChange( callback );
 
 populate();
 
@@ -63,36 +62,38 @@ function populate () {
 
     if( !display ){
 
-        ui.add('title',  { name:'Title'});
-        //ui.add('fps',    { h:30, hplus:100, res:80 });
-        ty = ui.add('fps', { name:'custom', h:30, hplus:100, custom:true, alpha:1, res:50, names:['Post','Step','Next'], cc:['50,160,222','222,120,50','222,222,50'], range:[25,25,25], precision:2, radius:4, fontColor:'#EEEEEE', adding:true   });
-        ui.add('bool',   { name:'bool', h:20, value:false });
-        ui.add('color',  { name:'color', type:'html', value:0xffffff});
-        ui.add('color',  { name:'color', type:'html', value:[0,1,1,1], h:20});
-        ui.add('slide',  { name:'slide', min:-100, max:100, value:0, precision:0 });
-        ui.add('slide',  { name:'slide', min:-1, max:1, value:0, step:0.01, precision:2, mode:1 });
-        ui.add('slide',  { name:'slide', min:-1, max:1, value:0, step:0.01, precision:2, mode:2 });
-        ui.add('string', { name:'string', value:'welcome to uil', h:30});
-        ui.add('list',   { name:'list', list:list});
-        ui.add('list',   { name:'list', list:list2, itemHeight:30, listOnly:true });
-        ui.add('graph',  { name:'graph', h:80, value:[-0.5,1,0.5,1,0.25,0,0.5,1,0.5], neg:true, multiplicator:90 });
-        ui.add('number', { name:'number', value:20, min:-60, max:200 });
-        ui.add('number', { name:'vector2', value:[0,0] });
-        ui.add('number', { name:'vector3', value:[0,0,0] });
-        ui.add('number', { name:'vector4', value:[0,0,0,0], step:1, precision:0, h:36 });
-        ui.add('button', { name:'button', callback:callbackButton });
+        ui.add('title',  { name:'UIL '+ UIL.REVISION, h:22, align:'center' });
+        ui.add('fps', { h:22, hplus:70, res:80 });
+        ty = ui.add('fps', { name:'custom graph', h:22, hplus:70, custom:true, alpha:1, res:50, names:['Post','Step','Next'], cc:['50,160,222','222,120,50','222,222,50'], range:[25,25,25], precision:2, radius:4, fontColor:'#EEEEEE', adding:true   });
+        ui.add('bool',   { name:'Bool', h:20, value:false });
+        ui.add('color',  { name:'Color', type:'html', value:0xffffff});
+        ui.add('color',  { name:'Color', type:'html', value:[0,1,1,1], h:20});
+        ui.add('slide',  { name:'Slide', min:-100, max:100, value:0, precision:0 });
+        ui.add('slide',  { name:'Slide', min:-1, max:1, value:0, step:0.01, precision:2, mode:1 });
+        ui.add('slide',  { name:'Slide', min:-1, max:1, value:0, step:0.01, precision:2, mode:2 });
+        ui.add('string', { name:'String', value:'welcome to uil', h:30});
+        ui.add('list',   { name:'List', list:list});
+        ui.add('list',   { name:'', list:list2, itemHeight:30, listOnly:true });
+        ui.add('graph',  { name:'Graph', h:80, value:[-0.5,1,0.5,1,0.25,0,0.5,1,0.5], neg:true, multiplicator:90, precision:0 });
+
+        ui.add('number', { name:'Number', value:20, min:-60, max:200 });
+        ui.add('number', { name:'Vector2', value:[0,0] });
+        ui.add('number', { name:'Vector3', value:[0,0,0] });
+        ui.add('number', { name:'Vector4', value:[0,0,0,0], step:1, precision:0 });
+
+        ui.add('button', { name:'Button', callback:callbackButton });
 
         //ui.add('button', { name: 'Test HTML', fontColor: '#D4B87B', h: 30 } ).onChange( ( ) => { let w = window.open("about:blank", "hello", "width=200,height=200"); } );
-        ui.add('button', { name: '3D UIL TEST', fontColor: '#D4B87B', h: 30, link:true } ).onChange( ( ) => { let w = window.open("./examples/uil_3d.html", ""); w.focus();} );
+        ui.add('button', { name: '3D UIL TEST', fontColor: '#D4B87B', h: 30, link:true } ).onChange( function ( ) { let w = window.open("./examples/uil_3d.html", ""); w.focus();} );
 
-        ui.add('grid', { name:'button', values:['box', 'sphere', 'cylinder', 'wheel', 'convex', 'mesh'], h:100 });
+        ui.add('grid', { name:'Button', values:['Line','Rectangle', 'Circle', 'Ellipse', 'Arc', 'Donut'] });
 
-        ui.add('empty', { name:'button', h:2 });
+        ui.add('empty', { h:20 });
         ui.add('selector', { name:'selector', fontColor:'#D4B87B', h:30, value:1, values:[1, 2, 3, 4] });
 
         ui.add('select', { name:'select', fontColor:'#D4B87B', h:30, value:'yoooch' });
 
-        gr0 = ui.add('group', { name:'Group', h:36 });
+        gr0 = ui.add('group', { name:'Group', h:30 });
 
         gr0.add('list',   { name:'list', list:list });
 
@@ -102,25 +103,23 @@ function populate () {
         gr0.add('slide',  { name:'slide', min:-100, max:100, value:0, precision:0, fontColor:'#FF5B2B', h:20 });
         gr0.add('slide',  { name:'slide', min:-100, max:100, value:0, precision:0, fontColor:'#E70739', h:20 });
 
-        gr1 = ui.add('group', { name:'circulars', fontColor:'#D4B87B' });
+        gr1 = ui.add('group', { name:'circulars', fontColor:'#D4B87B', h:30  });
 
-        gr1.add('circular', { name:'circular', w:75, min:0, max:100, value:25, precision:2 , fontColor:'#B0CC99' });
-        gr1.add('circular', { name:'circular', w:75, min:0, max:100, value:50, precision:2 , fontColor:'#F6E497' });
-        gr1.add('circular', { name:'circular', w:75, min:0, max:100, value:70, precision:0, step:10, fontColor:'#C79F4B' });
-        gr1.add('circular', { name:'circular', w:75, min:0, max:100, value:100, precision:0, step:1, fontColor:'#FF5B2B' });
+        gr1.add('circular', { name:'circular', w:64, min:0, max:100, value:25, precision:2 , fontColor:'#B0CC99' });
+        gr1.add('circular', { name:'circular', w:64, min:0, max:100, value:50, precision:2 , fontColor:'#F6E497' });
+        gr1.add('circular', { name:'circular', w:64, min:0, max:100, value:70, precision:0, step:10, fontColor:'#C79F4B' });
 
-        gr2 = ui.add('group', { name:'knobs', fontColor:'#D4B87B' });
+        gr2 = ui.add('group', { name:'knobs', fontColor:'#D4B87B', h:30  });
 
-        gr2.add('knob', { name:'knob', w:50, min:0, max:100, value:25, precision:2 , fontColor:'#D4B87B' });
-        gr2.add('knob', { name:'knob', w:66, min:0, max:100, value:50, precision:2 , fontColor:'#D4B87B' });
-        gr2.add('knob', { name:'knob', w:84, min:0, max:100, value:70, precision:0, step:10, fontColor:'#D4B87B' });
-        gr2.add('knob', { name:'knob', w:100, min:0, max:100, value:100, precision:0, step:1, fontColor:'#D4B87B' });
+        gr2.add('knob', { name:'knob', w:64, min:0, max:100, value:25, precision:2 , fontColor:'#D4B87B' });
+        gr2.add('knob', { name:'knob', w:64, min:0, max:100, value:50, precision:2 , fontColor:'#D4B87B' });
+        gr2.add('knob', { name:'knob', w:64, min:0, max:100, value:70, precision:0, step:10, fontColor:'#D4B87B' });
 
-        gr3 = ui.add('group', { name:'joysticks', fontColor:'#D4B87B' });
+        gr3 = ui.add('group', { name:'joysticks', fontColor:'#D4B87B', h:30  });
 
-        gr3.add('joystick', { name:'joystick', w:100, multiplicator:1, precision:2, fontColor:'#D4B87B', mode:1 });
-        gr3.add('joystick', { name:'joystick', w:100, multiplicator:1, precision:2, fontColor:'#D4B87B' });
-        gr3.add('joystick', { name:'joystick', w:100, multiplicator:1, precision:2, fontColor:'#D4B87B' });
+        gr3.add('joystick', { name:'joystick', w:64, multiplicator:1, precision:2, fontColor:'#D4B87B', mode:1 });
+        gr3.add('joystick', { name:'joystick', w:64, multiplicator:1, precision:2, fontColor:'#D4B87B' });
+        gr3.add('joystick', { name:'joystick', w:64, multiplicator:1, precision:2, fontColor:'#D4B87B' });
         
         //gr0.open();
 

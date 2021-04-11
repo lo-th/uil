@@ -26,6 +26,8 @@ export class List extends Proto {
 
         this.listOnly = o.listOnly || false;
 
+        if( this.txt === '' ) this.p = 0;
+
         this.buttonColor = o.bColor || this.colors.button;
 
         let fltop = Math.floor(this.h*0.5)-5;

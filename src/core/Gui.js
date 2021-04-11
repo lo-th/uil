@@ -111,14 +111,17 @@ export class Gui {
         this.scrollBG.appendChild( this.scroll );
 
         // bottom button
-        this.bottom = Tools.dom( 'div',  this.css.txt + 'width:100%; top:auto; bottom:0; left:0; border-bottom-right-radius:10px;  border-bottom-left-radius:10px; text-align:center; height:'+this.bh+'px; line-height:'+(this.bh-5)+'px; border-top:1px solid '+Tools.colors.stroke+';');
+
+        let r = o.radius || this.colors.radius;
+        this.bottom = Tools.dom( 'div',  this.css.txt + 'width:100%; top:auto; bottom:0; left:0; border-bottom-right-radius:'+r+'px;  border-bottom-left-radius:'+r+'px; text-align:center; height:'+this.bh+'px; line-height:'+(this.bh-5)+'px;');// border-top:1px solid '+Tools.colors.stroke+';');
         this.content.appendChild( this.bottom );
-        this.bottom.textContent = 'close';
+        this.bottom.textContent = 'Close';
         this.bottom.style.background = this.bg;
 
         //
 
         this.parent = o.parent !== undefined ? o.parent : null;
+        this.parent = o.target !== undefined ? o.target : this.parent;
         
         if( this.parent === null && !this.isCanvas ){ 
         	this.parent = document.body;
@@ -361,7 +364,7 @@ export class Gui {
 	    		if( type === 'mousemove' ) change = this.mode('bottomOver');
 	    		if( type === 'mousedown' ) {
 	    			this.isOpen = this.isOpen ? false : true;
-		            this.bottom.textContent = this.isOpen ? 'close' : 'open';
+		            this.bottom.textContent = this.isOpen ? 'Close' : 'Open';
 		            this.setHeight();
 		            this.mode('def');
 		            change = true;

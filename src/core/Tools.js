@@ -36,34 +36,20 @@ const T = {
 
     },
 
-    size: {  w: 240, h: 20, p: 30, s: 20 },
+    size: {  w: 240, h: 20, p: 30, s: 8 },
 
     // ----------------------
     //   COLOR
     // ----------------------
 
-    cloneColor: function () {
-
-        let cc = Object.assign({}, T.colors );
-        return cc;
-
-    },
-
-    cloneCss: function () {
-
-        let cc = Object.assign({}, T.css );
-        return cc;
-
-    },
-
     colors: {
 
-        text : '#C0C0C0',
+        text : '#dcdcdc',
         textOver : '#FFFFFF',
         txtselectbg : 'none',
 
-        background: 'rgba(44,44,44,0.3)',
-        backgroundOver: 'rgba(11,11,11,0.5)',
+        background: 'rgba(50,50,50,0.5)',//'rgba(44,44,44,0.3)',
+        backgroundOver: 'rgba(50,50,50,0.5)',//'rgba(11,11,11,0.5)',
 
         //input: '#005AAA',
 
@@ -73,14 +59,12 @@ const T = {
         inputBg: 'rgba(0,0,0,0.1)',
         inputOver: 'rgba(0,0,0,0.2)',
 
+        // input border
         border : '#454545',
         borderOver : '#5050AA',
         borderSelect : '#308AFF',
 
-        scrollback:'rgba(44,44,44,0.2)',
-        scrollbackover:'rgba(44,44,44,0.2)',
-
-        button : '#404040',
+        button : '#3c3c3c', //'#404040',
         boolbg : '#181818',
         boolon : '#C0C0C0',
 
@@ -91,12 +75,21 @@ const T = {
         action: '#FF3300',
 
         stroke: 'rgba(11,11,11,0.5)',
+
         scroll: '#333333',
+        scrollback:'rgba(44,44,44,0.2)',
+        scrollbackover:'rgba(44,44,44,0.2)',
 
         hide: 'rgba(0,0,0,0)',
 
-        groupBorder: 'none',
-        buttonBorder: 'none',
+        groupBorder: '#3e3e3e', //'none',
+        buttonBorder: '#4a4a4a',//'none',
+
+        fontFamily: 'Tahoma',
+        fontShadow: 'none',
+        fontSize:11,
+
+        radius:4,
 
     },
 
@@ -106,6 +99,10 @@ const T = {
         //unselect: '-o-user-select:none; -ms-user-select:none; -khtml-user-select:none; -webkit-user-select:none; -moz-user-select:none;', 
         basic: 'position:absolute; pointer-events:none; box-sizing:border-box; margin:0; padding:0; overflow:hidden; ' + '-o-user-select:none; -ms-user-select:none; -khtml-user-select:none; -webkit-user-select:none; -moz-user-select:none;',
         button:'display:flex; justify-content:center; align-items:center; text-align:center;',
+
+        /*txt: T.css.basic + 'font-family:'+ T.colors.fontFamily +'; font-size:'+T.colors.fontSize+'px; color:'+T.colors.text+'; padding:2px 10px; left:0; top:2px; height:16px; width:100px; overflow:hidden; white-space: nowrap;',
+        txtselect:  T.css.txt + 'display:flex; justify-content:left; align-items:center; text-align:left;' +'padding:2px 5px; border:1px dashed ' + T.colors.border + '; background:'+ T.colors.txtselectbg+';',
+        item: T.css.txt + 'position:relative; background:rgba(0,0,0,0.2); margin-bottom:1px;',*/
     },
 
     // svg path
@@ -135,22 +132,50 @@ const T = {
 
     },
 
+    setStyle : function ( data ){
+
+        for ( var o in data ){
+            if( T.colors[o] ) T.colors[o] = data[o];
+        }
+
+        T.setText();
+
+    },
+
+    // ----------------------
     // custom text
+    // ----------------------
 
-    setText : function( size, color, font, shadow, colors, css ){
+    setText : function( size, color, font, shadow ){
 
-        size = size || 13;
-        color = color || '#CCC';
-        font = font || 'Consolas,monaco,monospace;';//'Monospace';//'"Consolas", "Lucida Console", Monaco, monospace';
+        let c = T.colors;
 
-        colors = colors || T.colors;
-        css = css || T.css;
+        if( font !== undefined ) c.fontFamily = font;
+        if( color !== undefined ) c.text = color;
+        if( size !== undefined ) c.fontSize = size;
 
-        colors.text = color;
-        css.txt = css.basic + 'font-family:'+font+'; font-size:'+size+'px; color:'+color+'; padding:2px 10px; left:0; top:2px; height:16px; width:100px; overflow:hidden; white-space: nowrap;';
-        if( shadow ) css.txt += ' text-shadow:'+ shadow + '; '; //"1px 1px 1px #ff0000";
-        css.txtselect = css.txt + 'display:flex; justify-content:left; align-items:center; text-align:left;' +'padding:2px 5px; border:1px dashed ' + colors.border + '; background:'+ colors.txtselectbg+';';
-        css.item = css.txt + 'position:relative; background:rgba(0,0,0,0.2); margin-bottom:1px;';
+        T.css.txt = T.css.basic + 'font-family:'+ c.fontFamily +'; font-size:'+c.fontSize+'px; color:'+c.text+'; padding:2px 10px; left:0; top:2px; height:16px; width:100px; overflow:hidden; white-space: nowrap;';
+        if( shadow !== undefined ) T.css.txt += ' text-shadow:'+ shadow + '; '; //"1px 1px 1px #ff0000";
+        if( c.fontShadow !== 'none' ) T.css.txt += ' text-shadow: 1px 1px 1px '+c.fontShadow+';';
+        T.css.txtselect = T.css.txt + 'display:flex; justify-content:left; align-items:center; text-align:left;' +'padding:2px 5px; border:1px dashed ' + c.border + '; background:'+ c.txtselectbg+';';
+        T.css.item = T.css.txt + 'position:relative; background:rgba(0,0,0,0.2); margin-bottom:1px;';
+
+    },
+
+
+    // intern function
+
+    cloneColor: function () {
+
+        let cc = Object.assign({}, T.colors );
+        return cc;
+
+    },
+
+    cloneCss: function () {
+
+        let cc = Object.assign({}, T.css );
+        return cc;
 
     },
 
@@ -598,12 +623,11 @@ const T = {
         let t = ["<svg xmlns='"+T.svgns+"' version='1.1' xmlns:xlink='"+T.htmls+"' style='pointer-events:none;' preserveAspectRatio='xMinYMax meet' x='0px' y='0px' width='"+w+"px' height='"+w+"px' viewBox='"+viewBox+"'><g>"];
         switch(type){
             case 'logo':
-            //t[1]="<path id='logoin' stroke='"+color+"' stroke-width='16' stroke-linejoin='round' stroke-linecap='square' fill='none' d='M 192 44 L 192 148 Q 192 174.5 173.3 193.25 154.55 212 128 212 101.5 212 82.75 193.25 64 174.5 64 148 L 64 44 M 160 44 L 160 148 Q 160 161.25 150.65 170.65 141.25 180 128 180 114.75 180 105.35 170.65 96 161.25 96 148 L 96 44'/>";
             t[1]="<path id='logoin' fill='"+color+"' stroke='none' d='"+T.logoFill_d+"'/>";
-            
             break;
             case 'save':
-            t[1]="<path stroke='"+color+"' stroke-width='4' stroke-linejoin='round' stroke-linecap='round' fill='none' d='M 26.125 17 L 20 22.95 14.05 17 M 20 9.95 L 20 22.95'/><path stroke='"+color+"' stroke-width='2.5' stroke-linejoin='round' stroke-linecap='round' fill='none' d='M 32.6 23 L 32.6 25.5 Q 32.6 28.5 29.6 28.5 L 10.6 28.5 Q 7.6 28.5 7.6 25.5 L 7.6 23'/>";
+            t[1]="<path stroke='"+color+"' stroke-width='4' stroke-linejoin='round' stroke-linecap='round' fill='none' d='M 26.125 17 L 20 22.95 14.05 17 M 20 9.95 L 20 22.95'/><path stroke='"+color;
+            t[1]+="' stroke-width='2.5' stroke-linejoin='round' stroke-linecap='round' fill='none' d='M 32.6 23 L 32.6 25.5 Q 32.6 28.5 29.6 28.5 L 10.6 28.5 Q 7.6 28.5 7.6 25.5 L 7.6 23'/>";
             break;
         }
         t[2] = "</g></svg>";

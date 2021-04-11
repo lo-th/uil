@@ -5,9 +5,10 @@ export class Empty extends Proto {
     constructor( o = {} ) {
 
 	    o.simple = true;
-	    o.isEmpty = true;
+	    o.isSpace = true;
 
         super( o );
+        
         this.init();
 
     }

@@ -30,9 +30,11 @@ export class Group extends Proto {
         this.c[3] = this.dom( 'path', this.css.basic + 'position:absolute; width:10px; height:10px; left:0; top:'+fltop+'px;', { d:this.svgs.group, fill:this.fontColor, stroke:'none'});
         this.c[4] = this.dom( 'path', this.css.basic + 'position:absolute; width:10px; height:10px; left:4px; top:'+fltop+'px;', { d:this.svgs.arrow, fill:this.fontColor, stroke:'none'});
         // bottom line
-        if(this.isLine) this.c[5] = this.dom( 'div', this.css.basic +  'background:rgba(255, 255, 255, 0.2); width:100%; left:0; height:1px; bottom:0px');
+        if( this.isLine ) this.c[5] = this.dom( 'div', this.css.basic +  'background:rgba(255, 255, 255, 0.2); width:100%; left:0; height:1px; bottom:0px');
 
         let s = this.s;
+
+
 
         s[0].height = this.h + 'px';
         s[1].height = this.h + 'px';
@@ -49,8 +51,12 @@ export class Group extends Proto {
         
         this.init();
 
-        if( o.bg !== undefined ) this.setBG(o.bg);
+        //if( o.bg !== undefined ) this.setBG(o.bg);
+        this.setBG( this.bg );
         if( o.open !== undefined ) this.open();
+
+
+        //s[0].background = this.bg;
 
     }
 

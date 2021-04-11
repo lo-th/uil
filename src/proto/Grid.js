@@ -7,7 +7,6 @@ export class Grid extends Proto {
         super( o );
 
         this.value = false;
-
         this.values = o.values || [];
 
         if( typeof this.values === 'string' ) this.values = [ this.values ];
@@ -20,15 +19,16 @@ export class Grid extends Proto {
         this.buttonDown = o.bDown || this.colors.select;
 
         this.spaces = o.spaces || [10,3];
-        this.bsize = o.bsize || [90,20];
+        this.bsize = o.bsize || [100,20];
 
-
+        this.bsizeMax = this.bsize[0];
 
         this.lng = this.values.length;
         this.tmp = [];
         this.stat = [];
-        this.grid = [2, Math.round( this.lng * 0.5 ) ];
-        this.h = Math.round( this.lng * 0.5 ) * ( this.bsize[1] + this.spaces[1] ) + this.spaces[1]; 
+        this.grid = [ 2, Math.round( this.lng * 0.5 ) ];
+        this.h = this.grid[1] * ( this.bsize[1] + this.spaces[1] ) + this.spaces[1];
+
         this.c[1].textContent = '';
 
         this.c[2] = this.dom( 'table', this.css.basic + 'width:100%; top:'+(this.spaces[1]-2)+'px; height:auto; border-collapse:separate; border:none; border-spacing: '+(this.spaces[0]-2)+'px '+(this.spaces[1]-2)+'px;' );
@@ -39,7 +39,6 @@ export class Grid extends Proto {
         this.stat = [];
         this.tmpX = [];
         this.tmpY = [];
-
 
         for( let i = 0; i < this.grid[1]; i++ ){
             tr = this.c[2].insertRow();
@@ -83,7 +82,6 @@ export class Grid extends Proto {
 
         let l = this.local;
         if( l.x === -1 && l.y === -1 ) return -1;
-
         
         let tx = this.tmpX;
         let ty = this.tmpY;
@@ -223,9 +221,31 @@ export class Grid extends Proto {
 
     }
 
+    testW () {
+
+        let vw = this.spaces[0]*3 + this.bsizeMax*2, rz = false;
+        if( vw > this.w ) {
+            this.bsize[0] = ( this.w-(this.spaces[0]*3) ) * 0.5;
+            rz = true;
+        } else {
+            if( this.bsize[0] !== this.bsizeMax ) {
+                this.bsize[0] = this.bsizeMax;
+                rz = true;
+            }
+        }
+
+        if( !rz ) return;
+
+        let i = this.buttons.length;
+        while(i--) this.buttons[i].style.width = this.bsize[0] + 'px';
+
+    }
+
     rSize () {
 
         super.rSize();
+
+        this.testW();
 
         let n = 0, b, mid;
 
@@ -249,7 +269,6 @@ export class Grid extends Proto {
         for( let i = 0; i < this.grid[1]; i++ ){
 
             this.tmpY.push( [ mid, mid + this.bsize[1] ] );
-
             mid += this.bsize[1] + this.spaces[1];
             
         }

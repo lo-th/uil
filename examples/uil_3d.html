@@ -355,6 +355,7 @@ function initGUI () {
 
             screen = new THREE.Texture( this.canvas );
             screen.minFilter = THREE.LinearFilter;
+            screen.encoding = THREE.sRGBEncoding;
             screen.needsUpdate = true;
             plane.material.map = screen;
             plane.material.needsUpdate = true;
@@ -388,6 +389,7 @@ function initGUI2 () {
 
             screen2 = new THREE.Texture( this.canvas );
             screen2.minFilter = THREE.LinearFilter;
+            screen2.encoding = THREE.sRGBEncoding;
             screen2.needsUpdate = true;
             plane2.material.map = screen2;
             plane2.material.needsUpdate = true;

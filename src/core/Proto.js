@@ -28,7 +28,7 @@ class Proto {
         this.svgs = Tools.svgs;
 
         // only space 
-        this.isEmpty = o.isEmpty || false;
+        this.isSpace = o.isSpace || false;
 
         this.zone = { x:0, y:0, w:0, h:0 };
         this.local = new V2().neg();
@@ -45,7 +45,7 @@ class Proto {
 
         this.h = this.isUI ? this.main.size.h : Tools.size.h;
         if( o.h !== undefined ) this.h = o.h;
-        if(!this.isEmpty) this.h = this.h < 11 ? 11 : this.h;
+        if( !this.isSpace ) this.h = this.h < 11 ? 11 : this.h;
 
         // if need resize width
         this.autoWidth = o.auto || true;
@@ -54,7 +54,7 @@ class Proto {
         this.isOpen = false;
 
         // radius for toolbox
-        this.radius = o.radius || 0;
+        this.radius = o.radius || this.colors.radius;
 
         // only for number
         this.isNumber = false;
@@ -91,7 +91,7 @@ class Proto {
         this.val = null;
         
         // Background
-        this.bg = this.colors.background;//this.isUI ? this.main.bg : Tools.colors.background;
+        this.bg = this.colors.background;
         this.bgOver = this.colors.backgroundOver;
         if( o.bg !== undefined ){ this.bg = o.bg; this.bgOver = o.bg; }
         if( o.bgOver !== undefined ){ this.bgOver = o.bgOver; }
@@ -122,7 +122,7 @@ class Proto {
 
         this.colorPlus = Tools.ColorLuma( this.fontColor, 0.3 );
 
-        this.txt = o.name || 'Proto';
+        this.txt = o.name || '';
         this.rename = o.rename || '';
         this.target = o.target || null;
 
@@ -178,7 +178,7 @@ class Proto {
         s[0].height = this.h + 'px';
 
         if( this.isUI  ) s[0].background = this.bg;
-        if( this.isEmpty  ) s[0].background = 'none';
+        //if( this.isSpace  ) s[0].background = 'none';
 
         //if( this.autoHeight ) s[0].transition = 'height 0.01s ease-out';
         if( c[1] !== undefined && this.autoWidth ){
@@ -304,7 +304,7 @@ class Proto {
 
     uiout () {
 
-        if( this.isEmpty ) return;
+        if( this.isSpace ) return;
 
         if(this.s) this.s[0].background = this.bg;
 
@@ -312,7 +312,7 @@ class Proto {
 
     uiover () {
 
-        if( this.isEmpty ) return;
+        if( this.isSpace ) return;
 
         if(this.s) this.s[0].background = this.bgOver;
 
@@ -357,7 +357,7 @@ class Proto {
 
     onChange ( f ) {
 
-        if( this.isEmpty ) return;
+        if( this.isSpace ) return;
 
         this.callback = f || null;
         return this;
@@ -370,7 +370,7 @@ class Proto {
 
     onFinishChange ( f ) {
 
-        if( this.isEmpty ) return;
+        if( this.isSpace ) return;
 
         this.callback = null;
         this.endCallback = f;
@@ -513,7 +513,7 @@ class Proto {
 
     handleEvent ( e ){
 
-        if( this.isEmpty ) return;
+        if( this.isSpace ) return;
         return this[e.type](e);
     
     }

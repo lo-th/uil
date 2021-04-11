@@ -19,6 +19,12 @@ export class Title extends Proto {
 
         }
 
+        let s = this.s;
+
+        s[1].textAlign = o.align || 'left';
+        s[1].fontWeight = o.fontWeight || 'bold';
+
+
         this.c[1].textContent = this.txt.substring(0,1).toUpperCase() + this.txt.substring(1).replace("-", " ");
         this.c[2].textContent = prefix;
 
@@ -41,8 +47,8 @@ export class Title extends Proto {
     rSize () {
 
         super.rSize();
-        this.s[1].width = this.w - 50 + 'px';
-        this.s[2].left = this.w - ( 50 + 26 ) + 'px';
+        this.s[1].width = this.w + 'px'; //- 50 + 'px';
+        this.s[2].left = this.w + 'px';//- ( 50 + 26 ) + 'px';
 
     }
 
