@@ -156,10 +156,12 @@ export class Slide extends Proto {
             this.setValue(v);
             this.old = v;
             this.update( true );
+
+            return true;
     
         }
               
-        return true;
+        return false;
     
     }
 
