@@ -2996,6 +2996,7 @@
 			}
 
 			_this = _Proto.call(this, o) || this;
+			_this.isCyclic = o.cyclic || false;
 			_this.autoWidth = false;
 			_this.buttonColor = _this.colors.button;
 
@@ -3069,6 +3070,12 @@
 
 		_proto.reset = function reset() {
 			this.isDown = false;
+		};
+
+		_proto.testZone = function testZone(e) {
+			var l = this.local;
+			if (l.x === -1 && l.y === -1) return '';
+			if (l.y <= this.c[1].offsetHeight) return 'title';else if (l.y > this.h - this.c[2].offsetHeight) return 'text';else return 'circular';
 		} // ----------------------
 		//	 EVENTS
 		// ----------------------
@@ -3115,6 +3122,27 @@
 				this.old = this.value;
 				this.oldr = this.r;
 			}
+		};
+
+		_proto.wheel = function wheel(e) {
+			var name = this.testZone(e);
+
+			if (name === 'circular') {
+				var v = this.value - this.step * e.delta;
+
+				if (v > this.max) {
+					v = this.isCyclic ? this.min : this.max;
+				} else if (v < this.min) {
+					v = this.isCyclic ? this.max : this.min;
+				}
+
+				this.setValue(v);
+				this.old = v;
+				this.update(true);
+				return true;
+			}
+
+			return false;
 		} // ----------------------
 		;
 
@@ -4501,6 +4529,7 @@
 			}
 
 			_this = _Proto.call(this, o) || this;
+			_this.isCyclic = o.cyclic || false;
 			_this.autoWidth = false;
 			_this.buttonColor = _this.colors.button;
 
@@ -4578,6 +4607,12 @@
 
 			this.cmode = _mode;
 			return true;
+		};
+
+		_proto.testZone = function testZone(e) {
+			var l = this.local;
+			if (l.x === -1 && l.y === -1) return '';
+			if (l.y <= this.c[1].offsetHeight) return 'title';else if (l.y > this.h - this.c[2].offsetHeight) return 'text';else return 'knob';
 		} // ----------------------
 		//	 EVENTS
 		// ----------------------
@@ -4618,6 +4653,27 @@
 				this.old = this.value;
 				this.oldr = this.r;
 			}
+		};
+
+		_proto.wheel = function wheel(e) {
+			var name = this.testZone(e);
+
+			if (name === 'knob') {
+				var v = this.value - this.step * e.delta;
+
+				if (v > this.max) {
+					v = this.isCyclic ? this.min : this.max;
+				} else if (v < this.min) {
+					v = this.isCyclic ? this.max : this.min;
+				}
+
+				this.setValue(v);
+				this.old = v;
+				this.update(true);
+				return true;
+			}
+
+			return false;
 		};
 
 		_proto.makeGrad = function makeGrad() {
