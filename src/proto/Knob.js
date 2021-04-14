@@ -7,6 +7,8 @@ export class Knob extends Proto {
 
         super( o );
 
+        this.isCyclic = o.cyclic || false;
+
         this.autoWidth = false;
 
         this.buttonColor = this.colors.button;
@@ -84,6 +86,17 @@ export class Knob extends Proto {
 
     }
 
+    testZone ( e ) {
+
+        let l = this.local;
+        if( l.x === -1 && l.y === -1 ) return '';
+        
+        if( l.y <= this.c[ 1 ].offsetHeight ) return 'title';
+        else if ( l.y > this.h - this.c[ 2 ].offsetHeight ) return 'text';
+        else return 'knob';
+
+    }
+
     // ----------------------
     //   EVENTS
     // ----------------------
@@ -136,6 +149,31 @@ export class Knob extends Proto {
             this.old = this.value;
             this.oldr = this.r;
         }
+
+    }
+
+    wheel ( e ) {
+
+        let name = this.testZone( e );
+
+        if( name === 'knob' ) {
+    
+            let v = this.value - this.step * e.delta;
+    
+            if ( v > this.max ) {
+                v = this.isCyclic ? this.min : this.max;
+            } else if ( v < this.min ) {
+                v = this.isCyclic ? this.max : this.min;
+            }
+    
+            this.setValue( v );
+            this.old = v;
+            this.update( true );
+
+            return true;
+    
+        }
+        return false;
 
     }
 
