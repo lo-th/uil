@@ -6362,7 +6362,10 @@ class Selector extends Proto {
         this.values = o.values;
         if(typeof this.values === 'string' ) this.values = [ this.values ];
 
-        this.value = o.value || this.values[0];
+        this.value = o.value || null;//this.values[0];
+
+        this.isSelectable = true;
+        if( o.selectable!== undefined ) this.isSelectable = o.selectable;
 
 
 
@@ -6382,9 +6385,10 @@ class Selector extends Proto {
         for(let i = 0; i < this.lng; i++){
 
             sel = false;
-            if( this.values[i] === this.value ) sel = true;
+            if( this.values[i] === this.value && this.isSelectable ) sel = true;
 
-            this.c[i+2] = this.dom( 'div', this.css.txt + this.css.button + ' top:1px; background:'+(sel? this.buttonDown : this.buttonColor)+'; height:'+(this.h-2)+'px; border:'+this.colors.buttonBorder+'; border-radius:'+this.radius+'px;' );
+            this.c[i+2] = this.dom( 'div', this.css.txt + this.css.button + ' top:1px; height:'+(this.h-2)+'px; border:'+this.colors.buttonBorder+'; border-radius:'+this.radius+'px;' );
+            this.c[i+2].style.background = sel ? this.buttonDown : this.buttonColor;
             this.c[i+2].style.color = sel ? this.fontSelect : this.fontColor;
             this.c[i+2].innerHTML = this.values[i];
             
@@ -6402,12 +6406,13 @@ class Selector extends Proto {
 
         let i = this.lng;
         let t = this.tmp;
+
         
         while( i-- ){
-        	if( l.x>t[i][0] && l.x<t[i][2] ) return i+2;
+        	if( l.x>t[i][0] && l.x<t[i][2] ) return i;
         }
 
-        return ''
+        return -1;
 
     }
 
@@ -6430,12 +6435,17 @@ class Selector extends Proto {
 
     mousedown ( e ) {
 
-    	let name = this.testZone( e );
+    	//let name = this.testZone( e );
 
-        if( !name ) return false;
+       // if( !name ) return false;
+
+        let id = this.testZone( e );
+
+        if( id < 0 ) return false;
 
     	this.isDown = true;
-        this.value = this.values[ name-2 ];
+        //this.value = this.values[ name-2 ];
+        this.value = this.values[ id ];
         this.send();
     	return this.mousemove( e );
  
@@ -6446,17 +6456,11 @@ class Selector extends Proto {
     mousemove ( e ) {
 
         let up = false;
+        let id = this.testZone( e );
 
-        let name = this.testZone( e );
-        //let sel = false;
-
-        
-
-        //console.log(name)
-
-        if( name !== '' ){
+        if( id !== -1 ){
             this.cursor('pointer');
-            up = this.modes( this.isDown ? 3 : 2, name );
+            up = this.modes( this.isDown ? 3 : 2, id );
         } else {
         	up = this.reset();
         }
@@ -6466,22 +6470,26 @@ class Selector extends Proto {
     }
 
     // ----------------------
+    //   MODE
+    // ----------------------
 
-    modes ( n, name ) {
+    modes ( n, id ) {
 
         let v, r = false;
 
-        for( let i = 0; i < this.lng; i++ ){
+        let i = this.lng;
+        while(i--){
 
-            if( i === name-2 && this.values[ i ] !== this.value ) v = this.mode( n, i+2 );
-            else { 
-
-                if( this.values[ i ] === this.value ) v = this.mode( 3, i+2 );
-                else v = this.mode( 1, i+2 );
-
+            if( i === id ) v = this.mode( n, i );
+            else {
+                if( this.isSelectable ){
+                    if( this.values[ i ] === this.value ) v = this.mode( 3, i );
+                    else v = this.mode( 1, i );
+                }
+                else v = this.mode( 1, i );
             }
 
-            if(v) r = true;
+            if( v ) r = true;
 
         }
 
@@ -6489,22 +6497,18 @@ class Selector extends Proto {
 
     }
 
-    mode ( n, name ) {
+    mode ( n, id ) {
 
         let change = false;
+        let i = id+2;
 
-        let i = name - 2;
+        if( this.stat[id] !== n ){
 
-
-        if( this.stat[i] !== n ){
-
-           
-        
             switch( n ){
 
-                case 1: this.stat[i] = 1; this.s[ i+2 ].color = this.fontColor;  this.s[ i+2 ].background = this.buttonColor; break;
-                case 2: this.stat[i] = 2; this.s[ i+2 ].color = this.fontSelect; this.s[ i+2 ].background = this.buttonOver; break;
-                case 3: this.stat[i] = 3; this.s[ i+2 ].color = this.fontSelect; this.s[ i+2 ].background = this.buttonDown; break;
+                case 1: this.stat[id] = 1; this.s[ i ].color = this.fontColor;  this.s[ i ].background = this.buttonColor; break;
+                case 2: this.stat[id] = 2; this.s[ i ].color = this.fontSelect; this.s[ i ].background = this.buttonOver; break;
+                case 3: this.stat[id] = 3; this.s[ i ].color = this.fontSelect; this.s[ i ].background = this.buttonDown; break;
 
             }
 
@@ -6512,7 +6516,6 @@ class Selector extends Proto {
 
         }
         
-
         return change;
 
     }
@@ -6522,26 +6525,7 @@ class Selector extends Proto {
     reset () {
 
         this.cursor();
-
-        let v, r = false;
-
-        for( let i = 0; i < this.lng; i++ ){
-
-            if( this.values[ i ] === this.value ) v = this.mode( 3, i+2 );
-            else v = this.mode( 1, i+2 );
-            if(v) r = true;
-        }
-
-        return r;//this.modes( 1 , 2 );
-
-    	/*if( this.selected ){
-    		this.s[ this.selected ].color = this.fontColor;
-            this.s[ this.selected ].background = this.buttonColor;
-            this.selected = null;
-            
-            return true;
-    	}
-        return false;*/
+        return this.modes( 1 , -1 );
 
     }
 
@@ -6723,10 +6707,15 @@ class Grid extends Proto {
 
         super( o );
 
-        this.value = false;
+        //this.value = o.value || false;
         this.values = o.values || [];
 
         if( typeof this.values === 'string' ) this.values = [ this.values ];
+
+        this.value = o.value || null;
+
+
+        this.isSelectable = o.selectable || false;
 
         //this.selected = null;
         this.isDown = false;
@@ -6735,8 +6724,8 @@ class Grid extends Proto {
         this.buttonOver = o.bOver || this.colors.over;
         this.buttonDown = o.bDown || this.colors.select;
 
-        this.spaces = o.spaces || [10,3];
-        this.bsize = o.bsize || [100,20];
+        this.spaces = o.spaces || [5,3];
+        this.bsize = o.bsize || [90,20];
 
         this.bsizeMax = this.bsize[0];
 
@@ -6750,7 +6739,7 @@ class Grid extends Proto {
 
         this.c[2] = this.dom( 'table', this.css.basic + 'width:100%; top:'+(this.spaces[1]-2)+'px; height:auto; border-collapse:separate; border:none; border-spacing: '+(this.spaces[0]-2)+'px '+(this.spaces[1]-2)+'px;' );
 
-        let n = 0, b, td, tr;
+        let n = 0, b, td, tr, sel;
 
         this.buttons = [];
         this.stat = [];
@@ -6767,8 +6756,13 @@ class Grid extends Proto {
 
                 if( this.values[n] ){
 
+                    sel = false;
+                    if( this.values[n] === this.value && this.isSelectable ) sel = true;
+
                     b = document.createElement( 'div' );
-                    b.style.cssText = this.css.txt + this.css.button + 'position:static; width:'+this.bsize[0]+'px; height:'+this.bsize[1]+'px; border:'+this.colors.buttonBorder+'; left:auto; right:auto; background:'+this.buttonColor+';  border-radius:'+this.radius+'px;';
+                    b.style.cssText = this.css.txt + this.css.button + 'position:static; width:'+this.bsize[0]+'px; height:'+this.bsize[1]+'px; border:'+this.colors.buttonBorder+'; left:auto; right:auto; border-radius:'+this.radius+'px;';
+                    b.style.background = sel ? this.buttonDown : this.buttonColor;
+                    b.style.color = sel ? this.fontSelect : this.fontColor;
                     b.innerHTML = this.values[n];
                     td.appendChild( b );
 
@@ -6832,7 +6826,7 @@ class Grid extends Proto {
     mouseup ( e ) {
     
         if( this.isDown ){
-            this.value = false;
+            //this.value = false;
             this.isDown = false;
             //this.send();
             return this.mousemove( e );
@@ -6849,7 +6843,7 @@ class Grid extends Proto {
         if( id < 0 ) return false;
 
     	this.isDown = true;
-        this.value = this.values[id];
+        this.value = this.values[ id ];
         this.send();
     	return this.mousemove( e );
 
@@ -6873,15 +6867,24 @@ class Grid extends Proto {
     }
 
     // ----------------------
+    //   MODE
+    // -----------------------
 
     modes ( n, id ) {
 
         let v, r = false;
 
-        for( let i = 0; i < this.lng; i++ ){
+        let i = this.lng;
+        while(i--){
 
             if( i === id ) v = this.mode( n, i );
-            else v = this.mode( 1, i );
+            else {
+                if( this.isSelectable ){
+                    if( this.values[ i ] === this.value ) v = this.mode( 3, i );
+                    else v = this.mode( 1, i );
+                }
+                else v = this.mode( 1, i );
+            }
 
             if(v) r = true;
 
@@ -6895,22 +6898,19 @@ class Grid extends Proto {
 
         let change = false;
 
-        let i = id;
-
-        if( this.stat[i] !== n ){
+        if( this.stat[id] !== n ){
         
             switch( n ){
 
-                case 1: this.stat[i] = 1; this.buttons[ i ].style.color = this.fontColor;  this.buttons[ i ].style.background = this.buttonColor; break;
-                case 2: this.stat[i] = 2; this.buttons[ i ].style.color = this.fontSelect; this.buttons[ i ].style.background = this.buttonOver; break;
-                case 3: this.stat[i] = 3; this.buttons[ i ].style.color = this.fontSelect; this.buttons[ i ].style.background = this.buttonDown; break;
+                case 1: this.stat[id] = 1; this.buttons[ id ].style.color = this.fontColor;  this.buttons[ id ].style.background = this.buttonColor; break;
+                case 2: this.stat[id] = 2; this.buttons[ id ].style.color = this.fontSelect; this.buttons[ id ].style.background = this.buttonOver; break;
+                case 3: this.stat[id] = 3; this.buttons[ id ].style.color = this.fontSelect; this.buttons[ id ].style.background = this.buttonDown; break;
 
             }
 
             change = true;
 
         }
-        
 
         return change;
 
@@ -6921,7 +6921,8 @@ class Grid extends Proto {
     reset () {
 
         this.cursor();
-        return this.modes( 1 , 0 );
+        return this.modes( 1 , -1 );
+
     }
 
 

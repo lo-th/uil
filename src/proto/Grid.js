@@ -6,10 +6,15 @@ export class Grid extends Proto {
 
         super( o );
 
-        this.value = false;
+        //this.value = o.value || false;
         this.values = o.values || [];
 
         if( typeof this.values === 'string' ) this.values = [ this.values ];
+
+        this.value = o.value || null;
+
+
+        this.isSelectable = o.selectable || false;
 
         //this.selected = null;
         this.isDown = false;
@@ -18,8 +23,8 @@ export class Grid extends Proto {
         this.buttonOver = o.bOver || this.colors.over;
         this.buttonDown = o.bDown || this.colors.select;
 
-        this.spaces = o.spaces || [10,3];
-        this.bsize = o.bsize || [100,20];
+        this.spaces = o.spaces || [5,3];
+        this.bsize = o.bsize || [90,20];
 
         this.bsizeMax = this.bsize[0];
 
@@ -33,7 +38,7 @@ export class Grid extends Proto {
 
         this.c[2] = this.dom( 'table', this.css.basic + 'width:100%; top:'+(this.spaces[1]-2)+'px; height:auto; border-collapse:separate; border:none; border-spacing: '+(this.spaces[0]-2)+'px '+(this.spaces[1]-2)+'px;' );
 
-        let n = 0, b, mid, td, tr;
+        let n = 0, b, mid, td, tr, sel;
 
         this.buttons = [];
         this.stat = [];
@@ -50,8 +55,13 @@ export class Grid extends Proto {
 
                 if( this.values[n] ){
 
+                    sel = false;
+                    if( this.values[n] === this.value && this.isSelectable ) sel = true;
+
                     b = document.createElement( 'div' );
-                    b.style.cssText = this.css.txt + this.css.button + 'position:static; width:'+this.bsize[0]+'px; height:'+this.bsize[1]+'px; border:'+this.colors.buttonBorder+'; left:auto; right:auto; background:'+this.buttonColor+';  border-radius:'+this.radius+'px;';
+                    b.style.cssText = this.css.txt + this.css.button + 'position:static; width:'+this.bsize[0]+'px; height:'+this.bsize[1]+'px; border:'+this.colors.buttonBorder+'; left:auto; right:auto; border-radius:'+this.radius+'px;';
+                    b.style.background = sel ? this.buttonDown : this.buttonColor;
+                    b.style.color = sel ? this.fontSelect : this.fontColor;
                     b.innerHTML = this.values[n];
                     td.appendChild( b );
 
@@ -115,7 +125,7 @@ export class Grid extends Proto {
     mouseup ( e ) {
     
         if( this.isDown ){
-            this.value = false;
+            //this.value = false;
             this.isDown = false;
             //this.send();
             return this.mousemove( e );
@@ -132,7 +142,7 @@ export class Grid extends Proto {
         if( id < 0 ) return false;
 
     	this.isDown = true;
-        this.value = this.values[id];
+        this.value = this.values[ id ];
         this.send();
     	return this.mousemove( e );
 
@@ -156,15 +166,24 @@ export class Grid extends Proto {
     }
 
     // ----------------------
+    //   MODE
+    // -----------------------
 
     modes ( n, id ) {
 
         let v, r = false;
 
-        for( let i = 0; i < this.lng; i++ ){
+        let i = this.lng;
+        while(i--){
 
             if( i === id ) v = this.mode( n, i );
-            else v = this.mode( 1, i );
+            else {
+                if( this.isSelectable ){
+                    if( this.values[ i ] === this.value ) v = this.mode( 3, i );
+                    else v = this.mode( 1, i );
+                }
+                else v = this.mode( 1, i );
+            }
 
             if(v) r = true;
 
@@ -178,22 +197,19 @@ export class Grid extends Proto {
 
         let change = false;
 
-        let i = id;
-
-        if( this.stat[i] !== n ){
+        if( this.stat[id] !== n ){
         
             switch( n ){
 
-                case 1: this.stat[i] = 1; this.buttons[ i ].style.color = this.fontColor;  this.buttons[ i ].style.background = this.buttonColor; break;
-                case 2: this.stat[i] = 2; this.buttons[ i ].style.color = this.fontSelect; this.buttons[ i ].style.background = this.buttonOver; break;
-                case 3: this.stat[i] = 3; this.buttons[ i ].style.color = this.fontSelect; this.buttons[ i ].style.background = this.buttonDown; break;
+                case 1: this.stat[id] = 1; this.buttons[ id ].style.color = this.fontColor;  this.buttons[ id ].style.background = this.buttonColor; break;
+                case 2: this.stat[id] = 2; this.buttons[ id ].style.color = this.fontSelect; this.buttons[ id ].style.background = this.buttonOver; break;
+                case 3: this.stat[id] = 3; this.buttons[ id ].style.color = this.fontSelect; this.buttons[ id ].style.background = this.buttonDown; break;
 
             }
 
             change = true;
 
         }
-        
 
         return change;
 
@@ -204,7 +220,8 @@ export class Grid extends Proto {
     reset () {
 
         this.cursor();
-        return this.modes( 1 , 0 );
+        return this.modes( 1 , -1 );
+
     }
 
 

@@ -84,12 +84,15 @@ function populate () {
         ui.add('button', { name:'Button', callback:callbackButton });
 
         //ui.add('button', { name: 'Test HTML', fontColor: '#D4B87B', h: 30 } ).onChange( ( ) => { let w = window.open("about:blank", "hello", "width=200,height=200"); } );
-        ui.add('button', { name: '3D UIL TEST', fontColor: '#D4B87B', h: 30, link:true } ).onChange( function ( ) { let w = window.open("./examples/uil_3d.html", ""); w.focus();} );
+        ui.add('button', { name: '3D UIL TEST', fontColor: '#D4B87B', h:30, link:true, p:0 } ).onChange( function ( ) { let w = window.open("./examples/uil_3d.html", ""); w.focus();} );
 
-        ui.add('grid', { name:'Button', values:['Line','Rectangle', 'Circle', 'Ellipse', 'Arc', 'Donut'] });
+        ui.add('empty', { h:5 });
 
-        ui.add('empty', { h:20 });
-        ui.add('selector', { name:'selector', fontColor:'#D4B87B', h:30, value:1, values:[1, 2, 3, 4] });
+        ui.add('grid', { values:['Line','Rectangle', 'Circle', 'Ellipse'], selectable:true, value:'Line' });
+        ui.add('selector', { name:'selector', fontColor:'#D4B87B', h:30,  values:[1, 2, 3, 4], value:4 });
+
+        ui.add('empty', { h:5 });
+        
 
         ui.add('select', { name:'select', fontColor:'#D4B87B', h:30, value:'yoooch' });
 

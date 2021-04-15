@@ -6176,7 +6176,10 @@
 			_this = _Proto.call(this, o) || this;
 			_this.values = o.values;
 			if (typeof _this.values === 'string') _this.values = [_this.values];
-			_this.value = o.value || _this.values[0]; //this.selected = null;
+			_this.value = o.value || null; //this.values[0];
+
+			_this.isSelectable = true;
+			if (o.selectable !== undefined) _this.isSelectable = o.selectable; //this.selected = null;
 
 			_this.isDown = false;
 			_this.buttonColor = o.bColor || _this.colors.button;
@@ -6189,8 +6192,9 @@
 
 			for (var i = 0; i < _this.lng; i++) {
 				sel = false;
-				if (_this.values[i] === _this.value) sel = true;
-				_this.c[i + 2] = _this.dom('div', _this.css.txt + _this.css.button + ' top:1px; background:' + (sel ? _this.buttonDown : _this.buttonColor) + '; height:' + (_this.h - 2) + 'px; border:' + _this.colors.buttonBorder + '; border-radius:' + _this.radius + 'px;');
+				if (_this.values[i] === _this.value && _this.isSelectable) sel = true;
+				_this.c[i + 2] = _this.dom('div', _this.css.txt + _this.css.button + ' top:1px; height:' + (_this.h - 2) + 'px; border:' + _this.colors.buttonBorder + '; border-radius:' + _this.radius + 'px;');
+				_this.c[i + 2].style.background = sel ? _this.buttonDown : _this.buttonColor;
 				_this.c[i + 2].style.color = sel ? _this.fontSelect : _this.fontColor;
 				_this.c[i + 2].innerHTML = _this.values[i];
 				_this.stat[i] = sel ? 3 : 1;
@@ -6210,10 +6214,10 @@
 			var t = this.tmp;
 
 			while (i--) {
-				if (l.x > t[i][0] && l.x < t[i][2]) return i + 2;
+				if (l.x > t[i][0] && l.x < t[i][2]) return i;
 			}
 
-			return '';
+			return -1;
 		} // ----------------------
 		//	 EVENTS
 		// ----------------------
@@ -6231,37 +6235,44 @@
 		};
 
 		_proto.mousedown = function mousedown(e) {
-			var name = this.testZone(e);
-			if (!name) return false;
-			this.isDown = true;
-			this.value = this.values[name - 2];
+			//let name = this.testZone( e );
+			// if( !name ) return false;
+			var id = this.testZone(e);
+			if (id < 0) return false;
+			this.isDown = true; //this.value = this.values[ name-2 ];
+
+			this.value = this.values[id];
 			this.send();
 			return this.mousemove(e); // true;
 		};
 
 		_proto.mousemove = function mousemove(e) {
 			var up = false;
-			var name = this.testZone(e); //let sel = false;
-			//console.log(name)
+			var id = this.testZone(e);
 
-			if (name !== '') {
+			if (id !== -1) {
 				this.cursor('pointer');
-				up = this.modes(this.isDown ? 3 : 2, name);
+				up = this.modes(this.isDown ? 3 : 2, id);
 			} else {
 				up = this.reset();
 			}
 
 			return up;
 		} // ----------------------
+		//	 MODE
+		// ----------------------
 		;
 
-		_proto.modes = function modes(n, name) {
+		_proto.modes = function modes(n, id) {
 			var v,
 					r = false;
+			var i = this.lng;
 
-			for (var i = 0; i < this.lng; i++) {
-				if (i === name - 2 && this.values[i] !== this.value) v = this.mode(n, i + 2);else {
-					if (this.values[i] === this.value) v = this.mode(3, i + 2);else v = this.mode(1, i + 2);
+			while (i--) {
+				if (i === id) v = this.mode(n, i);else {
+					if (this.isSelectable) {
+						if (this.values[i] === this.value) v = this.mode(3, i);else v = this.mode(1, i);
+					} else v = this.mode(1, i);
 				}
 				if (v) r = true;
 			}
@@ -6269,28 +6280,28 @@
 			return r;
 		};
 
-		_proto.mode = function mode(n, name) {
+		_proto.mode = function mode(n, id) {
 			var change = false;
-			var i = name - 2;
+			var i = id + 2;
 
-			if (this.stat[i] !== n) {
+			if (this.stat[id] !== n) {
 				switch (n) {
 					case 1:
-						this.stat[i] = 1;
-						this.s[i + 2].color = this.fontColor;
-						this.s[i + 2].background = this.buttonColor;
+						this.stat[id] = 1;
+						this.s[i].color = this.fontColor;
+						this.s[i].background = this.buttonColor;
 						break;
 
 					case 2:
-						this.stat[i] = 2;
-						this.s[i + 2].color = this.fontSelect;
-						this.s[i + 2].background = this.buttonOver;
+						this.stat[id] = 2;
+						this.s[i].color = this.fontSelect;
+						this.s[i].background = this.buttonOver;
 						break;
 
 					case 3:
-						this.stat[i] = 3;
-						this.s[i + 2].color = this.fontSelect;
-						this.s[i + 2].background = this.buttonDown;
+						this.stat[id] = 3;
+						this.s[i].color = this.fontSelect;
+						this.s[i].background = this.buttonDown;
 						break;
 				}
 
@@ -6303,24 +6314,7 @@
 
 		_proto.reset = function reset() {
 			this.cursor();
-			var v,
-					r = false;
-
-			for (var i = 0; i < this.lng; i++) {
-				if (this.values[i] === this.value) v = this.mode(3, i + 2);else v = this.mode(1, i + 2);
-				if (v) r = true;
-			}
-
-			return r; //this.modes( 1 , 2 );
-
-			/*if( this.selected ){
-				this.s[ this.selected ].color = this.fontColor;
-						 this.s[ this.selected ].background = this.buttonColor;
-						 this.selected = null;
-						 
-						 return true;
-			}
-				 return false;*/
+			return this.modes(1, -1);
 		};
 
 		_proto.label = function label(string, n) {
@@ -6498,17 +6492,19 @@
 				o = {};
 			}
 
-			_this = _Proto.call(this, o) || this;
-			_this.value = false;
+			_this = _Proto.call(this, o) || this; //this.value = o.value || false;
+
 			_this.values = o.values || [];
-			if (typeof _this.values === 'string') _this.values = [_this.values]; //this.selected = null;
+			if (typeof _this.values === 'string') _this.values = [_this.values];
+			_this.value = o.value || null;
+			_this.isSelectable = o.selectable || false; //this.selected = null;
 
 			_this.isDown = false;
 			_this.buttonColor = o.bColor || _this.colors.button;
 			_this.buttonOver = o.bOver || _this.colors.over;
 			_this.buttonDown = o.bDown || _this.colors.select;
-			_this.spaces = o.spaces || [10, 3];
-			_this.bsize = o.bsize || [100, 20];
+			_this.spaces = o.spaces || [5, 3];
+			_this.bsize = o.bsize || [90, 20];
 			_this.bsizeMax = _this.bsize[0];
 			_this.lng = _this.values.length;
 			_this.tmp = [];
@@ -6520,7 +6516,8 @@
 			var n = 0,
 					b,
 					td,
-					tr;
+					tr,
+					sel;
 			_this.buttons = [];
 			_this.stat = [];
 			_this.tmpX = [];
@@ -6535,8 +6532,12 @@
 					td.style.cssText = 'pointer-events:none;';
 
 					if (_this.values[n]) {
+						sel = false;
+						if (_this.values[n] === _this.value && _this.isSelectable) sel = true;
 						b = document.createElement('div');
-						b.style.cssText = _this.css.txt + _this.css.button + 'position:static; width:' + _this.bsize[0] + 'px; height:' + _this.bsize[1] + 'px; border:' + _this.colors.buttonBorder + '; left:auto; right:auto; background:' + _this.buttonColor + ';	border-radius:' + _this.radius + 'px;';
+						b.style.cssText = _this.css.txt + _this.css.button + 'position:static; width:' + _this.bsize[0] + 'px; height:' + _this.bsize[1] + 'px; border:' + _this.colors.buttonBorder + '; left:auto; right:auto; border-radius:' + _this.radius + 'px;';
+						b.style.background = sel ? _this.buttonDown : _this.buttonColor;
+						b.style.color = sel ? _this.fontSelect : _this.fontColor;
 						b.innerHTML = _this.values[n];
 						td.appendChild(b);
 
@@ -6594,7 +6595,7 @@
 
 		_proto.mouseup = function mouseup(e) {
 			if (this.isDown) {
-				this.value = false;
+				//this.value = false;
 				this.isDown = false; //this.send();
 
 				return this.mousemove(e);
@@ -6625,14 +6626,21 @@
 
 			return up;
 		} // ----------------------
+		//	 MODE
+		// -----------------------
 		;
 
 		_proto.modes = function modes(n, id) {
 			var v,
 					r = false;
+			var i = this.lng;
 
-			for (var i = 0; i < this.lng; i++) {
-				if (i === id) v = this.mode(n, i);else v = this.mode(1, i);
+			while (i--) {
+				if (i === id) v = this.mode(n, i);else {
+					if (this.isSelectable) {
+						if (this.values[i] === this.value) v = this.mode(3, i);else v = this.mode(1, i);
+					} else v = this.mode(1, i);
+				}
 				if (v) r = true;
 			}
 
@@ -6641,26 +6649,25 @@
 
 		_proto.mode = function mode(n, id) {
 			var change = false;
-			var i = id;
 
-			if (this.stat[i] !== n) {
+			if (this.stat[id] !== n) {
 				switch (n) {
 					case 1:
-						this.stat[i] = 1;
-						this.buttons[i].style.color = this.fontColor;
-						this.buttons[i].style.background = this.buttonColor;
+						this.stat[id] = 1;
+						this.buttons[id].style.color = this.fontColor;
+						this.buttons[id].style.background = this.buttonColor;
 						break;
 
 					case 2:
-						this.stat[i] = 2;
-						this.buttons[i].style.color = this.fontSelect;
-						this.buttons[i].style.background = this.buttonOver;
+						this.stat[id] = 2;
+						this.buttons[id].style.color = this.fontSelect;
+						this.buttons[id].style.background = this.buttonOver;
 						break;
 
 					case 3:
-						this.stat[i] = 3;
-						this.buttons[i].style.color = this.fontSelect;
-						this.buttons[i].style.background = this.buttonDown;
+						this.stat[id] = 3;
+						this.buttons[id].style.color = this.fontSelect;
+						this.buttons[id].style.background = this.buttonDown;
 						break;
 				}
 
@@ -6673,7 +6680,7 @@
 
 		_proto.reset = function reset() {
 			this.cursor();
-			return this.modes(1, 0);
+			return this.modes(1, -1);
 		};
 
 		_proto.label = function label(string, n) {
