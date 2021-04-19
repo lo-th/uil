@@ -333,6 +333,13 @@ const T = {
         
     },
 
+    lerpColor: function( c1, c2, factor ) {
+        let newColor = {};
+        for ( let i = 0; i < 3; i++ ) {
+          newColor[i] = c1[ i ] + ( c2[ i ] - c1[ i ] ) * factor;
+        }
+        return newColor;
+    },
 
     hexToHtml: function ( v ) { 
         v = v === undefined ? 0x000000 : v;
@@ -362,6 +369,18 @@ const T = {
 
         if (c.length == 7) return [ T.u255(c, 1), T.u255(c, 3), T.u255(c, 5) ];
         else if (c.length == 4) return [ T.u16(c,1), T.u16(c,2), T.u16(c,3) ];
+
+    },
+
+    p255: function ( c ) {
+        let h = Math.round( ( c * 255 ) ).toString( 16 );
+        if ( h.length < 2 ) h = '0' + h;
+        return h;
+    },
+
+    pack: function ( c ) {
+
+        return '#' + T.p255( c[ 0 ] ) + T.p255( c[ 1 ] ) + T.p255( c[ 2 ] );
 
     },
 
