@@ -8,6 +8,7 @@ export class Circular extends Proto {
         super( o );
 
         this.isCyclic = o.cyclic || false;
+        this.model = o.stype || 0;
 
         this.autoWidth = false;
 
@@ -62,12 +63,26 @@ export class Circular extends Proto {
             case 0: // base
                 this.s[2].color = this.fontColor;
                 this.setSvg( this.c[3], 'stroke','rgba(0,0,0,0.1)', 0);
-                this.setSvg( this.c[3], 'stroke', this.fontColor, 1 );
+                if ( this.model > 0 ) {
+
+                    let color = T.pack( T.lerpColor( T.unpack( T.ColorLuma( this.fontColor, -0.75) ), T.unpack( this.fontColor ), this.percent ) );
+                    this.setSvg( this.c[3], 'stroke', color, 1 );
+                
+                } else {
+                    this.setSvg( this.c[3], 'stroke', this.fontColor, 1 );
+                }
             break;
             case 1: // over
                 this.s[2].color = this.colorPlus;
                 this.setSvg( this.c[3], 'stroke','rgba(0,0,0,0.3)', 0);
-                this.setSvg( this.c[3], 'stroke', this.colorPlus, 1 );
+                if ( this.model > 0 ) {
+
+                    let color = T.pack( T.lerpColor( T.unpack( T.ColorLuma( this.fontColor, -0.75) ), T.unpack( this.fontColor ), this.percent ) );
+                    this.setSvg( this.c[3], 'stroke', color, 1 );
+                
+                } else {
+                    this.setSvg( this.c[3], 'stroke', this.colorPlus, 1 );
+                }
             break;
         }
 
@@ -199,6 +214,14 @@ export class Circular extends Proto {
         this.percent = ( this.value - this.min ) / this.range;
 
         this.setSvg( this.c[3], 'd', this.makePath(), 1 );
+
+        if ( this.model > 0 ) {
+
+            let color = T.pack( T.lerpColor( T.unpack( T.ColorLuma( this.fontColor, -0.75) ), T.unpack( this.fontColor ), this.percent ) );
+            this.setSvg( this.c[3], 'stroke', color, 1 );
+        
+        }
+
         if( up ) this.send();
         
     }
