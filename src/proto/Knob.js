@@ -1,4 +1,5 @@
 import { Proto } from '../core/Proto';
+import { Tools } from '../core/Tools';
 import { V2 } from '../core/V2';
 
 export class Knob extends Proto {
@@ -56,7 +57,7 @@ export class Knob extends Proto {
 
         if ( this.model > 0 ) {
 
-            T.dom( 'path', '', { d: '', stroke: this.fontColor, 'stroke-width': 2, fill: 'none', 'stroke-linecap': 'round' }, this.c[3] ); //4
+            Tools.dom( 'path', '', { d: '', stroke: this.fontColor, 'stroke-width': 2, fill: 'none', 'stroke-linecap': 'round' }, this.c[3] ); //4
 
         }
 
@@ -240,7 +241,7 @@ export class Knob extends Proto {
             let big = ea <= Math.PI - this.mPI ? 0 : 1;
             this.setSvg( this.c[3], 'd', 'M ' + x1 + ',' + y1 + ' A ' + 36 + ',' + 36 + ' 1 ' + big + ' 1 ' + x2 + ',' + y2, 4 );
 
-            let color = T.pack( T.lerpColor( T.unpack( T.ColorLuma( this.fontColor, -0.75) ), T.unpack( this.fontColor ), this.percent ) );
+            let color = Tools.pack( Tools.lerpColor( Tools.unpack( Tools.ColorLuma( this.fontColor, -0.75) ), Tools.unpack( this.fontColor ), this.percent ) );
             this.setSvg( this.c[3], 'stroke', color, 4 );
         
         }
