@@ -1,4 +1,4 @@
-<p align="center"><a href="http://lo-th.github.io/uil/"><img src="http://lo-th.github.io/uil/examples/img/uil.png"/></a><br>uil v2.7</p>
+<p align="center"><a href="http://lo-th.github.io/uil/"><img src="http://lo-th.github.io/uil/examples/img/uil.png"/></a><br>uil v3.0</p>
 
 uil.js is a lightweight ui for javascript with a complete 3d display support.
 [**example**](http://lo-th.github.io/uil/index.html)
