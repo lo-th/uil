@@ -6977,7 +6977,7 @@
 			this.bh = !this.isWithClose ? 0 : this.size.h;
 			this.autoResize = o.autoResize === undefined ? true : o.autoResize;
 			this.isCenter = o.center || false;
-			this.isOpen = true;
+			this.isOpen = o.open !== undefined ? o.open : true;
 			this.isDown = false;
 			this.isScroll = false;
 			this.uis = [];
@@ -6998,11 +6998,12 @@
 			this.scroll = Tools.dom('div', this.css.basic + 'background:' + this.colors.scroll + '; right:2px; top:0; width:' + (this.size.s - 4) + 'px; height:10px;');
 			this.scrollBG.appendChild(this.scroll); // bottom button
 
+			this.bottomText = o.bottomText || ['open', 'close'];
 			var r = o.radius || this.colors.radius;
 			this.bottom = Tools.dom('div', this.css.txt + 'width:100%; top:auto; bottom:0; left:0; border-bottom-right-radius:' + r + 'px;	border-bottom-left-radius:' + r + 'px; text-align:center; height:' + this.bh + 'px; line-height:' + (this.bh - 5) + 'px;'); // border-top:1px solid '+Tools.colors.stroke+';');
 
 			this.content.appendChild(this.bottom);
-			this.bottom.textContent = 'Close';
+			this.bottom.textContent = this.isOpen ? this.bottomText[1] : this.bottomText[0];
 			this.bottom.style.background = this.bg; //
 
 			this.parent = o.parent !== undefined ? o.parent : null;
@@ -7194,7 +7195,7 @@
 
 					if (type === 'mousedown') {
 						this.isOpen = this.isOpen ? false : true;
-						this.bottom.textContent = this.isOpen ? 'Close' : 'Open';
+						this.bottom.textContent = this.isOpen ? this.bottomText[1] : this.bottomText[0];
 						this.setHeight();
 						this.mode('def');
 						change = true;
