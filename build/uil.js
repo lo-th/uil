@@ -984,6 +984,15 @@
 		findDeepInver: function findDeepInver(c) {
 			return c[0] * 0.3 + c[1] * .59 + c[2] * .11 <= 0.6;
 		},
+		lerpColor: function lerpColor(c1, c2, factor) {
+			var newColor = {};
+
+			for (var i = 0; i < 3; i++) {
+				newColor[i] = c1[i] + (c2[i] - c1[i]) * factor;
+			}
+
+			return newColor;
+		},
 		hexToHtml: function hexToHtml(v) {
 			v = v === undefined ? 0x000000 : v;
 			return "#" + ("000000" + v.toString(16)).substr(-6);
@@ -999,6 +1008,14 @@
 		},
 		unpack: function unpack(c) {
 			if (c.length == 7) return [T.u255(c, 1), T.u255(c, 3), T.u255(c, 5)];else if (c.length == 4) return [T.u16(c, 1), T.u16(c, 2), T.u16(c, 3)];
+		},
+		p255: function p255(c) {
+			var h = Math.round(c * 255).toString(16);
+			if (h.length < 2) h = '0' + h;
+			return h;
+		},
+		pack: function pack(c) {
+			return '#' + T.p255(c[0]) + T.p255(c[1]) + T.p255(c[2]);
 		},
 		htmlRgb: function htmlRgb(c) {
 			return 'rgb(' + Math.round(c[0] * 255) + ',' + Math.round(c[1] * 255) + ',' + Math.round(c[2] * 255) + ')';
@@ -2997,6 +3014,8 @@
 
 			_this = _Proto.call(this, o) || this;
 			_this.isCyclic = o.cyclic || false;
+			_this.model = o.stype || 0;
+			if (o.mode !== undefined) _this.model = o.mode;
 			_this.autoWidth = false;
 			_this.buttonColor = _this.colors.button;
 
@@ -3053,14 +3072,29 @@
 					// base
 					this.s[2].color = this.fontColor;
 					this.setSvg(this.c[3], 'stroke', 'rgba(0,0,0,0.1)', 0);
-					this.setSvg(this.c[3], 'stroke', this.fontColor, 1);
+
+					if (this.model > 0) {
+						var color = Tools.pack(Tools.lerpColor(Tools.unpack(Tools.ColorLuma(this.fontColor, -0.75)), Tools.unpack(this.fontColor), this.percent));
+						this.setSvg(this.c[3], 'stroke', color, 1);
+					} else {
+						this.setSvg(this.c[3], 'stroke', this.fontColor, 1);
+					}
+
 					break;
 
 				case 1:
 					// over
 					this.s[2].color = this.colorPlus;
 					this.setSvg(this.c[3], 'stroke', 'rgba(0,0,0,0.3)', 0);
-					this.setSvg(this.c[3], 'stroke', this.colorPlus, 1);
+
+					if (this.model > 0) {
+						var _color = Tools.pack(Tools.lerpColor(Tools.unpack(Tools.ColorLuma(this.fontColor, -0.75)), Tools.unpack(this.fontColor), this.percent));
+
+						this.setSvg(this.c[3], 'stroke', _color, 1);
+					} else {
+						this.setSvg(this.c[3], 'stroke', this.colorPlus, 1);
+					}
+
 					break;
 			}
 
@@ -3160,6 +3194,12 @@
 			this.c[2].textContent = this.value;
 			this.percent = (this.value - this.min) / this.range;
 			this.setSvg(this.c[3], 'd', this.makePath(), 1);
+
+			if (this.model > 0) {
+				var color = Tools.pack(Tools.lerpColor(Tools.unpack(Tools.ColorLuma(this.fontColor, -0.75)), Tools.unpack(this.fontColor), this.percent));
+				this.setSvg(this.c[3], 'stroke', color, 1);
+			}
+
 			if (up) this.send();
 		};
 
@@ -4530,6 +4570,8 @@
 
 			_this = _Proto.call(this, o) || this;
 			_this.isCyclic = o.cyclic || false;
+			_this.model = o.stype || 0;
+			if (o.mode !== undefined) _this.model = o.mode;
 			_this.autoWidth = false;
 			_this.buttonColor = _this.colors.button;
 
@@ -4572,6 +4614,16 @@
 				left: 0,
 				top: _this.top
 			});
+
+			if (_this.model > 0) {
+				Tools.dom('path', '', {
+					d: '',
+					stroke: _this.fontColor,
+					'stroke-width': 2,
+					fill: 'none',
+					'stroke-linecap': 'round'
+				}, _this.c[3]); //4
+			}
 
 			_this.r = 0;
 
@@ -4711,20 +4763,31 @@
 
 		_proto.update = function update(up) {
 			this.c[2].textContent = this.value;
-			this.percent = (this.value - this.min) / this.range; // let r = 50;
-			// let d = 64; 
-
-			var r = this.percent * this.cirRange - this.mPI; //* this.toDeg;
-
-			var sin = Math.sin(r);
-			var cos = Math.cos(r);
+			this.percent = (this.value - this.min) / this.range;
+			var sa = Math.PI + this.mPI;
+			var ea = this.percent * this.cirRange - this.mPI;
+			var sin = Math.sin(ea);
+			var cos = Math.cos(ea);
 			var x1 = 25 * sin + 64;
 			var y1 = -(25 * cos) + 64;
 			var x2 = 20 * sin + 64;
-			var y2 = -(20 * cos) + 64; //this.setSvg( this.c[3], 'cx', x, 1 );
-			//this.setSvg( this.c[3], 'cy', y, 1 );
+			var y2 = -(20 * cos) + 64;
+			this.setSvg(this.c[3], 'd', 'M ' + x1 + ' ' + y1 + ' L ' + x2 + ' ' + y2, 1);
 
-			this.setSvg(this.c[3], 'd', 'M ' + x1 + ' ' + y1 + ' L ' + x2 + ' ' + y2, 1); //this.setSvg( this.c[3], 'transform', 'rotate('+ r +' '+64+' '+64+')', 1 );
+			if (this.model > 0) {
+				var _x = 36 * Math.sin(sa) + 64;
+
+				var _y = 36 * Math.cos(sa) + 64;
+
+				var _x2 = 36 * sin + 64;
+
+				var _y2 = -36 * cos + 64;
+
+				var big = ea <= Math.PI - this.mPI ? 0 : 1;
+				this.setSvg(this.c[3], 'd', 'M ' + _x + ',' + _y + ' A ' + 36 + ',' + 36 + ' 1 ' + big + ' 1 ' + _x2 + ',' + _y2, 4);
+				var color = Tools.pack(Tools.lerpColor(Tools.unpack(Tools.ColorLuma(this.fontColor, -0.75)), Tools.unpack(this.fontColor), this.percent));
+				this.setSvg(this.c[3], 'stroke', color, 4);
+			}
 
 			if (up) this.send();
 		};

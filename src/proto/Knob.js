@@ -10,6 +10,7 @@ export class Knob extends Proto {
 
         this.isCyclic = o.cyclic || false;
         this.model = o.stype || 0;
+        if( o.mode !== undefined ) this.model = o.mode;
 
         this.autoWidth = false;
 

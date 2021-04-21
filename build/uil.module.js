@@ -333,6 +333,13 @@ const T = {
         
     },
 
+    lerpColor: function( c1, c2, factor ) {
+        let newColor = {};
+        for ( let i = 0; i < 3; i++ ) {
+          newColor[i] = c1[ i ] + ( c2[ i ] - c1[ i ] ) * factor;
+        }
+        return newColor;
+    },
 
     hexToHtml: function ( v ) { 
         v = v === undefined ? 0x000000 : v;
@@ -362,6 +369,18 @@ const T = {
 
         if (c.length == 7) return [ T.u255(c, 1), T.u255(c, 3), T.u255(c, 5) ];
         else if (c.length == 4) return [ T.u16(c,1), T.u16(c,2), T.u16(c,3) ];
+
+    },
+
+    p255: function ( c ) {
+        let h = Math.round( ( c * 255 ) ).toString( 16 );
+        if ( h.length < 2 ) h = '0' + h;
+        return h;
+    },
+
+    pack: function ( c ) {
+
+        return '#' + T.p255( c[ 0 ] ) + T.p255( c[ 1 ] ) + T.p255( c[ 2 ] );
 
     },
 
@@ -2645,6 +2664,8 @@ class Circular extends Proto {
         super( o );
 
         this.isCyclic = o.cyclic || false;
+        this.model = o.stype || 0;
+        if( o.mode !== undefined ) this.model = o.mode;
 
         this.autoWidth = false;
 
@@ -2699,12 +2720,26 @@ class Circular extends Proto {
             case 0: // base
                 this.s[2].color = this.fontColor;
                 this.setSvg( this.c[3], 'stroke','rgba(0,0,0,0.1)', 0);
-                this.setSvg( this.c[3], 'stroke', this.fontColor, 1 );
+                if ( this.model > 0 ) {
+
+                    let color = Tools.pack( Tools.lerpColor( Tools.unpack( Tools.ColorLuma( this.fontColor, -0.75) ), Tools.unpack( this.fontColor ), this.percent ) );
+                    this.setSvg( this.c[3], 'stroke', color, 1 );
+                
+                } else {
+                    this.setSvg( this.c[3], 'stroke', this.fontColor, 1 );
+                }
             break;
             case 1: // over
                 this.s[2].color = this.colorPlus;
                 this.setSvg( this.c[3], 'stroke','rgba(0,0,0,0.3)', 0);
-                this.setSvg( this.c[3], 'stroke', this.colorPlus, 1 );
+                if ( this.model > 0 ) {
+
+                    let color = Tools.pack( Tools.lerpColor( Tools.unpack( Tools.ColorLuma( this.fontColor, -0.75) ), Tools.unpack( this.fontColor ), this.percent ) );
+                    this.setSvg( this.c[3], 'stroke', color, 1 );
+                
+                } else {
+                    this.setSvg( this.c[3], 'stroke', this.colorPlus, 1 );
+                }
             break;
         }
 
@@ -2836,6 +2871,14 @@ class Circular extends Proto {
         this.percent = ( this.value - this.min ) / this.range;
 
         this.setSvg( this.c[3], 'd', this.makePath(), 1 );
+
+        if ( this.model > 0 ) {
+
+            let color = Tools.pack( Tools.lerpColor( Tools.unpack( Tools.ColorLuma( this.fontColor, -0.75) ), Tools.unpack( this.fontColor ), this.percent ) );
+            this.setSvg( this.c[3], 'stroke', color, 1 );
+        
+        }
+
         if( up ) this.send();
         
     }
@@ -4450,6 +4493,8 @@ class Knob extends Proto {
         super( o );
 
         this.isCyclic = o.cyclic || false;
+        this.model = o.stype || 0;
+        if( o.mode !== undefined ) this.model = o.mode;
 
         this.autoWidth = false;
 
@@ -4492,9 +4537,14 @@ class Knob extends Proto {
         this.setSvg( this.c[3], 'stroke', this.fontColor, 3 );
         this.setSvg( this.c[3], 'd', this.makeGrad(), 3 );
         
-
         this.setSvg( this.c[3], 'viewBox', '0 0 '+this.ww+' '+this.ww );
         this.setCss( this.c[3], { width:this.w, height:this.w, left:0, top:this.top });
+
+        if ( this.model > 0 ) {
+
+            Tools.dom( 'path', '', { d: '', stroke: this.fontColor, 'stroke-width': 2, fill: 'none', 'stroke-linecap': 'round' }, this.c[3] ); //4
+
+        }
 
         this.r = 0;
 
@@ -4508,7 +4558,7 @@ class Knob extends Proto {
 
         if( this.cmode === mode ) return false;
 
-        switch(mode){
+        switch( mode ) {
             case 0: // base
                 this.s[2].color = this.fontColor;
                 this.setSvg( this.c[3], 'fill',this.colors.button, 0);
@@ -4654,24 +4704,32 @@ class Knob extends Proto {
         this.c[2].textContent = this.value;
         this.percent = (this.value - this.min) / this.range;
 
-       // let r = 50;
-       // let d = 64; 
-        let r = ( (this.percent * this.cirRange) - (this.mPI));//* this.toDeg;
+        let sa = Math.PI + this.mPI;
+        let ea = ( ( this.percent * this.cirRange ) - ( this.mPI ) );
 
-        let sin = Math.sin(r);
-        let cos = Math.cos(r);
+        let sin = Math.sin( ea );
+        let cos = Math.cos( ea );
 
-        let x1 = (25 * sin) + 64;
-        let y1 = -(25 * cos) + 64;
-        let x2 = (20 * sin) + 64;
-        let y2 = -(20 * cos) + 64;
-
-        //this.setSvg( this.c[3], 'cx', x, 1 );
-        //this.setSvg( this.c[3], 'cy', y, 1 );
+        let x1 = ( 25 * sin ) + 64;
+        let y1 = -( 25 * cos ) + 64;
+        let x2 = ( 20 * sin ) + 64;
+        let y2 = -( 20 * cos ) + 64;
 
         this.setSvg( this.c[3], 'd', 'M ' + x1 +' ' + y1 + ' L ' + x2 +' ' + y2, 1 );
+        
+        if ( this.model > 0 ) {
 
-        //this.setSvg( this.c[3], 'transform', 'rotate('+ r +' '+64+' '+64+')', 1 );
+            let x1 = 36 * Math.sin( sa ) + 64;
+            let y1 = 36 * Math.cos( sa ) + 64;
+            let x2 = 36 * sin + 64;
+            let y2 = -36 * cos + 64;
+            let big = ea <= Math.PI - this.mPI ? 0 : 1;
+            this.setSvg( this.c[3], 'd', 'M ' + x1 + ',' + y1 + ' A ' + 36 + ',' + 36 + ' 1 ' + big + ' 1 ' + x2 + ',' + y2, 4 );
+
+            let color = Tools.pack( Tools.lerpColor( Tools.unpack( Tools.ColorLuma( this.fontColor, -0.75) ), Tools.unpack( this.fontColor ), this.percent ) );
+            this.setSvg( this.c[3], 'stroke', color, 4 );
+        
+        }
 
         if( up ) this.send();
         
