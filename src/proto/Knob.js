@@ -60,6 +60,13 @@ export class Knob extends Proto {
 
             Tools.dom( 'path', '', { d: '', stroke: this.fontColor, 'stroke-width': 2, fill: 'none', 'stroke-linecap': 'round' }, this.c[3] ); //4
 
+            if ( this.model == 2) {
+            
+                Tools.addSVGGlowEffect();
+                this.setSvg( this.c[3], 'style', 'filter: url("#UILGlow");', 4 );
+            
+            }
+
         }
 
         this.r = 0;

@@ -301,6 +301,45 @@ const T = {
     },
 
     // ----------------------
+    //   SVG Effects function
+    // ----------------------
+
+    addSVGGlowEffect: function () {
+
+        if ( document.getElementById( 'UILGlow') !== null ) return;
+
+        let svgFilter = T.initUILEffects();
+
+        let filter = T.addAttributes( svgFilter, 'filter', { id: 'UILGlow', x: '-20%', y: '-20%', width: '140%', height: '140%' } );
+        T.addAttributes( filter, 'feGaussianBlur', { in: 'SourceGraphic', stdDeviation: '3', result: 'uilBlur' } );
+        let feMerge = T.addAttributes( filter, 'feMerge', {  } );
+        
+        for( let i = 0; i <= 3; i++ ) {
+
+            T.addAttributes( feMerge, 'feMergeNode', { in: 'uilBlur' } );
+        
+        }
+
+        T.addAttributes( feMerge, 'feMergeNode', { in: 'SourceGraphic' } );
+
+    },
+
+    initUILEffects: function () {
+
+        let svgFilter = document.getElementById( 'UILSVGEffects');
+        
+        if ( svgFilter === null ) {
+            
+            svgFilter = T.dom( 'svg', undefined , { id: 'UILSVGEffects', width: '0', height: '0' } );
+            document.body.appendChild( svgFilter );
+ 
+        }
+
+        return svgFilter;
+
+    },
+
+    // ----------------------
     //   Color function
     // ----------------------
 
