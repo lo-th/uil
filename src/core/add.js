@@ -18,6 +18,7 @@ import { Selector } from '../proto/Selector.js';
 import { Empty } from '../proto/Empty.js';
 import { Item } from '../proto/Item.js';
 import { Grid } from '../proto/Grid.js';
+import { Pad2D } from '../proto/Pad2D.js';
 
 
 export const add = function () {
@@ -69,6 +70,7 @@ export const add = function () {
             case 'empty': case 'space': n = new Empty(o); break;
             case 'item': n = new Item(o); break;
             case 'grid': n = new Grid(o); break;
+            case 'pad2d': n = new Pad2D(o); break;
 
         }
 
