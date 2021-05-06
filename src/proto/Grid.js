@@ -26,6 +26,8 @@ export class Grid extends Proto {
         this.spaces = o.spaces || [5,3];
         this.bsize = o.bsize || [90,20];
 
+        if(o.h) this.bsize[1] = o.h;
+
         this.bsizeMax = this.bsize[0];
 
         this.lng = this.values.length;

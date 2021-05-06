@@ -956,6 +956,50 @@
 			}
 		},
 		// ----------------------
+		//	 SVG Effects function
+		// ----------------------
+		addSVGGlowEffect: function addSVGGlowEffect() {
+			if (document.getElementById('UILGlow') !== null) return;
+			var svgFilter = T.initUILEffects();
+			var filter = T.addAttributes(svgFilter, 'filter', {
+				id: 'UILGlow',
+				x: '-20%',
+				y: '-20%',
+				width: '140%',
+				height: '140%'
+			});
+			T.addAttributes(filter, 'feGaussianBlur', {
+				in: 'SourceGraphic',
+				stdDeviation: '3',
+				result: 'uilBlur'
+			});
+			var feMerge = T.addAttributes(filter, 'feMerge', {});
+
+			for (var i = 0; i <= 3; i++) {
+				T.addAttributes(feMerge, 'feMergeNode', {
+					in: 'uilBlur'
+				});
+			}
+
+			T.addAttributes(feMerge, 'feMergeNode', {
+				in: 'SourceGraphic'
+			});
+		},
+		initUILEffects: function initUILEffects() {
+			var svgFilter = document.getElementById('UILSVGEffects');
+
+			if (svgFilter === null) {
+				svgFilter = T.dom('svg', undefined, {
+					id: 'UILSVGEffects',
+					width: '0',
+					height: '0'
+				});
+				document.body.appendChild(svgFilter);
+			}
+
+			return svgFilter;
+		},
+		// ----------------------
 		//	 Color function
 		// ----------------------
 		ColorLuma: function ColorLuma(hex, l) {
@@ -4623,6 +4667,12 @@
 					fill: 'none',
 					'stroke-linecap': 'round'
 				}, _this.c[3]); //4
+
+				if (_this.model == 2) {
+					Tools.addSVGGlowEffect();
+
+					_this.setSvg(_this.c[3], 'style', 'filter: url("#UILGlow");', 4);
+				}
 			}
 
 			_this.r = 0;
@@ -6568,6 +6618,7 @@
 			_this.buttonDown = o.bDown || _this.colors.select;
 			_this.spaces = o.spaces || [5, 3];
 			_this.bsize = o.bsize || [90, 20];
+			if (o.h) _this.bsize[1] = o.h;
 			_this.bsizeMax = _this.bsize[0];
 			_this.lng = _this.values.length;
 			_this.tmp = [];
@@ -6806,6 +6857,219 @@
 		return Grid;
 	}(Proto);
 
+	var Pad2D = /*#__PURE__*/function (_Proto) {
+		_inheritsLoose(Pad2D, _Proto);
+
+		function Pad2D(o) {
+			var _this;
+
+			if (o === void 0) {
+				o = {};
+			}
+
+			_this = _Proto.call(this, o) || this;
+			_this.autoWidth = false;
+			_this.margin = 15;
+			_this.pos = new V2();
+			_this.model = o.stype || 0;
+			if (o.mode !== undefined) _this.model = o.mode;
+			_this.precision = o.precision === undefined ? 2 : o.precision;
+			_this.bounds = {};
+			_this.bounds.x1 = o.x1 || -1;
+			_this.bounds.x2 = o.x2 || 1;
+			_this.bounds.y1 = o.y1 || -1;
+			_this.bounds.y2 = o.y2 || 1;
+			_this.lerpX = _this.lerp(_this.margin, _this.w - _this.margin, _this.bounds.x1, _this.bounds.x2);
+			_this.lerpY = _this.lerp(_this.margin, _this.w - _this.margin, _this.bounds.y1, _this.bounds.y2);
+			_this.alerpX = _this.lerp(_this.bounds.x1, _this.bounds.x2, _this.margin, _this.w - _this.margin);
+			_this.alerpY = _this.lerp(_this.bounds.y1, _this.bounds.y2, _this.margin, _this.w - _this.margin);
+			_this.value = [];
+			var v = Array.isArray(o.value) && o.value.length == 2 ? o.value : [0, 0];
+
+			_this.setValue(v);
+
+			_this.h = o.h || _this.w + 10;
+			_this.top = 0;
+			_this.c[0].style.width = _this.w + 'px'; // Title
+
+			if (_this.c[1] !== undefined) {
+				// with title
+				_this.c[1].style.width = _this.w + 'px';
+				_this.c[1].style.textAlign = 'center';
+				_this.top = 10;
+				_this.h += 10;
+			} // Value
+
+
+			_this.c[2] = _this.dom('div', _this.css.txt + 'text-align:center; top:' + (_this.h - 20) + 'px; width:' + _this.w + 'px; color:' + _this.fontColor);
+			_this.c[2].textContent = _this.value; // Pad
+
+			var svg = Tools.dom('svg', Tools.css.basic, {
+				viewBox: '0 0 ' + _this.w + ' ' + _this.w,
+				width: _this.w,
+				height: _this.w,
+				preserveAspectRatio: 'none'
+			});
+			Tools.dom('rect', '', {
+				x: _this.margin - 5,
+				y: _this.margin - 5,
+				width: _this.w - (_this.margin - 5) * 2,
+				height: _this.w - (_this.margin - 5) * 2,
+				rx: 5,
+				ty: 5,
+				stroke: 'rgba(0,0,0,0.25)',
+				'stroke-width': 0,
+				fill: 'rgba(0,0,0,0.1)'
+			}, svg); // 0
+
+			Tools.dom('rect', '', {
+				x: _this.margin,
+				y: _this.margin,
+				width: _this.w - _this.margin * 2,
+				height: _this.w - _this.margin * 2,
+				stroke: 'rgba(0,0,0,0.25)',
+				'stroke-width': 0,
+				fill: 'rgba(0,0,0,0.1)'
+			}, svg); // 1
+
+			_this.c[3] = svg;
+
+			_this.setSvg(_this.c[3], 'viewBox', '0 0 ' + _this.w + ' ' + _this.w);
+
+			_this.setCss(_this.c[3], {
+				left: 0,
+				top: _this.top
+			}); // Pointer
+
+
+			Tools.dom('line', '', {
+				x1: _this.margin,
+				y1: _this.w / 2,
+				x2: _this.w - _this.margin,
+				y2: _this.w / 2,
+				stroke: '#1C1C1C',
+				'stroke-width': 1
+			}, _this.c[3]); // 2
+
+			Tools.dom('line', '', {
+				x1: _this.w / 2,
+				y1: _this.margin,
+				x2: _this.w / 2,
+				y2: _this.w - _this.margin,
+				stroke: '#1C1C1C',
+				'stroke-width': 1
+			}, _this.c[3]); // 3
+
+			Tools.dom('circle', '', {
+				cx: _this.w / 2,
+				cy: _this.w / 2,
+				r: 5,
+				stroke: 'rgba(0,0,0,0.25)',
+				'stroke-width': 0,
+				fill: _this.fontColor
+			}, _this.c[3]); // 4
+
+			_this.init();
+
+			_this.update(false);
+
+			return _this;
+		}
+
+		var _proto = Pad2D.prototype;
+
+		_proto.testZone = function testZone(e) {
+			var l = this.local;
+			if (l.x === -1 && l.y === -1) return '';
+
+			if (l.x >= this.margin && l.x <= this.w - this.margin && l.y >= this.top + this.margin && l.y <= this.top + this.w - this.margin) {
+				return 'pad';
+			}
+
+			return '';
+		};
+
+		_proto.mouseup = function mouseup(e) {
+			this.isDown = false;
+		};
+
+		_proto.mousedown = function mousedown(e) {
+			if (this.testZone(e) === 'pad') {
+				this.isDown = true;
+				this.mousemove(e);
+			}
+		};
+
+		_proto.mousemove = function mousemove(e) {
+			if (!this.isDown) return;
+			var x = e.clientX - this.zone.x;
+			var y = e.clientY - this.zone.y - this.top;
+			if (x < this.margin) x = this.margin;
+			if (x > this.w - this.margin) x = this.w - this.margin;
+			if (y < this.margin) y = this.margin;
+			if (y > this.w - this.margin) y = this.w - this.margin;
+			this.setPos([x, y]);
+			this.update();
+		};
+
+		_proto.update = function update(up) {
+			if (up === undefined) up = true;
+			this.c[2].textContent = this.value;
+			this.updateSVG();
+			if (up) this.send();
+		};
+
+		_proto.updateSVG = function updateSVG() {
+			if (this.model == 1) {
+				this.setSvg(this.c[3], 'y1', this.pos.y, 2);
+				this.setSvg(this.c[3], 'y2', this.pos.y, 2);
+				this.setSvg(this.c[3], 'x1', this.pos.x, 3);
+				this.setSvg(this.c[3], 'x2', this.pos.x, 3);
+			}
+
+			this.setSvg(this.c[3], 'cx', this.pos.x, 4);
+			this.setSvg(this.c[3], 'cy', this.pos.y, 4);
+		};
+
+		_proto.setPos = function setPos(p) {
+			if (p === undefined) p = [this.w / 2, this.w / 2];
+			this.pos.set(p[0], p[1]);
+			this.value[0] = this.lerpX(p[0]).toFixed(this.precision);
+			this.value[1] = this.lerpY(p[1]).toFixed(this.precision);
+		};
+
+		_proto.setValue = function setValue(v, up) {
+			if (up === void 0) {
+				up = false;
+			}
+
+			if (v === undefined) v = [0, 0];
+			if (v[0] < this.bounds.x1) v[0] = this.bounds.x1;
+			if (v[0] > this.bounds.x2) v[0] = this.bounds.x2;
+			if (v[1] < this.bounds.y1) v[1] = this.bounds.y1;
+			if (v[1] > this.bounds.y2) v[1] = this.bounds.y2;
+			this.value[0] = v[0];
+			this.value[1] = v[1];
+			this.pos.set(this.alerpX(v[0]), this.alerpY(v[1]));
+			if (up) this.update();
+		};
+
+		_proto.lerp = function lerp(s1, s2, d1, d2, c) {
+			if (c === void 0) {
+				c = true;
+			}
+
+			var s = (d2 - d1) / (s2 - s1);
+			return c ? function (v) {
+				return ((v < s1 ? s1 : v > s2 ? s2 : v) - s1) * s + d1;
+			} : function (v) {
+				return (v - s1) * s + d1;
+			};
+		};
+
+		return Pad2D;
+	}(Proto);
+
 	var add = function add() {
 		var a = arguments;
 		var type,
@@ -6908,6 +7172,10 @@
 
 			case 'grid':
 				n = new Grid(o);
+				break;
+
+			case 'pad2d':
+				n = new Pad2D(o);
 				break;
 		}
 
