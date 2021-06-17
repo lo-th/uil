@@ -3727,13 +3727,24 @@ class Graph extends Proto {
 
     }
 
+    setValue ( value ) {
+
+        this.value = value;
+        this.lng = this.value.length;
+        for (var i = 0; i < this.lng; i++) {
+            if (this.neg) this.v[i] = (1 + value[i] / this.multiplicator) * 0.5;
+            else this.v[i] = value[i] / this.multiplicator;
+        }
+        this.update();
+
+    }
+
     updateSVG () {
 
         if( this.line ) this.setSvg( this.c[3], 'd', this.makePath(), 0 );
 
         for(let i = 0; i<this.lng; i++ ){
 
-            
             this.setSvg( this.c[3], 'height', this.v[i]*this.gh, i+2 );
             this.setSvg( this.c[3], 'y', 14 + (this.gh - this.v[i]*this.gh), i+2 );
             if( this.neg ) this.value[i] = ( ((this.v[i]*2)-1) * this.multiplicator ).toFixed( this.precision ) * 1;

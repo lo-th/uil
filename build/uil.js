@@ -3945,6 +3945,17 @@
 
 		var _proto = Graph.prototype;
 
+		_proto.setValue = function setValue(value) {
+			this.value = value;
+			this.lng = this.value.length;
+
+			for (var i = 0; i < this.lng; i++) {
+				if (this.neg) this.v[i] = (1 + value[i] / this.multiplicator) * 0.5;else this.v[i] = value[i] / this.multiplicator;
+			}
+
+			this.update();
+		};
+
 		_proto.updateSVG = function updateSVG() {
 			if (this.line) this.setSvg(this.c[3], 'd', this.makePath(), 0);
 

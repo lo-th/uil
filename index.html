@@ -36,7 +36,7 @@ octo.addEventListener('mouseover',function(e){ octo.setAttribute('fill', '#3998d
 octo.addEventListener('mouseout',function(e){ octo.setAttribute('fill','rgba(255,255,255,0.2)');  octoArm.style.animationName='none'; }, false );
 octo.addEventListener('mousedown',function(e){ window.open('https://github.com/lo-th/uil','_blank'); }, false );
 
-var gr0, gr1, gr2, gr3, ty, ny =0;
+var gr0, gr1, gr2, gr3, ty, ny =0, graph;
 var display = false;
 var list = ['item-0', 'item-1', 'item-2', 'item-3', 'item-4', 'item-5', 'item-6', 'item-7', 'item-8', 'item-9', 'item-10', 'item-11', 'item-12'];
 var list2 = ['item-0', 'item-1', 'item-2'];
@@ -74,7 +74,8 @@ function populate () {
         ui.add('string', { name:'String', value:'welcome to uil', h:30});
         ui.add('list',   { name:'List', list:list});
         ui.add('list',   { name:'', list:list2, itemHeight:30, listOnly:true });
-        ui.add('graph',  { name:'Graph', h:80, value:[-0.5,1,0.5,1,0.25,0,0.5,1,0.5], neg:true, multiplicator:90, precision:0 });
+
+        ui.add('graph',  { name:'Graph', h:80, value:[90,-30,0,-90,0,0,0,50,30], neg:true, multiplicator:100, precision:0 });
 
         ui.add('number', { name:'Number', value:20, min:-60, max:200 });
         ui.add('number', { name:'Vector2', value:[0,0] });
@@ -142,6 +143,7 @@ function populate () {
 }
 
 function update (){
+
     requestAnimationFrame( update );
 
     if( ny==4 ){ 
