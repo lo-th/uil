@@ -65,7 +65,8 @@ function populate () {
         ui.add('title',  { name:'UIL '+ UIL.REVISION, h:22, align:'center' });
         ui.add('fps', { h:22, hplus:70, res:80 });
         ty = ui.add('fps', { name:'custom graph', h:22, hplus:70, custom:true, alpha:1, res:50, names:['Post','Step','Next'], cc:['50,160,222','222,120,50','222,222,50'], range:[25,25,25], precision:2, radius:4, fontColor:'#EEEEEE', adding:true   });
-        ui.add('bool',   { name:'Bool', h:20, value:false });
+        ui.add('bool', { name:'Bool', h:20, value:false });
+        ui.add('bool', { name:'OFF', onName:'ON', value:false, mode:1 });
         ui.add('color',  { name:'Color', type:'html', value:0xffffff});
         ui.add('color',  { name:'Color', type:'html', value:[0,1,1,1], h:20});
         ui.add('slide',  { name:'Slide', min:-100, max:100, value:0, precision:0 });
@@ -82,7 +83,8 @@ function populate () {
         ui.add('number', { name:'Vector3', value:[0,0,0] });
         ui.add('number', { name:'Vector4', value:[0,0,0,0], step:1, precision:0 });
 
-        ui.add('button', { name:'Button', callback:callbackButton });
+        ui.add('button', { name:'Button' });
+
 
         //ui.add('button', { name: 'Test HTML', fontColor: '#D4B87B', h: 30 } ).onChange( ( ) => { let w = window.open("about:blank", "hello", "width=200,height=200"); } );
         ui.add('button', { name: '3D UIL TEST', fontColor: '#D4B87B', h:30, link:true, p:0 } ).onChange( function ( ) { let w = window.open("./examples/uil_3d.html", ""); w.focus();} );

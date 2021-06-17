@@ -445,6 +445,15 @@ export class List extends Proto {
         this.setTopItem();
     }
 
+    setValue ( value ) {
+
+        if(!isNaN(value)) this.value = this.list[ value ];
+        else this.value = value;
+
+        this.setTopItem();
+
+    }
+
     setTopItem (){
 
         if( this.isWithImage ){ 

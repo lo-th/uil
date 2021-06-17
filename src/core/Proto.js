@@ -123,7 +123,7 @@ class Proto {
         this.colorPlus = Tools.ColorLuma( this.fontColor, 0.3 );
 
         this.txt = o.name || '';
-        this.rename = o.rename || '';
+        this.name = o.rename || this.txt;
         this.target = o.target || null;
 
         this.callback = o.callback === undefined ? null : o.callback;
@@ -147,7 +147,7 @@ class Proto {
         if( !this.simple ){ 
             this.c[1] = Tools.dom( 'div', this.css.txt );
             this.s[1] = this.c[1].style;
-            this.c[1].textContent = this.rename === '' ? this.txt : this.rename;
+            this.c[1].textContent = this.name;
             this.s[1].color = this.titleColor;
         }
 

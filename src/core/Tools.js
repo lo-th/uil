@@ -72,6 +72,7 @@ const T = {
         moving : '#03afff',
         down : '#024699',
         over : '#024699',
+        over2 : '#1c1c1c',
         action: '#FF3300',
 
         stroke: 'rgba(11,11,11,0.5)',

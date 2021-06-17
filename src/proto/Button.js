@@ -15,7 +15,11 @@ export class Button extends Proto {
 
         this.on = false;
 
+
+
         if( typeof this.values === 'string' ) this.values = [ this.values ];
+
+
 
         //this.selected = null;
         this.isDown = false;
@@ -56,15 +60,18 @@ export class Button extends Proto {
             this.initDrager();
         }
 
+        if( this.onName !== '' ) this.values[0] = this.on;
+
         this.init();
 
     }
 
     onOff ( ){
 
+        //this.values[0] = this.on;
         this.on = !this.on;
-        this.c[2].innerHTML = this.on ? this.onName : this.values[0];
-
+        this.c[2].innerHTML = this.on ? this.onName : this.txt
+        
     }
 
     testZone ( e ) {

@@ -788,6 +788,7 @@
 			moving: '#03afff',
 			down: '#024699',
 			over: '#024699',
+			over2: '#1c1c1c',
 			action: '#FF3300',
 			stroke: 'rgba(11,11,11,0.5)',
 			scroll: '#333333',
@@ -2278,7 +2279,7 @@
 
 			this.colorPlus = Tools.ColorLuma(this.fontColor, 0.3);
 			this.txt = o.name || '';
-			this.rename = o.rename || '';
+			this.name = o.rename || this.txt;
 			this.target = o.target || null;
 			this.callback = o.callback === undefined ? null : o.callback;
 			this.endCallback = null;
@@ -2294,7 +2295,7 @@
 			if (!this.simple) {
 				this.c[1] = Tools.dom('div', this.css.txt);
 				this.s[1] = this.c[1].style;
-				this.c[1].textContent = this.rename === '' ? this.txt : this.rename;
+				this.c[1].textContent = this.name;
 				this.s[1].color = this.titleColor;
 			}
 
@@ -2683,12 +2684,28 @@
 
 			_this = _Proto.call(this, o) || this;
 			_this.value = o.value || false;
+			_this.model = o.mode !== undefined ? o.mode : 0;
+			_this.onName = o.onName || _this.txt;
 			_this.buttonColor = o.bColor || _this.colors.button;
 			_this.inh = o.inh || Math.floor(_this.h * 0.8);
 			_this.inw = o.inw || 36;
-			var t = Math.floor(_this.h * 0.5) - (_this.inh - 2) * 0.5;
-			_this.c[2] = _this.dom('div', _this.css.basic + 'background:' + _this.colors.boolbg + '; height:' + (_this.inh - 2) + 'px; width:' + _this.inw + 'px; top:' + t + 'px; border-radius:10px; border:2px solid ' + _this.boolbg);
-			_this.c[3] = _this.dom('div', _this.css.basic + 'height:' + (_this.inh - 6) + 'px; width:16px; top:' + (t + 2) + 'px; border-radius:10px; background:' + _this.buttonColor + ';');
+
+			if (_this.model === 0) {
+				var t = Math.floor(_this.h * 0.5) - (_this.inh - 2) * 0.5;
+				_this.c[2] = _this.dom('div', _this.css.basic + 'background:' + _this.colors.boolbg + '; height:' + (_this.inh - 2) + 'px; width:' + _this.inw + 'px; top:' + t + 'px; border-radius:10px; border:2px solid ' + _this.boolbg);
+				_this.c[3] = _this.dom('div', _this.css.basic + 'height:' + (_this.inh - 6) + 'px; width:16px; top:' + (t + 2) + 'px; border-radius:10px; background:' + _this.buttonColor + ';');
+			} else {
+				_this.p = 0;
+				_this.c[1].textContent = '';
+				_this.c[2] = _this.dom('div', _this.css.txt + _this.css.button + 'top:1px; background:' + _this.colors.button + '; height:' + (_this.h - 2) + 'px; border:' + _this.colors.buttonBorder + '; border-radius:' + _this.radius + 'px;');
+				/*
+				this.c[2].style.background = this.value ? this.colors.select : this.colors.button;
+				this.c[2].style.color = this.value ? this.fontSelect : this.fontColor;*/
+			}
+
+			_this.stat = -1;
+
+			_this.mode(_this.value ? 2 : 1);
 
 			_this.init();
 
@@ -2702,30 +2719,87 @@
 
 		var _proto = Bool.prototype;
 
-		_proto.mousemove = function mousemove(e) {
-			this.cursor('pointer');
-		};
-
 		_proto.mousedown = function mousedown(e) {
-			this.value = this.value ? false : true;
+			this.value = !this.value; // ? false : true;
+
 			this.update();
 			this.send();
-			return true;
+			return this.mousemove(e);
+		};
+
+		_proto.mousemove = function mousemove(e) {
+			this.cursor('pointer');
+			return this.mode(this.value ? 4 : 3);
+			/*this.s[2].background = this.colors.down;
+			this.s[2].color = this.fontSelect;
+			return true*/
+		};
+
+		_proto.reset = function reset() {
+			this.cursor();
+			return this.mode(this.value ? 2 : 1);
+		};
+
+		_proto.mode = function mode(n) {
+			var change = false;
+
+			if (this.stat !== n) {
+				if (this.model !== 0) {
+					var s = this.c[2].style;
+
+					switch (n) {
+						case 1:
+							this.stat = 1;
+							s.color = this.fontColor;
+							s.background = this.colors.button;
+							break;
+
+						case 2:
+							this.stat = 2;
+							s.color = this.fontSelect;
+							s.background = this.colors.select;
+							break;
+
+						case 3:
+							this.stat = 3;
+							s.color = this.fontSelect;
+							s.background = this.colors.over2;
+							break;
+
+						case 4:
+							this.stat = 4;
+							s.color = this.fontSelect;
+							s.background = this.colors.over;
+							break;
+					}
+
+					this.c[2].innerHTML = this.value ? this.onName : this.name;
+				} else {
+					this.c[2].style.background = this.value ? this.colors.boolon : this.colors.boolbg;
+					this.c[2].style.borderColor = this.value ? this.colors.boolon : this.colors.boolbg;
+					this.c[3].style.marginLeft = this.value ? '17px' : '2px';
+					this.c[1].textContent = this.value ? this.onName : this.name;
+				}
+
+				change = true;
+			}
+
+			return change;
 		} // ----------------------
 		;
 
 		_proto.update = function update() {
-			var s = this.s;
-
-			if (this.value) {
-				s[2].background = this.colors.boolon;
-				s[2].borderColor = this.colors.boolon;
-				s[3].marginLeft = '17px';
-			} else {
-				s[2].background = this.colors.boolbg;
-				s[2].borderColor = this.colors.boolbg;
-				s[3].marginLeft = '2px';
-			}
+			/*let s = this.s;
+				if( this.model === 0 ){
+							s[2].background = this.value ? this.colors.boolon : this.colors.boolbg;
+					s[2].borderColor = this.value ? this.colors.boolon : this.colors.boolbg;
+					s[3].marginLeft = this.value ? '17px' : '2px';
+				} else {
+						//this.mode( this.value ? 4 : 3 )
+						/*s[2].background = this.value ? this.colors.select : this.colors.button;
+					s[2].color = this.value ? this.fontSelect : this.fontColor;
+					this.c[2].innerHTML = this.value ? this.onName : this.name;*/
+			// }
 		};
 
 		_proto.rSize = function rSize() {
@@ -2733,8 +2807,14 @@
 
 			var s = this.s;
 			var w = this.w - 10 - this.inw;
-			s[2].left = w + 'px';
-			s[3].left = w + 'px';
+
+			if (this.model === 0) {
+				s[2].left = w + 'px';
+				s[3].left = w + 'px';
+			} else {
+				s[2].left = this.sa + 'px';
+				s[2].width = this.w - 20 + 'px';
+			}
 		};
 
 		return Bool;
@@ -2788,6 +2868,8 @@
 				_this.initDrager();
 			}
 
+			if (_this.onName !== '') _this.values[0] = _this.on;
+
 			_this.init();
 
 			return _this;
@@ -2796,8 +2878,9 @@
 		var _proto = Button.prototype;
 
 		_proto.onOff = function onOff() {
+			//this.values[0] = this.on;
 			this.on = !this.on;
-			this.c[2].innerHTML = this.on ? this.onName : this.values[0];
+			this.c[2].innerHTML = this.on ? this.onName : this.txt;
 		};
 
 		_proto.testZone = function testZone(e) {
@@ -5240,6 +5323,11 @@
 				this.items[i].appendChild(this.tmpImage[this.list[i]]);
 			}
 
+			this.setTopItem();
+		};
+
+		_proto.setValue = function setValue(value) {
+			if (!isNaN(value)) this.value = this.list[value];else this.value = value;
 			this.setTopItem();
 		};
 
