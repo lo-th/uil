@@ -766,6 +766,7 @@
 			text: '#dcdcdc',
 			textOver: '#FFFFFF',
 			txtselectbg: 'none',
+			content: 'none',
 			background: 'rgba(50,50,50,0.5)',
 			//'rgba(44,44,44,0.3)',
 			backgroundOver: 'rgba(50,50,50,0.5)',
@@ -792,16 +793,17 @@
 			action: '#FF3300',
 			stroke: 'rgba(11,11,11,0.5)',
 			scroll: '#333333',
-			scrollback: 'rgba(44,44,44,0.2)',
-			scrollbackover: 'rgba(44,44,44,0.2)',
+			scrollback: 'rgba(0,0,0,0.2)',
+			scrollbackover: 'rgba(0,0,0,0.3)',
 			hide: 'rgba(0,0,0,0)',
 			groupBorder: '#3e3e3e',
 			//'none',
 			buttonBorder: '#4a4a4a',
 			//'none',
-			fontFamily: 'Tahoma',
+			//fontFamily: 'Tahoma',
+			fontFamily: 'Consolas,monaco,monospace',
 			fontShadow: 'none',
-			fontSize: 11,
+			fontSize: 12,
 			radius: 4
 		},
 		// style css
@@ -854,9 +856,10 @@
 			T.css.txt = T.css.basic + 'font-family:' + c.fontFamily + '; font-size:' + c.fontSize + 'px; color:' + c.text + '; padding:2px 10px; left:0; top:2px; height:16px; width:100px; overflow:hidden; white-space: nowrap;';
 			if (shadow !== undefined) T.css.txt += ' text-shadow:' + shadow + '; '; //"1px 1px 1px #ff0000";
 
-			if (c.fontShadow !== 'none') T.css.txt += ' text-shadow: 1px 1px 1px ' + c.fontShadow + ';';
+			if (c.fontShadow !== 'none') T.css.txt += ' text-shadow: 1px 1px 1px ' + c.fontShadow + ';'; //else T.css.txt += ' text-shadow:none;';
+
 			T.css.txtselect = T.css.txt + 'display:flex; justify-content:left; align-items:center; text-align:left;' + 'padding:2px 5px; border:1px dashed ' + c.border + '; background:' + c.txtselectbg + ';';
-			T.css.item = T.css.txt + 'position:relative; background:rgba(0,0,0,0.2); margin-bottom:1px;';
+			T.css.item = T.css.txt + 'position:relative; background:rgba(0,0,0,0.2); margin-bottom:1px;'; //console.log(T.css.txt)
 		},
 		// intern function
 		cloneColor: function cloneColor() {
@@ -3358,6 +3361,7 @@
 			_this.pp = new V2();
 			_this.c[2] = _this.dom('div', _this.css.txt + 'height:' + (_this.h - 4) + 'px;' + 'border-radius:' + _this.radius + 'px; line-height:' + (_this.h - 8) + 'px;');
 			_this.s[2] = _this.c[2].style;
+			_this.s[2].textShadow = 'none';
 
 			if (_this.up) {
 				_this.s[2].top = 'auto';
@@ -7354,7 +7358,7 @@
 			this.ratio = 1;
 			this.oy = 0;
 			this.isNewTarget = false;
-			this.content = Tools.dom('div', this.css.basic + ' width:0px; height:auto; top:0px; ' + this.cssGui);
+			this.content = Tools.dom('div', this.css.basic + ' width:0px; height:auto; top:0px; background:' + this.colors.content + '; ' + this.cssGui);
 			this.innerContent = Tools.dom('div', this.css.basic + 'width:100%; top:0; left:0; height:auto; overflow:hidden;');
 			this.content.appendChild(this.innerContent);
 			this.inner = Tools.dom('div', this.css.basic + 'width:100%; left:0; ');

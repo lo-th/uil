@@ -95,7 +95,7 @@ export class Gui {
 
         this.isNewTarget = false;
 
-        this.content = Tools.dom( 'div', this.css.basic + ' width:0px; height:auto; top:0px; ' + this.cssGui );
+        this.content = Tools.dom( 'div', this.css.basic + ' width:0px; height:auto; top:0px; background:'+this.colors.content+'; ' + this.cssGui );
 
         this.innerContent = Tools.dom( 'div', this.css.basic + 'width:100%; top:0; left:0; height:auto; overflow:hidden;');
         this.content.appendChild( this.innerContent );

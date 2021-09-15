@@ -30,6 +30,8 @@ export class Color extends Proto {
 	    this.c[2] = this.dom( 'div', this.css.txt + 'height:'+(this.h-4)+'px;' + 'border-radius:'+this.radius+'px; line-height:'+(this.h-8)+'px;' );
 	    this.s[2] = this.c[2].style;
 
+	    this.s[2].textShadow = 'none'
+
 	    if( this.up ){
 	        this.s[2].top = 'auto';
 	        this.s[2].bottom = '2px';
