@@ -273,18 +273,13 @@ export class Numeric extends Proto {
             if( v.w !== undefined ) this.value[3] = v.w;
 
         } else {
-            this.value = v;
+
+            if( this.isSingle ) this.value = [v]
+            else this.value = v
+            
         }
 
-        
-        
         this.update();
-
-        //let i = this.value.length;
-
-        /*n = n || 0;
-        this.value[n] = this.numValue( v );
-        this.c[ 3 + n ].textContent = this.value[n];*/
 
     }
 

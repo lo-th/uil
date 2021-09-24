@@ -48,12 +48,13 @@ callback();
 //
 
 var ui = new UIL.Gui().onChange( callback );
-//ui.add( V, 'position', { type:'number', precision:2, min:-20000, max:20000 } ).listen();
+
 ui.add( obj1, 'speed', { min:-5, max:5, rename:'speed R' } ).listen();
 ui.add( obj1, 'speed', { min:-5, max:5, stype:1 } ).listen();
-ui.add( obj1, 'speed', { min:-5, max:5, stype:2 } ).listen();
+ui.add( obj1, 'speed', { min:-5, max:5, fontColor:'#D4B87B', stype:2 } ).listen();
 ui.add( obj1, 'speed', { type:'Circular', min:-5, max:5, size:120 } ).listen();
 ui.add( obj1, 'speed', { type:'Knob', min:-5, max:5, size:120 } ).listen();
+ui.add( obj1, 'speed', { type:'number', min:-5, max:5, stype:2 } ).listen();
 
 //
 
@@ -64,6 +65,7 @@ ui2.add( obj2, 'speed', { min:-5, max:5, fontColor:'#D4B87B', stype:1 } ).listen
 ui2.add( obj2, 'speed', { min:-5, max:5, fontColor:'#D4B87B', stype:2 } ).listen();
 ui2.add( obj2, 'speed', { type:'Circular', min:-5, max:5, size:120, fontColor:'#D4B87B' } ).listen();
 ui2.add( obj2, 'speed', { type:'Knob', min:-5, max:5, size:120, fontColor:'#D4B87B' } ).listen();
+ui2.add( obj2, 'speed', { type:'number', min:-5, max:5 } ).listen();
 
 </script>
 </body>

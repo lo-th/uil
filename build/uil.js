@@ -5669,14 +5669,10 @@
 				if (v.z !== undefined) this.value[2] = v.z;
 				if (v.w !== undefined) this.value[3] = v.w;
 			} else {
-				this.value = v;
+				if (this.isSingle) this.value = [v];else this.value = v;
 			}
 
-			this.update(); //let i = this.value.length;
-
-			/*n = n || 0;
-			this.value[n] = this.numValue( v );
-			this.c[ 3 + n ].textContent = this.value[n];*/
+			this.update();
 		};
 
 		_proto.sameStr = function sameStr(str) {
