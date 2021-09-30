@@ -9,7 +9,10 @@ export class Bool extends Proto {
         this.value = o.value || false;
 
         this.model = o.mode !== undefined ? o.mode : 0;
-        this.onName = o.onName || this.txt;
+
+        this.onName = o.rename || this.txt;
+        if( o.onName ) o.onname = o.onName
+        if( o.onname ) this.onName = o.onname;
 
         this.buttonColor = o.bColor || this.colors.button;
 

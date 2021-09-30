@@ -2688,7 +2688,9 @@
 			_this = _Proto.call(this, o) || this;
 			_this.value = o.value || false;
 			_this.model = o.mode !== undefined ? o.mode : 0;
-			_this.onName = o.onName || _this.txt;
+			_this.onName = o.rename || _this.txt;
+			if (o.onName) o.onname = o.onName;
+			if (o.onname) _this.onName = o.onname;
 			_this.buttonColor = o.bColor || _this.colors.button;
 			_this.inh = o.inh || Math.floor(_this.h * 0.8);
 			_this.inw = o.inw || 36;
