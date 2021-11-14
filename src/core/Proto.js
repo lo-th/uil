@@ -11,6 +11,9 @@ class Proto {
 
     constructor( o = {} ) {
 
+        // disable mouse controle
+        this.lock = o.lock || false;
+
         // if is on gui or group
         this.main = o.main || null;
         this.isUI = o.isUI || false;
@@ -513,6 +516,7 @@ class Proto {
 
     handleEvent ( e ){
 
+        if( this.lock ) return;
         if( this.isSpace ) return;
         return this[e.type](e);
     

@@ -2187,7 +2187,9 @@
 				o = {};
 			}
 
-			// if is on gui or group
+			// disable mouse controle
+			this.lock = o.lock || false; // if is on gui or group
+
 			this.main = o.main || null;
 			this.isUI = o.isUI || false;
 			this.group = null;
@@ -2584,6 +2586,7 @@
 		;
 
 		_proto.handleEvent = function handleEvent(e) {
+			if (this.lock) return;
 			if (this.isSpace) return;
 			return this[e.type](e);
 		};
