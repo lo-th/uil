@@ -251,6 +251,7 @@ function initGUI () {
             screen = new THREE.Texture( this.canvas );
             screen.flipY = false;
             screen.minFilter = THREE.LinearFilter;
+            screen.encoding = THREE.sRGBEncoding
             //screen.generateMipmaps = false;
             //screen.premultiplyAlpha = false;
             screen.needsUpdate = true;

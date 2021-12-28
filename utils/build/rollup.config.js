@@ -1,6 +1,4 @@
-//import buble from 'rollup-plugin-buble';
 import babel from '@rollup/plugin-babel';
-import { nodeResolve } from '@rollup/plugin-node-resolve';
 import { terser } from 'rollup-plugin-terser';
 
 /*export default [
@@ -58,44 +56,27 @@ function babelCleanup() {
 
 }
 
+
 function header() {
-
-	/*return {
-
-		renderChunk( code ) {
-
-			//return '// threejs.org/license\n' + code;
-
-		}
-
-	};*/
-
-}
-
-function polyfills() {
-
-	// for what ??
 
 	return {
 
-		transform( code, filePath ) {
+		renderChunk( code ) {
 
-			if ( filePath.endsWith( 'src/Uil.js' ) || filePath.endsWith( 'src\\Uil.js' ) ) {
-
-				code = 'import \'regenerator-runtime\';\n' + code;
-
-			}
-
-			return {
-				code: code,
-				map: null
-			};
+			return `/**
+ * @license
+ * Copyright 2010-2021 Uil.js Authors
+ * SPDX-License-Identifier: MIT
+ */
+${ code }`;
 
 		}
 
 	};
 
 }
+
+
 
 const babelrc = {
 	presets: [
@@ -105,20 +86,39 @@ const babelrc = {
 				modules: false,
 				// the supported browsers of the three.js browser bundle
 				// https://browsersl.ist/?q=%3E0.3%25%2C+not+dead
-				targets: '>0.3%, not dead',
+				targets: '>1%',
 				loose: true,
 				bugfixes: true,
 			}
 		]
+	],
+	plugins: [
+	    [
+	        "@babel/plugin-proposal-class-properties",
+	        {
+	        	"loose": true
+	        }
+	    ]
 	]
 };
 
 export default [
+    {
+		input: 'src/Uil.js',
+		plugins: [
+		    terser(),
+			header()
+		],
+		output: [
+			{
+				format: 'esm',
+				file: 'build/uil.module.js'
+			}
+		]
+	},
 	{
 		input: 'src/Uil.js',
 		plugins: [
-			polyfills(),
-			nodeResolve(),
 			babel( {
 				babelHelpers: 'bundled',
 				compact: false,
@@ -140,8 +140,6 @@ export default [
 	{
 		input: 'src/Uil.js',
 		plugins: [
-			polyfills(),
-			nodeResolve(),
 			babel( {
 				babelHelpers: 'bundled',
 				babelrc: false,
@@ -158,18 +156,6 @@ export default [
 				file: 'build/uil.min.js'
 			}
 		]
-	},
-	{
-		input: 'src/Uil.js',
-		plugins: [
-		    terser(),
-			header()
-		],
-		output: [
-			{
-				format: 'esm',
-				file: 'build/uil.module.js'
-			}
-		]
 	}
+	
 ];

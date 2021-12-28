@@ -1,6 +1,6 @@
-import { Proto } from '../core/Proto';
-import { Tools } from '../core/Tools';
-import { V2 } from '../core/V2';
+import { Proto } from '../core/Proto.js';
+import { Tools } from '../core/Tools.js';
+import { V2 } from '../core/V2.js';
 
 export class Circular extends Proto {
 

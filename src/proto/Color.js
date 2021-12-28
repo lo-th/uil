@@ -1,6 +1,6 @@
-import { Tools } from '../core/Tools';
-import { Proto } from '../core/Proto';
-import { V2 } from '../core/V2';
+import { Tools } from '../core/Tools.js';
+import { Proto } from '../core/Proto.js';
+import { V2 } from '../core/V2.js';
 
 export class Color extends Proto {
 

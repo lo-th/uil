@@ -1,5 +1,5 @@
-import { Proto } from '../core/Proto';
-import { V2 } from '../core/V2';
+import { Proto } from '../core/Proto.js';
+import { V2 } from '../core/V2.js';
 
 export class Joystick extends Proto {
 

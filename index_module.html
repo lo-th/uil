@@ -92,7 +92,7 @@
 				let ui = new UIL.Gui( { w:300, h:26, close:true } );
 				ui.add( setting, 'size', { min:30, max:300, precision:0 } ).onChange( function( s ){ mesh.scale.set(1,1,1).multiplyScalar( s ); } );
 				ui.add( setting, 'repeat', { min:1, max:10, precision:0 } ).onChange( function( r ){ texture.repeat.set(r,r); } );
-				ui.add( setting, 'color', { type:'color', } ).onChange( function( c ){ mesh.material.color.setHex( c ); } );
+				ui.add( setting, 'color', { type:'color' } ).onChange( function( c ){ mesh.material.color.setHex( c ); } );
 
 			}
 

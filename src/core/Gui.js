@@ -1,8 +1,8 @@
 
-import { Roots } from './Roots';
-import { Tools } from './Tools';
-import { add } from './add';
-import { V2 } from './V2';
+import { Roots } from './Roots.js';
+import { Tools } from './Tools.js';
+import { add } from './add.js';
+import { V2 } from './V2.js';
 
 /**
  * @author lth / https://github.com/lo-th
@@ -12,7 +12,10 @@ export class Gui {
 
     constructor( o = {} ) {
 
+        // for 3d
         this.canvas = null;
+        this.screen = null;
+        this.plane = o.plane || null;
 
         this.isEmpty = true;
 
@@ -197,6 +200,18 @@ export class Gui {
     getDom () {
 
         return this.content;
+
+    }
+
+    setUvMouse ( uv ) {
+
+        this.mouse.set( Math.round( uv.x * this.canvas.width ), this.canvas.height - Math.round( uv.y * this.canvas.height ) );
+
+    }
+
+    noMouse () {
+
+        this.mouse.neg();
 
     }
 

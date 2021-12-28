@@ -90,8 +90,11 @@ const T = {
 
         //fontFamily: 'Tahoma',
         fontFamily: 'Consolas,monaco,monospace',
+        fontWeight: 'normal',
         fontShadow: 'none',
         fontSize:12,
+
+        itemBg:'rgba(0,0,0,0.2)',
 
         radius:4,
 
@@ -158,12 +161,12 @@ const T = {
         if( color !== undefined ) c.text = color;
         if( size !== undefined ) c.fontSize = size;
 
-        T.css.txt = T.css.basic + 'font-family:'+ c.fontFamily +'; font-size:'+c.fontSize+'px; color:'+c.text+'; padding:2px 10px; left:0; top:2px; height:16px; width:100px; overflow:hidden; white-space: nowrap;';
+        T.css.txt = T.css.basic + 'font-family:'+ c.fontFamily +'; font-weight:'+c.fontWeight+'; font-size:'+c.fontSize+'px; color:'+c.text+'; padding:2px 10px; left:0; top:2px; height:16px; width:100px; overflow:hidden; white-space: nowrap;';
         if( shadow !== undefined ) T.css.txt += ' text-shadow:'+ shadow + '; '; //"1px 1px 1px #ff0000";
         if( c.fontShadow !== 'none' ) T.css.txt += ' text-shadow: 1px 1px 1px '+c.fontShadow+';';
         //else T.css.txt += ' text-shadow:none;';
         T.css.txtselect = T.css.txt + 'display:flex; justify-content:left; align-items:center; text-align:left;' +'padding:2px 5px; border:1px dashed ' + c.border + '; background:'+ c.txtselectbg+';';
-        T.css.item = T.css.txt + 'position:relative; background:rgba(0,0,0,0.2); margin-bottom:1px;';
+        T.css.item = T.css.txt + 'position:relative; margin-bottom:1px;';
 
         //console.log(T.css.txt)
 

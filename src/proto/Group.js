@@ -1,6 +1,6 @@
 
-import { Roots } from '../core/Roots';
-import { Proto } from '../core/Proto';
+import { Roots } from '../core/Roots.js';
+import { Proto } from '../core/Proto.js';
 
 export class Group extends Proto {
 

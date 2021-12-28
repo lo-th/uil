@@ -1,5 +1,5 @@
-import { Roots } from '../core/Roots';
-import { Proto } from '../core/Proto';
+import { Roots } from '../core/Roots.js';
+import { Proto } from '../core/Proto.js';
 
 export class Fps extends Proto {
 
@@ -39,7 +39,7 @@ export class Fps extends Proto {
 
         if(!this.custom){
 
-            this.now = ( self.performance && self.performance.now ) ? self.performance.now.bind( performance ) : Date.now;
+            this.now = Roots.getTime()
             this.startTime = 0;//this.now()
             this.prevTime = 0;//this.startTime;
             this.frames = 0;

@@ -1,4 +1,4 @@
-import { Proto } from '../core/Proto';
+import { Proto } from '../core/Proto.js';
 
 
 export class Button extends Proto {
@@ -15,6 +15,8 @@ export class Button extends Proto {
 
         this.on = false;
 
+        this.customSize = o.forceWidth || -1;
+
 
 
         if( typeof this.values === 'string' ) this.values = [ this.values ];
@@ -27,7 +29,7 @@ export class Button extends Proto {
         this.isLink = o.link || false;
 
         // custom color
-        this.cc = [ this.colors.button, this.colors.select, this.colors.down ];
+        this.cc = [ this.colors.button, this.colors.over, this.colors.select ];
 
         if( o.cBg !== undefined ) this.cc[0] = o.cBg;
         if( o.bColor !== undefined ) this.cc[0] = o.bColor;
@@ -94,26 +96,26 @@ export class Button extends Proto {
     //   EVENTS
     // ----------------------
 
-    click ( e ) {
+    /*click ( e ) {
 
         if( this.onName!== '' ) this.onOff();
 
-        if( this.isLink ){
+        //if( this.isLink ){
 
-            let name = this.testZone( e );
+         /*   let name = this.testZone( e );
             if( !name ) return false;
 
             this.value = this.values[name-2]
-            this.send();
-            return this.reset();
-        }
+            if( !this.isLoadButton ) this.send();
+            return this.reset();*/
+        //}
 
-    }
+    //}
 
     mouseup ( e ) {
     
         if( this.isDown ){
-            this.value = false;
+            //this.value = false;
             this.isDown = false;
             //this.send();
             return this.mousemove( e );
@@ -125,15 +127,16 @@ export class Button extends Proto {
 
     mousedown ( e ) {
 
-        if( this.isLink ) return false;
+       // if( this.isLink ) return false;
 
-    	let name = this.testZone( e );
+    	//let name = this.testZone( e );
 
-        if( !name ) return false;
+        //if( !name ) return false;
 
     	this.isDown = true;
+        /**/
         this.value = this.values[name-2]
-        if( !this.isLoadButton ) this.send();
+        if( !this.isLoadButton ) this.send(); 
         //else this.fileSelect( e.target.files[0] );
     	return this.mousemove( e );
  
@@ -210,6 +213,8 @@ export class Button extends Proto {
     // ----------------------
 
     reset () {
+
+        this.value = false;
 
         this.cursor();
 
@@ -357,6 +362,12 @@ export class Button extends Proto {
         let i = this.lng;
         let dc =  3;
         let size = Math.floor( ( w-(dc*(i-1)) ) / i );
+
+        if( this.customSize !== -1 ){ 
+            size = this.customSize
+           // d = (this.s-size)*0.5
+
+        }
 
         while( i-- ){
 

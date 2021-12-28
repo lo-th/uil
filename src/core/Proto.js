@@ -1,7 +1,7 @@
 
-import { Roots } from './Roots';
-import { Tools } from './Tools';
-import { V2 } from './V2';
+import { Roots } from './Roots.js';
+import { Tools } from './Tools.js';
+import { V2 } from './V2.js';
 
 /**
  * @author lth / https://github.com/lo-th
@@ -516,6 +516,8 @@ class Proto {
 
     handleEvent ( e ){
 
+        if( !this[e.type] ) return console.error(e.type, 'this type of event no existe !')
+
         if( this.lock ) return;
         if( this.isSpace ) return;
         return this[e.type](e);
@@ -532,9 +534,15 @@ class Proto {
 
     keydown ( e ) { return false; }
 
-    click ( e ) { return false; }
-
     keyup ( e ) { return false; }
+
+
+    /*dragstart ( e ) { return false; }
+    dragover ( e ) { return false; }
+    dragenter ( e ) { return false; }
+    dragleave ( e ) { return false; }
+    dragend ( e ) { return false; }
+    drop ( e ) { return false; }*/
 
 
     // ----------------------

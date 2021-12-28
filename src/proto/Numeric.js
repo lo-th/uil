@@ -1,5 +1,5 @@
-import { Proto } from '../core/Proto';
-import { Tools } from '../core/Tools';
+import { Proto } from '../core/Proto.js';
+import { Tools } from '../core/Tools.js';
 
 export class Numeric extends Proto {
 

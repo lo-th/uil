@@ -1,4 +1,4 @@
-import { Proto } from '../core/Proto';
+import { Proto } from '../core/Proto.js';
 
 export class Bool extends Proto {
 
