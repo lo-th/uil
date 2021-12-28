@@ -117,25 +117,10 @@ export class Bool extends Proto {
 
     // ----------------------
 
-    update () {
+    update ( up ) {
 
-        /*let s = this.s;
-
-        if( this.model === 0 ){
-  
-            s[2].background = this.value ? this.colors.boolon : this.colors.boolbg;
-            s[2].borderColor = this.value ? this.colors.boolon : this.colors.boolbg;
-            s[3].marginLeft = this.value ? '17px' : '2px';
-
-        } else {
-
-            //this.mode( this.value ? 4 : 3 )
-
-            /*s[2].background = this.value ? this.colors.select : this.colors.button;
-            s[2].color = this.value ? this.fontSelect : this.fontColor;
-            this.c[2].innerHTML = this.value ? this.onName : this.name;*/
-
-       // }
+        this.mode( this.value ? 4 : 3 )
+       if( up ) this.send();
             
     }
 

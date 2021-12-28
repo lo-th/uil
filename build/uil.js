@@ -2042,7 +2042,8 @@
 		} // ----------------------
 
 
-		update() {
+		update(up) {
+			this.mode(this.value ? 4 : 3);
 			/*let s = this.s;
 				if( this.model === 0 ){
 							s[2].background = this.value ? this.colors.boolon : this.colors.boolbg;
@@ -2054,6 +2055,8 @@
 					s[2].color = this.value ? this.fontSelect : this.fontColor;
 					this.c[2].innerHTML = this.value ? this.onName : this.name;*/
 			// }
+
+			if (up) this.send();
 		}
 
 		rSize() {
