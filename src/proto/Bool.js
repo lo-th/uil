@@ -54,8 +54,8 @@ export class Bool extends Proto {
     mousedown ( e ) {
 
         this.value = !this.value// ? false : true;
-        this.update();
-        this.send();
+        this.update( true );
+        //this.send();
         return this.mousemove( e );
 
     }
@@ -64,10 +64,6 @@ export class Bool extends Proto {
 
         this.cursor('pointer');
         return this.mode( this.value ? 4 : 3 )
-
-        /*this.s[2].background = this.colors.down;
-        this.s[2].color = this.fontSelect;
-        return true*/
         
     }
 
@@ -120,7 +116,7 @@ export class Bool extends Proto {
     update ( up ) {
 
         this.mode( this.value ? 4 : 3 )
-       if( up ) this.send();
+        if( up ) this.send();
             
     }
 
