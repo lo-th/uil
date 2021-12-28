@@ -1,1 +1,0 @@
-http-server ./ -c-1 -a localhost -p 8111 -o ./dev.html

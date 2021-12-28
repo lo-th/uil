@@ -5,4 +5,4 @@ src_old
 npm-debug.log
 package-lock.json
 testing
-_build.sh
+*.sh
