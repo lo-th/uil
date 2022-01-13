@@ -16,13 +16,13 @@ ui.add('color', { name:'Color', type:'rgba', value:[0,1,1,1]})
 ui.add('slide', { name:'Slide', value:50})
 let myList = ui.add('list', { name:'List', list:['i1', 'i2', ...]})
 ```
-**4 - add value with object reference**
+**3 - add value with object reference**
 ```sh
 const obj = {
-	name:'welcome to uil',
-	value: 2,
-	slider: 30,
-	vector: { x:10, y:-30 }
+  name:'welcome to uil',
+  value: 2,
+  slider: 30,
+  vector: { x:10, y:-30 }
 }
 
 ui.add( obj, 'string', { type:'string' })
@@ -30,15 +30,15 @@ ui.add( obj, 'value', { type:'number', min:0, max:10, precision:2, step:0.01 })
 ui.add( obj, 'slider', { type:'slide' })
 ui.add( obj, 'vector', { type:'number' })
 ```
-**5 - callback return the value**
+**4 - callback return the value**
 ```sh
 ui.add('number', { name:'Vector4', value:[0,0,0,0] }).onChange( function(v){ debug.innerHTML = v; } )
 ```
-**6 - you can reset all value**
+**5 - you can reset all value**
 ```sh
 ui.clear();
 ```
-**7 - other examples**
+**6 - other examples**
 
 [**uil module**](http://lo-th.github.io/uil/examples/index_module.html)
 
