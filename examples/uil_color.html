@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<title>UIL color</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="IE=11" />
+<meta http-equiv="Pragma" content="no-cache">
+
+<link rel="shortcut icon" href="../favicon.ico">
+<style>
+	html{  margin: 0; padding: 0; overflow:hidden;  }
+	body {
+		color: #ffffff;
+		font-family: tahoma;
+		font-size:13px;
+		background-color: #222;
+		margin: 0px;
+	}
+	#content1{ position:absolute; left:0%; width:33.33%; top:0px; height: 100vh; background: linear-gradient( #ccc, #888);  }
+	#content2{ position:absolute; left:33.33%; width:33.33%; top:0px; height: 100vh; background: linear-gradient( #222, #111);  }
+	#content3{ position:absolute; left:66.66%;  width:33.33%; top:0px; height: 100vh; background: linear-gradient( #ca3e47, #982f35);  }
+	#debug { position:absolute; bottom:10px; left:0; width:100%; text-align: center; pointer-events:none; -webkit-user-select:none; }
+</style>
+</head>
+
+<body>
+
+<div id='content1'></div>
+<div id='content2'></div>
+<div id='content3'></div>
+<div id='debug'>debug</div>
+
+<script type="module">
+
+    import {UIL} from '../src/UIL_dev.js';
+
+    const debug = document.querySelector('#debug');
+
+    const contents = [ document.querySelector('#content1'), document.querySelector('#content2'), document.querySelector('#content3') ];
+    const guis = []
+    let ui;
+    let maxW = 450;
+
+
+
+    function callback (v){ debug.innerHTML = v; }
+
+    let colors = [
+        { bg:'#ddd', text:'#333', button:'#ddd', select:'#0ff',  back:'#ccc', size:16, shadow:'#ccc', borderSize:2  },
+        { shadow:'#000' },
+        { content:'#000', bg:'#000', text:'#0c0', button:'#333', select:'#a00', back:'#222', font:'Tahoma', fontSize:16, weight:'bold', shadow:'none'  }
+    ]
+
+    for( let i = 0; i<3; i++ ){
+
+    	ui = new UIL.Gui( { css:'top:0; left:50%;', center:true, w:maxW, h:30, target:contents[i], colors:colors[i] } ).onChange( callback );
+
+        ui.add('bool',  { name:'bool' })
+    	ui.add('slide',  { name:'slide', min:-100, max:100, value:0, precision:0 })
+        ui.add('slide',  { name:'slide', min:-100, max:100, value:0, precision:0 });
+        ui.add('slide',  { name:'slide', min:-100, max:100, value:0, precision:0 });
+        ui.add('slide',  { name:'slide', min:-100, max:100, value:0, precision:0, color:'#AA0000' });
+        ui.add('slide',  { name:'slide', min:-100, max:100, value:0, precision:0, color:'#00AA00' });
+        ui.add('empty', { h:5 });
+        ui.add('button', { name:'Button' });
+        ui.add('button', { name:'Button2', value:['B1', 'B2', 'B3'], selectable:true });
+        ui.add('string', { name:'String', value:'welcome to uil'});
+        ui.add('number', { name:'Vector3', value:[0,0,0] });
+        ui.add('list',   { name:'list', list:['item-0', 'item-1', 'item-2', 'item-3', 'item-4', 'item-5', 'item-6', 'item-7'], itemHeight:30, miniCanvas:true, canvasBg:'green', listOnly:false, dragout:true })
+
+        ui.add('circular', { name:'circular1', w:100, min:0, max:100, value:25, precision:2 });
+        //ui.add('circular', { name:'circular2', w:100, min:0, max:100, value:25, precision:2 });
+
+        ui.add('joystick', { name:'joystick', w:100, multiplicator:1, precision:2, mode:1 });
+        //ui.add('joystick', { name:'joystick', w:100, multiplicator:1, precision:2, });
+        ui.add('knob', { name:'knob', w:100, min:0, max:100, value:25, precision:2 })
+        ui.add('Pad', { name:'Pad_1', w:100, min:-1, max:1, precision:2 })
+        //ui.add('Pad2D', { name:'Pad_2', w:100, min:-180, max:180, value:[50, -180], precision:0, mode: 1 })
+        //ui.add('Pad2D', { name:'Pad_3', w:100, min:-180, max:180, value:[50, 180], precision:0, mode: 1 })
+        //ui.add('Pad2D', { name:'Pad_4', w:100, min:-180, max:180, value:[50, 180], precision:0, mode: 1 })
+
+        //ui.add('button', { name:'Button', h:100 });
+
+    	guis.push( ui );
+
+    }
+
+    // resize event
+
+    resize();
+
+    window.addEventListener( 'resize', resize, false );
+
+    function resize() {
+
+    	let w = window.innerWidth/3;
+    	if( w < maxW + 100  ){
+    		for( let i in guis )  guis[i].setWidth(  (w-100) );
+    	}
+
+    }
+
+
+</script>
+</body>
+</html>
+

@@ -4,12 +4,11 @@ export class Empty extends Proto {
 
     constructor( o = {} ) {
 
-	    o.simple = true;
-	    o.isSpace = true;
-
-        super( o );
-        
-        this.init();
+	    o.isSpace = true
+        o.margin = 0
+        if(!o.h) o.h = 10
+        super( o )
+        this.init()
 
     }
     

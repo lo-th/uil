@@ -14,9 +14,10 @@ export class Knob extends Proto {
 
         this.autoWidth = false;
 
-        this.buttonColor = this.colors.button;
-
         this.setTypeNumber( o );
+
+        this.minw  = this.w
+        this.diam = o.diam || this.w 
 
         this.mPI = Math.PI * 0.8;
         this.toDeg = 180 / Math.PI;
@@ -24,18 +25,15 @@ export class Knob extends Proto {
 
         this.offset = new V2();
 
-        this.radius = this.w * 0.5;//Math.floor((this.w-20)*0.5);
-
-        //this.ww = this.height = this.radius * 2;
         this.h = o.h || this.w + 10;
         this.top = 0;
 
-        this.c[0].style.width = this.w +'px';
+        this.c[0].style.width = this.w +'px'
 
         if(this.c[1] !== undefined) {
 
-            this.c[1].style.width = this.w +'px';
-            this.c[1].style.textAlign = 'center';
+            this.c[1].style.width = '100%'
+            this.c[1].style.justifyContent = 'center'
             this.top = 10;
             this.h += 10;
 
@@ -44,21 +42,22 @@ export class Knob extends Proto {
         this.percent = 0;
 
         this.cmode = 0;
+        let cc = this.colors
 
-        this.c[2] = this.dom( 'div', this.css.txt + 'text-align:center; top:'+(this.h-20)+'px; width:'+this.w+'px; color:'+ this.fontColor );
+        this.c[2] = this.dom( 'div', this.css.txt + 'justify-content:center; top:'+(this.h-20)+'px; width:100%; color:'+ cc.text );
 
         this.c[3] = this.getKnob();
+        this.setSvg( this.c[3], 'fill', cc.button, 0 )
+        this.setSvg( this.c[3], 'stroke', cc.text, 1 )
+        this.setSvg( this.c[3], 'stroke', cc.text, 3 )
+        this.setSvg( this.c[3], 'd', this.makeGrad(), 3 )
         
-        this.setSvg( this.c[3], 'stroke', this.fontColor, 1 );
-        this.setSvg( this.c[3], 'stroke', this.fontColor, 3 );
-        this.setSvg( this.c[3], 'd', this.makeGrad(), 3 );
-        
-        this.setSvg( this.c[3], 'viewBox', '0 0 '+this.ww+' '+this.ww );
-        this.setCss( this.c[3], { width:this.w, height:this.w, left:0, top:this.top });
+        this.setSvg( this.c[3], 'viewBox', '0 0 ' + this.diam + ' ' + this.diam )
+        this.setCss( this.c[3], { width:this.diam, height:this.diam, left:0, top:this.top })
 
         if ( this.model > 0 ) {
 
-            Tools.dom( 'path', '', { d: '', stroke: this.fontColor, 'stroke-width': 2, fill: 'none', 'stroke-linecap': 'round' }, this.c[3] ); //4
+            Tools.dom( 'path', '', { d: '', stroke:cc.text, 'stroke-width': 2, fill: 'none', 'stroke-linecap': 'round' }, this.c[3] ); //4
 
             if ( this.model == 2) {
             
@@ -79,20 +78,22 @@ export class Knob extends Proto {
 
     mode ( mode ) {
 
+        let cc = this.colors
+
         if( this.cmode === mode ) return false;
 
         switch( mode ) {
             case 0: // base
-                this.s[2].color = this.fontColor;
-                this.setSvg( this.c[3], 'fill',this.colors.button, 0);
-                //this.setSvg( this.c[3], 'stroke','rgba(0,0,0,0.2)', 2);
-                this.setSvg( this.c[3], 'stroke', this.fontColor, 1 );
+                this.s[2].color = cc.text;
+                this.setSvg( this.c[3], 'fill', cc.button, 0);
+                //this.setSvg( this.c[3], 'stroke','rgba(255,0,0,0.2)', 2);
+                this.setSvg( this.c[3], 'stroke', cc.text, 1 );
             break;
-            case 1: // over
-                this.s[2].color = this.colorPlus;
-                this.setSvg( this.c[3], 'fill',this.colors.select, 0);
+            case 1: // down
+                this.s[2].color = cc.textOver;
+                this.setSvg( this.c[3], 'fill', cc.select, 0);
                 //this.setSvg( this.c[3], 'stroke','rgba(0,0,0,0.6)', 2);
-                this.setSvg( this.c[3], 'stroke', this.colorPlus, 1 );
+                this.setSvg( this.c[3], 'stroke', cc.textOver, 1 );
             break;
         }
 
@@ -105,7 +106,6 @@ export class Knob extends Proto {
 
         let l = this.local;
         if( l.x === -1 && l.y === -1 ) return '';
-        
         if( l.y <= this.c[ 1 ].offsetHeight ) return 'title';
         else if ( l.y > this.h - this.c[ 2 ].offsetHeight ) return 'text';
         else return 'knob';
@@ -119,31 +119,32 @@ export class Knob extends Proto {
     mouseup ( e ) {
 
         this.isDown = false;
-        this.sendEnd();
-        return this.mode(0);
+        this.sendEnd()
+        return this.mode(0)
 
     }
 
     mousedown ( e ) {
 
-        this.isDown = true;
-        this.old = this.value;
-        this.oldr = null;
-        this.mousemove( e );
-        return this.mode(1);
+        this.isDown = true
+        this.old = this.value
+        this.oldr = null
+        this.mousemove( e )
+        return this.mode(1)
 
     }
 
     mousemove ( e ) {
 
-        //this.mode(1);
-
         if( !this.isDown ) return;
 
         let off = this.offset;
 
-        off.x = this.radius - ( e.clientX - this.zone.x );
-        off.y = this.radius - ( e.clientY - this.zone.y - this.top );
+        //off.x = this.radius - ( e.clientX - this.zone.x );
+        //off.y = this.radius - ( e.clientY - this.zone.y - this.top );
+
+        off.x = (this.w*0.5) - ( e.clientX - this.zone.x );
+        off.y = (this.diam*0.5) - ( e.clientY - this.zone.y - this.top );
 
         this.r = - Math.atan2( off.x, off.y );
 
@@ -249,7 +250,7 @@ export class Knob extends Proto {
             let big = ea <= Math.PI - this.mPI ? 0 : 1;
             this.setSvg( this.c[3], 'd', 'M ' + x1 + ',' + y1 + ' A ' + 36 + ',' + 36 + ' 1 ' + big + ' 1 ' + x2 + ',' + y2, 4 );
 
-            let color = Tools.pack( Tools.lerpColor( Tools.unpack( Tools.ColorLuma( this.fontColor, -0.75) ), Tools.unpack( this.fontColor ), this.percent ) );
+            let color = Tools.pack( Tools.lerpColor( Tools.unpack( Tools.ColorLuma( this.colors.text, -0.75) ), Tools.unpack( this.colors.text ), this.percent ) );
             this.setSvg( this.c[3], 'stroke', color, 4 );
         
         }

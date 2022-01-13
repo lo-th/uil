@@ -12,9 +12,8 @@ export class Slide extends Proto {
 
         this.model = o.stype || 0;
         if( o.mode !== undefined ) this.model = o.mode;
-        this.buttonColor = o.bColor || this.colors.button;
 
-        this.defaultBorderColor = this.colors.hide;
+        //this.defaultBorderColor = this.colors.hide;
 
         this.isDown = false;
         this.isOver = false;
@@ -25,13 +24,15 @@ export class Slide extends Proto {
 
         this.firstImput = false;
 
-        //this.c[2] = this.dom( 'div', this.css.txtselect + 'letter-spacing:-1px; text-align:right; width:47px; border:1px dashed '+this.defaultBorderColor+'; color:'+ this.fontColor );
-        //this.c[2] = this.dom( 'div', this.css.txtselect + 'text-align:right; width:47px; border:1px dashed '+this.defaultBorderColor+'; color:'+ this.fontColor );
-        this.c[2] = this.dom( 'div', this.css.txtselect + 'border:none; width:47px; color:'+ this.fontColor );
-        //this.c[2] = this.dom( 'div', this.css.txtselect + 'letter-spacing:-1px; text-align:right; width:47px; color:'+ this.fontColor );
+        let cc = this.colors
+
+        //this.c[2] = this.dom( 'div', this.css.txtselect + 'letter-spacing:-1px; text-align:right; width:47px; border:1px dashed '+this.defaultBorderColor+'; color:'+ this.colors.text );
+        //this.c[2] = this.dom( 'div', this.css.txtselect + 'text-align:right; width:47px; border:1px dashed '+this.defaultBorderColor+'; color:'+ this.colors.text );
+        this.c[2] = this.dom( 'div', this.css.txtselect + 'border:none; background:none; width:47px; color:'+ cc.text +';' );
+        //this.c[2] = this.dom( 'div', this.css.txtselect + 'letter-spacing:-1px; text-align:right; width:47px; color:'+ this.colors.text );
         this.c[3] = this.dom( 'div', this.css.basic + ' top:0; height:'+this.h+'px;' );
-        this.c[4] = this.dom( 'div', this.css.basic + 'background:'+this.colors.scrollback+'; top:2px; height:'+(this.h-4)+'px;' );
-        this.c[5] = this.dom( 'div', this.css.basic + 'left:4px; top:5px; height:'+(this.h-10)+'px; background:' + this.fontColor +';' );
+        this.c[4] = this.dom( 'div', this.css.basic + 'background:'+cc.back+'; top:2px; height:'+(this.h-4)+'px;' );
+        this.c[5] = this.dom( 'div', this.css.basic + 'left:4px; top:5px; height:'+(this.h-10)+'px; background:' + cc.text +';' );
 
         this.c[2].isNum = true;
         //this.c[2].style.height = (this.h-4) + 'px';
@@ -59,7 +60,7 @@ export class Slide extends Proto {
             this.c[5].style.height = h1 + 'px';
             this.c[5].style.top = (this.h*0.5)-(h1*0.5) + 'px';
 
-            this.c[6] = this.dom( 'div', this.css.basic + 'border-radius:'+ra+'px; margin-left:'+(-ww*0.5)+'px; border:1px solid '+this.colors.border+'; background:'+this.buttonColor+'; left:4px; top:2px; height:'+(this.h-4)+'px; width:'+ww+'px;' );
+            this.c[6] = this.dom( 'div', this.css.basic + 'border-radius:'+ra+'px; margin-left:'+(-ww*0.5)+'px; border:1px solid '+cc.border+'; background:'+cc.button+'; left:4px; top:2px; height:'+(this.h-4)+'px; width:'+ww+'px;' );
         }
 
         this.init();
@@ -194,25 +195,26 @@ export class Slide extends Proto {
     mode ( mode ) {
 
         let s = this.s;
+        let cc = this.colors
 
         switch(mode){
             case 0: // base
                // s[2].border = '1px solid ' + this.colors.hide;
-                s[2].color = this.fontColor;
-                s[4].background = this.colors.scrollback;
-                s[5].background = this.fontColor;
+                s[2].color = cc.text;
+                s[4].background = cc.back;
+                s[5].background = cc.text;
             break;
             case 1: // scroll over
                 //s[2].border = '1px dashed ' + this.colors.hide;
-                s[2].color = this.colorPlus;
-                s[4].background = this.colors.scrollbackover;
-                s[5].background = this.colorPlus;
+                s[2].color = cc.textOver;
+                s[4].background = cc.back;
+                s[5].background = cc.textOver;
             break;
            /* case 2: 
                 s[2].border = '1px solid ' + this.colors.borderSelect;
             break;
             case 3: 
-                s[2].border = '1px dashed ' + this.fontColor;//this.colors.borderSelect;
+                s[2].border = '1px dashed ' + this.colors.text;//this.colors.borderSelect;
             break;
             case 4: 
                 s[2].border = '1px dashed ' + this.colors.hide;

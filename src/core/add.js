@@ -41,7 +41,8 @@ export const add = function () {
 
             o = a[2];
             o.name = a[1];
-            o.value = a[0][a[1]];
+            if( type === 'list' ){ o.list = a[0][a[1]]; }
+            else o.value = a[0][a[1]];
 
         }
 
@@ -64,13 +65,13 @@ export const add = function () {
             case 'numeric': case 'number': n = new Numeric(o); break;
             case 'slide': n = new Slide(o); break;
             case 'textInput': case 'string': n = new TextInput(o); break;
-            case 'title': n = new Title(o); break;
+            case 'title': case 'text': n = new Title(o); break;
             case 'select': n = new Select(o); break;
             case 'selector': n = new Selector(o); break;
             case 'empty': case 'space': n = new Empty(o); break;
             case 'item': n = new Item(o); break;
             case 'grid': n = new Grid(o); break;
-            case 'pad2d': n = new Pad2D(o); break;
+            case 'pad2d': case 'pad': n = new Pad2D(o); break;
 
         }
 

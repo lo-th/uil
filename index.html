@@ -4,12 +4,10 @@
 <title>UIL</title>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
-<meta http-equiv="X-UA-Compatible" content="IE=11" />
 <meta http-equiv="Pragma" content="no-cache">
 
 <link rel="shortcut icon" href="./favicon.ico">
 <link rel="stylesheet" type="text/css" href="style.css">
-
 
 <script type="text/javascript" src="build/uil.js"></script>
 
@@ -20,140 +18,183 @@
 <div id='logo'></div>
 <div id='debug'></div>
 
-<!-- GITHUB LOGO -->
-<svg xmlns='http://www.w3.org/2000/svg' version='1.1' xmlns:xlink='http://www.w3.org/1999/xlink' width='80' height='80' viewBox='0 0 250 250' style='fill:rgba(255,255,255,0.1); color:#050608; position: absolute; top: 0; border: 0; right: 0;'><path d='M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z' id='octo'></path>
-<path d='M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2' fill='currentColor' style='transform-origin: 130px 106px;' id='octo-arm'></path>
-<path d='M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z' fill='currentColor' id='octo-body'></path></svg>
-
 <script>
 
-document.getElementById('logo').innerHTML = UIL.Tools.icon('logo', '#FFF', 64);
-//document.getElementById('version').innerHTML = 'Uil '+ UIL.REVISION;
+    document.getElementById('logo').innerHTML = UIL.Tools.icon('logo', '#FFF', 64)
 
-// svg github link
-var octoArm = document.getElementById('octo-arm');
-octo.addEventListener('mouseover',function(e){ octo.setAttribute('fill', '#3998d6'); octoArm.style.animationName='octocat-wave'; octoArm.style.animationDuration='560ms';}, false );
-octo.addEventListener('mouseout',function(e){ octo.setAttribute('fill','rgba(255,255,255,0.2)');  octoArm.style.animationName='none'; }, false );
-octo.addEventListener('mousedown',function(e){ window.open('https://github.com/lo-th/uil','_blank'); }, false );
+    let gr0, gr1, gr2, gr3, ny =0, graph, graphUp, display = false
 
-var gr0, gr1, gr2, gr3, ty, ny =0, graph;
-var display = false;
-var list = ['item-0', 'item-1', 'item-2', 'item-3', 'item-4', 'item-5', 'item-6', 'item-7', 'item-8', 'item-9', 'item-10', 'item-11', 'item-12'];
-var list2 = ['item-0', 'item-1', 'item-2'];
+    const list = ['item-0', 'item-1', 'item-2', 'item-3', 'item-4', 'item-5', 'item-6', 'item-7', 'item-8', 'item-9', 'item-10', 'item-11', 'item-12']
+    const list2 = ['item-0', 'item-1', 'item-2']
 
-var debug = document.getElementById('debug');
+    const debug = document.getElementById('debug')
 
-var callback = function(v){ debug.innerHTML = v; }
-var callbackButton = function(){ debug.innerHTML = "i'm a button !!" ; console.log(this.value) }
-var callbackSize = function(v){  ui.setWidth( v ); }
-var callbackLogo = function(v){ document.getElementById('logoin').setAttributeNS(null, 'fill', v );   }
+    const callback = function(v){ debug.innerHTML = v; }
+    const callbackButton = function(){ debug.innerHTML = "i'm a button !!" ; console.log(this.value) }
+    const callbackSize = function(v){ ui.setWidth( v ); }
+    const callbackLogo = function(v){ document.getElementById('logoin').setAttributeNS(null, 'fill', v ); }
+    const callbackLink = function(v){ let w = window.open("./examples/"+v+".html", ""); }
 
-// single UI element
-var s = UIL.add('slide', {target:document.body, callback:callbackSize, name:'ui size', min:100, max:400, value:200, step:10, w:100, pos:{left:'10px', top:'40px' }, simple:true });
-var b = UIL.add('button', {target:document.body, callback:populate, name:'populate', w:100, pos:{left:'10px', top:'60px'}, simple:true });
-var c = UIL.add('color', {target:document.body, callback:callbackLogo, name:' ', w:100, pos:{left:'10px', top:'auto', bottom:'10px' }, simple:true, side:'up', ctype:'html' });
+    // single UI element
+    const s = UIL.add('slide', { name:'ui size', min:128, max:400, value:240, step:10, w:100, pos:{left:'10px', top:'30px' }, simple:true }).onChange( callbackSize )
+    const b = UIL.add('button', { name:'populate', w:100, pos:{left:'10px', top:'60px'}, simple:true }).onChange( populate )
+    const c = UIL.add('button', { w:64, h:64, pos:{right:'10px', top:'10px'}, simple:true }).icon(UIL.Tools.icon('github', '#DEDEDE', 50) ).onChange( function(v){ let w = window.open('https://github.com/lo-th/uil','_blank'); } )
 
-// init gui and define global callback
-var ui = new UIL.Gui( { css:'top:68px; left:50%;', w:200, h:20, center:true } ).onChange( callback );
+    // you can also use object reference 
+    const obj = {
+        Bool_v: false,
+        Color_v: 0xffffff,
+        Slide_v: -50,
+        Circular_v: 25,
+        Knob_v:25,
+    }
 
-populate();
+    // init gui and define global callback
+    const ui = new UIL.Gui( { css:'top:68px; left:50%;', w:240, h:20, center:true } ).onChange( callback );
 
-function populate () {
+    populate();
 
-    if( !display ){
+    function populate () {
 
-        ui.add('title',  { name:'UIL '+ UIL.REVISION, h:22, align:'center' });
-        ui.add('fps', { h:22, hplus:70, res:80 });
-        ty = ui.add('fps', { name:'custom graph', h:22, hplus:70, custom:true, alpha:1, res:50, names:['Post','Step','Next'], cc:['50,160,222','222,120,50','222,222,50'], range:[25,25,25], precision:2, radius:4, fontColor:'#EEEEEE', adding:true   });
-        ui.add('bool', { name:'Bool', h:20, value:false });
-        ui.add('bool', { name:'OFF', onName:'ON', value:false, mode:1 });
-        ui.add('color',  { name:'Color', type:'html', value:0xffffff});
-        ui.add('color',  { name:'Color', type:'html', value:[0,1,1,1], h:20});
-        ui.add('slide',  { name:'Slide', min:-100, max:100, value:0, precision:0 });
-        ui.add('slide',  { name:'Slide', min:-1, max:1, value:0, step:0.01, precision:2, mode:1 });
-        ui.add('slide',  { name:'Slide', min:-1, max:1, value:0, step:0.01, precision:2, mode:2 });
-        ui.add('string', { name:'String', value:'welcome to uil', h:30});
-        ui.add('list',   { name:'List', list:list});
-        ui.add('list',   { name:'', list:list2, itemHeight:30, listOnly:true });
+        if( !display ){
 
-        ui.add('graph',  { name:'Graph', h:80, value:[90,-30,0,-90,0,0,0,50,30], neg:true, multiplicator:100, precision:0 });
+            ui.add( 'title',  { name:'UIL '+ UIL.REVISION, h:22, align:'center' })
 
-        ui.add('number', { name:'Number', value:20, min:-60, max:200 });
-        ui.add('number', { name:'Vector2', value:[0,0] });
-        ui.add('number', { name:'Vector3', value:[0,0,0] });
-        ui.add('number', { name:'Vector4', value:[0,0,0,0], step:1, precision:0 });
+            let gr = ui.add('group', { name:'Examples', h:30, color:'#0FF' }).onChange( callbackLink )
 
-        ui.add('button', { name:'Button' });
+            gr.add( 'button', { name: 'uil_3d', color: '#EEE' })
+            gr.add( 'button', { name: 'uil_3d_2', color: '#EEE' })
+            gr.add( 'button', { name: 'uil_color' })
+            gr.add( 'button', { name: 'uil_module' })
+            gr.add( 'button', { name: 'uil_group' })
+            gr.add( 'button', { name: 'uil_imagelist' })
+            gr.add( 'button', { name: 'uil_item' })
+            gr.add( 'button', { name: 'uil_listen' })
+            gr.add( 'button', { name: 'uil_pad2d' })
+            gr.add( 'button', { name: 'uil_to_canvas' })
+            gr.add( 'button', { name: 'uil_stress' })
+            gr.add( 'button', { name: 'uil_test' })
+            
+
+            ui.add('fps', { h:22, hplus:70, res:80 });
+            graph = ui.add('fps', { 
+                name:'custom graph', h:22, hplus:70, custom:true, alpha:1, res:50, 
+                names:['Post','Step','Next'], cc:['50,160,222','222,120,50','222,222,50'], 
+                range:[25,25,25], precision:2, radius:4, color:'#EEEEEE', adding:true   
+            }).onOpen( updateGraph ).onClose( stopGraph )
+
+            ui.add( 'empty', { h:5 })
+
+            ui.add( obj, 'Bool_v', { type:'bool', h:20 })
+            
+            ui.add( 'space', { h:5 })
+
+            ui.add( obj, 'Color_v', { type:'color', ctype:'html' }).onChange( callbackLogo );
+            ui.add( 'color', { name:'Color', ctype:'html', value:[ 0,1,1,1 ] });
+
+            ui.add( 'empty', { h:5 })
+
+            ui.add( obj, 'Slide_v', { type:'slide', min:-100, max:100, value:0, precision:0 });
+            ui.add( 'slide',  { name:'Slide', min:-1, max:1, value:0, step:0.01, precision:2, mode:1 });
+            ui.add( 'slide',  { name:'Slide', min:-1, max:1, value:0, step:0.01, precision:2, mode:2, color:'#D4B87B' });
+
+            ui.add( 'empty', { h:5 })
+
+            ui.add( 'string', { name:'String', value:'welcome to uil', h:30});
+
+            ui.add( 'empty', { h:5 })
+
+            ui.add( 'list',   { name:'List', list:list, miniCanvas:true, canvasBg:'green', h:30 })
+            
+
+            ui.add( 'number', { name:'Number', value:20, min:-60, max:200, h:25 })
+            ui.add( 'number', { name:'Vector2', value:[0,0], h:25 })
+            ui.add( 'number', { name:'Vector3', value:[0,0,0], h:25 })
+            ui.add( 'number', { name:'Vector4', value:[0,0,0,0], step:1, precision:0, h:25 })
+
+            ui.add('empty', { h:5 })
+
+            gr = ui.add('group', { name:'Buttons', h:30 })
+
+            gr.add('button', { name:'Button' })
+            gr.add('button', { name:'Button2', value:['B1', 'B2', 'B3'], selectable:true })
+            gr.add( 'empty', { h:5 })
+            gr.add( 'grid', { values:['Line','Rectangle', 'Circle', 'Ellipse'], selectable:true, value:'Line' })
+            gr.add( 'empty', { h:5 })
+            gr.add( 'selector', { name:'selector', color:'#D4B87B', h:30,  values:[1, 2, 3, 4], value:4 })
+
+            //
+
+            gr = ui.add( 'group', { name:'Groups', h:30 })
+
+            gr.add('list',   { name:'', list:list2, itemHeight:30, miniCanvas:true, canvasBg:'green', listOnly:true, dragout:true });
+            gr.add( 'bool', { name:'OFF', onName:'ON', value:false, mode:1 })
+
+            let grIn = gr.add('group', { name:'Slider', h:30 })
+
+            grIn.add( 'slide',  { name:'slide', min:-100, max:100, value:0, precision:0, color:'#B0CC99', h:20 })
+            grIn.add( 'slide',  { name:'slide', min:-100, max:100, value:0, precision:0, color:'#F6E497', h:20 })
+            grIn.add( 'slide',  { name:'slide', min:-100, max:100, value:0, precision:0, color:'#C79F4B', h:20 })
+            grIn.add( 'slide',  { name:'slide', min:-100, max:100, value:0, precision:0, color:'#FF5B2B', h:20 })
+            grIn.add( 'slide',  { name:'slide', min:-100, max:100, value:0, precision:0, color:'#E70739', h:20 })
+
+            gr = ui.add( 'group', { name:'Circulars', color:'#D4B87B', h:30  })
+
+            gr.add( obj, 'Circular_v', { type:'circular', w:64, min:0, max:100, precision:2, step:0.1, color:'#B0CC99', mode:1 })
+            gr.add( 'circular', { name:'circular', w:64, min:0, max:100, value:50, precision:0, step:1, color:'#F6E497', mode:1 })
+            gr.add( 'circular', { name:'circular', w:64, min:0, max:100, value:70, precision:0, step:10, color:'#C79F4B', mode:1 })
+
+            gr = ui.add('group', { name:'Knobs', color:'#D4B87B', h:30  })
+
+            gr.add( obj, 'Knob_v', { type:'knob', w:64, min:0, max:100, precision:2, step:0.1, color:'#D4B87B', mode:1 })
+            gr.add( 'knob', { name:'knob', w:64, min:0, max:100, value:50, precision:0, step:1, color:'#D4B87B', mode:2 })
+            gr.add( 'knob', { name:'knob', w:64, min:0, max:100, value:70, precision:0, step:10, color:'#D4B87B', mode:1 })
+
+            gr = ui.add('group', { name:'Joysticks', color:'#D4B87B', h:30  })
+
+            gr.add( 'joystick', { name:'joystick', w:64, multiplicator:1, precision:2, color:'#D4B87B', mode:1 })
+            gr.add( 'joystick', { name:'joystick', w:64, multiplicator:1, precision:2, color:'#D4B87B' })
+            gr.add( 'joystick', { name:'joystick', w:64, multiplicator:1, precision:2, color:'#D4B87B' })
+
+            gr = ui.add('group', { name:'Extra', h:30  })
 
 
-        //ui.add('button', { name: 'Test HTML', fontColor: '#D4B87B', h: 30 } ).onChange( ( ) => { let w = window.open("about:blank", "hello", "width=200,height=200"); } );
-        ui.add('button', { name: '3D UIL TEST', fontColor: '#D4B87B', h:30, link:true, p:0 } ).onChange( function ( ) { let w = window.open("./examples/uil_3d.html", ""); w.focus();} );
+            gr.add( 'graph',  { name:'Graph', h:80, value:[90,30,-40,-90,-40,30,90], neg:true, multiplicator:100, precision:0 })
+            gr.add( 'pad', { name:'pad', w:100, color:'#D4B87B', mode:0 })
+            gr.add( 'pad', { name:'pad', w:100, color:'#D4B87B', min:-50, max:50, precision:0, mode:1 })
+            gr.add( 'select', { name:'select', color:'#D4B87B', h:30, value:'yoooch' })
 
-        ui.add('empty', { h:5 });
+            //gr.open();
 
-        ui.add('grid', { values:['Line','Rectangle', 'Circle', 'Ellipse'], selectable:true, value:'Line' });
-        ui.add('selector', { name:'selector', fontColor:'#D4B87B', h:30,  values:[1, 2, 3, 4], value:4 });
+            display = true
+            b.label('clear')
+            
+        } else {
 
-        ui.add('empty', { h:5 });
-        
+            ui.clear()
+            display = false
+            b.label('populate')
 
-        ui.add('select', { name:'select', fontColor:'#D4B87B', h:30, value:'yoooch' });
-
-        gr0 = ui.add('group', { name:'Group', h:30 });
-
-        gr0.add('list',   { name:'list', list:list });
-
-        gr0.add('slide',  { name:'slide', min:-100, max:100, value:0, precision:0, fontColor:'#B0CC99', h:20 });
-        gr0.add('slide',  { name:'slide', min:-100, max:100, value:0, precision:0, fontColor:'#F6E497', h:20 });
-        gr0.add('slide',  { name:'slide', min:-100, max:100, value:0, precision:0, fontColor:'#C79F4B', h:20 });
-        gr0.add('slide',  { name:'slide', min:-100, max:100, value:0, precision:0, fontColor:'#FF5B2B', h:20 });
-        gr0.add('slide',  { name:'slide', min:-100, max:100, value:0, precision:0, fontColor:'#E70739', h:20 });
-
-        gr1 = ui.add('group', { name:'circulars', fontColor:'#D4B87B', h:30  });
-
-        gr1.add('circular', { name:'circular', w:64, min:0, max:100, value:25, precision:2, step:0.1, fontColor:'#B0CC99', mode:1 });
-        gr1.add('circular', { name:'circular', w:64, min:0, max:100, value:50, precision:0, step:1, fontColor:'#F6E497', mode:1 });
-        gr1.add('circular', { name:'circular', w:64, min:0, max:100, value:70, precision:0, step:10, fontColor:'#C79F4B', mode:1 });
-
-        gr2 = ui.add('group', { name:'knobs', fontColor:'#D4B87B', h:30  });
-
-        gr2.add('knob', { name:'knob', w:64, min:0, max:100, value:25, precision:2, step:0.1, fontColor:'#D4B87B', mode:1 });
-        gr2.add('knob', { name:'knob', w:64, min:0, max:100, value:50, precision:0, step:1, fontColor:'#D4B87B', mode:2 });
-        gr2.add('knob', { name:'knob', w:64, min:0, max:100, value:70, precision:0, step:10, fontColor:'#D4B87B', mode:1 });
-
-        gr3 = ui.add('group', { name:'joysticks', fontColor:'#D4B87B', h:30  });
-
-        gr3.add('joystick', { name:'joystick', w:64, multiplicator:1, precision:2, fontColor:'#D4B87B', mode:1 });
-        gr3.add('joystick', { name:'joystick', w:64, multiplicator:1, precision:2, fontColor:'#D4B87B' });
-        gr3.add('joystick', { name:'joystick', w:64, multiplicator:1, precision:2, fontColor:'#D4B87B' });
-        
-        //gr0.open();
-
-        display = true;
-        b.label('clear');
-        
-    } else {
-
-        ui.clear();
-        display = false;
-        b.label('populate');
+        }
 
     }
 
-    //ty.open()
-    update();
-}
+    // update custom graph
 
-function update (){
-
-    requestAnimationFrame( update );
-
-    if( ny==4 ){ 
-        ny=0;
-        if(ty.isOpen) ty.tick( [ 5*Math.random(), 5*Math.random(), 8*Math.random() ] );
+    function stopGraph() {
+        cancelAnimationFrame( graphUp )
     }
-    ny++
-}
+
+    function updateGraph() {
+
+        graphUp = requestAnimationFrame( updateGraph )
+        if( ny==4 ){
+            graph.tick( [ 5*Math.random(), 5*Math.random(), 8*Math.random() ] )
+            ny=0
+        }
+        ny++
+
+    }
 
 </script>
 </body>

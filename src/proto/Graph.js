@@ -32,6 +32,11 @@ export class Graph extends Proto {
         if( this.c[1] !== undefined ) { // with title
 
             this.c[1].style.width = this.w +'px';
+
+            if(!this.autoWidth){
+                this.c[1].style.width = '100%';
+                this.c[1].style.justifyContent = 'center'
+            }
             
             
             //this.c[1].style.background = '#ff0000';
@@ -44,8 +49,13 @@ export class Graph extends Proto {
         this.gh = this.rh - 28;
         this.gw = this.w - 28;
 
-        this.c[2] = this.dom( 'div', this.css.txt + 'text-align:center; top:'+(this.h-20)+'px; width:'+this.w+'px; color:'+ this.fontColor );
-        this.c[2].textContent = this.value;
+        //this.c[2] = this.dom( 'div', this.css.txt + 'justify-content:center; text-align: justify; column-count:'+this.lng+'; top:'+(this.h-20)+'px; width:100%; color:'+ this.colors.text );
+
+        //let colum = 'column-count:'+this.lng+'; column:'+this.lng+'; break-inside: column; top:'
+        this.c[2] = this.dom( 'div', this.css.txt + 'display:block; text-align:center; padding:0px 0px; top:'+(this.h-20)+'px; left:14px; width:'+this.gw+'px;  color:'+ this.colors.text );
+       
+        //this.c[2].textContent = this.value;
+        this.c[2].innerHTML = this.valueToHtml();
 
         let svg = this.dom( 'svg', this.css.basic , { viewBox:'0 0 '+this.w+' '+this.rh, width:this.w, height:this.rh, preserveAspectRatio:'none' } );
         this.setCss( svg, { width:this.w, height:this.rh, left:0, top:this.top });
@@ -68,7 +78,7 @@ export class Graph extends Proto {
             if( this.neg ) this.v[i] = ((1+(this.value[i] / this.multiplicator))*0.5);
         	else this.v[i] = this.value[i] / this.multiplicator;
 
-        	this.dom( 'rect', '', { x:t[i][0], y:14, width:t[i][1], height:1, fill:this.fontColor, 'fill-opacity':0.3 }, svg );
+        	this.dom( 'rect', '', { x:t[i][0], y:14, width:t[i][1], height:1, fill:this.colors.text, 'fill-opacity':0.3 }, svg );
 
         }
 
@@ -101,6 +111,19 @@ export class Graph extends Proto {
 
     }
 
+    valueToHtml() {
+
+        let i = this.lng, n=0, r = '<table style="width:100%;"><tr>'
+        let w = 100 / this.lng
+        let style = 'width:'+ w +'%;'//' text-align:center;'
+        while(i--){
+            if(n===this.lng-1) r += '<td style='+style+'>' + this.value[n] + '</td></tr></table>'
+            else r += '<td style='+style+'>' + this.value[n] + '</td>'
+            n++
+        }
+        return r
+    }
+
     updateSVG () {
 
         if( this.line ) this.setSvg( this.c[3], 'd', this.makePath(), 0 );
@@ -114,7 +137,8 @@ export class Graph extends Proto {
 
         }
 
-        this.c[2].textContent = this.value;
+        //this.c[2].textContent = this.value;
+        this.c[2].innerHTML = this.valueToHtml();
 
     }
 
@@ -263,13 +287,14 @@ export class Graph extends Proto {
 
         let s = this.s;
         if( this.c[1] !== undefined ) s[1].width = this.w + 'px';
-        s[2].width = this.w + 'px';
         s[3].width = this.w + 'px';
 
         let gw = this.w - 28;
         let iw = ((gw-(4*(this.lng-1)))/this.lng);
 
         let t = [];
+
+        s[2].width = gw + 'px'
 
         for( let i = 0; i < this.lng; i++ ){
 

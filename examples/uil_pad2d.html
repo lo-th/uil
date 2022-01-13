@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 	<head>
-		<title>UIL Module example</title>
+		<title>UIL Pad</title>
 		<meta charset="utf-8">
 		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
         <link rel="shortcut icon" href="../favicon.ico">
@@ -23,7 +23,7 @@
 			let gr2 = ui.add( 'group', { name: 'Pad 2D - setValue', fontColor: '#D4B87B', h:30  } );
 
 			gr1.add( 'pad2d', { name: 'Mode 0', w: 256, precision: 2, fontColor:'#D4B87B', mode: 0 } );
-			gr1.add( 'pad2d', { name: 'Mode 1', w: 256, value: [50, -75], x1: -180, x2: 180, y1: -180, y2: 180, precision: 0, fontColor:'#D4B87B', mode: 1 } );
+			gr1.add( 'pad2d', { name: 'Mode 1', w: 256, value: [50, -75], min: -180, max: 180, precision: 0, fontColor:'#D4B87B', mode: 1 } );
 			gr2.add( 'pad2d', { name:'pad2d', w: 200, precision: 2, fontColor:'#D4B87B', mode: 0, callback: callback2 } );
 			let g1 = gr2.add( 'pad2d', { name:'pad2d', w: 200, precision: 2, fontColor:'#D4B87B', mode: 1 } );
 

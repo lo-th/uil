@@ -9,15 +9,31 @@ export class Pad2D extends Proto {
         super( o );
 
         this.autoWidth = false;
-        this.margin = 15;
-        this.pos = new V2();
+        this.minw  = this.w
+        this.diam = o.diam || this.w 
+
+        //this.margin = 15;
+        this.pos = new V2(0,0);
+        this.maxPos = 90
 
         this.model = o.stype || 0;
         if( o.mode !== undefined ) this.model = o.mode;
 
+        this.min = o.min === undefined ? -1 : o.min;
+        this.max = o.max === undefined ? 1 : o.max;
+
+        this.range = (this.max - this.min)*0.5;  
+
+        this.cmode = 0;
+
+
+        //console.log(this.range)
+
+
+
         this.precision = o.precision === undefined ? 2 : o.precision;
 
-        this.bounds = {};
+        /*this.bounds = {};
         this.bounds.x1 = o.x1 || -1;
         this.bounds.x2 = o.x2 || 1;
         this.bounds.y1 = o.y1 || -1;
@@ -27,11 +43,10 @@ export class Pad2D extends Proto {
         this.lerpY = this.lerp( this.margin, this.w - this.margin , this.bounds.y1, this.bounds.y2 );
 
         this.alerpX = this.lerp( this.bounds.x1, this.bounds.x2, this.margin, this.w - this.margin );
-        this.alerpY = this.lerp( this.bounds.y1, this.bounds.y2, this.margin, this.w - this.margin );
+        this.alerpY = this.lerp( this.bounds.y1, this.bounds.y2, this.margin, this.w - this.margin );*/
 
-        this.value = [];
-        let v = ( Array.isArray( o.value ) && o.value.length == 2 ) ? o.value : [ 0, 0 ];
-        this.setValue( v );
+        this.value = ( Array.isArray( o.value ) && o.value.length == 2 ) ? o.value : [ 0, 0 ];
+        
         
         this.h = o.h || this.w + 10;
         this.top = 0;
@@ -41,41 +56,37 @@ export class Pad2D extends Proto {
         // Title
         if( this.c[1] !== undefined ) { // with title
 
-            this.c[1].style.width = this.w + 'px';
-            this.c[1].style.textAlign = 'center';
+            this.c[1].style.width = '100%';
+            this.c[1].style.justifyContent = 'center';
             this.top = 10;
             this.h += 10;
 
         }
 
+        let cc = this.colors
+
+
         // Value
-        this.c[2] = this.dom( 'div', this.css.txt + 'text-align:center; top:'+ ( this.h - 20 ) + 'px; width:' + this.w + 'px; color:' + this.fontColor );
+        this.c[2] = this.dom( 'div', this.css.txt + 'justify-content:center; top:'+ ( this.h - 20 ) + 'px; width:100%; color:' + cc.text );
         this.c[2].textContent = this.value;
 
         // Pad
-        let svg = Tools.dom( 'svg', Tools.css.basic , { viewBox: '0 0 ' + this.w + ' ' + this.w, width: this.w, height: this.w, preserveAspectRatio: 'none' } );
-        Tools.dom( 'rect', '', { x: this.margin - 5, 
-                                 y: this.margin - 5, 
-                                 width: this.w - ( this.margin - 5 ) * 2 , 
-                                 height: this.w - ( this.margin -5 ) * 2 ,
-                                 rx: 5, ty: 5, 
-                                 stroke:'rgba(0,0,0,0.25)', 
-                                 'stroke-width':0, 
-                                 fill: 'rgba(0,0,0,0.1)' }, svg ); // 0
 
-        Tools.dom( 'rect', '', { x: this.margin, y: this.margin, width: this.w - this.margin * 2, height: this.w - this.margin * 2, stroke:'rgba(0,0,0,0.25)', 'stroke-width':0, fill: 'rgba(0,0,0,0.1)' }, svg ); // 1
-        this.c[3] = svg;
-        this.setSvg( this.c[3], 'viewBox', '0 0 ' + this.w + ' ' + this.w );
-        this.setCss( this.c[3], { left: 0, top: this.top } );
+        let pad = this.getPad2d()
 
-        // Pointer
-        Tools.dom( 'line', '', { x1: this.margin, y1: this.w / 2, x2: this.w - this.margin, y2: this.w / 2, stroke:'#1C1C1C', 'stroke-width': 1 }, this.c[3] ); // 2
-        Tools.dom( 'line', '', { x1: this.w / 2, y1: this.margin, x2: this.w / 2, y2: this.w - this.margin, stroke:'#1C1C1C', 'stroke-width': 1 }, this.c[3] ); // 3
-        Tools.dom( 'circle', '', { cx: this.w / 2, cy: this.w / 2, r: 5, stroke: 'rgba(0,0,0,0.25)', 'stroke-width': 0, fill: this.fontColor }, this.c[3] ); // 4
+        this.setSvg( pad, 'fill', cc.back, 0 )
+        this.setSvg( pad, 'fill', cc.button, 1 )
+        this.setSvg( pad, 'stroke', cc.back, 2 )
+        this.setSvg( pad, 'stroke', cc.back, 3 )
+        this.setSvg( pad, 'stroke', cc.text, 4 )
 
-        this.init();
-        
-        this.update( false );
+        this.setSvg( pad, 'viewBox', '0 0 '+this.diam+' '+this.diam )
+        this.setCss( pad, { width:this.diam, height:this.diam, left:0, top:this.top })
+
+        this.c[3] = pad
+
+        this.init()
+        this.setValue()
 
     }
     
@@ -85,17 +96,22 @@ export class Pad2D extends Proto {
 
         if( l.x === -1 && l.y === -1 ) return '';
 
-        if( ( l.x >= this.margin ) && ( l.x <= this.w - this.margin ) && ( l.y >= this.top + this.margin ) && ( l.y <= this.top + this.w - this.margin ) ) {
+        if( l.y <= this.c[ 1 ].offsetHeight ) return 'title';
+        else if ( l.y > this.h - this.c[ 2 ].offsetHeight ) return 'text';
+        else return 'pad';
+
+        /*if( ( l.x >= this.margin ) && ( l.x <= this.w - this.margin ) && ( l.y >= this.top + this.margin ) && ( l.y <= this.top + this.w - this.margin ) ) {
             return 'pad';
-        }
+        }*/
         
-        return '';
+        //return '';
 
     }
 
     mouseup ( e ) {
 
         this.isDown = false;
+        return this.mode(0);
     
     }
 
@@ -104,6 +120,7 @@ export class Pad2D extends Proto {
         if ( this.testZone(e) === 'pad' ) {
             this.isDown = true;
             this.mousemove( e );
+            return this.mode(1);
         }
 
     }
@@ -112,23 +129,71 @@ export class Pad2D extends Proto {
 
         if( !this.isDown ) return;
 
-        let x = e.clientX - this.zone.x;
-        let y = e.clientY - this.zone.y - this.top;
+        let x = (this.w*0.5) - ( e.clientX - this.zone.x )
+        let y = (this.diam*0.5) - ( e.clientY - this.zone.y - this.top )
+        let r = 256 / this.diam
 
-        if( x < this.margin ) x = this.margin;
+        x = -(x*r)
+        y = -(y*r)
+
+        x = Tools.clamp( x, -this.maxPos, this.maxPos )
+        y = Tools.clamp( y, -this.maxPos, this.maxPos )
+
+        //let x = e.clientX - this.zone.x;
+        //let y = e.clientY - this.zone.y - this.top;
+
+        /*if( x < this.margin ) x = this.margin;
         if( x > this.w - this.margin ) x = this.w - this.margin;
         if( y < this.margin ) y = this.margin;
-        if( y > this.w - this.margin ) y = this.w - this.margin;
+        if( y > this.w - this.margin ) y = this.w - this.margin;*/
+
+        //console.log(x,y)
 
         this.setPos( [ x , y ] );
         
-        this.update();
+        this.update( true );
+
+    }
+
+    mode ( mode ) {
+
+        if( this.cmode === mode ) return false;
+
+        let cc = this.colors
+
+        switch( mode ){
+            case 0: // base
+
+                this.s[2].color = cc.text;
+                this.setSvg( this.c[3], 'fill', cc.back, 0)
+                this.setSvg( this.c[3], 'fill', cc.button, 1)
+                this.setSvg( this.c[3], 'stroke', cc.back, 2)
+                this.setSvg( this.c[3], 'stroke', cc.back, 3)
+                this.setSvg( this.c[3], 'stroke', cc.text, 4 )
+                
+            break;
+            case 1: // down
+
+                this.s[2].color = cc.textSelect;
+                this.setSvg( this.c[3], 'fill', cc.backoff, 0)
+                this.setSvg( this.c[3], 'fill', cc.overoff, 1)
+                this.setSvg( this.c[3], 'stroke', cc.backoff, 2)
+                this.setSvg( this.c[3], 'stroke', cc.backoff, 3)
+                this.setSvg( this.c[3], 'stroke', cc.textSelect, 4 )
+                
+            break;
+        }
+
+        this.cmode = mode;
+        return true;
+
+
 
     }
 
     update ( up ) {
 
-        if( up === undefined ) up = true;
+        //if( up === undefined ) up = true;
         
         this.c[2].textContent = this.value;
 
@@ -157,34 +222,38 @@ export class Pad2D extends Proto {
 
     setPos ( p ) {
 
-        if( p === undefined ) p = [ this.w / 2, this.w / 2 ];
+        //if( p === undefined ) p = [ this.w / 2, this.w / 2 ];
 
-        this.pos.set( p[0] , p[1] );
+        this.pos.set( p[0]+128 , p[1]+128 );
 
-        this.value[0] = this.lerpX( p[0] ).toFixed( this.precision );
-        this.value[1] = this.lerpY( p[1] ).toFixed( this.precision );
+        let r = 1/this.maxPos
+
+        this.value[0] = ((p[0]*r)*this.range).toFixed( this.precision );
+        this.value[1] = ((p[1]*r)*this.range).toFixed( this.precision );
 
     }
 
     setValue ( v, up = false ) {
 
-        if( v === undefined ) v = [ 0, 0 ];
+        if( v === undefined ) v = this.value;
 
-        if ( v[0] < this.bounds.x1 ) v[0] = this.bounds.x1;
+        /*if ( v[0] < this.bounds.x1 ) v[0] = this.bounds.x1;
         if ( v[0] > this.bounds.x2 ) v[0] = this.bounds.x2;
         if ( v[1] < this.bounds.y1 ) v[1] = this.bounds.y1;
-        if ( v[1] > this.bounds.y2 ) v[1] = this.bounds.y2;
+        if ( v[1] > this.bounds.y2 ) v[1] = this.bounds.y2;*/
 
-        this.value[0] = v[0];
-        this.value[1] = v[1];
+        this.value[0] = Math.min( this.max, Math.max( this.min, v[0] ) ).toFixed( this.precision ) * 1;
+        this.value[1] = Math.min( this.max, Math.max( this.min, v[1] ) ).toFixed( this.precision ) * 1;
 
-        this.pos.set( this.alerpX( v[0] ) , this.alerpY( v[1] ) );
+        this.pos.set( ((this.value[0]/this.range)*this.maxPos)+128  , ((this.value[1]/this.range)*this.maxPos)+128 )
 
-       if ( up ) this.update();
+        //console.log(this.pos)
+
+        this.update( up );
 
     }
 
-    lerp( s1, s2, d1, d2, c = true ) {
+    /*lerp( s1, s2, d1, d2, c = true ) {
 
         let s = ( d2 - d1 ) / ( s2 - s1 );
 
@@ -194,6 +263,6 @@ export class Pad2D extends Proto {
           return ( v - s1 ) * s + d1
         }
 
-    }
+    }*/
 
 }

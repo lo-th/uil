@@ -37,6 +37,9 @@ export class Color extends Proto {
 	        this.s[2].bottom = '2px';
 	    }
 
+	    //this.c[0].style.textAlign = 'center';
+	    //this.c[0].style.flex = '1 0 auto'
+
 	    this.c[3] = this.getColorRing();
 	    this.c[3].style.visibility  = 'hidden';
 
@@ -51,6 +54,8 @@ export class Color extends Proto {
 	    this.bcolor = null;
 	    this.isDown = false;
 	    this.fistDown = false;
+
+	    this.notext = o.notext || false
 
 	    this.tr = 98;
 	    this.tsl = Math.sqrt(3) * this.tr;
@@ -265,7 +270,7 @@ export class Color extends Proto {
 
 
 	    this.s[2].background = this.bcolor;
-	    this.c[2].textContent = Tools.htmlToHex( this.bcolor );
+	    if(!this.notext) this.c[2].textContent = Tools.htmlToHex( this.bcolor );
 
 	    this.invert = Tools.findDeepInver( this.rgb );
 	    this.s[2].color = this.invert ? '#fff' : '#000';
@@ -279,10 +284,21 @@ export class Color extends Proto {
 
 	}
 
+	setValue ( v ){
+
+		if( v instanceof Array ) this.value = Tools.rgbToHex( v );
+        else if(!isNaN(v)) this.value = Tools.hexToHtml( v );
+        else this.value = v;
+
+		this.setColor( this.value )
+        this.update();
+
+	}
+
 	setColor ( color ) {
 
 	    let unpack = Tools.unpack(color);
-	    if (this.bcolor != color && unpack) {
+	    if (this.bcolor !== color && unpack) {
 
 	        this.bcolor = color;
 	        this.rgb = unpack;
@@ -363,7 +379,7 @@ export class Color extends Proto {
 	    this.rSizeColor( this.cw );
 
 	    this.decal.x = Math.floor((this.w - this.wfixe) * 0.5);
-	    s[3].left = this.decal.x + 'px';
+	    //s[3].left = this.decal.x + 'px';
 	    
 	}
 

@@ -47,7 +47,7 @@ callback();
 
 //
 
-var ui = new UIL.Gui().onChange( callback );
+var ui = new UIL.Gui().onChange( callback )
 
 ui.add( obj1, 'speed', { min:-5, max:5, rename:'speed R' } ).listen();
 ui.add( obj1, 'speed', { min:-5, max:5, stype:1 } ).listen();
@@ -59,7 +59,7 @@ ui.add( obj2, 'ready', { type:'bool' } ).listen();
 
 //
 
-var ui2 = new UIL.Gui({css:'top:0px; left:10px;'}).onChange( callback );
+var ui2 = new UIL.Gui({css:'top:0px; left:10px;'}).onChange( callback )
 
 ui2.add( obj2, 'speed', { min:-5, max:5, rename:'speed L', fontColor:'#D4B87B' } ).listen();
 ui2.add( obj2, 'speed', { min:-5, max:5, fontColor:'#D4B87B', stype:1 } ).listen();

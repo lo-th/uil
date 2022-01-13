@@ -17,36 +17,52 @@
 
 var display = false;
 
-var b = UIL.add('button', { target:document.body, callback:populate, name:'populate', w:100, h:30, radius:10, pos:{left:'200px', top:'5px'}, simple:true });
-var w = new UIL.Numeric({ target:document.body, callback:null, name:'', value:100, w:70, h:30, precision:0, pos:{left:'310px', top:'5px' }, simple:true });
+var b = UIL.add('button', { target:document.body, name:'populate', w:100, h:30, radius:10, pos:{left:'200px', top:'5px'}, simple:true }).onChange( populate )
+var w = UIL.add('number',{ target:document.body, name:'max', value:50, min:1, max:200, w:120, h:30, precision:0, pos:{left:'310px', top:'5px' }, simple:false });
 
 var callback = function(v){ debug.innerHTML = v; }
 
 var ui0 = new UIL.Gui( { w:200, css:'top:50px; left:10px;' } ).onChange( callback );
 var ui1 = new UIL.Gui( { w:200, css:'top:50px; left:220px;' } ).onChange( callback );
-var ui2 = new UIL.Gui( { w:395, css:'top:50px; left:430px;' } ).onChange( callback );
-var ui3 = new UIL.Gui( { w:395, css:'top:50px; left:840px;' } ).onChange( callback );
+var ui2 = new UIL.Gui( { w:375, css:'top:50px; left:430px;' } ).onChange( callback );
+var ui3 = new UIL.Gui( { w:370, css:'top:50px; left:840px;' } ).onChange( callback );
 
 function populate(){
 
     if(!display){ 
-        var list = ['cool', 'gool', 'tool', 'fool', 'mool'];
+        var list = ['cool', 'gool', 'tool', 'fool', 'moule'];
 
-        for(var i = 0; i<w.value[0]; i++){
+        for(var i = 0; i<w.value; i++){
+
             var name = 'n-'+i;
-            ui0.add('list', { name:name, value:'cool', list:list, w:200 });
-            ui1.add('slide', { name:name, value:Math.random().toFixed(3), min:0, max:1, precision:2, w:200 } );
-            ui2.add('knob', { name:name, value:Math.random().toFixed(3), min:0, max:1, precision:2, w:75 });
-            ui3.add('circular', { name:name, value:Math.random().toFixed(3), min:0, max:1, precision:2, w:75 });
+            let c = random_color()
+            ui0.add('list', { name:name, value:'cool', list:list, color:c });
+            ui1.add('slide', { name:name, value:Math.random().toFixed(3), min:0, max:1, precision:2, w:200, color:c } );
+            ui2.add('knob', { name:name, value:Math.random().toFixed(3), min:0, max:1, precision:2, w:75, mode:2, color:c });
+            ui3.add('circular', { name:name, value:Math.random().toFixed(3), min:0, max:1, precision:2, w:75, color:c });
+
         }
-        //add()
+
         display = true;
         b.label('clear');
     }else{ 
+
+        ui0.clear()
+        ui1.clear()
+        ui2.clear()
+        ui3.clear()
         //remove()
         display = false;
         b.label('populate');
     }
+}
+
+function random_color() {
+    function c() {
+        var hex = Math.floor(Math.random()*256).toString(16);
+        return ("0"+String(hex)).substr(-2); // pad with zero
+    }
+    return "#"+c()+c()+c();
 }
 
 populate()

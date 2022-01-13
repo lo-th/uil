@@ -12,13 +12,641 @@
 	/**
 	 * @author lth / https://github.com/lo-th
 	 */
+	// INTENAL FUNCTION
+	const R = {
+		ui: [],
+		dom: null,
+		ID: null,
+		lock: false,
+		wlock: false,
+		current: -1,
+		needReZone: true,
+		isEventsInit: false,
+		isLeave: false,
+		downTime: 0,
+		prevTime: 0,
+		prevDefault: ['contextmenu', 'wheel'],
+		pointerEvent: ['pointerdown', 'pointermove', 'pointerup'],
+		eventOut: ['pointercancel', 'pointerout', 'pointerleave'],
+		xmlserializer: new XMLSerializer(),
+		tmpTime: null,
+		tmpImage: null,
+		oldCursor: 'auto',
+		input: null,
+		parent: null,
+		firstImput: true,
+		hiddenImput: null,
+		hiddenSizer: null,
+		hasFocus: false,
+		startInput: false,
+		inputRange: [0, 0],
+		cursorId: 0,
+		str: '',
+		pos: 0,
+		startX: -1,
+		moveX: -1,
+		debugInput: false,
+		isLoop: false,
+		listens: [],
+		e: {
+			type: null,
+			clientX: 0,
+			clientY: 0,
+			keyCode: NaN,
+			key: null,
+			delta: 0
+		},
+		isMobile: false,
+		now: null,
+		getTime: function () {
+			return self.performance && self.performance.now ? self.performance.now.bind(performance) : Date.now;
+		},
+		add: function (o) {
+			R.ui.push(o);
+			R.getZone(o);
+			if (!R.isEventsInit) R.initEvents();
+		},
+		testMobile: function () {
+			let n = navigator.userAgent;
+			if (n.match(/Android/i) || n.match(/webOS/i) || n.match(/iPhone/i) || n.match(/iPad/i) || n.match(/iPod/i) || n.match(/BlackBerry/i) || n.match(/Windows Phone/i)) return true;else return false;
+		},
+		remove: function (o) {
+			let i = R.ui.indexOf(o);
+
+			if (i !== -1) {
+				R.removeListen(o);
+				R.ui.splice(i, 1);
+			}
+
+			if (R.ui.length === 0) {
+				R.removeEvents();
+			}
+		},
+		// ----------------------
+		//	 EVENTS
+		// ----------------------
+		initEvents: function () {
+			if (R.isEventsInit) return;
+			let dom = document.body;
+			R.isMobile = R.testMobile();
+			R.now = R.getTime();
+
+			if (!R.isMobile) {
+				dom.addEventListener('wheel', R, {
+					passive: false
+				});
+			} else {
+				dom.style.touchAction = 'none';
+			}
+
+			dom.addEventListener('pointercancel', R);
+			dom.addEventListener('pointerleave', R); //dom.addEventListener( 'pointerout', R )
+
+			dom.addEventListener('pointermove', R);
+			dom.addEventListener('pointerdown', R);
+			dom.addEventListener('pointerup', R);
+			dom.addEventListener('keydown', R, false);
+			dom.addEventListener('keyup', R, false);
+			window.addEventListener('resize', R.resize, false); //window.onblur = R.out;
+			//window.onfocus = R.in;
+
+			R.isEventsInit = true;
+			R.dom = dom;
+		},
+		removeEvents: function () {
+			if (!R.isEventsInit) return;
+			let dom = document.body;
+
+			if (!R.isMobile) {
+				dom.removeEventListener('wheel', R);
+			}
+
+			dom.removeEventListener('pointercancel', R);
+			dom.removeEventListener('pointerleave', R); //dom.removeEventListener( 'pointerout', R );
+
+			dom.removeEventListener('pointermove', R);
+			dom.removeEventListener('pointerdown', R);
+			dom.removeEventListener('pointerup', R);
+			dom.removeEventListener('keydown', R);
+			dom.removeEventListener('keyup', R);
+			window.removeEventListener('resize', R.resize);
+			R.isEventsInit = false;
+		},
+		resize: function () {
+			R.needReZone = true;
+			let i = R.ui.length,
+					u;
+
+			while (i--) {
+				u = R.ui[i];
+				if (u.isGui && !u.isCanvasOnly && u.autoResize) u.calc();
+			}
+		},
+		out: function () {
+			console.log('im am out');
+			R.clearOldID();
+		},
+		in: function () {
+			console.log('im am in'); //	R.clearOldID();
+		},
+		// ----------------------
+		//	 HANDLE EVENTS
+		// ----------------------
+		fakeUp: function () {
+			this.handleEvent({
+				type: 'pointerup'
+			});
+		},
+		handleEvent: function (event) {
+			//if(!event.type) return;
+			if (R.prevDefault.indexOf(event.type) !== -1) event.preventDefault();
+			R.findZone();
+			let e = R.e;
+			let leave = false;
+			if (event.type === 'keydown') R.keydown(event);
+			if (event.type === 'keyup') R.keyup(event);
+			if (event.type === 'wheel') e.delta = event.deltaY > 0 ? 1 : -1;else e.delta = 0;
+			let ptype = event.pointerType; // mouse, pen, touch
+
+			e.clientX = (ptype === 'touch' ? event.pageX : event.clientX) || 0;
+			e.clientY = (ptype === 'touch' ? event.pageY : event.clientY) || 0;
+			e.type = event.type;
+
+			if (R.eventOut.indexOf(event.type) !== -1) {
+				leave = true;
+				e.type = 'mouseup';
+			}
+
+			if (event.type === 'pointerleave') {
+				R.isLeave = true;
+			}
+			if (event.type === 'pointerdown') e.type = 'mousedown';
+			if (event.type === 'pointerup') e.type = 'mouseup';
+
+			if (event.type === 'pointermove') {
+				if (R.isLeave) {
+					// if user resize outside this document
+					R.isLeave = false;
+					R.resize();
+				}
+
+				e.type = 'mousemove';
+			} // double click test
+
+
+			if (e.type === 'mousedown') {
+				R.downTime = R.now();
+				let time = R.downTime - R.prevTime; // double click on imput
+
+				if (time < 200) {
+					R.selectAll();
+					return false;
+				}
+
+				R.prevTime = R.downTime;
+			} // for imput
+
+
+			if (e.type === 'mousedown') R.clearInput(); // mouse lock
+
+			if (e.type === 'mousedown') R.lock = true;
+			if (e.type === 'mouseup') R.lock = false; //if( R.current !== null && R.current.neverlock ) R.lock = false;
+
+			/*if( e.type === 'mousedown' && event.button === 1){
+					R.cursor()
+					e.preventDefault();
+					e.stopPropagation();
+			}*/
+
+			if (R.isMobile && e.type === 'mousedown') R.findID(e);
+			if (e.type === 'mousemove' && !R.lock) R.findID(e);
+
+			if (R.ID !== null) {
+				if (R.ID.isCanvasOnly) {
+					e.clientX = R.ID.mouse.x;
+					e.clientY = R.ID.mouse.y;
+				}
+
+				R.ID.handleEvent(e);
+			}
+
+			if (R.isMobile && e.type === 'mouseup') R.clearOldID();
+			if (leave) R.clearOldID();
+		},
+		// ----------------------
+		//	 ID
+		// ----------------------
+		findID: function (e) {
+			let i = R.ui.length,
+					next = -1,
+					u,
+					x,
+					y;
+
+			while (i--) {
+				u = R.ui[i];
+
+				if (u.isCanvasOnly) {
+					x = u.mouse.x;
+					y = u.mouse.y;
+				} else {
+					x = e.clientX;
+					y = e.clientY;
+				}
+
+				if (R.onZone(u, x, y)) {
+					next = i;
+
+					if (next !== R.current) {
+						R.clearOldID();
+						R.current = next;
+						R.ID = u;
+					}
+
+					break;
+				}
+			}
+
+			if (next === -1) R.clearOldID();
+		},
+		clearOldID: function () {
+			if (!R.ID) return;
+			R.current = -1;
+			R.ID.reset();
+			R.ID = null;
+			R.cursor();
+		},
+		// ----------------------
+		//	 GUI / GROUP FUNCTION
+		// ----------------------
+		calcUis: function (uis, zone, py) {
+			//console.log('calc_uis')
+			let i = uis.length,
+					u,
+					px = 0,
+					n = 0,
+					tw;
+			let height = 0;
+			let m = 1;
+
+			while (i--) {
+				u = uis[n];
+				n++;
+				if (u.isGroup) u.calcUis();
+				u.zone.w = u.w;
+				u.zone.h = u.h;
+				m = u.margin;
+
+				if (!u.autoWidth) {
+					if (px === 0) {
+						height += u.h + m;
+					}
+
+					u.zone.x = zone.x + px;
+					u.zone.y = py;
+					tw = R.getWidth(u);
+					if (tw) u.zone.w = u.w = tw; //console.log( u.name, u.zone.w, u.w, zone )
+
+					px += u.zone.w;
+
+					if (px >= zone.w) {
+						py += u.h + m;
+						px = 0;
+					}
+				} else {
+					px = 0;
+					u.zone.x = zone.x;
+					u.zone.y = py;
+					py += u.h + m;
+					height += u.h + m;
+				}
+			}
+
+			return height;
+		},
+		findTarget: function (uis, e) {
+			let i = uis.length;
+
+			while (i--) {
+				if (R.onZone(uis[i], e.clientX, e.clientY)) return i;
+			}
+
+			return -1;
+		},
+		// ----------------------
+		//	 ZONE
+		// ----------------------
+		findZone: function (force) {
+			if (!R.needReZone && !force) return;
+			var i = R.ui.length,
+					u;
+
+			while (i--) {
+				u = R.ui[i];
+				R.getZone(u);
+				if (u.isGui) u.calcUis();
+			}
+
+			R.needReZone = false;
+		},
+		onZone: function (o, x, y) {
+			if (x === undefined || y === undefined) return false;
+			let z = o.zone;
+			let mx = x - z.x;
+			let my = y - z.y;
+			let over = mx >= 0 && my >= 0 && mx <= z.w && my <= z.h;
+			if (over) o.local.set(mx, my);else o.local.neg();
+			return over;
+		},
+		getWidth: function (o) {
+			return o.getDom().offsetWidth; //let r = o.getDom().getBoundingClientRect();
+			//return (r.width)
+			//return Math.floor(r.width)
+		},
+		getZone: function (o) {
+			if (o.isCanvasOnly) return;
+			let r = o.getDom().getBoundingClientRect(); //if( !r.width ) return
+			//o.zone = { x:Math.floor(r.left), y:Math.floor(r.top), w:Math.floor(r.width), h:Math.floor(r.height) };
+			//o.zone = { x:Math.round(r.left), y:Math.round(r.top), w:Math.round(r.width), h:Math.round(r.height) };
+
+			o.zone = {
+				x: r.left,
+				y: r.top,
+				w: r.width,
+				h: r.height
+			}; //console.log(o.name, o.zone)
+		},
+		// ----------------------
+		//	 CURSOR
+		// ----------------------
+		cursor: function (name) {
+			name = name ? name : 'auto';
+
+			if (name !== R.oldCursor) {
+				document.body.style.cursor = name;
+				R.oldCursor = name;
+			}
+		},
+		// ----------------------
+		//	 CANVAS
+		// ----------------------
+		toCanvas: function (o, w, h, force) {
+			// prevent exesive redraw
+			if (force && R.tmpTime !== null) {
+				clearTimeout(R.tmpTime);
+				R.tmpTime = null;
+			}
+
+			if (R.tmpTime !== null) return;
+			if (R.lock) R.tmpTime = setTimeout(function () {
+				R.tmpTime = null;
+			}, 10); ///
+
+			let isNewSize = false;
+			if (w !== o.canvas.width || h !== o.canvas.height) isNewSize = true;
+			if (R.tmpImage === null) R.tmpImage = new Image();
+			let img = R.tmpImage; //new Image();
+
+			let htmlString = R.xmlserializer.serializeToString(o.content);
+			let svg = '<svg xmlns="http://www.w3.org/2000/svg" width="' + w + '" height="' + h + '"><foreignObject style="pointer-events: none; left:0;" width="100%" height="100%">' + htmlString + '</foreignObject></svg>';
+
+			img.onload = function () {
+				let ctx = o.canvas.getContext("2d");
+
+				if (isNewSize) {
+					o.canvas.width = w;
+					o.canvas.height = h;
+				} else {
+					ctx.clearRect(0, 0, w, h);
+				}
+
+				ctx.drawImage(this, 0, 0);
+				o.onDraw();
+			};
+
+			img.src = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svg); //img.src = 'data:image/svg+xml;base64,'+ window.btoa( svg );
+
+			img.crossOrigin = '';
+		},
+		// ----------------------
+		//	 INPUT
+		// ----------------------
+		setHidden: function () {
+			if (R.hiddenImput === null) {
+				//let css = R.parent.css.txtselect + 'padding:0; width:auto; height:auto; '
+				//let css = R.parent.css.txt + 'padding:0; width:auto; height:auto; text-shadow:none;'
+				//css += 'left:10px; top:auto; border:none; color:#FFF; background:#000;' + hide;
+				R.hiddenImput = document.createElement('input');
+				R.hiddenImput.type = 'text'; //R.hiddenImput.style.cssText = css + 'bottom:30px;' + (R.debugInput ? '' : 'transform:scale(0);');
+
+				R.hiddenSizer = document.createElement('div'); //R.hiddenSizer.style.cssText = css + 'bottom:60px;';
+
+				document.body.appendChild(R.hiddenImput);
+				document.body.appendChild(R.hiddenSizer);
+			}
+
+			let hide = R.debugInput ? '' : 'opacity:0; zIndex:0;';
+			let css = R.parent.css.txtselect + 'padding:0; width:auto; height:auto; left:10px; top:auto; color:#FFF; background:#000;' + hide;
+			R.hiddenImput.style.cssText = css + 'bottom:10px;' + (R.debugInput ? '' : 'transform:scale(0);');
+			R.hiddenSizer.style.cssText = css + 'bottom:40px;';
+			R.hiddenImput.style.width = R.input.clientWidth + 'px';
+			R.hiddenImput.value = R.str;
+			R.hiddenSizer.innerHTML = R.str;
+			R.hasFocus = true;
+		},
+		clearHidden: function (p) {
+			if (R.hiddenImput === null) return;
+			R.hasFocus = false;
+		},
+		clickPos: function (x) {
+			let i = R.str.length,
+					l = 0,
+					n = 0;
+
+			while (i--) {
+				l += R.textWidth(R.str[n]);
+				if (l >= x) break;
+				n++;
+			}
+
+			return n;
+		},
+		upInput: function (x, down) {
+			if (R.parent === null) return false;
+			let up = false;
+
+			if (down) {
+				let id = R.clickPos(x);
+				R.moveX = id;
+
+				if (R.startX === -1) {
+					R.startX = id;
+					R.cursorId = id;
+					R.inputRange = [R.startX, R.startX];
+				} else {
+					let isSelection = R.moveX !== R.startX;
+
+					if (isSelection) {
+						if (R.startX > R.moveX) R.inputRange = [R.moveX, R.startX];else R.inputRange = [R.startX, R.moveX];
+					}
+				}
+
+				up = true;
+			} else {
+				if (R.startX !== -1) {
+					R.hasFocus = true;
+					R.hiddenImput.focus();
+					R.hiddenImput.selectionStart = R.inputRange[0];
+					R.hiddenImput.selectionEnd = R.inputRange[1];
+					R.startX = -1;
+					up = true;
+				}
+			}
+
+			if (up) R.selectParent();
+			return up;
+		},
+		selectAll: function () {
+			if (!R.parent) return;
+			R.str = R.input.textContent;
+			R.inputRange = [0, R.str.length];
+			R.hasFocus = true;
+			R.hiddenImput.focus();
+			R.hiddenImput.selectionStart = R.inputRange[0];
+			R.hiddenImput.selectionEnd = R.inputRange[1];
+			R.cursorId = R.inputRange[1];
+			R.selectParent();
+		},
+		selectParent: function () {
+			var c = R.textWidth(R.str.substring(0, R.cursorId));
+			var e = R.textWidth(R.str.substring(0, R.inputRange[0]));
+			var s = R.textWidth(R.str.substring(R.inputRange[0], R.inputRange[1]));
+			R.parent.select(c, e, s, R.hiddenSizer.innerHTML);
+		},
+		textWidth: function (text) {
+			if (R.hiddenSizer === null) return 0;
+			text = text.replace(/ /g, '&nbsp;');
+			R.hiddenSizer.innerHTML = text;
+			return R.hiddenSizer.clientWidth;
+		},
+		clearInput: function () {
+			if (R.parent === null) return;
+			if (!R.firstImput) R.parent.validate(true);
+			R.clearHidden();
+			R.parent.unselect(); //R.input.style.background = 'none';
+
+			R.input.style.background = R.parent.colors.back;
+			R.input.style.borderColor = R.parent.colors.border; //R.input.style.color = R.parent.colors.text;
+
+			R.parent.isEdit = false;
+			R.input = null;
+			R.parent = null;
+			R.str = '', R.firstImput = true;
+		},
+		setInput: function (Input, parent) {
+			R.clearInput();
+			R.input = Input;
+			R.parent = parent;
+			R.input.style.background = R.parent.colors.backoff;
+			R.input.style.borderColor = R.parent.colors.select; //R.input.style.color = R.parent.colors.textSelect;
+
+			R.str = R.input.textContent;
+			R.setHidden();
+		},
+		keydown: function (e) {
+			if (R.parent === null) return;
+			let keyCode = e.which;
+					e.shiftKey; //console.log( keyCode )
+
+			R.firstImput = false;
+
+			if (R.hasFocus) {
+				// hack to fix touch event bug in iOS Safari
+				window.focus();
+				R.hiddenImput.focus();
+			}
+
+			R.parent.isEdit = true; // e.preventDefault();
+			// add support for Ctrl/Cmd+A selection
+			//if ( keyCode === 65 && (e.ctrlKey || e.metaKey )) {
+			//R.selectText();
+			//e.preventDefault();
+			//return self.render();
+			//}
+
+			if (keyCode === 13) {
+				//enter
+				R.clearInput(); //} else if( keyCode === 9 ){ //tab key
+				// R.input.textContent = '';
+			} else {
+				if (R.input.isNum) {
+					if (e.keyCode > 47 && e.keyCode < 58 || e.keyCode > 95 && e.keyCode < 106 || e.keyCode === 190 || e.keyCode === 110 || e.keyCode === 8 || e.keyCode === 109) {
+						R.hiddenImput.readOnly = false;
+					} else {
+						R.hiddenImput.readOnly = true;
+					}
+				} else {
+					R.hiddenImput.readOnly = false;
+				}
+			}
+		},
+		keyup: function (e) {
+			if (R.parent === null) return;
+			R.str = R.hiddenImput.value;
+			if (R.parent.allEqual) R.parent.sameStr(R.str); // numeric samùe value
+			else R.input.textContent = R.str;
+			R.cursorId = R.hiddenImput.selectionStart;
+			R.inputRange = [R.hiddenImput.selectionStart, R.hiddenImput.selectionEnd];
+			R.selectParent(); //if( R.parent.allway ) 
+
+			R.parent.validate();
+		},
+		// ----------------------
+		//
+		//	 LISTENING
+		//
+		// ----------------------
+		loop: function () {
+			if (R.isLoop) requestAnimationFrame(R.loop);
+			R.update();
+		},
+		update: function () {
+			let i = R.listens.length;
+
+			while (i--) R.listens[i].listening();
+		},
+		removeListen: function (proto) {
+			let id = R.listens.indexOf(proto);
+			if (id !== -1) R.listens.splice(id, 1);
+			if (R.listens.length === 0) R.isLoop = false;
+		},
+		addListen: function (proto) {
+			let id = R.listens.indexOf(proto);
+			if (id !== -1) return false;
+			R.listens.push(proto);
+
+			if (!R.isLoop) {
+				R.isLoop = true;
+				R.loop();
+			}
+
+			return true;
+		}
+	};
+	const Roots = R;
+
+	/**
+	 * @author lth / https://github.com/lo-th
+	 */
 	const T = {
+		transition: 0.2,
 		frag: document.createDocumentFragment(),
 		colorRing: null,
 		joystick_0: null,
 		joystick_1: null,
 		circular: null,
 		knob: null,
+		pad2d: null,
 		svgns: "http://www.w3.org/2000/svg",
 		links: "http://www.w3.org/1999/xlink",
 		htmls: "http://www.w3.org/1999/xhtml",
@@ -45,51 +673,94 @@
 		// ----------------------
 		//	 COLOR
 		// ----------------------
+		defineColor: function (o, cc = T.colors) {
+			let color = { ...cc
+			};
+			let textChange = ['fontFamily', 'fontWeight', 'fontShadow', 'fontSize'];
+			let changeText = false;
+			if (o.font) o.fontFamily = o.font;
+			if (o.shadow) o.fontShadow = o.shadow;
+			if (o.weight) o.fontWeight = o.weight;
+			if (o.fontColor) o.text = o.fontColor;
+			if (o.color) o.text = o.color;
+
+			if (o.text) {
+				color.text = o.text;
+
+				if (!o.fontColor && !o.color) {
+					color.title = T.ColorLuma(o.text, -0.25);
+					color.titleoff = T.ColorLuma(o.text, -0.5);
+				}
+
+				color.textOver = T.ColorLuma(o.text, 0.25);
+				color.textSelect = T.ColorLuma(o.text, 0.5);
+			}
+
+			if (o.button) {
+				color.button = o.button;
+				color.border = T.ColorLuma(o.button, 0.1);
+				color.overoff = T.ColorLuma(o.button, 0.2);
+			}
+
+			if (o.select) {
+				color.select = o.select;
+				color.over = T.ColorLuma(o.select, -0.1);
+			}
+
+			if (o.itemBg) o.back = o.itemBg;
+
+			if (o.back) {
+				color.back = o.back;
+				color.backoff = T.ColorLuma(o.back, -0.1);
+			}
+
+			if (o.fontSelect) color.textSelect = o.fontSelect;
+			if (o.groupBorder) color.gborder = o.groupBorder;
+			if (o.transparent) o.bg = 'none';
+			if (o.bg) color.background = color.backgroundOver = o.bg;
+			if (o.bgOver) color.backgroundOver = o.bgOver;
+
+			for (let m in color) {
+				if (o[m]) color[m] = o[m];
+			}
+
+			for (let m in o) {
+				if (textChange.indexOf(m) !== -1) changeText = true;
+			}
+
+			if (changeText) T.defineText(color);
+			return color;
+		},
 		colors: {
-			text: '#dcdcdc',
-			textOver: '#FFFFFF',
-			txtselectbg: 'none',
 			content: 'none',
-			background: 'rgba(50,50,50,0.5)',
-			//'rgba(44,44,44,0.3)',
-			backgroundOver: 'rgba(50,50,50,0.5)',
-			//'rgba(11,11,11,0.5)',
-			//input: '#005AAA',
-			inputBorder: '#454545',
-			inputHolder: '#808080',
-			inputBorderSelect: '#005AAA',
-			inputBg: 'rgba(0,0,0,0.1)',
-			inputOver: 'rgba(0,0,0,0.2)',
-			// input border
-			border: '#454545',
-			borderOver: '#5050AA',
-			borderSelect: '#308AFF',
+			background: 'rgba(50,50,50,0.3)',
+			backgroundOver: 'rgba(50,50,50,0.4)',
+			title: '#CCC',
+			titleoff: '#BBB',
+			text: '#DDD',
+			textOver: '#EEE',
+			textSelect: '#FFF',
+			//inputBg: 'rgba(0,0,0,0.25)',
+			//itemBg:'rgba(0,0,0,0.25)',
+			back: 'rgba(0,0,0,0.2)',
+			backoff: 'rgba(0,0,0,0.3)',
+			//inputOver: 'rgba(0,0,0,0.2)',
+			// input and button border
+			border: '#4c4c4c',
+			borderSize: 1,
+			gborder: 'none',
 			button: '#3c3c3c',
-			//'#404040',
-			boolbg: '#181818',
-			boolon: '#C0C0C0',
-			select: '#308AFF',
-			moving: '#03afff',
-			down: '#024699',
+			overoff: '#5c5c5c',
 			over: '#024699',
-			over2: '#1c1c1c',
+			select: '#308AFF',
 			action: '#FF3300',
-			stroke: 'rgba(11,11,11,0.5)',
-			scroll: '#333333',
-			scrollback: 'rgba(0,0,0,0.2)',
-			scrollbackover: 'rgba(0,0,0,0.3)',
-			hide: 'rgba(0,0,0,0)',
-			groupBorder: '#3e3e3e',
-			//'none',
-			buttonBorder: '#4a4a4a',
-			//'none',
 			//fontFamily: 'Tahoma',
 			fontFamily: 'Consolas,monaco,monospace',
 			fontWeight: 'normal',
-			fontShadow: 'none',
+			fontShadow: '#000',
 			fontSize: 12,
-			itemBg: 'rgba(0,0,0,0.2)',
-			radius: 4
+			radius: 4,
+			hide: 'rgba(0,0,0,0)'
 		},
 		// style css
 		css: {
@@ -123,6 +794,9 @@
 			none: 'M 9 5 L 5 5 5 9 9 9 9 5 Z',
 			cursor: 'M 4 7 L 1 10 1 12 2 13 4 13 7 10 9 14 14 0 0 5 4 7 Z'
 		},
+		getImput: function () {
+			return Roots.input ? true : false;
+		},
 		setStyle: function (data) {
 			for (var o in data) {
 				if (T.colors[o]) T.colors[o] = data[o];
@@ -133,27 +807,35 @@
 		// ----------------------
 		// custom text
 		// ----------------------
-		setText: function (size, color, font, shadow) {
-			let c = T.colors;
-			if (font !== undefined) c.fontFamily = font;
-			if (color !== undefined) c.text = color;
-			if (size !== undefined) c.fontSize = size;
-			T.css.txt = T.css.basic + 'font-family:' + c.fontFamily + '; font-weight:' + c.fontWeight + '; font-size:' + c.fontSize + 'px; color:' + c.text + '; padding:2px 10px; left:0; top:2px; height:16px; width:100px; overflow:hidden; white-space: nowrap;';
-			if (shadow !== undefined) T.css.txt += ' text-shadow:' + shadow + '; '; //"1px 1px 1px #ff0000";
-
-			if (c.fontShadow !== 'none') T.css.txt += ' text-shadow: 1px 1px 1px ' + c.fontShadow + ';'; //else T.css.txt += ' text-shadow:none;';
-
-			T.css.txtselect = T.css.txt + 'display:flex; justify-content:left; align-items:center; text-align:left;' + 'padding:2px 5px; border:1px dashed ' + c.border + '; background:' + c.txtselectbg + ';';
-			T.css.item = T.css.txt + 'position:relative; margin-bottom:1px;'; //console.log(T.css.txt)
+		defineText: function (o) {
+			T.setText(o.fontSize, o.text, o.fontFamily, o.fontShadow, o.fontWeight);
 		},
+		setText: function (size, color, font, shadow, weight) {
+			let cc = T.colors;
+			if (font === undefined) font = cc.fontFamily;
+			if (size === undefined) size = cc.fontSize;
+			if (shadow === undefined) shadow = cc.fontShadow;
+			if (weight === undefined) weight = cc.fontWeight;
+			if (color === undefined) color = cc.text;
+			let align = 'display:flex; justify-content:left; align-items:center; text-align:left;';
+			T.css.txt = T.css.basic + align + 'font-family:' + font + '; font-weight:' + weight + '; font-size:' + size + 'px; color:' + cc.text + '; padding:0px 10px; left:0; top:2px; height:16px; width:100px; overflow:hidden; white-space: nowrap;';
+			if (shadow !== 'none') T.css.txt += ' text-shadow: 1px 1px 1px ' + shadow + ';';
+			T.css.txtselect = T.css.txt + 'padding:0px 4px; border:1px dashed ' + cc.border + ';'; //T.css.item = T.css.txt + ' position:relative; margin-bottom:1px; '//display:block; padding:4px 4px;';//
+
+			T.css.item = T.css.txt + ' position:relative; margin-bottom:1px; display:block; padding:2px 4px;'; //
+		},
+		// note
+		//https://developer.mozilla.org/fr/docs/Web/CSS/css_flexible_box_layout/aligning_items_in_a_flex_container
+
+		/*cloneColor: function () {
+					let cc = Object.assign({}, T.colors );
+				return cc;
+			},*/
 		// intern function
-		cloneColor: function () {
-			let cc = Object.assign({}, T.colors);
-			return cc;
-		},
 		cloneCss: function () {
-			let cc = Object.assign({}, T.css);
-			return cc;
+			//let cc = Object.assign({}, T.css );
+			return { ...T.css
+			};
 		},
 		clone: function (o) {
 			return o.cloneNode(true);
@@ -435,10 +1117,67 @@
 				//T.dom( 'path', '', { d:'', stroke:'rgba(255,255,255,0.3)', 'stroke-width':2, fill:'none', 'stroke-linecap':'round', 'stroke-opacity':0.5 }, svg );//3
 				T.graph = svg;
 			},*/
+		makePad: function (model) {
+			let ww = 256;
+			let svg = T.dom('svg', T.css.basic + 'position:relative;', {
+				viewBox: '0 0 ' + ww + ' ' + ww,
+				width: ww,
+				height: ww,
+				preserveAspectRatio: 'none'
+			});
+			let w = 200;
+			let d = (ww - w) * 0.5,
+					m = 20;
+			Tools.dom('rect', '', {
+				x: d,
+				y: d,
+				width: w,
+				height: w,
+				fill: T.colors.back
+			}, svg); // 0
+
+			Tools.dom('rect', '', {
+				x: d + m * 0.5,
+				y: d + m * 0.5,
+				width: w - m,
+				height: w - m,
+				fill: T.colors.button
+			}, svg); // 1
+			// Pointer
+
+			Tools.dom('line', '', {
+				x1: d + m * 0.5,
+				y1: ww * 0.5,
+				x2: d + (w - m * 0.5),
+				y2: ww * 0.5,
+				stroke: T.colors.back,
+				'stroke-width': 2
+			}, svg); // 2
+
+			Tools.dom('line', '', {
+				x1: ww * 0.5,
+				x2: ww * 0.5,
+				y1: d + m * 0.5,
+				y2: d + (w - m * 0.5),
+				stroke: T.colors.back,
+				'stroke-width': 2
+			}, svg); // 3
+
+			Tools.dom('circle', '', {
+				cx: ww * 0.5,
+				cy: ww * 0.5,
+				r: 5,
+				stroke: T.colors.text,
+				'stroke-width': 5,
+				fill: 'none'
+			}, svg); // 4
+
+			T.pad2d = svg;
+		},
 		makeKnob: function (model) {
 			let w = 128;
 			let radius = 34;
-			let svg = T.dom('svg', T.css.basic, {
+			let svg = T.dom('svg', T.css.basic + 'position:relative;', {
 				viewBox: '0 0 ' + w + ' ' + w,
 				width: w,
 				height: w,
@@ -484,7 +1223,7 @@
 		makeCircular: function (model) {
 			let w = 128;
 			let radius = 40;
-			let svg = T.dom('svg', T.css.basic, {
+			let svg = T.dom('svg', T.css.basic + 'position:relative;', {
 				viewBox: '0 0 ' + w + ' ' + w,
 				width: w,
 				height: w,
@@ -515,7 +1254,7 @@
 					ccc;
 			let radius = Math.floor((w - 30) * 0.5);
 			let innerRadius = Math.floor(radius * 0.6);
-			let svg = T.dom('svg', T.css.basic, {
+			let svg = T.dom('svg', T.css.basic + 'position:relative;', {
 				viewBox: '0 0 ' + w + ' ' + w,
 				width: w,
 				height: w,
@@ -630,7 +1369,7 @@
 		},
 		makeColorRing: function () {
 			let w = 256;
-			let svg = T.dom('svg', T.css.basic, {
+			let svg = T.dom('svg', T.css.basic + 'position:relative;', {
 				viewBox: '0 0 ' + w + ' ' + w,
 				width: w,
 				height: w,
@@ -748,14 +1487,23 @@
 			T.colorRing = svg;
 		},
 		icon: function (type, color, w) {
-			w = w || 40;
-			color = color || '#DEDEDE';
-			let viewBox = '0 0 256 256';
+			w = w || 40; //color = color || '#DEDEDE';
+
+			let viewBox = '0 0 256 256'; //let viewBox = '0 0 '+ w +' '+ w;
+
 			let t = ["<svg xmlns='" + T.svgns + "' version='1.1' xmlns:xlink='" + T.htmls + "' style='pointer-events:none;' preserveAspectRatio='xMinYMax meet' x='0px' y='0px' width='" + w + "px' height='" + w + "px' viewBox='" + viewBox + "'><g>"];
 
 			switch (type) {
 				case 'logo':
 					t[1] = "<path id='logoin' fill='" + color + "' stroke='none' d='" + T.logoFill_d + "'/>";
+					break;
+
+				case 'paypal':
+					t[1] = "<path id='logoin' fill='" + color + "' stroke='none' d='" + T.logo_paypal + "'/>";
+					break;
+
+				case 'github':
+					t[1] = "<path id='logoin' fill='" + color + "' stroke='none' d='" + T.logo_github + "'/>";
 					break;
 
 				case 'save':
@@ -767,584 +1515,38 @@
 			t[2] = "</g></svg>";
 			return t.join("\n");
 		},
-		logoFill_d: ["M 171 150.75 L 171 33.25 155.5 33.25 155.5 150.75 Q 155.5 162.2 147.45 170.2 139.45 178.25 128 178.25 116.6 178.25 108.55 170.2 100.5 162.2 100.5 150.75 ", "L 100.5 33.25 85 33.25 85 150.75 Q 85 168.65 97.55 181.15 110.15 193.75 128 193.75 145.9 193.75 158.4 181.15 171 168.65 171 150.75 ", "M 200 33.25 L 184 33.25 184 150.8 Q 184 174.1 167.6 190.4 151.3 206.8 128 206.8 104.75 206.8 88.3 190.4 72 174.1 72 150.8 L 72 33.25 56 33.25 56 150.75 ", "Q 56 180.55 77.05 201.6 98.2 222.75 128 222.75 157.8 222.75 178.9 201.6 200 180.55 200 150.75 L 200 33.25 Z"].join('\n')
+		logoFill_d: `
+		M 171 150.75 L 171 33.25 155.5 33.25 155.5 150.75 Q 155.5 162.2 147.45 170.2 139.45 178.25 128 178.25 116.6 178.25 108.55 170.2 100.5 162.2 100.5 150.75 
+		L 100.5 33.25 85 33.25 85 150.75 Q 85 168.65 97.55 181.15 110.15 193.75 128 193.75 145.9 193.75 158.4 181.15 171 168.65 171 150.75 
+		M 200 33.25 L 184 33.25 184 150.8 Q 184 174.1 167.6 190.4 151.3 206.8 128 206.8 104.75 206.8 88.3 190.4 72 174.1 72 150.8 L 72 33.25 56 33.25 56 150.75 
+		Q 56 180.55 77.05 201.6 98.2 222.75 128 222.75 157.8 222.75 178.9 201.6 200 180.55 200 150.75 L 200 33.25 Z
+		`,
+		logo_github: `
+		M 180.5 70 Q 186.3 82.4 181.55 96.55 196.5 111.5 189.7 140.65 183.65 168.35 146 172.7 152.5 178.7 152.55 185.9 L 152.55 218.15 Q 152.84 224.56 159.15 223.3 
+		159.21 223.3 159.25 223.3 181.14 216.25 198.7 198.7 228 169.4 228 128 228 86.6 198.7 57.3 169.4 28 128 28 86.6 28 57.3 57.3 28 86.6 28 128 28 169.4 57.3 198.7 74.85 
+		216.25 96.75 223.3 96.78 223.3 96.8 223.3 103.16 224.54 103.45 218.15 L 103.45 200 Q 82.97 203.1 75.1 196.35 69.85 191.65 68.4 185.45 64.27 177.055 59.4 174.15 49.20 
+		166.87 60.8 167.8 69.85 169.61 75.7 180 81.13 188.09 90 188.55 98.18 188.86 103.45 185.9 103.49 178.67 110 172.7 72.33 168.33 66.3 140.65 59.48 111.49 74.45 96.55 69.7 
+		82.41 75.5 70 84.87 68.74 103.15 80 115.125 76.635 128 76.85 140.85 76.65 152.85 80 171.1 68.75 180.5 70 Z
+		`,
+		logo_paypal: `
+		M 99.7 221.75 Q 103.5 217.7 103.5 210.65 103.5 203.6 99.7 199.6 95.95 195.5 89.4 195.5 82.8 195.5 79.05 199.6 75.3 203.65 75.3 210.65 75.3 217.6 79.05 221.7 82.8 225.8 
+		89.4 225.8 95.95 225.8 99.7 221.75 M 94 203.25 Q 94.9 204.4 95.45 206.25 95.95 208.05 95.95 210.65 95.95 213.4 95.45 215.1 94.95 216.75 94 218.05 93.1 219.2 91.9 219.75 
+		90.7 220.3 89.4 220.3 88.15 220.3 86.95 219.8 85.75 219.3 84.8 218.05 83.9 216.9 83.4 215.1 82.85 213.35 82.85 210.65 82.85 208.05 83.4 206.2 83.95 204.3 84.85 203.2 85.9 
+		201.95 86.95 201.5 88.05 201 89.4 201 90.7 201 91.85 201.55 93.05 202.05 94 203.25 M 153.3 196.1 L 145.3 196.1 135.5 225.2 142.8 225.2 144.6 219.25 153.75 219.25 155.6 
+		225.2 163.1 225.2 153.3 196.1 M 149.2 204.4 L 152.15 214 146.25 214 149.2 204.4 M 116.75 196.1 L 107.8 196.1 107.8 225.2 114.5 225.2 114.5 204.95 125.7 225.2 132.75 
+		225.2 132.75 196.1 126.05 196.1 126.05 212.8 116.75 196.1 M 55.75 196.1 L 46.7 196.1 46.7 225.2 55.8 225.2 Q 58.8 225.2 61.5 224.8 64.15 224.35 66.4 222.9 69.15 221.2 
+		70.9 217.95 72.7 214.75 72.7 210.7 72.7 206.45 71 203.35 69.35 200.25 66.5 198.4 64.15 196.9 61.45 196.5 58.8 196.1 55.75 196.1 M 61.15 202.5 Q 63.2 203.7 64.2 205.75 
+		65.2 207.75 65.2 210.65 65.2 213.5 64.25 215.5 63.3 217.5 61.5 218.6 60 219.6 58.3 219.65 56.6 219.75 54.15 219.75 L 54 219.75 54 201.55 54.15 201.55 Q 56.4 201.55 58.05 
+		201.65 59.7 201.7 61.15 202.5 M 210.2 196.1 L 190.5 196.1 190.5 225.2 210.2 225.2 210.2 219.65 197.75 219.65 197.75 212.3 209.2 212.3 209.2 206.75 197.75 206.75 197.75 
+		201.65 210.2 201.65 210.2 196.1 M 187.5 196.1 L 163 196.1 163 201.65 171.6 201.65 171.6 225.2 178.9 225.2 178.9 201.65 187.5 201.65 187.5 196.1 M 174.65 83.25 Q 183.75 
+		63.05 174.65 44.9 166.65 30.15 141.35 27.45 L 89.15 27.45 Q 83.55 27.8 82.4 33.05 L 62.6 158.5 Q 62.3 163.45 66.2 163.55 L 96.45 163.55 103.2 118 Q 105.15 112.4 109.4 
+		112.3 129.25 114.05 145.75 109.45 165.8 103.75 174.65 83.25 M 184.05 73.45 Q 182.75 82.6 178.65 91.65 171.45 108.35 153.05 115.3 140.55 120.65 114.9 119.55 110 119.3 
+		107.6 124.5 L 98.4 182.85 Q 98.15 187.15 101.5 187.2 L 127.55 187.2 Q 131.2 187.6 132.45 182.5 L 137.95 149.5 Q 139.6 144.7 143.3 144.6 147.2 144.85 151.65 144.75 156 
+		144.6 159.15 144.15 162.25 143.7 169.6 141.1 185.8 135.55 193.05 117.55 200.15 100.4 194.85 85.05 191.8 77.2 184.05 73.45 Z
+		`
 	};
 	T.setText();
 	const Tools = T;
-
-	/**
-	 * @author lth / https://github.com/lo-th
-	 */
-	// INTENAL FUNCTION
-	const R = {
-		ui: [],
-		dom: null,
-		ID: null,
-		lock: false,
-		wlock: false,
-		current: -1,
-		needReZone: true,
-		isEventsInit: false,
-		downTime: 0,
-		prevTime: 0,
-		prevDefault: ['contextmenu', 'wheel'],
-		pointerEvent: ['pointerdown', 'pointermove', 'pointerup'],
-		eventOut: ['pointercancel', 'pointerout', 'pointerleave'],
-		xmlserializer: new XMLSerializer(),
-		tmpTime: null,
-		tmpImage: null,
-		oldCursor: 'auto',
-		input: null,
-		parent: null,
-		firstImput: true,
-		hiddenImput: null,
-		hiddenSizer: null,
-		hasFocus: false,
-		startInput: false,
-		inputRange: [0, 0],
-		cursorId: 0,
-		str: '',
-		pos: 0,
-		startX: -1,
-		moveX: -1,
-		debugInput: false,
-		isLoop: false,
-		listens: [],
-		e: {
-			type: null,
-			clientX: 0,
-			clientY: 0,
-			keyCode: NaN,
-			key: null,
-			delta: 0
-		},
-		isMobile: false,
-		now: null,
-		getTime: function () {
-			return self.performance && self.performance.now ? self.performance.now.bind(performance) : Date.now;
-		},
-		add: function (o) {
-			R.ui.push(o);
-			R.getZone(o);
-			if (!R.isEventsInit) R.initEvents();
-		},
-		testMobile: function () {
-			let n = navigator.userAgent;
-			if (n.match(/Android/i) || n.match(/webOS/i) || n.match(/iPhone/i) || n.match(/iPad/i) || n.match(/iPod/i) || n.match(/BlackBerry/i) || n.match(/Windows Phone/i)) return true;else return false;
-		},
-		remove: function (o) {
-			let i = R.ui.indexOf(o);
-
-			if (i !== -1) {
-				R.removeListen(o);
-				R.ui.splice(i, 1);
-			}
-
-			if (R.ui.length === 0) {
-				R.removeEvents();
-			}
-		},
-		// ----------------------
-		//	 EVENTS
-		// ----------------------
-		initEvents: function () {
-			if (R.isEventsInit) return;
-			let dom = document.body;
-			R.isMobile = R.testMobile();
-			R.now = R.getTime();
-
-			if (!R.isMobile) {
-				dom.addEventListener('wheel', R, {
-					passive: false
-				});
-			} else {
-				dom.style.touchAction = 'none';
-			}
-
-			dom.addEventListener('pointercancel', R);
-			dom.addEventListener('pointerleave', R);
-			dom.addEventListener('pointerout', R);
-			dom.addEventListener('pointerdown', R);
-			dom.addEventListener('pointermove', R);
-			dom.addEventListener('pointerup', R);
-			dom.addEventListener('keydown', R, false);
-			dom.addEventListener('keyup', R, false);
-			window.addEventListener('resize', R.resize, false); //window.onblur = R.out;
-			//window.onfocus = R.in;
-
-			R.isEventsInit = true;
-			R.dom = dom;
-		},
-		removeEvents: function () {
-			if (!R.isEventsInit) return;
-			let dom = document.body;
-
-			if (!R.isMobile) {
-				dom.removeEventListener('wheel', R);
-			}
-
-			dom.removeEventListener('pointercancel', R);
-			dom.removeEventListener('pointermove', R);
-			dom.removeEventListener('pointerleave', R);
-			dom.removeEventListener('pointerdown', R);
-			dom.removeEventListener('pointerup', R);
-			dom.removeEventListener('pointerout', R);
-			dom.removeEventListener('keydown', R);
-			dom.removeEventListener('keyup', R);
-			window.removeEventListener('resize', R.resize);
-			R.isEventsInit = false;
-		},
-		resize: function () {
-			R.needReZone = true;
-			let i = R.ui.length,
-					u;
-
-			while (i--) {
-				u = R.ui[i];
-				if (u.isGui && !u.isCanvasOnly && u.autoResize) u.setHeight();
-			}
-		},
-		out: function () {
-			console.log('im am out');
-			R.clearOldID();
-		},
-		in: function () {
-			console.log('im am in'); //	R.clearOldID();
-		},
-		// ----------------------
-		//	 HANDLE EVENTS
-		// ----------------------
-		fakeUp: function () {
-			this.handleEvent({
-				type: 'pointerup'
-			});
-		},
-		handleEvent: function (event) {
-			//if(!event.type) return;
-			if (R.prevDefault.indexOf(event.type) !== -1) event.preventDefault();
-			R.findZone();
-			let e = R.e;
-			let leave = false;
-			if (event.type === 'keydown') R.keydown(event);
-			if (event.type === 'keyup') R.keyup(event);
-			if (event.type === 'wheel') e.delta = event.deltaY > 0 ? 1 : -1;else e.delta = 0;
-			let ptype = event.pointerType; // mouse, pen, touch
-
-			e.clientX = (ptype === 'touch' ? event.pageX : event.clientX) || 0;
-			e.clientY = (ptype === 'touch' ? event.pageY : event.clientY) || 0;
-			e.type = event.type;
-
-			if (R.eventOut.indexOf(event.type) !== -1) {
-				leave = true;
-				e.type = 'mouseup';
-			}
-
-			if (event.type === 'pointerdown') e.type = 'mousedown';
-			if (event.type === 'pointerup') e.type = 'mouseup';
-			if (event.type === 'pointermove') e.type = 'mousemove'; // double click test
-
-			if (e.type === 'mousedown') {
-				R.downTime = R.now();
-				let time = R.downTime - R.prevTime; // double click on imput
-
-				if (time < 200) {
-					R.selectAll();
-					return false;
-				}
-
-				R.prevTime = R.downTime;
-			} // for imput
-
-
-			if (e.type === 'mousedown') R.clearInput(); // mouse lock
-
-			if (e.type === 'mousedown') R.lock = true;
-			if (e.type === 'mouseup') R.lock = false;
-			if (R.isMobile && e.type === 'mousedown') R.findID(e);
-			if (e.type === 'mousemove' && !R.lock) R.findID(e);
-
-			if (R.ID !== null) {
-				if (R.ID.isCanvasOnly) {
-					e.clientX = R.ID.mouse.x;
-					e.clientY = R.ID.mouse.y;
-				}
-
-				R.ID.handleEvent(e);
-			}
-
-			if (R.isMobile && e.type === 'mouseup') R.clearOldID();
-			if (leave) R.clearOldID();
-		},
-		// ----------------------
-		//	 ID
-		// ----------------------
-		findID: function (e) {
-			let i = R.ui.length,
-					next = -1,
-					u,
-					x,
-					y;
-
-			while (i--) {
-				u = R.ui[i];
-
-				if (u.isCanvasOnly) {
-					x = u.mouse.x;
-					y = u.mouse.y;
-				} else {
-					x = e.clientX;
-					y = e.clientY;
-				}
-
-				if (R.onZone(u, x, y)) {
-					next = i;
-
-					if (next !== R.current) {
-						R.clearOldID();
-						R.current = next;
-						R.ID = u;
-					}
-
-					break;
-				}
-			}
-
-			if (next === -1) R.clearOldID();
-		},
-		clearOldID: function () {
-			if (!R.ID) return;
-			R.current = -1;
-			R.ID.reset();
-			R.ID = null;
-			R.cursor();
-		},
-		// ----------------------
-		//	 GUI / GROUP FUNCTION
-		// ----------------------
-		calcUis: function (uis, zone, py) {
-			let lng = uis.length,
-					u,
-					i,
-					px = 0,
-					my = 0;
-
-			for (i = 0; i < lng; i++) {
-				u = uis[i];
-				u.zone.w = u.w;
-				u.zone.h = u.h;
-
-				if (!u.autoWidth) {
-					if (px === 0) py += u.h + 1;
-					u.zone.x = zone.x + px;
-					u.zone.y = px === 0 ? py - u.h : my;
-					my = u.zone.y;
-					px += u.w;
-					if (px + u.w > zone.w) px = 0;
-				} else {
-					u.zone.x = zone.x;
-					u.zone.y = py;
-					py += u.h + 1;
-				}
-
-				if (u.isGroup) u.calcUis();
-			}
-		},
-		findTarget: function (uis, e) {
-			let i = uis.length;
-
-			while (i--) {
-				if (R.onZone(uis[i], e.clientX, e.clientY)) return i;
-			}
-
-			return -1;
-		},
-		// ----------------------
-		//	 ZONE
-		// ----------------------
-		findZone: function (force) {
-			if (!R.needReZone && !force) return;
-			var i = R.ui.length,
-					u;
-
-			while (i--) {
-				u = R.ui[i];
-				R.getZone(u);
-				if (u.isGui) u.calcUis();
-			}
-
-			R.needReZone = false;
-		},
-		onZone: function (o, x, y) {
-			if (x === undefined || y === undefined) return false;
-			let z = o.zone;
-			let mx = x - z.x;
-			let my = y - z.y;
-			let over = mx >= 0 && my >= 0 && mx <= z.w && my <= z.h;
-			if (over) o.local.set(mx, my);else o.local.neg();
-			return over;
-		},
-		getZone: function (o) {
-			if (o.isCanvasOnly) return;
-			let r = o.getDom().getBoundingClientRect();
-			o.zone = {
-				x: r.left,
-				y: r.top,
-				w: r.width,
-				h: r.height
-			};
-		},
-		// ----------------------
-		//	 CURSOR
-		// ----------------------
-		cursor: function (name) {
-			name = name ? name : 'auto';
-
-			if (name !== R.oldCursor) {
-				document.body.style.cursor = name;
-				R.oldCursor = name;
-			}
-		},
-		// ----------------------
-		//	 CANVAS
-		// ----------------------
-		toCanvas: function (o, w, h, force) {
-			// prevent exesive redraw
-			if (force && R.tmpTime !== null) {
-				clearTimeout(R.tmpTime);
-				R.tmpTime = null;
-			}
-
-			if (R.tmpTime !== null) return;
-			if (R.lock) R.tmpTime = setTimeout(function () {
-				R.tmpTime = null;
-			}, 10); ///
-
-			let isNewSize = false;
-			if (w !== o.canvas.width || h !== o.canvas.height) isNewSize = true;
-			if (R.tmpImage === null) R.tmpImage = new Image();
-			let img = R.tmpImage; //new Image();
-
-			let htmlString = R.xmlserializer.serializeToString(o.content);
-			let svg = '<svg xmlns="http://www.w3.org/2000/svg" width="' + w + '" height="' + h + '"><foreignObject style="pointer-events: none; left:0;" width="100%" height="100%">' + htmlString + '</foreignObject></svg>';
-
-			img.onload = function () {
-				let ctx = o.canvas.getContext("2d");
-
-				if (isNewSize) {
-					o.canvas.width = w;
-					o.canvas.height = h;
-				} else {
-					ctx.clearRect(0, 0, w, h);
-				}
-
-				ctx.drawImage(this, 0, 0);
-				o.onDraw();
-			};
-
-			img.src = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svg); //img.src = 'data:image/svg+xml;base64,'+ window.btoa( svg );
-
-			img.crossOrigin = '';
-		},
-		// ----------------------
-		//	 INPUT
-		// ----------------------
-		setHidden: function () {
-			if (R.hiddenImput === null) {
-				let hide = R.debugInput ? '' : 'opacity:0; zIndex:0;';
-				let css = R.parent.css.txt + 'padding:0; width:auto; height:auto; text-shadow:none;';
-				css += 'left:10px; top:auto; border:none; color:#FFF; background:#000;' + hide;
-				R.hiddenImput = document.createElement('input');
-				R.hiddenImput.type = 'text';
-				R.hiddenImput.style.cssText = css + 'bottom:30px;' + (R.debugInput ? '' : 'transform:scale(0);');
-				R.hiddenSizer = document.createElement('div');
-				R.hiddenSizer.style.cssText = css + 'bottom:60px;';
-				document.body.appendChild(R.hiddenImput);
-				document.body.appendChild(R.hiddenSizer);
-			}
-
-			R.hiddenImput.style.width = R.input.clientWidth + 'px';
-			R.hiddenImput.value = R.str;
-			R.hiddenSizer.innerHTML = R.str;
-			R.hasFocus = true;
-		},
-		clearHidden: function (p) {
-			if (R.hiddenImput === null) return;
-			R.hasFocus = false;
-		},
-		clickPos: function (x) {
-			let i = R.str.length,
-					l = 0,
-					n = 0;
-
-			while (i--) {
-				l += R.textWidth(R.str[n]);
-				if (l >= x) break;
-				n++;
-			}
-
-			return n;
-		},
-		upInput: function (x, down) {
-			if (R.parent === null) return false;
-			let up = false;
-
-			if (down) {
-				let id = R.clickPos(x);
-				R.moveX = id;
-
-				if (R.startX === -1) {
-					R.startX = id;
-					R.cursorId = id;
-					R.inputRange = [R.startX, R.startX];
-				} else {
-					let isSelection = R.moveX !== R.startX;
-
-					if (isSelection) {
-						if (R.startX > R.moveX) R.inputRange = [R.moveX, R.startX];else R.inputRange = [R.startX, R.moveX];
-					}
-				}
-
-				up = true;
-			} else {
-				if (R.startX !== -1) {
-					R.hasFocus = true;
-					R.hiddenImput.focus();
-					R.hiddenImput.selectionStart = R.inputRange[0];
-					R.hiddenImput.selectionEnd = R.inputRange[1];
-					R.startX = -1;
-					up = true;
-				}
-			}
-
-			if (up) R.selectParent();
-			return up;
-		},
-		selectAll: function () {
-			if (!R.parent) return;
-			R.str = R.input.textContent;
-			R.inputRange = [0, R.str.length];
-			R.hasFocus = true;
-			R.hiddenImput.focus();
-			R.hiddenImput.selectionStart = R.inputRange[0];
-			R.hiddenImput.selectionEnd = R.inputRange[1];
-			R.cursorId = R.inputRange[1];
-			R.selectParent();
-		},
-		selectParent: function () {
-			var c = R.textWidth(R.str.substring(0, R.cursorId));
-			var e = R.textWidth(R.str.substring(0, R.inputRange[0]));
-			var s = R.textWidth(R.str.substring(R.inputRange[0], R.inputRange[1]));
-			R.parent.select(c, e, s);
-		},
-		textWidth: function (text) {
-			if (R.hiddenSizer === null) return 0;
-			text = text.replace(/ /g, '&nbsp;');
-			R.hiddenSizer.innerHTML = text;
-			return R.hiddenSizer.clientWidth;
-		},
-		clearInput: function () {
-			if (R.parent === null) return;
-			if (!R.firstImput) R.parent.validate(true);
-			R.clearHidden();
-			R.parent.unselect(); //R.input.style.background = 'none';
-
-			R.input.style.background = R.parent.colors.inputBg;
-			R.input.style.borderColor = R.parent.colors.inputBorder;
-			R.parent.isEdit = false;
-			R.input = null;
-			R.parent = null;
-			R.str = '', R.firstImput = true;
-		},
-		setInput: function (Input, parent) {
-			R.clearInput();
-			R.input = Input;
-			R.parent = parent;
-			R.input.style.background = R.parent.colors.inputOver;
-			R.input.style.borderColor = R.parent.colors.inputBorderSelect;
-			R.str = R.input.textContent;
-			R.setHidden();
-		},
-		keydown: function (e) {
-			if (R.parent === null) return;
-			let keyCode = e.which;
-					e.shiftKey; //console.log( keyCode )
-
-			R.firstImput = false;
-
-			if (R.hasFocus) {
-				// hack to fix touch event bug in iOS Safari
-				window.focus();
-				R.hiddenImput.focus();
-			}
-
-			R.parent.isEdit = true; // e.preventDefault();
-			// add support for Ctrl/Cmd+A selection
-			//if ( keyCode === 65 && (e.ctrlKey || e.metaKey )) {
-			//R.selectText();
-			//e.preventDefault();
-			//return self.render();
-			//}
-
-			if (keyCode === 13) {
-				//enter
-				R.clearInput(); //} else if( keyCode === 9 ){ //tab key
-				// R.input.textContent = '';
-			} else {
-				if (R.input.isNum) {
-					if (e.keyCode > 47 && e.keyCode < 58 || e.keyCode > 95 && e.keyCode < 106 || e.keyCode === 190 || e.keyCode === 110 || e.keyCode === 8 || e.keyCode === 109) {
-						R.hiddenImput.readOnly = false;
-					} else {
-						R.hiddenImput.readOnly = true;
-					}
-				} else {
-					R.hiddenImput.readOnly = false;
-				}
-			}
-		},
-		keyup: function (e) {
-			if (R.parent === null) return;
-			R.str = R.hiddenImput.value;
-			if (R.parent.allEqual) R.parent.sameStr(R.str); // numeric samùe value
-			else R.input.textContent = R.str;
-			R.cursorId = R.hiddenImput.selectionStart;
-			R.inputRange = [R.hiddenImput.selectionStart, R.hiddenImput.selectionEnd];
-			R.selectParent(); //if( R.parent.allway ) 
-
-			R.parent.validate();
-		},
-		// ----------------------
-		//
-		//	 LISTENING
-		//
-		// ----------------------
-		loop: function () {
-			if (R.isLoop) requestAnimationFrame(R.loop);
-			R.update();
-		},
-		update: function () {
-			let i = R.listens.length;
-
-			while (i--) R.listens[i].listening();
-		},
-		removeListen: function (proto) {
-			let id = R.listens.indexOf(proto);
-			if (id !== -1) R.listens.splice(id, 1);
-			if (R.listens.length === 0) R.isLoop = false;
-		},
-		addListen: function (proto) {
-			let id = R.listens.indexOf(proto);
-			if (id !== -1) return false;
-			R.listens.push(proto);
-
-			if (!R.isLoop) {
-				R.isLoop = true;
-				R.loop();
-			}
-
-			return true;
-		}
-	};
-	const Roots = R;
 
 	class V2 {
 		constructor(x = 0, y = 0) {
@@ -1448,21 +1650,25 @@
 	class Proto {
 		constructor(o = {}) {
 			// disable mouse controle
-			this.lock = o.lock || false; // if is on gui or group
+			this.lock = o.lock || false; // for button
+
+			this.neverlock = false; // only simple space 
+
+			this.isSpace = o.isSpace || false; // if is on gui or group
 
 			this.main = o.main || null;
 			this.isUI = o.isUI || false;
-			this.group = null;
+			this.group = o.group || null;
 			this.isListen = false; //this.parentGroup = null;
+			//if( o.select !== undefined ) o.selectable = o.select
 
+			this.isSelectable = o.selectable !== undefined ? o.selectable : false;
+			this.unselectable = o.unselect !== undefined ? o.unselect : this.isSelectable;
 			this.ontop = o.ontop ? o.ontop : false; // 'beforebegin' 'afterbegin' 'beforeend' 'afterend'
 
 			this.css = this.main ? this.main.css : Tools.css;
-			this.colors = this.main ? this.main.colors : Tools.colors;
-			this.defaultBorderColor = this.colors.border;
-			this.svgs = Tools.svgs; // only space 
-
-			this.isSpace = o.isSpace || false;
+			this.colors = Tools.defineColor(o, this.main ? this.group ? this.group.colors : this.main.colors : Tools.colors);
+			this.svgs = Tools.svgs;
 			this.zone = {
 				x: 0,
 				y: 0,
@@ -1478,13 +1684,14 @@
 			if (o.w !== undefined) this.w = o.w;
 			this.h = this.isUI ? this.main.size.h : Tools.size.h;
 			if (o.h !== undefined) this.h = o.h;
-			if (!this.isSpace) this.h = this.h < 11 ? 11 : this.h; // if need resize width
+			if (!this.isSpace) this.h = this.h < 11 ? 11 : this.h;else this.lock = true;
+			this.autoWidth = o.auto || true; // auto width or flex 
 
-			this.autoWidth = o.auto || true; // open statu
+			this.isOpen = false; // open statu
+			// radius for toolbox
 
-			this.isOpen = false; // radius for toolbox
-
-			this.radius = o.radius || this.colors.radius; // only for number
+			this.radius = o.radius || this.colors.radius;
+			this.transition = o.transition || Tools.transition; // only for number
 
 			this.isNumber = false;
 			this.noNeg = o.noNeg || false;
@@ -1507,61 +1714,51 @@
 
 			this.objectLink = null;
 			this.isSend = false;
-			this.val = null; // Background
-
-			this.bg = this.colors.background;
-			this.bgOver = this.colors.backgroundOver;
-
-			if (o.bg !== undefined) {
-				this.bg = o.bg;
-				this.bgOver = o.bg;
-			}
-
-			if (o.bgOver !== undefined) {
-				this.bgOver = o.bgOver;
-			} // Font Color;
-
-
-			this.titleColor = o.titleColor || this.colors.text;
-			this.fontColor = o.fontColor || this.colors.text;
-			this.fontSelect = o.fontSelect || this.colors.textOver;
-			if (o.color !== undefined) this.fontColor = o.color;
-			/*{ 
-				if(o.color === 'n') o.color = '#ff0000';
-				if( o.color !== 'no' ) {
-					if( !isNaN(o.color) ) this.fontColor = Tools.hexToHtml(o.color);
-					else this.fontColor = o.color;
-					this.titleColor = this.fontColor;
-			}
-			
-			}*/
-
-			/*if( o.color !== undefined ){ 
-					if( !isNaN(o.color) ) this.fontColor = Tools.hexToHtml(o.color);
-					else this.fontColor = o.color;
-					this.titleColor = this.fontColor;
-			}*/
-
-			this.colorPlus = Tools.ColorLuma(this.fontColor, 0.3);
+			this.val = null;
 			this.txt = o.name || '';
 			this.name = o.rename || this.txt;
-			this.target = o.target || null;
+			this.target = o.target || null; // callback
+
 			this.callback = o.callback === undefined ? null : o.callback;
 			this.endCallback = null;
-			if (this.callback === null && this.isUI && this.main.callback !== null) this.callback = this.main.callback; // elements
+			this.openCallback = o.openCallback === undefined ? null : o.openCallback;
+			this.closeCallback = o.closeCallback === undefined ? null : o.closeCallback; // if no callback take one from group or gui
+
+			if (this.callback === null && this.isUI && this.main.callback !== null) {
+				this.callback = this.group ? this.group.callback : this.main.callback;
+			} // elements
+
 
 			this.c = []; // style 
 
-			this.s = [];
-			this.c[0] = Tools.dom('div', this.css.basic + 'position:relative; height:20px; float:left; overflow:hidden;');
-			this.s[0] = this.c[0].style;
-			if (this.isUI) this.s[0].marginBottom = '1px'; // with title
+			this.s = []; //this.c[0] = Tools.dom( 'div', this.css.basic + this.css.button +'align-self:stretch; position:relative; height:20px; overflow:hidden;'); //float:left;
+			//this.c[0] = Tools.dom( 'div',	'order: 1;' ); //
+
+			this.useFlex = this.isUI ? this.main.useFlex : false;
+			let flexible = this.useFlex ? 'disply:flex; justify-content:center; align-items:center; text-align:center; flex: 1 100%;' : 'float:left;';
+			this.c[0] = Tools.dom('div', this.css.basic + flexible + 'position:relative; height:20px;'); //this.c[0] = Tools.dom( 'div', this.css.basic +'position:relative; height:20px; align-self: auto;');
+
+			this.s[0] = this.c[0].style; // bottom margin
+
+			this.margin = o.margin || 1;
+
+			if (this.isUI && this.margin) {
+				this.s[0].boxSizing = 'content-box'; //this.s[0].marginBottom = this.margin + 'px';
+
+				if (this.margin * 0.5 === Math.floor(this.margin * 0.5)) {
+					this.s[0].borderTop = this.margin * 0.5 + 'px solid transparent';
+					this.s[0].borderBottom = this.margin * 0.5 + 'px solid transparent';
+				} else {
+					this.s[0].borderBottom = this.margin + 'px solid transparent';
+				}
+			} // with title
+
 
 			if (!this.simple) {
 				this.c[1] = Tools.dom('div', this.css.txt);
 				this.s[1] = this.c[1].style;
 				this.c[1].textContent = this.name;
-				this.s[1].color = this.titleColor;
+				this.s[1].color = this.lock ? this.colors.titleoff : this.colors.title;
 			}
 
 			if (o.pos) {
@@ -1582,13 +1779,22 @@
 
 		init() {
 			this.zone.h = this.h;
+			this.zone.w = this.w;
 			let s = this.s; // style cache
 
 			let c = this.c; // div cach
 
 			s[0].height = this.h + 'px';
-			if (this.isUI) s[0].background = this.bg; //if( this.isSpace	) s[0].background = 'none';
-			//if( this.autoHeight ) s[0].transition = 'height 0.01s ease-out';
+			if (this.isUI) s[0].background = this.colors.background;
+
+			if (!this.autoWidth && this.useFlex) {
+				s[0].flex = '1 0 auto';
+				s[0].minWidth = this.minw + 'px';
+				s[0].textAlign = 'center';
+			} else {
+				if (this.isUI) s[0].width = '100%';
+			} //if( this.autoHeight ) s[0].transition = 'height 0.01s ease-out';
+
 
 			if (c[1] !== undefined && this.autoWidth) {
 				s[1] = c[1].style;
@@ -1607,19 +1813,16 @@
 
 			let pp = this.target !== null ? this.target : this.isUI ? this.main.inner : document.body;
 			if (this.ontop) pp.insertAdjacentElement('afterbegin', c[0]);else pp.appendChild(c[0]);
-			/*if( this.target !== null ){ 
-					this.target.appendChild( c[0] );
-			} else {
-					if( this.isUI ) this.main.inner.appendChild( c[0] );
-					else document.body.appendChild( c[0] );
-			}*/
-
 			c[0].appendChild(frag);
 			this.rSize(); // ! solo proto
 
 			if (!this.isUI) {
 				this.c[0].style.pointerEvents = 'auto';
 				Roots.add(this);
+			}
+
+			if (this.baseH && this.transition && this.isUI) {
+				this.c[0].style.transition = 'height ' + this.transition + 's ease-out';
 			}
 		} // from Tools
 
@@ -1658,6 +1861,11 @@
 		getKnob(model) {
 			if (!Tools.knob) Tools.makeKnob(model);
 			return Tools.clone(Tools.knob);
+		}
+
+		getPad2d(model) {
+			if (!Tools.pad2d) Tools.makePad(model);
+			return Tools.clone(Tools.pad2d);
 		} // from Roots
 
 
@@ -1676,13 +1884,13 @@
 		}
 
 		uiout() {
-			if (this.isSpace) return;
-			if (this.s) this.s[0].background = this.bg;
+			if (this.lock) return;
+			if (this.s) this.s[0].background = this.colors.background;
 		}
 
 		uiover() {
-			if (this.isSpace) return;
-			if (this.s) this.s[0].background = this.bgOver;
+			if (this.lock) return;
+			if (this.s) this.s[0].background = this.colors.backgroundOver;
 		}
 
 		rename(s) {
@@ -1724,7 +1932,23 @@
 			this.callback = null;
 			this.endCallback = f;
 			return this;
+		} // ----------------------
+		// event on open close
+		// ----------------------
+
+
+		onOpen(f) {
+			this.openCallback = f;
+			return this;
 		}
+
+		onClose(f) {
+			this.closeCallback = f;
+			return this;
+		} // ----------------------
+		//	send back value
+		// ----------------------
+
 
 		send(v) {
 			v = v || this.value;
@@ -1769,6 +1993,11 @@
 		// ----------------------
 
 
+		getWidth() {
+			let nw = Roots.getWidth(this);
+			if (nw) this.w = nw;
+		}
+
 		setSize(sx) {
 			if (!this.autoWidth) return;
 			this.w = sx;
@@ -1784,7 +2013,7 @@
 
 		rSize() {
 			if (!this.autoWidth) return;
-			this.s[0].width = this.w + 'px';
+			if (!this.isUI) this.s[0].width = this.w + 'px';
 			if (!this.simple) this.s[1].width = this.sa + 'px';
 		} // ----------------------
 		// for numeric value
@@ -1844,9 +2073,9 @@
 
 
 		handleEvent(e) {
-			if (!this[e.type]) return console.error(e.type, 'this type of event no existe !');
 			if (this.lock) return;
-			if (this.isSpace) return;
+			if (this.neverlock) Roots.lock = false;
+			if (!this[e.type]) return console.error(e.type, 'this type of event no existe !');
 			return this[e.type](e);
 		}
 
@@ -1891,7 +2120,7 @@
 
 		display(v) {
 			v = v || false;
-			this.s[0].display = v ? 'block' : 'none'; //this.isReady = v ? false : true;
+			this.s[0].display = v ? this.useFlex ? 'flex' : 'block' : 'none';
 		} // ----------------------
 		// resize height 
 		// ----------------------
@@ -1900,11 +2129,13 @@
 		open() {
 			if (this.isOpen) return;
 			this.isOpen = true;
+			if (this.openCallback) this.openCallback();
 		}
 
 		close() {
 			if (!this.isOpen) return;
 			this.isOpen = false;
+			if (this.closeCallback) this.closeCallback();
 		}
 
 		needZone() {
@@ -1947,25 +2178,21 @@
 			this.onName = o.rename || this.txt;
 			if (o.onName) o.onname = o.onName;
 			if (o.onname) this.onName = o.onname;
-			this.buttonColor = o.bColor || this.colors.button;
 			this.inh = o.inh || Math.floor(this.h * 0.8);
 			this.inw = o.inw || 36;
+			let cc = this.colors;
 
 			if (this.model === 0) {
 				let t = Math.floor(this.h * 0.5) - (this.inh - 2) * 0.5;
-				this.c[2] = this.dom('div', this.css.basic + 'background:' + this.colors.boolbg + '; height:' + (this.inh - 2) + 'px; width:' + this.inw + 'px; top:' + t + 'px; border-radius:10px; border:2px solid ' + this.boolbg);
-				this.c[3] = this.dom('div', this.css.basic + 'height:' + (this.inh - 6) + 'px; width:16px; top:' + (t + 2) + 'px; border-radius:10px; background:' + this.buttonColor + ';');
+				this.c[2] = this.dom('div', this.css.basic + 'background:' + cc.inputBg + '; height:' + (this.inh - 2) + 'px; width:' + this.inw + 'px; top:' + t + 'px; border-radius:10px; border:2px solid ' + cc.back);
+				this.c[3] = this.dom('div', this.css.basic + 'height:' + (this.inh - 6) + 'px; width:16px; top:' + (t + 2) + 'px; border-radius:10px; background:' + cc.button + ';');
 			} else {
 				this.p = 0;
-				this.c[1].textContent = '';
-				this.c[2] = this.dom('div', this.css.txt + this.css.button + 'top:1px; background:' + this.colors.button + '; height:' + (this.h - 2) + 'px; border:' + this.colors.buttonBorder + '; border-radius:' + this.radius + 'px;');
-				/*
-				this.c[2].style.background = this.value ? this.colors.select : this.colors.button;
-				this.c[2].style.color = this.value ? this.fontSelect : this.fontColor;*/
+				if (this.c[1] !== undefined) this.c[1].textContent = '';
+				this.c[2] = this.dom('div', this.css.txt + this.css.button + 'top:1px; background:' + cc.button + '; height:' + (this.h - 2) + 'px; border:1px solid ' + cc.border + '; border-radius:' + this.radius + 'px;');
 			}
 
 			this.stat = -1;
-			this.mode(this.value ? 2 : 1);
 			this.init();
 			this.update();
 		} // ----------------------
@@ -1974,62 +2201,90 @@
 
 
 		mousedown(e) {
-			this.value = !this.value; // ? false : true;
-
-			this.update(true); //this.send();
-
+			this.value = !this.value;
+			this.update(true);
 			return this.mousemove(e);
 		}
 
 		mousemove(e) {
 			this.cursor('pointer');
-			return this.mode(this.value ? 4 : 3);
+			return this.mode(true);
 		}
 
 		reset() {
 			this.cursor();
-			return this.mode(this.value ? 2 : 1);
-		}
+			return this.mode();
+		} // ----------------------
+		//	 MODE
+		// ----------------------
 
-		mode(n) {
+
+		mode(over) {
 			let change = false;
+			let cc = this.colors,
+					s,
+					s2,
+					n,
+					v = this.value;
+			if (over) n = v ? 4 : 3;else n = v ? 2 : 1;
 
 			if (this.stat !== n) {
+				this.stat = n;
+
 				if (this.model !== 0) {
-					let s = this.c[2].style;
+					s = this.s[2];
 
 					switch (n) {
 						case 1:
-							this.stat = 1;
-							s.color = this.fontColor;
-							s.background = this.colors.button;
+							s.color = cc.text;
+							s.background = cc.button;
 							break;
 
 						case 2:
-							this.stat = 2;
-							s.color = this.fontSelect;
-							s.background = this.colors.select;
+							s.color = cc.textSelect;
+							s.background = cc.select;
 							break;
 
 						case 3:
-							this.stat = 3;
-							s.color = this.fontSelect;
-							s.background = this.colors.over2;
+							s.color = cc.textOver;
+							s.background = cc.overoff;
 							break;
 
 						case 4:
-							this.stat = 4;
-							s.color = this.fontSelect;
-							s.background = this.colors.over;
+							s.color = cc.textOver;
+							s.background = cc.over;
 							break;
 					}
 
-					this.c[2].innerHTML = this.value ? this.onName : this.name;
+					this.c[2].innerHTML = v ? this.onName : this.name;
 				} else {
-					this.c[2].style.background = this.value ? this.colors.boolon : this.colors.boolbg;
-					this.c[2].style.borderColor = this.value ? this.colors.boolon : this.colors.boolbg;
-					this.c[3].style.marginLeft = this.value ? '17px' : '2px';
-					this.c[1].textContent = this.value ? this.onName : this.name;
+					s = this.s[2];
+					s2 = this.s[3];
+
+					switch (n) {
+						case 1:
+							s.background = s.borderColor = cc.back;
+							s2.background = cc.button;
+							break;
+
+						case 2:
+							s.background = s.borderColor = cc.select;
+							s2.background = cc.button;
+							break;
+
+						case 3:
+							s.background = s.borderColor = cc.back;
+							s2.background = cc.overoff;
+							break;
+
+						case 4:
+							s.background = s.borderColor = cc.select;
+							s2.background = cc.over;
+							break;
+					}
+
+					this.s[3].marginLeft = v ? '17px' : '2px';
+					this.c[1].textContent = v ? this.onName : this.name;
 				}
 
 				change = true;
@@ -2040,7 +2295,7 @@
 
 
 		update(up) {
-			this.mode(this.value ? 4 : 3);
+			this.mode();
 			if (up) this.send();
 		}
 
@@ -2063,36 +2318,43 @@
 	class Button extends Proto {
 		constructor(o = {}) {
 			super(o);
-			this.value = false;
+			this.value = o.value || '';
 			this.values = o.value || this.txt;
+			if (o.values) this.values = o.values;
 			this.onName = o.onName || '';
 			this.on = false;
 			this.customSize = o.forceWidth || -1;
-			if (typeof this.values === 'string') this.values = [this.values]; //this.selected = null;
-
+			if (typeof this.values === 'string') this.values = [this.values];
 			this.isDown = false;
-			this.isLink = o.link || false; // custom color
-
-			this.cc = [this.colors.button, this.colors.over, this.colors.select];
-			if (o.cBg !== undefined) this.cc[0] = o.cBg;
-			if (o.bColor !== undefined) this.cc[0] = o.bColor;
-			if (o.cSelect !== undefined) this.cc[1] = o.cSelect;
-			if (o.cDown !== undefined) this.cc[2] = o.cDown;
+			this.neverlock = true;
 			this.isLoadButton = o.loader || false;
 			this.isDragButton = o.drag || false;
+			this.res = 0;
 			if (this.isDragButton) this.isLoadButton = true;
 			this.lng = this.values.length;
 			this.tmp = [];
 			this.stat = [];
+			let sel,
+					cc = this.colors;
 
 			for (let i = 0; i < this.lng; i++) {
-				this.c[i + 2] = this.dom('div', this.css.txt + this.css.button + 'top:1px; background:' + this.cc[0] + '; height:' + (this.h - 2) + 'px; border:' + this.colors.buttonBorder + '; border-radius:' + this.radius + 'px;');
-				this.c[i + 2].style.color = this.fontColor;
+				sel = false;
+				if (this.values[i] === this.value && this.isSelectable) sel = true;
+				this.c[i + 2] = this.dom('div', this.css.txt + this.css.button + 'top:1px; height:' + (this.h - 2) + 'px; border:' + cc.borderSize + 'px solid ' + cc.border + '; border-radius:' + this.radius + 'px;');
+				this.c[i + 2].style.background = sel ? cc.select : cc.button;
+				this.c[i + 2].style.color = sel ? cc.textSelect : cc.text;
 				this.c[i + 2].innerHTML = this.values[i];
-				this.stat[i] = 1;
+				this.stat[i] = sel ? 3 : 1;
 			}
 
-			if (this.c[1] !== undefined) this.c[1].textContent = '';
+			if (!o.value || !o.values) {
+				if (this.c[1] !== undefined) this.c[1].textContent = '';
+				this.p = o.p !== undefined ? o.p : 0;
+			} else {
+				if (!this.txt) this.p = 0;
+			} //
+
+
 			if (this.isLoadButton) this.initLoader();
 
 			if (this.isDragButton) {
@@ -2105,112 +2367,111 @@
 		}
 
 		onOff() {
-			//this.values[0] = this.on;
 			this.on = !this.on;
 			this.c[2].innerHTML = this.on ? this.onName : this.txt;
 		}
 
 		testZone(e) {
 			let l = this.local;
-			if (l.x === -1 && l.y === -1) return '';
+			if (l.x === -1 && l.y === -1) return -1;
 			let i = this.lng;
 			let t = this.tmp;
 
 			while (i--) {
-				if (l.x > t[i][0] && l.x < t[i][2]) return i + 2;
+				if (l.x > t[i][0] && l.x < t[i][2]) return i;
 			}
 
-			return '';
+			return -1;
 		} // ----------------------
 		//	 EVENTS
 		// ----------------------
 
-		/*click ( e ) {
-					if( this.onName!== '' ) this.onOff();
-					//if( this.isLink ){
-					 /*	 let name = this.testZone( e );
-						if( !name ) return false;
-							this.value = this.values[name-2]
-						if( !this.isLoadButton ) this.send();
-						return this.reset();*/
-		//}
-		//}
-
 
 		mouseup(e) {
-			if (this.isDown) {
-				//this.value = false;
-				this.isDown = false; //this.send();
+			if (!this.isDown) return false;
+			this.isDown = false;
 
-				return this.mousemove(e);
+			if (this.res !== -1) {
+				if (this.value === this.values[this.res] && this.unselectable) this.value = '';else this.value = this.values[this.res];
+				if (!this.isLoadButton) this.send();
 			}
 
-			return false;
+			return this.mousemove(e);
 		}
 
 		mousedown(e) {
-			// if( this.isLink ) return false;
-			//let name = this.testZone( e );
-			//if( !name ) return false;
+			if (this.isDown) return false;
 			this.isDown = true;
-			/**/
-
-			this.value = this.values[name - 2];
-			if (!this.isLoadButton) this.send(); //else this.fileSelect( e.target.files[0] );
-
-			return this.mousemove(e); // true;
+			return this.mousemove(e);
 		}
 
 		mousemove(e) {
 			let up = false;
-			let name = this.testZone(e); // console.log(name)
+			this.res = this.testZone(e);
 
-			if (name !== '') {
+			if (this.res !== -1) {
 				this.cursor('pointer');
-				up = this.modes(this.isDown ? 3 : 2, name);
+				up = this.modes(this.isDown ? 3 : 2, this.res);
 			} else {
 				up = this.reset();
-			} //console.log(up)
-
+			}
 
 			return up;
 		} // ----------------------
 
 
-		modes(n, name) {
-			let v,
+		modes(N = 1, id = -1) {
+			let i = this.lng,
+					w,
+					n,
 					r = false;
 
-			for (let i = 0; i < this.lng; i++) {
-				if (i === name - 2) v = this.mode(n, i + 2);else v = this.mode(1, i + 2);
-				if (v) r = true;
+			while (i--) {
+				n = N;
+				w = this.isSelectable ? this.values[i] === this.value : false;
+
+				if (i === id) {
+					if (w && n === 2) n = 3;
+				} else {
+					n = 1;
+					if (w) n = 4;
+				} //if( this.mode( n, i ) ) r = true
+
+
+				r = this.mode(n, i);
 			}
 
 			return r;
 		}
 
-		mode(n, name) {
+		mode(n, id) {
 			let change = false;
-			let i = name - 2;
+			let cc = this.colors,
+					s = this.s;
+			let i = id + 2;
 
-			if (this.stat[i] !== n) {
+			if (this.stat[id] !== n) {
+				this.stat[id] = n;
+
 				switch (n) {
 					case 1:
-						this.stat[i] = 1;
-						this.s[i + 2].color = this.fontColor;
-						this.s[i + 2].background = this.cc[0];
+						s[i].color = cc.text;
+						s[i].background = cc.button;
 						break;
 
 					case 2:
-						this.stat[i] = 2;
-						this.s[i + 2].color = this.fontSelect;
-						this.s[i + 2].background = this.cc[1];
+						s[i].color = cc.textOver;
+						s[i].background = cc.overoff;
 						break;
 
 					case 3:
-						this.stat[i] = 3;
-						this.s[i + 2].color = this.fontSelect;
-						this.s[i + 2].background = this.cc[2];
+						s[i].color = cc.textOver;
+						s[i].background = cc.over;
+						break;
+
+					case 4:
+						s[i].color = cc.textSelect;
+						s[i].background = cc.select;
 						break;
 				}
 
@@ -2222,23 +2483,9 @@
 
 
 		reset() {
-			this.value = false;
+			this.res = -1;
 			this.cursor();
-			/*let v, r = false;
-				for( let i = 0; i < this.lng; i++ ){
-					v = this.mode( 1, i+2 );
-					if(v) r = true;
-			}*/
-
-			return this.modes(1, 2);
-			/*if( this.selected ){
-				this.s[ this.selected ].color = this.fontColor;
-						 this.s[ this.selected ].background = this.buttonColor;
-						 this.selected = null;
-						 
-						 return true;
-			}
-				 return false;*/
+			return this.modes();
 		} // ----------------------
 
 
@@ -2250,8 +2497,8 @@
 
 		dragend(e) {
 			e.preventDefault();
-			this.s[4].borderColor = this.fontColor;
-			this.s[4].color = this.fontColor;
+			this.s[4].borderColor = this.color.text;
+			this.s[4].color = this.color.text;
 		}
 
 		drop(e) {
@@ -2261,7 +2508,7 @@
 		}
 
 		initDrager() {
-			this.c[4] = this.dom('div', this.css.txt + ' text-align:center; line-height:' + (this.h - 8) + 'px; border:1px dashed ' + this.fontColor + '; top:2px;	height:' + (this.h - 4) + 'px; border-radius:' + this.radius + 'px; pointer-events:auto;'); // cursor:default;
+			this.c[4] = this.dom('div', this.css.txt + ' text-align:center; line-height:' + (this.h - 8) + 'px; border:1px dashed ' + this.color.text + '; top:2px;	height:' + (this.h - 4) + 'px; border-radius:' + this.radius + 'px; pointer-events:auto;'); // cursor:default;
 
 			this.c[4].textContent = 'DRAG';
 			this.c[4].addEventListener('dragover', function (e) {
@@ -2321,10 +2568,11 @@
 			this.c[n].textContent = string;
 		}
 
-		icon(string, y, n) {
-			n = n || 2;
-			this.s[n].padding = (y || 0) + 'px 0px';
+		icon(string, y = 0, n = 2) {
+			//if(y) this.s[n].margin = ( y ) +'px 0px';
+			this.s[n].padding = y + 'px 0px';
 			this.c[n].innerHTML = string;
+			return this;
 		}
 
 		rSize() {
@@ -2367,34 +2615,36 @@
 			this.model = o.stype || 0;
 			if (o.mode !== undefined) this.model = o.mode;
 			this.autoWidth = false;
-			this.buttonColor = this.colors.button;
+			this.minw = this.w;
+			this.diam = o.diam || this.w;
 			this.setTypeNumber(o);
-			this.radius = this.w * 0.5; //Math.floor((this.w-20)*0.5);
-
-			this.twoPi = Math.PI * 2;
-			this.pi90 = Math.PI * 0.5;
+			this.twoPi = Tools.TwoPI;
+			this.pi90 = Tools.pi90;
 			this.offset = new V2();
 			this.h = o.h || this.w + 10;
 			this.top = 0;
 			this.c[0].style.width = this.w + 'px';
 
 			if (this.c[1] !== undefined) {
-				this.c[1].style.width = this.w + 'px';
-				this.c[1].style.textAlign = 'center';
+				this.c[1].style.width = '100%';
+				this.c[1].style.justifyContent = 'center';
 				this.top = 10;
 				this.h += 10;
 			}
 
 			this.percent = 0;
 			this.cmode = 0;
-			this.c[2] = this.dom('div', this.css.txt + 'text-align:center; top:' + (this.h - 20) + 'px; width:' + this.w + 'px; color:' + this.fontColor);
+			let cc = this.colors;
+			this.c[2] = this.dom('div', this.css.txt + 'justify-content:center; top:' + (this.h - 20) + 'px; width:100%; color:' + cc.text); // svg
+
 			this.c[3] = this.getCircular();
+			this.setSvg(this.c[3], 'stroke', cc.back, 0);
 			this.setSvg(this.c[3], 'd', this.makePath(), 1);
-			this.setSvg(this.c[3], 'stroke', this.fontColor, 1);
-			this.setSvg(this.c[3], 'viewBox', '0 0 ' + this.w + ' ' + this.w);
+			this.setSvg(this.c[3], 'stroke', cc.text, 1);
+			this.setSvg(this.c[3], 'viewBox', '0 0 ' + this.diam + ' ' + this.diam);
 			this.setCss(this.c[3], {
-				width: this.w,
-				height: this.w,
+				width: this.diam,
+				height: this.diam,
 				left: 0,
 				top: this.top
 			});
@@ -2404,34 +2654,24 @@
 
 		mode(mode) {
 			if (this.cmode === mode) return false;
+			let cc = this.colors;
+			let color;
 
 			switch (mode) {
 				case 0:
 					// base
-					this.s[2].color = this.fontColor;
-					this.setSvg(this.c[3], 'stroke', 'rgba(0,0,0,0.1)', 0);
-
-					if (this.model > 0) {
-						let color = Tools.pack(Tools.lerpColor(Tools.unpack(Tools.ColorLuma(this.fontColor, -0.75)), Tools.unpack(this.fontColor), this.percent));
-						this.setSvg(this.c[3], 'stroke', color, 1);
-					} else {
-						this.setSvg(this.c[3], 'stroke', this.fontColor, 1);
-					}
-
+					this.s[2].color = cc.text;
+					this.setSvg(this.c[3], 'stroke', cc.back, 0);
+					color = this.model > 0 ? Tools.pack(Tools.lerpColor(Tools.unpack(Tools.ColorLuma(cc.text, -0.75)), Tools.unpack(cc.text), this.percent)) : cc.text;
+					this.setSvg(this.c[3], 'stroke', color, 1);
 					break;
 
 				case 1:
-					// over
-					this.s[2].color = this.colorPlus;
-					this.setSvg(this.c[3], 'stroke', 'rgba(0,0,0,0.3)', 0);
-
-					if (this.model > 0) {
-						let color = Tools.pack(Tools.lerpColor(Tools.unpack(Tools.ColorLuma(this.fontColor, -0.75)), Tools.unpack(this.fontColor), this.percent));
-						this.setSvg(this.c[3], 'stroke', color, 1);
-					} else {
-						this.setSvg(this.c[3], 'stroke', this.colorPlus, 1);
-					}
-
+					// down
+					this.s[2].color = cc.textOver;
+					this.setSvg(this.c[3], 'stroke', cc.backoff, 0);
+					color = this.model > 0 ? Tools.pack(Tools.lerpColor(Tools.unpack(Tools.ColorLuma(cc.text, -0.75)), Tools.unpack(cc.text), this.percent)) : cc.textOver;
+					this.setSvg(this.c[3], 'stroke', color, 1);
 					break;
 			}
 
@@ -2467,24 +2707,24 @@
 		}
 
 		mousemove(e) {
-			//this.mode(1);
-			if (!this.isDown) return;
-			var off = this.offset;
-			off.x = this.radius - (e.clientX - this.zone.x);
-			off.y = this.radius - (e.clientY - this.zone.y - this.top);
+			if (!this.isDown) return; //console.log('over')
+
+			let off = this.offset;
+			off.x = this.w * 0.5 - (e.clientX - this.zone.x);
+			off.y = this.diam * 0.5 - (e.clientY - this.zone.y - this.top);
 			this.r = off.angle() - this.pi90;
 			this.r = (this.r % this.twoPi + this.twoPi) % this.twoPi;
 
 			if (this.oldr !== null) {
-				var dif = this.r - this.oldr;
+				let dif = this.r - this.oldr;
 				this.r = Math.abs(dif) > Math.PI ? this.oldr : this.r;
 				if (dif > 6) this.r = 0;
 				if (dif < -6) this.r = this.twoPi;
 			}
 
-			var steps = 1 / this.twoPi;
-			var value = this.r * steps;
-			var n = this.range * value + this.min - this.old;
+			let steps = 1 / this.twoPi;
+			let value = this.r * steps;
+			let n = this.range * value + this.min - this.old;
 
 			if (n >= this.step || n <= this.step) {
 				n = ~~(n / this.step);
@@ -2518,12 +2758,12 @@
 
 
 		makePath() {
-			var r = 40;
-			var d = 24;
-			var a = this.percent * this.twoPi - 0.001;
-			var x2 = r + r * Math.sin(a) + d;
-			var y2 = r - r * Math.cos(a) + d;
-			var big = a > Math.PI ? 1 : 0;
+			let r = 40;
+			let d = 24;
+			let a = this.percent * this.twoPi - 0.001;
+			let x2 = r + r * Math.sin(a) + d;
+			let y2 = r - r * Math.cos(a) + d;
+			let big = a > Math.PI ? 1 : 0;
 			return "M " + (r + d) + "," + d + " A " + r + "," + r + " 0 " + big + " 1 " + x2 + "," + y2;
 		}
 
@@ -2533,7 +2773,8 @@
 			this.setSvg(this.c[3], 'd', this.makePath(), 1);
 
 			if (this.model > 0) {
-				let color = Tools.pack(Tools.lerpColor(Tools.unpack(Tools.ColorLuma(this.fontColor, -0.75)), Tools.unpack(this.fontColor), this.percent));
+				let cc = this.colors;
+				let color = Tools.pack(Tools.lerpColor(Tools.unpack(Tools.ColorLuma(cc.text, -0.75)), Tools.unpack(cc.text), this.percent));
 				this.setSvg(this.c[3], 'stroke', color, 1);
 			}
 
@@ -2564,7 +2805,9 @@
 			if (this.up) {
 				this.s[2].top = 'auto';
 				this.s[2].bottom = '2px';
-			}
+			} //this.c[0].style.textAlign = 'center';
+			//this.c[0].style.flex = '1 0 auto'
+
 
 			this.c[3] = this.getColorRing();
 			this.c[3].style.visibility = 'hidden';
@@ -2578,6 +2821,7 @@
 			this.bcolor = null;
 			this.isDown = false;
 			this.fistDown = false;
+			this.notext = o.notext || false;
 			this.tr = 98;
 			this.tsl = Math.sqrt(3) * this.tr;
 			this.hue = 0;
@@ -2729,7 +2973,7 @@
 			this.value = this.bcolor;
 			this.setSvg(this.c[3], 'fill', cc, 2, 0);
 			this.s[2].background = this.bcolor;
-			this.c[2].textContent = Tools.htmlToHex(this.bcolor);
+			if (!this.notext) this.c[2].textContent = Tools.htmlToHex(this.bcolor);
 			this.invert = Tools.findDeepInver(this.rgb);
 			this.s[2].color = this.invert ? '#fff' : '#000';
 			if (!up) return;
@@ -2739,10 +2983,16 @@
 			if (this.ctype === 'html') this.send();
 		}
 
+		setValue(v) {
+			if (v instanceof Array) this.value = Tools.rgbToHex(v);else if (!isNaN(v)) this.value = Tools.hexToHtml(v);else this.value = v;
+			this.setColor(this.value);
+			this.update();
+		}
+
 		setColor(color) {
 			let unpack = Tools.unpack(color);
 
-			if (this.bcolor != color && unpack) {
+			if (this.bcolor !== color && unpack) {
 				this.bcolor = color;
 				this.rgb = unpack;
 				this.hsl = Tools.rgbToHsl(this.rgb);
@@ -2802,8 +3052,7 @@
 			s[2].width = this.sb + 'px';
 			s[2].left = this.sa + 'px';
 			this.rSizeColor(this.cw);
-			this.decal.x = Math.floor((this.w - this.wfixe) * 0.5);
-			s[3].left = this.decal.x + 'px';
+			this.decal.x = Math.floor((this.w - this.wfixe) * 0.5); //s[3].left = this.decal.x + 'px';
 		}
 
 		rSizeColor(w) {
@@ -2873,7 +3122,7 @@
 			this.c[1].textContent = this.txt;
 			this.c[0].style.cursor = 'pointer';
 			this.c[0].style.pointerEvents = 'auto';
-			let panelCss = 'display:none; left:10px; top:' + this.h + 'px; height:' + (this.hplus - 8) + 'px; box-sizing:border-box; background: rgba(0, 0, 0, 0.2); border:' + (this.colors.groupBorder !== 'none' ? this.colors.groupBorder + ';' : '1px solid rgba(255, 255, 255, 0.2);');
+			let panelCss = 'display:none; left:10px; top:' + this.h + 'px; height:' + (this.hplus - 8) + 'px; box-sizing:border-box; background: rgba(0, 0, 0, 0.2); border:1px solid ' + this.colors.border + ';';
 			if (this.radius !== 0) panelCss += 'border-radius:' + this.radius + 'px;';
 			this.c[2] = this.dom('path', this.css.basic + panelCss, {});
 			this.c[2].setAttribute('viewBox', '0 0 ' + this.res + ' 50');
@@ -2885,7 +3134,7 @@
 
 			this.c[3] = this.dom('path', this.css.basic + 'position:absolute; width:10px; height:10px; left:4px; top:' + fltop + 'px;', {
 				d: this.svgs.arrow,
-				fill: this.fontColor,
+				fill: this.colors.text,
 				stroke: 'none'
 			}); // result test
 
@@ -2896,10 +3145,10 @@
 			let s = this.s;
 			s[1].marginLeft = '10px';
 			s[1].lineHeight = this.h - 4;
-			s[1].color = this.fontColor;
+			s[1].color = this.colors.text;
 			s[1].fontWeight = 'bold';
 			if (this.radius !== 0) s[0].borderRadius = this.radius + 'px';
-			s[0].border = this.colors.groupBorder;
+			if (this.colors.gborder !== 'none') s[0].border = '1px solid ' + this.colors.gborder;
 			let j = 0;
 
 			for (j = 0; j < this.names.length; j++) {
@@ -2940,7 +3189,7 @@
 					let s = this.s;
 					switch(mode){
 						case 0: // base
-								s[1].color = this.fontColor;
+								s[1].color = this.colors.text;
 								//s[1].background = 'none';
 						break;
 						case 1: // over
@@ -2948,7 +3197,7 @@
 								//s[1].background = UIL.SELECT;
 						break;
 						case 2: // edit / down
-								s[1].color = this.fontColor;
+								s[1].color = this.colors.text;
 								//s[1].background = UIL.SELECTDOWN;
 						break;
 					}
@@ -3098,17 +3347,26 @@
 
 			if (this.c[1] !== undefined) {
 				// with title
-				this.c[1].style.width = this.w + 'px'; //this.c[1].style.background = '#ff0000';
+				this.c[1].style.width = this.w + 'px';
+
+				if (!this.autoWidth) {
+					this.c[1].style.width = '100%';
+					this.c[1].style.justifyContent = 'center';
+				} //this.c[1].style.background = '#ff0000';
 				//this.c[1].style.textAlign = 'center';
+
 
 				this.top = 10;
 				this.h += 10;
 			}
 
 			this.gh = this.rh - 28;
-			this.gw = this.w - 28;
-			this.c[2] = this.dom('div', this.css.txt + 'text-align:center; top:' + (this.h - 20) + 'px; width:' + this.w + 'px; color:' + this.fontColor);
-			this.c[2].textContent = this.value;
+			this.gw = this.w - 28; //this.c[2] = this.dom( 'div', this.css.txt + 'justify-content:center; text-align: justify; column-count:'+this.lng+'; top:'+(this.h-20)+'px; width:100%; color:'+ this.colors.text );
+			//let colum = 'column-count:'+this.lng+'; column:'+this.lng+'; break-inside: column; top:'
+
+			this.c[2] = this.dom('div', this.css.txt + 'display:block; text-align:center; padding:0px 0px; top:' + (this.h - 20) + 'px; left:14px; width:' + this.gw + 'px;	color:' + this.colors.text); //this.c[2].textContent = this.value;
+
+			this.c[2].innerHTML = this.valueToHtml();
 			let svg = this.dom('svg', this.css.basic, {
 				viewBox: '0 0 ' + this.w + ' ' + this.rh,
 				width: this.w,
@@ -3152,7 +3410,7 @@
 					y: 14,
 					width: t[i][1],
 					height: 1,
-					fill: this.fontColor,
+					fill: this.colors.text,
 					'fill-opacity': 0.3
 				}, svg);
 			}
@@ -3182,6 +3440,21 @@
 			this.update();
 		}
 
+		valueToHtml() {
+			let i = this.lng,
+					n = 0,
+					r = '<table style="width:100%;"><tr>';
+			let w = 100 / this.lng;
+			let style = 'width:' + w + '%;'; //' text-align:center;'
+
+			while (i--) {
+				if (n === this.lng - 1) r += '<td style=' + style + '>' + this.value[n] + '</td></tr></table>';else r += '<td style=' + style + '>' + this.value[n] + '</td>';
+				n++;
+			}
+
+			return r;
+		}
+
 		updateSVG() {
 			if (this.line) this.setSvg(this.c[3], 'd', this.makePath(), 0);
 
@@ -3189,9 +3462,10 @@
 				this.setSvg(this.c[3], 'height', this.v[i] * this.gh, i + 2);
 				this.setSvg(this.c[3], 'y', 14 + (this.gh - this.v[i] * this.gh), i + 2);
 				if (this.neg) this.value[i] = ((this.v[i] * 2 - 1) * this.multiplicator).toFixed(this.precision) * 1;else this.value[i] = (this.v[i] * this.multiplicator).toFixed(this.precision) * 1;
-			}
+			} //this.c[2].textContent = this.value;
 
-			this.c[2].textContent = this.value;
+
+			this.c[2].innerHTML = this.valueToHtml();
 		}
 
 		testZone(e) {
@@ -3313,11 +3587,11 @@
 			super.rSize();
 			let s = this.s;
 			if (this.c[1] !== undefined) s[1].width = this.w + 'px';
-			s[2].width = this.w + 'px';
 			s[3].width = this.w + 'px';
 			let gw = this.w - 28;
 			let iw = (gw - 4 * (this.lng - 1)) / this.lng;
 			let t = [];
+			s[2].width = gw + 'px';
 
 			for (let i = 0; i < this.lng; i++) {
 				t[i] = [14 + i * iw + i * 4, iw];
@@ -3332,25 +3606,36 @@
 	class Group extends Proto {
 		constructor(o = {}) {
 			super(o);
+			this.isGroup = true;
 			this.ADD = o.add;
 			this.uis = [];
 			this.isEmpty = true;
 			this.autoHeight = true;
 			this.current = -1;
-			this.target = null;
+			this.targetIn = null;
 			this.decal = 0;
 			this.baseH = this.h;
 			let fltop = Math.floor(this.h * 0.5) - 6;
 			this.isLine = o.line !== undefined ? o.line : false;
-			this.c[2] = this.dom('div', this.css.basic + 'width:100%; left:0; height:auto; overflow:hidden; top:' + this.h + 'px');
+			this.decal = 0;
+
+			if (o.group) {
+				this.decal = o.group.decal ? o.group.decal : 0;
+				this.decal += 6;
+			}
+
+			this.useFlex = true;
+			let flexible = this.useFlex ? 'display:flex; flex-flow: row wrap;' : '';
+			this.c[2] = this.dom('div', this.css.basic + flexible + 'width:100%; left:0; height:auto; overflow:hidden; top:' + this.h + 'px'); // 
+
 			this.c[3] = this.dom('path', this.css.basic + 'position:absolute; width:10px; height:10px; left:0; top:' + fltop + 'px;', {
 				d: this.svgs.group,
-				fill: this.fontColor,
+				fill: this.colors.text,
 				stroke: 'none'
 			});
-			this.c[4] = this.dom('path', this.css.basic + 'position:absolute; width:10px; height:10px; left:4px; top:' + fltop + 'px;', {
+			this.c[4] = this.dom('path', this.css.basic + 'position:absolute; width:10px; height:10px; left:' + (4 + this.decal) + 'px; top:' + fltop + 'px;', {
 				d: this.svgs.arrow,
-				fill: this.fontColor,
+				fill: this.colors.text,
 				stroke: 'none'
 			}); // bottom line
 
@@ -3359,15 +3644,20 @@
 			s[0].height = this.h + 'px';
 			s[1].height = this.h + 'px';
 			this.c[1].name = 'group';
-			s[1].marginLeft = '10px';
+			s[1].marginLeft = 10 + this.decal + 'px';
 			s[1].lineHeight = this.h - 4;
-			s[1].color = this.fontColor;
+			s[1].color = this.colors.text;
 			s[1].fontWeight = 'bold';
-			if (this.radius !== 0) s[0].borderRadius = this.radius + 'px';
-			s[0].border = this.colors.groupBorder;
-			this.init(); //if( o.bg !== undefined ) this.setBG(o.bg);
+			if (this.radius !== 0) s[0].borderRadius = this.radius + 'px'; //if( o.border ) s[0].border = '1px solid ' + o.border;
 
-			this.setBG(this.bg);
+			/*if(this.decal){
+					s[0].boxSizing = 'border-box';
+					s[0].backgroundClip = 'border-box';
+					s[0].border = (this.decal/3)+'px solid ' + o.group.colors.background;
+			}*/
+
+			this.init();
+			this.setBG(o.bg);
 			if (o.open !== undefined) this.open(); //s[0].background = this.bg;
 		}
 
@@ -3382,12 +3672,12 @@
 		}
 
 		clearTarget() {
-			if (this.current === -1) return false; // if(!this.target) return;
+			if (this.current === -1) return false; // if(!this.targetIn ) return;
 
-			this.target.uiout();
-			this.target.reset();
+			this.targetIn.uiout();
+			this.targetIn.reset();
 			this.current = -1;
-			this.target = null;
+			this.targetIn = null;
 			this.cursor();
 			return true;
 		}
@@ -3410,7 +3700,7 @@
 				case 'content':
 					this.cursor();
 					if (Roots.isMobile && type === 'mousedown') this.getNext(e, change);
-					if (this.target) targetChange = this.target.handleEvent(e); //if( type === 'mousemove' ) change = this.styles('def');
+					if (this.targetIn) targetChange = this.targetIn.handleEvent(e); //if( type === 'mousemove' ) change = this.styles('def');
 
 					if (!Roots.lock) this.getNext(e, change);
 					break;
@@ -3439,48 +3729,38 @@
 			}
 
 			if (next !== -1) {
-				this.target = this.uis[this.current];
-				this.target.uiover();
+				this.targetIn = this.uis[this.current];
+				this.targetIn.uiover();
 			}
 		} // ----------------------
 
+		/*calcH () {
+					let lng = this.uis.length, i, u,	h=0, px=0, tmph=0;
+				for( i = 0; i < lng; i++){
+						u = this.uis[i];
+						if( !u.autoWidth ){
+									if(px===0) h += u.h+1;
+								else {
+										if(tmph<u.h) h += u.h-tmph;
+								}
+								tmph = u.h;
+									//tmph = tmph < u.h ? u.h : tmph;
+								px += u.w;
+								if( px+u.w > this.w ) px = 0;
+							}
+						else h += u.h+1;
+				}
+					return h;
+		}*/
 
-		calcH() {
-			let lng = this.uis.length,
-					i,
-					u,
-					h = 0,
-					px = 0,
-					tmph = 0;
 
-			for (i = 0; i < lng; i++) {
-				u = this.uis[i];
-
-				if (!u.autoWidth) {
-					if (px === 0) h += u.h + 1;else {
-						if (tmph < u.h) h += u.h - tmph;
-					}
-					tmph = u.h; //tmph = tmph < u.h ? u.h : tmph;
-
-					px += u.w;
-					if (px + u.w > this.w) px = 0;
-				} else h += u.h + 1;
-			}
-
-			return h;
-		}
-
-		calcUis() {
-			if (!this.isOpen) return;
-			Roots.calcUis(this.uis, this.zone, this.zone.y + this.baseH);
-		}
-
-		setBG(c) {
-			this.s[0].background = c;
+		setBG(bg) {
+			if (bg !== undefined) this.colors.background = bg;
+			this.c[0].style.background = this.colors.background;
 			let i = this.uis.length;
 
 			while (i--) {
-				this.uis[i].setBG(c);
+				this.uis[i].setBG(this.colors.background);
 			}
 		}
 
@@ -3491,6 +3771,7 @@
 				a[1].isUI = this.isUI;
 				a[1].target = this.c[2];
 				a[1].main = this.main;
+				a[1].group = this;
 			} else if (typeof arguments[1] === 'string') {
 				if (a[2] === undefined) [].push.call(a, {
 					isUI: true,
@@ -3500,15 +3781,14 @@
 					a[2].isUI = true;
 					a[2].target = this.c[2];
 					a[2].main = this.main;
+					a[2].group = this;
 				}
 			} //let n = add.apply( this, a );
 
 
 			let u = this.ADD.apply(this, a);
-			this.uis.push(u); //if( u.autoHeight ) u.parentGroup = this;
-			//if( u.isGroup ) 
+			this.uis.push(u); //this.calc()
 
-			u.group = this;
 			this.isEmpty = false;
 			return u;
 		} // remove one node
@@ -3550,26 +3830,21 @@
 			}
 		}
 
-		parentHeight(t) {
-			//if ( this.parentGroup !== null ) this.parentGroup.calc( t );
-			if (this.group !== null) this.group.calc(t);else if (this.isUI) this.main.calc(t);
-		}
-
 		open() {
 			super.open();
 			this.setSvg(this.c[4], 'd', this.svgs.arrowDown);
 			this.rSizeContent();
-			let t = this.h - this.baseH;
-			this.parentHeight(t); //console.log( this.uis );
+			this.h - this.baseH;
+			this.parentHeight();
 		}
 
 		close() {
 			super.close();
-			let t = this.h - this.baseH;
+			this.h - this.baseH;
 			this.setSvg(this.c[4], 'd', this.svgs.arrow);
 			this.h = this.baseH;
 			this.s[0].height = this.h + 'px';
-			this.parentHeight(-t); //console.log( this.uis );
+			this.parentHeight();
 		}
 
 		clear() {
@@ -3589,17 +3864,31 @@
 			this.h = this.baseH;*/
 		}
 
+		calcUis() {
+			if (!this.isOpen) this.h = this.baseH;else this.h = Roots.calcUis(this.uis, this.zone, this.zone.y + this.baseH) + this.baseH;
+			this.s[0].height = this.h + 'px'; //console.log('G', this.h)
+			//if( !this.isOpen ) return;
+			//this.h = Roots.calcUis( this.uis, this.zone, this.zone.y + this.baseH )+this.baseH;
+		}
+
+		parentHeight(t) {
+			if (this.group !== null) this.group.calc(t);else if (this.isUI) this.main.calc(t);
+		}
+
 		calc(y) {
 			if (!this.isOpen) return;
-
-			if (y !== undefined) {
-				this.h += y;
-				if (this.isUI) this.main.calc(y);
+			/*
+				if( y !== undefined ){ 
+					this.h += y;
+					if( this.isUI ) this.main.calc( y );
 			} else {
-				this.h = this.calcH() + this.baseH;
+					this.h = this.calcH() + this.baseH;
 			}
+			this.s[0].height = this.h + 'px';*/
+			// if(this.isOpen)
 
-			this.s[0].height = this.h + 'px'; //if(this.isOpen) this.calcUis();
+			if (this.isUI) this.main.calc();else this.calcUis();
+			this.s[0].height = this.h + 'px';
 		}
 
 		rSizeContent() {
@@ -3608,9 +3897,8 @@
 			while (i--) {
 				this.uis[i].setSize(this.w);
 				this.uis[i].rSize();
-			}
+			} //this.calc()
 
-			this.calc();
 		}
 
 		rSize() {
@@ -3623,41 +3911,44 @@
 		}
 
 	}
-	Group.prototype.isGroup = true;
 
 	class Joystick extends Proto {
 		constructor(o = {}) {
 			super(o);
 			this.autoWidth = false;
 			this.value = [0, 0];
+			this.minw = this.w;
+			this.diam = o.diam || this.w;
 			this.joyType = 'analogique';
 			this.model = o.mode !== undefined ? o.mode : 0;
 			this.precision = o.precision || 2;
 			this.multiplicator = o.multiplicator || 1;
 			this.pos = new V2();
 			this.tmp = new V2();
-			this.interval = null;
-			this.radius = this.w * 0.5;
-			this.distance = this.radius * 0.25;
+			this.interval = null; //this.radius = this.w * 0.5;
+			//this.distance = this.radius*0.25;
+
+			this.distance = this.diam * 0.5 * 0.25;
 			this.h = o.h || this.w + 10;
 			this.top = 0;
 			this.c[0].style.width = this.w + 'px';
 
 			if (this.c[1] !== undefined) {
 				// with title
-				this.c[1].style.width = this.w + 'px';
-				this.c[1].style.textAlign = 'center';
+				this.c[1].style.width = '100%';
+				this.c[1].style.justifyContent = 'center';
 				this.top = 10;
 				this.h += 10;
 			}
 
-			this.c[2] = this.dom('div', this.css.txt + 'text-align:center; top:' + (this.h - 20) + 'px; width:' + this.w + 'px; color:' + this.fontColor);
+			let cc = this.colors;
+			this.c[2] = this.dom('div', this.css.txt + 'justify-content:center; top:' + (this.h - 20) + 'px; width:100%; color:' + cc.text);
 			this.c[2].textContent = this.value;
 			this.c[3] = this.getJoystick(this.model);
-			this.setSvg(this.c[3], 'viewBox', '0 0 ' + this.w + ' ' + this.w);
+			this.setSvg(this.c[3], 'viewBox', '0 0 ' + this.diam + ' ' + this.diam);
 			this.setCss(this.c[3], {
-				width: this.w,
-				height: this.w,
+				width: this.diam,
+				height: this.diam,
 				left: 0,
 				top: this.top
 			});
@@ -3667,6 +3958,8 @@
 		}
 
 		mode(mode) {
+			let cc = this.colors;
+
 			switch (mode) {
 				case 0:
 					// base
@@ -3690,7 +3983,7 @@
 					} else {
 						this.setSvg(this.c[3], 'stroke', 'rgba(48,138,255,0.25)', 2); //this.setSvg( this.c[3], 'stroke', 'rgb(0,0,0,0.3)', 3 );
 
-						this.setSvg(this.c[3], 'stroke', this.colors.select, 4);
+						this.setSvg(this.c[3], 'stroke', cc.select, 4);
 						this.setSvg(this.c[3], 'fill', 'rgba(48,138,255,0.25)', 4);
 					}
 
@@ -3733,9 +4026,11 @@
 
 		mousemove(e) {
 			this.mode(1);
-			if (!this.isDown) return;
-			this.tmp.x = this.radius - (e.clientX - this.zone.x);
-			this.tmp.y = this.radius - (e.clientY - this.zone.y - this.top);
+			if (!this.isDown) return; //this.tmp.x = this.radius - ( e.clientX - this.zone.x );
+			//this.tmp.y = this.radius - ( e.clientY - this.zone.y - this.top );
+
+			this.tmp.x = this.w * 0.5 - (e.clientX - this.zone.x);
+			this.tmp.y = this.diam * 0.5 - (e.clientY - this.zone.y - this.top);
 			let distance = this.tmp.length();
 
 			if (distance > this.distance) {
@@ -3772,8 +4067,10 @@
 		}
 
 		updateSVG() {
-			let x = this.radius - -this.pos.x * this.distance;
-			let y = this.radius - -this.pos.y * this.distance;
+			//let x = this.radius - ( -this.pos.x * this.distance );
+			//let y = this.radius - ( -this.pos.y * this.distance );
+			let x = this.diam * 0.5 - -this.pos.x * this.distance;
+			let y = this.diam * 0.5 - -this.pos.y * this.distance;
 
 			if (this.model === 0) {
 				let sx = x + this.pos.x * 5 + 5;
@@ -3806,37 +4103,37 @@
 			this.model = o.stype || 0;
 			if (o.mode !== undefined) this.model = o.mode;
 			this.autoWidth = false;
-			this.buttonColor = this.colors.button;
 			this.setTypeNumber(o);
+			this.minw = this.w;
+			this.diam = o.diam || this.w;
 			this.mPI = Math.PI * 0.8;
 			this.toDeg = 180 / Math.PI;
 			this.cirRange = this.mPI * 2;
 			this.offset = new V2();
-			this.radius = this.w * 0.5; //Math.floor((this.w-20)*0.5);
-			//this.ww = this.height = this.radius * 2;
-
 			this.h = o.h || this.w + 10;
 			this.top = 0;
 			this.c[0].style.width = this.w + 'px';
 
 			if (this.c[1] !== undefined) {
-				this.c[1].style.width = this.w + 'px';
-				this.c[1].style.textAlign = 'center';
+				this.c[1].style.width = '100%';
+				this.c[1].style.justifyContent = 'center';
 				this.top = 10;
 				this.h += 10;
 			}
 
 			this.percent = 0;
 			this.cmode = 0;
-			this.c[2] = this.dom('div', this.css.txt + 'text-align:center; top:' + (this.h - 20) + 'px; width:' + this.w + 'px; color:' + this.fontColor);
+			let cc = this.colors;
+			this.c[2] = this.dom('div', this.css.txt + 'justify-content:center; top:' + (this.h - 20) + 'px; width:100%; color:' + cc.text);
 			this.c[3] = this.getKnob();
-			this.setSvg(this.c[3], 'stroke', this.fontColor, 1);
-			this.setSvg(this.c[3], 'stroke', this.fontColor, 3);
+			this.setSvg(this.c[3], 'fill', cc.button, 0);
+			this.setSvg(this.c[3], 'stroke', cc.text, 1);
+			this.setSvg(this.c[3], 'stroke', cc.text, 3);
 			this.setSvg(this.c[3], 'd', this.makeGrad(), 3);
-			this.setSvg(this.c[3], 'viewBox', '0 0 ' + this.ww + ' ' + this.ww);
+			this.setSvg(this.c[3], 'viewBox', '0 0 ' + this.diam + ' ' + this.diam);
 			this.setCss(this.c[3], {
-				width: this.w,
-				height: this.w,
+				width: this.diam,
+				height: this.diam,
 				left: 0,
 				top: this.top
 			});
@@ -3844,7 +4141,7 @@
 			if (this.model > 0) {
 				Tools.dom('path', '', {
 					d: '',
-					stroke: this.fontColor,
+					stroke: cc.text,
 					'stroke-width': 2,
 					fill: 'none',
 					'stroke-linecap': 'round'
@@ -3862,23 +4159,24 @@
 		}
 
 		mode(mode) {
+			let cc = this.colors;
 			if (this.cmode === mode) return false;
 
 			switch (mode) {
 				case 0:
 					// base
-					this.s[2].color = this.fontColor;
-					this.setSvg(this.c[3], 'fill', this.colors.button, 0); //this.setSvg( this.c[3], 'stroke','rgba(0,0,0,0.2)', 2);
+					this.s[2].color = cc.text;
+					this.setSvg(this.c[3], 'fill', cc.button, 0); //this.setSvg( this.c[3], 'stroke','rgba(255,0,0,0.2)', 2);
 
-					this.setSvg(this.c[3], 'stroke', this.fontColor, 1);
+					this.setSvg(this.c[3], 'stroke', cc.text, 1);
 					break;
 
 				case 1:
-					// over
-					this.s[2].color = this.colorPlus;
-					this.setSvg(this.c[3], 'fill', this.colors.select, 0); //this.setSvg( this.c[3], 'stroke','rgba(0,0,0,0.6)', 2);
+					// down
+					this.s[2].color = cc.textOver;
+					this.setSvg(this.c[3], 'fill', cc.select, 0); //this.setSvg( this.c[3], 'stroke','rgba(0,0,0,0.6)', 2);
 
-					this.setSvg(this.c[3], 'stroke', this.colorPlus, 1);
+					this.setSvg(this.c[3], 'stroke', cc.textOver, 1);
 					break;
 			}
 
@@ -3910,11 +4208,12 @@
 		}
 
 		mousemove(e) {
-			//this.mode(1);
 			if (!this.isDown) return;
-			let off = this.offset;
-			off.x = this.radius - (e.clientX - this.zone.x);
-			off.y = this.radius - (e.clientY - this.zone.y - this.top);
+			let off = this.offset; //off.x = this.radius - ( e.clientX - this.zone.x );
+			//off.y = this.radius - ( e.clientY - this.zone.y - this.top );
+
+			off.x = this.w * 0.5 - (e.clientX - this.zone.x);
+			off.y = this.diam * 0.5 - (e.clientY - this.zone.y - this.top);
 			this.r = -Math.atan2(off.x, off.y);
 			if (this.oldr !== null) this.r = Math.abs(this.r - this.oldr) > Math.PI ? this.oldr : this.r;
 			this.r = this.r > this.mPI ? this.mPI : this.r;
@@ -4006,7 +4305,7 @@
 				let y2 = -36 * cos + 64;
 				let big = ea <= Math.PI - this.mPI ? 0 : 1;
 				this.setSvg(this.c[3], 'd', 'M ' + x1 + ',' + y1 + ' A ' + 36 + ',' + 36 + ' 1 ' + big + ' 1 ' + x2 + ',' + y2, 4);
-				let color = Tools.pack(Tools.lerpColor(Tools.unpack(Tools.ColorLuma(this.fontColor, -0.75)), Tools.unpack(this.fontColor), this.percent));
+				let color = Tools.pack(Tools.lerpColor(Tools.unpack(Tools.ColorLuma(this.colors.text, -0.75)), Tools.unpack(this.colors.text), this.percent));
 				this.setSvg(this.c[3], 'stroke', color, 4);
 			}
 
@@ -4021,29 +4320,35 @@
 
 			this.path = o.path || '';
 			this.format = o.format || '';
-			this.imageSize = o.imageSize || [20, 20];
 			this.isWithImage = this.path !== '' ? true : false;
 			this.preLoadComplete = false;
 			this.tmpImage = {};
 			this.tmpUrl = []; //this.autoHeight = false;
 
-			let align = o.align || 'center';
+			let align = o.align || 'center'; // scroll size
+
+			let ss = o.scrollSize || 10;
+			this.ss = ss + 1;
 			this.sMode = 0;
 			this.tMode = 0;
 			this.listOnly = o.listOnly || false;
+			this.staticTop = o.staticTop || false;
+			this.isSelectable = this.listOnly;
+			if (o.select !== undefined) o.selectable = o.select;
+			if (o.selectable !== undefined) this.isSelectable = o.selectable;
 			if (this.txt === '') this.p = 0;
-			this.buttonColor = o.bColor || this.colors.button;
-			this.itemBg = o.itemBg || this.colors.itemBg;
 			let fltop = Math.floor(this.h * 0.5) - 5;
-			this.c[2] = this.dom('div', this.css.basic + 'top:0; display:none;');
-			this.c[3] = this.dom('div', this.css.txt + 'text-align:' + align + '; line-height:' + (this.h - 4) + 'px; top:1px; background:' + this.buttonColor + '; height:' + (this.h - 2) + 'px; border-radius:' + this.radius + 'px;');
+			let cc = this.colors;
+			this.c[2] = this.dom('div', this.css.basic + 'top:0; display:none; border-radius:' + this.radius + 'px;');
+			this.c[3] = this.dom('div', this.css.item + 'position:absolute; text-align:' + align + '; line-height:' + (this.h - 4) + 'px; top:1px; background:' + cc.button + '; height:' + (this.h - 2) + 'px; border:1px solid ' + cc.border + '; border-radius:' + this.radius + 'px;');
 			this.c[4] = this.dom('path', this.css.basic + 'position:absolute; width:10px; height:10px; top:' + fltop + 'px;', {
 				d: this.svgs.arrow,
-				fill: this.fontColor,
+				fill: cc.text,
 				stroke: 'none'
 			});
-			this.scroller = this.dom('div', this.css.basic + 'right:5px; width:10px; background:#666; display:none;');
-			this.c[3].style.color = this.fontColor;
+			this.scrollerBack = this.dom('div', this.css.basic + 'right:0px; width:' + ss + 'px; background:' + cc.back + '; display:none;');
+			this.scroller = this.dom('div', this.css.basic + 'right:' + (ss - ss * 0.25) * 0.5 + 'px; width:' + ss * 0.25 + 'px; background:' + cc.text + '; display:none; ');
+			this.c[3].style.color = cc.text;
 			this.list = [];
 			this.refObject = null;
 
@@ -4084,10 +4389,11 @@
 				this.c[2].style.top = this.baseH + 'px';
 			}
 
-			this.listIn = this.dom('div', this.css.basic + 'left:0; top:0; width:100%; background:rgba(0,0,0,0.2);');
+			this.listIn = this.dom('div', this.css.basic + 'left:0; top:0; width:100%; background:none;');
 			this.listIn.name = 'list';
 			this.topList = 0;
 			this.c[2].appendChild(this.listIn);
+			this.c[2].appendChild(this.scrollerBack);
 			this.c[2].appendChild(this.scroller);
 
 			if (o.value !== undefined) {
@@ -4107,7 +4413,8 @@
 			}
 
 			this.miniCanvas = o.miniCanvas || false;
-			this.canvasBg = o.canvasBg || 'rgba(0,0,0,0)'; // dragout function
+			this.canvasBg = o.canvasBg || 'rgba(0,0,0,0)';
+			this.imageSize = o.imageSize || [20, 20]; // dragout function
 
 			this.drag = o.drag || false;
 			this.dragout = o.dragout || false;
@@ -4170,13 +4477,13 @@
 
 			if (this.up && this.isOpen) {
 				if (l.y > this.h - this.baseH) return 'title';else {
-					if (this.scroll && l.x > this.sa + this.sb - 20) return 'scroll';
+					if (this.scroll && l.x > this.sa + this.sb - this.ss) return 'scroll';
 					if (l.x > this.sa) return this.testItems(l.y - this.baseH);
 				}
 			} else {
 				if (l.y < this.baseH + 2) return 'title';else {
 					if (this.isOpen) {
-						if (this.scroll && l.x > this.sa + this.sb - 20) return 'scroll';
+						if (this.scroll && l.x > this.sa + this.sb - this.ss) return 'scroll';
 						if (l.x > this.sa) return this.testItems(l.y - this.baseH);
 					}
 				}
@@ -4199,9 +4506,9 @@
 
 				if (y >= a && y <= b) {
 					name = 'item' + i;
-					this.unSelected();
+					this.modeItem(0);
 					this.current = item;
-					this.selected();
+					this.modeItem(1);
 					return name;
 				}
 			}
@@ -4209,17 +4516,53 @@
 			return name;
 		}
 
-		unSelected() {
-			if (this.current) {
-				this.current.style.background = 'rgba(0,0,0,0.2)';
-				this.current.style.color = this.fontColor;
-				this.current = null;
+		modeItem(mode) {
+			if (!this.current) return;
+			if (this.current.select && mode === 0) mode = 2;
+			let cc = this.colors;
+
+			switch (mode) {
+				case 0:
+					// base
+					this.current.style.background = cc.back;
+					this.current.style.color = cc.text;
+					break;
+
+				case 1:
+					// over
+					this.current.style.background = cc.over;
+					this.current.style.color = cc.textOver;
+					break;
+
+				case 2:
+					// edit / down
+					this.current.style.background = cc.select;
+					this.current.style.color = cc.textSelect;
+					break;
 			}
 		}
 
+		unSelected() {
+			if (!this.current) return;
+			this.modeItem(0);
+			this.current = null;
+		}
+
 		selected() {
-			this.current.style.background = this.colors.select;
-			this.current.style.color = '#FFF';
+			if (!this.current) return;
+			this.resetItems();
+			this.modeItem(2);
+			this.current.select = true;
+		}
+
+		resetItems() {
+			let i = this.items.length;
+
+			while (i--) {
+				this.items[i].select = false;
+				this.items[i].style.background = this.colors.back;
+				this.items[i].style.color = this.colors.text;
+			}
 		} // ----------------------
 		//	 EVENTS
 		// ----------------------
@@ -4243,8 +4586,10 @@
 					if (!this.isOpen) this.open();else this.close();
 				}
 			} else {
+				// is item
 				if (this.current) {
-					this.value = this.list[this.current.id]; //this.value = this.refObject !== null ? this.refObject[this.list[this.current.id]]	: this.list[this.current.id]
+					this.value = this.list[this.current.id];
+					if (this.isSelectable) this.selected(); //this.value = this.refObject !== null ? this.refObject[this.list[this.current.id]]	: this.list[this.current.id]
 					//this.value = this.current.textContent;
 
 					this.send(this.refObject !== null ? this.refObject[this.list[this.current.id]] : this.value);
@@ -4308,21 +4653,23 @@
 
 		modeScroll(mode) {
 			if (mode === this.sMode) return;
+			let s = this.scroller.style;
+			let cc = this.colors;
 
 			switch (mode) {
 				case 0:
 					// base
-					this.scroller.style.background = this.buttonColor;
+					s.background = cc.text;
 					break;
 
 				case 1:
 					// over
-					this.scroller.style.background = this.colors.select;
+					s.background = cc.select;
 					break;
 
 				case 2:
 					// edit / down
-					this.scroller.style.background = this.colors.down;
+					s.background = cc.select;
 					break;
 			}
 
@@ -4332,24 +4679,25 @@
 		modeTitle(mode) {
 			if (mode === this.tMode) return;
 			let s = this.s;
+			let cc = this.colors;
 
 			switch (mode) {
 				case 0:
 					// base
-					s[3].color = this.fontColor;
-					s[3].background = this.buttonColor;
+					s[3].color = cc.text;
+					s[3].background = cc.button;
 					break;
 
 				case 1:
 					// over
-					s[3].color = '#FFF';
-					s[3].background = this.colors.select;
+					s[3].color = cc.textOver;
+					s[3].background = cc.overoff;
 					break;
 
 				case 2:
 					// edit / down
-					s[3].color = this.fontColor;
-					s[3].background = this.colors.down;
+					s[3].color = cc.textSelect;
+					s[3].background = cc.overoff;
 					break;
 			}
 
@@ -4374,34 +4722,51 @@
 			this.sh = this.maxHeight * this.ratio;
 			this.range = this.maxHeight - this.sh;
 			this.c[2].style.height = this.maxHeight + 'px';
+			this.scrollerBack.style.height = this.maxHeight + 'px';
 			this.scroller.style.height = this.sh + 'px';
 
 			if (this.max > this.maxHeight) {
-				this.ww = this.sb - 20;
+				this.ww = this.sb - this.ss;
 				this.scroll = true;
+			}
+
+			if (this.miniCanvas) {
+				this.tmpCanvas = document.createElement('canvas');
+				this.tmpCanvas.width = this.imageSize[0];
+				this.tmpCanvas.height = this.imageSize[1];
+				this.tmpCtx = this.tmpCanvas.getContext("2d");
+				this.tmpCtx.fillStyle = this.canvasBg;
+				this.tmpCtx.fillRect(0, 0, this.imageSize[0], this.imageSize[1]);
 			}
 
 			let item, n; //, l = this.sb;
 
 			for (let i = 0; i < this.length; i++) {
 				n = this.list[i];
-				item = this.dom('div', this.css.item + 'width:' + this.ww + 'px; height:' + this.itemHeight + 'px; line-height:' + (this.itemHeight - 5) + 'px; color:' + this.fontColor + '; background:' + this.itemBg + ';');
+				item = this.dom('div', this.css.item + 'width:' + this.ww + 'px; height:' + this.itemHeight + 'px; line-height:' + (this.itemHeight - 5) + 'px; color:' + this.colors.text + '; background:' + this.colors.back + ';');
 				item.name = 'item' + i;
 				item.id = i;
+				item.select = false;
 				item.posy = (this.itemHeight + 1) * i;
 				this.listIn.appendChild(item);
-				this.items.push(item); //if( this.isWithImage ) item.appendChild( this.tmpImage[n] );
+				this.items.push(item);
+				if (n === this.value) this.current = item; //if( this.isWithImage ) item.appendChild( this.tmpImage[n] );
 
 				if (!this.isWithImage) item.textContent = n;
 
 				if (this.miniCanvas) {
-					let c = document.createElement('canvas');
-					c.width = this.imageSize[0];
-					c.height = this.imageSize[1];
-					let ctx = c.getContext("2d");
-					ctx.fillStyle = this.canvasBg;
-					ctx.fillRect(0, 0, this.imageSize[0], this.imageSize[1]);
-					c.style.cssText = 'pointer-events:none; display:inline-block; float: left; margin-left:-5px;margin-right:5px; ';
+					let c = new Image();
+					c.src = this.tmpCanvas.toDataURL();
+					/*let c = document.createElement('canvas')
+						c.width = this.imageSize[0]
+					c.height = this.imageSize[1]
+					let ctx = c.getContext("2d")
+					ctx.fillStyle = this.canvasBg
+					ctx.fillRect(0, 0, this.imageSize[0], this.imageSize[1])*/
+
+					c.style.cssText = 'position:relative; pointer-events:none; display:inline-block; float:left; margin-left:0px; margin-right:5px; top:2px'; //c.style.cssText = 'display:flex; align-content: flex-start; flex-wrap: wrap;'
+					//item.style.float = 'right'
+
 					item.appendChild(c);
 					this.tmpImage[n] = c;
 				}
@@ -4428,12 +4793,16 @@
 			}
 
 			this.setTopItem();
+			if (this.isSelectable) this.selected();
 		}
 
 		drawImage(name, image, x, y, w, h) {
-			let c = this.tmpImage[name];
-			let ctx = c.getContext("2d");
-			ctx.drawImage(image, x, y, w, h, 0, 0, this.imageSize[0], this.imageSize[1]);
+			this.tmpCtx.clearRect(0, 0, this.imageSize[0], this.imageSize[1]);
+			this.tmpCtx.drawImage(image, x, y, w, h, 0, 0, this.imageSize[0], this.imageSize[1]);
+			this.tmpImage[name].src = this.tmpCanvas.toDataURL();
+			/*let c = this.tmpImage[name]
+			let ctx = c.getContext("2d")
+			ctx.drawImage(image, x, y, w, h, 0, 0, this.imageSize[0], this.imageSize[1])*/
 		}
 
 		addImages() {
@@ -4452,6 +4821,8 @@
 		}
 
 		setTopItem() {
+			if (this.staticTop) return;
+
 			if (this.isWithImage) {
 				if (!this.preLoadComplete) return;
 
@@ -4473,9 +4844,11 @@
 					this.canvas = document.createElement('canvas');
 					this.canvas.width = this.imageSize[0];
 					this.canvas.height = this.imageSize[1];
-					let h = (this.h - this.imageSize[1]) * 0.5;
-					this.canvas.style.cssText = 'position:absolute; top:' + h + 'px; left:5px;';
+					(this.h - this.imageSize[1]) * 0.5;
+					this.canvas.style.cssText = 'position:relative; pointer-events:none; display:inline-block; float:left; margin-left:0px; margin-right:5px; top:2px'; //this.canvas.style.cssText = 'position:absolute; top:'+h+'px; left:5px;'
+
 					this.ctx = this.canvas.getContext("2d");
+					this.c[3].style.textAlign = 'left';
 					this.c[3].appendChild(this.canvas);
 				}
 
@@ -4507,8 +4880,10 @@
 				this.topList = 0;
 				this.h = this.baseH + 5 + this.max;
 				this.scroller.style.display = 'none';
+				this.scrollerBack.style.display = 'none';
 			} else {
 				this.scroller.style.display = 'block';
+				this.scrollerBack.style.display = 'block';
 			}
 
 			this.s[0].height = this.h + 'px';
@@ -4563,7 +4938,7 @@
 			s[3].left = d + 'px';
 			s[4].left = d + w - 17 + 'px';
 			this.ww = w;
-			if (this.max > this.maxHeight) this.ww = w - 20;
+			if (this.max > this.maxHeight) this.ww = w - this.ss;
 			if (this.isOpen) this.rSizeContent();
 		}
 
@@ -4615,25 +4990,29 @@
 				y: 0,
 				d: 0,
 				v: 0
-			}; // bg
+			};
+			let cc = this.colors; // bg
 
-			this.c[2] = this.dom('div', this.css.basic + ' background:' + this.colors.select + '; top:4px; width:0px; height:' + (this.h - 8) + 'px;');
+			this.c[2] = this.dom('div', this.css.basic + ' background:' + cc.select + '; top:4px; width:0px; height:' + (this.h - 8) + 'px;');
 			this.cMode = [];
 			let i = this.lng;
 
 			while (i--) {
 				if (this.isAngle) this.value[i] = (this.value[i] * 180 / Math.PI).toFixed(this.precision);
-				this.c[3 + i] = this.dom('div', this.css.txtselect + ' height:' + (this.h - 4) + 'px; background:' + this.colors.inputBg + '; borderColor:' + this.colors.inputBorder + '; border-radius:' + this.radius + 'px;');
+				this.c[3 + i] = this.dom('div', this.css.txtselect + ' height:' + (this.h - 4) + 'px; color:' + cc.text + '; background:' + cc.back + '; borderColor:' + cc.border + '; border-radius:' + this.radius + 'px;');
 				if (o.center) this.c[2 + i].style.textAlign = 'center';
 				this.c[3 + i].textContent = this.value[i];
-				this.c[3 + i].style.color = this.fontColor;
+				this.c[3 + i].style.color = this.colors.text;
 				this.c[3 + i].isNum = true;
 				this.cMode[i] = 0;
-			} // cursor
+			} // selection
 
 
-			this.cursorId = 3 + this.lng;
-			this.c[this.cursorId] = this.dom('div', this.css.basic + 'top:4px; height:' + (this.h - 8) + 'px; width:0px; background:' + this.fontColor + ';');
+			this.selectId = 3 + this.lng;
+			this.c[this.selectId] = this.dom('div', this.css.txtselect + 'position:absolute; top:4px; height:' + (this.h - 8) + 'px; padding:0px 0px; width:0px; color:' + cc.textSelect + '; background:' + cc.select + '; border:none; border-radius:0px;'); // cursor
+
+			this.cursorId = 4 + this.lng;
+			this.c[this.cursorId] = this.dom('div', this.css.basic + 'top:4px; height:' + (this.h - 8) + 'px; width:0px; background:' + cc.text + ';');
 			this.init();
 		}
 
@@ -4826,19 +5205,23 @@
 		// ----------------------
 
 
-		select(c, e, w) {
+		select(c, e, w, t) {
 			let s = this.s;
 			let d = this.current !== -1 ? this.tmp[this.current][0] + 5 : 0;
 			s[this.cursorId].width = '1px';
-			s[this.cursorId].left = d + c + 'px';
-			s[2].left = d + e + 'px';
-			s[2].width = w + 'px';
+			s[this.cursorId].left = d + c + 'px'; //s[2].left = ( d + e ) + 'px';
+			//s[2].width = w + 'px';
+
+			s[this.selectId].left = d + e + 'px';
+			s[this.selectId].width = w + 'px';
+			this.c[this.selectId].innerHTML = t;
 		}
 
 		unselect() {
 			let s = this.s;
 			if (!s) return;
-			s[2].width = 0 + 'px';
+			this.c[this.selectId].innerHTML = '';
+			s[this.selectId].width = 0 + 'px';
 			s[this.cursorId].width = 0 + 'px';
 		}
 
@@ -4888,22 +5271,22 @@
 			super(o);
 			this.setTypeNumber(o);
 			this.model = o.stype || 0;
-			if (o.mode !== undefined) this.model = o.mode;
-			this.buttonColor = o.bColor || this.colors.button;
-			this.defaultBorderColor = this.colors.hide;
+			if (o.mode !== undefined) this.model = o.mode; //this.defaultBorderColor = this.colors.hide;
+
 			this.isDown = false;
 			this.isOver = false;
 			this.allway = o.allway || false;
 			this.isDeg = o.isDeg || false;
 			this.isCyclic = o.cyclic || false;
-			this.firstImput = false; //this.c[2] = this.dom( 'div', this.css.txtselect + 'letter-spacing:-1px; text-align:right; width:47px; border:1px dashed '+this.defaultBorderColor+'; color:'+ this.fontColor );
-			//this.c[2] = this.dom( 'div', this.css.txtselect + 'text-align:right; width:47px; border:1px dashed '+this.defaultBorderColor+'; color:'+ this.fontColor );
+			this.firstImput = false;
+			let cc = this.colors; //this.c[2] = this.dom( 'div', this.css.txtselect + 'letter-spacing:-1px; text-align:right; width:47px; border:1px dashed '+this.defaultBorderColor+'; color:'+ this.colors.text );
+			//this.c[2] = this.dom( 'div', this.css.txtselect + 'text-align:right; width:47px; border:1px dashed '+this.defaultBorderColor+'; color:'+ this.colors.text );
 
-			this.c[2] = this.dom('div', this.css.txtselect + 'border:none; width:47px; color:' + this.fontColor); //this.c[2] = this.dom( 'div', this.css.txtselect + 'letter-spacing:-1px; text-align:right; width:47px; color:'+ this.fontColor );
+			this.c[2] = this.dom('div', this.css.txtselect + 'border:none; background:none; width:47px; color:' + cc.text + ';'); //this.c[2] = this.dom( 'div', this.css.txtselect + 'letter-spacing:-1px; text-align:right; width:47px; color:'+ this.colors.text );
 
 			this.c[3] = this.dom('div', this.css.basic + ' top:0; height:' + this.h + 'px;');
-			this.c[4] = this.dom('div', this.css.basic + 'background:' + this.colors.scrollback + '; top:2px; height:' + (this.h - 4) + 'px;');
-			this.c[5] = this.dom('div', this.css.basic + 'left:4px; top:5px; height:' + (this.h - 10) + 'px; background:' + this.fontColor + ';');
+			this.c[4] = this.dom('div', this.css.basic + 'background:' + cc.back + '; top:2px; height:' + (this.h - 4) + 'px;');
+			this.c[5] = this.dom('div', this.css.basic + 'left:4px; top:5px; height:' + (this.h - 10) + 'px; background:' + cc.text + ';');
 			this.c[2].isNum = true; //this.c[2].style.height = (this.h-4) + 'px';
 			//this.c[2].style.lineHeight = (this.h-8) + 'px';
 
@@ -4931,7 +5314,7 @@
 				this.c[5].style.borderRadius = h1 * 0.5 + 'px';
 				this.c[5].style.height = h1 + 'px';
 				this.c[5].style.top = this.h * 0.5 - h1 * 0.5 + 'px';
-				this.c[6] = this.dom('div', this.css.basic + 'border-radius:' + ra + 'px; margin-left:' + -ww * 0.5 + 'px; border:1px solid ' + this.colors.border + '; background:' + this.buttonColor + '; left:4px; top:2px; height:' + (this.h - 4) + 'px; width:' + ww + 'px;');
+				this.c[6] = this.dom('div', this.css.basic + 'border-radius:' + ra + 'px; margin-left:' + -ww * 0.5 + 'px; border:1px solid ' + cc.border + '; background:' + cc.button + '; left:4px; top:2px; height:' + (this.h - 4) + 'px; width:' + ww + 'px;');
 			}
 
 			this.init();
@@ -5035,29 +5418,30 @@
 
 		mode(mode) {
 			let s = this.s;
+			let cc = this.colors;
 
 			switch (mode) {
 				case 0:
 					// base
 					// s[2].border = '1px solid ' + this.colors.hide;
-					s[2].color = this.fontColor;
-					s[4].background = this.colors.scrollback;
-					s[5].background = this.fontColor;
+					s[2].color = cc.text;
+					s[4].background = cc.back;
+					s[5].background = cc.text;
 					break;
 
 				case 1:
 					// scroll over
 					//s[2].border = '1px dashed ' + this.colors.hide;
-					s[2].color = this.colorPlus;
-					s[4].background = this.colors.scrollbackover;
-					s[5].background = this.colorPlus;
+					s[2].color = cc.textOver;
+					s[4].background = cc.back;
+					s[5].background = cc.textOver;
 					break;
 
 				/* case 2: 
 						 s[2].border = '1px solid ' + this.colors.borderSelect;
 				 break;
 				 case 3: 
-						 s[2].border = '1px dashed ' + this.fontColor;//this.colors.borderSelect;
+						 s[2].border = '1px dashed ' + this.colors.text;//this.colors.borderSelect;
 				 break;
 				 case 4: 
 						 s[2].border = '1px dashed ' + this.colors.hide;
@@ -5103,15 +5487,17 @@
 			this.placeHolder = o.placeHolder || '';
 			this.allway = o.allway || false;
 			this.editable = o.edit !== undefined ? o.edit : true;
-			this.isDown = false; // bg
+			this.isDown = false;
+			let cc = this.colors; // text
 
-			this.c[2] = this.dom('div', this.css.basic + ' background:' + this.colors.select + '; top:4px; width:0px; height:' + (this.h - 8) + 'px;');
-			this.c[3] = this.dom('div', this.css.txtselect + 'height:' + (this.h - 4) + 'px; background:' + this.colors.inputBg + '; borderColor:' + this.colors.inputBorder + '; border-radius:' + this.radius + 'px;');
-			this.c[3].textContent = this.value; // cursor
+			this.c[2] = this.dom('div', this.css.txtselect + 'height:' + (this.h - 4) + 'px; color:' + cc.text + '; background:' + cc.back + '; borderColor:' + cc.border + '; border-radius:' + this.radius + 'px;');
+			this.c[2].textContent = this.value; // selection
 
-			this.c[4] = this.dom('div', this.css.basic + 'top:4px; height:' + (this.h - 8) + 'px; width:0px; background:' + this.fontColor + ';'); // fake
+			this.c[3] = this.dom('div', this.css.txtselect + 'position:absolute; top:4px; height:' + (this.h - 8) + 'px; padding:0px 0px; width:0px; color:' + cc.textSelect + '; background:' + cc.select + '; border:none; border-radius:0px;'); // cursor
 
-			this.c[5] = this.dom('div', this.css.txtselect + 'height:' + (this.h - 4) + 'px; justify-content: center; font-style: italic; color:' + this.colors.inputHolder + ';');
+			this.c[4] = this.dom('div', this.css.basic + 'top:4px; height:' + (this.h - 8) + 'px; width:0px; background:' + cc.text + ';'); // fake
+
+			this.c[5] = this.dom('div', this.css.txtselect + 'height:' + (this.h - 4) + 'px; justify-content: center; font-style: italic; color:' + cc.border + ';');
 			if (this.value === '') this.c[5].textContent = this.placeHolder;
 			this.init();
 		}
@@ -5143,7 +5529,7 @@
 
 			if (!this.isDown) {
 				this.isDown = true;
-				if (name === 'text') this.setInput(this.c[3]);
+				if (name === 'text') this.setInput(this.c[2]);
 				return this.mousemove(e);
 			}
 
@@ -5164,16 +5550,9 @@
 		}
 
 		update() {
-			this.c[3].textContent = this.value;
+			this.c[2].textContent = this.value;
 		} // ----------------------
 
-
-		render(c, e, s) {
-			this.s[4].width = '1px';
-			this.s[4].left = this.sa + c + 5 + 'px';
-			this.s[2].left = this.sa + e + 5 + 'px';
-			this.s[2].width = s + 'px';
-		}
 
 		reset() {
 			this.cursor();
@@ -5182,25 +5561,27 @@
 		// ----------------------
 
 
-		select(c, e, w) {
+		select(c, e, w, t) {
 			let s = this.s;
 			let d = this.sa + 5;
 			s[4].width = '1px';
-			s[4].left = d + c + 'px';
-			s[2].left = d + e + 'px';
-			s[2].width = w + 'px';
+			s[4].left = d + e + 'px';
+			s[3].left = d + e + 'px';
+			s[3].width = w + 'px';
+			this.c[3].innerHTML = t;
 		}
 
 		unselect() {
 			let s = this.s;
 			if (!s) return;
-			s[2].width = 0 + 'px';
+			s[3].width = 0 + 'px';
+			this.c[3].innerHTML = 't';
 			s[4].width = 0 + 'px';
 		}
 
 		validate(force) {
 			if (this.allway) force = true;
-			this.value = this.c[3].textContent;
+			this.value = this.c[2].textContent;
 			if (this.value !== '') this.c[5].textContent = '';else this.c[5].textContent = this.placeHolder;
 			if (!force) return;
 			this.send();
@@ -5212,8 +5593,8 @@
 		rSize() {
 			super.rSize();
 			let s = this.s;
-			s[3].left = this.sa + 'px';
-			s[3].width = this.sb + 'px';
+			s[2].left = this.sa + 'px';
+			s[2].width = this.sb + 'px';
 			s[5].left = this.sa + 'px';
 			s[5].width = this.sb + 'px';
 		}
@@ -5224,7 +5605,7 @@
 		constructor(o = {}) {
 			super(o);
 			let prefix = o.prefix || '';
-			this.c[2] = this.dom('div', this.css.txt + 'text-align:right; width:60px; line-height:' + (this.h - 8) + 'px; color:' + this.fontColor);
+			this.c[2] = this.dom('div', this.css.txt + 'justify-content:right; width:60px; line-height:' + (this.h - 8) + 'px; color:' + this.colors.text);
 
 			if (this.h === 31) {
 				this.s[0].height = this.h + 'px';
@@ -5233,7 +5614,8 @@
 			}
 
 			let s = this.s;
-			s[1].textAlign = o.align || 'left';
+			s[1].justifyContent = o.align || 'left'; //s[1].textAlign = o.align || 'left';
+
 			s[1].fontWeight = o.fontWeight || 'bold';
 			this.c[1].textContent = this.txt.substring(0, 1).toUpperCase() + this.txt.substring(1).replace("-", " ");
 			this.c[2].textContent = prefix;
@@ -5265,12 +5647,8 @@
 
 			this.onActif = o.onActif || function () {};
 
-			this.buttonColor = o.bColor || this.colors.button;
-			this.buttonOver = o.bOver || this.colors.over;
-			this.buttonDown = o.bDown || this.colors.select;
-			this.buttonAction = o.bAction || this.colors.action;
 			o.prefix || '';
-			this.c[2] = this.dom('div', this.css.txt + this.css.button + ' top:1px; background:' + this.buttonColor + '; height:' + (this.h - 2) + 'px; border:' + this.colors.buttonBorder + '; border-radius:15px; width:30px; left:10px;');
+			this.c[2] = this.dom('div', this.css.txt + this.css.button + ' top:1px; background:' + this.colors.button + '; height:' + (this.h - 2) + 'px; border:' + this.colors.buttonBorder + '; border-radius:15px; width:30px; left:10px;');
 			this.c[2].style.color = this.fontColor;
 			this.c[3] = this.dom('div', this.css.txtselect + 'height:' + (this.h - 4) + 'px; background:' + this.colors.inputBg + '; borderColor:' + this.colors.inputBorder + '; border-radius:' + this.radius + 'px;');
 			this.c[3].textContent = this.value;
@@ -5349,6 +5727,7 @@
 
 		mode(n) {
 			let change = false;
+			let cc = this.colors;
 
 			if (this.stat !== n) {
 				if (n === 1) this.isActif = false;
@@ -5364,33 +5743,30 @@
 				}
 
 				if (n === 2 && this.isActif) n = 4;
+				this.stat = n;
 
 				switch (n) {
 					case 1:
-						this.stat = 1;
-						this.s[2].color = this.fontColor;
-						this.s[2].background = this.buttonColor;
+						this.s[2].color = cc.text;
+						this.s[2].background = cc.button;
 						break;
 					// base
 
 					case 2:
-						this.stat = 2;
-						this.s[2].color = this.fontSelect;
-						this.s[2].background = this.buttonOver;
+						this.s[2].color = cc.textOver;
+						this.s[2].background = cc.over;
 						break;
 					// over
 
 					case 3:
-						this.stat = 3;
-						this.s[2].color = this.fontSelect;
-						this.s[2].background = this.buttonDown;
+						this.s[2].color = cc.textSelect;
+						this.s[2].background = cc.select;
 						break;
 					// down
 
 					case 4:
-						this.stat = 4;
-						this.s[2].color = this.fontSelect;
-						this.s[2].background = this.buttonAction;
+						this.s[2].color = cc.textSelect;
+						this.s[2].background = cc.action;
 						break;
 					// actif
 				}
@@ -5421,182 +5797,20 @@
 
 	}
 
-	class Selector extends Proto {
+	//import { Proto } from '../core/Proto.js';
+	class Selector extends Button {
 		constructor(o = {}) {
+			if (o.selectable === undefined) o.selectable = true;
 			super(o);
-			this.values = o.values;
-			if (typeof this.values === 'string') this.values = [this.values];
-			this.value = o.value || null; //this.values[0];
-
-			this.isSelectable = true;
-			if (o.selectable !== undefined) this.isSelectable = o.selectable; //this.selected = null;
-
-			this.isDown = false;
-			this.buttonColor = o.bColor || this.colors.button;
-			this.buttonOver = o.bOver || this.colors.over;
-			this.buttonDown = o.bDown || this.colors.select;
-			this.lng = this.values.length;
-			this.tmp = [];
-			this.stat = [];
-			let sel;
-
-			for (let i = 0; i < this.lng; i++) {
-				sel = false;
-				if (this.values[i] === this.value && this.isSelectable) sel = true;
-				this.c[i + 2] = this.dom('div', this.css.txt + this.css.button + ' top:1px; height:' + (this.h - 2) + 'px; border:' + this.colors.buttonBorder + '; border-radius:' + this.radius + 'px;');
-				this.c[i + 2].style.background = sel ? this.buttonDown : this.buttonColor;
-				this.c[i + 2].style.color = sel ? this.fontSelect : this.fontColor;
-				this.c[i + 2].innerHTML = this.values[i];
-				this.stat[i] = sel ? 3 : 1;
-			}
-
-			this.init();
-		}
-
-		testZone(e) {
-			let l = this.local;
-			if (l.x === -1 && l.y === -1) return '';
-			let i = this.lng;
-			let t = this.tmp;
-
-			while (i--) {
-				if (l.x > t[i][0] && l.x < t[i][2]) return i;
-			}
-
-			return -1;
-		} // ----------------------
-		//	 EVENTS
-		// ----------------------
-
-
-		mouseup(e) {
-			if (this.isDown) {
-				//this.value = false;
-				this.isDown = false; //this.send();
-
-				return this.mousemove(e);
-			}
-
-			return false;
-		}
-
-		mousedown(e) {
-			//let name = this.testZone( e );
-			// if( !name ) return false;
-			let id = this.testZone(e);
-			if (id < 0) return false;
-			this.isDown = true; //this.value = this.values[ name-2 ];
-
-			this.value = this.values[id];
-			this.send();
-			return this.mousemove(e); // true;
-		}
-
-		mousemove(e) {
-			let up = false;
-			let id = this.testZone(e);
-
-			if (id !== -1) {
-				this.cursor('pointer');
-				up = this.modes(this.isDown ? 3 : 2, id);
-			} else {
-				up = this.reset();
-			}
-
-			return up;
-		} // ----------------------
-		//	 MODE
-		// ----------------------
-
-
-		modes(n, id) {
-			let v,
-					r = false;
-			let i = this.lng;
-
-			while (i--) {
-				if (i === id) v = this.mode(n, i);else {
-					if (this.isSelectable) {
-						if (this.values[i] === this.value) v = this.mode(3, i);else v = this.mode(1, i);
-					} else v = this.mode(1, i);
-				}
-				if (v) r = true;
-			}
-
-			return r;
-		}
-
-		mode(n, id) {
-			let change = false;
-			let i = id + 2;
-
-			if (this.stat[id] !== n) {
-				switch (n) {
-					case 1:
-						this.stat[id] = 1;
-						this.s[i].color = this.fontColor;
-						this.s[i].background = this.buttonColor;
-						break;
-
-					case 2:
-						this.stat[id] = 2;
-						this.s[i].color = this.fontSelect;
-						this.s[i].background = this.buttonOver;
-						break;
-
-					case 3:
-						this.stat[id] = 3;
-						this.s[i].color = this.fontSelect;
-						this.s[i].background = this.buttonDown;
-						break;
-				}
-
-				change = true;
-			}
-
-			return change;
-		} // ----------------------
-
-
-		reset() {
-			this.cursor();
-			return this.modes(1, -1);
-		}
-
-		label(string, n) {
-			n = n || 2;
-			this.c[n].textContent = string;
-		}
-
-		icon(string, y, n) {
-			n = n || 2;
-			this.s[n].padding = (y || 0) + 'px 0px';
-			this.c[n].innerHTML = string;
-		}
-
-		rSize() {
-			super.rSize();
-			let s = this.s;
-			let w = this.sb;
-			let d = this.sa;
-			let i = this.lng;
-			let dc = 3;
-			let size = Math.floor((w - dc * (i - 1)) / i);
-
-			while (i--) {
-				this.tmp[i] = [Math.floor(d + size * i + dc * i), size];
-				this.tmp[i][2] = this.tmp[i][0] + this.tmp[i][1];
-				s[i + 2].left = this.tmp[i][0] + 'px';
-				s[i + 2].width = this.tmp[i][1] + 'px';
-			}
 		}
 
 	}
 
 	class Empty extends Proto {
 		constructor(o = {}) {
-			o.simple = true;
 			o.isSpace = true;
+			o.margin = 0;
+			if (!o.h) o.h = 10;
 			super(o);
 			this.init();
 		}
@@ -5615,7 +5829,7 @@
 			let fltop = Math.floor(this.h * 0.5) - 7;
 			this.c[2] = this.dom('path', this.css.basic + 'position:absolute; width:14px; height:14px; left:5px; top:' + fltop + 'px;', {
 				d: this.graph,
-				fill: this.fontColor,
+				fill: this.colors.text,
 				stroke: 'none'
 			});
 			this.s[1].marginLeft = 20 + 'px';
@@ -5656,30 +5870,32 @@
 
 			if (this.status !== n) {
 				this.status = n;
+				let s = this.s,
+						cc = this.colors;
 
 				switch (n) {
 					case 1:
 						this.status = 1;
-						this.s[1].color = this.fontColor;
-						this.s[0].background = 'none';
+						s[1].color = cc.text;
+						s[0].background = 'none';
 						break;
 
 					case 2:
 						this.status = 2;
-						this.s[1].color = this.fontColor;
-						this.s[0].background = this.bgOver;
+						s[1].color = cc.textOver;
+						s[0].background = cc.back;
 						break;
 
 					case 3:
 						this.status = 3;
-						this.s[1].color = '#FFF';
-						this.s[0].background = this.colors.select;
+						s[1].color = cc.textSelect;
+						s[0].background = cc.select;
 						break;
 
 					case 4:
 						this.status = 4;
-						this.s[1].color = '#FFF';
-						this.s[0].background = this.colors.down;
+						s[1].color = cc.textOver;
+						s[0].background = cc.over;
 						break;
 				}
 
@@ -5703,22 +5919,16 @@
 
 	class Grid extends Proto {
 		constructor(o = {}) {
-			super(o); //this.value = o.value || false;
-
+			super(o);
 			this.values = o.values || [];
 			if (typeof this.values === 'string') this.values = [this.values];
+			this.lng = this.values.length;
 			this.value = o.value || null;
-			this.isSelectable = o.selectable || false; //this.selected = null;
-
-			this.isDown = false;
-			this.buttonColor = o.bColor || this.colors.button;
-			this.buttonOver = o.bOver || this.colors.over;
-			this.buttonDown = o.bDown || this.colors.select;
+			this.isSelectable = o.selectable || false;
 			this.spaces = o.spaces || [5, 3];
 			this.bsize = o.bsize || [90, 20];
 			if (o.h) this.bsize[1] = o.h;
 			this.bsizeMax = this.bsize[0];
-			this.lng = this.values.length;
 			this.tmp = [];
 			this.stat = [];
 			this.grid = [2, Math.round(this.lng * 0.5)];
@@ -5730,10 +5940,14 @@
 					td,
 					tr,
 					sel;
+			this.res = -1;
+			this.isDown = false;
+			this.neverlock = true;
 			this.buttons = [];
 			this.stat = [];
 			this.tmpX = [];
 			this.tmpY = [];
+			let cc = this.colors;
 
 			for (let i = 0; i < this.grid[1]; i++) {
 				tr = this.c[2].insertRow();
@@ -5747,16 +5961,16 @@
 						sel = false;
 						if (this.values[n] === this.value && this.isSelectable) sel = true;
 						b = document.createElement('div');
-						b.style.cssText = this.css.txt + this.css.button + 'position:static; width:' + this.bsize[0] + 'px; height:' + this.bsize[1] + 'px; border:' + this.colors.buttonBorder + '; left:auto; right:auto; border-radius:' + this.radius + 'px;';
-						b.style.background = sel ? this.buttonDown : this.buttonColor;
-						b.style.color = sel ? this.fontSelect : this.fontColor;
+						b.style.cssText = this.css.txt + this.css.button + 'position:static; width:' + this.bsize[0] + 'px; height:' + this.bsize[1] + 'px; border:' + cc.borderSize + 'px solid ' + cc.border + '; left:auto; right:auto; border-radius:' + this.radius + 'px;';
+						b.style.background = sel ? cc.select : cc.button;
+						b.style.color = sel ? cc.textSelect : cc.text;
 						b.innerHTML = this.values[n];
 						td.appendChild(b);
 						this.buttons.push(b);
 						this.stat.push(1);
 					} else {
 						b = document.createElement('div');
-						b.style.cssText = this.css.txt + 'position:static; width:' + this.bsize[0] + 'px; height:' + this.bsize[1] + 'px; text-align:center;	left:auto; right:auto; background:none;';
+						b.style.cssText = this.css.txt + 'position:static; width:' + this.bsize[0] + 'px; height:' + this.bsize[1] + 'px; text-align:center; left:auto; right:auto; background:none;';
 						td.appendChild(b);
 					}
 
@@ -5800,32 +6014,30 @@
 
 
 		mouseup(e) {
-			if (this.isDown) {
-				//this.value = false;
-				this.isDown = false; //this.send();
+			if (!this.isDown) return false;
+			this.isDown = false;
 
-				return this.mousemove(e);
+			if (this.res !== -1) {
+				this.value = this.values[this.res];
+				this.send();
 			}
 
-			return false;
+			return this.mousemove(e);
 		}
 
 		mousedown(e) {
-			let id = this.testZone(e);
-			if (id < 0) return false;
+			if (this.isDown) return false;
 			this.isDown = true;
-			this.value = this.values[id];
-			this.send();
 			return this.mousemove(e);
 		}
 
 		mousemove(e) {
 			let up = false;
-			let id = this.testZone(e);
+			this.res = this.testZone(e);
 
-			if (id !== -1) {
+			if (this.res !== -1) {
 				this.cursor('pointer');
-				up = this.modes(this.isDown ? 3 : 2, id);
+				up = this.modes(this.isDown ? 3 : 2, this.res);
 			} else {
 				up = this.reset();
 			}
@@ -5836,18 +6048,24 @@
 		// -----------------------
 
 
-		modes(n, id) {
-			let v,
+		modes(N = 1, id = -1) {
+			let i = this.lng,
+					w,
+					n,
 					r = false;
-			let i = this.lng;
 
 			while (i--) {
-				if (i === id) v = this.mode(n, i);else {
-					if (this.isSelectable) {
-						if (this.values[i] === this.value) v = this.mode(3, i);else v = this.mode(1, i);
-					} else v = this.mode(1, i);
+				n = N;
+				w = this.isSelectable ? this.values[i] === this.value : false;
+
+				if (i === id) {
+					if (w && n === 2) n = 3;
+				} else {
+					n = 1;
+					if (w) n = 4;
 				}
-				if (v) r = true;
+
+				if (this.mode(n, i)) r = true;
 			}
 
 			return r;
@@ -5855,25 +6073,32 @@
 
 		mode(n, id) {
 			let change = false;
+			let cc = this.colors,
+					s = this.buttons;
+			let i = id;
 
 			if (this.stat[id] !== n) {
+				this.stat[id] = n;
+
 				switch (n) {
 					case 1:
-						this.stat[id] = 1;
-						this.buttons[id].style.color = this.fontColor;
-						this.buttons[id].style.background = this.buttonColor;
+						s[i].style.color = cc.text;
+						s[i].style.background = cc.button;
 						break;
 
 					case 2:
-						this.stat[id] = 2;
-						this.buttons[id].style.color = this.fontSelect;
-						this.buttons[id].style.background = this.buttonOver;
+						s[i].style.color = cc.textOver;
+						s[i].style.background = cc.overoff;
 						break;
 
 					case 3:
-						this.stat[id] = 3;
-						this.buttons[id].style.color = this.fontSelect;
-						this.buttons[id].style.background = this.buttonDown;
+						s[i].style.color = cc.textOver;
+						s[i].style.background = cc.over;
+						break;
+
+					case 4:
+						s[i].style.color = cc.textSelect;
+						s[i].style.background = cc.select;
 						break;
 				}
 
@@ -5885,8 +6110,9 @@
 
 
 		reset() {
+			this.res = -1;
 			this.cursor();
-			return this.modes(1, -1);
+			return this.modes();
 		}
 
 		label(string, n) {
@@ -5949,141 +6175,141 @@
 		constructor(o = {}) {
 			super(o);
 			this.autoWidth = false;
-			this.margin = 15;
-			this.pos = new V2();
+			this.minw = this.w;
+			this.diam = o.diam || this.w; //this.margin = 15;
+
+			this.pos = new V2(0, 0);
+			this.maxPos = 90;
 			this.model = o.stype || 0;
 			if (o.mode !== undefined) this.model = o.mode;
+			this.min = o.min === undefined ? -1 : o.min;
+			this.max = o.max === undefined ? 1 : o.max;
+			this.range = (this.max - this.min) * 0.5;
+			this.cmode = 0; //console.log(this.range)
+
 			this.precision = o.precision === undefined ? 2 : o.precision;
-			this.bounds = {};
+			/*this.bounds = {};
 			this.bounds.x1 = o.x1 || -1;
 			this.bounds.x2 = o.x2 || 1;
 			this.bounds.y1 = o.y1 || -1;
 			this.bounds.y2 = o.y2 || 1;
-			this.lerpX = this.lerp(this.margin, this.w - this.margin, this.bounds.x1, this.bounds.x2);
-			this.lerpY = this.lerp(this.margin, this.w - this.margin, this.bounds.y1, this.bounds.y2);
-			this.alerpX = this.lerp(this.bounds.x1, this.bounds.x2, this.margin, this.w - this.margin);
-			this.alerpY = this.lerp(this.bounds.y1, this.bounds.y2, this.margin, this.w - this.margin);
-			this.value = [];
-			let v = Array.isArray(o.value) && o.value.length == 2 ? o.value : [0, 0];
-			this.setValue(v);
+				this.lerpX = this.lerp( this.margin, this.w - this.margin , this.bounds.x1, this.bounds.x2 );
+			this.lerpY = this.lerp( this.margin, this.w - this.margin , this.bounds.y1, this.bounds.y2 );
+				this.alerpX = this.lerp( this.bounds.x1, this.bounds.x2, this.margin, this.w - this.margin );
+			this.alerpY = this.lerp( this.bounds.y1, this.bounds.y2, this.margin, this.w - this.margin );*/
+
+			this.value = Array.isArray(o.value) && o.value.length == 2 ? o.value : [0, 0];
 			this.h = o.h || this.w + 10;
 			this.top = 0;
 			this.c[0].style.width = this.w + 'px'; // Title
 
 			if (this.c[1] !== undefined) {
 				// with title
-				this.c[1].style.width = this.w + 'px';
-				this.c[1].style.textAlign = 'center';
+				this.c[1].style.width = '100%';
+				this.c[1].style.justifyContent = 'center';
 				this.top = 10;
 				this.h += 10;
-			} // Value
+			}
 
+			let cc = this.colors; // Value
 
-			this.c[2] = this.dom('div', this.css.txt + 'text-align:center; top:' + (this.h - 20) + 'px; width:' + this.w + 'px; color:' + this.fontColor);
+			this.c[2] = this.dom('div', this.css.txt + 'justify-content:center; top:' + (this.h - 20) + 'px; width:100%; color:' + cc.text);
 			this.c[2].textContent = this.value; // Pad
 
-			let svg = Tools.dom('svg', Tools.css.basic, {
-				viewBox: '0 0 ' + this.w + ' ' + this.w,
-				width: this.w,
-				height: this.w,
-				preserveAspectRatio: 'none'
-			});
-			Tools.dom('rect', '', {
-				x: this.margin - 5,
-				y: this.margin - 5,
-				width: this.w - (this.margin - 5) * 2,
-				height: this.w - (this.margin - 5) * 2,
-				rx: 5,
-				ty: 5,
-				stroke: 'rgba(0,0,0,0.25)',
-				'stroke-width': 0,
-				fill: 'rgba(0,0,0,0.1)'
-			}, svg); // 0
-
-			Tools.dom('rect', '', {
-				x: this.margin,
-				y: this.margin,
-				width: this.w - this.margin * 2,
-				height: this.w - this.margin * 2,
-				stroke: 'rgba(0,0,0,0.25)',
-				'stroke-width': 0,
-				fill: 'rgba(0,0,0,0.1)'
-			}, svg); // 1
-
-			this.c[3] = svg;
-			this.setSvg(this.c[3], 'viewBox', '0 0 ' + this.w + ' ' + this.w);
-			this.setCss(this.c[3], {
+			let pad = this.getPad2d();
+			this.setSvg(pad, 'fill', cc.back, 0);
+			this.setSvg(pad, 'fill', cc.button, 1);
+			this.setSvg(pad, 'stroke', cc.back, 2);
+			this.setSvg(pad, 'stroke', cc.back, 3);
+			this.setSvg(pad, 'stroke', cc.text, 4);
+			this.setSvg(pad, 'viewBox', '0 0 ' + this.diam + ' ' + this.diam);
+			this.setCss(pad, {
+				width: this.diam,
+				height: this.diam,
 				left: 0,
 				top: this.top
-			}); // Pointer
-
-			Tools.dom('line', '', {
-				x1: this.margin,
-				y1: this.w / 2,
-				x2: this.w - this.margin,
-				y2: this.w / 2,
-				stroke: '#1C1C1C',
-				'stroke-width': 1
-			}, this.c[3]); // 2
-
-			Tools.dom('line', '', {
-				x1: this.w / 2,
-				y1: this.margin,
-				x2: this.w / 2,
-				y2: this.w - this.margin,
-				stroke: '#1C1C1C',
-				'stroke-width': 1
-			}, this.c[3]); // 3
-
-			Tools.dom('circle', '', {
-				cx: this.w / 2,
-				cy: this.w / 2,
-				r: 5,
-				stroke: 'rgba(0,0,0,0.25)',
-				'stroke-width': 0,
-				fill: this.fontColor
-			}, this.c[3]); // 4
-
+			});
+			this.c[3] = pad;
 			this.init();
-			this.update(false);
+			this.setValue();
 		}
 
 		testZone(e) {
 			let l = this.local;
 			if (l.x === -1 && l.y === -1) return '';
-
-			if (l.x >= this.margin && l.x <= this.w - this.margin && l.y >= this.top + this.margin && l.y <= this.top + this.w - this.margin) {
-				return 'pad';
-			}
-
-			return '';
+			if (l.y <= this.c[1].offsetHeight) return 'title';else if (l.y > this.h - this.c[2].offsetHeight) return 'text';else return 'pad';
+			/*if( ( l.x >= this.margin ) && ( l.x <= this.w - this.margin ) && ( l.y >= this.top + this.margin ) && ( l.y <= this.top + this.w - this.margin ) ) {
+					return 'pad';
+			}*/
+			//return '';
 		}
 
 		mouseup(e) {
 			this.isDown = false;
+			return this.mode(0);
 		}
 
 		mousedown(e) {
 			if (this.testZone(e) === 'pad') {
 				this.isDown = true;
 				this.mousemove(e);
+				return this.mode(1);
 			}
 		}
 
 		mousemove(e) {
 			if (!this.isDown) return;
-			let x = e.clientX - this.zone.x;
-			let y = e.clientY - this.zone.y - this.top;
-			if (x < this.margin) x = this.margin;
-			if (x > this.w - this.margin) x = this.w - this.margin;
-			if (y < this.margin) y = this.margin;
-			if (y > this.w - this.margin) y = this.w - this.margin;
+			let x = this.w * 0.5 - (e.clientX - this.zone.x);
+			let y = this.diam * 0.5 - (e.clientY - this.zone.y - this.top);
+			let r = 256 / this.diam;
+			x = -(x * r);
+			y = -(y * r);
+			x = Tools.clamp(x, -this.maxPos, this.maxPos);
+			y = Tools.clamp(y, -this.maxPos, this.maxPos); //let x = e.clientX - this.zone.x;
+			//let y = e.clientY - this.zone.y - this.top;
+
+			/*if( x < this.margin ) x = this.margin;
+			if( x > this.w - this.margin ) x = this.w - this.margin;
+			if( y < this.margin ) y = this.margin;
+			if( y > this.w - this.margin ) y = this.w - this.margin;*/
+			//console.log(x,y)
+
 			this.setPos([x, y]);
-			this.update();
+			this.update(true);
+		}
+
+		mode(mode) {
+			if (this.cmode === mode) return false;
+			let cc = this.colors;
+
+			switch (mode) {
+				case 0:
+					// base
+					this.s[2].color = cc.text;
+					this.setSvg(this.c[3], 'fill', cc.back, 0);
+					this.setSvg(this.c[3], 'fill', cc.button, 1);
+					this.setSvg(this.c[3], 'stroke', cc.back, 2);
+					this.setSvg(this.c[3], 'stroke', cc.back, 3);
+					this.setSvg(this.c[3], 'stroke', cc.text, 4);
+					break;
+
+				case 1:
+					// down
+					this.s[2].color = cc.textSelect;
+					this.setSvg(this.c[3], 'fill', cc.backoff, 0);
+					this.setSvg(this.c[3], 'fill', cc.overoff, 1);
+					this.setSvg(this.c[3], 'stroke', cc.backoff, 2);
+					this.setSvg(this.c[3], 'stroke', cc.backoff, 3);
+					this.setSvg(this.c[3], 'stroke', cc.textSelect, 4);
+					break;
+			}
+
+			this.cmode = mode;
+			return true;
 		}
 
 		update(up) {
-			if (up === undefined) up = true;
+			//if( up === undefined ) up = true;
 			this.c[2].textContent = this.value;
 			this.updateSVG();
 			if (up) this.send();
@@ -6102,32 +6328,35 @@
 		}
 
 		setPos(p) {
-			if (p === undefined) p = [this.w / 2, this.w / 2];
-			this.pos.set(p[0], p[1]);
-			this.value[0] = this.lerpX(p[0]).toFixed(this.precision);
-			this.value[1] = this.lerpY(p[1]).toFixed(this.precision);
+			//if( p === undefined ) p = [ this.w / 2, this.w / 2 ];
+			this.pos.set(p[0] + 128, p[1] + 128);
+			let r = 1 / this.maxPos;
+			this.value[0] = (p[0] * r * this.range).toFixed(this.precision);
+			this.value[1] = (p[1] * r * this.range).toFixed(this.precision);
 		}
 
 		setValue(v, up = false) {
-			if (v === undefined) v = [0, 0];
-			if (v[0] < this.bounds.x1) v[0] = this.bounds.x1;
-			if (v[0] > this.bounds.x2) v[0] = this.bounds.x2;
-			if (v[1] < this.bounds.y1) v[1] = this.bounds.y1;
-			if (v[1] > this.bounds.y2) v[1] = this.bounds.y2;
-			this.value[0] = v[0];
-			this.value[1] = v[1];
-			this.pos.set(this.alerpX(v[0]), this.alerpY(v[1]));
-			if (up) this.update();
-		}
+			if (v === undefined) v = this.value;
+			/*if ( v[0] < this.bounds.x1 ) v[0] = this.bounds.x1;
+			if ( v[0] > this.bounds.x2 ) v[0] = this.bounds.x2;
+			if ( v[1] < this.bounds.y1 ) v[1] = this.bounds.y1;
+			if ( v[1] > this.bounds.y2 ) v[1] = this.bounds.y2;*/
 
-		lerp(s1, s2, d1, d2, c = true) {
-			let s = (d2 - d1) / (s2 - s1);
-			return c ? v => {
-				return ((v < s1 ? s1 : v > s2 ? s2 : v) - s1) * s + d1;
-			} : v => {
-				return (v - s1) * s + d1;
-			};
+			this.value[0] = Math.min(this.max, Math.max(this.min, v[0])).toFixed(this.precision) * 1;
+			this.value[1] = Math.min(this.max, Math.max(this.min, v[1])).toFixed(this.precision) * 1;
+			this.pos.set(this.value[0] / this.range * this.maxPos + 128, this.value[1] / this.range * this.maxPos + 128); //console.log(this.pos)
+
+			this.update(up);
 		}
+		/*lerp( s1, s2, d1, d2, c = true ) {
+					let s = ( d2 - d1 ) / ( s2 - s1 );
+					return c ? ( v ) => { 
+						return ( ( v < s1 ? s1 : v > s2 ? s2 : v ) - s1 ) * s + d1
+				} : ( v ) => { 
+					return ( v - s1 ) * s + d1
+				}
+			}*/
+
 
 	}
 
@@ -6149,7 +6378,10 @@
 
 			o = a[2];
 			o.name = a[1];
-			o.value = a[0][a[1]];
+
+			if (type === 'list') {
+				o.list = a[0][a[1]];
+			} else o.value = a[0][a[1]];
 		}
 
 		let name = type.toLowerCase();
@@ -6211,6 +6443,7 @@
 				break;
 
 			case 'title':
+			case 'text':
 				n = new Title(o);
 				break;
 
@@ -6236,6 +6469,7 @@
 				break;
 
 			case 'pad2d':
+			case 'pad':
 				n = new Pad2D(o);
 				break;
 		}
@@ -6252,29 +6486,23 @@
 
 	class Gui {
 		constructor(o = {}) {
-			// for 3d
+			this.isGui = true;
+			this.name = 'gui'; // for 3d
+
 			this.canvas = null;
 			this.screen = null;
 			this.plane = o.plane || null;
 			this.isEmpty = true; // color
 
-			this.colors = Tools.cloneColor();
+			if (o.config) o.colors = o.config;
+			if (o.colors) this.setConfig(o.colors);else this.colors = Tools.defineColor(o); // style
+
 			this.css = Tools.cloneCss();
-			if (o.config) this.setConfig(o.config);
-			this.bg = o.bg || this.colors.background;
-
-			if (o.transparent !== undefined) {
-				this.colors.background = 'none';
-				this.colors.backgroundOver = 'none';
-			} //if( o.callback ) this.callback =	o.callback;
-
-
 			this.isReset = true;
-			this.tmpAdd = null;
-			this.tmpH = 0;
+			this.tmpAdd = null; //this.tmpH = 0
+
 			this.isCanvas = o.isCanvas || false;
 			this.isCanvasOnly = false;
-			this.cssGui = o.css !== undefined ? o.css : '';
 			this.callback = o.callback === undefined ? null : o.callback;
 			this.forceHeight = o.maxHeight || 0;
 			this.lockHeight = o.lockHeight || false;
@@ -6297,14 +6525,16 @@
 			}; // virtual mouse
 
 			this.mouse = new V2().neg();
-			this.h = 0;
-			this.prevY = -1;
+			this.h = 0; //this.prevY = -1;
+
 			this.sw = 0; // bottom and close height
 
 			this.isWithClose = o.close !== undefined ? o.close : true;
 			this.bh = !this.isWithClose ? 0 : this.size.h;
-			this.autoResize = o.autoResize === undefined ? true : o.autoResize;
+			this.autoResize = o.autoResize === undefined ? true : o.autoResize; // default position
+
 			this.isCenter = o.center || false;
+			this.cssGui = o.css !== undefined ? o.css : this.isCenter ? '' : 'right:10px;';
 			this.isOpen = o.open !== undefined ? o.open : true;
 			this.isDown = false;
 			this.isScroll = false;
@@ -6315,37 +6545,50 @@
 			this.ratio = 1;
 			this.oy = 0;
 			this.isNewTarget = false;
-			this.content = Tools.dom('div', this.css.basic + ' width:0px; height:auto; top:0px; background:' + this.colors.content + '; ' + this.cssGui);
-			this.innerContent = Tools.dom('div', this.css.basic + 'width:100%; top:0; left:0; height:auto; overflow:hidden;');
-			this.content.appendChild(this.innerContent);
-			this.inner = Tools.dom('div', this.css.basic + 'width:100%; left:0; ');
+			let cc = this.colors;
+			this.content = Tools.dom('div', this.css.basic + ' width:0px; height:auto; top:0px; background:' + cc.content + '; ' + this.cssGui);
+			this.innerContent = Tools.dom('div', this.css.basic + 'width:100%; top:0; left:0; height:auto; overflow:hidden;'); //this.innerContent = Tools.dom( 'div', this.css.basic + this.css.button + 'width:100%; top:0; left:0; height:auto; overflow:hidden;');
+
+			this.content.appendChild(this.innerContent); //this.inner = Tools.dom( 'div', this.css.basic + 'width:100%; left:0; ')
+
+			this.useFlex = true;
+			let flexible = this.useFlex ? 'display:flex; flex-flow: row wrap;' : ''; //' display:flex; justify-content:start; align-items:start;flex-direction: column; justify-content: center; align-items: center;';
+
+			this.inner = Tools.dom('div', this.css.basic + flexible + 'width:100%; left:0; ');
 			this.innerContent.appendChild(this.inner); // scroll
 
-			this.scrollBG = Tools.dom('div', this.css.basic + 'right:0; top:0; width:' + (this.size.s - 1) + 'px; height:10px; display:none; background:' + this.bg + ';');
+			this.scrollBG = Tools.dom('div', this.css.basic + 'right:0; top:0; width:' + (this.size.s - 1) + 'px; height:10px; display:none; background:' + cc.background + ';');
 			this.content.appendChild(this.scrollBG);
-			this.scroll = Tools.dom('div', this.css.basic + 'background:' + this.colors.scroll + '; right:2px; top:0; width:' + (this.size.s - 4) + 'px; height:10px;');
+			this.scroll = Tools.dom('div', this.css.basic + 'background:' + cc.button + '; right:2px; top:0; width:' + (this.size.s - 4) + 'px; height:10px;');
 			this.scrollBG.appendChild(this.scroll); // bottom button
 
 			this.bottomText = o.bottomText || ['open', 'close'];
-			let r = o.radius || this.colors.radius;
-			this.bottom = Tools.dom('div', this.css.txt + 'width:100%; top:auto; bottom:0; left:0; border-bottom-right-radius:' + r + 'px;	border-bottom-left-radius:' + r + 'px; text-align:center; height:' + this.bh + 'px; line-height:' + (this.bh - 5) + 'px;'); // border-top:1px solid '+Tools.colors.stroke+';');
+			let r = cc.radius;
+			this.bottom = Tools.dom('div', this.css.txt + 'width:100%; top:auto; bottom:0; left:0; border-bottom-right-radius:' + r + 'px; border-bottom-left-radius:' + r + 'px; justify-content:center; height:' + this.bh + 'px; line-height:' + (this.bh - 5) + 'px; color:' + cc.text + ';'); // border-top:1px solid '+Tools.colors.stroke+';');
 
 			this.content.appendChild(this.bottom);
 			this.bottom.textContent = this.isOpen ? this.bottomText[1] : this.bottomText[0];
-			this.bottom.style.background = this.bg; //
+			this.bottom.style.background = cc.background; //
 
 			this.parent = o.parent !== undefined ? o.parent : null;
 			this.parent = o.target !== undefined ? o.target : this.parent;
 
 			if (this.parent === null && !this.isCanvas) {
-				this.parent = document.body; // default position
-
-				if (!this.isCenter) this.content.style.right = '10px';
+				this.parent = document.body;
 			}
 
 			if (this.parent !== null) this.parent.appendChild(this.content);
 			if (this.isCanvas && this.parent === null) this.isCanvasOnly = true;
-			if (!this.isCanvasOnly) this.content.style.pointerEvents = 'auto';
+
+			if (!this.isCanvasOnly) {
+				this.content.style.pointerEvents = 'auto';
+			} else {
+				o.transition = 0;
+			} // height transition
+
+
+			this.transition = o.transition || Tools.transition;
+			if (this.transition) setTimeout(this.addTransition.bind(this), 0);
 			this.setWidth();
 			if (this.isCanvas) this.makeCanvas();
 			Roots.add(this);
@@ -6354,15 +6597,16 @@
 		setTop(t, h) {
 			this.content.style.top = t + 'px';
 			if (h !== undefined) this.forceHeight = h;
-			this.setHeight();
+			this.calc();
 			Roots.needReZone = true;
-		} //callback: function () {},
+		}
 
-
-		dispose() {
-			this.clear();
-			if (this.parent !== null) this.parent.removeChild(this.content);
-			Roots.remove(this);
+		addTransition() {
+			if (this.transition && !this.isCanvas) {
+				this.innerContent.style.transition = 'height ' + this.transition + 's ease-out';
+				this.content.style.transition = 'height ' + this.transition + 's ease-out';
+				this.bottom.style.transition = 'top ' + this.transition + 's ease-out'; //this.bottom.addEventListener("transitionend", Roots.resize, true);
+			}
 		} // ----------------------
 		//	 CANVAS
 		// ----------------------
@@ -6388,21 +6632,18 @@
 			return this.content;
 		}
 
-		setUvMouse(uv) {
-			this.mouse.set(Math.round(uv.x * this.canvas.width), this.canvas.height - Math.round(uv.y * this.canvas.height));
-		}
-
 		noMouse() {
 			this.mouse.neg();
 		}
 
-		setMouse(m) {
-			this.mouse.set(m.x, m.y);
+		setMouse(uv, flip = true) {
+			if (flip) this.mouse.set(Math.round(uv.x * this.canvas.width), this.canvas.height - Math.round(uv.y * this.canvas.height));else this.mouse.set(Math.round(uv.x * this.canvas.width), Math.round(uv.y * this.canvas.height)); //this.mouse.set( m.x, m.y );
 		}
 
 		setConfig(o) {
-			this.setColors(o);
-			this.setText(o.fontSize, o.text, o.font, o.shadow);
+			// reset to default text 
+			Tools.setText();
+			this.colors = Tools.defineColor(o);
 		}
 
 		setColors(o) {
@@ -6412,7 +6653,7 @@
 		}
 
 		setText(size, color, font, shadow) {
-			Tools.setText(size, color, font, shadow, this.colors, this.css);
+			Tools.setText(size, color, font, shadow);
 		}
 
 		hide(b) {
@@ -6429,30 +6670,34 @@
 
 		mode(n) {
 			let needChange = false;
+			let cc = this.colors;
 
 			if (n !== this.cn) {
 				this.cn = n;
 
 				switch (n) {
 					case 'def':
-						this.scroll.style.background = this.colors.scroll;
-						this.bottom.style.background = this.colors.background;
-						this.bottom.style.color = this.colors.text;
+						Roots.cursor();
+						this.scroll.style.background = cc.button;
+						this.bottom.style.background = cc.background;
+						this.bottom.style.color = cc.text;
 						break;
 					//case 'scrollDef': this.scroll.style.background = this.colors.scroll; break;
 
 					case 'scrollOver':
-						this.scroll.style.background = this.colors.select;
+						Roots.cursor('ns-resize');
+						this.scroll.style.background = cc.select;
 						break;
 
 					case 'scrollDown':
-						this.scroll.style.background = this.colors.down;
+						this.scroll.style.background = cc.select;
 						break;
 					//case 'bottomDef': this.bottom.style.background = this.colors.background; break;
 
 					case 'bottomOver':
-						this.bottom.style.background = this.colors.backgroundOver;
-						this.bottom.style.color = '#FFF';
+						Roots.cursor('pointer');
+						this.bottom.style.background = cc.backgroundOver;
+						this.bottom.style.color = cc.textOver;
 						break;
 					//case 'bottomDown': this.bottom.style.background = this.colors.select; this.bottom.style.color = '#000'; break;
 				}
@@ -6529,8 +6774,9 @@
 
 					if (type === 'mousedown') {
 						this.isOpen = this.isOpen ? false : true;
-						this.bottom.textContent = this.isOpen ? this.bottomText[1] : this.bottomText[0];
-						this.setHeight();
+						this.bottom.textContent = this.isOpen ? this.bottomText[1] : this.bottomText[0]; //this.setHeight();
+
+						this.calc();
 						this.mode('def');
 						change = true;
 					}
@@ -6614,34 +6860,28 @@
 			let u = add.apply(this, a);
 			if (u === null) return;
 			if (ontop) this.uis.unshift(u);else this.uis.push(u);
+			/*if( !u.autoWidth ){
+					let y = u.c[0].getBoundingClientRect().top;
+					if( this.prevY !== y ){
+							this.calc( u.h + 1 );
+							this.prevY = y;
+					}
+			}else{
+					this.prevY = 0;//-1;
+					this.calc( u.h + 1 );
+			}*/
 
-			if (!u.autoWidth) {
-				let y = u.c[0].getBoundingClientRect().top;
-
-				if (this.prevY !== y) {
-					this.calc(u.h + 1);
-					this.prevY = y;
-				}
-			} else {
-				this.prevY = 0; //-1;
-
-				this.calc(u.h + 1);
-			}
-
+			this.calc();
 			this.isEmpty = false;
 			return u;
 		}
-
-		applyCalc() {
-			//console.log(this.uis.length, this.tmpH )
-			this.calc(this.tmpH); //this.tmpH = 0;
-
-			this.tmpAdd = null;
-		}
-
-		calcUis() {
-			Roots.calcUis(this.uis, this.zone, this.zone.y);
-		} // remove one node
+		/*applyCalc () {
+					//console.log(this.uis.length, this.tmpH )
+					this.calc( this.tmpH );
+				//this.tmpH = 0;
+				this.tmpAdd = null;
+			}*/
+		// remove one node
 
 
 		remove(n) {
@@ -6653,9 +6893,10 @@
 			let id = this.uis.indexOf(n);
 
 			if (id !== -1) {
-				this.calc(-(this.uis[id].h + 1));
+				//this.calc( - (this.uis[ id ].h + 1 ) );
 				this.inner.removeChild(this.uis[id].c[0]);
 				this.uis.splice(id, 1);
+				this.calc();
 			}
 		} // clear all gui
 
@@ -6671,9 +6912,12 @@
 				item.clear(true); //this.uis[i].clear()
 			}
 
-			this.isEmpty = true; //Roots.listens = [];
+			this.uis = [];
+			this.isEmpty = true; //this.zone = { x:0, y:0, w:this.size.w, h:0 };
+			//this.setWidth()
+			//Roots.listens = [];
 
-			this.calc(-this.h);
+			this.calc();
 		}
 
 		clear() {
@@ -6684,6 +6928,12 @@
 				this.uis = [];
 			Roots.listens = [];
 				this.calc( -this.h );*/
+		}
+
+		dispose() {
+			this.clear();
+			if (this.parent !== null) this.parent.removeChild(this.content);
+			Roots.remove(this);
 		} // ----------------------
 		//	 ITEMS SPECIAL
 		// ----------------------
@@ -6751,19 +7001,22 @@
 		// ----------------------
 
 
-		calc(y) {
-			this.h += y;
+		calcUis() {
+			return Roots.calcUis(this.uis, this.zone, this.zone.y);
+		}
+
+		calc() {
 			clearTimeout(this.tmp);
 			this.tmp = setTimeout(this.setHeight.bind(this), 10);
 		}
 
 		setHeight() {
-			if (this.tmp) clearTimeout(this.tmp); //console.log(this.h )
-
+			if (this.tmp) clearTimeout(this.tmp);
 			this.zone.h = this.bh;
 			this.isScroll = false;
 
 			if (this.isOpen) {
+				this.h = this.calcUis();
 				let hhh = this.forceHeight ? this.forceHeight + this.zone.y : window.innerHeight;
 				this.maxHeight = hhh - this.zone.y - this.bh;
 				let diff = this.h - this.maxHeight;
@@ -6781,9 +7034,9 @@
 			this.innerContent.style.height = this.zone.h - this.bh + 'px';
 			this.content.style.height = this.zone.h + 'px';
 			this.bottom.style.top = this.zone.h - this.bh + 'px';
-			if (this.forceHeight && this.lockHeight) this.content.style.height = this.forceHeight + 'px';
-			if (this.isOpen) this.calcUis();
-			if (this.isCanvas) this.draw(true);
+			if (this.forceHeight && this.lockHeight) this.content.style.height = this.forceHeight + 'px'; //if( this.isOpen ) this.calcUis()
+
+			if (this.isCanvas) this.draw(true); //else if( !this.transition ) this.rezone()
 		}
 
 		rezone() {
@@ -6792,11 +7045,14 @@
 
 		setWidth(w) {
 			if (w) this.zone.w = w;
+			this.zone.w = Math.floor(this.zone.w); //console.log( this.zone.w )
+
 			this.content.style.width = this.zone.w + 'px';
 			if (this.isCenter) this.content.style.marginLeft = -Math.floor(this.zone.w * 0.5) + 'px';
-			this.setItemWidth(this.zone.w - this.sw);
-			this.setHeight();
-			if (!this.isCanvasOnly) Roots.needReZone = true; //this.resize();
+			this.setItemWidth(this.zone.w - this.sw); //this.setHeight();
+			//this.calc()
+			//if( this.isCanvasOnly ) Roots.needReZone = true;
+			//Roots.resize();
 		}
 
 		setItemWidth(w) {
@@ -6809,27 +7065,12 @@
 		}
 
 	}
-	Gui.prototype.isGui = true;
 
-	//import './polyfills.js';
-	const REVISION = '3.2';
+	const REVISION = '4.0';
 
-	exports.Bool = Bool;
-	exports.Button = Button;
-	exports.Circular = Circular;
-	exports.Color = Color;
-	exports.Fps = Fps;
-	exports.Group = Group;
 	exports.Gui = Gui;
-	exports.Joystick = Joystick;
-	exports.Knob = Knob;
-	exports.List = List;
-	exports.Numeric = Numeric;
 	exports.Proto = Proto;
 	exports.REVISION = REVISION;
-	exports.Slide = Slide;
-	exports.TextInput = TextInput;
-	exports.Title = Title;
 	exports.Tools = Tools;
 	exports.add = add;
 

@@ -4,7 +4,7 @@ body{
 	font-size:12px; 
 	color:#fff;
 	height: 100vh;
-    background: linear-gradient( #323133 , #121113);
+    background: linear-gradient( #323133 , #121113 );
 }
 
 @keyframes octocat-wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(-25deg)}40%,80%{transform:rotate(10deg)}}
@@ -14,5 +14,5 @@ body{
 
 #logo{ position:absolute; left:50%; margin-left:-32px; top:0px; }
 #version { position:absolute; top:64px; left:50%; width:128px; margin-left:-64px; height:10px; pointer-events:none; text-align:center; font-size:12px; font-weight: bold;}
-#debug { position:absolute; top:10px; left:10px; width:300px; pointer-events:none;}
-#debug2 { position:absolute; bottom:10px; right:10px; width:300px; pointer-events:none; text-align:right; }
+#debug { position:absolute; top:10px; left:10px; width:300px; pointer-events:none;  -webkit-user-select:none;}
+#debug2 { position:absolute; bottom:10px; right:10px; width:300px; pointer-events:none; text-align:right;  -webkit-user-select:none; }

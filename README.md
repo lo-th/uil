@@ -1,49 +1,54 @@
-<p align="center"><a href="http://lo-th.github.io/uil/"><img src="http://lo-th.github.io/uil/examples/img/uil.png"/></a><br>uil v3.0</p>
+<p align="center"><a href="http://lo-th.github.io/uil/"><img src="http://lo-th.github.io/uil/examples/assets/uil.png"/></a><br>UIL v4.0</p>
 
-uil.js is a lightweight ui for javascript with a complete 3d display support.
-[**example**](http://lo-th.github.io/uil/index.html)
+uil.js is a lightweight ui for javascript with a complete 3d display support.<br>
+totally customizable, only 6 events, auto resize<br>
+[**Main example**](http://lo-th.github.io/uil/index.html)
 
 **1 - init engine**
 ```sh
-var ui = new UIL.Gui( { css:'top:145px; left:50%;', size:300, center:true } );
+var ui = new UIL.Gui( { w:300 } )
 ```
 **2 - add value**
 ```sh
-ui.add('title', { name:'Title'});
-ui.add('bool', { name:'Bool', callback:callback});
-ui.add('color', { name:'Color', callback:callback, type:'html', value:0xff0000});
-ui.add('color', { name:'Color', callback:callback, type:'rgba', value:[0,1,1,1]});
-ui.add('slide', { name:'Slide', callback:callback, value:50});
-ui.add('string', { name:'String', callback:callback, value:'welcome to uil'});
-ui.add('list', { name:'List', callback:callback, list:['item1', 'item2', ...]});
-ui.add('number', { name:'Number', callback:callback, value:20, min:0, max:10, precision:2, step:0.01 });
-ui.add('number', { name:'Vector2', callback:callback, value:[0,0] });
-ui.add('number', { name:'Vector3', callback:callback, value:[0,0,0] });
-ui.add('number', { name:'Vector4', callback:callback, value:[0,0,0,0] });
+ui.add('title', { name:'Title'})
+ui.add('bool', { name:'Bool' })
+ui.add('color', { name:'Color', type:'rgba', value:[0,1,1,1]})
+ui.add('slide', { name:'Slide', value:50})
+let myList = ui.add('list', { name:'List', list:['i1', 'i2', ...]})
 ```
-**3 - callback is simple function easy to define**
+**4 - add value with object reference**
 ```sh
-var callback = function(value){ debug.innerHTML = value; }
-// you can also set like that 
-ui.add('number', { name:'Vector4', value:[0,0,0,0] }).onChange( function(v){ debug.innerHTML = v; } );
+const obj = {
+	name:'welcome to uil',
+	value: 2,
+	slider: 30,
+	vector: { x:10, y:-30 }
+}
+
+ui.add( obj, 'string', { type:'string' })
+ui.add( obj, 'value', { type:'number', min:0, max:10, precision:2, step:0.01 })
+ui.add( obj, 'slider', { type:'slide' })
+ui.add( obj, 'vector', { type:'number' })
 ```
-**4 - you can reset all value**
+**5 - callback return the value**
+```sh
+ui.add('number', { name:'Vector4', value:[0,0,0,0] }).onChange( function(v){ debug.innerHTML = v; } )
+```
+**6 - you can reset all value**
 ```sh
 ui.clear();
 ```
-**5 - other examples**
+**7 - other examples**
 
-[**uil module**](http://lo-th.github.io/uil/index_module.html)
+[**uil module**](http://lo-th.github.io/uil/examples/index_module.html)
 
 [**uil listen**](http://lo-th.github.io/uil/examples/uil_listen.html)
 
-[**uil item**](http://lo-th.github.io/uil/examples/uil_item.html)
-
-[**uil image list**](http://lo-th.github.io/uil/examples/uil_imagelist.html)
+[**uil color**](http://lo-th.github.io/uil/examples/uil_color.html)
 
 [**uil stresstest**](http://lo-th.github.io/uil/examples/uil_stresstest.html)
 
-[**uil advanced**](http://lo-th.github.io/uil/examples/uil_test.html)
+[**uil group**](http://lo-th.github.io/uil/examples/uil_group.html)
 
 [**uil to canvas**](http://lo-th.github.io/uil/examples/uil_to_canvas.html)
 

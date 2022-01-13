@@ -8,6 +8,8 @@ export class Group extends Proto {
 
         super( o );
 
+        this.isGroup = true
+
         this.ADD = o.add;
 
         this.uis = [];
@@ -16,7 +18,7 @@ export class Group extends Proto {
 
         this.autoHeight = true;
         this.current = -1;
-        this.target = null;
+        this.targetIn  = null;
 
         this.decal = 0;
 
@@ -26,9 +28,19 @@ export class Group extends Proto {
 
         this.isLine = o.line !== undefined ? o.line : false;
 
-        this.c[2] = this.dom( 'div', this.css.basic + 'width:100%; left:0; height:auto; overflow:hidden; top:'+this.h+'px');
-        this.c[3] = this.dom( 'path', this.css.basic + 'position:absolute; width:10px; height:10px; left:0; top:'+fltop+'px;', { d:this.svgs.group, fill:this.fontColor, stroke:'none'});
-        this.c[4] = this.dom( 'path', this.css.basic + 'position:absolute; width:10px; height:10px; left:4px; top:'+fltop+'px;', { d:this.svgs.arrow, fill:this.fontColor, stroke:'none'});
+        this.decal = 0;
+
+        if( o.group ){
+            this.decal = o.group.decal ? o.group.decal : 0
+            this.decal += 6
+        }
+
+        this.useFlex = true 
+        let flexible = this.useFlex ? 'display:flex; flex-flow: row wrap;' : ''
+
+        this.c[2] = this.dom( 'div', this.css.basic + flexible + 'width:100%; left:0; height:auto; overflow:hidden; top:'+this.h+'px');// 
+        this.c[3] = this.dom( 'path', this.css.basic + 'position:absolute; width:10px; height:10px; left:0; top:'+fltop+'px;', { d:this.svgs.group, fill:this.colors.text, stroke:'none'});
+        this.c[4] = this.dom( 'path', this.css.basic + 'position:absolute; width:10px; height:10px; left:'+(4+this.decal)+'px; top:'+fltop+'px;', { d:this.svgs.arrow, fill:this.colors.text, stroke:'none'});
         // bottom line
         if( this.isLine ) this.c[5] = this.dom( 'div', this.css.basic +  'background:rgba(255, 255, 255, 0.2); width:100%; left:0; height:1px; bottom:0px');
 
@@ -40,19 +52,28 @@ export class Group extends Proto {
         s[1].height = this.h + 'px';
         this.c[1].name = 'group';
 
-        s[1].marginLeft = '10px';
+        s[1].marginLeft = (10+this.decal)+'px';
         s[1].lineHeight = this.h-4;
-        s[1].color = this.fontColor;
+        s[1].color = this.colors.text;
         s[1].fontWeight = 'bold';
 
         if( this.radius !== 0 ) s[0].borderRadius = this.radius+'px'; 
-        s[0].border = this.colors.groupBorder;
+        //if( o.border ) s[0].border = '1px solid ' + o.border;
+
+
+        /*if(this.decal){
+            s[0].boxSizing = 'border-box';
+            s[0].backgroundClip = 'border-box';
+            s[0].border = (this.decal/3)+'px solid ' + o.group.colors.background;
+        }*/
+
+        
 
         
         this.init();
 
-        //if( o.bg !== undefined ) this.setBG(o.bg);
-        this.setBG( this.bg );
+        this.setBG( o.bg );
+
         if( o.open !== undefined ) this.open();
 
 
@@ -80,11 +101,11 @@ export class Group extends Proto {
 
         if( this.current === -1 ) return false;
 
-       // if(!this.target) return;
-        this.target.uiout();
-        this.target.reset();
+       // if(!this.targetIn ) return;
+        this.targetIn .uiout();
+        this.targetIn .reset();
         this.current = -1;
-        this.target = null;
+        this.targetIn  = null;
         this.cursor();
         return true;
 
@@ -118,7 +139,7 @@ export class Group extends Proto {
 
             if( Roots.isMobile && type === 'mousedown' ) this.getNext( e, change );
 
-            if( this.target ) targetChange = this.target.handleEvent( e );
+            if( this.targetIn  ) targetChange = this.targetIn .handleEvent( e );
 
             //if( type === 'mousemove' ) change = this.styles('def');
 
@@ -154,15 +175,15 @@ export class Group extends Proto {
         }
 
         if( next !== -1 ){ 
-            this.target = this.uis[ this.current ];
-            this.target.uiover();
+            this.targetIn  = this.uis[ this.current ];
+            this.targetIn .uiover();
         }
 
     }
 
     // ----------------------
 
-    calcH () {
+    /*calcH () {
 
         let lng = this.uis.length, i, u,  h=0, px=0, tmph=0;
         for( i = 0; i < lng; i++){
@@ -184,24 +205,20 @@ export class Group extends Proto {
         }
 
         return h;
-    }
+    }*/
 
-    calcUis () {
-
-        if( !this.isOpen ) return;
-
-        Roots.calcUis( this.uis, this.zone, this.zone.y + this.baseH );
-
-    }
+    
 
 
-    setBG ( c ) {
+    setBG ( bg ) {
 
-        this.s[0].background = c;
+        if( bg !== undefined ) this.colors.background = bg
+
+        this.c[0].style.background = this.colors.background;
 
         let i = this.uis.length;
         while(i--){
-            this.uis[i].setBG( c );
+            this.uis[i].setBG( this.colors.background );
         }
 
     }
@@ -214,24 +231,25 @@ export class Group extends Proto {
             a[1].isUI = this.isUI;
             a[1].target = this.c[2];
             a[1].main = this.main;
+            a[1].group = this;
         } else if( typeof arguments[1] === 'string' ){
             if( a[2] === undefined ) [].push.call( a, { isUI:true, target:this.c[2], main:this.main });
             else{ 
                 a[2].isUI = true;
                 a[2].target = this.c[2];
                 a[2].main = this.main;
+                a[2].group = this;
             }
         }
 
         //let n = add.apply( this, a );
         let u = this.ADD.apply( this, a );
 
-        this.uis.push( u );
+        this.uis.push( u )
 
-        //if( u.autoHeight ) u.parentGroup = this;
-        //if( u.isGroup ) 
+        //this.calc()
 
-        u.group = this;
+
 
         this.isEmpty = false;
 
@@ -287,26 +305,18 @@ export class Group extends Proto {
 
     }
 
-    parentHeight ( t ) {
-
-        //if ( this.parentGroup !== null ) this.parentGroup.calc( t );
-        if ( this.group !== null ) this.group.calc( t );
-        else if ( this.isUI ) this.main.calc( t );
-
-    }
+    
 
     open () {
 
         super.open();
 
-        this.setSvg( this.c[4], 'd', this.svgs.arrowDown );
-        this.rSizeContent();
+        this.setSvg( this.c[4], 'd', this.svgs.arrowDown )
+        this.rSizeContent()
 
         let t = this.h - this.baseH;
 
-        this.parentHeight( t );
-
-        //console.log( this.uis );
+        this.parentHeight()
 
     }
 
@@ -320,9 +330,7 @@ export class Group extends Proto {
         this.h = this.baseH;
         this.s[0].height = this.h + 'px';
 
-        this.parentHeight( -t );
-
-        //console.log( this.uis );
+        this.parentHeight()
 
     }
 
@@ -349,9 +357,33 @@ export class Group extends Proto {
 
     }
 
+    calcUis () {
+
+        if( !this.isOpen ) this.h = this.baseH;
+        else this.h = Roots.calcUis( this.uis, this.zone, this.zone.y + this.baseH ) + this.baseH;
+
+        this.s[0].height = this.h + 'px';
+
+        //console.log('G', this.h)
+
+        //if( !this.isOpen ) return;
+
+        //this.h = Roots.calcUis( this.uis, this.zone, this.zone.y + this.baseH )+this.baseH;
+
+    }
+
+    parentHeight ( t ) {
+
+        if ( this.group !== null ) this.group.calc( t )
+        else if ( this.isUI ) this.main.calc( t )
+
+    }
+
     calc ( y ) {
 
         if( !this.isOpen ) return;
+
+        /*
 
         if( y !== undefined ){ 
             this.h += y;
@@ -359,9 +391,13 @@ export class Group extends Proto {
         } else {
             this.h = this.calcH() + this.baseH;
         }
-        this.s[0].height = this.h + 'px';
+        this.s[0].height = this.h + 'px';*/
 
-        //if(this.isOpen) this.calcUis();
+        // if(this.isOpen)
+        if( this.isUI ) this.main.calc()
+        else this.calcUis()
+        
+        this.s[0].height = this.h + 'px';
 
     }
 
@@ -372,7 +408,8 @@ export class Group extends Proto {
             this.uis[i].setSize( this.w );
             this.uis[i].rSize();
         }
-        this.calc();
+
+        //this.calc()
 
     }
 
@@ -391,5 +428,3 @@ export class Group extends Proto {
     }
 
 }
-
-Group.prototype.isGroup = true;

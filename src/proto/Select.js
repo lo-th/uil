@@ -12,14 +12,9 @@ export class Select extends Proto {
 
         this.onActif = o.onActif || function(){};
 
-        this.buttonColor = o.bColor || this.colors.button;
-        this.buttonOver = o.bOver || this.colors.over;
-        this.buttonDown = o.bDown || this.colors.select;
-        this.buttonAction = o.bAction || this.colors.action;
-
         let prefix = o.prefix || '';
 
-        this.c[2] = this.dom( 'div', this.css.txt + this.css.button + ' top:1px; background:'+this.buttonColor+'; height:'+(this.h-2)+'px; border:'+this.colors.buttonBorder+'; border-radius:15px; width:30px; left:10px;' );
+        this.c[2] = this.dom( 'div', this.css.txt + this.css.button + ' top:1px; background:'+this.colors.button+'; height:'+(this.h-2)+'px; border:'+this.colors.buttonBorder+'; border-radius:15px; width:30px; left:10px;' );
         this.c[2].style.color = this.fontColor;
 
         this.c[3] = this.dom( 'div', this.css.txtselect + 'height:' + (this.h-4) + 'px; background:' + this.colors.inputBg + '; borderColor:' + this.colors.inputBorder+'; border-radius:'+this.radius+'px;' );
@@ -120,7 +115,8 @@ export class Select extends Proto {
 
     mode ( n ) {
 
-        let change = false;
+        let change = false
+        let cc = this.colors
 
         if( this.stat !== n ){
 
@@ -133,12 +129,14 @@ export class Select extends Proto {
 
             if( n===2 && this.isActif ) n = 4;
 
+            this.stat = n
+
             switch( n ){
 
-                case 1: this.stat = 1; this.s[ 2 ].color = this.fontColor;  this.s[ 2 ].background = this.buttonColor; break; // base
-                case 2: this.stat = 2; this.s[ 2 ].color = this.fontSelect; this.s[ 2 ].background = this.buttonOver; break; // over
-                case 3: this.stat = 3; this.s[ 2 ].color = this.fontSelect; this.s[ 2 ].background = this.buttonDown; break; // down
-                case 4: this.stat = 4; this.s[ 2 ].color = this.fontSelect; this.s[ 2 ].background = this.buttonAction; break; // actif
+                case 1: this.s[ 2 ].color = cc.text; this.s[ 2 ].background = cc.button; break; // base
+                case 2: this.s[ 2 ].color = cc.textOver; this.s[ 2 ].background = cc.over; break; // over
+                case 3: this.s[ 2 ].color = cc.textSelect; this.s[ 2 ].background = cc.select; break; // down
+                case 4: this.s[ 2 ].color = cc.textSelect; this.s[ 2 ].background = cc.action; break; // actif
 
             }
 

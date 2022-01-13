@@ -14,21 +14,25 @@ export class TextInput extends Proto {
         this.allway = o.allway || false;
         this.editable = o.edit !== undefined ? o.edit : true;
 
-
         this.isDown = false;
 
-        // bg
-        this.c[2] = this.dom( 'div', this.css.basic + ' background:' + this.colors.select + '; top:4px; width:0px; height:' + (this.h-8) + 'px;' );
+        let cc = this.colors
 
-        this.c[3] = this.dom( 'div', this.css.txtselect + 'height:' + (this.h-4) + 'px; background:' + this.colors.inputBg + '; borderColor:' + this.colors.inputBorder+'; border-radius:'+this.radius+'px;' );
-        this.c[3].textContent = this.value;
+        // text
+        this.c[2] = this.dom( 'div', this.css.txtselect + 'height:' + (this.h-4) + 'px; color:' + cc.text + '; background:' + cc.back + '; borderColor:' + cc.border+'; border-radius:'+this.radius+'px;' );
+        this.c[2].textContent = this.value;
+
+        // selection
+        this.c[3] = this.dom(  'div', this.css.txtselect + 'position:absolute; top:4px; height:' + (this.h-8) + 'px; padding:0px 0px; width:0px; color:' + cc.textSelect + '; background:' + cc.select + '; border:none; border-radius:0px;');
 
         // cursor
-        this.c[4] = this.dom( 'div', this.css.basic + 'top:4px; height:' + (this.h-8) + 'px; width:0px; background:'+this.fontColor+';' );
+        this.c[4] = this.dom( 'div', this.css.basic + 'top:4px; height:' + (this.h-8) + 'px; width:0px; background:'+cc.text+';' );
 
         // fake
-        this.c[5] = this.dom( 'div', this.css.txtselect + 'height:' + (this.h-4) + 'px; justify-content: center; font-style: italic; color:'+this.colors.inputHolder+';' );
+        this.c[5] = this.dom( 'div', this.css.txtselect + 'height:' + (this.h-4) + 'px; justify-content: center; font-style: italic; color:'+cc.border+';' );
         if( this.value === '' ) this.c[5].textContent = this.placeHolder;
+
+        
 
 
         this.init();
@@ -69,7 +73,7 @@ export class TextInput extends Proto {
 
         if( !this.isDown ){
             this.isDown = true;
-            if( name === 'text' ) this.setInput( this.c[3] );
+            if( name === 'text' ) this.setInput( this.c[2] );
             return this.mousemove( e );
         }
 
@@ -102,22 +106,11 @@ export class TextInput extends Proto {
 
     update ( ) {
 
-        this.c[3].textContent = this.value;
+        this.c[2].textContent = this.value;
         
     }
 
     // ----------------------
-
-    render ( c, e, s ) {
-
-        this.s[4].width = '1px';
-        this.s[4].left = (this.sa + c+5) + 'px';
-
-        this.s[2].left = (this.sa + e+5) + 'px';
-        this.s[2].width = s+'px';
-    
-    }
-
 
     reset () {
 
@@ -129,14 +122,16 @@ export class TextInput extends Proto {
     //   INPUT
     // ----------------------
 
-    select ( c, e, w ) {
+    select ( c, e, w, t ) {
 
         let s = this.s;
         let d = this.sa + 5;
         s[4].width = '1px';
-        s[4].left = ( d + c ) + 'px';
-        s[2].left = ( d + e ) + 'px';
-        s[2].width = w + 'px';
+        s[4].left = ( d + e ) + 'px';
+
+        s[3].left =  ( d + e )  + 'px';
+        s[3].width =  w  + 'px';
+        this.c[3].innerHTML = t
     
     }
 
@@ -144,7 +139,8 @@ export class TextInput extends Proto {
 
         let s = this.s;
         if(!s) return;
-        s[2].width = 0 + 'px';
+        s[3].width =  0  + 'px';
+        this.c[3].innerHTML = 't'
         s[4].width = 0 + 'px';
 
     }
@@ -153,7 +149,7 @@ export class TextInput extends Proto {
 
         if( this.allway ) force = true; 
 
-        this.value = this.c[3].textContent;
+        this.value = this.c[2].textContent;
 
         if(this.value !== '') this.c[5].textContent = '';
         else this.c[5].textContent = this.placeHolder;
@@ -173,8 +169,8 @@ export class TextInput extends Proto {
         super.rSize();
 
         let s = this.s;
-        s[3].left = this.sa + 'px';
-        s[3].width = this.sb + 'px';
+        s[2].left = this.sa + 'px';
+        s[2].width = this.sb + 'px';
 
         s[5].left = this.sa + 'px';
         s[5].width = this.sb + 'px';

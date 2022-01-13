@@ -12,46 +12,41 @@ export class Gui {
 
     constructor( o = {} ) {
 
-        // for 3d
-        this.canvas = null;
-        this.screen = null;
-        this.plane = o.plane || null;
+        this.isGui = true
 
-        this.isEmpty = true;
+        this.name = 'gui'
+
+        // for 3d
+        this.canvas = null
+        this.screen = null
+        this.plane = o.plane || null
+
+        this.isEmpty = true
 
         // color
-        this.colors = Tools.cloneColor();
-        this.css = Tools.cloneCss();
+        if( o.config ) o.colors = o.config
+        
+        if ( o.colors ) this.setConfig( o.colors )
+        else this.colors = Tools.defineColor( o )
 
+        // style
+        this.css = Tools.cloneCss()
 
-        if( o.config ) this.setConfig( o.config );
+        this.isReset = true
+        this.tmpAdd = null
+        //this.tmpH = 0
 
+        this.isCanvas = o.isCanvas || false
+        this.isCanvasOnly = false
+        
+        this.callback = o.callback  === undefined ? null : o.callback
 
-        this.bg = o.bg || this.colors.background;
+        this.forceHeight = o.maxHeight || 0
+        this.lockHeight = o.lockHeight || false
 
-        if( o.transparent !== undefined ){
-            this.colors.background = 'none';
-            this.colors.backgroundOver = 'none';
-        }
+        this.isItemMode = o.itemMode !== undefined ? o.itemMode : false
 
-        //if( o.callback ) this.callback =  o.callback;
-
-        this.isReset = true;
-
-        this.tmpAdd = null;
-        this.tmpH = 0;
-
-        this.isCanvas = o.isCanvas || false;
-        this.isCanvasOnly = false;
-        this.cssGui = o.css !== undefined ? o.css : '';
-        this.callback = o.callback  === undefined ? null : o.callback;
-
-        this.forceHeight = o.maxHeight || 0;
-        this.lockHeight = o.lockHeight || false;
-
-        this.isItemMode = o.itemMode !== undefined ? o.itemMode : false;
-
-        this.cn = '';
+        this.cn = ''
         
         // size define
         this.size = Tools.size;
@@ -70,7 +65,7 @@ export class Gui {
         this.mouse = new V2().neg();
 
         this.h = 0;
-        this.prevY = -1;
+        //this.prevY = -1;
         this.sw = 0;
 
         
@@ -80,8 +75,11 @@ export class Gui {
         this.bh = !this.isWithClose ? 0 : this.size.h;
 
         this.autoResize = o.autoResize === undefined ? true : o.autoResize;
-        
-        this.isCenter = o.center || false;
+
+        // default position
+        this.isCenter = o.center || false
+        this.cssGui = o.css !== undefined ? o.css : (this.isCenter ? '' : 'right:10px;')
+
         this.isOpen = o.open !== undefined ? o.open : true;
         this.isDown = false;
         this.isScroll = false;
@@ -95,33 +93,37 @@ export class Gui {
         this.oy = 0;
 
 
-
         this.isNewTarget = false;
 
-        this.content = Tools.dom( 'div', this.css.basic + ' width:0px; height:auto; top:0px; background:'+this.colors.content+'; ' + this.cssGui );
+        let cc = this.colors
+
+        this.content = Tools.dom( 'div', this.css.basic + ' width:0px; height:auto; top:0px; background:'+cc.content+'; ' + this.cssGui );
 
         this.innerContent = Tools.dom( 'div', this.css.basic + 'width:100%; top:0; left:0; height:auto; overflow:hidden;');
+        //this.innerContent = Tools.dom( 'div', this.css.basic + this.css.button + 'width:100%; top:0; left:0; height:auto; overflow:hidden;');
         this.content.appendChild( this.innerContent );
 
-        this.inner = Tools.dom( 'div', this.css.basic + 'width:100%; left:0; ');
+        //this.inner = Tools.dom( 'div', this.css.basic + 'width:100%; left:0; ')
+        this.useFlex = true 
+        let flexible = this.useFlex ? 'display:flex; flex-flow: row wrap;' : '' //' display:flex; justify-content:start; align-items:start;flex-direction: column; justify-content: center; align-items: center;';
+        this.inner = Tools.dom( 'div', this.css.basic + flexible + 'width:100%; left:0; ');
         this.innerContent.appendChild(this.inner);
 
         // scroll
-        this.scrollBG = Tools.dom( 'div', this.css.basic + 'right:0; top:0; width:'+ (this.size.s - 1) +'px; height:10px; display:none; background:'+this.bg+';');
+        this.scrollBG = Tools.dom( 'div', this.css.basic + 'right:0; top:0; width:'+ (this.size.s - 1) +'px; height:10px; display:none; background:'+cc.background+';');
         this.content.appendChild( this.scrollBG );
 
-        this.scroll = Tools.dom( 'div', this.css.basic + 'background:'+this.colors.scroll+'; right:2px; top:0; width:'+(this.size.s-4)+'px; height:10px;');
+        this.scroll = Tools.dom( 'div', this.css.basic + 'background:'+cc.button+'; right:2px; top:0; width:'+(this.size.s-4)+'px; height:10px;');
         this.scrollBG.appendChild( this.scroll );
 
         // bottom button
         this.bottomText = o.bottomText || ['open', 'close'];
 
-        let r = o.radius || this.colors.radius;
-        this.bottom = Tools.dom( 'div',  this.css.txt + 'width:100%; top:auto; bottom:0; left:0; border-bottom-right-radius:'+r+'px;  border-bottom-left-radius:'+r+'px; text-align:center; height:'+this.bh+'px; line-height:'+(this.bh-5)+'px;');// border-top:1px solid '+Tools.colors.stroke+';');
-        this.content.appendChild( this.bottom );
-        this.bottom.textContent = this.isOpen ? this.bottomText[1] : this.bottomText[0];
-        this.bottom.style.background = this.bg;
-
+        let r = cc.radius;
+        this.bottom = Tools.dom( 'div',  this.css.txt + 'width:100%; top:auto; bottom:0; left:0; border-bottom-right-radius:'+r+'px; border-bottom-left-radius:'+r+'px; justify-content:center; height:'+this.bh+'px; line-height:'+(this.bh-5)+'px; color:' + cc.text+';' );// border-top:1px solid '+Tools.colors.stroke+';');
+        this.content.appendChild( this.bottom )
+        this.bottom.textContent = this.isOpen ? this.bottomText[1] : this.bottomText[0]
+        this.bottom.style.background = cc.background
 
         //
 
@@ -129,17 +131,24 @@ export class Gui {
         this.parent = o.target !== undefined ? o.target : this.parent;
         
         if( this.parent === null && !this.isCanvas ){ 
-        	this.parent = document.body;
-            // default position
-        	if( !this.isCenter ) this.content.style.right = '10px'; 
+        	this.parent = document.body
         }
 
         if( this.parent !== null ) this.parent.appendChild( this.content );
 
         if( this.isCanvas && this.parent === null ) this.isCanvasOnly = true;
 
-        if( !this.isCanvasOnly ) this.content.style.pointerEvents = 'auto';
+        if( !this.isCanvasOnly ){ 
+            this.content.style.pointerEvents = 'auto';
+        } else {
+            o.transition = 0
+        }
 
+
+        // height transition
+        this.transition = o.transition || Tools.transition
+        if( this.transition ) setTimeout( this.addTransition.bind( this ), 0 );
+        
 
         this.setWidth();
 
@@ -147,27 +156,26 @@ export class Gui {
 
         Roots.add( this );
 
-
-
     }
 
-    setTop ( t, h ) {
+    setTop( t, h ) {
 
         this.content.style.top = t + 'px';
         if( h !== undefined ) this.forceHeight = h;
-        this.setHeight();
+        this.calc();
 
         Roots.needReZone = true;
 
     }
 
-    //callback: function () {},
+    addTransition(){
 
-    dispose () {
-
-        this.clear();
-        if( this.parent !== null ) this.parent.removeChild( this.content );
-        Roots.remove( this );
+        if( this.transition && !this.isCanvas ){
+            this.innerContent.style.transition = 'height '+this.transition+'s ease-out';
+            this.content.style.transition = 'height '+this.transition+'s ease-out';
+            this.bottom.style.transition = 'top '+this.transition+'s ease-out';
+            //this.bottom.addEventListener("transitionend", Roots.resize, true);
+        }
 
     }
 
@@ -203,28 +211,25 @@ export class Gui {
 
     }
 
-    setUvMouse ( uv ) {
-
-        this.mouse.set( Math.round( uv.x * this.canvas.width ), this.canvas.height - Math.round( uv.y * this.canvas.height ) );
-
-    }
-
     noMouse () {
 
         this.mouse.neg();
 
     }
 
-    setMouse ( m ) {
+    setMouse ( uv, flip = true ) {
 
-        this.mouse.set( m.x, m.y );
+        if(flip) this.mouse.set( Math.round( uv.x * this.canvas.width ), this.canvas.height - Math.round( uv.y * this.canvas.height ) );
+        else this.mouse.set( Math.round( uv.x * this.canvas.width ), Math.round( uv.y * this.canvas.height ) );
+        //this.mouse.set( m.x, m.y );
 
     }
 
     setConfig ( o ) {
 
-        this.setColors( o );
-        this.setText( o.fontSize, o.text, o.font, o.shadow );
+        // reset to default text 
+        Tools.setText()
+        this.colors = Tools.defineColor( o )
 
     }
 
@@ -238,7 +243,7 @@ export class Gui {
 
     setText ( size, color, font, shadow ) {
 
-        Tools.setText( size, color, font, shadow, this.colors, this.css );
+        Tools.setText( size, color, font, shadow );
 
     }
 
@@ -262,6 +267,7 @@ export class Gui {
     mode ( n ) {
 
     	let needChange = false;
+        let cc = this.colors;
 
     	if( n !== this.cn ){
 
@@ -269,18 +275,28 @@ export class Gui {
 
 	    	switch( n ){
 
-	    		case 'def': 
-	    		   this.scroll.style.background = this.colors.scroll; 
-	    		   this.bottom.style.background = this.colors.background;
-	    		   this.bottom.style.color = this.colors.text;
+	    		case 'def':
+                   Roots.cursor();
+	    		   this.scroll.style.background = cc.button; 
+	    		   this.bottom.style.background = cc.background
+	    		   this.bottom.style.color = cc.text
 	    		break;
 
 	    		//case 'scrollDef': this.scroll.style.background = this.colors.scroll; break;
-	    		case 'scrollOver': this.scroll.style.background = this.colors.select; break;
-	    		case 'scrollDown': this.scroll.style.background = this.colors.down; break;
+	    		case 'scrollOver': 
+                    Roots.cursor('ns-resize');
+                    this.scroll.style.background = cc.select
+                break;
+	    		case 'scrollDown': 
+                    this.scroll.style.background = cc.select
+                break;
 
 	    		//case 'bottomDef': this.bottom.style.background = this.colors.background; break;
-	    		case 'bottomOver': this.bottom.style.background = this.colors.backgroundOver; this.bottom.style.color = '#FFF'; break;
+	    		case 'bottomOver': 
+                    Roots.cursor('pointer');
+                    this.bottom.style.background = cc.backgroundOver; 
+                    this.bottom.style.color = cc.textOver; 
+                break;
 	    		//case 'bottomDown': this.bottom.style.background = this.colors.select; this.bottom.style.color = '#000'; break;
 
 	    	}
@@ -328,7 +344,7 @@ export class Gui {
 
         let name = '';
 
-        let s = this.isScroll ?  this.zone.w  - this.size.s : this.zone.w;
+        let s = this.isScroll ?  this.zone.w - this.size.s : this.zone.w;
         
         if( l.y > this.zone.h - this.bh &&  l.y < this.zone.h ) name = 'bottom';
         else name = l.x > s ? 'scroll' : 'content';
@@ -349,8 +365,6 @@ export class Gui {
     	let targetChange = false;
 
     	let name = this.testZone( e );
-
-        
 
     	if( type === 'mouseup' && this.isDown ) this.isDown = false;
     	if( type === 'mousedown' && !this.isDown ) this.isDown = true;
@@ -384,7 +398,8 @@ export class Gui {
 	    		if( type === 'mousedown' ) {
 	    			this.isOpen = this.isOpen ? false : true;
 		            this.bottom.textContent = this.isOpen ? this.bottomText[1] : this.bottomText[0];
-		            this.setHeight();
+		            //this.setHeight();
+                    this.calc();
 		            this.mode('def');
 		            change = true;
 	    		}
@@ -474,9 +489,8 @@ export class Gui {
 
     add () {
 
-        let a = arguments;
-
-        let ontop = false;
+        let a = arguments
+        let ontop = false
 
         if( typeof a[1] === 'object' ){ 
 
@@ -497,14 +511,14 @@ export class Gui {
             
         } 
 
-        let u = add.apply( this, a );
+        let u = add.apply( this, a )
 
         if( u === null ) return;
 
-        if(ontop) this.uis.unshift( u );
-        else this.uis.push( u );
+        if( ontop ) this.uis.unshift( u )
+        else this.uis.push( u )
 
-        if( !u.autoWidth ){
+        /*if( !u.autoWidth ){
             let y = u.c[0].getBoundingClientRect().top;
             if( this.prevY !== y ){
                 this.calc( u.h + 1 );
@@ -513,15 +527,17 @@ export class Gui {
         }else{
             this.prevY = 0;//-1;
             this.calc( u.h + 1 );
-        }
+        }*/
 
-        this.isEmpty = false;
+        this.calc()
 
-        return u;
+        this.isEmpty = false
+
+        return u
 
     }
 
-    applyCalc () {
+    /*applyCalc () {
 
         //console.log(this.uis.length, this.tmpH )
 
@@ -529,13 +545,9 @@ export class Gui {
         //this.tmpH = 0;
         this.tmpAdd = null;
 
-    }
+    }*/
 
-    calcUis () {
-
-        Roots.calcUis( this.uis, this.zone, this.zone.y );
-
-    }
+    
 
     // remove one node
 
@@ -551,16 +563,17 @@ export class Gui {
 
         let id = this.uis.indexOf( n ); 
         if ( id !== -1 ) {
-            this.calc( - (this.uis[ id ].h + 1 ) );
+            //this.calc( - (this.uis[ id ].h + 1 ) );
             this.inner.removeChild( this.uis[ id ].c[0] );
-            this.uis.splice( id, 1 ); 
+            this.uis.splice( id, 1 );
+            this.calc() 
         }
 
     }
 
     // clear all gui
 
-    empty () {
+    empty() {
 
         //this.close();
 
@@ -574,13 +587,18 @@ export class Gui {
             //this.uis[i].clear()
         }
 
+        this.uis = [];
         this.isEmpty = true;
+        //this.zone = { x:0, y:0, w:this.size.w, h:0 };
+        //this.setWidth()
         //Roots.listens = [];
-        this.calc( -this.h );
+        this.calc();
+
+
 
     }
 
-    clear () {
+    clear() {
 
         this.empty();
 
@@ -593,6 +611,14 @@ export class Gui {
         Roots.listens = [];
 
         this.calc( -this.h );*/
+
+    }
+
+    dispose() {
+
+        this.clear();
+        if( this.parent !== null ) this.parent.removeChild( this.content );
+        Roots.remove( this );
 
     }
 
@@ -685,24 +711,28 @@ export class Gui {
     //   RESIZE FUNCTION
     // ----------------------
 
-    calc ( y ) {
+    calcUis() {
+        
+        return Roots.calcUis( this.uis, this.zone, this.zone.y )
+    }
 
-        this.h += y;
-        clearTimeout( this.tmp );
-        this.tmp = setTimeout( this.setHeight.bind(this), 10 );
+    calc() {
+
+        clearTimeout( this.tmp )
+        this.tmp = setTimeout( this.setHeight.bind( this ), 10 )
 
     }
 
-    setHeight () {
+    setHeight() {
 
-        if( this.tmp ) clearTimeout( this.tmp );
+        if( this.tmp ) clearTimeout( this.tmp )
 
-        //console.log(this.h )
-
-        this.zone.h = this.bh;
-        this.isScroll = false;
+        this.zone.h = this.bh
+        this.isScroll = false
 
         if( this.isOpen ){
+
+            this.h = this.calcUis()
 
             let hhh = this.forceHeight ? this.forceHeight + this.zone.y : window.innerHeight;
 
@@ -723,16 +753,18 @@ export class Gui {
 
         }
 
-        this.upScroll( this.isScroll );
+        this.upScroll( this.isScroll )
 
-        this.innerContent.style.height = this.zone.h - this.bh + 'px';
-        this.content.style.height = this.zone.h + 'px';
-        this.bottom.style.top = this.zone.h - this.bh + 'px';
+        this.innerContent.style.height = this.zone.h - this.bh + 'px'
+        this.content.style.height = this.zone.h + 'px'
+        this.bottom.style.top = this.zone.h - this.bh + 'px'
+
 
         if( this.forceHeight && this.lockHeight ) this.content.style.height = this.forceHeight + 'px';
 
-        if( this.isOpen ) this.calcUis();
-        if( this.isCanvas ) this.draw( true );
+        //if( this.isOpen ) this.calcUis()
+        if( this.isCanvas ) this.draw( true )
+        //else if( !this.transition ) this.rezone()
 
     }
 
@@ -744,16 +776,21 @@ export class Gui {
 
         if( w ) this.zone.w = w;
 
+        this.zone.w = Math.floor( this.zone.w )
+
+        //console.log( this.zone.w )
+
         this.content.style.width = this.zone.w + 'px';
 
         if( this.isCenter ) this.content.style.marginLeft = -(Math.floor(this.zone.w*0.5)) + 'px';
 
         this.setItemWidth( this.zone.w - this.sw );
 
-        this.setHeight();
+        //this.setHeight();
+        //this.calc()
 
-        if( !this.isCanvasOnly ) Roots.needReZone = true;
-        //this.resize();
+        //if( this.isCanvasOnly ) Roots.needReZone = true;
+        //Roots.resize();
 
     }
 
@@ -761,12 +798,10 @@ export class Gui {
 
         let i = this.uis.length;
         while(i--){
-            this.uis[i].setSize( w );
+            this.uis[i].setSize( w )
             this.uis[i].rSize()
         }
 
     }
 
 }
-
-Gui.prototype.isGui = true;

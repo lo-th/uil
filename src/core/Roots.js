@@ -18,6 +18,7 @@ const R = {
 
 	needReZone: true,
 	isEventsInit: false,
+    isLeave:false,
 
     downTime:0,
     prevTime:0,
@@ -111,7 +112,7 @@ const R = {
 
         let dom = document.body;
 
-        R.isMobile = R.testMobile();
+        R.isMobile = R.testMobile()
         R.now = R.getTime()
 
 
@@ -124,10 +125,10 @@ const R = {
         
         dom.addEventListener( 'pointercancel', R )
         dom.addEventListener( 'pointerleave', R )
-        dom.addEventListener( 'pointerout', R )
+        //dom.addEventListener( 'pointerout', R )
 
-        dom.addEventListener( 'pointerdown', R )
         dom.addEventListener( 'pointermove', R )
+        dom.addEventListener( 'pointerdown', R )
         dom.addEventListener( 'pointerup', R )
        
 
@@ -156,12 +157,13 @@ const R = {
         
         
         dom.removeEventListener( 'pointercancel', R );
-        dom.removeEventListener( 'pointermove', R );
         dom.removeEventListener( 'pointerleave', R );
+        //dom.removeEventListener( 'pointerout', R );
 
+        dom.removeEventListener( 'pointermove', R );
         dom.removeEventListener( 'pointerdown', R );
         dom.removeEventListener( 'pointerup', R );
-        dom.removeEventListener( 'pointerout', R );
+        
 
         dom.removeEventListener( 'keydown', R );
         dom.removeEventListener( 'keyup', R );
@@ -179,8 +181,8 @@ const R = {
         
         while( i-- ){
 
-            u = R.ui[i];
-            if( u.isGui && !u.isCanvasOnly && u.autoResize ) u.setHeight();
+            u = R.ui[i]
+            if( u.isGui && !u.isCanvasOnly && u.autoResize ) u.calc()
         
         }
 
@@ -240,9 +242,19 @@ const R = {
             e.type = 'mouseup'
         }
 
+        if( event.type === 'pointerleave'){ R.isLeave = true };
+
+
         if( event.type === 'pointerdown') e.type = 'mousedown';
         if( event.type === 'pointerup') e.type = 'mouseup';
-        if( event.type === 'pointermove') e.type = 'mousemove';
+        if( event.type === 'pointermove'){ 
+            if( R.isLeave ){ 
+                // if user resize outside this document
+                R.isLeave = false
+                R.resize()
+            }
+            e.type = 'mousemove';
+        }
 
         // double click test
         if( e.type === 'mousedown' ) {
@@ -261,6 +273,14 @@ const R = {
         // mouse lock
         if( e.type === 'mousedown' ) R.lock = true;
         if( e.type === 'mouseup' ) R.lock = false;
+
+        //if( R.current !== null && R.current.neverlock ) R.lock = false;
+
+        /*if( e.type === 'mousedown' && event.button === 1){
+            R.cursor()
+            e.preventDefault();
+            e.stopPropagation();
+        }*/
 
         if( R.isMobile && e.type === 'mousedown' ) R.findID( e );
         if( e.type === 'mousemove' && !R.lock ) R.findID( e );
@@ -294,7 +314,7 @@ const R = {
 
         while( i-- ){
 
-            u = R.ui[i];
+            u = R.ui[i]
 
             if( u.isCanvasOnly ) {
 
@@ -342,38 +362,59 @@ const R = {
 
     calcUis: function ( uis, zone, py ) {
 
-        let lng = uis.length, u, i, px = 0, my = 0;
+        //console.log('calc_uis')
 
-        for( i = 0; i < lng; i++ ){
+        let i = uis.length, u, px = 0, n = 0, tw;
+        let height = 0
+        let m = 1
 
-            u = uis[i];
+        while( i-- ){
 
-            u.zone.w = u.w;
-            u.zone.h = u.h;
+            u = uis[n]
+            n++
+
+            if( u.isGroup ) u.calcUis()
+
+            u.zone.w = u.w
+            u.zone.h = u.h
+            m = u.margin
 
             if( !u.autoWidth ){
 
-                if( px === 0 ) py += u.h + 1;
+                if( px===0 ){ 
+                    height += u.h + m
+
+                } 
 
                 u.zone.x = zone.x + px;
-                u.zone.y = px === 0 ? py - u.h : my;
+                u.zone.y = py;
 
-                my = u.zone.y;
-                
-                px += u.w;
-                if( px + u.w > zone.w ) px = 0;
+                tw = R.getWidth(u)
+                if( tw ) u.zone.w = u.w = tw;
+
+                //console.log( u.name, u.zone.w, u.w, zone )
+                px += u.zone.w;
+
+                if( px >= zone.w ) { 
+                    py += u.h + m; 
+                    px = 0; 
+                }
 
             } else {
 
-                u.zone.x = zone.x;
-                u.zone.y = py;
-                py += u.h + 1;
+                px = 0
+
+                u.zone.x = zone.x
+                u.zone.y = py
+                py += u.h + m
+
+                height += u.h + m
 
             }
 
-            if( u.isGroup ) u.calcUis();
-
         }
+
+        return height
 
     },
 
@@ -383,7 +424,7 @@ const R = {
         let i = uis.length;
 
         while( i-- ){
-            if( R.onZone( uis[i], e.clientX, e.clientY ) ) return i;
+            if( R.onZone( uis[i], e.clientX, e.clientY ) ) return i
         }
 
         return -1;
@@ -402,13 +443,13 @@ const R = {
 
         while( i-- ){ 
 
-            u = R.ui[i];
-            R.getZone( u );
-            if( u.isGui ) u.calcUis();
+            u = R.ui[i]
+            R.getZone( u )
+            if( u.isGui ) u.calcUis()
 
         }
 
-        R.needReZone = false;
+        R.needReZone = false
 
     },
 
@@ -429,11 +470,29 @@ const R = {
 
     },
 
+    getWidth: function ( o ) {
+
+
+
+        return o.getDom().offsetWidth
+
+        //let r = o.getDom().getBoundingClientRect();
+        //return (r.width)
+        //return Math.floor(r.width)
+
+    },
+
     getZone: function ( o ) {
 
         if( o.isCanvasOnly ) return;
         let r = o.getDom().getBoundingClientRect();
+
+        //if( !r.width ) return
+        //o.zone = { x:Math.floor(r.left), y:Math.floor(r.top), w:Math.floor(r.width), h:Math.floor(r.height) };
+        //o.zone = { x:Math.round(r.left), y:Math.round(r.top), w:Math.round(r.width), h:Math.round(r.height) };
         o.zone = { x:r.left, y:r.top, w:r.width, h:r.height };
+
+        //console.log(o.name, o.zone)
 
     },
 
@@ -507,24 +566,29 @@ const R = {
 
     setHidden: function () {
 
+
         if( R.hiddenImput === null ){
 
-            let hide = R.debugInput ? '' : 'opacity:0; zIndex:0;';
-
-            let css = R.parent.css.txt + 'padding:0; width:auto; height:auto; text-shadow:none;'
-            css += 'left:10px; top:auto; border:none; color:#FFF; background:#000;' + hide;
+            //let css = R.parent.css.txtselect + 'padding:0; width:auto; height:auto; '
+            //let css = R.parent.css.txt + 'padding:0; width:auto; height:auto; text-shadow:none;'
+            //css += 'left:10px; top:auto; border:none; color:#FFF; background:#000;' + hide;
 
             R.hiddenImput = document.createElement('input');
             R.hiddenImput.type = 'text';
-            R.hiddenImput.style.cssText = css + 'bottom:30px;' + (R.debugInput ? '' : 'transform:scale(0);');;
+            //R.hiddenImput.style.cssText = css + 'bottom:30px;' + (R.debugInput ? '' : 'transform:scale(0);');
 
             R.hiddenSizer = document.createElement('div');
-            R.hiddenSizer.style.cssText = css + 'bottom:60px;';
+            //R.hiddenSizer.style.cssText = css + 'bottom:60px;';
             
             document.body.appendChild( R.hiddenImput );
             document.body.appendChild( R.hiddenSizer );
 
         }
+
+        let hide = R.debugInput ? '' : 'opacity:0; zIndex:0;';
+        let css = R.parent.css.txtselect + 'padding:0; width:auto; height:auto; left:10px; top:auto; color:#FFF; background:#000;'+ hide;
+        R.hiddenImput.style.cssText = css + 'bottom:10px;' + (R.debugInput ? '' : 'transform:scale(0);');
+        R.hiddenSizer.style.cssText = css + 'bottom:40px;';
 
         R.hiddenImput.style.width = R.input.clientWidth + 'px';
         R.hiddenImput.value = R.str;
@@ -626,7 +690,7 @@ const R = {
         var e = R.textWidth( R.str.substring( 0, R.inputRange[0] ));
         var s = R.textWidth( R.str.substring( R.inputRange[0],  R.inputRange[1] ));
 
-        R.parent.select( c, e, s );
+        R.parent.select( c, e, s, R.hiddenSizer.innerHTML );
 
     },
 
@@ -649,8 +713,9 @@ const R = {
         R.parent.unselect();
 
         //R.input.style.background = 'none';
-        R.input.style.background = R.parent.colors.inputBg;
-        R.input.style.borderColor = R.parent.colors.inputBorder;
+        R.input.style.background = R.parent.colors.back;
+        R.input.style.borderColor = R.parent.colors.border;
+        //R.input.style.color = R.parent.colors.text;
         R.parent.isEdit = false;
 
         R.input = null;
@@ -667,8 +732,9 @@ const R = {
         R.input = Input;
         R.parent = parent;
 
-        R.input.style.background = R.parent.colors.inputOver;
-        R.input.style.borderColor = R.parent.colors.inputBorderSelect;
+        R.input.style.background = R.parent.colors.backoff;
+        R.input.style.borderColor = R.parent.colors.select;
+        //R.input.style.color = R.parent.colors.textSelect;
         R.str = R.input.textContent;
 
         R.setHidden();

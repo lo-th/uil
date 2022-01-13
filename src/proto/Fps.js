@@ -72,7 +72,7 @@ export class Fps extends Proto {
         this.c[0].style.cursor = 'pointer';
         this.c[0].style.pointerEvents = 'auto';
 
-        let panelCss = 'display:none; left:10px; top:'+ this.h + 'px; height:'+(this.hplus - 8)+'px; box-sizing:border-box; background: rgba(0, 0, 0, 0.2); border:' + (this.colors.groupBorder !== 'none'? this.colors.groupBorder+';' : '1px solid rgba(255, 255, 255, 0.2);');
+        let panelCss = 'display:none; left:10px; top:'+ this.h + 'px; height:'+(this.hplus - 8)+'px; box-sizing:border-box; background: rgba(0, 0, 0, 0.2); border:1px solid '+ this.colors.border +';';
 
         if( this.radius !== 0 ) panelCss += 'border-radius:' + this.radius+'px;'; 
 
@@ -88,7 +88,7 @@ export class Fps extends Proto {
         //this.dom( 'path', null, { fill:'rgba(0,255,255,0.3)', 'stroke-width':1, stroke:'#0FF', 'vector-effect':'non-scaling-stroke' }, this.c[2] );
         
         // arrow
-        this.c[3] = this.dom( 'path', this.css.basic + 'position:absolute; width:10px; height:10px; left:4px; top:'+fltop+'px;', { d:this.svgs.arrow, fill:this.fontColor, stroke:'none'});
+        this.c[3] = this.dom( 'path', this.css.basic + 'position:absolute; width:10px; height:10px; left:4px; top:'+fltop+'px;', { d:this.svgs.arrow, fill:this.colors.text, stroke:'none'});
 
         // result test
         this.c[4] = this.dom( 'div', this.css.txt + 'position:absolute; left:10px; top:'+(this.h+2) +'px; display:none; width:100%; text-align:center;' );
@@ -102,11 +102,11 @@ export class Fps extends Proto {
 
         s[1].marginLeft = '10px';
         s[1].lineHeight = this.h-4;
-        s[1].color = this.fontColor;
+        s[1].color = this.colors.text;
         s[1].fontWeight = 'bold';
 
-        if( this.radius !== 0 )  s[0].borderRadius = this.radius+'px'; 
-        s[0].border = this.colors.groupBorder;
+        if( this.radius !== 0 )  s[0].borderRadius = this.radius+'px';
+        if( this.colors.gborder!=='none') s[0].border = '1px solid ' + this.colors.gborder;
 
 
 
@@ -159,7 +159,7 @@ export class Fps extends Proto {
 
         switch(mode){
             case 0: // base
-                s[1].color = this.fontColor;
+                s[1].color = this.colors.text;
                 //s[1].background = 'none';
             break;
             case 1: // over
@@ -167,7 +167,7 @@ export class Fps extends Proto {
                 //s[1].background = UIL.SELECT;
             break;
             case 2: // edit / down
-                s[1].color = this.fontColor;
+                s[1].color = this.colors.text;
                 //s[1].background = UIL.SELECTDOWN;
             break;
 
@@ -221,7 +221,7 @@ export class Fps extends Proto {
 
     open () {
 
-        super.open();
+        super.open()
 
         this.h = this.hplus + this.baseH;
 
@@ -241,7 +241,7 @@ export class Fps extends Proto {
 
     close () {
 
-        super.close();
+        super.close()
 
         this.h = this.baseH;
 

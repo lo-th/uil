@@ -91,7 +91,7 @@ function init() {
 
     var env = loader.load( './assets/textures/env.jpg' );
     env.mapping = THREE.SphericalReflectionMapping;
-   env.encoding == THREE.sRGBEncoding;
+    env.encoding == THREE.sRGBEncoding;
 
     var s8 = loader.load( './assets/textures/s8px.png' );
     s8.flipY = false;
@@ -220,11 +220,7 @@ function raytest ( e ) {
 
     if ( intersects.length > 0 ){
 
-        var uv = intersects[ 0 ].uv;
-        mouse2d.x = Math.round( uv.x*cw );
-        mouse2d.y = Math.round( uv.y*ch );
-
-        ui.setMouse( mouse2d );
+        ui.setMouse( intersects[ 0 ].uv, false );
         return true;
 
     } else {
@@ -252,18 +248,13 @@ function initGUI () {
             screen.flipY = false;
             screen.minFilter = THREE.LinearFilter;
             screen.encoding = THREE.sRGBEncoding
-            //screen.generateMipmaps = false;
-            //screen.premultiplyAlpha = false;
             screen.needsUpdate = true;
             mat.screen.map = screen;
             mat.screen.needsUpdate = true;
 
-            
-        } else {
-            screen.needsUpdate = true;
         }
-        
-        //console.log('ui draw')
+            
+        screen.needsUpdate = true
 
     }
 

@@ -53,8 +53,10 @@ export class Numeric extends Proto {
         this.current = -1;
         this.prev = { x:0, y:0, d:0, v:0 };
 
+        let cc = this.colors
+
         // bg
-        this.c[2] = this.dom( 'div', this.css.basic + ' background:' + this.colors.select + '; top:4px; width:0px; height:' + (this.h-8) + 'px;' );
+        this.c[2] = this.dom( 'div', this.css.basic + ' background:' + cc.select + '; top:4px; width:0px; height:' + (this.h-8) + 'px;' );
 
         this.cMode = [];
         
@@ -62,19 +64,23 @@ export class Numeric extends Proto {
         while(i--){
 
             if(this.isAngle) this.value[i] = (this.value[i] * 180 / Math.PI).toFixed( this.precision );
-            this.c[3+i] = this.dom( 'div', this.css.txtselect + ' height:'+(this.h-4)+'px; background:' + this.colors.inputBg + '; borderColor:' + this.colors.inputBorder+'; border-radius:'+this.radius+'px;');
+            this.c[3+i] = this.dom( 'div', this.css.txtselect + ' height:'+(this.h-4)+'px; color:' + cc.text + '; background:' + cc.back + '; borderColor:' + cc.border+'; border-radius:'+this.radius+'px;');
             if(o.center) this.c[2+i].style.textAlign = 'center';
             this.c[3+i].textContent = this.value[i];
-            this.c[3+i].style.color = this.fontColor;
+            this.c[3+i].style.color = this.colors.text;
             this.c[3+i].isNum = true;
 
             this.cMode[i] = 0;
 
         }
 
+        // selection
+        this.selectId = 3 + this.lng;
+        this.c[this.selectId] = this.dom(  'div', this.css.txtselect + 'position:absolute; top:4px; height:' + (this.h-8) + 'px; padding:0px 0px; width:0px; color:' + cc.textSelect + '; background:' + cc.select + '; border:none; border-radius:0px;');
+
         // cursor
-        this.cursorId = 3 + this.lng;
-        this.c[ this.cursorId ] = this.dom( 'div', this.css.basic + 'top:4px; height:' + (this.h-8) + 'px; width:0px; background:'+this.fontColor+';' );
+        this.cursorId = 4 + this.lng;
+        this.c[ this.cursorId ] = this.dom( 'div', this.css.basic + 'top:4px; height:' + (this.h-8) + 'px; width:0px; background:'+cc.text+';' );
 
         this.init();
     }
@@ -337,14 +343,18 @@ export class Numeric extends Proto {
     //   INPUT
     // ----------------------
 
-    select ( c, e, w ) {
+    select ( c, e, w, t ) {
 
         let s = this.s;
         let d = this.current !== -1 ? this.tmp[this.current][0] + 5 : 0;
         s[this.cursorId].width = '1px';
         s[this.cursorId].left = ( d + c ) + 'px';
-        s[2].left = ( d + e ) + 'px';
-        s[2].width = w + 'px';
+        //s[2].left = ( d + e ) + 'px';
+        //s[2].width = w + 'px';
+
+        s[this.selectId].left =  ( d + e )  + 'px';
+        s[this.selectId].width =  w  + 'px';
+        this.c[this.selectId].innerHTML = t
     
     }
 
@@ -352,7 +362,8 @@ export class Numeric extends Proto {
 
         let s = this.s;
         if(!s) return;
-        s[2].width = 0 + 'px';
+        this.c[this.selectId].innerHTML = ''
+        s[this.selectId].width = 0 + 'px';
         s[this.cursorId].width = 0 + 'px';
 
     }

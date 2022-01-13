@@ -1,15 +1,17 @@
 import { Proto } from '../core/Proto.js';
 
-
 export class Button extends Proto {
 
     constructor( o = {} ) {
 
-        super( o );
+        super( o )
 
-        this.value = false;
+        this.value = o.value || '';
 
-        this.values = o.value || this.txt;
+        this.values = o.value || this.txt
+        if( o.values ) this.values = o.values
+
+        
 
         this.onName = o.onName || '';
 
@@ -17,44 +19,43 @@ export class Button extends Proto {
 
         this.customSize = o.forceWidth || -1;
 
-
-
         if( typeof this.values === 'string' ) this.values = [ this.values ];
 
-
-
-        //this.selected = null;
-        this.isDown = false;
-
-        this.isLink = o.link || false;
-
-        // custom color
-        this.cc = [ this.colors.button, this.colors.over, this.colors.select ];
-
-        if( o.cBg !== undefined ) this.cc[0] = o.cBg;
-        if( o.bColor !== undefined ) this.cc[0] = o.bColor;
-        if( o.cSelect !== undefined ) this.cc[1] = o.cSelect;
-        if( o.cDown !== undefined ) this.cc[2] = o.cDown;
-
-        this.isLoadButton = o.loader || false;
-        this.isDragButton = o.drag || false;
+        this.isDown = false
+        this.neverlock = true
+        this.isLoadButton = o.loader || false
+        this.isDragButton = o.drag || false
+        this.res = 0
         
-        if( this.isDragButton ) this.isLoadButton = true;
+        if( this.isDragButton ) this.isLoadButton = true
 
         this.lng = this.values.length;
-        this.tmp = [];
-        this.stat = [];
+        this.tmp = []
+        this.stat = []
+
+        let sel, cc = this.colors;
 
         for( let i = 0; i < this.lng; i++ ){
 
-            this.c[i+2] = this.dom( 'div', this.css.txt + this.css.button + 'top:1px; background:'+this.cc[0]+'; height:'+(this.h-2)+'px; border:'+this.colors.buttonBorder+'; border-radius:'+this.radius+'px;' );
-            this.c[i+2].style.color = this.fontColor;
+            sel = false
+            if( this.values[i] === this.value && this.isSelectable ) sel = true
+
+            this.c[i+2] = this.dom( 'div', this.css.txt + this.css.button + 'top:1px; height:'+(this.h-2)+'px; border:'+cc.borderSize+'px solid '+cc.border+'; border-radius:'+this.radius+'px;' );
+            this.c[i+2].style.background = sel ? cc.select : cc.button
+            this.c[i+2].style.color = sel ? cc.textSelect : cc.text
             this.c[i+2].innerHTML = this.values[i];
-            this.stat[i] = 1;
+            this.stat[i] = sel ? 3:1;
 
         }
 
-        if( this.c[1] !== undefined ) this.c[1].textContent = '';
+        if( !o.value || !o.values ){
+            if( this.c[1] !== undefined ) this.c[1].textContent = '';
+            this.p = o.p !== undefined ? o.p : 0
+        } else {
+            if( !this.txt ) this.p = 0 
+        }
+
+        //
 
         if( this.isLoadButton ) this.initLoader();
         if( this.isDragButton ){ 
@@ -70,7 +71,6 @@ export class Button extends Proto {
 
     onOff ( ){
 
-        //this.values[0] = this.on;
         this.on = !this.on;
         this.c[2].innerHTML = this.on ? this.onName : this.txt
         
@@ -79,16 +79,16 @@ export class Button extends Proto {
     testZone ( e ) {
 
         let l = this.local;
-        if( l.x === -1 && l.y === -1 ) return '';
+        if( l.x === -1 && l.y === -1 ) return -1
 
-        let i = this.lng;
-        let t = this.tmp;
+        let i = this.lng
+        let t = this.tmp
         
         while( i-- ){
-        	if( l.x>t[i][0] && l.x<t[i][2] ) return i+2;
+        	if( l.x>t[i][0] && l.x<t[i][2] ) return i
         }
 
-        return ''
+        return -1
 
     }
 
@@ -96,117 +96,96 @@ export class Button extends Proto {
     //   EVENTS
     // ----------------------
 
-    /*click ( e ) {
-
-        if( this.onName!== '' ) this.onOff();
-
-        //if( this.isLink ){
-
-         /*   let name = this.testZone( e );
-            if( !name ) return false;
-
-            this.value = this.values[name-2]
-            if( !this.isLoadButton ) this.send();
-            return this.reset();*/
-        //}
-
-    //}
-
     mouseup ( e ) {
-    
-        if( this.isDown ){
-            //this.value = false;
-            this.isDown = false;
-            //this.send();
-            return this.mousemove( e );
+
+        if( !this.isDown ) return false
+
+        this.isDown = false
+        if( this.res !== -1 ){
+            if( this.value === this.values[this.res] && this.unselectable ) this.value = ''
+            else this.value = this.values[this.res]
+            if( !this.isLoadButton ) this.send()
         }
 
-        return false;
+        return this.mousemove( e )
 
     }
 
     mousedown ( e ) {
 
-       // if( this.isLink ) return false;
-
-    	//let name = this.testZone( e );
-
-        //if( !name ) return false;
-
-    	this.isDown = true;
-        /**/
-        this.value = this.values[name-2]
-        if( !this.isLoadButton ) this.send(); 
-        //else this.fileSelect( e.target.files[0] );
-    	return this.mousemove( e );
- 
-        // true;
+        if( this.isDown ) return false
+        this.isDown = true
+    	return this.mousemove( e )
 
     }
 
     mousemove ( e ) {
 
-        let up = false;
+        let up = false
+        this.res = this.testZone( e )
 
-        let name = this.testZone( e );
-
-       // console.log(name)
-
-        if( name !== '' ){
-            this.cursor('pointer');
-            up = this.modes( this.isDown ? 3 : 2, name );
+        if( this.res !== -1 ){
+            this.cursor('pointer')
+            up = this.modes( this.isDown ? 3 : 2, this.res )
         } else {
-        	up = this.reset();
+        	up = this.reset()
         }
 
-        //console.log(up)
-
-        return up;
+        return up
 
     }
 
     // ----------------------
 
-    modes ( n, name ) {
+    modes ( N = 1, id = -1 ) {
 
-        let v, r = false;
+        let i = this.lng, w, n, r = false
 
-        for( let i = 0; i < this.lng; i++ ){
+        while( i-- ){
 
-            if( i === name-2 ) v = this.mode( n, i+2 );
-            else v = this.mode( 1, i+2 );
+            n = N
+            w = this.isSelectable ? this.values[ i ] === this.value : false
+            
+            if( i === id ){
+                if( w && n === 2 ) n = 3 
+            } else {
+                n = 1
+                if( w ) n = 4
+            }
 
-            if(v) r = true;
+            //if( this.mode( n, i ) ) r = true
+            r = this.mode( n, i )
 
         }
 
-        return r;
+        return r
 
     }
 
-
-    mode ( n, name ) {
+    mode ( n, id ) {
 
         let change = false;
+        let cc = this.colors, s = this.s
+        let i = id+2
 
-        let i = name - 2;
+        if( this.stat[id] !== n ){
 
-        if( this.stat[i] !== n ){
+            this.stat[id] = n;
         
             switch( n ){
 
-                case 1: this.stat[i] = 1; this.s[ i+2 ].color = this.fontColor; this.s[ i+2 ].background = this.cc[0]; break;
-                case 2: this.stat[i] = 2; this.s[ i+2 ].color = this.fontSelect; this.s[ i+2 ].background = this.cc[1]; break;
-                case 3: this.stat[i] = 3; this.s[ i+2 ].color = this.fontSelect; this.s[ i+2 ].background = this.cc[2]; break;
+                case 1: s[i].color = cc.text; s[i].background = cc.button; break;
+                case 2: s[i].color = cc.textOver; s[i].background = cc.overoff; break;
+                case 3: s[i].color = cc.textOver; s[i].background = cc.over; break;
+                case 4: s[i].color = cc.textSelect; s[i].background = cc.select; break;
 
             }
 
             change = true;
 
         }
-        
 
-        return change;
+        return change
 
     }
 
@@ -214,27 +193,9 @@ export class Button extends Proto {
 
     reset () {
 
-        this.value = false;
-
-        this.cursor();
-
-        /*let v, r = false;
-
-        for( let i = 0; i < this.lng; i++ ){
-            v = this.mode( 1, i+2 );
-            if(v) r = true;
-        }*/
-
-        return this.modes( 1 , 2 );
-
-    	/*if( this.selected ){
-    		this.s[ this.selected ].color = this.fontColor;
-            this.s[ this.selected ].background = this.buttonColor;
-            this.selected = null;
-            
-            return true;
-    	}
-        return false;*/
+        this.res = -1
+        this.cursor()
+        return this.modes()
 
     }
 
@@ -253,8 +214,8 @@ export class Button extends Proto {
 
         e.preventDefault();
 
-        this.s[4].borderColor = this.fontColor;
-        this.s[4].color = this.fontColor;
+        this.s[4].borderColor = this.color.text;
+        this.s[4].color = this.color.text;
 
     }
 
@@ -269,7 +230,7 @@ export class Button extends Proto {
 
     initDrager () {
 
-        this.c[4] = this.dom( 'div', this.css.txt +' text-align:center; line-height:'+(this.h-8)+'px; border:1px dashed '+this.fontColor+'; top:2px;  height:'+(this.h-4)+'px; border-radius:'+this.radius+'px; pointer-events:auto;' );// cursor:default;
+        this.c[4] = this.dom( 'div', this.css.txt +' text-align:center; line-height:'+(this.h-8)+'px; border:1px dashed '+this.color.text+'; top:2px;  height:'+(this.h-4)+'px; border-radius:'+this.radius+'px; pointer-events:auto;' );// cursor:default;
         this.c[4].textContent = 'DRAG';
 
         this.c[4].addEventListener( 'dragover', function(e){ this.dragover(e); }.bind(this), false );
@@ -343,11 +304,13 @@ export class Button extends Proto {
 
     }
 
-    icon ( string, y, n ) {
+    icon ( string, y = 0, n = 2 ) {
 
-        n = n || 2;
-        this.s[n].padding = ( y || 0 ) +'px 0px';
+        //if(y) this.s[n].margin = ( y ) +'px 0px';
+        this.s[n].padding = ( y ) +'px 0px';
         this.c[n].innerHTML = string;
+
+        return this
 
     }
 

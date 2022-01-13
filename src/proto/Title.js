@@ -9,7 +9,7 @@ export class Title extends Proto {
 
         let prefix = o.prefix || '';
 
-        this.c[2] = this.dom( 'div', this.css.txt + 'text-align:right; width:60px; line-height:'+ (this.h-8) + 'px; color:' + this.fontColor );
+        this.c[2] = this.dom( 'div', this.css.txt + 'justify-content:right; width:60px; line-height:'+ (this.h-8) + 'px; color:' + this.colors.text );
 
         if( this.h === 31 ){
 
@@ -21,7 +21,8 @@ export class Title extends Proto {
 
         let s = this.s;
 
-        s[1].textAlign = o.align || 'left';
+        s[1].justifyContent = o.align || 'left';
+        //s[1].textAlign = o.align || 'left';
         s[1].fontWeight = o.fontWeight || 'bold';
 
 
