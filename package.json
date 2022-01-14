@@ -1,7 +1,7 @@
 {
   "name": "uil",
-  "version": "1.0.2",
-  "description": "JavaScript 3D library",
+  "version": "4.0.0",
+  "description": "JavaScript gui library",
   "main": "build/uil.js",
   "repository": "lo-th/uil",
   "jsnext:main": "build/uil.module.js",
