@@ -13,3 +13,4 @@ body{
 #version { position:absolute; top:64px; left:50%; width:128px; margin-left:-64px; height:10px; pointer-events:none; text-align:center; font-size:12px; font-weight: bold;}
 #debug { position:absolute; top:10px; left:10px; width:300px; pointer-events:none;  -webkit-user-select:none;}
 #debug2 { position:absolute; bottom:10px; right:10px; width:300px; pointer-events:none; text-align:right;  -webkit-user-select:none; }
+#debug3 { position:absolute; bottom:10px; left:0; width:100%; text-align: center; pointer-events:none; -webkit-user-select:none; }

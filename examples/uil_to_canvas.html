@@ -6,27 +6,23 @@
 <link rel="shortcut icon" href="./assets/favicon.ico">
 <link rel="stylesheet" type="text/css" href="./assets/style.css">
 
-
-<script type="text/javascript" src="../build/uil.js"></script>
+<script type="text/javascript" src="../build/uil.min.js"></script>
 
 </head>
 
 <body>
 <div id='logo'></div>
 <div id='version'></div>
-<div id='debug'></div>
+<div id='debug3'></div>
 <div id='debug2'></div>
 <script>
 
-var debug = document.getElementById('debug');
-debug.style.bottom = '10px'
-debug.style.top = 'auto'
-
+const debug = document.getElementById('debug3');
+const debug2 = document.getElementById('debug2');
 document.getElementById('logo').innerHTML = UIL.Tools.icon('logo', '#FFF', 64);
 document.getElementById('version').innerHTML = 'Uil '+ UIL.REVISION;
 
-var temp=0, fps=0, count=0; 
-var debug2 = document.getElementById('debug2');
+let temp=0, fps=0, count=0; 
 
 function animate(time) {
 
@@ -35,29 +31,26 @@ function animate(time) {
 
 }
 
-var timer = null;
-var display = false;
-var list = ['item-0', 'item-1', 'item-2', 'item-3', 'item-4', 'item-5', 'item-6', 'item-7', 'item-8', 'item-9', 'item-10', 'item-11', 'item-12'];
-var list2 = ['item-0', 'item-1', 'item-2'];
-var decal = window.innerWidth - 320;
+let timer = null;
+let display = false;
+let list = ['item-0', 'item-1', 'item-2', 'item-3', 'item-4', 'item-5', 'item-6', 'item-7', 'item-8', 'item-9', 'item-10', 'item-11', 'item-12'];
+let list2 = ['item-0', 'item-1', 'item-2'];
+let decal = window.innerWidth - 320;
 
-var callback = function( v ){ 
-    debug.innerHTML = v;
-}
-
-var callbackButton = function(){ debug.innerHTML = "i'm a button !!" ; }
-var callbackSize = function( v ){ ui.setWidth( v ); }
-var callbackLogo = function( v ){ document.getElementById('logoin').setAttributeNS(null, 'fill', UIL.hexToHtml(v)); document.getElementById('version').style.color = UIL.hexToHtml(v);  }
+const callback = function( v ){ debug.innerHTML = v; }
+const callbackButton = function(){ debug.innerHTML = "i'm a button !!" ; }
+const callbackSize = function( v ){ ui.setWidth( v ); }
+const callbackLogo = function( v ){ document.getElementById('logoin').setAttributeNS(null, 'fill', UIL.hexToHtml(v)); document.getElementById('version').style.color = UIL.hexToHtml(v);  }
 
 
 // single UI element
-var b = UIL.add('button', { target:document.body, callback:populate, name:'populate', w:100, pos:{left:'50%', top:'100px', marginLeft:'-50px' }, h:30, simple:true });
+const b = UIL.add('button', { target:document.body, callback:populate, name:'populate', w:100, pos:{left:'50%', top:'100px', marginLeft:'-50px' }, h:30, simple:true });
 
-var container = document.createElement('div');
+const container = document.createElement('div');
 container.style.cssText = 'position:absolute; top:0px; right:10px; height:100%; width:300px; pointer-events:none; ';
 document.body.appendChild(container);
 
-var ui = new UIL.Gui( { w:300, parent:container, css:'left:0px; top:0px;', isCanvas:true } ).onChange( callback );
+const ui = new UIL.Gui( { w:300, parent:container, css:'left:0px; top:0px;', isCanvas:true } ).onChange( callback );
 ui.canvas.style.cssText = 'position:absolute; left:10px; top:0; border:1px dashed #840; box-sizing: border-box; -moz-box-sizing: border-box; -webkit-box-sizing: border-box; pointer-events:auto;';
 ui.canvas.style.cssText = 'position:absolute; left:10px; top:0; border:1px dashed #840; box-sizing: border-box; -moz-box-sizing: border-box; -webkit-box-sizing: border-box; pointer-events:auto;';
 document.body.appendChild( ui.canvas );

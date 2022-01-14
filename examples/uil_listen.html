@@ -7,43 +7,28 @@
 <link rel="stylesheet" type="text/css" href="./assets/style.css">
 
 <script type="text/javascript" src="../build/uil.js"></script>
-<script type="text/javascript" src="./js/libs/three.min.js"></script>
 
 </head>
 
 <body>
 <div id='logo'></div>
 <div id='version'></div>
-<div id='debug'></div>
+<div id='debug3'></div>
 <script>
 
-var debug = document.getElementById('debug');
-debug.style.bottom = '10px'
-debug.style.top = 'auto'
-var obj1 = { speed: 5 };
-var obj2 = { speed: 5, ready:false };
+const debug = document.getElementById('debug3')
+const obj1 = { speed: 5 }
+const obj2 = { speed: 5, ready:false }
 
-// vector test
-/*var V = new THREE.Group();
-document.body.addEventListener( 'mousemove', mMove, false );
-
-function mMove(e){
-	V.position.x = ( e.clientX / window.innerWidth ) * 2 - 1;
-	V.position.y = - ( e.clientY / window.innerHeight ) * 2 + 1;
-}*/
 
 document.getElementById('logo').innerHTML = UIL.Tools.icon('logo', '#FFF', 64);
 document.getElementById('version').innerHTML = 'Uil '+ UIL.REVISION;
 
-var callback = function ( v, id ) {
+const callback = function ( v, id ) {
 
-
-
-	//document.getElementById('debug').innerHTML = obj2.speed + ' | ' + obj1.speed+ ' | ' + id; 
+	document.getElementById('debug3').innerHTML = obj2.speed + ' | ' + obj1.speed+ ' | ' + id; 
 
 }
-
-callback();
 
 //
 
