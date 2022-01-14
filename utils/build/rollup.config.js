@@ -106,7 +106,6 @@ export default [
     {
 		input: 'src/Uil.js',
 		plugins: [
-		    terser(),
 			header()
 		],
 		output: [

@@ -25,7 +25,7 @@ var callback = function(v){ debug.innerHTML = v; }
 var ui0 = new UIL.Gui( { w:200, css:'top:50px; left:10px;' } ).onChange( callback );
 var ui1 = new UIL.Gui( { w:200, css:'top:50px; left:220px;' } ).onChange( callback );
 var ui2 = new UIL.Gui( { w:375, css:'top:50px; left:430px;' } ).onChange( callback );
-var ui3 = new UIL.Gui( { w:370, css:'top:50px; left:840px;' } ).onChange( callback );
+var ui3 = new UIL.Gui( { w:375, css:'top:50px; left:840px;' } ).onChange( callback );
 
 function populate(){
 
@@ -35,7 +35,8 @@ function populate(){
         for(var i = 0; i<w.value; i++){
 
             var name = 'n-'+i;
-            let c = random_color()
+            let c = i === 22 ? '#FF0000' : '#DDD'
+            //let c = random_color()
             ui0.add('list', { name:name, value:'cool', list:list, color:c });
             ui1.add('slide', { name:name, value:Math.random().toFixed(3), min:0, max:1, precision:2, w:200, color:c } );
             ui2.add('knob', { name:name, value:Math.random().toFixed(3), min:0, max:1, precision:2, w:75, mode:2, color:c });
