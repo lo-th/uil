@@ -5621,6 +5621,11 @@
 			this.s[2].left = this.w + 'px'; //- ( 50 + 26 ) + 'px';
 		}
 
+		setColor(c) {
+			this.s[1].color = c;
+			this.s[2].color = c;
+		}
+
 	}
 
 	class Select extends Proto {

@@ -33,24 +33,29 @@ export class Title extends Proto {
 
     }
 
-    text ( txt ) {
+    text( txt ) {
 
         this.c[1].textContent = txt;
 
     }
 
-    text2 ( txt ) {
+    text2( txt ) {
 
         this.c[2].textContent = txt;
 
     }
 
-    rSize () {
+    rSize() {
 
         super.rSize();
         this.s[1].width = this.w + 'px'; //- 50 + 'px';
         this.s[2].left = this.w + 'px';//- ( 50 + 26 ) + 'px';
 
+    }
+
+    setColor( c ) {
+        this.s[1].color = c
+        this.s[2].color = c
     }
 
 }

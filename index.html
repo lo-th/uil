@@ -22,7 +22,7 @@
 
     document.getElementById('logo').innerHTML = UIL.Tools.icon('logo', '#FFF', 64)
 
-    let gr0, gr1, gr2, gr3, ny =0, graph, graphUp, display = false
+    let title, ny =0, graph, graphUp, display = false
 
     const list = ['item-0', 'item-1', 'item-2', 'item-3', 'item-4', 'item-5', 'item-6', 'item-7', 'item-8', 'item-9', 'item-10', 'item-11', 'item-12']
     const list2 = ['item-0', 'item-1', 'item-2']
@@ -32,7 +32,7 @@
     const callback = function(v){ debug.innerHTML = v; }
     const callbackButton = function(){ debug.innerHTML = "i'm a button !!" ; console.log(this.value) }
     const callbackSize = function(v){ ui.setWidth( v ); }
-    const callbackLogo = function(v){ document.getElementById('logoin').setAttributeNS(null, 'fill', v ); }
+    const callbackLogo = function(v){ document.getElementById('logoin').setAttributeNS(null, 'fill', v ); title.setColor(v); }
     const callbackLink = function(v){ let w = window.open("./examples/"+v+".html", ""); }
 
     // single UI element
@@ -58,7 +58,7 @@
 
         if( !display ){
 
-            ui.add( 'title',  { name:'UIL '+ UIL.REVISION, h:22, align:'center' })
+            title = ui.add( 'title',  { name:'UIL '+ UIL.REVISION, h:22, align:'center' })
 
             let gr = ui.add('group', { name:'Examples', h:30, color:'#0FF' }).onChange( callbackLink )
 
