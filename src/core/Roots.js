@@ -27,7 +27,7 @@ const R = {
     pointerEvent: ['pointerdown', 'pointermove', 'pointerup'],
     eventOut: ['pointercancel', 'pointerout', 'pointerleave'],
 
-	xmlserializer: new XMLSerializer(),
+	xmlserializer: null,
 	tmpTime: null,
     tmpImage: null,
 
@@ -515,6 +515,8 @@ const R = {
     // ----------------------
 
     toCanvas: function ( o, w, h, force ) {
+
+        if( !R.xmlserializer ) R.xmlserializer = new XMLSerializer()
 
         // prevent exesive redraw
 

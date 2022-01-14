@@ -28,7 +28,7 @@
 		prevDefault: ['contextmenu', 'wheel'],
 		pointerEvent: ['pointerdown', 'pointermove', 'pointerup'],
 		eventOut: ['pointercancel', 'pointerout', 'pointerleave'],
-		xmlserializer: new XMLSerializer(),
+		xmlserializer: null,
 		tmpTime: null,
 		tmpImage: null,
 		oldCursor: 'auto',
@@ -391,7 +391,8 @@
 		//	 CANVAS
 		// ----------------------
 		toCanvas: function (o, w, h, force) {
-			// prevent exesive redraw
+			if (!R.xmlserializer) R.xmlserializer = new XMLSerializer(); // prevent exesive redraw
+
 			if (force && R.tmpTime !== null) {
 				clearTimeout(R.tmpTime);
 				R.tmpTime = null;
@@ -7062,7 +7063,7 @@
 
 	}
 
-	const REVISION = '4.0';
+	const REVISION = '4.0.2';
 
 	exports.Gui = Gui;
 	exports.Proto = Proto;

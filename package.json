@@ -1,6 +1,6 @@
 {
   "name": "uil",
-  "version": "4.0.0",
+  "version": "4.0.2",
   "description": "JavaScript gui library",
   "main": "build/uil.js",
   "repository": "lo-th/uil",
@@ -12,10 +12,7 @@
     "README.md",
     "build/uil.js",
     "build/uil.min.js",
-    "build/uil.module.js",
-    "src",
-    "examples/js",
-    "examples/fonts"
+    "build/uil.module.js"
   ],
   "directories": {
     "doc": "docs",

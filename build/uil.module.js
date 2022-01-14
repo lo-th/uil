@@ -31,7 +31,7 @@ const R = {
     pointerEvent: ['pointerdown', 'pointermove', 'pointerup'],
     eventOut: ['pointercancel', 'pointerout', 'pointerleave'],
 
-	xmlserializer: new XMLSerializer(),
+	xmlserializer: null,
 	tmpTime: null,
     tmpImage: null,
 
@@ -518,6 +518,8 @@ const R = {
     // ----------------------
 
     toCanvas: function ( o, w, h, force ) {
+
+        if( !R.xmlserializer ) R.xmlserializer = new XMLSerializer();
 
         // prevent exesive redraw
 
@@ -8641,6 +8643,6 @@ class Gui {
 
 }
 
-const REVISION = '4.0';
+const REVISION = '4.0.2';
 
 export { Gui, Proto, REVISION, Tools, add };
