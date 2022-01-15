@@ -1,258 +1,260 @@
+import * as THREE from '../build/three.module.js';
+import { mergeVertices, mergeBufferGeometries } from '../examples/jsm/utils/BufferGeometryUtils.js';
+import { SimplexNoise } from '../examples/jsm/math/SimplexNoise.js';
 
+export class Landscape extends THREE.Mesh {
 
+    constructor( o = {} ) {
 
-var Landscape = function  ( o ) {
+        super()
 
-    o = o === undefined ? {} : o;
+        this.ready = false;
 
-    this.ready = false;
+        this.type = 'terrain';
 
-    this.type = 'terrain';
+        this.callback = o.callback || null;
 
-    this.callback = o.callback || null;
+        this.perlin = null;
 
-    this.perlin = null;
+        this.p90 = Math.PI*0.5;
 
+        this.textures = {};
+        this.loaderMap = null;
 
-    this.p90 = Math.PI*0.5;
+        this.mapN = 0;
+        this.mapMax = 6;
 
-    this.textures = {};
-    this.loaderMap = null;
+        // terrain, water, road
+        this.ttype = o.terrainType || 'terrain';
 
-    this.mapN = 0;
-    this.mapMax = 6;
+        this.callback = o.callback || null;
+        //this.physicsUpdate = function(){};
 
-    // terrain, water, road
-    this.ttype = o.terrainType || 'terrain';
+        this.uvx = [ o.uv || 18, o.uv || 18 ];
 
-    this.callback = o.callback || null;
-    //this.physicsUpdate = function(){};
 
-    this.uvx = [ o.uv || 18, o.uv || 18 ];
+        this.sample = o.sample == undefined ? [128,128] : o.sample;
+        this.size = o.size === undefined ? [100,30,100] : o.size;
 
+        this.data = o.data || {
+            move:[0,0],
+            height: this.size[1],
+            level: o.level || [1,0.2,0.05],
+            frequency: o.frequency || [0.016,0.05,0.2],
+            expo: o.expo || 1,
+        }
 
-    this.sample = o.sample == undefined ? [128,128] : o.sample;
-    this.size = o.size === undefined ? [100,30,100] : o.size;
+        this.isWater = o.water || false;
 
-    this.data = o.data || {
-        move:[0,0],
-        height: this.size[1],
-        level: o.level || [1,0.2,0.05],
-        frequency: o.frequency || [0.016,0.05,0.2],
-        expo: o.expo || 1,
-    }
+        this.isBorder = false;
+        this.wantBorder = o.border || false;
 
-    this.isWater = o.water || false;
+        this.isBottom = false;
+        this.wantBottom = o.bottom || false;
+        this.wantBorder = o.border || false;
 
-    this.isBorder = false;
-    this.wantBorder = o.border || false;
+        this.colorBase = this.isWater ? { r:0, g:0.7, b:1 } : { r:0.25, g:0.25, b:0.25 };
 
-    this.isBottom = false;
-    this.wantBottom = o.bottom || false;
-    this.wantBorder = o.border || false;
+        this.maxspeed = o.maxSpeed || 0.1;
+        this.acc = o.acc == undefined ? 0.01 : o.acc;
+        this.dec = o.dec == undefined ? 0.01 : o.dec;
 
-    this.colorBase = this.isWater ? { r:0, g:0.7, b:1 } : { r:0.25, g:0.25, b:0.25 };
+        this.deep = o.deep == undefined ? 0 : o.deep;
 
-    this.maxspeed = o.maxSpeed || 0.1;
-    this.acc = o.acc == undefined ? 0.01 : o.acc;
-    this.dec = o.dec == undefined ? 0.01 : o.dec;
+        this.ease = new THREE.Vector2();
 
-    this.deep = o.deep == undefined ? 0 : o.deep;
+        // for perlin
+        this.complexity = o.complexity == undefined ? 30 : o.complexity;
+        this.complexity2 = o.complexity2 == undefined ? null : o.complexity2;
 
-    this.ease = new THREE.Vector2();
+        this.local = new THREE.Vector3();
+        if( o.local ) this.local.fromArray( o.local );
 
-    // for perlin
-    this.complexity = o.complexity == undefined ? 30 : o.complexity;
-    this.complexity2 = o.complexity2 == undefined ? null : o.complexity2;
+        this.pp = new THREE.Vector3();
 
-    this.local = new THREE.Vector3();
-    if( o.local ) this.local.fromArray( o.local );
+        this.lng = this.sample[0] * this.sample[1];
+        var sx = this.sample[0] - 1;
+        var sz = this.sample[1] - 1;
+        this.rx = sx / this.size[0];
+        this.rz = sz / this.size[2];
+        this.ratio = 1 / this.sample[0];
+        this.ruvx =  1.0 / ( this.size[0] / this.uvx[0] );
+        this.ruvy = - ( 1.0 / ( this.size[2] / this.uvx[1] ) );
 
-    this.pp = new THREE.Vector3();
+        this.is64 = o.is64 || false;
 
-    this.lng = this.sample[0] * this.sample[1];
-    var sx = this.sample[0] - 1;
-    var sz = this.sample[1] - 1;
-    this.rx = sx / this.size[0];
-    this.rz = sz / this.size[2];
-    this.ratio = 1 / this.sample[0];
-    this.ruvx =  1.0 / ( this.size[0] / this.uvx[0] );
-    this.ruvy = - ( 1.0 / ( this.size[2] / this.uvx[1] ) );
+        this.isTurn = o.turn || false;
 
-    this.is64 = o.is64 || false;
+        this.heightData = [];//this.is64 ? new Float64Array( this.lng ) : new Float32Array( this.lng );
+        this.height = [];
 
-    this.isTurn = o.turn || false;
 
-    this.heightData = [];//this.is64 ? new Float64Array( this.lng ) : new Float32Array( this.lng );
-    this.height = [];
+        this.underWater = o.underWater || 0;
 
+        this.isAbsolute = o.isAbsolute || false;
+        this.isReverse = o.isReverse || false;
+        if( this.isReverse ) this.getReverseID();
 
-    this.underWater = o.underWater || 0;
+        this.colors = new Float32Array( this.lng * 3 );
+        this.geometry = new THREE.PlaneBufferGeometry( this.size[0], this.size[2], this.sample[0] - 1, this.sample[1] - 1 );
+        this.geometry.rotateX( -this.p90 );
+        if( this.isTurn ) this.geometry.rotateY( -this.p90 );
 
-    this.isAbsolute = o.isAbsolute || false;
-    this.isReverse = o.isReverse || false;
-    if( this.isReverse ) this.getReverseID();
 
-    this.colors = new Float32Array( this.lng * 3 );
-    this.geometry = new THREE.PlaneBufferGeometry( this.size[0], this.size[2], this.sample[0] - 1, this.sample[1] - 1 );
-    this.geometry.rotateX( -this.p90 );
-    if( this.isTurn ) this.geometry.rotateY( -this.p90 );
 
+     
+       // this.geometry.computeBoundingSphere();
 
+        this.geometry.setAttribute( 'color', new THREE.BufferAttribute( this.colors, 3 ) );
+        //this.geometry.setAttribute( 'uv2', this.geometry.attributes.uv );
+        this.vertices = this.geometry.attributes.position.array;
 
- 
-   // this.geometry.computeBoundingSphere();
 
-    this.geometry.setAttribute( 'color', new THREE.BufferAttribute( this.colors, 3 ) );
-    //this.geometry.setAttribute( 'uv2', this.geometry.attributes.uv );
-    this.vertices = this.geometry.attributes.position.array;
 
 
+        var isORM = false;
+        var clevels = new THREE.Quaternion( 0.95, 0.8, 0.1, 0.05 ); 
+        if( o.maplevels ) clevels.fromArray( o.maplevels );
+        var T = TerrainShader;
+        var maps = o.maps || [ 'sand', 'grass', 'rock' ], txt = {};
+        var name;
 
+        if(this.isWater) maps = ['water'];
 
-    var isORM = false;
-    var clevels = new THREE.Quaternion( 0.95, 0.8, 0.1, 0.05 ); 
-    if( o.maplevels ) clevels.fromArray( o.maplevels );
-    var T = TerrainShader;
-    var maps = o.maps || [ 'sand', 'grass', 'rock' ], txt = {};
-    var name;
+        for( var i in maps ){
 
-    if(this.isWater) maps = ['water'];
+            name = maps[i];
+            txt[name] = this.loadTextures('./assets/textures/terrain/'+name+'.jpg', { flip:false, repeat:this.uvx, encoding:o.encoding, callback: this.mapcallback.bind(this)  });
+            txt[name+'_n'] = this.loadTextures('./assets/textures/terrain/'+name+'_n.jpg', { flip:false, repeat:this.uvx, callback: this.mapcallback.bind(this) });
+            if( isORM )txt[name+'_n'] = this.loadTextures('./assets/textures/terrain/'+name+'_n.jpg', { flip:false, repeat:this.uvx, callback: this.mapcallback.bind(this) });
 
-    for( var i in maps ){
+        }
 
-        name = maps[i];
-        txt[name] = this.loadTextures('./assets/textures/terrain/'+name+'.jpg', { flip:false, repeat:this.uvx, encoding:o.encoding , callback: this.mapcallback.bind(this)  });
-        txt[name+'_n'] = this.loadTextures('./assets/textures/terrain/'+name+'_n.jpg', { flip:false, repeat:this.uvx, callback: this.mapcallback.bind(this) });
-        if( isORM )txt[name+'_n'] = this.loadTextures('./assets/textures/terrain/'+name+'_n.jpg', { flip:false, repeat:this.uvx, callback: this.mapcallback.bind(this) });
+        this.material = new THREE.MeshStandardMaterial({ name:'terrain', vertexColors:THREE.VertexColors, color:0xFFFFFF, map:txt[maps[0]], normalMap:txt[maps[0]+'_n'], envMap:o.envMap || null });
 
-    }
+        if( o.envmap !== undefined ) this.material.envMap = o.envmap 
 
-    this.material = new THREE.MeshStandardMaterial({ name:'terrain', vertexColors:THREE.VertexColors, color:0xFFFFFF, map:txt[maps[0]], normalMap:txt[maps[0]+'_n'], envMap:o.envMap || null });
+        if( this.isWater ){
+            this.material.transparent = true;
+            this.material.opacity = o.opacity || 0.4;
+            this.material.side = THREE.DoubleSide;
+            this.material.alphaMap = txt[maps[0]];
+            this.material.map = null;
+            this.material.metalness = 0.9;
+            this.material.roughness = 0.1;
+        } else {
+            this.material.metalness = 0.6;
+            this.material.roughness = 0.4; 
+        }
 
-    if( o.envmap !== undefined ) this.material.envMap = o.envmap 
+        if( isORM ){
+            this.material.metalness = 1; 
+            this.material.roughness = 1; 
+        }
 
-    if( this.isWater ){
-        this.material.transparent = true;
-        this.material.opacity = o.opacity || 0.4;
-        this.material.side = THREE.DoubleSide;
-        this.material.alphaMap = txt[maps[0]];
-        this.material.map = null;
-        this.material.metalnes  = 0.9;
-        this.material.roughness = 0.1;
-    } else {
-        this.material.metalnes  = 0.4;
-        this.material.roughness = 0.4; 
-    }
+        var ns = o.nScale || 1;
+        this.material.normalScale.set(ns,ns);
 
-    if( isORM ){
-        this.material.metalnes  = 1; 
-        this.material.roughness = 1; 
-    }
+        if( !this.isWater ){
 
-    var ns = o.nScale || 1;
-    this.material.normalScale.set(ns,ns);
+            this.material.onBeforeCompile = function ( shader ) {
 
-    if( !this.isWater ){
+                var uniforms = shader.uniforms;
 
-        this.material.onBeforeCompile = function ( shader ) {
+                //uniforms['fogTime'] = { value: 0 };
 
-            var uniforms = shader.uniforms;
+                uniforms['clevels'] = { value: clevels };
 
-            //uniforms['fogTime'] = { value: 0 };
+                uniforms['map1'] = { value: txt[maps[1]] };
+                uniforms['map2'] = { value: txt[maps[2]] };
 
-            uniforms['clevels'] = { value: clevels };
+                uniforms['normalMap1'] = { value: txt[maps[1]+'_n'] };
+                uniforms['normalMap2'] = { value: txt[maps[2]+'_n'] };
 
-            uniforms['map1'] = { value: txt[maps[1]] };
-            uniforms['map2'] = { value: txt[maps[2]] };
+                //uniforms['underWater'] = { value: o.underWater || 0.1 };
+                uniforms['waterColor'] = { value: new THREE.Color( o.waterColor || 0x3b4c5a ) };
 
-            uniforms['normalMap1'] = { value: txt[maps[1]+'_n'] };
-            uniforms['normalMap2'] = { value: txt[maps[2]+'_n'] };
+                shader.uniforms = uniforms
 
-            //uniforms['underWater'] = { value: o.underWater || 0.1 };
-            uniforms['waterColor'] = { value: new THREE.Color( o.waterColor || 0x3b4c5a ) };
+                var fragment = shader.fragmentShader;
 
-            shader.uniforms = uniforms;
+                fragment = fragment.replace( 'uniform vec3 diffuse;', T.baseRemplace );
 
-            var fragment = shader.fragmentShader;
+                fragment = fragment.replace( '#include <map_fragment>', T.map );
+                fragment = fragment.replace( '#include <normal_fragment_maps>', T.normal );
+                fragment = fragment.replace( '#include <color_fragment>', '' );
 
-            fragment = fragment.replace( 'uniform vec3 diffuse;', T.baseRemplace );
+                if( isORM ){
 
-            fragment = fragment.replace( '#include <map_fragment>', T.map );
-            fragment = fragment.replace( '#include <normal_fragment_maps>', T.normal );
-            fragment = fragment.replace( '#include <color_fragment>', '' );
+                    fragment = fragment.replace( '#include <normalmap_pars_fragment>', T.normal_pars );
+                        
+                    fragment = fragment.replace( '#include <roughnessmap_pars_fragment>', T.rough_pars );
+                    fragment = fragment.replace( '#include <metalnessmap_pars_fragment>', '' );
+                    fragment = fragment.replace( '#include <aomap_pars_fragment>', '' );
 
-            if( isORM ){
-
-                fragment = fragment.replace( '#include <normalmap_pars_fragment>', T.normal_pars );
                     
-                fragment = fragment.replace( '#include <roughnessmap_pars_fragment>', T.rough_pars );
-                fragment = fragment.replace( '#include <metalnessmap_pars_fragment>', '' );
-                fragment = fragment.replace( '#include <aomap_pars_fragment>', '' );
+                    fragment = fragment.replace( '#include <roughnessmap_fragment>', T.rough );
+                    fragment = fragment.replace( '#include <metalnessmap_fragment>', '' );
+                    fragment = fragment.replace( '#include <aomap_fragment>', T.ao );
 
+                }
                 
-                fragment = fragment.replace( '#include <roughnessmap_fragment>', T.rough );
-                fragment = fragment.replace( '#include <metalnessmap_fragment>', '' );
-                fragment = fragment.replace( '#include <aomap_fragment>', T.ao );
+                shader.fragmentShader = fragment;
+
+                if( o.shader ) o.shader.modify( shader );
 
             }
-            
-            shader.fragmentShader = fragment;
 
-            if( o.shader ) o.shader.modify( shader );
+        } else {
 
-        }
+            this.material.onBeforeCompile = function ( shader ) {
 
-    } else {
+                var fragment = shader.fragmentShader;
 
-        this.material.onBeforeCompile = function ( shader ) {
-
-            var fragment = shader.fragmentShader;
-
-            fragment = fragment.replace( '#include <alphamap_fragment>', T.alphamap );
+                fragment = fragment.replace( '#include <alphamap_fragment>', T.alphamap );
 
 
-            
-            shader.fragmentShader = fragment;
+                
+                shader.fragmentShader = fragment;
+
+            }
 
         }
 
+        /*var test = new THREE.Mesh( new THREE.SphereGeometry(4), new THREE.MeshStandardMaterial({ metalness:1, roughness:0, envMap:o.envMap || null } ));
+        test.position.y = 5
+            this.add( test );*/
+
+
+        //THREE.Mesh.call( this, this.geometry, this.material );
+
+        if(o.debuger){
+            var debuger = new THREE.Mesh( this.geometry, new THREE.MeshBasicMaterial({ wireframe:true } ));
+            this.add( debuger );
+        }
+
+        //root.garbage.push( this.geometry );
+        
+
+        if( this.wantBorder ) this.addBorder( o );
+        if( this.wantBottom ) this.addBottom( o );
+
+        this.name = o.name === undefined ? 'terrain' : o.name;
+        if( o.pos ) this.position.fromArray( o.pos );
+        if( o.decal ) this.position.y += o.decal;
+
+
+        this.castShadow = true;
+        this.receiveShadow = true;
+
+
+        this.update();
+
+        //if(this.callback) this.callback()
+
     }
 
-
-    THREE.Mesh.call( this, this.geometry, this.material );
-
-    if(o.debuger){
-        var debuger = new THREE.Mesh( this.geometry, new THREE.MeshBasicMaterial({ wireframe:true } ));
-        this.add( debuger );
-    }
-
-    //root.garbage.push( this.geometry );
-    
-
-    if( this.wantBorder ) this.addBorder( o );
-    if( this.wantBottom ) this.addBottom( o );
-
-    this.name = o.name === undefined ? 'terrain' : o.name;
-    if( o.pos ) this.position.fromArray( o.pos );
-    if( o.decal ) this.position.y += o.decal;
-
-
-    this.castShadow = true;
-    this.receiveShadow = true;
-
-
-    this.update();
-
-    //if(this.callback) this.callback()
-
-};
-
-Landscape.prototype = Object.assign( Object.create( THREE.Mesh.prototype ), {
-
-    constructor: Landscape,
-
-    loadTextures: function ( url, o ) {
+    loadTextures ( url, o ) {
 
         o = o || {};
 
@@ -297,18 +299,18 @@ Landscape.prototype = Object.assign( Object.create( THREE.Mesh.prototype ), {
 
         return this.textures[name];
 
-    },
+    }
 
-    mapcallback: function (){
+    mapcallback (){
 
         //if( this.callback === null ) return;
 
         this.mapN++;
         if( this.mapN == this.mapMax ) this.callback();
 
-    },
+    }
 
-    addBottom: function ( o ){
+    addBottom ( o ){
 
     	var geometry = new THREE.PlaneBufferGeometry( this.size[0], this.size[2], 1, 1 );
         geometry.rotateX( this.p90 );
@@ -319,9 +321,9 @@ Landscape.prototype = Object.assign( Object.create( THREE.Mesh.prototype ), {
         this.add( this.bottomMesh );
 
         this.isBottom = true;
-    },
+    }
 
-    addBorder: function ( o ){
+    addBorder ( o ){
 
     	this.borderMaterial = new THREE.MeshStandardMaterial({ 
 
@@ -354,7 +356,7 @@ Landscape.prototype = Object.assign( Object.create( THREE.Mesh.prototype ), {
         right.rotateY( this.p90 );
         right.translate( this.size[0]*0.5,1, 0);
 
-        this.borderGeometry = THREE.BufferGeometryUtils.mergeVertices( THREE.BufferGeometryUtils.mergeBufferGeometries( [ front, back, left, right ] ) );
+        this.borderGeometry = mergeVertices( mergeBufferGeometries( [ front, back, left, right ] ) );
         this.borderVertices = this.borderGeometry.attributes.position.array;
         this.lng2 = this.borderVertices.length / 3;
         this.list = new Array( this.lng2 )
@@ -377,23 +379,23 @@ Landscape.prototype = Object.assign( Object.create( THREE.Mesh.prototype ), {
 
         this.isBorder = true;
 
-    },
+    }
 
-    setData: function ( d ) {
+    setData ( d ) {
 
         this.data = d;
         this.update();
 
-    },
+    }
 
-    dispose: function () {
+    dispose () {
 
         this.geometry.dispose();
         this.material.dispose();
         
-    },
+    }
 
-    easing: function ( key, azimuthal, wait ) {
+    easing ( key, azimuthal, wait ) {
 
         key = key || user.key;
 
@@ -432,9 +434,9 @@ Landscape.prototype = Object.assign( Object.create( THREE.Mesh.prototype ), {
 
         this.update( wait );
 
-    },
+    }
 
-    getHeight: function ( x, z ) {
+    getHeight ( x, z ) {
 
 
 
@@ -458,21 +460,21 @@ Landscape.prototype = Object.assign( Object.create( THREE.Mesh.prototype ), {
         var h = this.isTurn ? this.height[ this.findId2( x, z ) ] : this.height[ this.findId( x, z ) ];
         return ( h * this.size[ 1 ] ) + this.position.y;
 
-    },
+    }
 
-    findId: function( x, z ){
+    findId( x, z ){
 
         return x+(z*this.sample[1]) || 1;
 
-    },
+    }
 
-    findId2: function( x, z ){
+    findId2( x, z ){
 
         return z+(-x*this.sample[0]) || 1;
 
-    },
+    }
 
-    findPoint: function( x, z ){
+    findPoint( x, z ){
 
         var i = this.lng, n;
         while( i-- ){
@@ -482,9 +484,9 @@ Landscape.prototype = Object.assign( Object.create( THREE.Mesh.prototype ), {
 
         return -1;
 
-    },
+    }
 
-    getReverseID: function () {
+    getReverseID () {
 
         this.invId = [];
 
@@ -498,17 +500,17 @@ Landscape.prototype = Object.assign( Object.create( THREE.Mesh.prototype ), {
             this.invId[i] = this.findId( x, zr );
         }
 
-    },
+    }
 
-    clamp: function (v, min, max) {
+    clamp (v, min, max) {
 
         //return Math.max( min, Math.min( max, value ) );
         v = v < min ? min : v;
         v = v > max ? max : v;
         return v;
-    },
+    }
 
-    noise: function ( v, o ) {
+    noise ( v, o ) {
 
         if( this.perlin === null ) this.perlin = new SimplexNoise();
 
@@ -531,9 +533,9 @@ Landscape.prototype = Object.assign( Object.create( THREE.Mesh.prototype ), {
 
         return c;
 
-    },
+    }
 
-    update: function ( wait ) {
+    update ( wait ) {
 
         this.size[1] = this.data.height;
 
@@ -659,9 +661,9 @@ Landscape.prototype = Object.assign( Object.create( THREE.Mesh.prototype ), {
 
         //if( phy ) root.view.update( { name:'terra', heightData:this.heightData, sample:this.sample } );
 
-    },
+    }
 
-    updateGeometry: function () {
+    updateGeometry () {
 
         this.geometry.attributes.position.needsUpdate = true;
         this.geometry.attributes.color.needsUpdate = true;
@@ -675,11 +677,11 @@ Landscape.prototype = Object.assign( Object.create( THREE.Mesh.prototype ), {
 
     }
 
-});
+}
 
 // SHADERS
 
-var TerrainShader = {
+const TerrainShader = {
 
     baseRemplace : /* glsl */`
         uniform vec3 diffuse; 
@@ -740,6 +742,7 @@ var TerrainShader = {
 
     map : /* glsl */`
         #ifdef USE_MAP
+
             vec4 sand = texture2D( map, vUv );
             vec4 grass = texture2D( map1, vUv );
             vec4 rock = texture2D( map2, vUv );
@@ -750,7 +753,8 @@ var TerrainShader = {
 
             //if ( vColor.b < underWater ) baseColor *= vec4( waterColor, 0.25 );
 
-            diffuseColor *= mapTexelToLinear( baseColor );
+            //diffuseColor *= mapTexelToLinear( baseColor );
+            diffuseColor *= baseColor;
 
         #endif
     `,

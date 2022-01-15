@@ -100,6 +100,6 @@ void main(){
 	star = star*(1.0-cubi.a)*clamp(pow(abs(1.-light.y),10.),0.,1.);
 	gl_FragColor = vec4( star + cubi.rgb,1);
 	
-	#include <tonemapping_fragment>
+	//#include <tonemapping_fragment>
 
 }

@@ -1,55 +1,59 @@
+import * as THREE from '../build/three.module.js';
+import { Lensflare, LensflareElement } from '../examples/jsm/objects/Lensflare.js';
 
-function SuperSky ( o ) {
 
-	this.skyResolution = 512;
+export class SuperSky extends THREE.Mesh {
 
-	this.size = o.size || 10000;
-	this.callback = o.callback || function(){};
+	constructor( o = {} ) {
 
-	this.setting = {
+		super()
 
-		t:0,
-		fog:0,
-		cloud_size: .45,
-		cloud_covr: .3,
-		cloud_dens: 40,
+		this.skyResolution = 512;
 
-		inclination: 45,
-		azimuth: 90,
-		hour:12,
+		this.size = o.size || 10000;
+		this.callback = o.callback || function(){};
+
+		this.setting = {
+
+			t:0,
+			fog:0,
+			cloud_size: .45,
+			cloud_covr: .3,
+			cloud_dens: 40,
+
+			inclination: 45,
+			azimuth: 90,
+			hour:12,
+
+		}
+
+		this.scene = o.scene;
+		this.renderer = o.renderer;
+
+		this.sceneSky = new THREE.Scene();
+
+		this.urls = ['./assets/glsl/base_vs.glsl', './assets/glsl/dome_fs.glsl', './assets/glsl/sky_fs.glsl'];
+		this.shaders = {};
+		this.textureLoader = new THREE.TextureLoader();
+
+		this.geometry = new THREE.SphereBufferGeometry( this.size, 30, 15 );
+		this.material = new THREE.ShaderMaterial();
+
+		//THREE.Mesh.call( this, this.geometry, this.material );
+
+		this.visible = false;
+		this.castShadow = false;
+	    this.receiveShadow = false;
+	    this.needsUpdate = false;
+	    this.torad = 0.0174532925199432957; 
+
+	    this.addLight();
+	    this.load();
 
 	}
 
-	this.scene = o.scene;
-	this.renderer = o.renderer;
 
-	this.sceneSky = new THREE.Scene();
-
-	this.urls = ['./glsl/base_vs.glsl', './glsl/dome_fs.glsl', './glsl/sky_fs.glsl'];
-	this.shaders = {};
-	this.textureLoader = new THREE.TextureLoader();
-
-	this.geometry = new THREE.SphereBufferGeometry( this.size, 30, 15 );
-	this.material = new THREE.ShaderMaterial();
-
-	THREE.Mesh.call( this, this.geometry, this.material );
-
-	this.visible = false;
-	this.castShadow = false;
-    this.receiveShadow = false;
-    this.needsUpdate = false;
-    this.torad = 0.0174532925199432957; 
-
-    this.addLight();
-    this.load();
-
-}
-
-SuperSky.prototype = Object.assign( Object.create( THREE.Mesh.prototype ), {
-
-    constructor: SuperSky,
-
-    load: function  () {
+    load() {
 		if( this.urls.length === 0 ){ 
 
 		    // load noise map
@@ -58,9 +62,9 @@ SuperSky.prototype = Object.assign( Object.create( THREE.Mesh.prototype ), {
 		} else{ 
 			this.loadShader( this.urls.shift() );
 		}
-	},
+	}
 
-    loadShader : function  ( link ) {
+    loadShader( link ) {
 
 		var name = link.substring( link.lastIndexOf('/')+1, link.lastIndexOf('.') );
 		var xhr = new XMLHttpRequest();
@@ -81,9 +85,9 @@ SuperSky.prototype = Object.assign( Object.create( THREE.Mesh.prototype ), {
 
         xhr.send( null );
 
-	},
+	}
 
-	addLight: function () {
+	addLight() {
 
 		this.sunMaterial = new THREE.SpriteMaterial( { map: this.textureLoader.load("assets/textures/sky/lensflare1.png"), blending:THREE.AdditiveBlending, opacity:0.5 } );
 		var sunSprite = new THREE.Sprite( this.sunMaterial );
@@ -128,17 +132,17 @@ SuperSky.prototype = Object.assign( Object.create( THREE.Mesh.prototype ), {
 		this.moonPosition = new THREE.Vector3();
 
 		var textureFlare3 = this.textureLoader.load("assets/textures/sky/lensflare3.png")
-		this.lensflare = new THREE.Lensflare();
-		this.lensflare.addElement( new THREE.LensflareElement( this.textureLoader.load("assets/textures/sky/lensflare0.png"), this.size*0.1, 0, this.sun.color ) );
-		this.lensflare.addElement( new THREE.LensflareElement( textureFlare3, 60, 0.6, this.sun.color ) );
-		this.lensflare.addElement( new THREE.LensflareElement( textureFlare3, 70, 0.7, this.sun.color ) );
-		this.lensflare.addElement( new THREE.LensflareElement( textureFlare3, 120, 0.9, this.sun.color ) );
-		this.lensflare.addElement( new THREE.LensflareElement( textureFlare3, 70, 1, this.sun.color ) );
+		this.lensflare = new Lensflare();
+		this.lensflare.addElement( new LensflareElement( this.textureLoader.load("assets/textures/sky/lensflare0.png"), this.size*0.1, 0, this.sun.color ) );
+		this.lensflare.addElement( new LensflareElement( textureFlare3, 60, 0.6, this.sun.color ) );
+		this.lensflare.addElement( new LensflareElement( textureFlare3, 70, 0.7, this.sun.color ) );
+		this.lensflare.addElement( new LensflareElement( textureFlare3, 120, 0.9, this.sun.color ) );
+		this.lensflare.addElement( new LensflareElement( textureFlare3, 70, 1, this.sun.color ) );
 		this.sun.add(this.lensflare);
 
-	},
+	}
 
-	init: function (){
+	init(){
 
 		this.materialSky = new THREE.ShaderMaterial( {
 
@@ -170,7 +174,7 @@ SuperSky.prototype = Object.assign( Object.create( THREE.Mesh.prototype ), {
 					format: THREE.RGBFormat,
 					generateMipmaps: true,
 					minFilter: THREE.LinearMipmapLinearFilter,
-					encoding: THREE.sRGBEncoding
+					//encoding: THREE.sRGBEncoding
 				});
 
 		this.cubeCamera = new THREE.CubeCamera( 0.5, 2, this.cubeCameraRender );
@@ -178,7 +182,9 @@ SuperSky.prototype = Object.assign( Object.create( THREE.Mesh.prototype ), {
 
 
 		//this.render();
+
 		this.envMap = this.cubeCameraRender.texture;
+		//this.envMap.encoding = THREE.sRGBEncoding
 		//this.envMap.minFilter = THREE.LinearMipMapLinearFilter;
 		//this.envMap.format = THREE.RGBAFormat;
 
@@ -204,9 +210,9 @@ SuperSky.prototype = Object.assign( Object.create( THREE.Mesh.prototype ), {
 
 		this.callback();
 
-	},
+	}
 
-	k: function (e, t) {
+	k(e, t) {
         var n = t.dot(t),
             a = 2 * t.dot(e),
             o = e.dot(e) - 1,
@@ -215,22 +221,22 @@ SuperSky.prototype = Object.assign( Object.create( THREE.Mesh.prototype ), {
             l = (-a - i) / 2,
             s = o / l;
         return s
-    },
+    }
 
-    z: function (e, t, n, a) {
+    z(e, t, n, a) {
         var o = new THREE.Vector3(.188, .458, .682),
             r = a.y >= 0 ? 1 : 0;
         return this.r = (t.x - t.x * Math.pow(o.x, n / e)) * r, this.g = (t.y - t.y * Math.pow(o.y, n / e)) * r, this.b = (t.z - t.z * Math.pow(o.z, n / e)) * r, this
-    },
+    }
 
-    setData: function ( d ) {
+    setData( d ) {
 
         this.setting = d;
         this.update();
 
-    },
+    }
 
-	update: function () {
+	update() {
 
 		var setting = this.setting;
 
@@ -281,17 +287,17 @@ SuperSky.prototype = Object.assign( Object.create( THREE.Mesh.prototype ), {
 
 		//this.render()
 
-	},
+	}
 
-	render: function () {
+	render() {
 
 		this.cubeCamera.update( this.renderer, this.sceneSky );
 		this.needsUpdate = false;
 
-	},
+	}
 
 
 
 
 
-});
+}

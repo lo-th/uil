@@ -12,351 +12,361 @@ body { font-family: "Lucida Console", Monaco, monospace; background-color:#717b8
 
 </style>
 
-<script type="text/javascript" src="../build/uil.js"></script>
-<script type="text/javascript" src="./js/libs/three.min.js"></script>
-<script type="text/javascript" src="./js/controls/OrbitControls.js"></script>
-<script type="text/javascript" src="./js/BufferGeometryUtils.js"></script>
-<script type="text/javascript" src="./js/SimplexNoise.js"></script>
-<script type="text/javascript" src="./js/objects/Landscape.js"></script>
-<script type="text/javascript" src="./js/objects/Lensflare.js"></script>
-<script type="text/javascript" src="./js/objects/Water.js"></script>
-<script type="text/javascript" src="./js/objects/SuperSky.js"></script>
-
 </head>
 
 <body>
 
 <div id='content'></div>
 
-<script>
+<script type="module">
 
-var cw = 128*5, ch=148;
-var screen = null;
-var screen2 = null;
-var ui, ui2;
-
-var sets = {
-
-	height: 5,
-	expo:2,
-	move:[0,0],
-	level:[ 1, 0.2, 0.1 ], 
-	frequency:[ 0.016, 0.05, 0.2 ],
-
-}
-
-var sets_W = {
-
-    waterNormals: null,
-    waterColor: 0x3b4c5a,
-    size:6,
-    alpha:0.6,
-    distortionScale:3.0,
-    depth:3.0,
-    py:0.8,
-
-}
-
-var sets_S = {
-
-    t:0,
-    fog:0,
-    cloud_size: .45,
-    cloud_covr: .3,
-    cloud_dens: 40,
-
-    inclination: 45,
-    azimuth: 90,
-    hour:12,
-
-}
-
-var view, terrain, water, sky, plane, plane2;
-
-var debug, debug2, camera, scene, renderer, controls, loader, mesh, mat, screen = null, interactive;
-var temp=0, fps=0, count=0; 
-
-var raycaster = new THREE.Raycaster();
-var mouse = new THREE.Vector2();
-
-init();
-initInterface();
-
-animate(0);
-
-function init() {
-
-    scene = new THREE.Scene();
-    scene.background = new THREE.Color( 0x717b84 );
-
-    renderer = new THREE.WebGLRenderer({ antialias:true });
-    renderer.setPixelRatio( window.devicePixelRatio );
-    renderer.setSize( window.innerWidth, window.innerHeight );
-
-    renderer.shadowMap.enabled = true;
-    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-
-    renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.0;
-    renderer.outputEncoding = THREE.sRGBEncoding;
-
-    document.getElementById('content').appendChild( renderer.domElement );
-
-    camera = new THREE.PerspectiveCamera( 50, window.innerWidth / window.innerHeight, 1, 2000 );
-    camera.position.set( 0, 14, 30 );
-    controls = new THREE.OrbitControls( camera, renderer.domElement );
-
-
-    loader = new THREE.TextureLoader();
-
-    // sky
-
-    sky = new SuperSky({ scene:scene, renderer:renderer, size:1000, callback:onSkyReady })
-    scene.add( sky );
-
-	// interactives
-
-	interactive = new THREE.Group();
-    scene.add(interactive);
-
-	plane = new THREE.Mesh( new THREE.PlaneGeometry( 20, 4.625 , 5, 1 ), new THREE.MeshBasicMaterial( { transparent:true } ) );
-	plane.geometry.rotateX( -Math.PI * 0.5 );
-	plane.position.z = 13;
-	plane.visible = false;
-    plane.name = 'p1';
-
-
-    plane2 = new THREE.Mesh( new THREE.PlaneGeometry( 20, 4.625 , 5, 1 ), new THREE.MeshBasicMaterial( { transparent:true } ) );
-    plane2.position.z = -13;
-    plane2.position.y = 5;
-    plane2.name = 'p2';
-    plane2.visible = false;
-
-	interactive.add( plane );
-    interactive.add( plane2 );
-
-
-    initGUI();
-
-    setTimeout( initGUI2, 100 );
-
-    // events
-
-    window.addEventListener( 'resize', resize, false );
-
-    document.addEventListener( 'pointerup', onMouseUp, false );
-    document.addEventListener( 'pointerdown', onMouseDown, false );
-    document.addEventListener( 'pointermove', onMouseMove, false );
-
-}
-
-function onSkyReady() {
-
-    // terrain
-
-    terrain = new Landscape({ 
-    	size:[20,sets.height,20], 
-    	uv:6, border:true, sample:[64,64], 
-    	data:sets, envMap:sky.envMap, 
-    	callback:next, 
-    	encoding:true,
-    	underWater: sets_W.py,
-    	waterColor: sets_W.waterColor,
-    })
-
-    // water 
-
-    sets_W.sunDirection = sky.day > 0 ? sky.sunPosition : sky.moonPosition;
-    sets_W.sunColor = sky.day > 0 ? sky.sun.color : sky.moon.color;
-
-    sets_W.waterNormals = loader.load( './assets/textures/water/water.png', function ( t ) { t.wrapS = t.wrapT = THREE.RepeatWrapping; t.anisotropy = 16; });
-    water = new THREE.Water( new THREE.PlaneGeometry( 20, 20, 2,2 ), sets_W );
-    water.rotation.x = - Math.PI * 0.5;
-    water.position.y = sets_W.py;
-    water.castShadow = false;
-    water.receiveShadow = true;
-    scene.add( water );
+    import * as UIL from '../build/uil.module.js';
+    import * as THREE from './three/build/three.module.js';
+    import { OrbitControls } from './three/examples/jsm/controls/OrbitControls.js';
+    import { Landscape } from './three/extend/Landscape.js';
+    import { SuperSky } from './three/extend/SuperSky.js';
+    import { Water } from './three/extend/Water.js';
     
 
+    let cw = 128*5, ch=148;
+    let screen = null;
+    let screen2 = null;
+    let ui, ui2;
 
-    //water.material.uniforms.sunDirection.value.copy(  sky.day > 0 ? sky.sunPosition : sky.moonPosition );
-    //water.material.uniforms.sunColor.value = sky.day > 0 ? sky.sun.color : sky.moon.color;
+    let sets = {
 
-}
+    	height: 5,
+    	expo:2,
+    	move:[0,0],
+    	level:[ 1, 0.2, 0.1 ], 
+    	frequency:[ 0.016, 0.05, 0.2 ],
 
-function next() {
+    }
 
-    scene.add( terrain );
+    let sets_W = {
 
-}
+        waterNormals: null,
+        waterColor: 0x3b4c5a,
+        size:6,
+        alpha:0.6,
+        distortionScale:3.0,
+        depth:3.0,
+        py:0.8,
 
-function initInterface () {
+    }
 
-    var logo = document.createElement("div");
-    logo.style.cssText = 'position:absolute; bottom:0px; left:0px; width:40px; pointer-events:none; ';
-    document.body.appendChild( logo );
-    logo.innerHTML = UIL.Tools.icon('logo', '#FFF', 40);
+    let sets_S = {
 
-    var version = document.createElement("div");
-    version.style.cssText = 'position:absolute; bottom:5px; left:35px;  pointer-events:none; color:#FFF; font-size:12px; font-weight: bold;';
-    document.body.appendChild( version );
-    version.innerHTML = 'il '+ UIL.REVISION;
+        t:0,
+        fog:0,
+        cloud_size: .45,
+        cloud_covr: .3,
+        cloud_dens: 40,
 
-    debug = document.createElement("div");
-    debug.style.cssText = 'position:absolute; bottom:5px; left:0; width:100%; pointer-events:none; text-align: center; ';
-    document.body.appendChild(debug);
+        inclination: 45,
+        azimuth: 90,
+        hour:12,
 
-    debug2 = document.createElement("div");
-    debug2.style.cssText = 'position:absolute; bottom:5px; right:5px; pointer-events:none; color:#FFFF00; font-size:12px; font-weight: bold;';
-    document.body.appendChild(debug2);
+    }
 
-}
+    let useEncoding = true
 
-function resize() {
+    let view, terrain, water, sky, plane, plane2;
 
-    camera.aspect = window.innerWidth / window.innerHeight;
-    camera.updateProjectionMatrix();
-    renderer.setSize( window.innerWidth, window.innerHeight );
+    let debug, debug2, camera, scene, renderer, controls, loader, mesh, mat, interactive;
+    let temp=0, fps=0, count=0; 
 
-}
+    let raycaster = new THREE.Raycaster();
+    let mouse = new THREE.Vector2();
 
-function animate(time) {
+    init();
+    initInterface();
 
-    requestAnimationFrame( animate );
+    animate(0);
 
-    if ( (time - 1000) > temp ){ temp = time; debug2.textContent = count; count = 0; }; count++;
+    function init() {
 
-    
-    //terrain.setHeight( sets.height );
-    //terrain.setExpo( sets.expo );
+        scene = new THREE.Scene();
+        scene.background = new THREE.Color( 0x717b84 );
 
-    if( sky.needsUpdate ){ 
-        sky.render();
+        renderer = new THREE.WebGLRenderer({ antialias:true });
+        renderer.setPixelRatio( window.devicePixelRatio );
+        renderer.setSize( window.innerWidth, window.innerHeight );
 
-        if(water){
-        	water.material.uniforms.sunDirection.value = sky.day > 0 ? sky.sunPosition : sky.moonPosition;
-        	water.material.uniforms.sunColor.value = sky.day > 0 ? sky.sun.color : sky.moon.color;
+        renderer.shadowMap.enabled = true;
+        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+
+        
+
+        if( useEncoding ){
+            renderer.toneMapping = THREE.ACESFilmicToneMapping
+            renderer.toneMappingExposure = 1.0
+            renderer.physicallyCorrectLights = true;
+            renderer.outputEncoding = THREE.sRGBEncoding
+        }
+
+        //
+
+        document.getElementById('content').appendChild( renderer.domElement );
+
+        camera = new THREE.PerspectiveCamera( 50, window.innerWidth / window.innerHeight, 1, 2000 );
+        camera.position.set( 0, 14, 30 );
+        controls = new OrbitControls( camera, renderer.domElement );
+
+
+        loader = new THREE.TextureLoader();
+
+        // sky
+
+        sky = new SuperSky({ scene:scene, renderer:renderer, size:1000, callback:onSkyReady })
+        scene.add( sky );
+
+    	// interactives
+
+    	interactive = new THREE.Group();
+        scene.add(interactive);
+
+    	plane = new THREE.Mesh( new THREE.PlaneGeometry( 20, 4.625 , 5, 1 ), new THREE.MeshBasicMaterial( { transparent:true } ) );
+    	plane.geometry.rotateX( -Math.PI * 0.5 );
+    	plane.position.z = 13;
+    	plane.visible = false;
+        plane.name = 'p1';
+
+
+        plane2 = new THREE.Mesh( new THREE.PlaneGeometry( 20, 4.625 , 5, 1 ), new THREE.MeshBasicMaterial( { transparent:true } ) );
+        plane2.position.z = -13;
+        plane2.position.y = 5;
+        plane2.name = 'p2';
+        plane2.visible = false;
+
+    	interactive.add( plane );
+        interactive.add( plane2 );
+
+
+        initGUI();
+
+        setTimeout( initGUI2, 100 );
+
+        // events
+
+        window.addEventListener( 'resize', resize, false );
+
+        document.addEventListener( 'pointerup', onMouseUp, false );
+        document.addEventListener( 'pointerdown', onMouseDown, false );
+        document.addEventListener( 'pointermove', onMouseMove, false );
+
+    }
+
+    function onSkyReady() {
+
+        // terrain
+
+        terrain = new Landscape({ 
+        	size:[20,sets.height,20], 
+        	uv:6, border:true, sample:[64,64], 
+        	data:sets, 
+            envMap:sky.envMap, 
+        	callback:next, 
+        	encoding:useEncoding,
+        	underWater: sets_W.py,
+        	waterColor: sets_W.waterColor,
+        })
+
+        // water 
+
+        sets_W.sunDirection = sky.day > 0 ? sky.sunPosition : sky.moonPosition;
+        sets_W.sunColor = sky.day > 0 ? sky.sun.color : sky.moon.color;
+
+        sets_W.waterNormals = loader.load( './assets/textures/water/water.png', function ( t ) { t.wrapS = t.wrapT = THREE.RepeatWrapping; t.anisotropy = 16; });
+        water = new Water( new THREE.PlaneGeometry( 20, 20, 2,2 ), sets_W );
+        water.rotation.x = - Math.PI * 0.5;
+        water.position.y = sets_W.py;
+        water.castShadow = false;
+        water.receiveShadow = true;
+        scene.add( water );
+        
+
+
+        //water.material.uniforms.sunDirection.value.copy(  sky.day > 0 ? sky.sunPosition : sky.moonPosition );
+        //water.material.uniforms.sunColor.value = sky.day > 0 ? sky.sun.color : sky.moon.color;
+
+    }
+
+    function next() {
+
+        scene.add( terrain );
+
+    }
+
+    function initInterface () {
+
+        let logo = document.createElement("div");
+        logo.style.cssText = 'position:absolute; bottom:0px; left:0px; width:40px; pointer-events:none; ';
+        document.body.appendChild( logo );
+        logo.innerHTML = UIL.Tools.icon('logo', '#FFF', 40);
+
+        let version = document.createElement("div");
+        version.style.cssText = 'position:absolute; bottom:5px; left:35px;  pointer-events:none; color:#FFF; font-size:12px; font-weight: bold;';
+        document.body.appendChild( version );
+        version.innerHTML = 'il '+ UIL.REVISION;
+
+        debug = document.createElement("div");
+        debug.style.cssText = 'position:absolute; bottom:5px; left:0; width:100%; pointer-events:none; text-align: center; ';
+        document.body.appendChild(debug);
+
+        debug2 = document.createElement("div");
+        debug2.style.cssText = 'position:absolute; bottom:5px; right:5px; pointer-events:none; color:#FFFF00; font-size:12px; font-weight: bold;';
+        document.body.appendChild(debug2);
+
+    }
+
+    function resize() {
+
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize( window.innerWidth, window.innerHeight );
+
+    }
+
+    function animate(time) {
+
+        requestAnimationFrame( animate );
+
+        if ( (time - 1000) > temp ){ temp = time; debug2.textContent = count; count = 0; }; count++;
+
+        
+        //terrain.setHeight( sets.height );
+        //terrain.setExpo( sets.expo );
+
+        if( sky.needsUpdate ){ 
+            sky.render();
+
+            if(water){
+            	water.material.uniforms.sunDirection.value = sky.day > 0 ? sky.sunPosition : sky.moonPosition;
+            	water.material.uniforms.sunColor.value = sky.day > 0 ? sky.sun.color : sky.moon.color;
+            }
+
+        }
+
+        
+        if( terrain ) terrain.easing( sets.move );
+
+        if( water ) water.material.uniforms.time.value += 0.001
+
+        renderer.render( scene, camera );
+
+    }
+
+
+    function onMouseUp( e ){
+
+        e.preventDefault();
+        if(!controls.enabled) controls.enabled = true;
+      
+    }
+
+    function onMouseDown( e ){
+
+        e.preventDefault();
+        controls.enabled = raytest( e ) ? false : true;
+
+    }
+
+    function onMouseMove( e ) {
+
+        e.preventDefault();
+        raytest( e );
+
+    }
+
+    function raytest ( e ) {
+
+        mouse.set( (e.clientX / window.innerWidth) * 2 - 1, - ( e.clientY / window.innerHeight) * 2 + 1 );
+        raycaster.setFromCamera( mouse, camera );
+        let intersects = raycaster.intersectObjects( interactive.children );
+
+        if(!ui) return
+
+        if ( intersects.length > 0 ){
+
+            // send uv to ui mouse
+            if( intersects[ 0 ].object.name === 'p1' ) ui.setMouse( intersects[ 0 ].uv );
+            if( intersects[ 0 ].object.name === 'p2' ) ui2.setMouse( intersects[ 0 ].uv );
+            return true;
+
+        } else {
+
+            if(ui)ui.reset( true );
+            if(ui2)ui2.reset( true );
+            return false;
+        }
+
+       
+    }
+
+    // GUI
+
+    function initGUI () {
+
+        // terrain
+
+        ui = new UIL.Gui( { w:cw, maxHeight:ch, parent:null, isCanvas:true, close:false, transparent:true } ).onChange( function( v ){ terrain.setData( sets ); debug.innerHTML = v; } );
+
+        ui.add( sets, 'height', { type:'Circular', min:0, max:10, w:128, precision:2, fontColor:'#D4B87B' } );
+        ui.add( sets, 'expo', { type:'Knob', min:0, max:10, w:128, precision:2, fontColor:'#D4B87B' } );
+        ui.add( sets, 'move', { type:'joystick', w:128, precision:2, fontColor:'#D4B87B' } );
+        ui.add( sets, 'level', { type:'graph', w:128, precision:2, fontColor:'#D4B87B', autoWidth:false } );
+        ui.add( sets, 'frequency', { type:'graph', w:128, precision:2, multiplicator:0.25, fontColor:'#D4B87B', autoWidth:false } );
+
+        ui.onDraw = function () {
+
+            if( screen === null ){
+
+                screen = new THREE.Texture( this.canvas )
+                screen.minFilter = THREE.LinearFilter
+                if( useEncoding ) screen.encoding = THREE.sRGBEncoding
+                plane.material.map = screen;
+                plane.material.needsUpdate = true;
+                plane.visible = true;
+                
+            }
+
+            screen.needsUpdate = true
+
+        }
+    }
+
+
+    function initGUI2 () {
+
+        // sky
+
+        ui2 = new UIL.Gui( { w:cw, maxHeight:ch, parent:null, isCanvas:true, close:false, transparent:true } ).onChange( function( v ){ sky.setData( sets_S ); debug.innerHTML = v; } );
+
+        ui2.add( sets_S, 'cloud_size', { type:'Circular', min:0, max:1, w:128, precision:2, fontColor:'#7BD4B8' } );
+        ui2.add( sets_S, 'cloud_covr', { type:'Circular', min:0, max:1, w:128, precision:2, fontColor:'#7BD4B8' } );
+        ui2.add( sets_S, 'cloud_dens', { type:'Circular', min:0, max:100, w:128, precision:2, fontColor:'#7BD4B8' } );
+        ui2.add( sets_S, 'azimuth', { type:'Circular',  min:0, max:360, w:128, precision:0, fontColor:'#D4B87B' } );
+        ui2.add( sets_S, 'hour', { type:'Circular', min:0, max:24, w:128, precision:2, fontColor:'#D47B7B' } );
+
+        ui2.onDraw = function () {
+
+            if( screen2 === null ){
+
+                screen2 = new THREE.Texture( this.canvas );
+                screen2.minFilter = THREE.LinearFilter;
+                if( useEncoding ) screen2.encoding = THREE.sRGBEncoding;
+                plane2.material.map = screen2;
+                plane2.material.needsUpdate = true;
+                plane2.visible = true;
+                
+            }
+
+            screen2.needsUpdate = true
+
         }
 
     }
-
-    
-    if( terrain ) terrain.easing( sets.move );
-
-    if( water ) water.material.uniforms.time.value += 0.001
-
-    renderer.render( scene, camera );
-
-}
-
-
-function onMouseUp( e ){
-
-    e.preventDefault();
-    if(!controls.enabled) controls.enabled = true;
-  
-}
-
-function onMouseDown( e ){
-
-    e.preventDefault();
-    controls.enabled = raytest( e ) ? false : true;
-
-}
-
-function onMouseMove( e ) {
-
-    e.preventDefault();
-    raytest( e );
-
-}
-
-function raytest ( e ) {
-
-    mouse.set( (e.clientX / window.innerWidth) * 2 - 1, - ( e.clientY / window.innerHeight) * 2 + 1 );
-    raycaster.setFromCamera( mouse, camera );
-    var intersects = raycaster.intersectObjects( interactive.children );
-
-    if ( intersects.length > 0 ){
-
-        // send uv to ui mouse
-        if( intersects[ 0 ].object.name === 'p1' ) ui.setMouse( intersects[ 0 ].uv );
-        if( intersects[ 0 ].object.name === 'p2' ) ui2.setMouse( intersects[ 0 ].uv );
-        return true;
-
-    } else {
-
-        if(ui)ui.reset( true );
-        if(ui2)ui2.reset( true );
-        return false;
-    }
-
-   
-}
-
-// GUI
-
-function initGUI () {
-
-    // terrain
-
-    ui = new UIL.Gui( { w:cw, maxHeight:ch, parent:null, isCanvas:true, close:false, transparent:true } ).onChange( function( v ){ terrain.setData( sets ); debug.innerHTML = v; } );
-
-    ui.add( sets, 'height', { type:'Circular', min:0, max:10, w:128, precision:2, fontColor:'#D4B87B' } );
-    ui.add( sets, 'expo', { type:'Knob', min:0, max:10, w:128, precision:2, fontColor:'#D4B87B' } );
-    ui.add( sets, 'move', { type:'joystick', w:128, precision:2, fontColor:'#D4B87B' } );
-    ui.add( sets, 'level', { type:'graph', w:128, precision:2, fontColor:'#D4B87B', autoWidth:false } );
-    ui.add( sets, 'frequency', { type:'graph', w:128, precision:2, multiplicator:0.25, fontColor:'#D4B87B', autoWidth:false } );
-
-    ui.onDraw = function () {
-
-        if( screen === null ){
-
-            screen = new THREE.Texture( this.canvas )
-            screen.minFilter = THREE.LinearFilter
-            screen.encoding = THREE.sRGBEncoding
-            plane.material.map = screen;
-            plane.material.needsUpdate = true;
-            plane.visible = true;
-            
-        }
-
-        screen.needsUpdate = true
-
-    }
-}
-
-
-function initGUI2 () {
-
-    // sky
-
-    ui2 = new UIL.Gui( { w:cw, maxHeight:ch, parent:null, isCanvas:true, close:false, transparent:true } ).onChange( function( v ){ sky.setData( sets_S ); debug.innerHTML = v; } );
-
-    ui2.add( sets_S, 'cloud_size', { type:'Circular', min:0, max:1, w:128, precision:2, fontColor:'#7BD4B8' } );
-    ui2.add( sets_S, 'cloud_covr', { type:'Circular', min:0, max:1, w:128, precision:2, fontColor:'#7BD4B8' } );
-    ui2.add( sets_S, 'cloud_dens', { type:'Circular', min:0, max:100, w:128, precision:2, fontColor:'#7BD4B8' } );
-    ui2.add( sets_S, 'azimuth', { type:'Circular',  min:0, max:360, w:128, precision:0, fontColor:'#D4B87B' } );
-    ui2.add( sets_S, 'hour', { type:'Circular', min:0, max:24, w:128, precision:2, fontColor:'#D47B7B' } );
-
-    ui2.onDraw = function () {
-
-        if( screen2 === null ){
-
-            screen2 = new THREE.Texture( this.canvas );
-            screen2.minFilter = THREE.LinearFilter;
-            screen2.encoding = THREE.sRGBEncoding;
-            plane2.material.map = screen2;
-            plane2.material.needsUpdate = true;
-            plane2.visible = true;
-            
-        }
-
-        screen2.needsUpdate = true
-
-    }
-
-}
 
 </script>
 </body>

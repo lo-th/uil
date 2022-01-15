@@ -6,332 +6,338 @@
 <link rel="shortcut icon" href="./assets/favicon.ico">
 <link rel="stylesheet" type="text/css" href="./assets/style.css">
 
-<script type="text/javascript" src="../build/uil.js"></script>
-<script type="text/javascript" src="./js/libs/three.min.js"></script>
-<script type="text/javascript" src="./js/libs/sea3d.min.js"></script>
-<script type="text/javascript" src="./js/controls/OrbitControls.js"></script>
-
 </head>
 
 <body>
-<div id='content'></div>
-<!-- GITHUB LOGO -->
-<svg xmlns='http://www.w3.org/2000/svg' version='1.1' xmlns:xlink='http://www.w3.org/1999/xlink' width='80' height='80' viewBox='0 0 250 250' style='fill:rgba(255,255,255,0.1); color:#050608; position: absolute; top: 0; border: 0; right: 0;'><path d='M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z' id='octo'></path>
-<path d='M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2' fill='currentColor' style='transform-origin: 130px 106px;' id='octo-arm'></path>
-<path d='M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z' fill='currentColor' id='octo-body'></path></svg>
+<script type="module">
 
+    import * as THREE from './three/build/three.module.js';
+    import { OrbitControls } from './three/examples/jsm/controls/OrbitControls.js';
+    import { GLTFLoader } from './three/examples/jsm/loaders/GLTFLoader.js';
+    import { DRACOLoader } from './three/examples/jsm/loaders/DRACOLoader.js';
+    import { RGBELoader } from './three/examples/jsm/loaders/RGBELoader.js';
+    import * as UIL from '../build/uil.module.js';
 
-<script>
-
-// svg github link
-var octoArm = document.getElementById('octo-arm');
-octo.addEventListener('mouseover',function(e){ octo.setAttribute('fill', '#3998d6'); octoArm.style.animationName='octocat-wave'; octoArm.style.animationDuration='560ms';}, false );
-octo.addEventListener('mouseout',function(e){ octo.setAttribute('fill','rgba(255,255,255,0.2)');  octoArm.style.animationName='none'; }, false );
-octo.addEventListener('mousedown',function(e){ window.open('https://github.com/lo-th/uil','_blank'); }, false );
-
-var ui, simpleButton, display = false;
-
-var cw = 300, ch=617;
-
-var debug, debug2, camera, scene, renderer, controls, loader, mesh, mat, screen = null, interactive;
-var temp=0, fps=0, count=0; 
-
-var raycaster = new THREE.Raycaster();
-var mouse = new THREE.Vector2();
-var mouse2d = new THREE.Vector2();
-
-
-init();
-initInterface();
-initGUI();
-load();
-animate(0);
-
-function init() {
-
-    scene = new THREE.Scene();
-    //scene.background = new THREE.Color( 0x050608 );
-
-    renderer = new THREE.WebGLRenderer({ antialias:true, alpha:true });
-    renderer.setPixelRatio( window.devicePixelRatio );
-    renderer.setSize( window.innerWidth, window.innerHeight );
-    renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.4;
-    renderer.outputEncoding = THREE.sRGBEncoding;
-    //renderer.setClearColor( 0x000000, 0 );
-   // renderer.domElement.style.cssText = 'position: fixed; top:0; left:0;';
-    document.getElementById('content').appendChild( renderer.domElement );
-
-    camera = new THREE.PerspectiveCamera( 45, window.innerWidth / window.innerHeight, 1, 1000 );
-    camera.position.set( 0, 24, 6 );
-    controls = new THREE.OrbitControls( camera, renderer.domElement );
-
-    //scene.add( new THREE.HemisphereLight( 0x202020, 0xffffff, 2 ) );
-
-    scene.add(new THREE.AmbientLight( 0x333333, 2 ));
-
-    var pointLight = new THREE.PointLight( 0xaaddff, 1 );
-    pointLight.position.set( -10, -30, -20 );
-    scene.add(pointLight)
-
-    var pointLight2 = new THREE.PointLight( 0xFFDDAA, 1 );
-    pointLight2.position.set( 10, 30, -20 );
-    scene.add(pointLight2)
-
-    var spotLight = new THREE.SpotLight( 0xffffff, 2 );
-    spotLight.position.set( 10, 50, 20 );
-    spotLight.lookAt(new THREE.Vector3())
-    spotLight.angle = 0.3;
-    spotLight.penumbra = 0.2;
-    spotLight.decay = 2;
-    spotLight.distance = 100;
-    scene.add( spotLight )
-
-    loader = new THREE.TextureLoader();
-
-    var env = loader.load( './assets/textures/env.jpg' );
-    env.mapping = THREE.SphericalReflectionMapping;
-    env.encoding == THREE.sRGBEncoding;
-
-    var s8 = loader.load( './assets/textures/s8px.png' );
-    s8.flipY = false;
-    s8.minFilter = THREE.LinearFilter;
-    s8.encoding == THREE.sRGBEncoding;
+    let ui, simpleButton, display = false;
 
     
 
-    mat = {};
-    mat['glass_f'] = new THREE.MeshStandardMaterial( { roughness:0.1, metalness:0.8, color:0x000000, opacity:0.2, transparent:true, envMap: env, depthTest:true } );
-    mat['glass_b'] = new THREE.MeshStandardMaterial( { roughness:0.1, metalness:0.8, color:0x000000 } );
-    mat['glass_c'] = mat['glass_b'];
-    mat['cadre'] = new THREE.MeshStandardMaterial( { roughness:0.7, metalness:0.2, color:0x020202, envMap: env } );
-    mat['cadre_pl'] = new THREE.MeshStandardMaterial( { roughness:0.7, metalness:0.2, color:0x050505, envMap: env } );
-    mat['cadre_side'] = mat['cadre'];
-    mat['bouton'] =  mat['cadre']
-    mat['screen_back'] = new THREE.MeshBasicMaterial( { color:0x000000 } );
-    mat['screen_border'] = mat['screen_back'];
-    mat['plane'] = new THREE.MeshBasicMaterial({map:s8});
-    
-    mat['screen'] = new THREE.MeshStandardMaterial({transparent:true, roughness:0.25, metalness:0.55, envMap: env, depthTest:false });
+    let debug, debug2, camera, scene, renderer, controls, loader, mesh, mat, screen = null, interactive;
+    let temp=0, fps=0, count=0; 
 
-    interactive = new THREE.Group();
-    scene.add( interactive );
-
-    // events
-
-    window.addEventListener( 'resize', resize, false );
-    document.addEventListener( 'pointerup', onMouseUp, false );
-    document.addEventListener( 'pointerdown', onMouseDown, false );
-    document.addEventListener( 'pointermove', onMouseMove, false );
-
-}
-
-function initInterface () {
-
-    var logo = document.createElement("div");
-    logo.style.cssText = 'position:absolute; bottom:0px; left:0px; width:64px; pointer-events:none; ';
-    document.body.appendChild( logo );
-    logo.innerHTML = UIL.Tools.icon('logo', '#FFF', 64);
-
-    var version = document.createElement("div");
-    version.style.cssText = 'position:absolute; bottom:10px; left:54px;  pointer-events:none; color:#FFF; font-size:16px; font-weight: bold;';
-    document.body.appendChild( version );
-    version.innerHTML = 'il '+ UIL.REVISION;
-
-    debug = document.createElement("div");
-    debug.style.cssText = 'position:absolute; top:10px; left:0; width:100%; pointer-events:none; text-align: center; ';
-    document.body.appendChild(debug);
-
-    debug2 = document.createElement("div");
-    debug2.style.cssText = 'position:absolute; bottom:10px; right:10px; pointer-events:none; color:#FFFF00; font-size:16px; font-weight: bold;';
-    document.body.appendChild(debug2);
-
-}
-
-function resize() {
-
-    camera.aspect = window.innerWidth / window.innerHeight;
-    camera.updateProjectionMatrix();
-    renderer.setSize( window.innerWidth, window.innerHeight );
-
-}
+    let raycaster = new THREE.Raycaster();
+    let mouse = new THREE.Vector2();
 
 
-function animate(time) {
+    init()
+    initInterface()
+    animate(0)
 
-    requestAnimationFrame( animate );
+    function init() {
 
-    if ( (time - 1000) > temp ){ temp = time; debug2.textContent = count; count = 0; }; count++;
+        scene = new THREE.Scene()
 
-    renderer.render( scene, camera );
+        renderer = new THREE.WebGLRenderer({ antialias:true, alpha:true });
+        renderer.setPixelRatio( window.devicePixelRatio );
+        renderer.setSize( window.innerWidth, window.innerHeight );
+        renderer.setClearColor( 0x000000, 0 )
+        renderer.toneMapping = THREE.ACESFilmicToneMapping;
+        renderer.toneMappingExposure = 1.4;
+        renderer.outputEncoding = THREE.sRGBEncoding;
+        document.body.appendChild( renderer.domElement )
 
-}
+        camera = new THREE.PerspectiveCamera( 45, window.innerWidth / window.innerHeight, 1, 1000 );
+        camera.position.set( 0, 24, 6 );
+        controls = new OrbitControls( camera, renderer.domElement );
 
-function load() {
+        //scene.add(new THREE.AmbientLight( 0x333333, 2 ));
 
-    var l = new THREE.SEA3D();
-    meshs = {};
+        var pointLight = new THREE.PointLight( 0xaaddff, 1 );
+        pointLight.position.set( -10, -30, -20 );
+        scene.add(pointLight)
 
-    l.onComplete = function( e ) {
+        var pointLight2 = new THREE.PointLight( 0xFFDDAA, 1 );
+        pointLight2.position.set( 10, 30, -20 );
+        scene.add(pointLight2)
 
-        var i = l.meshes.length, m;
-        while(i--){
-            m = l.meshes[i];
-            meshs[m.name] = m;
-            m.material = mat[m.name];
-            if(m.name === 'screen') interactive.add( m );
-            else scene.add( m );
-        }
+        var spotLight = new THREE.SpotLight( 0xffffff, 2 );
+        spotLight.position.set( 10, 50, 20 );
+        spotLight.lookAt(new THREE.Vector3())
+        spotLight.angle = 0.3;
+        spotLight.penumbra = 0.2;
+        spotLight.decay = 2;
+        spotLight.distance = 100;
+        scene.add( spotLight )
 
-        
+        interactive = new THREE.Group();
+        scene.add( interactive );
 
-    };
+        initMaterial()
 
-    l.load( './assets/models/s8.sea' );
+        // events
 
-}
+        window.addEventListener( 'resize', resize, false );
+        document.addEventListener( 'pointerup', onMouseUp, false );
+        document.addEventListener( 'pointerdown', onMouseDown, false );
+        document.addEventListener( 'pointermove', onMouseMove, false );
 
-function onMouseUp( e ){
-
-    e.preventDefault();
-    if(!controls.enabled) controls.enabled = true;
-    
-}
-
-function onMouseDown( e ){
-
-    e.preventDefault();
-    controls.enabled = raytest( e ) ? false : true;
-
-}
-
-function onMouseMove( e ) {
-
-    e.preventDefault();
-    raytest( e );
-
-}
-
-function raytest ( e ) {
-
-    mouse.set( (e.clientX / window.innerWidth) * 2 - 1, - ( e.clientY / window.innerHeight) * 2 + 1 );
-    raycaster.setFromCamera( mouse, camera );
-    var intersects = raycaster.intersectObjects( interactive.children );
-
-    if ( intersects.length > 0 ){
-
-        ui.setMouse( intersects[ 0 ].uv, false );
-        return true;
-
-    } else {
-
-        ui.reset( true );
-        return false;
     }
 
-}
+    function initMaterial() {
 
-////
+        loader = new THREE.TextureLoader();
 
-function initGUI () {
+        new RGBELoader()
+        .setPath( './assets/textures/' )
+        .load( 'basic.hdr', function ( texture ) {
 
-    simpleButton = UIL.add( 'button', { target:document.body, name:'populate', w:100, h:30, radius:10, pos:{ left:'10px', top:'10px' }, simple:true }).onChange( populate );
+            texture.mapping = THREE.EquirectangularReflectionMapping;
+            //scene.background = texture;
+            scene.environment = texture;
 
-    // canvas GUI element
-    ui = new UIL.Gui( { w:cw, maxHeight:ch, parent:null, isCanvas:true } ).onChange( function( v ){ debug.innerHTML = v; } );
-
-    ui.onDraw = function (){
-
-        if( screen === null ){
-
-            screen = new THREE.Texture( this.canvas );
-            screen.flipY = false;
-            screen.minFilter = THREE.LinearFilter;
-            screen.encoding = THREE.sRGBEncoding
-            screen.needsUpdate = true;
-            mat.screen.map = screen;
-            mat.screen.needsUpdate = true;
-
-        }
+            var s8 = loader.load( './assets/textures/s8px.png' );
+            s8.flipY = false;
+            s8.minFilter = THREE.LinearFilter;
+            s8.encoding == THREE.sRGBEncoding;
             
-        screen.needsUpdate = true
+            mat = {};
+            mat['glass_f'] = new THREE.MeshStandardMaterial( { roughness:0.1, metalness:0.8, color:0x000000, opacity:0.2, transparent:true, depthTest:true } );
+            mat['glass_b'] = new THREE.MeshStandardMaterial( { roughness:0.1, metalness:0.8, color:0x000000 } );
+            mat['glass_c'] = mat['glass_b'];
+            mat['cadre'] = new THREE.MeshStandardMaterial( { roughness:0.7, metalness:0.2, color:0x020202} );
+            mat['cadre_pl'] = new THREE.MeshStandardMaterial( { roughness:0.7, metalness:0.2, color:0x050505 } );
+            mat['cadre_side'] = mat['cadre'];
+            mat['bouton'] =  mat['cadre']
+            mat['screen_back'] = new THREE.MeshBasicMaterial( { color:0x000000 } );
+            mat['screen_border'] = mat['screen_back'];
+            mat['plane'] = new THREE.MeshBasicMaterial({map:s8});
+            mat['screen'] = new THREE.MeshStandardMaterial({ transparent:true, roughness:0.25, metalness:0.55, depthTest:false });
+
+            loadModel()
+
+        })
+    }
+
+    function loadModel() {
+
+        let ratio = 0
+
+        new GLTFLoader()
+        .setPath( './assets/models/' )
+        .setDRACOLoader( new DRACOLoader().setDecoderPath( './three/examples/js/libs/draco/gltf/' ) )
+        .load( 's8.glb', function ( gltf ) {
+
+            let mm = gltf.scene.children
+
+            let i = mm.length, m;
+            while(i--){
+                m = mm[i];
+                m.scale.set(100,100,100);
+                m.material = mat[m.name];
+                if( m.name === 'screen' ){ 
+                    let s = m.geometry.boundingBox
+                    ratio = s.max.z/s.max.x
+                    interactive.add( m );
+                }
+                else scene.add( m );
+            }
+
+            initGUI( ratio )
+
+        })
 
     }
 
-    populate();
+    function initInterface () {
 
-}
+        var logo = document.createElement("div");
+        logo.style.cssText = 'position:absolute; bottom:0px; left:0px; width:40px; pointer-events:none; ';
+        document.body.appendChild( logo );
+        logo.innerHTML = UIL.Tools.icon('logo', '#FFF', 40);
 
-function populate(){
+        var version = document.createElement("div");
+        version.style.cssText = 'position:absolute; bottom:5px; left:35px;  pointer-events:none; color:#FFF; font-size:12px; font-weight: bold;';
+        document.body.appendChild( version );
+        version.innerHTML = 'il '+ UIL.REVISION;
 
-    if(!display){
+        debug = document.createElement("div");
+        debug.style.cssText = 'position:absolute; bottom:5px; left:0; width:100%; pointer-events:none; text-align: center; ';
+        document.body.appendChild(debug);
 
-        var list = ['item-0', 'item-1', 'item-2', 'item-3', 'item-4', 'item-5', 'item-6', 'item-7', 'item-8', 'item-9', 'item-10', 'item-11', 'item-12'];
-        var list2 = ['item-0', 'item-1', 'item-2'];
+        debug2 = document.createElement("div");
+        debug2.style.cssText = 'position:absolute; bottom:5px; right:5px; pointer-events:none; color:#FFFF00; font-size:12px; font-weight: bold;';
+        document.body.appendChild(debug2);
 
-        ui.add('title',  { name:'Title', titleColor:'#D4B87B', h:30});
-        ui.add('bool',   { name:'bool', titleColor:'#D4B87B', h:30 });
-        ui.add('color',  { name:'color', type:'html', value:0x000000, fontColor:'#D4B87B'});
-        ui.add('color',  { name:'color', type:'rgb', value:[0,1,1,1], h:20 });
-        ui.add('slide',  { name:'slide',  min:-100, max:100, value:0, precision:0, fontColor:'#D4B87B' });
-        ui.add('slide',  { name:'slide',  min:-1, max:1, value:0, step:0.01, precision:2, h:30 });
-        ui.add('string', { name:'string',  value:'welcome to uil', fontColor:'#D4B87B', h:30});
-        ui.add('string', { name:'string',  value:'full 3d input', fontColor:'#D4B87B', h:30});
-        ui.add('list',   { name:'list',  list:list, fontColor:'#D4B87B', h:30});
-        ui.add('list',   { name:'list',  list:list2, h:40});
-        ui.add('number', { name:'number',  value:20});
-        ui.add('number', { name:'vector2', value:[0,0], fontColor:'#D4B87B' });
-        ui.add('number', { name:'vector3', value:[0,0,0] });
-        ui.add('number', { name:'vector4', value:[0,0,0,0], step:1, precision:0, h:30 });
-        ui.add('button', { name:'button', fontColor:'#D4B87B', h:30 });
-        ui.add('button', { name:'MULTY', fontColor:'#D4B87B', h:30, value:[1, 2, 3, 4] })
+    }
 
-        gr0 = ui.add('group', { name:'Group', fontColor:'#D4B87B', h:30 });
-        gr0.add('list',   { name:'listH', list:list, fontColor:'#D4B87B', h:30});
-        gr0.add('slide',  { name:'slide', min:-100, max:100, value:0, precision:0 });
-        gr0.add('slide',  { name:'slide', min:-100, max:100, value:0, precision:0 });
-        gr0.add('slide',  { name:'slide', min:-100, max:100, value:0, precision:0 });
-        gr0.add('slide',  { name:'slide', min:-100, max:100, value:0, precision:0 });
-        gr0.add('slide',  { name:'slide', min:-100, max:100, value:0, precision:0 });
+    function resize() {
 
-        gr1 = ui.add('group', { name:'circulars', fontColor:'#D4B87B' });
-
-        gr1.add('circular', { name:'circular', w:70, min:0, max:100, step:10, value:20, precision:0 , fontColor:'#D4B87B' });
-        gr1.add('circular', { name:'circular', w:70, min:0, max:100, value:50, precision:2 , fontColor:'#D4B87B' });
-        gr1.add('circular', { name:'circular', w:70, min:0, max:100, value:75, precision:2 , fontColor:'#D4B87B' });
-        gr1.add('circular', { name:'circular', w:70, min:0, max:100, value:100, precision:0 , fontColor:'#D4B87B' });
-
-        gr2 = ui.add('group', { name:'knobs', fontColor:'#D4B87B' });
-
-        gr2.add('knob', { name:'knob', w:70, min:0, max:100, step:10, value:20, precision:0 , fontColor:'#D4B87B' });
-        gr2.add('knob', { name:'knob', w:70, min:0, max:100, value:50, precision:2 , fontColor:'#D4B87B' });
-        gr2.add('knob', { name:'knob', w:70, min:0, max:100, value:75, precision:2 , fontColor:'#D4B87B' });
-        gr2.add('knob', { name:'knob', w:70, min:0, max:100, value:100, step:1, precision:0 , fontColor:'#D4B87B' });
-        gr2.add('knob', { name:'knob', w:70, min:0, max:100, step:10, value:20, precision:0 , fontColor:'#D4B87B' });
-        gr2.add('knob', { name:'knob', w:70, min:0, max:100, value:50, precision:2 , fontColor:'#D4B87B' });
-        gr2.add('knob', { name:'knob', w:70, min:0, max:100, value:75, precision:2 , fontColor:'#D4B87B' });
-        gr2.add('knob', { name:'knob', w:70, min:0, max:100, value:100, step:1, precision:0 , fontColor:'#D4B87B' });
-
-        gr3 = ui.add('group', { name:'joysticks', fontColor:'#D4B87B' });
-
-        gr3.add('joystick', { name:'joystick', w:140, multiplicator:1, precision:2, fontColor:'#D4B87B' });
-        gr3.add('joystick', { name:'joystick', w:140, multiplicator:1, precision:2, fontColor:'#D4B87B' });
-
-        //gr0.open();
-
-        display = true;
-        simpleButton.label('clear');
-
-    } else {
-
-        ui.clear();
-        display = false;
-        simpleButton.label('populate');
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize( window.innerWidth, window.innerHeight );
 
     }
 
 
-}
+    function animate(time) {
+
+        requestAnimationFrame( animate );
+
+        if ( (time - 1000) > temp ){ temp = time; debug2.textContent = count; count = 0; }; count++;
+
+        renderer.render( scene, camera );
+
+    }
+
+   
+
+    function onMouseUp( e ){
+
+        e.preventDefault();
+        if(!controls.enabled) controls.enabled = true;
+        
+    }
+
+    function onMouseDown( e ){
+
+        e.preventDefault();
+        controls.enabled = raytest( e ) ? false : true;
+
+    }
+
+    function onMouseMove( e ) {
+
+        e.preventDefault();
+        raytest( e );
+
+    }
+
+    function raytest ( e ) {
+
+        mouse.set( (e.clientX / window.innerWidth) * 2 - 1, - ( e.clientY / window.innerHeight) * 2 + 1 );
+        raycaster.setFromCamera( mouse, camera );
+        var intersects = raycaster.intersectObjects( interactive.children );
+
+        if( !ui ) return
+
+        if ( intersects.length > 0 ){
+
+            ui.setMouse( intersects[ 0 ].uv, false );
+            return true;
+
+        } else {
+
+            ui.reset( true );
+            return false;
+        }
+
+    }
+
+    ////
+
+    function initGUI( r ) {
+
+        console.log(300*r)
+
+        simpleButton = UIL.add( 'button', { target:document.body, name:'populate', w:100, h:30, radius:10, pos:{ left:'10px', top:'10px' }, simple:true }).onChange( populate );
+
+        // canvas GUI element
+        let cw = 300, ch = 640//Math.floor(cw*r)//617;
+        ui = new UIL.Gui( { w:cw, maxHeight:ch, parent:null, isCanvas:true } ).onChange( function( v ){ debug.innerHTML = v; } );
+
+        ui.onDraw = function (){
+
+            if( screen === null ){
+
+                screen = new THREE.Texture( this.canvas );
+                screen.flipY = false;
+                //screen.minFilter = THREE.LinearFilter;
+                screen.encoding = THREE.sRGBEncoding
+                mat.screen.map = screen;
+                mat.screen.needsUpdate = true;
+
+            }
+                
+            screen.needsUpdate = true
+
+        }
+
+        populate();
+
+    }
+
+    function populate(){
+
+        let g
+
+        if(!display){
+
+            var list = ['item-0', 'item-1', 'item-2', 'item-3', 'item-4', 'item-5', 'item-6', 'item-7', 'item-8', 'item-9', 'item-10', 'item-11', 'item-12'];
+            var list2 = ['item-0', 'item-1', 'item-2'];
+
+            ui.add('title',  { name:'Title', titleColor:'#D4B87B', h:30});
+            ui.add('bool',   { name:'bool', titleColor:'#D4B87B', h:30 });
+            ui.add('color',  { name:'color', type:'html', value:0x000000, fontColor:'#D4B87B'});
+            ui.add('color',  { name:'color', type:'rgb', value:[0,1,1,1], h:20 });
+            ui.add('slide',  { name:'slide',  min:-100, max:100, value:0, precision:0, fontColor:'#D4B87B' });
+            ui.add('slide',  { name:'slide',  min:-1, max:1, value:0, step:0.01, precision:2, h:30 });
+            ui.add('string', { name:'string',  value:'welcome to uil', fontColor:'#D4B87B', h:30});
+            ui.add('string', { name:'string',  value:'full 3d input', fontColor:'#D4B87B', h:30});
+            ui.add('list',   { name:'list',  list:list, fontColor:'#D4B87B', h:30});
+            ui.add('list',   { name:'list',  list:list2, h:40});
+            ui.add('number', { name:'number',  value:20});
+            ui.add('number', { name:'vector2', value:[0,0], fontColor:'#D4B87B' });
+            ui.add('number', { name:'vector3', value:[0,0,0] });
+            ui.add('number', { name:'vector4', value:[0,0,0,0], step:1, precision:0, h:30 });
+            ui.add('button', { name:'button', fontColor:'#D4B87B', h:30 });
+            ui.add('button', { name:'MULTY', fontColor:'#D4B87B', h:30, value:[1, 2, 3, 4] })
+
+            g = ui.add('group', { name:'Group', fontColor:'#D4B87B', h:30 });
+            g.add('list',   { name:'listH', list:list, fontColor:'#D4B87B', h:30});
+            g.add('slide',  { name:'slide', min:-100, max:100, value:0, precision:0 });
+            g.add('slide',  { name:'slide', min:-100, max:100, value:0, precision:0 });
+            g.add('slide',  { name:'slide', min:-100, max:100, value:0, precision:0 });
+            g.add('slide',  { name:'slide', min:-100, max:100, value:0, precision:0 });
+            g.add('slide',  { name:'slide', min:-100, max:100, value:0, precision:0 });
+
+            g = ui.add('group', { name:'circulars', fontColor:'#D4B87B' });
+
+            g.add('circular', { name:'circular', w:70, min:0, max:100, step:10, value:20, precision:0 , fontColor:'#D4B87B' });
+            g.add('circular', { name:'circular', w:70, min:0, max:100, value:50, precision:2 , fontColor:'#D4B87B' });
+            g.add('circular', { name:'circular', w:70, min:0, max:100, value:75, precision:2 , fontColor:'#D4B87B' });
+            g.add('circular', { name:'circular', w:70, min:0, max:100, value:100, precision:0 , fontColor:'#D4B87B' });
+
+            g = ui.add('group', { name:'knobs', fontColor:'#D4B87B' });
+
+            g.add('knob', { name:'knob', w:70, min:0, max:100, step:10, value:20, precision:0 , fontColor:'#D4B87B' });
+            g.add('knob', { name:'knob', w:70, min:0, max:100, value:50, precision:2 , fontColor:'#D4B87B' });
+            g.add('knob', { name:'knob', w:70, min:0, max:100, value:75, precision:2 , fontColor:'#D4B87B' });
+            g.add('knob', { name:'knob', w:70, min:0, max:100, value:100, step:1, precision:0 , fontColor:'#D4B87B' });
+            g.add('knob', { name:'knob', w:70, min:0, max:100, step:10, value:20, precision:0 , fontColor:'#D4B87B' });
+            g.add('knob', { name:'knob', w:70, min:0, max:100, value:50, precision:2 , fontColor:'#D4B87B' });
+            g.add('knob', { name:'knob', w:70, min:0, max:100, value:75, precision:2 , fontColor:'#D4B87B' });
+            g.add('knob', { name:'knob', w:70, min:0, max:100, value:100, step:1, precision:0 , fontColor:'#D4B87B' });
+
+            g = ui.add('group', { name:'joysticks', fontColor:'#D4B87B' });
+
+            g.add('joystick', { name:'joystick', w:140, multiplicator:1, precision:2, fontColor:'#D4B87B' });
+            g.add('joystick', { name:'joystick', w:140, multiplicator:1, precision:2, fontColor:'#D4B87B' });
+
+            //gr0.open();
+
+            display = true;
+            simpleButton.label('clear');
+
+        } else {
+
+            ui.clear();
+            display = false;
+            simpleButton.label('populate');
+
+        }
+
+
+    }
 
 
 </script>

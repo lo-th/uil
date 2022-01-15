@@ -1,3 +1,5 @@
+import * as THREE from '../build/three.module.js';
+
 /**
  * Work based on :
  * http://slayvin.net : Flat mirror for three.js
@@ -5,13 +7,13 @@
  * http://29a.ch/ && http://29a.ch/slides/2012/webglwater/ : Water shader explanations in WebGL
  */
 
-THREE.Water = function ( geometry, options ) {
+export class Water extends THREE.Mesh {
 
-	THREE.Mesh.call( this, geometry );
+	constructor( geometry, options = {} ) {
 
-	var scope = this;
+	super( geometry )
 
-	options = options || {};
+	var scope = this
 
 	var textureWidth = options.textureWidth !== undefined ? options.textureWidth : 512;
 	var textureHeight = options.textureHeight !== undefined ? options.textureHeight : 512;
@@ -321,9 +323,7 @@ THREE.Water = function ( geometry, options ) {
 
 		}
 
-	};
+	}
 
-};
-
-THREE.Water.prototype = Object.create( THREE.Mesh.prototype );
-THREE.Water.prototype.constructor = THREE.Water;
+}
+}
