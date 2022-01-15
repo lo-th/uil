@@ -1,4 +1,4 @@
-<p align="center"><a href="http://lo-th.github.io/uil/"><img src="http://lo-th.github.io/uil/examples/assets/uil.jpg"/></a><br>UIL v4.0</p>
+<p align="center"><a href="http://lo-th.github.io/uil/"><img src="http://lo-th.github.io/uil/examples/assets/uil.jpg"/></a><br>UIL v4.0.2</p>
 
 uil.js is a lightweight ui for javascript with a complete 3d display support.<br>
 totally customizable, only 6 events, auto resize<br>
@@ -55,3 +55,7 @@ ui.clear();
 [**uil to three**](http://lo-th.github.io/uil/examples/uil_3d.html)
 
 [**uil to three 2**](http://lo-th.github.io/uil/examples/uil_3d_2.html)
+
+**7 - uil is on npm**
+```sh
+npm i uil
