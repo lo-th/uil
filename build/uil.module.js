@@ -2428,7 +2428,8 @@ class Proto {
     display( v ) {
         
         v = v || false;
-        this.s[0].display = v ? (this.useFlex? 'flex':'block') : 'none';
+        this.s[0].visibility = v ? 'visible' : 'hidden';
+        //this.s[0].display = v ? (this.useFlex? 'flex':'block') : 'none'
 
     }
 
