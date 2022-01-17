@@ -6875,7 +6875,7 @@
 
 
 		remove(n) {
-			if (n.clear) n.clear();
+			if (n.dispose) n.dispose();
 		} // call after uis clear
 
 
@@ -7050,7 +7050,7 @@
 
 	}
 
-	const REVISION = '4.0.3';
+	const REVISION = '4.0.4';
 
 	exports.Gui = Gui;
 	exports.Proto = Proto;

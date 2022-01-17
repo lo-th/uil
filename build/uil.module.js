@@ -8385,7 +8385,7 @@ class Gui {
 
     remove ( n ) {
 
-        if( n.clear ) n.clear();
+        if( n.dispose ) n.dispose();
 
     }
 
@@ -8628,6 +8628,6 @@ class Gui {
 
 }
 
-const REVISION = '4.0.3';
+const REVISION = '4.0.4';
 
 export { Gui, Proto, REVISION, Tools, add };

@@ -1,4 +1,3 @@
-
 import { Roots } from './Roots.js';
 import { Tools } from './Tools.js';
 import { add } from './add.js';
@@ -553,7 +552,7 @@ export class Gui {
 
     remove ( n ) {
 
-        if( n.clear ) n.clear();
+        if( n.dispose ) n.dispose();
 
     }
 
