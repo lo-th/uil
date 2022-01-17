@@ -443,36 +443,36 @@ export class Proto {
     // ----------------------
     // clear node
     // ----------------------
-    
-    clear( nofull ) {
+
+    dispose(){
 
         if( this.isListen ) Roots.removeListen( this );
 
         Tools.clear( this.c[0] );
 
-        if( !nofull ){
+        if( this.target !== null ){ 
 
-            if( this.target !== null ){ 
+            if( this.group !== null  ) this.group.clearOne( this );
+            else this.target.removeChild( this.c[0] );
 
-                if( this.group !== null  ) this.group.clearOne( this );
-                else this.target.removeChild( this.c[0] );
+        } else {
 
-            } else {
-
-                if( this.isUI ) this.main.clearOne( this );
-                else document.body.removeChild( this.c[0] );
-
-            }
-
-            if( !this.isUI ) Roots.remove( this );
+            if( this.isUI ) this.main.clearOne( this );
+            else document.body.removeChild( this.c[0] );
 
         }
 
+        if( !this.isUI ) Roots.remove( this );
+        
         this.c = null;
         this.s = null;
         this.callback = null;
         this.target = null;
         this.isListen = false;
+
+    }
+    
+    clear() {
 
     }
 

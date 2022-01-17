@@ -223,7 +223,7 @@ export class Group extends Proto {
 
     }
 
-    add () {
+    add() {
 
         let a = arguments;
 
@@ -261,11 +261,27 @@ export class Group extends Proto {
 
     remove ( n ) {
 
-        if( n.clear ) n.clear();
+        if( n.dispose ) n.dispose();
 
     }
 
     // clear all iner 
+
+    dispose() {
+
+        this.clear()
+        if( this.isUI ) this.main.calc()
+
+        super.dispose()
+        //Proto.prototype.clear.call( this );
+
+    }
+
+    clear() {
+
+        this.empty()
+
+    }
 
     empty () {
 
@@ -331,29 +347,6 @@ export class Group extends Proto {
         this.s[0].height = this.h + 'px';
 
         this.parentHeight()
-
-    }
-
-    clear () {
-
-        this.empty();
-        if( this.isUI ) this.main.calc( -( this.h + 1 ));
-        Proto.prototype.clear.call( this );
-
-    }
-
-    clearGroup () {
-
-        this.empty();
-
-        /*this.close();
-
-        let i = this.uis.length;
-        while(i--){
-            this.uis[i].clear();   
-        }
-        this.uis = [];
-        this.h = this.baseH;*/
 
     }
 

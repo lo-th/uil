@@ -54,7 +54,7 @@ function addRemove_0(){
 
     if( tmp_0 ){ 
 
-        tmp_0.clear();
+        tmp_0.dispose();
         // or
         //ui.remove( tmp_0 );
         tmp_0 = null;
@@ -73,7 +73,7 @@ function addRemove_1(){
 
         for( let i in tmp_1 ){
 
-            tmp_1[ i ].clear();
+            tmp_1[ i ].dispose();
             // or
             //ui.remove(  tmp_1[ i ] );
 
@@ -107,7 +107,7 @@ function addRemove_2(){
 
     } else {
 
-        gr.empty();
+        gr.clear();
 
     }
 }

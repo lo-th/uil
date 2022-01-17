@@ -582,7 +582,7 @@ export class Gui {
         while( i-- ){
             item = this.uis.pop();
             this.inner.removeChild( item.c[0] );
-            item.clear( true );
+            item.dispose()
 
             //this.uis[i].clear()
         }
@@ -600,17 +600,7 @@ export class Gui {
 
     clear() {
 
-        this.empty();
-
-        //this.callback = null;
-
-        /*let i = this.uis.length;
-        while( i-- ) this.uis[i].clear();
-
-        this.uis = [];
-        Roots.listens = [];
-
-        this.calc( -this.h );*/
+        this.empty()
 
     }
 

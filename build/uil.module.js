@@ -2265,36 +2265,36 @@ class Proto {
     // ----------------------
     // clear node
     // ----------------------
-    
-    clear( nofull ) {
+
+    dispose(){
 
         if( this.isListen ) Roots.removeListen( this );
 
         Tools.clear( this.c[0] );
 
-        if( !nofull ){
+        if( this.target !== null ){ 
 
-            if( this.target !== null ){ 
+            if( this.group !== null  ) this.group.clearOne( this );
+            else this.target.removeChild( this.c[0] );
 
-                if( this.group !== null  ) this.group.clearOne( this );
-                else this.target.removeChild( this.c[0] );
+        } else {
 
-            } else {
-
-                if( this.isUI ) this.main.clearOne( this );
-                else document.body.removeChild( this.c[0] );
-
-            }
-
-            if( !this.isUI ) Roots.remove( this );
+            if( this.isUI ) this.main.clearOne( this );
+            else document.body.removeChild( this.c[0] );
 
         }
 
+        if( !this.isUI ) Roots.remove( this );
+        
         this.c = null;
         this.s = null;
         this.callback = null;
         this.target = null;
         this.isListen = false;
+
+    }
+    
+    clear() {
 
     }
 
@@ -2660,7 +2660,7 @@ class Button extends Proto {
 
         
 
-        this.onName = o.onName || '';
+        this.onName = o.onName || null;
 
         this.on = false;
 
@@ -2710,16 +2710,16 @@ class Button extends Proto {
             this.initDrager();
         }
 
-        if( this.onName !== '' ) this.values[0] = this.on;
+        //if( this.onName !== '' ) this.values[0] = this.on;
 
         this.init();
 
     }
 
-    onOff ( ){
+    onOff() {
 
         this.on = !this.on;
-        this.c[2].innerHTML = this.on ? this.onName : this.txt;
+        this.label( this.on ? this.onName : this.txt );
         
     }
 
@@ -2751,6 +2751,7 @@ class Button extends Proto {
         if( this.res !== -1 ){
             if( this.value === this.values[this.res] && this.unselectable ) this.value = '';
             else this.value = this.values[this.res];
+            if( this.onName !== null ) this.onOff();
             if( !this.isLoadButton ) this.send();
         }
 
@@ -4491,7 +4492,7 @@ class Group extends Proto {
 
     }
 
-    add () {
+    add() {
 
         let a = arguments;
 
@@ -4529,11 +4530,27 @@ class Group extends Proto {
 
     remove ( n ) {
 
-        if( n.clear ) n.clear();
+        if( n.dispose ) n.dispose();
 
     }
 
     // clear all iner 
+
+    dispose() {
+
+        this.clear();
+        if( this.isUI ) this.main.calc();
+
+        super.dispose();
+        //Proto.prototype.clear.call( this );
+
+    }
+
+    clear() {
+
+        this.empty();
+
+    }
 
     empty () {
 
@@ -4599,29 +4616,6 @@ class Group extends Proto {
         this.s[0].height = this.h + 'px';
 
         this.parentHeight();
-
-    }
-
-    clear () {
-
-        this.empty();
-        if( this.isUI ) this.main.calc( -( this.h + 1 ));
-        Proto.prototype.clear.call( this );
-
-    }
-
-    clearGroup () {
-
-        this.empty();
-
-        /*this.close();
-
-        let i = this.uis.length;
-        while(i--){
-            this.uis[i].clear();   
-        }
-        this.uis = [];
-        this.h = this.baseH;*/
 
     }
 
@@ -8420,7 +8414,7 @@ class Gui {
         while( i-- ){
             item = this.uis.pop();
             this.inner.removeChild( item.c[0] );
-            item.clear( true );
+            item.dispose();
 
             //this.uis[i].clear()
         }
@@ -8439,16 +8433,6 @@ class Gui {
     clear() {
 
         this.empty();
-
-        //this.callback = null;
-
-        /*let i = this.uis.length;
-        while( i-- ) this.uis[i].clear();
-
-        this.uis = [];
-        Roots.listens = [];
-
-        this.calc( -this.h );*/
 
     }
 
@@ -8644,6 +8628,6 @@ class Gui {
 
 }
 
-const REVISION = '4.0.2';
+const REVISION = '4.0.3';
 
 export { Gui, Proto, REVISION, Tools, add };

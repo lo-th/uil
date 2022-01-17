@@ -13,7 +13,7 @@ export class Button extends Proto {
 
         
 
-        this.onName = o.onName || '';
+        this.onName = o.onName || null;
 
         this.on = false;
 
@@ -63,16 +63,16 @@ export class Button extends Proto {
             this.initDrager();
         }
 
-        if( this.onName !== '' ) this.values[0] = this.on;
+        //if( this.onName !== '' ) this.values[0] = this.on;
 
         this.init();
 
     }
 
-    onOff ( ){
+    onOff() {
 
         this.on = !this.on;
-        this.c[2].innerHTML = this.on ? this.onName : this.txt
+        this.label( this.on ? this.onName : this.txt )
         
     }
 
@@ -104,6 +104,7 @@ export class Button extends Proto {
         if( this.res !== -1 ){
             if( this.value === this.values[this.res] && this.unselectable ) this.value = ''
             else this.value = this.values[this.res]
+            if( this.onName !== null ) this.onOff()
             if( !this.isLoadButton ) this.send()
         }
 
