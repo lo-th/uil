@@ -140,6 +140,8 @@ export class Gui {
         if( !this.isCanvasOnly ){ 
             this.content.style.pointerEvents = 'auto';
         } else {
+            this.content.style.left = '0px';
+            this.content.style.right = 'auto';
             o.transition = 0
         }
 
@@ -189,6 +191,8 @@ export class Gui {
     	this.canvas = document.createElementNS( 'http://www.w3.org/1999/xhtml', "canvas" );
     	this.canvas.width = this.zone.w;
     	this.canvas.height = this.forceHeight ? this.forceHeight : this.zone.h;
+
+        //console.log( this.canvas.width, this.canvas.height )
 
     }
 
@@ -742,6 +746,8 @@ export class Gui {
 
         }
 
+        //if( this.forceHeight ) this.zone.h = this.forceHeight
+
         this.upScroll( this.isScroll )
 
         this.innerContent.style.height = this.zone.h - this.bh + 'px'
@@ -750,6 +756,8 @@ export class Gui {
 
 
         if( this.forceHeight && this.lockHeight ) this.content.style.height = this.forceHeight + 'px';
+
+        //console.log( this.zone, this.bh )
 
         //if( this.isOpen ) this.calcUis()
         if( this.isCanvas ) this.draw( true )

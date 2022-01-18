@@ -305,7 +305,9 @@
 					u.zone.x = zone.x + px;
 					u.zone.y = py;
 					tw = R.getWidth(u);
-					if (tw) u.zone.w = u.w = tw; //console.log( u.name, u.zone.w, u.w, zone )
+					if (tw) u.zone.w = u.w = tw; // focrce width if content is canvas
+					else if (u.fw) u.zone.w = u.w = u.fw; //console.log( u.name, u.zone.w, u.w, zone, tw )
+					//console.log(	tw )
 
 					px += u.zone.w;
 
@@ -359,7 +361,8 @@
 			return over;
 		},
 		getWidth: function (o) {
-			return o.getDom().offsetWidth; //let r = o.getDom().getBoundingClientRect();
+			//return o.getDom().offsetWidth
+			return o.getDom().clientWidth; //let r = o.getDom().getBoundingClientRect();
 			//return (r.width)
 			//return Math.floor(r.width)
 		},
@@ -1676,7 +1679,14 @@
 			if (o.w !== undefined) this.w = o.w;
 			this.h = this.isUI ? this.main.size.h : Tools.size.h;
 			if (o.h !== undefined) this.h = o.h;
-			if (!this.isSpace) this.h = this.h < 11 ? 11 : this.h;else this.lock = true;
+			if (!this.isSpace) this.h = this.h < 11 ? 11 : this.h;else this.lock = true; // decale for canvas only
+
+			this.fw = o.fw || 0;
+			/*this.dc = 0
+			if(this.isUI){
+					if( this.main.isCanvasOnly && this.fw) this.dc = (this.main.zone.w - this.w)*0.5
+			}*/
+
 			this.autoWidth = o.auto || true; // auto width or flex 
 
 			this.isOpen = false; // open statu
@@ -6573,6 +6583,8 @@
 			if (!this.isCanvasOnly) {
 				this.content.style.pointerEvents = 'auto';
 			} else {
+				this.content.style.left = '0px';
+				this.content.style.right = 'auto';
 				o.transition = 0;
 			} // height transition
 
@@ -6607,7 +6619,7 @@
 		makeCanvas() {
 			this.canvas = document.createElementNS('http://www.w3.org/1999/xhtml', "canvas");
 			this.canvas.width = this.zone.w;
-			this.canvas.height = this.forceHeight ? this.forceHeight : this.zone.h;
+			this.canvas.height = this.forceHeight ? this.forceHeight : this.zone.h; //console.log( this.canvas.width, this.canvas.height )
 		}
 
 		draw(force) {
@@ -7012,13 +7024,15 @@
 				} else {
 					this.zone.h = this.h + this.bh;
 				}
-			}
+			} //if( this.forceHeight ) this.zone.h = this.forceHeight
+
 
 			this.upScroll(this.isScroll);
 			this.innerContent.style.height = this.zone.h - this.bh + 'px';
 			this.content.style.height = this.zone.h + 'px';
 			this.bottom.style.top = this.zone.h - this.bh + 'px';
-			if (this.forceHeight && this.lockHeight) this.content.style.height = this.forceHeight + 'px'; //if( this.isOpen ) this.calcUis()
+			if (this.forceHeight && this.lockHeight) this.content.style.height = this.forceHeight + 'px'; //console.log( this.zone, this.bh )
+			//if( this.isOpen ) this.calcUis()
 
 			if (this.isCanvas) this.draw(true); //else if( !this.transition ) this.rezone()
 		}
@@ -7050,7 +7064,7 @@
 
 	}
 
-	const REVISION = '4.0.4';
+	const REVISION = '4.0.5';
 
 	exports.Gui = Gui;
 	exports.Proto = Proto;

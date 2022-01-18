@@ -29,6 +29,8 @@ export class Pad2D extends Proto {
 
         //console.log(this.range)
 
+        
+
 
 
         this.precision = o.precision === undefined ? 2 : o.precision;
@@ -118,6 +120,7 @@ export class Pad2D extends Proto {
     mousedown ( e ) {
 
         if ( this.testZone(e) === 'pad' ) {
+
             this.isDown = true;
             this.mousemove( e );
             return this.mode(1);

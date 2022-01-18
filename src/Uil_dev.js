@@ -6,7 +6,7 @@ import { add } from './core/add.js'
 
 export const UIL = {
 
-	REVISION : '4.0.4',
+	REVISION : '4.0.5',
 
 	Tools:Tools,
 	Gui:Gui,

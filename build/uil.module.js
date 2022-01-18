@@ -394,8 +394,12 @@ const R = {
 
                 tw = R.getWidth(u);
                 if( tw ) u.zone.w = u.w = tw;
+                // focrce width if content is canvas
+                else if( u.fw ) u.zone.w = u.w = u.fw;
+                
 
-                //console.log( u.name, u.zone.w, u.w, zone )
+                //console.log( u.name, u.zone.w, u.w, zone, tw )
+                //console.log(  tw )
                 px += u.zone.w;
 
                 if( px >= zone.w ) { 
@@ -477,7 +481,8 @@ const R = {
 
 
 
-        return o.getDom().offsetWidth
+        //return o.getDom().offsetWidth
+        return o.getDom().clientWidth
 
         //let r = o.getDom().getBoundingClientRect();
         //return (r.width)
@@ -1851,6 +1856,8 @@ class Proto {
 
         this.isListen = false;
 
+
+
         
         //this.parentGroup = null;
 
@@ -1883,6 +1890,14 @@ class Proto {
         if( o.h !== undefined ) this.h = o.h;
         if( !this.isSpace ) this.h = this.h < 11 ? 11 : this.h;
         else this.lock = true;
+
+
+        // decale for canvas only
+        this.fw = o.fw || 0;
+        /*this.dc = 0
+        if(this.isUI){
+            if( this.main.isCanvasOnly && this.fw) this.dc = (this.main.zone.w - this.w)*0.5
+        }*/
 
         
         this.autoWidth = o.auto || true;// auto width or flex 
@@ -7536,6 +7551,8 @@ class Pad2D extends Proto {
 
         //console.log(this.range)
 
+        
+
 
 
         this.precision = o.precision === undefined ? 2 : o.precision;
@@ -7625,6 +7642,7 @@ class Pad2D extends Proto {
     mousedown ( e ) {
 
         if ( this.testZone(e) === 'pad' ) {
+
             this.isDown = true;
             this.mousemove( e );
             return this.mode(1);
@@ -7974,6 +7992,8 @@ class Gui {
         if( !this.isCanvasOnly ){ 
             this.content.style.pointerEvents = 'auto';
         } else {
+            this.content.style.left = '0px';
+            this.content.style.right = 'auto';
             o.transition = 0;
         }
 
@@ -8023,6 +8043,8 @@ class Gui {
     	this.canvas = document.createElementNS( 'http://www.w3.org/1999/xhtml', "canvas" );
     	this.canvas.width = this.zone.w;
     	this.canvas.height = this.forceHeight ? this.forceHeight : this.zone.h;
+
+        //console.log( this.canvas.width, this.canvas.height )
 
     }
 
@@ -8575,6 +8597,8 @@ class Gui {
 
         }
 
+        //if( this.forceHeight ) this.zone.h = this.forceHeight
+
         this.upScroll( this.isScroll );
 
         this.innerContent.style.height = this.zone.h - this.bh + 'px';
@@ -8583,6 +8607,8 @@ class Gui {
 
 
         if( this.forceHeight && this.lockHeight ) this.content.style.height = this.forceHeight + 'px';
+
+        //console.log( this.zone, this.bh )
 
         //if( this.isOpen ) this.calcUis()
         if( this.isCanvas ) this.draw( true );
@@ -8628,6 +8654,6 @@ class Gui {
 
 }
 
-const REVISION = '4.0.4';
+const REVISION = '4.0.5';
 
 export { Gui, Proto, REVISION, Tools, add };

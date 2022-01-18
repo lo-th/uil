@@ -29,6 +29,8 @@ export class Proto {
 
         this.isListen = false;
 
+
+
         
         //this.parentGroup = null;
 
@@ -61,6 +63,14 @@ export class Proto {
         if( o.h !== undefined ) this.h = o.h;
         if( !this.isSpace ) this.h = this.h < 11 ? 11 : this.h;
         else this.lock = true
+
+
+        // decale for canvas only
+        this.fw = o.fw || 0
+        /*this.dc = 0
+        if(this.isUI){
+            if( this.main.isCanvasOnly && this.fw) this.dc = (this.main.zone.w - this.w)*0.5
+        }*/
 
         
         this.autoWidth = o.auto || true;// auto width or flex 

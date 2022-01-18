@@ -391,8 +391,12 @@ const R = {
 
                 tw = R.getWidth(u)
                 if( tw ) u.zone.w = u.w = tw;
+                // focrce width if content is canvas
+                else if( u.fw ) u.zone.w = u.w = u.fw;
+                
 
-                //console.log( u.name, u.zone.w, u.w, zone )
+                //console.log( u.name, u.zone.w, u.w, zone, tw )
+                //console.log(  tw )
                 px += u.zone.w;
 
                 if( px >= zone.w ) { 
@@ -474,7 +478,8 @@ const R = {
 
 
 
-        return o.getDom().offsetWidth
+        //return o.getDom().offsetWidth
+        return o.getDom().clientWidth
 
         //let r = o.getDom().getBoundingClientRect();
         //return (r.width)

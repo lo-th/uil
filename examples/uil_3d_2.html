@@ -237,7 +237,6 @@
 
     function initGUI( r ) {
 
-        console.log(300*r)
 
         simpleButton = UIL.add( 'button', { target:document.body, name:'populate', w:100, h:30, radius:10, pos:{ left:'10px', top:'10px' }, simple:true }).onChange( populate );
 
@@ -274,6 +273,8 @@
 
             var list = ['item-0', 'item-1', 'item-2', 'item-3', 'item-4', 'item-5', 'item-6', 'item-7', 'item-8', 'item-9', 'item-10', 'item-11', 'item-12'];
             var list2 = ['item-0', 'item-1', 'item-2'];
+
+
 
             ui.add('title',  { name:'Title', titleColor:'#D4B87B', h:30});
             ui.add('bool',   { name:'bool', titleColor:'#D4B87B', h:30 });
