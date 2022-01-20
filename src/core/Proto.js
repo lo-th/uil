@@ -29,15 +29,8 @@ export class Proto {
 
         this.isListen = false;
 
-
-
-        
-        //this.parentGroup = null;
-
-        //if( o.select !== undefined ) o.selectable = o.select
         this.isSelectable = o.selectable !== undefined ? o.selectable : false
         this.unselectable =  o.unselect !== undefined ? o.unselect : this.isSelectable
-
 
         this.ontop = o.ontop ? o.ontop : false; // 'beforebegin' 'afterbegin' 'beforeend' 'afterend'
 
@@ -67,12 +60,7 @@ export class Proto {
 
         // decale for canvas only
         this.fw = o.fw || 0
-        /*this.dc = 0
-        if(this.isUI){
-            if( this.main.isCanvasOnly && this.fw) this.dc = (this.main.zone.w - this.w)*0.5
-        }*/
 
-        
         this.autoWidth = o.auto || true;// auto width or flex 
         this.isOpen = false// open statu
 
@@ -135,13 +123,10 @@ export class Proto {
         this.s = [];
 
 
-        //this.c[0] = Tools.dom( 'div', this.css.basic + this.css.button +'align-self:stretch; position:relative; height:20px; overflow:hidden;'); //float:left;
-        //this.c[0] = Tools.dom( 'div',  'order: 1;' ); //
         this.useFlex = this.isUI ? this.main.useFlex : false 
-        let flexible = this.useFlex ? 'disply:flex; justify-content:center; align-items:center; text-align:center; flex: 1 100%;' : 'float:left;'
+        let flexible = this.useFlex ? 'display:flex; justify-content:center; align-items:center; text-align:center; flex: 1 100%;' : 'float:left;'
 
         this.c[0] = Tools.dom( 'div', this.css.basic + flexible + 'position:relative; height:20px;');
-        //this.c[0] = Tools.dom( 'div', this.css.basic +'position:relative; height:20px; align-self: auto;');
 
 
         this.s[0] = this.c[0].style
@@ -571,8 +556,6 @@ export class Proto {
 
     handleEvent( e ) {
 
-        //if(!this.s) return false
-
         if( this.lock ) return
 
         if( this.neverlock ) Roots.lock = false
@@ -584,24 +567,11 @@ export class Proto {
     }
 
     wheel( e ) { return false; }
-
     mousedown( e ) { return false; }
-
     mousemove( e ) { return false; }
-
     mouseup( e ) { return false; }
-
     keydown( e ) { return false; }
-
     keyup( e ) { return false; }
-
-
-    /*dragstart ( e ) { return false; }
-    dragover ( e ) { return false; }
-    dragenter ( e ) { return false; }
-    dragleave ( e ) { return false; }
-    dragend ( e ) { return false; }
-    drop ( e ) { return false; }*/
 
 
     // ----------------------
@@ -615,12 +585,8 @@ export class Proto {
 
     }
 
-    display( v ) {
-        
-        v = v || false
+    display( v = false ) {
         this.s[0].visibility = v ? 'visible' : 'hidden'
-        //this.s[0].display = v ? (this.useFlex? 'flex':'block') : 'none'
-
     }
 
     // ----------------------

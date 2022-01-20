@@ -12,17 +12,15 @@ export class Group extends Proto {
 
         this.ADD = o.add;
 
-        this.uis = [];
+        this.autoHeight = true
 
-        this.isEmpty = true;
+        this.uis = []
+        this.current = -1
+        this.proto = null
+        this.isEmpty = true
+        this.decal = 0
 
-        this.autoHeight = true;
-        this.current = -1;
-        this.targetIn  = null;
-
-        this.decal = 0;
-
-        this.baseH = this.h;
+        this.baseH = this.h
 
         let fltop = Math.floor(this.h*0.5)-6;
 
@@ -45,9 +43,6 @@ export class Group extends Proto {
         if( this.isLine ) this.c[5] = this.dom( 'div', this.css.basic +  'background:rgba(255, 255, 255, 0.2); width:100%; left:0; height:1px; bottom:0px');
 
         let s = this.s;
-
-
-
         s[0].height = this.h + 'px';
         s[1].height = this.h + 'px';
         this.c[1].name = 'group';
@@ -57,27 +52,12 @@ export class Group extends Proto {
         s[1].color = this.colors.text;
         s[1].fontWeight = 'bold';
 
-        if( this.radius !== 0 ) s[0].borderRadius = this.radius+'px'; 
-        //if( o.border ) s[0].border = '1px solid ' + o.border;
-
-
-        /*if(this.decal){
-            s[0].boxSizing = 'border-box';
-            s[0].backgroundClip = 'border-box';
-            s[0].border = (this.decal/3)+'px solid ' + o.group.colors.background;
-        }*/
-
-        
-
-        
+        if( this.radius !== 0 ) s[0].borderRadius = this.radius+'px'
         this.init();
 
         this.setBG( o.bg );
 
         if( o.open !== undefined ) this.open();
-
-
-        //s[0].background = this.bg;
 
     }
 
@@ -100,12 +80,13 @@ export class Group extends Proto {
     clearTarget () {
 
         if( this.current === -1 ) return false;
-
-       // if(!this.targetIn ) return;
-        this.targetIn .uiout();
-        this.targetIn .reset();
+        if( this.proto.s ){
+            // if no s target is delete !!
+            this.proto.uiout();
+            this.proto.reset();
+        }
+        this.proto = null;
         this.current = -1;
-        this.targetIn  = null;
         this.cursor();
         return true;
 
@@ -113,7 +94,7 @@ export class Group extends Proto {
 
     reset () {
 
-        this.clearTarget();
+        this.clearTarget()
 
     }
 
@@ -126,7 +107,7 @@ export class Group extends Proto {
         let type = e.type;
 
         let change = false;
-        let targetChange = false;
+        let protoChange = false;
 
         let name = this.testZone( e );
 
@@ -137,13 +118,11 @@ export class Group extends Proto {
             case 'content':
             this.cursor();
 
-            if( Roots.isMobile && type === 'mousedown' ) this.getNext( e, change );
+            if( Roots.isMobile && type === 'mousedown' ) this.getNext( e, change )
 
-            if( this.targetIn  ) targetChange = this.targetIn .handleEvent( e );
+            if( this.proto ) protoChange = this.proto.handleEvent( e )
 
-            //if( type === 'mousemove' ) change = this.styles('def');
-
-            if( !Roots.lock ) this.getNext( e, change );
+            if( !Roots.lock ) this.getNext( e, change )
 
             break;
             case 'title':
@@ -158,7 +137,7 @@ export class Group extends Proto {
         }
 
         if( this.isDown ) change = true;
-        if( targetChange ) change = true;
+        if( protoChange ) change = true;
 
         return change;
 
@@ -175,40 +154,13 @@ export class Group extends Proto {
         }
 
         if( next !== -1 ){ 
-            this.targetIn  = this.uis[ this.current ];
-            this.targetIn .uiover();
+            this.proto  = this.uis[ this.current ];
+            this.proto.uiover();
         }
 
     }
 
     // ----------------------
-
-    /*calcH () {
-
-        let lng = this.uis.length, i, u,  h=0, px=0, tmph=0;
-        for( i = 0; i < lng; i++){
-            u = this.uis[i];
-            if( !u.autoWidth ){
-
-                if(px===0) h += u.h+1;
-                else {
-                    if(tmph<u.h) h += u.h-tmph;
-                }
-                tmph = u.h;
-
-                //tmph = tmph < u.h ? u.h : tmph;
-                px += u.w;
-                if( px+u.w > this.w ) px = 0;
-
-            }
-            else h += u.h+1;
-        }
-
-        return h;
-    }*/
-
-    
-
 
     setBG ( bg ) {
 
@@ -228,10 +180,10 @@ export class Group extends Proto {
         let a = arguments;
 
         if( typeof a[1] === 'object' ){ 
-            a[1].isUI = this.isUI;
-            a[1].target = this.c[2];
-            a[1].main = this.main;
-            a[1].group = this;
+            a[1].isUI = this.isUI
+            a[1].target = this.c[2]
+            a[1].main = this.main
+            a[1].group = this
         } else if( typeof arguments[1] === 'string' ){
             if( a[2] === undefined ) [].push.call( a, { isUI:true, target:this.c[2], main:this.main });
             else{ 
@@ -242,16 +194,11 @@ export class Group extends Proto {
             }
         }
 
-        //let n = add.apply( this, a );
-        let u = this.ADD.apply( this, a );
+        let u = this.ADD.apply( this, a )
 
         this.uis.push( u )
 
-        //this.calc()
-
-
-
-        this.isEmpty = false;
+        this.isEmpty = false
 
         return u;
 
@@ -271,9 +218,7 @@ export class Group extends Proto {
 
         this.clear()
         if( this.isUI ) this.main.calc()
-
         super.dispose()
-        //Proto.prototype.clear.call( this );
 
     }
 
@@ -340,11 +285,11 @@ export class Group extends Proto {
 
         super.close();
 
-        let t = this.h - this.baseH;
+        let t = this.h - this.baseH
 
-        this.setSvg( this.c[4], 'd', this.svgs.arrow );
-        this.h = this.baseH;
-        this.s[0].height = this.h + 'px';
+        this.setSvg( this.c[4], 'd', this.svgs.arrow )
+        this.h = this.baseH
+        this.s[0].height = this.h + 'px'
 
         this.parentHeight()
 
@@ -357,12 +302,6 @@ export class Group extends Proto {
 
         this.s[0].height = this.h + 'px';
 
-        //console.log('G', this.h)
-
-        //if( !this.isOpen ) return;
-
-        //this.h = Roots.calcUis( this.uis, this.zone, this.zone.y + this.baseH )+this.baseH;
-
     }
 
     parentHeight ( t ) {
@@ -374,49 +313,34 @@ export class Group extends Proto {
 
     calc ( y ) {
 
-        if( !this.isOpen ) return;
-
-        /*
-
-        if( y !== undefined ){ 
-            this.h += y;
-            if( this.isUI ) this.main.calc( y );
-        } else {
-            this.h = this.calcH() + this.baseH;
-        }
-        this.s[0].height = this.h + 'px';*/
-
-        // if(this.isOpen)
+        if( !this.isOpen ) return
         if( this.isUI ) this.main.calc()
         else this.calcUis()
-        
-        this.s[0].height = this.h + 'px';
+        this.s[0].height = this.h + 'px'
 
     }
 
     rSizeContent () {
 
-        let i = this.uis.length;
+        let i = this.uis.length
         while(i--){
-            this.uis[i].setSize( this.w );
-            this.uis[i].rSize();
+            this.uis[i].setSize( this.w )
+            this.uis[i].rSize()
         }
-
-        //this.calc()
 
     }
 
     rSize () {
 
-        super.rSize();
+        super.rSize()
 
-        let s = this.s;
+        let s = this.s
 
-        s[3].left = ( this.sa + this.sb - 17 ) + 'px';
-        s[1].width = this.w + 'px';
-        s[2].width = this.w + 'px';
+        s[3].left = ( this.sa + this.sb - 17 ) + 'px'
+        s[1].width = this.w + 'px'
+        s[2].width = this.w + 'px'
 
-        if( this.isOpen ) this.rSizeContent();
+        if( this.isOpen ) this.rSizeContent()
 
     }
 

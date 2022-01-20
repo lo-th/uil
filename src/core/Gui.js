@@ -20,7 +20,7 @@ export class Gui {
         this.screen = null
         this.plane = o.plane || null
 
-        this.isEmpty = true
+        
 
         // color
         if( o.config ) o.colors = o.config
@@ -83,13 +83,13 @@ export class Gui {
         this.isDown = false;
         this.isScroll = false;
 
-        this.uis = [];
-
-        this.current = -1;
-        this.target = null;
-        this.decal = 0;
-        this.ratio = 1;
-        this.oy = 0;
+        this.uis = []
+        this.current = -1
+        this.proto = null
+        this.isEmpty = true
+        this.decal = 0
+        this.ratio = 1
+        this.oy = 0
 
 
         this.isNewTarget = false;
@@ -251,9 +251,11 @@ export class Gui {
     }
 
     hide ( b ) {
+        this.content.style.visibility = b ? 'hidden' : 'visible'; 
+    }
 
-        this.content.style.display = b ? 'none' : 'block';
-        
+    display( v = false ) {
+        this.content.style.visibility = v ? 'visible' : 'hidden'
     }
 
     onChange ( f ) {
@@ -319,13 +321,13 @@ export class Gui {
     clearTarget () {
 
     	if( this.current === -1 ) return false;
-        if( this.target.s ){
+        if( this.proto.s ){
             // if no s target is delete !!
-            this.target.uiout();
-            this.target.reset();
+            this.proto.uiout();
+            this.proto.reset();
         }
         
-        this.target = null;
+        this.proto = null;
         this.current = -1;
 
         ///console.log(this.isDown)//if(this.isDown)Roots.clearInput();
@@ -368,7 +370,7 @@ export class Gui {
     	let type = e.type;
 
     	let change = false;
-    	let targetChange = false;
+    	let protoChange = false;
 
     	let name = this.testZone( e );
 
@@ -387,10 +389,10 @@ export class Gui {
 
                 if( Roots.isMobile && type === 'mousedown' ) this.getNext( e, change );
 
-	    		if( this.target ) targetChange = this.target.handleEvent( e );
+	    		if( this.proto ) protoChange = this.proto.handleEvent( e );
 
 	    		if( type === 'mousemove' ) change = this.mode('def');
-                if( type === 'wheel' && !targetChange && this.isScroll ) change = this.onWheel( e );
+                if( type === 'wheel' && !protoChange && this.isScroll ) change = this.onWheel( e );
                
 	    		if( !Roots.lock ) {
                     this.getNext( e, change );
@@ -425,7 +427,7 @@ export class Gui {
     	}
 
     	if( this.isDown ) change = true;
-    	if( targetChange ) change = true;
+    	if( protoChange ) change = true;
 
         if( type === 'keyup' ) change = true;
         if( type === 'keydown' ) change = true;
@@ -450,8 +452,8 @@ export class Gui {
         }
 
         if( next !== -1 ){ 
-            this.target = this.uis[ this.current ];
-            this.target.uiover();
+            this.proto = this.uis[ this.current ];
+            this.proto.uiover();
         }
 
     }
@@ -524,17 +526,6 @@ export class Gui {
         if( ontop ) this.uis.unshift( u )
         else this.uis.push( u )
 
-        /*if( !u.autoWidth ){
-            let y = u.c[0].getBoundingClientRect().top;
-            if( this.prevY !== y ){
-                this.calc( u.h + 1 );
-                this.prevY = y;
-            }
-        }else{
-            this.prevY = 0;//-1;
-            this.calc( u.h + 1 );
-        }*/
-
         this.calc()
 
         this.isEmpty = false
@@ -542,18 +533,6 @@ export class Gui {
         return u
 
     }
-
-    /*applyCalc () {
-
-        //console.log(this.uis.length, this.tmpH )
-
-        this.calc( this.tmpH );
-        //this.tmpH = 0;
-        this.tmpAdd = null;
-
-    }*/
-
-    
 
     // remove one node
 
@@ -583,24 +562,17 @@ export class Gui {
 
         //this.close();
 
-        let i = this.uis.length, item;
+        let i = this.uis.length, item
 
         while( i-- ){
-            item = this.uis.pop();
-            this.inner.removeChild( item.c[0] );
+            item = this.uis.pop()
+            this.inner.removeChild( item.c[0] )
             item.dispose()
-
-            //this.uis[i].clear()
         }
 
-        this.uis = [];
-        this.isEmpty = true;
-        //this.zone = { x:0, y:0, w:this.size.w, h:0 };
-        //this.setWidth()
-        //Roots.listens = [];
-        this.calc();
-
-
+        this.uis = []
+        this.isEmpty = true
+        this.calc()
 
     }
 
@@ -618,17 +590,17 @@ export class Gui {
 
     }
 
+
     // ----------------------
     //   ITEMS SPECIAL
     // ----------------------
-
 
     resetItem () {
 
         if( !this.isItemMode ) return;
 
         let i = this.uis.length;
-        while(i--) this.uis[i].selected();
+        while(i--) this.uis[i].selected()
 
     }
 
@@ -636,20 +608,19 @@ export class Gui {
 
         if( !this.isItemMode ) return;
 
-        name = name || '';
-
-        this.resetItem();
+        name = name || ''
+        this.resetItem()
 
         if( !name ){
-            this.update(0);
-            return;
+            this.update(0)
+            return
         } 
 
-        let i = this.uis.length;
+        let i = this.uis.length
         while(i--){ 
             if( this.uis[i].value === name ){ 
-                this.uis[i].selected( true );
-                if( this.isScroll ) this.update( ( i*(this.uis[i].h+1) )*this.ratio );
+                this.uis[i].selected( true )
+                if( this.isScroll ) this.update( ( i*(this.uis[i].h+1) )*this.ratio )
             }
         }
 
@@ -663,32 +634,30 @@ export class Gui {
 
     upScroll ( b ) {
 
-        this.sw = b ? this.size.s : 0;
-        this.oy = b ? this.oy : 0;
-        this.scrollBG.style.display = b ? 'block' : 'none';
+        this.sw = b ? this.size.s : 0
+        this.oy = b ? this.oy : 0
+        this.scrollBG.style.display = b ? 'block' : 'none'
 
         if( b ){
 
             this.total = this.h;
 
-            this.maxView = this.maxHeight;
+            this.maxView = this.maxHeight
 
-            this.ratio = this.maxView / this.total;
-            this.sh = this.maxView * this.ratio;
+            this.ratio = this.maxView / this.total
+            this.sh = this.maxView * this.ratio
 
-            //if( this.sh < 20 ) this.sh = 20;
+            this.range = this.maxView - this.sh
 
-            this.range = this.maxView - this.sh;
+            this.oy = Tools.clamp( this.oy, 0, this.range )
 
-            this.oy = Tools.clamp( this.oy, 0, this.range );
-
-            this.scrollBG.style.height = this.maxView + 'px';
-            this.scroll.style.height = this.sh + 'px';
+            this.scrollBG.style.height = this.maxView + 'px'
+            this.scroll.style.height = this.sh + 'px'
 
         }
 
-        this.setItemWidth( this.zone.w - this.sw );
-        this.update( this.oy );
+        this.setItemWidth( this.zone.w - this.sw )
+        this.update( this.oy )
 
     }
 
@@ -736,7 +705,7 @@ export class Gui {
 
             let diff = this.h - this.maxHeight;
 
-            if( diff > 1 ){ //this.h > this.maxHeight ){
+            if( diff > 1 ){
 
                 this.isScroll = true;
                 this.zone.h = this.maxHeight + this.bh;
@@ -749,8 +718,6 @@ export class Gui {
 
         }
 
-        //if( this.forceHeight ) this.zone.h = this.forceHeight
-
         this.upScroll( this.isScroll )
 
         this.innerContent.style.height = this.zone.h - this.bh + 'px'
@@ -760,11 +727,7 @@ export class Gui {
 
         if( this.forceHeight && this.lockHeight ) this.content.style.height = this.forceHeight + 'px';
 
-        //console.log( this.zone, this.bh )
-
-        //if( this.isOpen ) this.calcUis()
         if( this.isCanvas ) this.draw( true )
-        //else if( !this.transition ) this.rezone()
 
     }
 
@@ -774,23 +737,15 @@ export class Gui {
 
     setWidth ( w ) {
 
-        if( w ) this.zone.w = w;
+        if( w ) this.zone.w = w
 
         this.zone.w = Math.floor( this.zone.w )
 
-        //console.log( this.zone.w )
+        this.content.style.width = this.zone.w + 'px'
 
-        this.content.style.width = this.zone.w + 'px';
+        if( this.isCenter ) this.content.style.marginLeft = -(Math.floor(this.zone.w*0.5)) + 'px'
 
-        if( this.isCenter ) this.content.style.marginLeft = -(Math.floor(this.zone.w*0.5)) + 'px';
-
-        this.setItemWidth( this.zone.w - this.sw );
-
-        //this.setHeight();
-        //this.calc()
-
-        //if( this.isCanvasOnly ) Roots.needReZone = true;
-        //Roots.resize();
+        this.setItemWidth( this.zone.w - this.sw )
 
     }
 

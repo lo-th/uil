@@ -17,17 +17,16 @@ export class Button extends Proto {
 
         this.on = false;
 
-        this.customSize = o.forceWidth || -1;
+        // force button width
+        this.bw = o.forceWidth || 0
+        if(o.bw) this.bw = o.bw
+        this.space = o.space || 3
 
         if( typeof this.values === 'string' ) this.values = [ this.values ];
 
         this.isDown = false
         this.neverlock = true
-        this.isLoadButton = o.loader || false
-        this.isDragButton = o.drag || false
         this.res = 0
-        
-        if( this.isDragButton ) this.isLoadButton = true
 
         this.lng = this.values.length;
         this.tmp = []
@@ -49,22 +48,12 @@ export class Button extends Proto {
         }
 
         if( !o.value && !o.values ){
-            if( this.c[1] !== undefined ) { 
-                this.txt = ''
+            if( this.c[1] !== undefined ) {
                 this.c[1].textContent = '';
+                this.txt = ''
             }
         } 
         if( !this.txt ) this.p = 0 
-
-        //
-
-        if( this.isLoadButton ) this.initLoader();
-        if( this.isDragButton ){ 
-            this.lng ++;
-            this.initDrager();
-        }
-
-        //if( this.onName !== '' ) this.values[0] = this.on;
 
         this.init();
 
@@ -106,7 +95,7 @@ export class Button extends Proto {
             if( this.value === this.values[this.res] && this.unselectable ) this.value = ''
             else this.value = this.values[this.res]
             if( this.onName !== null ) this.onOff()
-            if( !this.isLoadButton ) this.send()
+            this.send()
         }
 
         return this.mousemove( e )
@@ -203,121 +192,6 @@ export class Button extends Proto {
 
     }
 
-    // ----------------------
-
-    dragover ( e ) {
-
-        e.preventDefault();
-
-        this.s[4].borderColor = this.colors.select;
-        this.s[4].color = this.colors.select;
-
-    }
-
-    dragend ( e ) {
-
-        e.preventDefault();
-
-        this.s[4].borderColor = this.color.text;
-        this.s[4].color = this.color.text;
-
-    }
-
-    drop ( e ) {
-
-        e.preventDefault();
-
-        this.dragend(e);
-        this.fileSelect( e.dataTransfer.files[0] );
-
-    }
-
-    initDrager () {
-
-        this.c[4] = this.dom( 'div', this.css.txt +' text-align:center; line-height:'+(this.h-8)+'px; border:1px dashed '+this.color.text+'; top:2px;  height:'+(this.h-4)+'px; border-radius:'+this.radius+'px; pointer-events:auto;' );// cursor:default;
-        this.c[4].textContent = 'DRAG';
-
-        this.c[4].addEventListener( 'dragover', function(e){ this.dragover(e); }.bind(this), false );
-        this.c[4].addEventListener( 'dragend', function(e){ this.dragend(e); }.bind(this), false );
-        this.c[4].addEventListener( 'dragleave', function(e){ this.dragend(e); }.bind(this), false );
-        this.c[4].addEventListener( 'drop', function(e){ this.drop(e); }.bind(this), false );
-
-        //this.c[2].events = [  ];
-        //this.c[4].events = [ 'dragover', 'dragend', 'dragleave', 'drop' ];
-
-
-    }
-
-    addLoader( n, callbackLoad ){
-
-        this.callbackLoad = callbackLoad
-
-        let l = this.dom( 'input', this.css.basic +'top:0px; opacity:0; height:100%; width:100%; pointer-events:auto; cursor:pointer;' );//
-        l.name = 'loader'
-        l.type = "file"
-        l.addEventListener( 'change', function(e){ this.fileSelect( e.target.files[0] ); }.bind(this), false )
-
-        this.c[n].appendChild( l )
-
-        return this
-
-    }
-
-    initLoader () {
-
-        this.c[3] = this.dom( 'input', this.css.basic +'top:0px; opacity:0; height:'+(this.h)+'px; pointer-events:auto; cursor:pointer;' );//
-        this.c[3].name = 'loader';
-        this.c[3].type = "file";
-
-        this.c[3].addEventListener( 'change', function(e){ this.fileSelect( e.target.files[0] ); }.bind(this), false );
-        //this.c[3].addEventListener( 'mousedown', function(e){  }.bind(this), false );
-
-        //this.c[2].events = [  ];
-        //this.c[3].events = [ 'change', 'mouseover', 'mousedown', 'mouseup', 'mouseout' ];
-
-        //this.hide = document.createElement('input');
-
-    }
-
-    fileSelect ( file ) {
-
-        let dataUrl = [ 'png', 'jpg', 'mp4', 'webm', 'ogg' ];
-        let dataBuf = [ 'sea', 'z', 'hex', 'bvh', 'BVH', 'glb' ];
-
-        //if( ! e.target.files ) return;
-
-        //let file = e.target.files[0];
-       
-        //this.c[3].type = "null";
-        // console.log( this.c[4] )
-
-        if( file === undefined ) return;
-
-        let reader = new FileReader();
-        let fname = file.name;
-        let type = fname.substring(fname.lastIndexOf('.')+1, fname.length );
-
-        if( dataUrl.indexOf( type ) !== -1 ) reader.readAsDataURL( file );
-        else if( dataBuf.indexOf( type ) !== -1 ) reader.readAsArrayBuffer( file );//reader.readAsArrayBuffer( file );
-        else reader.readAsText( file );
-
-        // if( type === 'png' || type === 'jpg' || type === 'mp4' || type === 'webm' || type === 'ogg' ) reader.readAsDataURL( file );
-        //else if( type === 'z' ) reader.readAsBinaryString( file );
-        //else if( type === 'sea' || type === 'bvh' || type === 'BVH' || type === 'z') reader.readAsArrayBuffer( file );
-        //else if(  ) reader.readAsArrayBuffer( file );
-        //else reader.readAsText( file );
-
-        reader.onload = function (e) {
-
-            if( this.callbackLoad ) this.callbackLoad( e.target.result, fname, type );
-            
-            //if( this.callback ) this.callback( e.target.result, fname, type );
-            //this.c[3].type = "file";
-            //this.send( e.target.result ); 
-        }.bind(this);
-
-    }
-
     label ( string, n ) {
 
         n = n || 2;
@@ -344,13 +218,12 @@ export class Button extends Proto {
         let d = this.sa;
 
         let i = this.lng;
-        let dc =  3;
+        let dc = this.space;
         let size = Math.floor( ( w-(dc*(i-1)) ) / i );
 
-        if( this.customSize !== -1 ){ 
-            size = this.customSize
-           // d = (this.s-size)*0.5
-
+        if( this.bw ){ 
+            size = this.bw < size ? this.bw : size
+            d = Math.floor((this.w-( (size * i) + (dc * (i-1)) ))*0.5)
         }
 
         while( i-- ){
@@ -361,16 +234,6 @@ export class Button extends Proto {
             s[i+2].left = this.tmp[i][0] + 'px';
             s[i+2].width = this.tmp[i][1] + 'px';
 
-        }
-
-        if( this.isDragButton ){ 
-            s[4].left = (d+size+dc) + 'px';
-            s[4].width = size + 'px';
-        }
-
-        if( this.isLoadButton ){
-            s[3].left = d + 'px';
-            s[3].width = size + 'px';
         }
 
     }
