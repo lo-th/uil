@@ -48,12 +48,13 @@ export class Button extends Proto {
 
         }
 
-        if( !o.value || !o.values ){
-            if( this.c[1] !== undefined ) this.c[1].textContent = '';
-            this.p = o.p !== undefined ? o.p : 0
-        } else {
-            if( !this.txt ) this.p = 0 
-        }
+        if( !o.value && !o.values ){
+            if( this.c[1] !== undefined ) { 
+                this.txt = ''
+                this.c[1].textContent = '';
+            }
+        } 
+        if( !this.txt ) this.p = 0 
 
         //
 
@@ -165,6 +166,8 @@ export class Button extends Proto {
 
     mode ( n, id ) {
 
+        //if(!this.s) return false
+ 
         let change = false;
         let cc = this.colors, s = this.s
         let i = id+2
@@ -245,6 +248,21 @@ export class Button extends Proto {
 
     }
 
+    addLoader( n, callbackLoad ){
+
+        this.callbackLoad = callbackLoad
+
+        let l = this.dom( 'input', this.css.basic +'top:0px; opacity:0; height:100%; width:100%; pointer-events:auto; cursor:pointer;' );//
+        l.name = 'loader'
+        l.type = "file"
+        l.addEventListener( 'change', function(e){ this.fileSelect( e.target.files[0] ); }.bind(this), false )
+
+        this.c[n].appendChild( l )
+
+        return this
+
+    }
+
     initLoader () {
 
         this.c[3] = this.dom( 'input', this.css.basic +'top:0px; opacity:0; height:'+(this.h)+'px; pointer-events:auto; cursor:pointer;' );//
@@ -290,8 +308,10 @@ export class Button extends Proto {
         //else reader.readAsText( file );
 
         reader.onload = function (e) {
+
+            if( this.callbackLoad ) this.callbackLoad( e.target.result, fname, type );
             
-            if( this.callback ) this.callback( e.target.result, fname, type );
+            //if( this.callback ) this.callback( e.target.result, fname, type );
             //this.c[3].type = "file";
             //this.send( e.target.result ); 
         }.bind(this);

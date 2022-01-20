@@ -32,6 +32,24 @@
     const callbackSize = function(v){ ui.setWidth( v ); }
     const callbackLogo = function(v){ document.getElementById('logoin').setAttributeNS(null, 'fill', v ); title.setColor(v); }
     const callbackLink = function(v){ let w = window.open("./examples/"+v+".html", ""); }
+    const callbackReturn = function ( data, name ){
+        // data is text for any textfile or image
+        // name is the name of file
+        debug.innerHTML = name
+    }
+
+    const callbackLoader = function( name ){
+
+        switch(name){
+            case 'LOAD' :
+                UIL.Files.load( { callback:callbackReturn } )
+            break;
+            case 'SAVE' :
+                UIL.Files.save( { name:'test', data:'you are the best!!', type:'text' } )
+            break;
+        }
+
+    }
 
     // single UI element
     const s = UIL.add('slide', { name:'ui size', min:128, max:400, value:240, step:10, w:100, pos:{left:'10px', top:'30px' }, simple:true }).onChange( callbackSize )
@@ -83,16 +101,16 @@
 
             ui.add( 'empty', { h:5 })
 
-            ui.add( obj, 'Bool_v', { type:'bool', h:20 })
+            ui.add( obj, 'Bool_v', { h:20 })
             
             ui.add( 'space', { h:5 })
 
-            ui.add( obj, 'Color_v', { type:'color', ctype:'html' }).onChange( callbackLogo );
+            ui.add( obj, 'Color_v', { ctype:'html' }).onChange( callbackLogo );
             ui.add( 'color', { name:'Color', ctype:'html', value:[ 0,1,1,1 ] });
 
             ui.add( 'empty', { h:5 })
 
-            ui.add( obj, 'Slide_v', { type:'slide', min:-100, max:100, value:0, precision:0 });
+            ui.add( obj, 'Slide_v', { min:-100, max:100, precision:0 });
             ui.add( 'slide',  { name:'Slide', min:-1, max:1, value:0, step:0.01, precision:2, mode:1 });
             ui.add( 'slide',  { name:'Slide', min:-1, max:1, value:0, step:0.01, precision:2, mode:2, color:'#D4B87B' });
 
@@ -110,6 +128,9 @@
             ui.add( 'number', { name:'Vector3', value:[0,0,0], h:25 })
             ui.add( 'number', { name:'Vector4', value:[0,0,0,0], step:1, precision:0, h:25 })
 
+
+            ui.add('empty', { h:5 })
+            ui.add('button', { name:'Files', value:[ 'LOAD', 'SAVE' ] }).onChange( callbackLoader )
             ui.add('empty', { h:5 })
 
             gr = ui.add('group', { name:'Buttons', h:30 })

@@ -1698,6 +1698,238 @@ T.setText();
 
 const Tools = T;
 
+///https://wicg.github.io/file-system-access/#api-filesystemfilehandle-getfile
+
+
+class Files {
+
+    //-----------------------------
+    //  FILE TYPE
+    //-----------------------------
+
+    static autoTypes( type ) {
+
+        let t = [];
+
+        switch( type ){
+            case 'json':
+            t = [ { accept: { 'image/svg+xml': '.svg'} }, ];
+            break;
+            case 'text':
+            t = [ { description: 'Text Files', accept: { 'text/plain': ['.txt', '.text'], 'text/html': ['.html', '.htm'] } }, ];
+            break;
+            case 'json':
+            t = [ { description: 'JSON Files', accept: { 'text/plain': ['.json'] } }, ];
+            break;
+            case 'image':
+            t = [ { description: 'Images', accept: { 'image/*': ['.png', '.gif', '.jpeg', '.jpg'] } }, ];
+            break;
+
+        }
+
+        return t
+
+    }
+
+
+    //-----------------------------
+    //  LOAD
+    //-----------------------------
+
+	static async load( o = {} ) {
+
+        if (typeof window.showOpenFilePicker !== 'function') {
+            window.showOpenFilePicker = this.showOpenFilePickerPolyfill;
+        }
+
+        try {
+
+        	let type = o.type || '';
+
+            const options = {
+                excludeAcceptAllOption: type ? true : false,
+                multiple: false,
+                //startIn:'./assets'
+            };
+
+            options.types = this.autoTypes( type );
+
+            // create a new handle
+            const handle = await window.showOpenFilePicker( options );
+            const file = await handle[0].getFile();
+            //let content = await file.text()
+
+            if( !file ) return null
+
+            let fname = file.name;
+            let ftype = fname.substring( fname.lastIndexOf('.')+1, fname.length );
+
+            const dataUrl = [ 'png', 'jpg', 'jpeg', 'mp4', 'webm', 'ogg', 'mp3' ];
+            const dataBuf = [ 'sea', 'z', 'hex', 'bvh', 'BVH', 'glb', 'gltf' ];
+            const reader = new FileReader();
+
+            if( dataUrl.indexOf( ftype ) !== -1 ) reader.readAsDataURL( file );
+            else if( dataBuf.indexOf( ftype ) !== -1 ) reader.readAsArrayBuffer( file );
+            else reader.readAsText( file );
+
+            reader.onload = function(e) {
+
+                let content = e.target.result;
+
+                if( type === 'image' ){
+                    var img = new Image;
+                    img.onload = function() {
+                        if( o.callback ) o.callback( img, fname );
+                    };
+                    img.src = content;
+                } else {
+                    if( o.callback ) o.callback( content, fname );
+                }
+
+            };
+
+        } catch(e) {
+
+            console.log(e);
+
+        }
+
+    }
+
+	static showOpenFilePickerPolyfill( options ) {
+        return new Promise((resolve) => {
+            const input = document.createElement("input");
+            input.type = "file";
+            input.multiple = options.multiple;
+            input.accept = options.types
+                .map((type) => type.accept)
+                .flatMap((inst) => Object.keys(inst).flatMap((key) => inst[key]))
+                .join(",");
+
+            input.addEventListener("change", () => {
+                resolve(
+                    [...input.files].map((file) => {
+                        return {
+                            getFile: async () =>
+                                new Promise((resolve) => {
+                                    resolve(file);
+                                }),
+                        };
+                    })
+                );
+            });
+
+            input.click();
+        })
+    }
+
+
+    //-----------------------------
+    //  SAVE
+    //-----------------------------
+
+    static async save( o = {} ) {
+
+        this.usePoly = false;
+
+        if (typeof window.showSaveFilePicker !== 'function') {
+            window.showSaveFilePicker = this.showSaveFilePickerPolyfill;
+            this.usePoly = true;
+        }
+
+        try {
+
+            let type = o.type || '';
+
+            const options = {
+                suggestedName: o.name || 'hello',
+                data: o.data || ''
+            };
+
+
+            options.types = this.autoTypes( type );
+            options.finalType = Object.keys(options.types[0].accept )[0];
+            options.suggestedName += options.types[0].accept[options.finalType][0];
+
+
+            // create a new handle
+            const handle = await window.showSaveFilePicker( options );
+
+            if( this.usePoly ) return
+
+            // create a FileSystemWritableFileStream to write to
+            const file = await handle.createWritable();
+
+            let blob = new Blob([ options.data ], { type: option.finalType });
+
+            // write our file
+            await file.write(blob);
+
+            // close the file and write the contents to disk.
+            await file.close();
+
+        } catch(e) {
+
+            console.log(e);
+
+        }
+
+    }
+
+    static showSaveFilePickerPolyfill( options ) {
+        return new Promise((resolve) => {
+            const a = document.createElement("a");
+            a.download = options.suggestedName || "my-file.txt";
+            let blob = new Blob([ options.data ], { type:options.finalType });
+            a.href = URL.createObjectURL( blob );
+
+            a.addEventListener("click", () => {
+                resolve(
+                    setTimeout( () => URL.revokeObjectURL(a.href), 1000 )
+                );
+            });
+            a.click();
+        })
+    }
+
+
+    //-----------------------------
+    //  FOLDER not possible in poly
+    //-----------------------------
+
+    static async getFolder() {
+
+        try {
+    
+            const handle = await window.showDirectoryPicker();
+            const files = [];
+            for await (const entry of handle.values()) {
+                const file = await entry.getFile();
+                files.push(file);
+            }
+
+            console.log(files);
+            return files;
+
+        } catch(e) {
+
+            console.log(e);
+
+        }
+    
+    }
+
+
+
+
+
+
+
+
+    
+
+}
+
 class V2 {
 
 	constructor( x = 0, y = 0 ) {
@@ -2398,6 +2630,8 @@ class Proto {
 
     handleEvent( e ) {
 
+        //if(!this.s) return false
+
         if( this.lock ) return
 
         if( this.neverlock ) Roots.lock = false;
@@ -2710,12 +2944,13 @@ class Button extends Proto {
 
         }
 
-        if( !o.value || !o.values ){
-            if( this.c[1] !== undefined ) this.c[1].textContent = '';
-            this.p = o.p !== undefined ? o.p : 0;
-        } else {
-            if( !this.txt ) this.p = 0; 
-        }
+        if( !o.value && !o.values ){
+            if( this.c[1] !== undefined ) { 
+                this.txt = '';
+                this.c[1].textContent = '';
+            }
+        } 
+        if( !this.txt ) this.p = 0; 
 
         //
 
@@ -2827,6 +3062,8 @@ class Button extends Proto {
 
     mode ( n, id ) {
 
+        //if(!this.s) return false
+ 
         let change = false;
         let cc = this.colors, s = this.s;
         let i = id+2;
@@ -2907,6 +3144,21 @@ class Button extends Proto {
 
     }
 
+    addLoader( n, callbackLoad ){
+
+        this.callbackLoad = callbackLoad;
+
+        let l = this.dom( 'input', this.css.basic +'top:0px; opacity:0; height:100%; width:100%; pointer-events:auto; cursor:pointer;' );//
+        l.name = 'loader';
+        l.type = "file";
+        l.addEventListener( 'change', function(e){ this.fileSelect( e.target.files[0] ); }.bind(this), false );
+
+        this.c[n].appendChild( l );
+
+        return this
+
+    }
+
     initLoader () {
 
         this.c[3] = this.dom( 'input', this.css.basic +'top:0px; opacity:0; height:'+(this.h)+'px; pointer-events:auto; cursor:pointer;' );//
@@ -2952,8 +3204,10 @@ class Button extends Proto {
         //else reader.readAsText( file );
 
         reader.onload = function (e) {
+
+            if( this.callbackLoad ) this.callbackLoad( e.target.result, fname, type );
             
-            if( this.callback ) this.callback( e.target.result, fname, type );
+            //if( this.callback ) this.callback( e.target.result, fname, type );
             //this.c[3].type = "file";
             //this.send( e.target.result ); 
         }.bind(this);
@@ -7807,8 +8061,8 @@ const add = function () {
 
             ref = true;
             if( a[2] === undefined ) [].push.call(a, {});
-
-            type = a[2].type ? a[2].type : 'slide';//autoType.apply( this, a );
+                
+            type = a[2].type ? a[2].type : autoType( a[0][a[1]], a[2] );
 
             o = a[2];
             o.name = a[1];
@@ -7817,13 +8071,15 @@ const add = function () {
 
         }
 
+        
+
         let name = type.toLowerCase();
 
         if( name === 'group' ) o.add = add;
 
         switch( name ){
 
-            case 'bool': n = new Bool(o); break;
+            case 'bool': case 'boolean': n = new Bool(o); break;
             case 'button': n = new Button(o); break;
             case 'circular': n = new Circular(o); break;
             case 'color': n = new Color(o); break;
@@ -7852,6 +8108,37 @@ const add = function () {
             return n;
 
         }
+
+};
+
+const autoType = function ( v, o ) {
+
+    let type = 'slide';
+
+    if( typeof v === 'boolean' ) type = 'bool'; 
+    else if( typeof v === 'string' ){ 
+
+        if( v.substring(0,1) === '#' ) type = 'color';
+        else type = 'string'; 
+
+    } else if( typeof v === 'number' ){ 
+
+        if( o.ctype ) type = 'color';
+        else type = 'slide';
+
+    } else if( typeof v === 'array' && v instanceof Array ){
+
+        if( typeof v[0] === 'number' ) type = 'number';
+        else if( typeof v[0] === 'string' ) type = 'list';
+
+    } else if( typeof v === 'object' && v instanceof Object ){
+
+        if( v.x !== undefined ) type = 'number';
+        else type = 'list';
+
+    }
+
+    return type
 
 };
 
@@ -8171,9 +8458,12 @@ class Gui {
     clearTarget () {
 
     	if( this.current === -1 ) return false;
-        //if(!this.target) return;
-        this.target.uiout();
-        this.target.reset();
+        if( this.target.s ){
+            // if no s target is delete !!
+            this.target.uiout();
+            this.target.reset();
+        }
+        
         this.target = null;
         this.current = -1;
 
@@ -8359,8 +8649,8 @@ class Gui {
             else {
                 a[2].isUI = true;
                 a[2].main = this;
-
-                ontop = a[1].ontop ? a[1].ontop : false;
+                //ontop = a[1].ontop ? a[1].ontop : false;
+                ontop = a[2].ontop ? a[2].ontop : false;
             }
             
         } 
@@ -8654,6 +8944,6 @@ class Gui {
 
 }
 
-const REVISION = '4.0.5';
+const REVISION = '4.0.7';
 
-export { Gui, Proto, REVISION, Tools, add };
+export { Files, Gui, Proto, REVISION, Tools, add };

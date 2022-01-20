@@ -319,9 +319,12 @@ export class Gui {
     clearTarget () {
 
     	if( this.current === -1 ) return false;
-        //if(!this.target) return;
-        this.target.uiout();
-        this.target.reset();
+        if( this.target.s ){
+            // if no s target is delete !!
+            this.target.uiout();
+            this.target.reset();
+        }
+        
         this.target = null;
         this.current = -1;
 
@@ -508,8 +511,8 @@ export class Gui {
             else {
                 a[2].isUI = true;
                 a[2].main = this;
-
-                ontop = a[1].ontop ? a[1].ontop : false;
+                //ontop = a[1].ontop ? a[1].ontop : false;
+                ontop = a[2].ontop ? a[2].ontop : false
             }
             
         } 

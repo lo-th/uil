@@ -36,8 +36,8 @@ export const add = function () {
 
             ref = true;
             if( a[2] === undefined ) [].push.call(a, {});
-
-            type = a[2].type ? a[2].type : 'slide';//autoType.apply( this, a );
+                
+            type = a[2].type ? a[2].type : autoType( a[0][a[1]], a[2] );
 
             o = a[2];
             o.name = a[1];
@@ -46,13 +46,15 @@ export const add = function () {
 
         }
 
+        
+
         let name = type.toLowerCase();
 
         if( name === 'group' ) o.add = add;
 
         switch( name ){
 
-            case 'bool': n = new Bool(o); break;
+            case 'bool': case 'boolean': n = new Bool(o); break;
             case 'button': n = new Button(o); break;
             case 'circular': n = new Circular(o); break;
             case 'color': n = new Color(o); break;
@@ -81,5 +83,36 @@ export const add = function () {
             return n;
 
         }
+
+}
+
+export const autoType = function ( v, o ) {
+
+    let type = 'slide'
+
+    if( typeof v === 'boolean' ) type = 'bool' 
+    else if( typeof v === 'string' ){ 
+
+        if( v.substring(0,1) === '#' ) type = 'color'
+        else type = 'string' 
+
+    } else if( typeof v === 'number' ){ 
+
+        if( o.ctype ) type = 'color'
+        else type = 'slide'
+
+    } else if( typeof v === 'array' && v instanceof Array ){
+
+        if( typeof v[0] === 'number' ) type = 'number'
+        else if( typeof v[0] === 'string' ) type = 'list'
+
+    } else if( typeof v === 'object' && v instanceof Object ){
+
+        if( v.x !== undefined ) type = 'number'
+        else type = 'list'
+
+    }
+
+    return type
 
 }

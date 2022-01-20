@@ -571,6 +571,8 @@ export class Proto {
 
     handleEvent( e ) {
 
+        //if(!this.s) return false
+
         if( this.lock ) return
 
         if( this.neverlock ) Roots.lock = false

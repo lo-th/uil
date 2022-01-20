@@ -1,4 +1,4 @@
-
+import { Files } from './core/Files.js'
 import { Tools } from './core/Tools.js'
 import { Gui } from './core/Gui.js'
 import { add } from './core/add.js'
@@ -6,9 +6,10 @@ import { add } from './core/add.js'
 
 export const UIL = {
 
-	REVISION : '4.0.5',
+	REVISION : '4.0.7',
 
 	Tools:Tools,
+	Files:Files,
 	Gui:Gui,
 	add:add,
 
