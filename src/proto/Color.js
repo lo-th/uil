@@ -38,7 +38,7 @@ export class Color extends Proto {
 	    }
 
 	    //this.c[0].style.textAlign = 'center';
-	    //this.c[0].style.flex = '1 0 auto'
+	    this.c[0].style.display = 'block'
 
 	    this.c[3] = this.getColorRing();
 	    this.c[3].style.visibility  = 'hidden';
