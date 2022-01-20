@@ -55,6 +55,7 @@
     const s = UIL.add('slide', { name:'ui size', min:128, max:400, value:240, step:10, w:100, pos:{left:'10px', top:'30px' }, simple:true }).onChange( callbackSize )
     const b = UIL.add('button', { name:'populate', w:100, pos:{left:'10px', top:'60px'}, simple:true }).onChange( populate )
     const c = UIL.add('button', { w:64, h:64, pos:{right:'10px', top:'10px'}, simple:true }).icon(UIL.Tools.icon('github', '#DEDEDE', 50) ).onChange( function(v){ let w = window.open('https://github.com/lo-th/uil','_blank'); } )
+    const d = UIL.add('button', { w:64, h:64, pos:{right:'10px', top:'84px'}, simple:true }).icon(UIL.Tools.icon('donate', '#DEDEDE', 50) ).onChange( function(v){ let w = window.open('https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=8KTXA987XHYNQ','_blank'); } )
 
     // you can also use object reference 
     const obj = {
