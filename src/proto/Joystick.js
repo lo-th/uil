@@ -24,6 +24,7 @@ export class Joystick extends Proto {
         this.tmp = new V2();
 
         this.interval = null;
+        this.c[0].style.display = 'block'
 
         //this.radius = this.w * 0.5;
         //this.distance = this.radius*0.25;

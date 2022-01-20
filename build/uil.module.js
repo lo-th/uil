@@ -3147,6 +3147,7 @@ class Circular extends Proto {
         this.top = 0;
 
         this.c[0].style.width = this.w +'px';
+        this.c[0].style.display = 'block';
 
         if(this.c[1] !== undefined) {
 
@@ -4756,6 +4757,7 @@ class Joystick extends Proto {
         this.tmp = new V2();
 
         this.interval = null;
+        this.c[0].style.display = 'block';
 
         //this.radius = this.w * 0.5;
         //this.distance = this.radius*0.25;
@@ -4997,6 +4999,7 @@ class Knob extends Proto {
         this.top = 0;
 
         this.c[0].style.width = this.w +'px';
+        this.c[0].style.display = 'block';
 
         if(this.c[1] !== undefined) {
 
@@ -7578,6 +7581,8 @@ class Pad2D extends Proto {
 
         //console.log(this.range)
 
+        this.c[0].style.display = 'block';
+
         
 
 
@@ -8672,6 +8677,6 @@ class Gui {
 
 }
 
-const REVISION = '4.0.8';
+const REVISION = '4.0.9';
 
 export { Files, Gui, Proto, REVISION, Tools, add };

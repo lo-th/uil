@@ -2727,6 +2727,7 @@
 			this.h = o.h || this.w + 10;
 			this.top = 0;
 			this.c[0].style.width = this.w + 'px';
+			this.c[0].style.display = 'block';
 
 			if (this.c[1] !== undefined) {
 				this.c[1].style.width = '100%';
@@ -3983,7 +3984,8 @@
 			this.multiplicator = o.multiplicator || 1;
 			this.pos = new V2();
 			this.tmp = new V2();
-			this.interval = null; //this.radius = this.w * 0.5;
+			this.interval = null;
+			this.c[0].style.display = 'block'; //this.radius = this.w * 0.5;
 			//this.distance = this.radius*0.25;
 
 			this.distance = this.diam * 0.5 * 0.25;
@@ -4171,6 +4173,7 @@
 			this.h = o.h || this.w + 10;
 			this.top = 0;
 			this.c[0].style.width = this.w + 'px';
+			this.c[0].style.display = 'block';
 
 			if (this.c[1] !== undefined) {
 				this.c[1].style.width = '100%';
@@ -6250,6 +6253,7 @@
 			this.range = (this.max - this.min) * 0.5;
 			this.cmode = 0; //console.log(this.range)
 
+			this.c[0].style.display = 'block';
 			this.precision = o.precision === undefined ? 2 : o.precision;
 			/*this.bounds = {};
 			this.bounds.x1 = o.x1 || -1;
@@ -7119,7 +7123,7 @@
 
 	}
 
-	const REVISION = '4.0.8';
+	const REVISION = '4.0.9';
 
 	exports.Files = Files;
 	exports.Gui = Gui;

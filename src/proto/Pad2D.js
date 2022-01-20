@@ -29,6 +29,8 @@ export class Pad2D extends Proto {
 
         //console.log(this.range)
 
+        this.c[0].style.display = 'block'
+
         
 
 

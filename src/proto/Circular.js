@@ -27,6 +27,7 @@ export class Circular extends Proto {
         this.top = 0
 
         this.c[0].style.width = this.w +'px'
+        this.c[0].style.display = 'block'
 
         if(this.c[1] !== undefined) {
 
