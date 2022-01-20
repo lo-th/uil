@@ -2,7 +2,7 @@
 
 uil.js is a lightweight ui for javascript with a complete 3d display support.<br>
 totally customizable, only 6 events, auto resize<br>
-[**Main example**](http://lo-th.github.io/uil/index.html)
+[**MAIN EXAMPLE**](http://lo-th.github.io/uil/index.html)
 
 **1 - init engine**
 ```sh
