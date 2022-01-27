@@ -1572,7 +1572,7 @@
 			let t = [];
 
 			switch (type) {
-				case 'json':
+				case 'svg':
 					t = [{
 						accept: {
 							'image/svg+xml': '.svg'
@@ -1643,16 +1643,24 @@
 				reader.onload = function (e) {
 					let content = e.target.result;
 
-					if (type === 'image') {
-						var img = new Image();
+					switch (type) {
+						case 'image':
+							let img = new Image();
 
-						img.onload = function () {
-							if (o.callback) o.callback(img, fname);
-						};
+							img.onload = function () {
+								if (o.callback) o.callback(img, fname);
+							};
 
-						img.src = content;
-					} else {
-						if (o.callback) o.callback(content, fname);
+							img.src = content;
+							break;
+
+						case 'json':
+							if (o.callback) o.callback(JSON.parse(content), fname);
+							break;
+
+						default:
+							if (o.callback) o.callback(content, fname);
+							break;
 					}
 				};
 			} catch (e) {
@@ -1705,7 +1713,7 @@
 
 				const file = await handle.createWritable();
 				let blob = new Blob([options.data], {
-					type: option.finalType
+					type: options.finalType
 				}); // write our file
 
 				await file.write(blob); // close the file and write the contents to disk.
@@ -7123,7 +7131,7 @@
 
 	}
 
-	const REVISION = '4.0.9';
+	const REVISION = '4.1.0';
 
 	exports.Files = Files;
 	exports.Gui = Gui;

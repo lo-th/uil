@@ -12,7 +12,7 @@ export class Files {
         let t = []
 
         switch( type ){
-            case 'json':
+            case 'svg':
             t = [ { accept: { 'image/svg+xml': '.svg'} }, ]
             break;
             case 'text':
@@ -76,14 +76,20 @@ export class Files {
 
                 let content = e.target.result
 
-                if( type === 'image' ){
-                    var img = new Image;
-                    img.onload = function() {
-                        if( o.callback ) o.callback( img, fname )
-                    }
-                    img.src = content
-                } else {
-                    if( o.callback ) o.callback( content, fname )
+                switch(type){
+                    case 'image':
+                        let img = new Image;
+                        img.onload = function() {
+                            if( o.callback ) o.callback( img, fname )
+                        }
+                        img.src = content
+                    break;
+                    case 'json':
+                        if( o.callback ) o.callback( JSON.parse( content ), fname )
+                    break;
+                    default:
+                        if( o.callback ) o.callback( content, fname )
+                    break;
                 }
 
             }
@@ -160,7 +166,7 @@ export class Files {
             // create a FileSystemWritableFileStream to write to
             const file = await handle.createWritable();
 
-            let blob = new Blob([ options.data ], { type: option.finalType });
+            let blob = new Blob([ options.data ], { type: options.finalType });
 
             // write our file
             await file.write(blob);
