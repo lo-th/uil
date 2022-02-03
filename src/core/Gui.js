@@ -148,7 +148,7 @@ export class Gui {
 
         // height transition
         this.transition = o.transition || Tools.transition
-        if( this.transition ) setTimeout( this.addTransition.bind( this ), 0 );
+        if( this.transition ) setTimeout( this.addTransition.bind( this ), 1000 );
         
 
         this.setWidth();
@@ -177,6 +177,9 @@ export class Gui {
             this.bottom.style.transition = 'top '+this.transition+'s ease-out';
             //this.bottom.addEventListener("transitionend", Roots.resize, true);
         }
+
+        let i = this.uis.length
+        while( i-- ) this.uis[i].addTransition()
 
     }
 

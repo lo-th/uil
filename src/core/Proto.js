@@ -227,10 +227,16 @@ export class Proto {
         }
 
         
+        
+
+    }
+
+    addTransition(){
+
         if( this.baseH && this.transition && this.isUI ){
             this.c[0].style.transition = 'height '+this.transition+'s ease-out';
         }
-
+        
     }
 
     // from Tools
