@@ -798,6 +798,11 @@
 			none: 'M 9 5 L 5 5 5 9 9 9 9 5 Z',
 			cursor: 'M 4 7 L 1 10 1 12 2 13 4 13 7 10 9 14 14 0 0 5 4 7 Z'
 		},
+
+		rezone() {
+			Roots.needReZone = true;
+		},
+
 		getImput: function () {
 			return Roots.input ? true : false;
 		},
@@ -2552,8 +2557,7 @@
 
 			if (!o.value && !o.values) {
 				if (this.c[1] !== undefined) {
-					this.c[1].textContent = '';
-					this.txt = '';
+					this.c[1].textContent = ''; //this.txt = ''
 				}
 			}
 
@@ -5554,7 +5558,7 @@
 		constructor(o = {}) {
 			super(o);
 			this.cmode = 0;
-			this.value = o.value || '';
+			this.value = o.value !== undefined ? o.value : '';
 			this.placeHolder = o.placeHolder || '';
 			this.allway = o.allway || false;
 			this.editable = o.edit !== undefined ? o.edit : true;

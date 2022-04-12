@@ -8,7 +8,7 @@ export class TextInput extends Proto {
 
         this.cmode = 0;
 
-        this.value = o.value || '';
+        this.value = o.value !== undefined ? o.value : '';
         this.placeHolder = o.placeHolder || '';
 
         this.allway = o.allway || false;

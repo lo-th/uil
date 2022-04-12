@@ -50,7 +50,7 @@ export class Button extends Proto {
         if( !o.value && !o.values ){
             if( this.c[1] !== undefined ) {
                 this.c[1].textContent = '';
-                this.txt = ''
+                //this.txt = ''
             }
         } 
         if( !this.txt ) this.p = 0 

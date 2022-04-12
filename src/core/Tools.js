@@ -193,6 +193,9 @@ const T = {
 
     },
 
+    rezone () {
+        Roots.needReZone = true;
+    },
 
     getImput: function(){
 
