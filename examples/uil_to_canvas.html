@@ -44,7 +44,7 @@ const callbackLogo = function( v ){ document.getElementById('logoin').setAttribu
 
 
 // single UI element
-const b = UIL.add('button', { target:document.body, callback:populate, name:'populate', w:100, pos:{left:'50%', top:'100px', marginLeft:'-50px' }, h:30, simple:true });
+const b = UIL.add('button', { target:document.body, callback:populate, name:'populate', w:100, pos:{left:'50%', top:'100px', marginLeft:'-50px' }, h:30, simple:true })
 
 const container = document.createElement('div');
 container.style.cssText = 'position:absolute; top:0px; right:10px; height:100%; width:300px; pointer-events:none; ';
@@ -88,9 +88,9 @@ ui.onDraw = function (){
 }
 
 
-var u;
-populate();
-animate(0);
+var u
+populate()
+animate(0)
 
 function populate(){
 
