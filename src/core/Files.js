@@ -97,6 +97,7 @@ export class Files {
         } catch(e) {
 
             console.log(e)
+            if( o.callback ) o.callback( null )
 
         }
 

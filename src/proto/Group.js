@@ -270,12 +270,12 @@ export class Group extends Proto {
 
     open () {
 
-        super.open();
+        super.open()
 
         this.setSvg( this.c[4], 'd', this.svgs.arrowDown )
         this.rSizeContent()
 
-        let t = this.h - this.baseH;
+        let t = this.h - this.baseH
 
         this.parentHeight()
 

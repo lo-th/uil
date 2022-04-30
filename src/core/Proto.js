@@ -99,7 +99,7 @@ export class Proto {
         // for listening object
         this.objectLink = null;
         this.isSend = false;
-        this.val = null;
+        this.objectKey = null;
 
         this.txt = o.name || '';
         this.name = o.rename || this.txt;
@@ -359,7 +359,7 @@ export class Proto {
         if( this.isSend ) return;
         if( this.isEdit ) return;
 
-        this.setValue( this.objectLink[ this.val ] );
+        this.setValue( this.objectLink[ this.objectKey ] );
 
     }
 
@@ -425,8 +425,8 @@ export class Proto {
         if( v instanceof Array && v.length === 1 ) v = v[0];
 
         this.isSend = true
-        if( this.objectLink !== null ) this.objectLink[ this.val ] = v
-        if( this.callback ) this.callback( v, this.val )
+        if( this.objectLink !== null ) this.objectLink[ this.objectKey ] = v
+        if( this.callback ) this.callback( v, this.objectKey )
         this.isSend = false
 
     }
@@ -437,7 +437,7 @@ export class Proto {
         if( v instanceof Array && v.length === 1 ) v = v[0];
 
         if( this.endCallback ) this.endCallback( v );
-        if( this.objectLink !== null ) this.objectLink[ this.val ] = v;
+        if( this.objectLink !== null ) this.objectLink[ this.objectKey ] = v;
 
     }
 
@@ -506,10 +506,9 @@ export class Proto {
 
     rSize() {
 
-        if( !this.autoWidth ) return;
-
-        if( !this.isUI ) this.s[0].width = this.w + 'px';
-        if( !this.simple ) this.s[1].width = this.sa + 'px';
+        if( !this.autoWidth ) return
+        if( !this.isUI ) this.s[0].width = this.w + 'px'
+        if( !this.simple ) this.s[1].width = this.sa + 'px'
     
     }
 
@@ -584,10 +583,10 @@ export class Proto {
     // object referency
     // ----------------------
 
-    setReferency( obj, val ) {
+    setReferency( obj, key ) {
 
         this.objectLink = obj
-        this.val = val
+        this.objectKey = key
 
     }
 
@@ -601,8 +600,9 @@ export class Proto {
 
     open () {
 
-        if( this.isOpen ) return;
-        this.isOpen = true;
+        if( this.isOpen ) return
+        this.isOpen = true
+        //Roots.needResize = true
         if( this.openCallback ) this.openCallback()
 
     }
@@ -611,6 +611,7 @@ export class Proto {
 
         if( !this.isOpen ) return
         this.isOpen = false
+        //Roots.needResize = true
         if( this.closeCallback ) this.closeCallback()
 
     }

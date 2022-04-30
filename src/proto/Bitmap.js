@@ -1,33 +1,35 @@
 import { Proto } from '../core/Proto.js';
+import { Files } from '../core/Files.js';
 
-export class Select extends Proto {
+
+export class Bitmap extends Proto {
 
     constructor( o = {} ) {
 
-        super( o );
+        super( o )
 
-        this.value = o.value || '';
+        this.value = o.value || ''
+        this.refTexture = o.texture || null;
+        this.img = null
 
-        this.isDown = false;
+        this.isDown = false
+        this.neverlock = true
 
-        this.onActif = o.onActif || function(){};
 
-        //let prefix = o.prefix || '';
+
         const cc = this.colors
 
-        this.c[2] = this.dom( 'div', this.css.txt + this.css.button + ' top:1px; background:'+cc.button+'; height:'+(this.h-2)+'px; border:'+ cc.buttonBorder+'; border-radius:15px; width:30px; left:10px;' );
-        //this.c[2].style.color = this.fontColor;
+        this.c[2] = this.dom( 'div', this.css.txt + this.css.button + ' top:1px; background:'+cc.button+'; height:'+(this.h-2)+'px; border:'+cc.buttonBorder+'; border-radius:15px; width:30px; left:10px;' )
 
-        this.c[3] = this.dom( 'div', this.css.txtselect + 'height:' + (this.h-4) + 'px; background:' + cc.inputBg + '; borderColor:' + cc.inputBorder+'; border-radius:'+this.radius+'px;' );
+        this.c[3] = this.dom( 'div', this.css.txtselect + 'height:' + (this.h-4) + 'px; background:' + cc.inputBg + '; borderColor:' + cc.inputBorder+'; border-radius:'+this.radius+'px;' )
         this.c[3].textContent = this.value;
 
-        let fltop = Math.floor(this.h*0.5)-7;
-        this.c[4] = this.dom( 'path', this.css.basic + 'position:absolute; width:14px; height:14px; left:5px; top:'+fltop+'px;', { d:this.svgs[ 'cursor' ], fill:cc.text, stroke:'none'});
+        let fltop = Math.floor(this.h*0.5)-7
+        this.c[4] = this.dom( 'path', this.css.basic + 'position:absolute; width:14px; height:14px; left:5px; top:'+fltop+'px;', { d:this.svgs[ 'load' ], fill:cc.text, stroke:'none'})
 
-        this.stat = 1;
-        this.isActif = false;
+        this.stat = 1
 
-        this.init();
+        this.init()
 
     }
 
@@ -63,7 +65,13 @@ export class Select extends Proto {
 
         if( !name ) return false;
 
-        this.isDown = true;
+        if( name === 'over' ){
+            this.isDown = true
+            Files.load( { callback:this.changeBitmap.bind(this) } )
+
+        }
+
+        
         //this.value = this.values[ name-2 ];
         //this.send();
         return this.mousemove( e );
@@ -83,13 +91,27 @@ export class Select extends Proto {
 
         if( name === 'over' ){
             this.cursor('pointer');
-            up = this.mode( this.isDown ? 3 : 2 );
+            up = this.mode( this.isDown ? 3 : 2 )
         } else {
             up = this.reset();
         }
 
         return up;
 
+    }
+
+    // ----------------------
+
+    changeBitmap( img, fname ){
+
+        if( img ){
+            this.img = img
+            this.apply( fname )
+        } else {
+            this.img = null
+            this.apply( 'null' )
+        }
+        
     }
 
     // ----------------------
@@ -101,7 +123,12 @@ export class Select extends Proto {
         if( v !== this.value ) {
             this.value = v;
             this.c[3].textContent = this.value;
-            this.send();
+
+            if( this.img !== null ){
+                if( this.objectLink !== null ) this.objectLink[ this.val ] = v
+                if( this.callback ) this.callback( v, this.img, this.name )
+            }
+            
         }
         
         this.mode(1);
@@ -121,14 +148,14 @@ export class Select extends Proto {
 
         if( this.stat !== n ){
 
-            if( n===1 ) this.isActif = false;;
+            /*if( n===1 ) this.isActif = false
 
             if( n===3 ){ 
                 if( !this.isActif ){ this.isActif = true; n=4; this.onActif( this ); }
                 else { this.isActif = false; }
             }
 
-            if( n===2 && this.isActif ) n = 4;
+            if( n===2 && this.isActif ) n = 4;*/
 
             this.stat = n
 
@@ -136,8 +163,8 @@ export class Select extends Proto {
 
                 case 1: this.s[ 2 ].color = cc.text; this.s[ 2 ].background = cc.button; break; // base
                 case 2: this.s[ 2 ].color = cc.textOver; this.s[ 2 ].background = cc.overoff; break; // over
-                case 3: this.s[ 2 ].color = cc.textOver; this.s[ 2 ].background = cc.action; break; // down
-                case 4: this.s[ 2 ].color = cc.textSelect; this.s[ 2 ].background = cc.action; break; // actif
+                case 3: this.s[ 2 ].color = cc.textOver; this.s[ 2 ].background = cc.over; break; // down
+                case 4: this.s[ 2 ].color = cc.textSelect; this.s[ 2 ].background = cc.select; break; // actif
 
             }
 

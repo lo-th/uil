@@ -14,12 +14,13 @@ import { Slide } from '../proto/Slide.js';
 import { TextInput } from '../proto/TextInput.js';
 import { Title } from '../proto/Title.js';
 import { Select } from '../proto/Select.js';
+import { Bitmap } from '../proto/Bitmap.js';
 import { Selector } from '../proto/Selector.js';
 import { Empty } from '../proto/Empty.js';
 import { Item } from '../proto/Item.js';
 import { Grid } from '../proto/Grid.js';
 import { Pad2D } from '../proto/Pad2D.js';
-
+import { Roots } from './Roots.js';
 
 export const add = function () {
 
@@ -69,6 +70,7 @@ export const add = function () {
             case 'textInput': case 'string': n = new TextInput(o); break;
             case 'title': case 'text': n = new Title(o); break;
             case 'select': n = new Select(o); break;
+            case 'bitmap': n = new Bitmap(o); break;
             case 'selector': n = new Selector(o); break;
             case 'empty': case 'space': n = new Empty(o); break;
             case 'item': n = new Item(o); break;
@@ -77,7 +79,11 @@ export const add = function () {
 
         }
 
+        
+
         if( n !== null ){
+
+            Roots.needResize = true
 
             if( ref ) n.setReferency( a[0], a[1] );
             return n;

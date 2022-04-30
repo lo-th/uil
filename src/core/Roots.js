@@ -17,7 +17,8 @@ const R = {
     current:-1,
 
 	needReZone: true,
-	isEventsInit: false,
+    needResize:false,
+    isEventsInit: false,
     isLeave:false,
 
     downTime:0,
@@ -175,8 +176,6 @@ const R = {
 
     resize: function () {
 
-        R.needReZone = true;
-
         let i = R.ui.length, u;
         
         while( i-- ){
@@ -185,6 +184,9 @@ const R = {
             if( u.isGui && !u.isCanvasOnly && u.autoResize ) u.calc()
         
         }
+
+        R.needReZone = true
+        R.needResize = false
 
     },
 
@@ -218,6 +220,8 @@ const R = {
         //if(!event.type) return;
 
         if( R.prevDefault.indexOf( event.type ) !== -1 ) event.preventDefault(); 
+
+        if( R.needResize ) R.resize()
 
         R.findZone();
        

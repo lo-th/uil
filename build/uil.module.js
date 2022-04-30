@@ -21,7 +21,8 @@ const R = {
     current:-1,
 
 	needReZone: true,
-	isEventsInit: false,
+    needResize:false,
+    isEventsInit: false,
     isLeave:false,
 
     downTime:0,
@@ -179,8 +180,6 @@ const R = {
 
     resize: function () {
 
-        R.needReZone = true;
-
         let i = R.ui.length, u;
         
         while( i-- ){
@@ -189,6 +188,9 @@ const R = {
             if( u.isGui && !u.isCanvasOnly && u.autoResize ) u.calc();
         
         }
+
+        R.needReZone = true;
+        R.needResize = false;
 
     },
 
@@ -222,6 +224,8 @@ const R = {
         //if(!event.type) return;
 
         if( R.prevDefault.indexOf( event.type ) !== -1 ) event.preventDefault(); 
+
+        if( R.needResize ) R.resize();
 
         R.findZone();
        
@@ -1063,6 +1067,7 @@ const T = {
         object:'M 10 1 L 7 4 4 1 1 1 1 13 4 13 4 5 7 8 10 5 10 13 13 13 13 1 10 1 Z',
         none:'M 9 5 L 5 5 5 9 9 9 9 5 Z',
         cursor:'M 4 7 L 1 10 1 12 2 13 4 13 7 10 9 14 14 0 0 5 4 7 Z',
+        load:'M 14 8 L 12 8 12 12 2 12 2 8 0 8 0 14 14 14 14 8 M 8 5 L 8 0 6 0 6 5 3 5 7 9 11 5 8 5 Z',
 
     },
 
@@ -1820,6 +1825,7 @@ class Files {
         } catch(e) {
 
             console.log(e);
+            if( o.callback ) o.callback( null );
 
         }
 
@@ -2187,7 +2193,7 @@ class Proto {
         // for listening object
         this.objectLink = null;
         this.isSend = false;
-        this.val = null;
+        this.objectKey = null;
 
         this.txt = o.name || '';
         this.name = o.rename || this.txt;
@@ -2447,7 +2453,7 @@ class Proto {
         if( this.isSend ) return;
         if( this.isEdit ) return;
 
-        this.setValue( this.objectLink[ this.val ] );
+        this.setValue( this.objectLink[ this.objectKey ] );
 
     }
 
@@ -2513,8 +2519,8 @@ class Proto {
         if( v instanceof Array && v.length === 1 ) v = v[0];
 
         this.isSend = true;
-        if( this.objectLink !== null ) this.objectLink[ this.val ] = v;
-        if( this.callback ) this.callback( v, this.val );
+        if( this.objectLink !== null ) this.objectLink[ this.objectKey ] = v;
+        if( this.callback ) this.callback( v, this.objectKey );
         this.isSend = false;
 
     }
@@ -2525,7 +2531,7 @@ class Proto {
         if( v instanceof Array && v.length === 1 ) v = v[0];
 
         if( this.endCallback ) this.endCallback( v );
-        if( this.objectLink !== null ) this.objectLink[ this.val ] = v;
+        if( this.objectLink !== null ) this.objectLink[ this.objectKey ] = v;
 
     }
 
@@ -2594,8 +2600,7 @@ class Proto {
 
     rSize() {
 
-        if( !this.autoWidth ) return;
-
+        if( !this.autoWidth ) return
         if( !this.isUI ) this.s[0].width = this.w + 'px';
         if( !this.simple ) this.s[1].width = this.sa + 'px';
     
@@ -2672,10 +2677,10 @@ class Proto {
     // object referency
     // ----------------------
 
-    setReferency( obj, val ) {
+    setReferency( obj, key ) {
 
         this.objectLink = obj;
-        this.val = val;
+        this.objectKey = key;
 
     }
 
@@ -2689,8 +2694,9 @@ class Proto {
 
     open () {
 
-        if( this.isOpen ) return;
+        if( this.isOpen ) return
         this.isOpen = true;
+        //Roots.needResize = true
         if( this.openCallback ) this.openCallback();
 
     }
@@ -2699,6 +2705,7 @@ class Proto {
 
         if( !this.isOpen ) return
         this.isOpen = false;
+        //Roots.needResize = true
         if( this.closeCallback ) this.closeCallback();
 
     }
@@ -6352,20 +6359,15 @@ class Numeric extends Proto {
 
             if( this.isVector ){
 
-                this.objectLink[ this.val ].fromArray( v );
-
-                /*this.objectLink[ this.val ].x = v[0];
-                this.objectLink[ this.val ].y = v[1];
-                this.objectLink[ this.val ].z = v[2];
-                if( v[3] ) this.objectLink[ this.val ].w = v[3];*/
+                this.objectLink[ this.objectKey ].fromArray( v );
 
             } else {
-                this.objectLink[ this.val ] = v;
+                this.objectLink[ this.objectKey ] = v;
             }
 
         }
 
-        if( this.callback ) this.callback( v, this.val );
+        if( this.callback ) this.callback( v, this.objectKey );
 
         this.isSend = false;
 
@@ -6965,16 +6967,17 @@ class Select extends Proto {
 
         this.onActif = o.onActif || function(){};
 
-        o.prefix || '';
+        //let prefix = o.prefix || '';
+        const cc = this.colors;
 
-        this.c[2] = this.dom( 'div', this.css.txt + this.css.button + ' top:1px; background:'+this.colors.button+'; height:'+(this.h-2)+'px; border:'+this.colors.buttonBorder+'; border-radius:15px; width:30px; left:10px;' );
-        this.c[2].style.color = this.fontColor;
+        this.c[2] = this.dom( 'div', this.css.txt + this.css.button + ' top:1px; background:'+cc.button+'; height:'+(this.h-2)+'px; border:'+ cc.buttonBorder+'; border-radius:15px; width:30px; left:10px;' );
+        //this.c[2].style.color = this.fontColor;
 
-        this.c[3] = this.dom( 'div', this.css.txtselect + 'height:' + (this.h-4) + 'px; background:' + this.colors.inputBg + '; borderColor:' + this.colors.inputBorder+'; border-radius:'+this.radius+'px;' );
+        this.c[3] = this.dom( 'div', this.css.txtselect + 'height:' + (this.h-4) + 'px; background:' + cc.inputBg + '; borderColor:' + cc.inputBorder+'; border-radius:'+this.radius+'px;' );
         this.c[3].textContent = this.value;
 
         let fltop = Math.floor(this.h*0.5)-7;
-        this.c[4] = this.dom( 'path', this.css.basic + 'position:absolute; width:14px; height:14px; left:5px; top:'+fltop+'px;', { d:this.svgs[ 'cursor' ], fill:this.fontColor, stroke:'none'});
+        this.c[4] = this.dom( 'path', this.css.basic + 'position:absolute; width:14px; height:14px; left:5px; top:'+fltop+'px;', { d:this.svgs[ 'cursor' ], fill:cc.text, stroke:'none'});
 
         this.stat = 1;
         this.isActif = false;
@@ -7086,9 +7089,212 @@ class Select extends Proto {
             switch( n ){
 
                 case 1: this.s[ 2 ].color = cc.text; this.s[ 2 ].background = cc.button; break; // base
-                case 2: this.s[ 2 ].color = cc.textOver; this.s[ 2 ].background = cc.over; break; // over
-                case 3: this.s[ 2 ].color = cc.textSelect; this.s[ 2 ].background = cc.select; break; // down
+                case 2: this.s[ 2 ].color = cc.textOver; this.s[ 2 ].background = cc.overoff; break; // over
+                case 3: this.s[ 2 ].color = cc.textOver; this.s[ 2 ].background = cc.action; break; // down
                 case 4: this.s[ 2 ].color = cc.textSelect; this.s[ 2 ].background = cc.action; break; // actif
+
+            }
+
+            change = true;
+
+        }
+
+        return change;
+
+
+
+    }
+
+    reset () {
+
+        this.cursor();
+        return this.mode( this.isActif ? 4 : 1 );
+
+    }
+
+    text ( txt ) {
+
+        this.c[3].textContent = txt;
+
+    }
+
+    rSize () {
+
+        super.rSize();
+
+        let s = this.s;
+        s[2].left = this.sa + 'px';
+        s[3].left = (this.sa + 40) + 'px';
+        s[3].width = (this.sb - 40) + 'px';
+        s[4].left = (this.sa+8) + 'px';
+
+    }
+
+}
+
+class Bitmap extends Proto {
+
+    constructor( o = {} ) {
+
+        super( o );
+
+        this.value = o.value || '';
+        this.refTexture = o.texture || null;
+        this.img = null;
+
+        this.isDown = false;
+        this.neverlock = true;
+
+
+
+        const cc = this.colors;
+
+        this.c[2] = this.dom( 'div', this.css.txt + this.css.button + ' top:1px; background:'+cc.button+'; height:'+(this.h-2)+'px; border:'+cc.buttonBorder+'; border-radius:15px; width:30px; left:10px;' );
+
+        this.c[3] = this.dom( 'div', this.css.txtselect + 'height:' + (this.h-4) + 'px; background:' + cc.inputBg + '; borderColor:' + cc.inputBorder+'; border-radius:'+this.radius+'px;' );
+        this.c[3].textContent = this.value;
+
+        let fltop = Math.floor(this.h*0.5)-7;
+        this.c[4] = this.dom( 'path', this.css.basic + 'position:absolute; width:14px; height:14px; left:5px; top:'+fltop+'px;', { d:this.svgs[ 'load' ], fill:cc.text, stroke:'none'});
+
+        this.stat = 1;
+
+        this.init();
+
+    }
+
+    testZone ( e ) {
+
+        let l = this.local;
+        if( l.x === -1 && l.y === -1 ) return '';
+        if( l.x > this.sa && l.x < this.sa+30 ) return 'over';
+        return '0'
+
+    }
+
+    // ----------------------
+    //   EVENTS
+    // ----------------------
+
+    mouseup ( e ) {
+    
+        if( this.isDown ){
+            //this.value = false;
+            this.isDown = false;
+            //this.send();
+            return this.mousemove( e );
+        }
+
+        return false;
+
+    }
+
+    mousedown ( e ) {
+
+        let name = this.testZone( e );
+
+        if( !name ) return false;
+
+        if( name === 'over' ){
+            this.isDown = true;
+            Files.load( { callback:this.changeBitmap.bind(this) } );
+
+        }
+
+        
+        //this.value = this.values[ name-2 ];
+        //this.send();
+        return this.mousemove( e );
+
+    }
+
+    mousemove ( e ) {
+
+        let up = false;
+
+        let name = this.testZone( e );
+        //let sel = false;
+
+        
+
+        //console.log(name)
+
+        if( name === 'over' ){
+            this.cursor('pointer');
+            up = this.mode( this.isDown ? 3 : 2 );
+        } else {
+            up = this.reset();
+        }
+
+        return up;
+
+    }
+
+    // ----------------------
+
+    changeBitmap( img, fname ){
+
+        if( img ){
+            this.img = img;
+            this.apply( fname );
+        } else {
+            this.img = null;
+            this.apply( 'null' );
+        }
+        
+    }
+
+    // ----------------------
+
+    apply ( v ) {
+
+        v = v || '';
+
+        if( v !== this.value ) {
+            this.value = v;
+            this.c[3].textContent = this.value;
+
+            if( this.img !== null ){
+                if( this.objectLink !== null ) this.objectLink[ this.val ] = v;
+                if( this.callback ) this.callback( v, this.img, this.name );
+            }
+            
+        }
+        
+        this.mode(1);
+
+    }
+
+    update () {
+
+        this.mode( 3 );
+
+    }
+
+    mode ( n ) {
+
+        let change = false;
+        let cc = this.colors;
+
+        if( this.stat !== n ){
+
+            /*if( n===1 ) this.isActif = false
+
+            if( n===3 ){ 
+                if( !this.isActif ){ this.isActif = true; n=4; this.onActif( this ); }
+                else { this.isActif = false; }
+            }
+
+            if( n===2 && this.isActif ) n = 4;*/
+
+            this.stat = n;
+
+            switch( n ){
+
+                case 1: this.s[ 2 ].color = cc.text; this.s[ 2 ].background = cc.button; break; // base
+                case 2: this.s[ 2 ].color = cc.textOver; this.s[ 2 ].background = cc.overoff; break; // over
+                case 3: this.s[ 2 ].color = cc.textOver; this.s[ 2 ].background = cc.over; break; // down
+                case 4: this.s[ 2 ].color = cc.textSelect; this.s[ 2 ].background = cc.select; break; // actif
 
             }
 
@@ -7887,6 +8093,7 @@ const add = function () {
             case 'textInput': case 'string': n = new TextInput(o); break;
             case 'title': case 'text': n = new Title(o); break;
             case 'select': n = new Select(o); break;
+            case 'bitmap': n = new Bitmap(o); break;
             case 'selector': n = new Selector(o); break;
             case 'empty': case 'space': n = new Empty(o); break;
             case 'item': n = new Item(o); break;
@@ -7895,7 +8102,11 @@ const add = function () {
 
         }
 
+        
+
         if( n !== null ){
+
+            Roots.needResize = true;
 
             if( ref ) n.setReferency( a[0], a[1] );
             return n;
@@ -8695,6 +8906,6 @@ class Gui {
 
 }
 
-const REVISION = '4.1.0';
+const REVISION = '4.2.0';
 
 export { Files, Gui, Proto, REVISION, Tools, add };

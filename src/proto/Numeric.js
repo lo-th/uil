@@ -319,20 +319,15 @@ export class Numeric extends Proto {
 
             if( this.isVector ){
 
-                this.objectLink[ this.val ].fromArray( v );
-
-                /*this.objectLink[ this.val ].x = v[0];
-                this.objectLink[ this.val ].y = v[1];
-                this.objectLink[ this.val ].z = v[2];
-                if( v[3] ) this.objectLink[ this.val ].w = v[3];*/
+                this.objectLink[ this.objectKey ].fromArray( v );
 
             } else {
-                this.objectLink[ this.val ] = v;
+                this.objectLink[ this.objectKey ] = v;
             }
 
         }
 
-        if( this.callback ) this.callback( v, this.val );
+        if( this.callback ) this.callback( v, this.objectKey );
 
         this.isSend = false;
 
