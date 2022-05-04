@@ -50,7 +50,7 @@ export class Group extends Proto {
         s[1].marginLeft = (10+this.decal)+'px';
         s[1].lineHeight = this.h-4;
         s[1].color = this.colors.text;
-        s[1].fontWeight = 'bold';
+        //s[1].fontWeight = 'bold';
 
         if( this.radius !== 0 ) s[0].borderRadius = this.radius+'px'
         this.init();
@@ -283,7 +283,7 @@ export class Group extends Proto {
 
     close () {
 
-        super.close();
+        super.close()
 
         let t = this.h - this.baseH
 

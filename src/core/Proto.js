@@ -602,7 +602,7 @@ export class Proto {
 
         if( this.isOpen ) return
         this.isOpen = true
-        //Roots.needResize = true
+        Roots.needResize = true
         if( this.openCallback ) this.openCallback()
 
     }
@@ -611,7 +611,7 @@ export class Proto {
 
         if( !this.isOpen ) return
         this.isOpen = false
-        //Roots.needResize = true
+        Roots.needResize = true
         if( this.closeCallback ) this.closeCallback()
 
     }

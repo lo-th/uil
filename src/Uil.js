@@ -1,4 +1,4 @@
-export const REVISION = '4.2.0';
+export const REVISION = '4.2.1';
 
 export { Tools } from './core/Tools.js';
 export { Files } from './core/Files.js';

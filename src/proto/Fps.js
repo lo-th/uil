@@ -103,7 +103,7 @@ export class Fps extends Proto {
         s[1].marginLeft = '10px';
         s[1].lineHeight = this.h-4;
         s[1].color = this.colors.text;
-        s[1].fontWeight = 'bold';
+        //s[1].fontWeight = 'bold';
 
         if( this.radius !== 0 )  s[0].borderRadius = this.radius+'px';
         if( this.colors.gborder!=='none') s[0].border = '1px solid ' + this.colors.gborder;

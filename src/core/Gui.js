@@ -24,7 +24,6 @@ export class Gui {
 
         // color
         if( o.config ) o.colors = o.config
-        
         if ( o.colors ) this.setConfig( o.colors )
         else this.colors = Tools.defineColor( o )
 

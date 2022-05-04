@@ -1019,13 +1019,13 @@ const T = {
         
 
         //fontFamily: 'Tahoma',
-        fontFamily: 'Consolas,monaco,monospace',
+        fontFamily: 'Consolas, monaco, monospace',
+        //fontFamily: "'Roboto Mono', 'Source Code Pro', Menlo, Courier, monospace",
         fontWeight: 'normal',
-        fontShadow: '#000',
+        fontShadow: 'none',//'#000',
         fontSize:12,
 
-
-        radius:4,
+        radius:2,
         hide: 'rgba(0,0,0,0)',
 
     },
@@ -1110,16 +1110,21 @@ const T = {
         if( shadow === undefined ) shadow = cc.fontShadow;
         if( weight === undefined ) weight = cc.fontWeight;
         if( color === undefined ) color = cc.text;
+
+        if( isNaN(size) ){ if( size.search('em')===-1 ) size += 'px';}
+        else size += 'px';
         
 
         let align = 'display:flex; justify-content:left; align-items:center; text-align:left;';
 
-        T.css.txt = T.css.basic + align + 'font-family:'+ font +'; font-weight:'+weight+'; font-size:'+size+'px; color:'+cc.text+'; padding:0px 10px; left:0; top:2px; height:16px; width:100px; overflow:hidden; white-space: nowrap;';
+        T.css.txt = T.css.basic + align + ' font-family:'+ font +'; font-weight:'+weight+'; font-size:'+size+'; color:'+cc.text+'; padding:0px 10px; left:0; top:2px; height:16px; width:100px; overflow:hidden; white-space: nowrap; letter-spacing: normal;';
         if( shadow !== 'none' ) T.css.txt += ' text-shadow: 1px 1px 1px '+shadow+';';
 
         T.css.txtselect = T.css.txt + 'padding:0px 4px; border:1px dashed ' + cc.border + ';';
         //T.css.item = T.css.txt + ' position:relative; margin-bottom:1px; '//display:block; padding:4px 4px;';//
         T.css.item = T.css.txt + ' position:relative; margin-bottom:1px; display:block; padding:2px 4px;';//
+
+        //console.log( T.css.txt )
 
     },
 
@@ -2696,7 +2701,7 @@ class Proto {
 
         if( this.isOpen ) return
         this.isOpen = true;
-        //Roots.needResize = true
+        Roots.needResize = true;
         if( this.openCallback ) this.openCallback();
 
     }
@@ -2705,7 +2710,7 @@ class Proto {
 
         if( !this.isOpen ) return
         this.isOpen = false;
-        //Roots.needResize = true
+        Roots.needResize = true;
         if( this.closeCallback ) this.closeCallback();
 
     }
@@ -3882,7 +3887,7 @@ class Fps extends Proto {
         s[1].marginLeft = '10px';
         s[1].lineHeight = this.h-4;
         s[1].color = this.colors.text;
-        s[1].fontWeight = 'bold';
+        //s[1].fontWeight = 'bold';
 
         if( this.radius !== 0 )  s[0].borderRadius = this.radius+'px';
         if( this.colors.gborder!=='none') s[0].border = '1px solid ' + this.colors.gborder;
@@ -4461,7 +4466,7 @@ class Group extends Proto {
         s[1].marginLeft = (10+this.decal)+'px';
         s[1].lineHeight = this.h-4;
         s[1].color = this.colors.text;
-        s[1].fontWeight = 'bold';
+        //s[1].fontWeight = 'bold';
 
         if( this.radius !== 0 ) s[0].borderRadius = this.radius+'px';
         this.init();
@@ -8167,7 +8172,6 @@ class Gui {
 
         // color
         if( o.config ) o.colors = o.config;
-        
         if ( o.colors ) this.setConfig( o.colors );
         else this.colors = Tools.defineColor( o );
 
@@ -8906,6 +8910,6 @@ class Gui {
 
 }
 
-const REVISION = '4.2.0';
+const REVISION = '4.2.1';
 
 export { Files, Gui, Proto, REVISION, Tools, add };

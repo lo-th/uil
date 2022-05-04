@@ -142,13 +142,13 @@ const T = {
         
 
         //fontFamily: 'Tahoma',
-        fontFamily: 'Consolas,monaco,monospace',
+        fontFamily: 'Consolas, monaco, monospace',
+        //fontFamily: "'Roboto Mono', 'Source Code Pro', Menlo, Courier, monospace",
         fontWeight: 'normal',
-        fontShadow: '#000',
+        fontShadow: 'none',//'#000',
         fontSize:12,
 
-
-        radius:4,
+        radius:2,
         hide: 'rgba(0,0,0,0)',
 
     },
@@ -233,16 +233,21 @@ const T = {
         if( shadow === undefined ) shadow = cc.fontShadow
         if( weight === undefined ) weight = cc.fontWeight
         if( color === undefined ) color = cc.text
+
+        if( isNaN(size) ){ if( size.search('em')===-1 ) size += 'px'}
+        else size += 'px'
         
 
         let align = 'display:flex; justify-content:left; align-items:center; text-align:left;'
 
-        T.css.txt = T.css.basic + align + 'font-family:'+ font +'; font-weight:'+weight+'; font-size:'+size+'px; color:'+cc.text+'; padding:0px 10px; left:0; top:2px; height:16px; width:100px; overflow:hidden; white-space: nowrap;';
+        T.css.txt = T.css.basic + align + ' font-family:'+ font +'; font-weight:'+weight+'; font-size:'+size+'; color:'+cc.text+'; padding:0px 10px; left:0; top:2px; height:16px; width:100px; overflow:hidden; white-space: nowrap; letter-spacing: normal;';
         if( shadow !== 'none' ) T.css.txt += ' text-shadow: 1px 1px 1px '+shadow+';';
 
         T.css.txtselect = T.css.txt + 'padding:0px 4px; border:1px dashed ' + cc.border + ';';
         //T.css.item = T.css.txt + ' position:relative; margin-bottom:1px; '//display:block; padding:4px 4px;';//
         T.css.item = T.css.txt + ' position:relative; margin-bottom:1px; display:block; padding:2px 4px;';//
+
+        //console.log( T.css.txt )
 
     },
 
