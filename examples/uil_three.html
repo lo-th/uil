@@ -20,6 +20,7 @@
 				color: 0xFFFFFF,
 				size: 150,
 				repeat: 5,
+				map:'check.jpg'
 			}
 
 			init()
@@ -90,7 +91,25 @@
 				ui.add( setting, 'size', { min:30, max:300, precision:0 } ).onChange( function( s ){ mesh.scale.set(1,1,1).multiplyScalar( s ); } )
 				ui.add( setting, 'repeat', { min:1, max:10, precision:0 } ).onChange( function( r ){ texture.repeat.set(r,r); } )
 				ui.add( setting, 'color', { type:'color' } ).onChange( function( c ){ mesh.material.color.setHex( c ); } )
+				ui.add( setting, 'map',  { type:'bitmap' }).onChange( setTexure )
 
+			}
+
+			function setTexure( file, img, name ){
+
+				let im = new Image()
+				let r = setting.repeat
+				im.src = img
+				im.onload = function (){
+
+					texture = new THREE.Texture( im )
+					texture.wrapS = texture.wrapT = THREE.RepeatWrapping
+				    texture.repeat.set(r,r);
+				    texture.needsUpdate = true;
+				    mesh.material.map = texture
+
+				}
+				
 			}
 
 			function onWindowResize() {

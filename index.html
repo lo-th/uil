@@ -79,20 +79,13 @@
 
             let gr = ui.add('group', { name:'Examples', h:30, color:'#0FF' }).onChange( callbackLink )
 
-            gr.add( 'button', { name: 'uil_3d', color: '#EEE' })
-            gr.add( 'button', { name: 'uil_3d_2', color: '#EEE' })
-            gr.add( 'button', { name: 'uil_color' })
-            gr.add( 'button', { name: 'uil_module' })
-            gr.add( 'button', { name: 'uil_group' })
-            gr.add( 'button', { name: 'uil_imagelist' })
-            gr.add( 'button', { name: 'uil_item' })
-            gr.add( 'button', { name: 'uil_listen' })
-            gr.add( 'button', { name: 'uil_pad2d' })
-            gr.add( 'button', { name: 'uil_to_canvas' })
-            gr.add( 'button', { name: 'uil_stress' })
-            gr.add( 'button', { name: 'uil_test' })
+            gr.add( 'button', { value: ['uil_3d', 'uil_3d_2'], color: '#EEE' })
+            gr.add( 'button', { value: ['uil_color', 'uil_three'] })
+            gr.add( 'button', { value: ['uil_group', 'uil_imagelist'] })
+            gr.add( 'button', { value: ['uil_item', 'uil_listen'] })
+            gr.add( 'button', { value: ['uil_pad2d', 'uil_to_canvas'] })
+            gr.add( 'button', { value: ['uil_stress', 'uil_test'] })
             
-
             ui.add('fps', { h:22, hplus:70, res:80 });
             graph = ui.add('fps', { 
                 name:'custom graph', h:22, hplus:70, custom:true, alpha:1, res:50, 
