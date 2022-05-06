@@ -18,46 +18,99 @@ export class Group extends Proto {
         this.current = -1
         this.proto = null
         this.isEmpty = true
-        this.decal = 0
+
+        this.decal = o.group ? 8 : 0
 
         this.baseH = this.h
 
-        let fltop = Math.floor(this.h*0.5)-6;
+        let fltop = Math.floor(this.h*0.5)-3;
+
+        const cc = this.colors;
 
         this.isLine = o.line !== undefined ? o.line : false;
 
-        this.decal = 0;
-
-        if( o.group ){
-            this.decal = o.group.decal ? o.group.decal : 0
-            this.decal += 6
-        }
+        
 
         this.useFlex = true 
         let flexible = this.useFlex ? 'display:flex; flex-flow: row wrap;' : ''
 
-        this.c[2] = this.dom( 'div', this.css.basic + flexible + 'width:100%; left:0; height:auto; overflow:hidden; top:'+this.h+'px');// 
-        this.c[3] = this.dom( 'path', this.css.basic + 'position:absolute; width:10px; height:10px; left:0; top:'+fltop+'px;', { d:this.svgs.group, fill:this.colors.text, stroke:'none'});
-        this.c[4] = this.dom( 'path', this.css.basic + 'position:absolute; width:10px; height:10px; left:'+(4+this.decal)+'px; top:'+fltop+'px;', { d:this.svgs.arrow, fill:this.colors.text, stroke:'none'});
+        this.c[2] = this.dom( 'div', this.css.basic + flexible + 'width:100%; left:0; height:auto; overflow:hidden; top:'+(this.h-1)+'px')
+        this.c[3] = this.dom( 'path', this.css.basic + 'position:absolute; width:6px; height:6px; left:0; top:'+fltop+'px;', { d:this.svgs.g1, fill:cc.text, stroke:'none'})
+        //this.c[3] = this.dom( 'path', this.css.basic + 'position:absolute; width:10px; height:10px; left:0; top:'+fltop+'px;', { d:this.svgs.group, fill:cc.text, stroke:'none'})
+        //this.c[3] = this.dom( 'path', this.css.basic + 'position:absolute; width:10px; height:10px; left:0; top:'+fltop+'px;', { d:this.svgs.group, fill:cc.text, stroke:'none'})
+        //this.c[4] = this.dom( 'path', this.css.basic + 'position:absolute; width:10px; height:10px; left:'+(this.decal-1)+'px; top:'+fltop+'px;', { d:this.svgs.arrow, fill:cc.text, stroke:'none'})
+
+
+
         // bottom line
         if( this.isLine ) this.c[5] = this.dom( 'div', this.css.basic +  'background:rgba(255, 255, 255, 0.2); width:100%; left:0; height:1px; bottom:0px');
+        //else this.c[5] = this.dom( 'div', this.css.basic + 'width:100%; left:0; height:auto; top:'+(this.h-1)+'px')
 
         let s = this.s;
-        s[0].height = this.h + 'px';
-        s[1].height = this.h + 'px';
-        this.c[1].name = 'group';
+        s[0].height = this.h + 'px'
+        this.c[1].name = 'group'
 
-        s[1].marginLeft = (10+this.decal)+'px';
+        if( cc.groups !== 'none' ){
+            
+            s[1].background = cc.groups
+            s[1].border = cc.borderSize+'px solid '+ cc.border
+            s[1].borderRadius = this.radius+'px'
+
+            //s[5].border = '2px solid ' + '#000' 
+            //s[1].marginRight = 10+'px';
+        }
+
+        //this.c[1].innerHTML = this.dd + this.name
+
+        //s[1].padding = '0px ' + (10+this.decal)+'px';
+
         s[1].lineHeight = this.h-4;
-        s[1].color = this.colors.text;
+        s[1].color = cc.text;
         //s[1].fontWeight = 'bold';
 
-        if( this.radius !== 0 ) s[0].borderRadius = this.radius+'px'
+
+
+
+
         this.init();
 
-        this.setBG( o.bg );
+        if( this.radius !== 0 ){ 
+            //s[0].borderRadius = this.radius+'px'
 
-        if( o.open !== undefined ) this.open();
+            s[1].borderRadius = this.radius+'px'
+            s[2].borderRadius = this.radius+'px'
+        }
+
+
+        //s[1].paddingLeft = (10+this.decal)+'px'
+
+        this.setBG( o.bg )
+
+        if( o.open ) this.open()
+
+    }
+
+    setBG ( bg ) {
+
+        const cc = this.colors;
+
+        const s = this.s;
+
+        //if( bg !== undefined ) this.colors.background = bg
+
+        //this.c[0].style.background = this.colors.background;
+        s[1].background = bg//this.colors.background
+        s[2].background = bg
+
+        //s[5].border = '1px solid ' + '#000' 
+        // s[5].background =  '#000'
+
+
+
+        let i = this.uis.length;
+        while(i--){
+            //this.uis[i].setBG( this.colors.background );
+        }
 
     }
 
@@ -162,18 +215,7 @@ export class Group extends Proto {
 
     // ----------------------
 
-    setBG ( bg ) {
-
-        if( bg !== undefined ) this.colors.background = bg
-
-        this.c[0].style.background = this.colors.background;
-
-        let i = this.uis.length;
-        while(i--){
-            this.uis[i].setBG( this.colors.background );
-        }
-
-    }
+    
 
     add() {
 
@@ -272,10 +314,28 @@ export class Group extends Proto {
 
         super.open()
 
-        this.setSvg( this.c[4], 'd', this.svgs.arrowDown )
+        this.setSvg( this.c[3], 'd', this.svgs.g2 )
+
+        //this.setSvg( this.c[4], 'd', this.svgs.arrowDown )
         this.rSizeContent()
 
         let t = this.h - this.baseH
+
+        const s = this.s
+
+        if(this.radius){
+
+            s[1].borderRadius = '0px'
+            s[2].borderRadius = '0px'
+
+            s[1].borderTopLeftRadius = this.radius+'px'
+            s[1].borderTopRightRadius = this.radius+'px'
+            s[2].borderBottomLeftRadius = this.radius+'px'
+            s[2].borderBottomRightRadius = this.radius+'px'
+        }
+        
+
+
 
         this.parentHeight()
 
@@ -287,9 +347,14 @@ export class Group extends Proto {
 
         let t = this.h - this.baseH
 
-        this.setSvg( this.c[4], 'd', this.svgs.arrow )
+        this.setSvg( this.c[3], 'd', this.svgs.g1 )
+
+        //this.setSvg( this.c[4], 'd', this.svgs.arrow )
         this.h = this.baseH
-        this.s[0].height = this.h + 'px'
+
+        const s = this.s
+        s[0].height = this.h + 'px'
+        if(this.radius) s[1].borderRadius = this.radius+'px'
 
         this.parentHeight()
 
@@ -336,9 +401,20 @@ export class Group extends Proto {
 
         let s = this.s
 
-        s[3].left = ( this.sa + this.sb - 17 ) + 'px'
+        this.w = this.w - this.decal
+
+        s[3].left = ( this.sa + this.sb - 6 ) + 'px'
+        //s[1].width = this.isbgGroup ? (this.w-5) + 'px' : this.w + 'px'
+
         s[1].width = this.w + 'px'
         s[2].width = this.w + 'px'
+        //s[1].width = (this.w - this.decal) + 'px'
+        //s[2].width = (this.w - this.decal) + 'px'
+
+        s[1].left = (this.decal) + 'px'
+        s[2].left = (this.decal) + 'px'
+
+
 
         if( this.isOpen ) this.rSizeContent()
 

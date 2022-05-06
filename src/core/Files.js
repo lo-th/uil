@@ -15,11 +15,26 @@ export class Files {
             case 'svg':
             t = [ { accept: { 'image/svg+xml': '.svg'} }, ]
             break;
+            case 'wav':
+            t = [ { accept: { 'audio/wav': '.wav'} }, ]
+            break;
+            case 'mp3':
+            t = [ { accept: { 'audio/mpeg': '.mp3'} }, ]
+            break;
+            case 'mp4':
+            t = [ { accept: { 'video/mp4': '.mp4'} }, ]
+            break;
+            case 'bin':case 'hex':
+            t = [ { description: 'Binary Files', accept: { 'application/octet-stream': ['.bin', '.hex'] } }, ]
+            break;
             case 'text':
             t = [ { description: 'Text Files', accept: { 'text/plain': ['.txt', '.text'], 'text/html': ['.html', '.htm'] } }, ]
             break;
             case 'json':
-            t = [ { description: 'JSON Files', accept: { 'text/plain': ['.json'] } }, ]
+            t = [ { description: 'JSON Files', accept: { 'application/json': ['.json'] } }, ]//text/plain
+            break;
+            case 'js':
+            t = [ { description: 'JavaScript Files', accept: { 'text/javascript': ['.js'] } }, ]
             break;
             case 'image':
             t = [ { description: 'Images', accept: { 'image/*': ['.png', '.gif', '.jpeg', '.jpg'] } }, ]

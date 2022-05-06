@@ -39,14 +39,12 @@ export class List extends Proto {
         if( this.txt === '' ) this.p = 0;
 
 
-        let fltop = Math.floor(this.h*0.5)-5;
+        let fltop = Math.floor(this.h*0.5)-3;
         let cc = this.colors
-
-
 
         this.c[2] = this.dom( 'div', this.css.basic + 'top:0; display:none; border-radius:'+this.radius+'px;' );
         this.c[3] = this.dom( 'div', this.css.item + 'position:absolute; text-align:'+align+'; line-height:'+(this.h-4)+'px; top:1px; background:'+cc.button+'; height:'+(this.h-2)+'px; border:1px solid '+cc.border+'; border-radius:'+this.radius+'px;' );
-        this.c[4] = this.dom( 'path', this.css.basic + 'position:absolute; width:10px; height:10px; top:'+fltop+'px;', { d:this.svgs.arrow, fill:cc.text, stroke:'none'});
+        this.c[4] = this.dom( 'path', this.css.basic + 'position:absolute; width:6px; height:6px; top:'+fltop+'px;', { d:this.svgs.g1, fill:cc.text, stroke:'none'});
 
         this.scrollerBack = this.dom( 'div', this.css.basic + 'right:0px; width:'+ss+'px; background:'+cc.back+'; display:none;');
         this.scroller = this.dom( 'div', this.css.basic + 'right:'+((ss-(ss*0.25))*0.5)+'px; width:'+(ss*0.25)+'px; background:'+cc.text+'; display:none; ');
@@ -106,8 +104,6 @@ export class List extends Proto {
         this.listIn = this.dom( 'div', this.css.basic + 'left:0; top:0; width:100%; background:none;');
         this.listIn.name = 'list';
 
-
-
         this.topList = 0;
         
         this.c[2].appendChild( this.listIn );
@@ -146,12 +142,10 @@ export class List extends Proto {
 
         //this.c[0].style.background = '#FF0000'
         if( this.isWithImage ) this.preloadImage();
-       // } else {
-            // populate list
-            this.setList( this.list );
-            this.init();
-            if( this.isOpenOnStart ) this.open( true );
-       // }
+            
+        this.setList( this.list );
+        this.init();
+        if( this.isOpenOnStart ) this.open( true )
 
     }
 
@@ -711,9 +705,9 @@ export class List extends Proto {
 
         if( this.up ){ 
             this.zone.y -= this.h - (this.baseH-10);
-            this.setSvg( this.c[4], 'd', this.svgs.arrowUp );
+            this.setSvg( this.c[4], 'd', this.svgs.g1 );
         } else {
-            this.setSvg( this.c[4], 'd', this.svgs.arrowDown );
+            this.setSvg( this.c[4], 'd', this.svgs.g2 );
         }
 
         this.rSizeContent();
@@ -737,7 +731,7 @@ export class List extends Proto {
         this.h = this.baseH;
         this.s[0].height = this.h + 'px';
         this.s[2].display = 'none';
-        this.setSvg( this.c[4], 'd', this.svgs.arrow );
+        this.setSvg( this.c[4], 'd', this.svgs.g1 );
 
         this.zone.h = this.h;
 
@@ -778,7 +772,7 @@ export class List extends Proto {
         s[3].width = w + 'px';
         s[3].left = d + 'px';
 
-        s[4].left = d + w - 17 + 'px';
+        s[4].left = d + w - 15 + 'px';
 
         this.ww = w;
         if( this.max > this.maxHeight ) this.ww = w-this.ss;

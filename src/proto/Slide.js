@@ -42,25 +42,27 @@ export class Slide extends Proto {
 
         if(this.model !== 0){
 
-            let h1 = 4, h2 = 8, ww = this.h-4, ra = 20;
+            let r1 = 4, h1 = 4, h2 = 8, ww = this.h-6, ra = 16;
 
             if( this.model === 2 ){
-                h1 = 4;//2
-                h2 = 8;
-                ra = 2;
-                ww = (this.h-4)*0.5
+                r1 = 0
+                h1 = 2
+                h2 = 4
+                ra = 2
+                ww = (this.h-6)*0.5
             }
 
-            if(this.model === 3) this.c[5].style.visible = 'none';
+            if( this.model === 3 ) this.c[5].style.visible = 'none';
 
-            this.c[4].style.borderRadius = h1 + 'px';
+            this.c[4].style.borderRadius = r1 + 'px';
             this.c[4].style.height = h2 + 'px';
             this.c[4].style.top = (this.h*0.5) - h1 + 'px';
-            this.c[5].style.borderRadius = (h1*0.5) + 'px';
+            this.c[5].style.borderRadius = (r1*0.5) + 'px';
             this.c[5].style.height = h1 + 'px';
             this.c[5].style.top = (this.h*0.5)-(h1*0.5) + 'px';
 
-            this.c[6] = this.dom( 'div', this.css.basic + 'border-radius:'+ra+'px; margin-left:'+(-ww*0.5)+'px; border:1px solid '+cc.border+'; background:'+cc.button+'; left:4px; top:2px; height:'+(this.h-4)+'px; width:'+ww+'px;' );
+            //this.c[6] = this.dom( 'div', this.css.basic + 'border-radius:'+ra+'px; margin-left:'+(-ww*0.5)+'px; border:1px solid '+cc.border+'; background:'+cc.button+'; left:4px; top:2px; height:'+(this.h-4)+'px; width:'+ww+'px;' );
+            this.c[6] = this.dom( 'div', this.css.basic + 'border-radius:'+ra+'px; margin-left:'+(-ww*0.5)+'px; background:'+cc.text+'; left:4px; top:3px; height:'+(this.h-6)+'px; width:'+ww+'px;' )
         }
 
         this.init();
@@ -203,23 +205,15 @@ export class Slide extends Proto {
                 s[2].color = cc.text;
                 s[4].background = cc.back;
                 s[5].background = cc.text;
+                if(this.model !== 0) s[6].background = cc.text//cc.button;
             break;
             case 1: // scroll over
                 //s[2].border = '1px dashed ' + this.colors.hide;
                 s[2].color = cc.textOver;
                 s[4].background = cc.back;
                 s[5].background = cc.textOver;
+                if(this.model !== 0) s[6].background = cc.textOver//cc.overoff;
             break;
-           /* case 2: 
-                s[2].border = '1px solid ' + this.colors.borderSelect;
-            break;
-            case 3: 
-                s[2].border = '1px dashed ' + this.colors.text;//this.colors.borderSelect;
-            break;
-            case 4: 
-                s[2].border = '1px dashed ' + this.colors.hide;
-            break;*/
-
 
         }
     }

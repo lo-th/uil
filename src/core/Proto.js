@@ -62,7 +62,7 @@ export class Proto {
         this.fw = o.fw || 0
 
         this.autoWidth = o.auto || true;// auto width or flex 
-        this.isOpen = false// open statu
+        this.isOpen = false;//false// open statu
 
         // radius for toolbox
         this.radius = o.radius || this.colors.radius;
@@ -140,6 +140,7 @@ export class Proto {
                 this.s[0].borderTop = (this.margin*0.5) + 'px solid transparent'
                 this.s[0].borderBottom = (this.margin*0.5) + 'px solid transparent'
             } else {
+                //this.s[0].borderTop = (this.margin*0.5) + 'px solid transparent'
                 this.s[0].borderBottom = this.margin + 'px solid transparent'
             }
             
@@ -147,7 +148,7 @@ export class Proto {
         
         // with title
         if( !this.simple ){ 
-            this.c[1] = Tools.dom( 'div', this.css.txt )
+            this.c[1] = Tools.dom( 'div', this.css.txt + this.css.middle )
             this.s[1] = this.c[1].style
             this.c[1].textContent = this.name
             this.s[1].color = this.lock ? this.colors.titleoff : this.colors.title
@@ -196,8 +197,10 @@ export class Proto {
         //if( this.autoHeight ) s[0].transition = 'height 0.01s ease-out';
         if( c[1] !== undefined && this.autoWidth ){
             s[1] = c[1].style;
-            s[1].height = (this.h-4) + 'px';
-            s[1].lineHeight = (this.h-8) + 'px';
+            s[1].top = 1 + 'px';
+            s[1].height = (this.h-2) + 'px';
+            //s[1].height = (this.h-4) + 'px';
+           // s[1].lineHeight = (this.h-8) + 'px';
         }
 
         let frag = Tools.frag;
@@ -498,8 +501,10 @@ export class Proto {
             this.sb = this.w - this.sa
         } else {
             let pp = this.w * ( this.p / 100 )
-            this.sa = Math.floor( pp + 10 )
-            this.sb = Math.floor( this.w - pp - 20 )
+            //this.sa = Math.floor( pp + 10 )
+            //this.sb = Math.floor( this.w - pp - 20 )
+            this.sa = Math.floor( pp + 8 )
+            this.sb = Math.floor( this.w - pp - 16 )
         }
 
     }

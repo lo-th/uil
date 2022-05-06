@@ -395,16 +395,19 @@ export class Numeric extends Proto {
 
     rSize () {
 
-        super.rSize();
-
-        let w = Math.floor( ( this.sb + 5 ) / this.lng )-5;
+        super.rSize()
+        let sx = this.colors.sx
+        let ss = sx * (this.lng-1)
+        let w = (this.sb-ss) / this.lng//(( this.sb + sx ) / this.lng )-sx
         let s = this.s;
         let i = this.lng;
+
         while(i--){
-            this.tmp[i] = [ Math.floor( this.sa + ( w * i )+( 5 * i )), w ];
-            this.tmp[i][2] = this.tmp[i][0] + this.tmp[i][1];
-            s[ 3 + i ].left = this.tmp[i][0] + 'px';
-            s[ 3 + i ].width = this.tmp[i][1] + 'px';
+            //this.tmp[i] = [ Math.floor( this.sa + ( w * i )+( 5 * i )), w ];
+            this.tmp[i] = [ ( this.sa + ( w * i )+( sx * i )), w ]
+            this.tmp[i][2] = this.tmp[i][0] + this.tmp[i][1]
+            s[ 3 + i ].left = this.tmp[i][0] + 'px'
+            s[ 3 + i ].width = this.tmp[i][1] + 'px'
         }
 
     }

@@ -724,8 +724,8 @@
 
 			if (o.fontSelect) color.textSelect = o.fontSelect;
 			if (o.groupBorder) color.gborder = o.groupBorder;
-			if (o.transparent) o.bg = 'none';
-			if (o.bg) color.background = color.backgroundOver = o.bg;
+			if (o.transparent) o.bg = 'none'; //if( o.bg ) color.background = color.backgroundOver = o.bg
+
 			if (o.bgOver) color.backgroundOver = o.bgOver;
 
 			for (let m in color) {
@@ -740,6 +740,8 @@
 			return color;
 		},
 		colors: {
+			sx: 3,
+			sy: 3,
 			content: 'none',
 			background: 'rgba(50,50,50,0.3)',
 			backgroundOver: 'rgba(50,50,50,0.4)',
@@ -757,26 +759,28 @@
 			border: '#4c4c4c',
 			borderSize: 1,
 			gborder: 'none',
+			groups: 'none',
 			button: '#3c3c3c',
 			overoff: '#5c5c5c',
 			over: '#024699',
 			select: '#308AFF',
 			action: '#FF3300',
 			//fontFamily: 'Tahoma',
-			fontFamily: 'Consolas, monaco, monospace',
+			fontFamily: 'Consolas, monospace',
 			//fontFamily: "'Roboto Mono', 'Source Code Pro', Menlo, Courier, monospace",
 			fontWeight: 'normal',
 			fontShadow: 'none',
 			//'#000',
 			fontSize: 12,
-			radius: 2,
+			radius: 3,
 			hide: 'rgba(0,0,0,0)'
 		},
 		// style css
 		css: {
 			//unselect: '-o-user-select:none; -ms-user-select:none; -khtml-user-select:none; -webkit-user-select:none; -moz-user-select:none;', 
 			basic: 'position:absolute; pointer-events:none; box-sizing:border-box; margin:0; padding:0; overflow:hidden; ' + '-o-user-select:none; -ms-user-select:none; -khtml-user-select:none; -webkit-user-select:none; -moz-user-select:none;',
-			button: 'display:flex; justify-content:center; align-items:center; text-align:center;'
+			button: 'display:flex; justify-content:center; align-items:center; text-align:center;',
+			middle: 'display:flex; align-items:center;'
 			/*txt: T.css.basic + 'font-family:'+ T.colors.fontFamily +'; font-size:'+T.colors.fontSize+'px; color:'+T.colors.text+'; padding:2px 10px; left:0; top:2px; height:16px; width:100px; overflow:hidden; white-space: nowrap;',
 			txtselect:	T.css.txt + 'display:flex; justify-content:left; align-items:center; text-align:left;' +'padding:2px 5px; border:1px dashed ' + T.colors.border + '; background:'+ T.colors.txtselectbg+';',
 			item: T.css.txt + 'position:relative; background:rgba(0,0,0,0.2); margin-bottom:1px;',*/
@@ -784,6 +788,8 @@
 		},
 		// svg path
 		svgs: {
+			g1: 'M 6 4 L 0 4 0 6 6 6 6 4 M 6 0 L 0 0 0 2 6 2 6 0 Z',
+			g2: 'M 6 0 L 4 0 4 6 6 6 6 0 M 2 0 L 0 0 0 6 2 6 2 0 Z',
 			group: 'M 7 7 L 7 8 8 8 8 7 7 7 M 5 7 L 5 8 6 8 6 7 5 7 M 3 7 L 3 8 4 8 4 7 3 7 M 7 5 L 7 6 8 6 8 5 7 5 M 6 6 L 6 5 5 5 5 6 6 6 M 7 3 L 7 4 8 4 8 3 7 3 M 6 4 L 6 3 5 3 5 4 6 4 M 3 5 L 3 6 4 6 4 5 3 5 M 3 3 L 3 4 4 4 4 3 3 3 Z',
 			arrow: 'M 3 8 L 8 5 3 2 3 8 Z',
 			arrowDown: 'M 5 8 L 8 3 2 3 5 8 Z',
@@ -839,7 +845,7 @@
 			} else size += 'px';
 
 			let align = 'display:flex; justify-content:left; align-items:center; text-align:left;';
-			T.css.txt = T.css.basic + align + ' font-family:' + font + '; font-weight:' + weight + '; font-size:' + size + '; color:' + cc.text + '; padding:0px 10px; left:0; top:2px; height:16px; width:100px; overflow:hidden; white-space: nowrap; letter-spacing: normal;';
+			T.css.txt = T.css.basic + align + ' font-family:' + font + '; font-weight:' + weight + '; font-size:' + size + '; color:' + cc.text + '; padding:0px 8px; left:0; top:2px; height:16px; width:100px; overflow:hidden; white-space: nowrap; letter-spacing: normal;';
 			if (shadow !== 'none') T.css.txt += ' text-shadow: 1px 1px 1px ' + shadow + ';';
 			T.css.txtselect = T.css.txt + 'padding:0px 4px; border:1px dashed ' + cc.border + ';'; //T.css.item = T.css.txt + ' position:relative; margin-bottom:1px; '//display:block; padding:4px 4px;';//
 
@@ -1598,6 +1604,40 @@
 					}];
 					break;
 
+				case 'wav':
+					t = [{
+						accept: {
+							'audio/wav': '.wav'
+						}
+					}];
+					break;
+
+				case 'mp3':
+					t = [{
+						accept: {
+							'audio/mpeg': '.mp3'
+						}
+					}];
+					break;
+
+				case 'mp4':
+					t = [{
+						accept: {
+							'video/mp4': '.mp4'
+						}
+					}];
+					break;
+
+				case 'bin':
+				case 'hex':
+					t = [{
+						description: 'Binary Files',
+						accept: {
+							'application/octet-stream': ['.bin', '.hex']
+						}
+					}];
+					break;
+
 				case 'text':
 					t = [{
 						description: 'Text Files',
@@ -1612,7 +1652,17 @@
 					t = [{
 						description: 'JSON Files',
 						accept: {
-							'text/plain': ['.json']
+							'application/json': ['.json']
+						}
+					}]; //text/plain
+
+					break;
+
+				case 'js':
+					t = [{
+						description: 'JavaScript Files',
+						accept: {
+							'text/javascript': ['.js']
 						}
 					}];
 					break;
@@ -1919,7 +1969,7 @@
 			this.fw = o.fw || 0;
 			this.autoWidth = o.auto || true; // auto width or flex 
 
-			this.isOpen = false; // open statu
+			this.isOpen = false; //false// open statu
 			// radius for toolbox
 
 			this.radius = o.radius || this.colors.radius;
@@ -1978,13 +2028,14 @@
 					this.s[0].borderTop = this.margin * 0.5 + 'px solid transparent';
 					this.s[0].borderBottom = this.margin * 0.5 + 'px solid transparent';
 				} else {
+					//this.s[0].borderTop = (this.margin*0.5) + 'px solid transparent'
 					this.s[0].borderBottom = this.margin + 'px solid transparent';
 				}
 			} // with title
 
 
 			if (!this.simple) {
-				this.c[1] = Tools.dom('div', this.css.txt);
+				this.c[1] = Tools.dom('div', this.css.txt + this.css.middle);
 				this.s[1] = this.c[1].style;
 				this.c[1].textContent = this.name;
 				this.s[1].color = this.lock ? this.colors.titleoff : this.colors.title;
@@ -2027,8 +2078,9 @@
 
 			if (c[1] !== undefined && this.autoWidth) {
 				s[1] = c[1].style;
-				s[1].height = this.h - 4 + 'px';
-				s[1].lineHeight = this.h - 8 + 'px';
+				s[1].top = 1 + 'px';
+				s[1].height = this.h - 2 + 'px'; //s[1].height = (this.h-4) + 'px';
+				// s[1].lineHeight = (this.h-8) + 'px';
 			}
 
 			let frag = Tools.frag;
@@ -2235,9 +2287,11 @@
 			if (this.simple) {
 				this.sb = this.w - this.sa;
 			} else {
-				let pp = this.w * (this.p / 100);
-				this.sa = Math.floor(pp + 10);
-				this.sb = Math.floor(this.w - pp - 20);
+				let pp = this.w * (this.p / 100); //this.sa = Math.floor( pp + 10 )
+				//this.sb = Math.floor( this.w - pp - 20 )
+
+				this.sa = Math.floor(pp + 8);
+				this.sb = Math.floor(this.w - pp - 16);
 			}
 		}
 
@@ -2545,6 +2599,7 @@
 			this.value = o.value || '';
 			this.values = o.value || this.txt;
 			if (o.values) this.values = o.values;
+			if (!o.values && !o.value) this.txt = '';
 			this.onName = o.onName || null;
 			this.on = false; // force button width
 
@@ -2577,7 +2632,7 @@
 				}
 			}
 
-			if (!this.txt) this.p = 0;
+			if (this.txt === '') this.p = 0;
 			this.init();
 		}
 
@@ -2723,16 +2778,20 @@
 			let w = this.sb;
 			let d = this.sa;
 			let i = this.lng;
-			let dc = this.space;
-			let size = Math.floor((w - dc * (i - 1)) / i);
+			let sx = this.colors.sx; //this.space;
+			//let size = Math.floor( ( w-(dc*(i-1)) ) / i );
+
+			let size = (w - sx * (i - 1)) / i;
 
 			if (this.bw) {
-				size = this.bw < size ? this.bw : size;
-				d = Math.floor((this.w - (size * i + dc * (i - 1))) * 0.5);
+				size = this.bw < size ? this.bw : size; //d = Math.floor((this.w-( (size * i) + (dc * (i-1)) ))*0.5)
+
+				d = (this.w - (size * i + sx * (i - 1))) * 0.5;
 			}
 
 			while (i--) {
-				this.tmp[i] = [Math.floor(d + size * i + dc * i), size];
+				//this.tmp[i] = [ Math.floor( d + ( size * i ) + ( dc * i )), size ];
+				this.tmp[i] = [d + size * i + sx * i, size];
 				this.tmp[i][2] = this.tmp[i][0] + this.tmp[i][1];
 				s[i + 2].left = this.tmp[i][0] + 'px';
 				s[i + 2].width = this.tmp[i][1] + 'px';
@@ -3252,11 +3311,13 @@
 				this.txt = o.name || 'Fps';
 			}
 
-			let fltop = Math.floor(this.h * 0.5) - 6;
-			this.c[1].textContent = this.txt;
+			let fltop = Math.floor(this.h * 0.5) - 3;
+			const ccc = this.colors;
+			this.c[1].textContent = this.txt; //this.c[1].innerHTML = '&#160;' + this.txt
+
 			this.c[0].style.cursor = 'pointer';
 			this.c[0].style.pointerEvents = 'auto';
-			let panelCss = 'display:none; left:10px; top:' + this.h + 'px; height:' + (this.hplus - 8) + 'px; box-sizing:border-box; background: rgba(0, 0, 0, 0.2); border:1px solid ' + this.colors.border + ';';
+			let panelCss = 'display:none; left:10px; top:' + this.h + 'px; height:' + (this.hplus - 8) + 'px; box-sizing:border-box; background: rgba(0, 0, 0, 0.2); border:1px solid ' + ccc.border + ';';
 			if (this.radius !== 0) panelCss += 'border-radius:' + this.radius + 'px;';
 			this.c[2] = this.dom('path', this.css.basic + panelCss, {});
 			this.c[2].setAttribute('viewBox', '0 0 ' + this.res + ' 50');
@@ -3266,23 +3327,25 @@
 			//this.dom( 'path', null, { fill:'rgba(0,255,255,0.3)', 'stroke-width':1, stroke:'#0FF', 'vector-effect':'non-scaling-stroke' }, this.c[2] );
 			// arrow
 
-			this.c[3] = this.dom('path', this.css.basic + 'position:absolute; width:10px; height:10px; left:4px; top:' + fltop + 'px;', {
-				d: this.svgs.arrow,
-				fill: this.colors.text,
+			this.c[3] = this.dom('path', this.css.basic + 'position:absolute; width:6px; height:6px; left:0; top:' + fltop + 'px;', {
+				d: this.svgs.g1,
+				fill: ccc.text,
 				stroke: 'none'
-			}); // result test
+			}); //this.c[3] = this.dom( 'path', this.css.basic + 'position:absolute; width:10px; height:10px; left:4px; top:'+fltop+'px;', { d:this.svgs.arrow, fill:this.colors.text, stroke:'none'});
+			// result test
 
 			this.c[4] = this.dom('div', this.css.txt + 'position:absolute; left:10px; top:' + (this.h + 2) + 'px; display:none; width:100%; text-align:center;'); // bottom line
 
 			if (o.bottomLine) this.c[4] = this.dom('div', this.css.basic + 'width:100%; bottom:0px; height:1px; background: rgba(255, 255, 255, 0.2);');
 			this.isShow = false;
-			let s = this.s;
-			s[1].marginLeft = '10px';
+			let s = this.s; //s[1].marginLeft = '10px';
+
 			s[1].lineHeight = this.h - 4;
-			s[1].color = this.colors.text; //s[1].fontWeight = 'bold';
+			s[1].color = ccc.text; //s[1].paddingLeft = '18px';
+			//s[1].fontWeight = 'bold';
 
 			if (this.radius !== 0) s[0].borderRadius = this.radius + 'px';
-			if (this.colors.gborder !== 'none') s[0].border = '1px solid ' + this.colors.gborder;
+			if (this.colors.gborder !== 'none') s[0].border = '1px solid ' + ccc.gborder;
 			let j = 0;
 
 			for (j = 0; j < this.names.length; j++) {
@@ -3386,7 +3449,7 @@
 		open() {
 			super.open();
 			this.h = this.hplus + this.baseH;
-			this.setSvg(this.c[3], 'd', this.svgs.arrowDown);
+			this.setSvg(this.c[3], 'd', this.svgs.g2);
 
 			if (this.group !== null) {
 				this.group.calc(this.hplus);
@@ -3402,7 +3465,7 @@
 		close() {
 			super.close();
 			this.h = this.baseH;
-			this.setSvg(this.c[3], 'd', this.svgs.arrow);
+			this.setSvg(this.c[3], 'd', this.svgs.g1);
 
 			if (this.group !== null) {
 				this.group.calc(-this.hplus);
@@ -3452,6 +3515,7 @@
 		rSize() {
 			let s = this.s;
 			let w = this.w;
+			s[3].left = this.sa + this.sb - 6 + 'px';
 			s[0].width = w + 'px';
 			s[1].width = w + 'px';
 			s[2].left = 10 + 'px';
@@ -3747,45 +3811,65 @@
 			this.current = -1;
 			this.proto = null;
 			this.isEmpty = true;
-			this.decal = 0;
+			this.decal = o.group ? 8 : 0;
 			this.baseH = this.h;
-			let fltop = Math.floor(this.h * 0.5) - 6;
+			let fltop = Math.floor(this.h * 0.5) - 3;
+			const cc = this.colors;
 			this.isLine = o.line !== undefined ? o.line : false;
-			this.decal = 0;
-
-			if (o.group) {
-				this.decal = o.group.decal ? o.group.decal : 0;
-				this.decal += 6;
-			}
-
 			this.useFlex = true;
 			let flexible = this.useFlex ? 'display:flex; flex-flow: row wrap;' : '';
-			this.c[2] = this.dom('div', this.css.basic + flexible + 'width:100%; left:0; height:auto; overflow:hidden; top:' + this.h + 'px'); // 
-
-			this.c[3] = this.dom('path', this.css.basic + 'position:absolute; width:10px; height:10px; left:0; top:' + fltop + 'px;', {
-				d: this.svgs.group,
-				fill: this.colors.text,
+			this.c[2] = this.dom('div', this.css.basic + flexible + 'width:100%; left:0; height:auto; overflow:hidden; top:' + (this.h - 1) + 'px');
+			this.c[3] = this.dom('path', this.css.basic + 'position:absolute; width:6px; height:6px; left:0; top:' + fltop + 'px;', {
+				d: this.svgs.g1,
+				fill: cc.text,
 				stroke: 'none'
-			});
-			this.c[4] = this.dom('path', this.css.basic + 'position:absolute; width:10px; height:10px; left:' + (4 + this.decal) + 'px; top:' + fltop + 'px;', {
-				d: this.svgs.arrow,
-				fill: this.colors.text,
-				stroke: 'none'
-			}); // bottom line
+			}); //this.c[3] = this.dom( 'path', this.css.basic + 'position:absolute; width:10px; height:10px; left:0; top:'+fltop+'px;', { d:this.svgs.group, fill:cc.text, stroke:'none'})
+			//this.c[3] = this.dom( 'path', this.css.basic + 'position:absolute; width:10px; height:10px; left:0; top:'+fltop+'px;', { d:this.svgs.group, fill:cc.text, stroke:'none'})
+			//this.c[4] = this.dom( 'path', this.css.basic + 'position:absolute; width:10px; height:10px; left:'+(this.decal-1)+'px; top:'+fltop+'px;', { d:this.svgs.arrow, fill:cc.text, stroke:'none'})
+			// bottom line
 
-			if (this.isLine) this.c[5] = this.dom('div', this.css.basic + 'background:rgba(255, 255, 255, 0.2); width:100%; left:0; height:1px; bottom:0px');
+			if (this.isLine) this.c[5] = this.dom('div', this.css.basic + 'background:rgba(255, 255, 255, 0.2); width:100%; left:0; height:1px; bottom:0px'); //else this.c[5] = this.dom( 'div', this.css.basic + 'width:100%; left:0; height:auto; top:'+(this.h-1)+'px')
+
 			let s = this.s;
 			s[0].height = this.h + 'px';
-			s[1].height = this.h + 'px';
 			this.c[1].name = 'group';
-			s[1].marginLeft = 10 + this.decal + 'px';
-			s[1].lineHeight = this.h - 4;
-			s[1].color = this.colors.text; //s[1].fontWeight = 'bold';
 
-			if (this.radius !== 0) s[0].borderRadius = this.radius + 'px';
+			if (cc.groups !== 'none') {
+				s[1].background = cc.groups;
+				s[1].border = cc.borderSize + 'px solid ' + cc.border;
+				s[1].borderRadius = this.radius + 'px'; //s[5].border = '2px solid ' + '#000' 
+				//s[1].marginRight = 10+'px';
+			} //this.c[1].innerHTML = this.dd + this.name
+			//s[1].padding = '0px ' + (10+this.decal)+'px';
+
+
+			s[1].lineHeight = this.h - 4;
+			s[1].color = cc.text; //s[1].fontWeight = 'bold';
+
 			this.init();
+
+			if (this.radius !== 0) {
+				//s[0].borderRadius = this.radius+'px'
+				s[1].borderRadius = this.radius + 'px';
+				s[2].borderRadius = this.radius + 'px';
+			} //s[1].paddingLeft = (10+this.decal)+'px'
+
+
 			this.setBG(o.bg);
-			if (o.open !== undefined) this.open();
+			if (o.open) this.open();
+		}
+
+		setBG(bg) {
+			this.colors;
+			const s = this.s; //if( bg !== undefined ) this.colors.background = bg
+			//this.c[0].style.background = this.colors.background;
+
+			s[1].background = bg; //this.colors.background
+
+			s[2].background = bg; //s[5].border = '1px solid ' + '#000' 
+			// s[5].background =	'#000'
+
+			this.uis.length;
 		}
 
 		testZone(e) {
@@ -3865,16 +3949,6 @@
 		} // ----------------------
 
 
-		setBG(bg) {
-			if (bg !== undefined) this.colors.background = bg;
-			this.c[0].style.background = this.colors.background;
-			let i = this.uis.length;
-
-			while (i--) {
-				this.uis[i].setBG(this.colors.background);
-			}
-		}
-
 		add() {
 			let a = arguments;
 
@@ -3951,18 +4025,33 @@
 
 		open() {
 			super.open();
-			this.setSvg(this.c[4], 'd', this.svgs.arrowDown);
+			this.setSvg(this.c[3], 'd', this.svgs.g2); //this.setSvg( this.c[4], 'd', this.svgs.arrowDown )
+
 			this.rSizeContent();
 			this.h - this.baseH;
+			const s = this.s;
+
+			if (this.radius) {
+				s[1].borderRadius = '0px';
+				s[2].borderRadius = '0px';
+				s[1].borderTopLeftRadius = this.radius + 'px';
+				s[1].borderTopRightRadius = this.radius + 'px';
+				s[2].borderBottomLeftRadius = this.radius + 'px';
+				s[2].borderBottomRightRadius = this.radius + 'px';
+			}
+
 			this.parentHeight();
 		}
 
 		close() {
 			super.close();
 			this.h - this.baseH;
-			this.setSvg(this.c[4], 'd', this.svgs.arrow);
+			this.setSvg(this.c[3], 'd', this.svgs.g1); //this.setSvg( this.c[4], 'd', this.svgs.arrow )
+
 			this.h = this.baseH;
-			this.s[0].height = this.h + 'px';
+			const s = this.s;
+			s[0].height = this.h + 'px';
+			if (this.radius) s[1].borderRadius = this.radius + 'px';
 			this.parentHeight();
 		}
 
@@ -3993,9 +4082,15 @@
 		rSize() {
 			super.rSize();
 			let s = this.s;
-			s[3].left = this.sa + this.sb - 17 + 'px';
+			this.w = this.w - this.decal;
+			s[3].left = this.sa + this.sb - 6 + 'px'; //s[1].width = this.isbgGroup ? (this.w-5) + 'px' : this.w + 'px'
+
 			s[1].width = this.w + 'px';
-			s[2].width = this.w + 'px';
+			s[2].width = this.w + 'px'; //s[1].width = (this.w - this.decal) + 'px'
+			//s[2].width = (this.w - this.decal) + 'px'
+
+			s[1].left = this.decal + 'px';
+			s[2].left = this.decal + 'px';
 			if (this.isOpen) this.rSizeContent();
 		}
 
@@ -4428,12 +4523,12 @@
 			if (o.select !== undefined) o.selectable = o.select;
 			if (o.selectable !== undefined) this.isSelectable = o.selectable;
 			if (this.txt === '') this.p = 0;
-			let fltop = Math.floor(this.h * 0.5) - 5;
+			let fltop = Math.floor(this.h * 0.5) - 3;
 			let cc = this.colors;
 			this.c[2] = this.dom('div', this.css.basic + 'top:0; display:none; border-radius:' + this.radius + 'px;');
 			this.c[3] = this.dom('div', this.css.item + 'position:absolute; text-align:' + align + '; line-height:' + (this.h - 4) + 'px; top:1px; background:' + cc.button + '; height:' + (this.h - 2) + 'px; border:1px solid ' + cc.border + '; border-radius:' + this.radius + 'px;');
-			this.c[4] = this.dom('path', this.css.basic + 'position:absolute; width:10px; height:10px; top:' + fltop + 'px;', {
-				d: this.svgs.arrow,
+			this.c[4] = this.dom('path', this.css.basic + 'position:absolute; width:6px; height:6px; top:' + fltop + 'px;', {
+				d: this.svgs.g1,
 				fill: cc.text,
 				stroke: 'none'
 			});
@@ -4512,12 +4607,10 @@
 			this.dragstart = o.dragstart || null;
 			this.dragend = o.dragend || null; //this.c[0].style.background = '#FF0000'
 
-			if (this.isWithImage) this.preloadImage(); // } else {
-			// populate list
-
+			if (this.isWithImage) this.preloadImage();
 			this.setList(this.list);
 			this.init();
-			if (this.isOpenOnStart) this.open(true); // }
+			if (this.isOpenOnStart) this.open(true);
 		}
 		/*send ( v ) {
 					super.send( v );
@@ -4982,9 +5075,9 @@
 
 			if (this.up) {
 				this.zone.y -= this.h - (this.baseH - 10);
-				this.setSvg(this.c[4], 'd', this.svgs.arrowUp);
+				this.setSvg(this.c[4], 'd', this.svgs.g1);
 			} else {
-				this.setSvg(this.c[4], 'd', this.svgs.arrowDown);
+				this.setSvg(this.c[4], 'd', this.svgs.g2);
 			}
 
 			this.rSizeContent();
@@ -5000,7 +5093,7 @@
 			this.h = this.baseH;
 			this.s[0].height = this.h + 'px';
 			this.s[2].display = 'none';
-			this.setSvg(this.c[4], 'd', this.svgs.arrow);
+			this.setSvg(this.c[4], 'd', this.svgs.g1);
 			this.zone.h = this.h;
 			this.parentHeight(-t);
 		} // -----
@@ -5027,7 +5120,7 @@
 			s[2].left = d + 'px';
 			s[3].width = w + 'px';
 			s[3].left = d + 'px';
-			s[4].left = d + w - 17 + 'px';
+			s[4].left = d + w - 15 + 'px';
 			this.ww = w;
 			if (this.max > this.maxHeight) this.ww = w - this.ss;
 			if (this.isOpen) this.rSizeContent();
@@ -5339,12 +5432,16 @@
 
 		rSize() {
 			super.rSize();
-			let w = Math.floor((this.sb + 5) / this.lng) - 5;
+			let sx = this.colors.sx;
+			let ss = sx * (this.lng - 1);
+			let w = (this.sb - ss) / this.lng; //(( this.sb + sx ) / this.lng )-sx
+
 			let s = this.s;
 			let i = this.lng;
 
 			while (i--) {
-				this.tmp[i] = [Math.floor(this.sa + w * i + 5 * i), w];
+				//this.tmp[i] = [ Math.floor( this.sa + ( w * i )+( 5 * i )), w ];
+				this.tmp[i] = [this.sa + w * i + sx * i, w];
 				this.tmp[i][2] = this.tmp[i][0] + this.tmp[i][1];
 				s[3 + i].left = this.tmp[i][0] + 'px';
 				s[3 + i].width = this.tmp[i][1] + 'px';
@@ -5381,27 +5478,29 @@
 			this.c[2].style.lineHeight = this.h - 10 + 'px';
 
 			if (this.model !== 0) {
-				let h1 = 4,
+				let r1 = 4,
+						h1 = 4,
 						h2 = 8,
-						ww = this.h - 4,
-						ra = 20;
+						ww = this.h - 6,
+						ra = 16;
 
 				if (this.model === 2) {
-					h1 = 4; //2
-
-					h2 = 8;
+					r1 = 0;
+					h1 = 2;
+					h2 = 4;
 					ra = 2;
-					ww = (this.h - 4) * 0.5;
+					ww = (this.h - 6) * 0.5;
 				}
 
 				if (this.model === 3) this.c[5].style.visible = 'none';
-				this.c[4].style.borderRadius = h1 + 'px';
+				this.c[4].style.borderRadius = r1 + 'px';
 				this.c[4].style.height = h2 + 'px';
 				this.c[4].style.top = this.h * 0.5 - h1 + 'px';
-				this.c[5].style.borderRadius = h1 * 0.5 + 'px';
+				this.c[5].style.borderRadius = r1 * 0.5 + 'px';
 				this.c[5].style.height = h1 + 'px';
-				this.c[5].style.top = this.h * 0.5 - h1 * 0.5 + 'px';
-				this.c[6] = this.dom('div', this.css.basic + 'border-radius:' + ra + 'px; margin-left:' + -ww * 0.5 + 'px; border:1px solid ' + cc.border + '; background:' + cc.button + '; left:4px; top:2px; height:' + (this.h - 4) + 'px; width:' + ww + 'px;');
+				this.c[5].style.top = this.h * 0.5 - h1 * 0.5 + 'px'; //this.c[6] = this.dom( 'div', this.css.basic + 'border-radius:'+ra+'px; margin-left:'+(-ww*0.5)+'px; border:1px solid '+cc.border+'; background:'+cc.button+'; left:4px; top:2px; height:'+(this.h-4)+'px; width:'+ww+'px;' );
+
+				this.c[6] = this.dom('div', this.css.basic + 'border-radius:' + ra + 'px; margin-left:' + -ww * 0.5 + 'px; background:' + cc.text + '; left:4px; top:3px; height:' + (this.h - 6) + 'px; width:' + ww + 'px;');
 			}
 
 			this.init();
@@ -5514,6 +5613,8 @@
 					s[2].color = cc.text;
 					s[4].background = cc.back;
 					s[5].background = cc.text;
+					if (this.model !== 0) s[6].background = cc.text; //cc.button;
+
 					break;
 
 				case 1:
@@ -5522,17 +5623,9 @@
 					s[2].color = cc.textOver;
 					s[4].background = cc.back;
 					s[5].background = cc.textOver;
-					break;
+					if (this.model !== 0) s[6].background = cc.textOver; //cc.overoff;
 
-				/* case 2: 
-						 s[2].border = '1px solid ' + this.colors.borderSelect;
-				 break;
-				 case 3: 
-						 s[2].border = '1px dashed ' + this.colors.text;//this.colors.borderSelect;
-				 break;
-				 case 4: 
-						 s[2].border = '1px dashed ' + this.colors.hide;
-				 break;*/
+					break;
 			}
 		}
 
@@ -7330,7 +7423,7 @@
 
 	}
 
-	const REVISION = '4.2.1';
+	const REVISION = '4.2.2';
 
 	exports.Files = Files;
 	exports.Gui = Gui;

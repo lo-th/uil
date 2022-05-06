@@ -11,6 +11,8 @@ export class Button extends Proto {
         this.values = o.value || this.txt
         if( o.values ) this.values = o.values
 
+            if( !o.values && !o.value ) this.txt = ''
+
         
 
         this.onName = o.onName || null;
@@ -53,7 +55,7 @@ export class Button extends Proto {
                 //this.txt = ''
             }
         } 
-        if( !this.txt ) this.p = 0 
+        if( this.txt==='' ) this.p = 0 
 
         this.init();
 
@@ -218,21 +220,24 @@ export class Button extends Proto {
         let d = this.sa;
 
         let i = this.lng;
-        let dc = this.space;
-        let size = Math.floor( ( w-(dc*(i-1)) ) / i );
+        let sx = this.colors.sx //this.space;
+        //let size = Math.floor( ( w-(dc*(i-1)) ) / i );
+        let size = ( ( w-(sx*(i-1)) ) / i )
 
         if( this.bw ){ 
             size = this.bw < size ? this.bw : size
-            d = Math.floor((this.w-( (size * i) + (dc * (i-1)) ))*0.5)
+            //d = Math.floor((this.w-( (size * i) + (dc * (i-1)) ))*0.5)
+            d = ((this.w-( (size * i) + (sx * (i-1)) ))*0.5)
         }
 
         while( i-- ){
 
-        	this.tmp[i] = [ Math.floor( d + ( size * i ) + ( dc * i )), size ];
+        	//this.tmp[i] = [ Math.floor( d + ( size * i ) + ( dc * i )), size ];
+            this.tmp[i] = [ ( d + ( size * i ) + ( sx * i )), size ];
         	this.tmp[i][2] = this.tmp[i][0] + this.tmp[i][1];
 
-            s[i+2].left = this.tmp[i][0] + 'px';
-            s[i+2].width = this.tmp[i][1] + 'px';
+            s[i+2].left = this.tmp[i][0] + 'px'
+            s[i+2].width = this.tmp[i][1] + 'px'
 
         }
 
