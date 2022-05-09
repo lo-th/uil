@@ -6,15 +6,16 @@
 <link rel="shortcut icon" href="./assets/favicon.ico">
 <link rel="stylesheet" type="text/css" href="./assets/style.css">>
 
-<script type="text/javascript" src="../build/uil.js"></script>
 
 </head>
 
 <body>
 <div id='logo'></div>
 <div id='version'></div>
-<div id='debug'></div>
-<script>
+<div id='debug3'></div>
+<script type="module">
+
+    import {UIL} from '../src/UIL_dev.js';
 
 document.getElementById('logo').innerHTML = UIL.Tools.icon('logo', '#FFF', 64);
 document.getElementById('version').innerHTML = 'Uil '+ UIL.REVISION;
@@ -28,14 +29,43 @@ var display = false;
 
 var list = ["alley", "arches", "bridge", "castle", "cave", "church", "colors", "downtown", "factory", "gallery", "green", "lake", "loft", "milkyway", "mit", "night", "outside", "parking", "photo", "pisa", "place", "red", "river", "rock", "room", "snow", "street", "studio", "sunset", "tatami", "tokyo", "tonight", "tunnel", "veranda", "yellow"];
 
-var debug = document.getElementById('debug');
+var debug = document.getElementById('debug3');
 var callback = function( v ){  debug.innerHTML = v; }
 
 // in GUI element
-var ui = new UIL.Gui( { w:300 } ).onChange( callback );
+const ui = new UIL.Gui( { w:250 } ).onChange( callback );
 ui.add('title',  { name:'Test image list', titleColor:'#D4B87B'});
-ui.add('list',   { name:'image_list',  list:list, h:64, path:'assets/mini/', format:'.jpg', imageSize: [128,64] });
+ui.add('list',   { name:'image_list',  list:list, h:64, path:'assets/mini/', format:'.jpg', imageSize: [128,64], m:0 });
 
+const ui2 = new UIL.Gui( { w:80, css:'top:0; left:10px;' } ).onChange( callback );
+ui2.add('title',  { name:'Test icon list', titleColor:'#D4B87B'});
+
+let addList = ui2.add('list',{ list:['bang', 'flag', 'switch', 'module', 'color', 'curve', 'lfo', 'audio', 'video'], staticTop:true, miniCanvas:true, simple:true, full:true, h:20, align:'center', itemBg:'#333' }).onChange( callback );
+
+addMiniTrackImg( addList )
+
+function addMiniTrackImg( addList ) {
+
+    addList.text('ADD')
+
+    let img = document.createElement('img')
+    img.src = `data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAALQAAAAUCAYAAAAk0RfcAAAAGXRFWHRTb2Z0d2Fy
+    ZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAl1JREFUeNrsWkFWwjAQbUJ34AHwALhwiXuee7YegXIALlAOoHtk6dKlHED3cAAvoM+13ZI4rQmmpS1JU1/TMv
+    Pe0GRe81+S+ZlMUjwPBaVDQmQhDENuAwTtSaaOeIjXDJ4tWBYD8RCvKTyKmxRKl8SXhbvNZmyFtN2mqoiHeE3g+YXJNWPJG5zSGx27UeIuMKrgHNpSuip
+    9kbG5Dr7al1LMCnh9oQOh/cwzlqeK88gZG0LSeKkchla2fqn1cKbwBPo2g3xgbXCwm2XnPc9HeZjUlYE7IdnJc1jAcYHH+Z
+    +ajTPw9vsVY2xUarPwqbqwYuKlSGpA5hhHVdVHeZjUpdWMpNYNz3wCvyOPkIXX681jPThcL7IH0Padcr4ostVFZhs/5OFkSe0ko
+    V3ZJrVSGTcIfQVR7w36GpkzjsS56gfoI5RHhTYDAqta5EuTKJ1HZol/itQ+krllZLYdIuehGGsEBLmI77oI53EuvkvZKpyVXPClj
+    2Q+HzKX+sLzPp3unyZX8B66bcLYALbuaRJRKxJDkgNI/J09BEobPF+het+2s5CPDHFbDls/5LdA5CEUxyI92FljA2l7v3gTwH9Qb
+    VAfMyA0MYycRXm00dUd7JZl+XgyJwU7KkbolqUFoEtw9LKWYA+LBPACznkkF4i0QfGFUGqchiT3znVEakFqEzJjhG4Dif/xnCEIe3vKZktqk
+    +icug3JI/WJDyu+6UTWMcE2GNptKV03jRcJ/TrzhWjylfDofc15PyL083RqlZNdh2GqjniI1wQe5tAo3TpEywL
+    +oRzxuoSHgtIJ+RFgALOc3s25JFD0AAAAAElFTkSuQmCC`
+    img.onload = function(){ 
+        for(let i = 0; i<addList.list.length; i++ ){
+            addList.drawImage( addList.list[i], img, i*20, 0, 20, 20 )
+        }
+    }.bind(this)
+
+}
 
 </script>
 </body>

@@ -23,66 +23,20 @@ export class Group extends Proto {
 
         this.baseH = this.h
 
-        let fltop = Math.floor(this.h*0.5)-3;
+        let fltop = Math.floor(this.h*0.5)-3
 
-        const cc = this.colors;
-
-        this.isLine = o.line !== undefined ? o.line : false;
-
-        
+        const cc = this.colors
 
         this.useFlex = true 
         let flexible = this.useFlex ? 'display:flex; flex-flow: row wrap;' : ''
 
-        this.c[2] = this.dom( 'div', this.css.basic + flexible + 'width:100%; left:0; height:auto; overflow:hidden; top:'+(this.h-1)+'px')
+        this.c[2] = this.dom( 'div', this.css.basic + flexible + 'width:100%; left:0; height:auto; overflow:hidden; top:'+(this.h)+'px')
         this.c[3] = this.dom( 'path', this.css.basic + 'position:absolute; width:6px; height:6px; left:0; top:'+fltop+'px;', { d:this.svgs.g1, fill:cc.text, stroke:'none'})
-        //this.c[3] = this.dom( 'path', this.css.basic + 'position:absolute; width:10px; height:10px; left:0; top:'+fltop+'px;', { d:this.svgs.group, fill:cc.text, stroke:'none'})
-        //this.c[3] = this.dom( 'path', this.css.basic + 'position:absolute; width:10px; height:10px; left:0; top:'+fltop+'px;', { d:this.svgs.group, fill:cc.text, stroke:'none'})
-        //this.c[4] = this.dom( 'path', this.css.basic + 'position:absolute; width:10px; height:10px; left:'+(this.decal-1)+'px; top:'+fltop+'px;', { d:this.svgs.arrow, fill:cc.text, stroke:'none'})
-
-
-
-        // bottom line
-        if( this.isLine ) this.c[5] = this.dom( 'div', this.css.basic +  'background:rgba(255, 255, 255, 0.2); width:100%; left:0; height:1px; bottom:0px');
-        //else this.c[5] = this.dom( 'div', this.css.basic + 'width:100%; left:0; height:auto; top:'+(this.h-1)+'px')
 
         let s = this.s;
-        s[0].height = this.h + 'px'
         this.c[1].name = 'group'
 
-        if( cc.groups !== 'none' ){
-            
-            s[1].background = cc.groups
-            s[1].border = cc.borderSize+'px solid '+ cc.border
-            s[1].borderRadius = this.radius+'px'
-
-            //s[5].border = '2px solid ' + '#000' 
-            //s[1].marginRight = 10+'px';
-        }
-
-        //this.c[1].innerHTML = this.dd + this.name
-
-        //s[1].padding = '0px ' + (10+this.decal)+'px';
-
-        s[1].lineHeight = this.h-4;
-        s[1].color = cc.text;
-        //s[1].fontWeight = 'bold';
-
-
-
-
-
         this.init();
-
-        if( this.radius !== 0 ){ 
-            //s[0].borderRadius = this.radius+'px'
-
-            s[1].borderRadius = this.radius+'px'
-            s[2].borderRadius = this.radius+'px'
-        }
-
-
-        //s[1].paddingLeft = (10+this.decal)+'px'
 
         this.setBG( o.bg )
 
@@ -92,25 +46,33 @@ export class Group extends Proto {
 
     setBG ( bg ) {
 
-        const cc = this.colors;
+        const cc = this.colors
+        const s = this.s
 
-        const s = this.s;
+        if( bg !== undefined ) cc.groups = bg
+        if(cc.groups === 'none') cc.groups = cc.background
+            cc.background = 'none'
 
-        //if( bg !== undefined ) this.colors.background = bg
+        s[0].background = 'none';
+        s[1].background = cc.groups
+        s[2].background = cc.groups
 
-        //this.c[0].style.background = this.colors.background;
-        s[1].background = bg//this.colors.background
-        s[2].background = bg
-
-        //s[5].border = '1px solid ' + '#000' 
-        // s[5].background =  '#000'
-
-
-
-        let i = this.uis.length;
-        while(i--){
-            //this.uis[i].setBG( this.colors.background );
+        if( cc.gborder !== 'none' ){
+            s[1].border = cc.borderSize+'px solid '+ cc.gborder
         }
+
+        if( this.radius !== 0 ){
+
+            s[1].borderRadius = this.radius+'px'
+            s[2].borderRadius = this.radius+'px'
+
+        }
+
+        /*let i = this.uis.length;
+        while(i--){
+            this.uis[i].setBG( 'none' );
+            //this.uis[i].setBG( this.colors.background );
+        }*/
 
     }
 
@@ -315,13 +277,14 @@ export class Group extends Proto {
         super.open()
 
         this.setSvg( this.c[3], 'd', this.svgs.g2 )
-
-        //this.setSvg( this.c[4], 'd', this.svgs.arrowDown )
         this.rSizeContent()
 
         let t = this.h - this.baseH
 
         const s = this.s
+        const cc = this.colors
+
+        s[2].top = (this.h-1) + 'px'
 
         if(this.radius){
 
@@ -333,10 +296,15 @@ export class Group extends Proto {
             s[2].borderBottomLeftRadius = this.radius+'px'
             s[2].borderBottomRightRadius = this.radius+'px'
         }
+
+        if( cc.gborder !== 'none' ){
+
+            s[2].border = cc.borderSize+'px solid '+ cc.gborder
+            s[2].borderTop = 'none';
+            s[1].borderBottom = cc.borderSize+'px solid rgba(0,0,0,0)'
+
+        }
         
-
-
-
         this.parentHeight()
 
     }
@@ -349,11 +317,21 @@ export class Group extends Proto {
 
         this.setSvg( this.c[3], 'd', this.svgs.g1 )
 
-        //this.setSvg( this.c[4], 'd', this.svgs.arrow )
         this.h = this.baseH
 
         const s = this.s
+        const cc = this.colors
+        
         s[0].height = this.h + 'px'
+        //s[1].height = (this.h-2) + 'px'
+        s[2].top = this.h + 'px'
+
+        if( cc.gborder !== 'none' ){
+
+            s[2].border = 'none'
+            s[1].border = cc.borderSize+'px solid '+ cc.gborder
+        }
+
         if(this.radius) s[1].borderRadius = this.radius+'px'
 
         this.parentHeight()
@@ -408,13 +386,8 @@ export class Group extends Proto {
 
         s[1].width = this.w + 'px'
         s[2].width = this.w + 'px'
-        //s[1].width = (this.w - this.decal) + 'px'
-        //s[2].width = (this.w - this.decal) + 'px'
-
         s[1].left = (this.decal) + 'px'
         s[2].left = (this.decal) + 'px'
-
-
 
         if( this.isOpen ) this.rSizeContent()
 

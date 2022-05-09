@@ -83,11 +83,6 @@ export class Bitmap extends Proto {
         let up = false;
 
         let name = this.testZone( e );
-        //let sel = false;
-
-        
-
-        //console.log(name)
 
         if( name === 'over' ){
             this.cursor('pointer');
@@ -126,7 +121,7 @@ export class Bitmap extends Proto {
 
             if( this.img !== null ){
                 if( this.objectLink !== null ) this.objectLink[ this.val ] = v
-                if( this.callback ) this.callback( v, this.img, this.name )
+                if( this.callback ) this.callback( this.value, this.img, this.name )
             }
             
         }
@@ -147,15 +142,6 @@ export class Bitmap extends Proto {
         let cc = this.colors
 
         if( this.stat !== n ){
-
-            /*if( n===1 ) this.isActif = false
-
-            if( n===3 ){ 
-                if( !this.isActif ){ this.isActif = true; n=4; this.onActif( this ); }
-                else { this.isActif = false; }
-            }
-
-            if( n===2 && this.isActif ) n = 4;*/
 
             this.stat = n
 

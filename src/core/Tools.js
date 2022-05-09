@@ -92,7 +92,7 @@ const T = {
         if( o.fontSelect ) color.textSelect = o.fontSelect
         if( o.groupBorder ) color.gborder = o.groupBorder
 
-        if( o.transparent ) o.bg = 'none'
+        //if( o.transparent ) o.bg = 'none'
         //if( o.bg ) color.background = color.backgroundOver = o.bg
         if( o.bgOver ) color.backgroundOver = o.bgOver
 
@@ -116,8 +116,8 @@ const T = {
         sy: 3,
 
         content:'none',
-        background: 'rgba(50,50,50,0.3)',
-        backgroundOver: 'rgba(50,50,50,0.4)',
+        background: 'rgba(50,50,50,0.15)',
+        backgroundOver: 'rgba(50,50,50,0.3)',
 
         title : '#CCC',
         titleoff : '#BBB',
@@ -125,26 +125,22 @@ const T = {
         textOver : '#EEE',
         textSelect : '#FFF',
         
-        //inputBg: 'rgba(0,0,0,0.25)',
-        //itemBg:'rgba(0,0,0,0.25)',
-
         back:'rgba(0,0,0,0.2)',
         backoff:'rgba(0,0,0,0.3)',
-        //inputOver: 'rgba(0,0,0,0.2)',
 
         // input and button border
         border : '#4c4c4c',
         borderSize : 1,
-        gborder : 'none',
 
+        gborder : 'none',
         groups : 'none',
+
         button : '#3c3c3c',
         overoff : '#5c5c5c',
         over : '#024699',
         select : '#308AFF',
         action: '#FF3300',
         
-
         //fontFamily: 'Tahoma',
         fontFamily: 'Consolas, monospace',
         //fontFamily: "'Roboto Mono', 'Source Code Pro', Menlo, Courier, monospace",
@@ -152,7 +148,7 @@ const T = {
         fontShadow: 'none',//'#000',
         fontSize:12,
 
-        radius:3,
+        radius:4,
         hide: 'rgba(0,0,0,0)',
 
     },
@@ -161,14 +157,9 @@ const T = {
 
     css : {
 
-        //unselect: '-o-user-select:none; -ms-user-select:none; -khtml-user-select:none; -webkit-user-select:none; -moz-user-select:none;', 
         basic: 'position:absolute; pointer-events:none; box-sizing:border-box; margin:0; padding:0; overflow:hidden; ' + '-o-user-select:none; -ms-user-select:none; -khtml-user-select:none; -webkit-user-select:none; -moz-user-select:none;',
-        button:'display:flex; justify-content:center; align-items:center; text-align:center;',
-        middle:'display:flex; align-items:center;',
-
-        /*txt: T.css.basic + 'font-family:'+ T.colors.fontFamily +'; font-size:'+T.colors.fontSize+'px; color:'+T.colors.text+'; padding:2px 10px; left:0; top:2px; height:16px; width:100px; overflow:hidden; white-space: nowrap;',
-        txtselect:  T.css.txt + 'display:flex; justify-content:left; align-items:center; text-align:left;' +'padding:2px 5px; border:1px dashed ' + T.colors.border + '; background:'+ T.colors.txtselectbg+';',
-        item: T.css.txt + 'position:relative; background:rgba(0,0,0,0.2); margin-bottom:1px;',*/
+        button:'display:flex; align-items:center; justify-content:center; text-align:center;',
+        middle:'display:flex; align-items:center; justify-content:left;   text-align:left; flex-direction: row-reverse;'
     },
 
     // svg path
@@ -180,6 +171,7 @@ const T = {
 
         group:'M 7 7 L 7 8 8 8 8 7 7 7 M 5 7 L 5 8 6 8 6 7 5 7 M 3 7 L 3 8 4 8 4 7 3 7 M 7 5 L 7 6 8 6 8 5 7 5 M 6 6 L 6 5 5 5 5 6 6 6 M 7 3 L 7 4 8 4 8 3 7 3 M 6 4 L 6 3 5 3 5 4 6 4 M 3 5 L 3 6 4 6 4 5 3 5 M 3 3 L 3 4 4 4 4 3 3 3 Z',
         arrow:'M 3 8 L 8 5 3 2 3 8 Z',
+
         arrowDown:'M 5 8 L 8 3 2 3 5 8 Z',
         arrowUp:'M 5 2 L 2 7 8 7 5 2 Z',
 
@@ -246,16 +238,13 @@ const T = {
         else size += 'px'
         
 
-        let align = 'display:flex; justify-content:left; align-items:center; text-align:left;'
+        //let align = 'display:flex; justify-content:left; align-items:center; text-align:left;'
 
-        T.css.txt = T.css.basic + align + ' font-family:'+ font +'; font-weight:'+weight+'; font-size:'+size+'; color:'+cc.text+'; padding:0px 8px; left:0; top:2px; height:16px; width:100px; overflow:hidden; white-space: nowrap; letter-spacing: normal;';
+        T.css.txt = T.css.basic + T.css.middle + ' font-family:'+ font +'; font-weight:'+weight+'; font-size:'+size+'; color:'+cc.text+'; padding:0px 8px; left:0; top:2px; height:16px; width:100px; overflow:hidden; white-space: nowrap; letter-spacing: normal;';
         if( shadow !== 'none' ) T.css.txt += ' text-shadow: 1px 1px 1px '+shadow+';';
 
         T.css.txtselect = T.css.txt + 'padding:0px 4px; border:1px dashed ' + cc.border + ';';
-        //T.css.item = T.css.txt + ' position:relative; margin-bottom:1px; '//display:block; padding:4px 4px;';//
-        T.css.item = T.css.txt + ' position:relative; margin-bottom:1px; display:block; padding:2px 4px;';//
-
-        //console.log( T.css.txt )
+        T.css.item = T.css.txt + 'padding:0px 4px; position:relative; margin-bottom:1px; '
 
     },
 

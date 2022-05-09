@@ -723,8 +723,8 @@
 			}
 
 			if (o.fontSelect) color.textSelect = o.fontSelect;
-			if (o.groupBorder) color.gborder = o.groupBorder;
-			if (o.transparent) o.bg = 'none'; //if( o.bg ) color.background = color.backgroundOver = o.bg
+			if (o.groupBorder) color.gborder = o.groupBorder; //if( o.transparent ) o.bg = 'none'
+			//if( o.bg ) color.background = color.backgroundOver = o.bg
 
 			if (o.bgOver) color.backgroundOver = o.bgOver;
 
@@ -743,18 +743,15 @@
 			sx: 3,
 			sy: 3,
 			content: 'none',
-			background: 'rgba(50,50,50,0.3)',
-			backgroundOver: 'rgba(50,50,50,0.4)',
+			background: 'rgba(50,50,50,0.15)',
+			backgroundOver: 'rgba(50,50,50,0.3)',
 			title: '#CCC',
 			titleoff: '#BBB',
 			text: '#DDD',
 			textOver: '#EEE',
 			textSelect: '#FFF',
-			//inputBg: 'rgba(0,0,0,0.25)',
-			//itemBg:'rgba(0,0,0,0.25)',
 			back: 'rgba(0,0,0,0.2)',
 			backoff: 'rgba(0,0,0,0.3)',
-			//inputOver: 'rgba(0,0,0,0.2)',
 			// input and button border
 			border: '#4c4c4c',
 			borderSize: 1,
@@ -772,19 +769,14 @@
 			fontShadow: 'none',
 			//'#000',
 			fontSize: 12,
-			radius: 3,
+			radius: 4,
 			hide: 'rgba(0,0,0,0)'
 		},
 		// style css
 		css: {
-			//unselect: '-o-user-select:none; -ms-user-select:none; -khtml-user-select:none; -webkit-user-select:none; -moz-user-select:none;', 
 			basic: 'position:absolute; pointer-events:none; box-sizing:border-box; margin:0; padding:0; overflow:hidden; ' + '-o-user-select:none; -ms-user-select:none; -khtml-user-select:none; -webkit-user-select:none; -moz-user-select:none;',
-			button: 'display:flex; justify-content:center; align-items:center; text-align:center;',
-			middle: 'display:flex; align-items:center;'
-			/*txt: T.css.basic + 'font-family:'+ T.colors.fontFamily +'; font-size:'+T.colors.fontSize+'px; color:'+T.colors.text+'; padding:2px 10px; left:0; top:2px; height:16px; width:100px; overflow:hidden; white-space: nowrap;',
-			txtselect:	T.css.txt + 'display:flex; justify-content:left; align-items:center; text-align:left;' +'padding:2px 5px; border:1px dashed ' + T.colors.border + '; background:'+ T.colors.txtselectbg+';',
-			item: T.css.txt + 'position:relative; background:rgba(0,0,0,0.2); margin-bottom:1px;',*/
-
+			button: 'display:flex; align-items:center; justify-content:center; text-align:center;',
+			middle: 'display:flex; align-items:center; justify-content:left;	 text-align:left; flex-direction: row-reverse;'
 		},
 		// svg path
 		svgs: {
@@ -842,15 +834,13 @@
 
 			if (isNaN(size)) {
 				if (size.search('em') === -1) size += 'px';
-			} else size += 'px';
+			} else size += 'px'; //let align = 'display:flex; justify-content:left; align-items:center; text-align:left;'
 
-			let align = 'display:flex; justify-content:left; align-items:center; text-align:left;';
-			T.css.txt = T.css.basic + align + ' font-family:' + font + '; font-weight:' + weight + '; font-size:' + size + '; color:' + cc.text + '; padding:0px 8px; left:0; top:2px; height:16px; width:100px; overflow:hidden; white-space: nowrap; letter-spacing: normal;';
+
+			T.css.txt = T.css.basic + T.css.middle + ' font-family:' + font + '; font-weight:' + weight + '; font-size:' + size + '; color:' + cc.text + '; padding:0px 8px; left:0; top:2px; height:16px; width:100px; overflow:hidden; white-space: nowrap; letter-spacing: normal;';
 			if (shadow !== 'none') T.css.txt += ' text-shadow: 1px 1px 1px ' + shadow + ';';
-			T.css.txtselect = T.css.txt + 'padding:0px 4px; border:1px dashed ' + cc.border + ';'; //T.css.item = T.css.txt + ' position:relative; margin-bottom:1px; '//display:block; padding:4px 4px;';//
-
-			T.css.item = T.css.txt + ' position:relative; margin-bottom:1px; display:block; padding:2px 4px;'; //
-			//console.log( T.css.txt )
+			T.css.txtselect = T.css.txt + 'padding:0px 4px; border:1px dashed ' + cc.border + ';';
+			T.css.item = T.css.txt + 'padding:0px 4px; position:relative; margin-bottom:1px; ';
 		},
 		// note
 		//https://developer.mozilla.org/fr/docs/Web/CSS/css_flexible_box_layout/aligning_items_in_a_flex_container
@@ -3815,61 +3805,45 @@
 			this.baseH = this.h;
 			let fltop = Math.floor(this.h * 0.5) - 3;
 			const cc = this.colors;
-			this.isLine = o.line !== undefined ? o.line : false;
 			this.useFlex = true;
 			let flexible = this.useFlex ? 'display:flex; flex-flow: row wrap;' : '';
-			this.c[2] = this.dom('div', this.css.basic + flexible + 'width:100%; left:0; height:auto; overflow:hidden; top:' + (this.h - 1) + 'px');
+			this.c[2] = this.dom('div', this.css.basic + flexible + 'width:100%; left:0; height:auto; overflow:hidden; top:' + this.h + 'px');
 			this.c[3] = this.dom('path', this.css.basic + 'position:absolute; width:6px; height:6px; left:0; top:' + fltop + 'px;', {
 				d: this.svgs.g1,
 				fill: cc.text,
 				stroke: 'none'
-			}); //this.c[3] = this.dom( 'path', this.css.basic + 'position:absolute; width:10px; height:10px; left:0; top:'+fltop+'px;', { d:this.svgs.group, fill:cc.text, stroke:'none'})
-			//this.c[3] = this.dom( 'path', this.css.basic + 'position:absolute; width:10px; height:10px; left:0; top:'+fltop+'px;', { d:this.svgs.group, fill:cc.text, stroke:'none'})
-			//this.c[4] = this.dom( 'path', this.css.basic + 'position:absolute; width:10px; height:10px; left:'+(this.decal-1)+'px; top:'+fltop+'px;', { d:this.svgs.arrow, fill:cc.text, stroke:'none'})
-			// bottom line
-
-			if (this.isLine) this.c[5] = this.dom('div', this.css.basic + 'background:rgba(255, 255, 255, 0.2); width:100%; left:0; height:1px; bottom:0px'); //else this.c[5] = this.dom( 'div', this.css.basic + 'width:100%; left:0; height:auto; top:'+(this.h-1)+'px')
-
-			let s = this.s;
-			s[0].height = this.h + 'px';
+			});
+			this.s;
 			this.c[1].name = 'group';
-
-			if (cc.groups !== 'none') {
-				s[1].background = cc.groups;
-				s[1].border = cc.borderSize + 'px solid ' + cc.border;
-				s[1].borderRadius = this.radius + 'px'; //s[5].border = '2px solid ' + '#000' 
-				//s[1].marginRight = 10+'px';
-			} //this.c[1].innerHTML = this.dd + this.name
-			//s[1].padding = '0px ' + (10+this.decal)+'px';
-
-
-			s[1].lineHeight = this.h - 4;
-			s[1].color = cc.text; //s[1].fontWeight = 'bold';
-
 			this.init();
-
-			if (this.radius !== 0) {
-				//s[0].borderRadius = this.radius+'px'
-				s[1].borderRadius = this.radius + 'px';
-				s[2].borderRadius = this.radius + 'px';
-			} //s[1].paddingLeft = (10+this.decal)+'px'
-
-
 			this.setBG(o.bg);
 			if (o.open) this.open();
 		}
 
 		setBG(bg) {
-			this.colors;
-			const s = this.s; //if( bg !== undefined ) this.colors.background = bg
-			//this.c[0].style.background = this.colors.background;
+			const cc = this.colors;
+			const s = this.s;
+			if (bg !== undefined) cc.groups = bg;
+			if (cc.groups === 'none') cc.groups = cc.background;
+			cc.background = 'none';
+			s[0].background = 'none';
+			s[1].background = cc.groups;
+			s[2].background = cc.groups;
 
-			s[1].background = bg; //this.colors.background
+			if (cc.gborder !== 'none') {
+				s[1].border = cc.borderSize + 'px solid ' + cc.gborder;
+			}
 
-			s[2].background = bg; //s[5].border = '1px solid ' + '#000' 
-			// s[5].background =	'#000'
+			if (this.radius !== 0) {
+				s[1].borderRadius = this.radius + 'px';
+				s[2].borderRadius = this.radius + 'px';
+			}
+			/*let i = this.uis.length;
+			while(i--){
+					this.uis[i].setBG( 'none' );
+					//this.uis[i].setBG( this.colors.background );
+			}*/
 
-			this.uis.length;
 		}
 
 		testZone(e) {
@@ -4025,11 +3999,12 @@
 
 		open() {
 			super.open();
-			this.setSvg(this.c[3], 'd', this.svgs.g2); //this.setSvg( this.c[4], 'd', this.svgs.arrowDown )
-
+			this.setSvg(this.c[3], 'd', this.svgs.g2);
 			this.rSizeContent();
 			this.h - this.baseH;
 			const s = this.s;
+			const cc = this.colors;
+			s[2].top = this.h - 1 + 'px';
 
 			if (this.radius) {
 				s[1].borderRadius = '0px';
@@ -4040,17 +4015,31 @@
 				s[2].borderBottomRightRadius = this.radius + 'px';
 			}
 
+			if (cc.gborder !== 'none') {
+				s[2].border = cc.borderSize + 'px solid ' + cc.gborder;
+				s[2].borderTop = 'none';
+				s[1].borderBottom = cc.borderSize + 'px solid rgba(0,0,0,0)';
+			}
+
 			this.parentHeight();
 		}
 
 		close() {
 			super.close();
 			this.h - this.baseH;
-			this.setSvg(this.c[3], 'd', this.svgs.g1); //this.setSvg( this.c[4], 'd', this.svgs.arrow )
-
+			this.setSvg(this.c[3], 'd', this.svgs.g1);
 			this.h = this.baseH;
 			const s = this.s;
-			s[0].height = this.h + 'px';
+			const cc = this.colors;
+			s[0].height = this.h + 'px'; //s[1].height = (this.h-2) + 'px'
+
+			s[2].top = this.h + 'px';
+
+			if (cc.gborder !== 'none') {
+				s[2].border = 'none';
+				s[1].border = cc.borderSize + 'px solid ' + cc.gborder;
+			}
+
 			if (this.radius) s[1].borderRadius = this.radius + 'px';
 			this.parentHeight();
 		}
@@ -4086,9 +4075,7 @@
 			s[3].left = this.sa + this.sb - 6 + 'px'; //s[1].width = this.isbgGroup ? (this.w-5) + 'px' : this.w + 'px'
 
 			s[1].width = this.w + 'px';
-			s[2].width = this.w + 'px'; //s[1].width = (this.w - this.decal) + 'px'
-			//s[2].width = (this.w - this.decal) + 'px'
-
+			s[2].width = this.w + 'px';
 			s[1].left = this.decal + 'px';
 			s[2].left = this.decal + 'px';
 			if (this.isOpen) this.rSizeContent();
@@ -4509,9 +4496,9 @@
 			this.isWithImage = this.path !== '' ? true : false;
 			this.preLoadComplete = false;
 			this.tmpImage = {};
-			this.tmpUrl = []; //this.autoHeight = false;
-
-			let align = o.align || 'center'; // scroll size
+			this.tmpUrl = [];
+			this.m = o.m !== undefined ? o.m : 5;
+			let align = o.align || 'left'; // scroll size
 
 			let ss = o.scrollSize || 10;
 			this.ss = ss + 1;
@@ -4526,7 +4513,7 @@
 			let fltop = Math.floor(this.h * 0.5) - 3;
 			let cc = this.colors;
 			this.c[2] = this.dom('div', this.css.basic + 'top:0; display:none; border-radius:' + this.radius + 'px;');
-			this.c[3] = this.dom('div', this.css.item + 'position:absolute; text-align:' + align + '; line-height:' + (this.h - 4) + 'px; top:1px; background:' + cc.button + '; height:' + (this.h - 2) + 'px; border:1px solid ' + cc.border + '; border-radius:' + this.radius + 'px;');
+			this.c[3] = this.dom('div', this.css.item + 'padding:0px ' + this.m + 'px; margin-bottom:0px; position:absolute; justify-content:' + align + '; text-align:' + align + '; line-height:' + (this.h - 4) + 'px; top:1px; background:' + cc.button + '; height:' + (this.h - 2) + 'px; border:1px solid ' + cc.border + '; border-radius:' + this.radius + 'px;');
 			this.c[4] = this.dom('path', this.css.basic + 'position:absolute; width:6px; height:6px; top:' + fltop + 'px;', {
 				d: this.svgs.g1,
 				fill: cc.text,
@@ -4541,7 +4528,7 @@
 			if (o.list) {
 				if (o.list instanceof Array) {
 					this.list = o.list;
-				} else {
+				} else if (o.list instanceof Object) {
 					this.refObject = o.list;
 
 					for (let g in this.refObject) this.list.push(g);
@@ -4551,7 +4538,8 @@
 			this.items = [];
 			this.prevName = '';
 			this.baseH = this.h;
-			this.itemHeight = o.itemHeight || this.h - 3; // force full list 
+			this.itemHeight = o.itemHeight || this.h; //(this.h-3);
+			// force full list 
 
 			this.full = o.full || false;
 			this.py = 0;
@@ -4566,8 +4554,7 @@
 			if (this.up) {
 				this.c[2].style.top = 'auto';
 				this.c[3].style.top = 'auto';
-				this.c[4].style.top = 'auto'; //this.c[5].style.top = 'auto';
-
+				this.c[4].style.top = 'auto';
 				this.c[2].style.bottom = this.h - 2 + 'px';
 				this.c[3].style.bottom = '1px';
 				this.c[4].style.bottom = fltop + 'px';
@@ -4611,12 +4598,7 @@
 			this.setList(this.list);
 			this.init();
 			if (this.isOpenOnStart) this.open(true);
-		}
-		/*send ( v ) {
-					super.send( v );
-					//Proto.prototype.send.call( this, v );
-		}*/
-		// image list
+		} // image list
 
 
 		preloadImage() {
@@ -4773,10 +4755,9 @@
 				// is item
 				if (this.current) {
 					this.value = this.list[this.current.id];
-					if (this.isSelectable) this.selected(); //this.value = this.refObject !== null ? this.refObject[this.list[this.current.id]]	: this.list[this.current.id]
-					//this.value = this.current.textContent;
+					if (this.isSelectable) this.selected(); //this.send( this.refObject !== null ? this.refObject[ this.list[this.current.id]] : this.value );
 
-					this.send(this.refObject !== null ? this.refObject[this.list[this.current.id]] : this.value);
+					this.send(this.value);
 
 					if (!this.listOnly) {
 						this.close();
@@ -4927,7 +4908,7 @@
 
 			for (let i = 0; i < this.length; i++) {
 				n = this.list[i];
-				item = this.dom('div', this.css.item + 'width:' + this.ww + 'px; height:' + this.itemHeight + 'px; line-height:' + (this.itemHeight - 5) + 'px; color:' + this.colors.text + '; background:' + this.colors.back + ';');
+				item = this.dom('div', this.css.item + 'padding:0px ' + (this.m + 1) + 'px; width:' + this.ww + 'px; height:' + this.itemHeight + 'px; line-height:' + (this.itemHeight - 2) + 'px; color:' + this.colors.text + '; background:' + this.colors.back + ';');
 				item.name = 'item' + i;
 				item.id = i;
 				item.select = false;
@@ -4940,15 +4921,18 @@
 
 				if (this.miniCanvas) {
 					let c = new Image();
-					c.src = this.tmpCanvas.toDataURL();
+					c.src = this.tmpCanvas.toDataURL(); //item.style.marginLeft = (this.imageSize[0]+8)+'px'
+
 					/*let c = document.createElement('canvas')
 						c.width = this.imageSize[0]
 					c.height = this.imageSize[1]
 					let ctx = c.getContext("2d")
 					ctx.fillStyle = this.canvasBg
 					ctx.fillRect(0, 0, this.imageSize[0], this.imageSize[1])*/
+					//c.style.cssText = 'position:relative; pointer-events:none; display:inline-block; float:left; margin-left:0px; margin-right:5px; top:2px'
+					// c.style.cssText =' flex-shrink: 0;'
 
-					c.style.cssText = 'position:relative; pointer-events:none; display:inline-block; float:left; margin-left:0px; margin-right:5px; top:2px'; //c.style.cssText = 'display:flex; align-content: flex-start; flex-wrap: wrap;'
+					c.style.cssText = 'margin-right:4px;'; //c.style.cssText = 'display:flex; align-content: flex-start; flex-wrap: wrap;'
 					//item.style.float = 'right'
 
 					item.appendChild(c);
@@ -5014,8 +4998,10 @@
 					this.canvas = document.createElement('canvas');
 					this.canvas.width = this.imageSize[0];
 					this.canvas.height = this.imageSize[1];
-					this.canvas.style.cssText = 'position:absolute; top:0px; left:0px;';
+					this.canvas.style.cssText = 'margin-right:4px;';
 					this.ctx = this.canvas.getContext("2d");
+					this.c[3].style.textAlign = 'left';
+					this.c[3].style.justifyContent = 'left';
 					this.c[3].appendChild(this.canvas);
 				}
 
@@ -5028,11 +5014,10 @@
 					this.canvas = document.createElement('canvas');
 					this.canvas.width = this.imageSize[0];
 					this.canvas.height = this.imageSize[1];
-					(this.h - this.imageSize[1]) * 0.5;
-					this.canvas.style.cssText = 'position:relative; pointer-events:none; display:inline-block; float:left; margin-left:0px; margin-right:5px; top:2px'; //this.canvas.style.cssText = 'position:absolute; top:'+h+'px; left:5px;'
-
+					this.canvas.style.cssText = 'margin-right:4px;';
 					this.ctx = this.canvas.getContext("2d");
 					this.c[3].style.textAlign = 'left';
+					this.c[3].style.justifyContent = 'left';
 					this.c[3].appendChild(this.canvas);
 				}
 
@@ -6044,8 +6029,7 @@
 
 		mousemove(e) {
 			let up = false;
-			let name = this.testZone(e); //let sel = false;
-			//console.log(name)
+			let name = this.testZone(e);
 
 			if (name === 'over') {
 				this.cursor('pointer');
@@ -6078,7 +6062,7 @@
 
 				if (this.img !== null) {
 					if (this.objectLink !== null) this.objectLink[this.val] = v;
-					if (this.callback) this.callback(v, this.img, this.name);
+					if (this.callback) this.callback(this.value, this.img, this.name);
 				}
 			}
 
@@ -6094,12 +6078,6 @@
 			let cc = this.colors;
 
 			if (this.stat !== n) {
-				/*if( n===1 ) this.isActif = false
-					if( n===3 ){ 
-						if( !this.isActif ){ this.isActif = true; n=4; this.onActif( this ); }
-						else { this.isActif = false; }
-				}
-					if( n===2 && this.isActif ) n = 4;*/
 				this.stat = n;
 
 				switch (n) {
@@ -6736,7 +6714,7 @@
 			o = a[2];
 			o.name = a[1];
 
-			if (type === 'list') {
+			if (type === 'list' && !o.list) {
 				o.list = a[0][a[1]];
 			} else o.value = a[0][a[1]];
 		}
@@ -7423,7 +7401,7 @@
 
 	}
 
-	const REVISION = '4.2.2';
+	const REVISION = '4.2.3';
 
 	exports.Files = Files;
 	exports.Gui = Gui;

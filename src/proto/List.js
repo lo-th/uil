@@ -18,9 +18,10 @@ export class List extends Proto {
         this.tmpImage = {};
         this.tmpUrl = [];
 
-        //this.autoHeight = false;
+        this.m = o.m !== undefined ? o.m : 5
 
-        let align = o.align || 'center';
+
+        let align = o.align || 'left';
 
         // scroll size
         let ss = o.scrollSize || 10
@@ -29,10 +30,10 @@ export class List extends Proto {
         this.sMode = 0;
         this.tMode = 0;
 
-        this.listOnly = o.listOnly || false;
-        this.staticTop = o.staticTop || false;
+        this.listOnly = o.listOnly || false
+        this.staticTop = o.staticTop || false
 
-        this.isSelectable = this.listOnly;
+        this.isSelectable = this.listOnly
         if( o.select !== undefined ) o.selectable = o.select
         if( o.selectable !== undefined ) this.isSelectable = o.selectable
 
@@ -43,7 +44,7 @@ export class List extends Proto {
         let cc = this.colors
 
         this.c[2] = this.dom( 'div', this.css.basic + 'top:0; display:none; border-radius:'+this.radius+'px;' );
-        this.c[3] = this.dom( 'div', this.css.item + 'position:absolute; text-align:'+align+'; line-height:'+(this.h-4)+'px; top:1px; background:'+cc.button+'; height:'+(this.h-2)+'px; border:1px solid '+cc.border+'; border-radius:'+this.radius+'px;' );
+        this.c[3] = this.dom( 'div', this.css.item + 'padding:0px '+this.m+'px; margin-bottom:0px; position:absolute; justify-content:'+align+'; text-align:'+align+'; line-height:'+(this.h-4)+'px; top:1px; background:'+cc.button+'; height:'+(this.h-2)+'px; border:1px solid '+cc.border+'; border-radius:'+this.radius+'px;' );
         this.c[4] = this.dom( 'path', this.css.basic + 'position:absolute; width:6px; height:6px; top:'+fltop+'px;', { d:this.svgs.g1, fill:cc.text, stroke:'none'});
 
         this.scrollerBack = this.dom( 'div', this.css.basic + 'right:0px; width:'+ss+'px; background:'+cc.back+'; display:none;');
@@ -55,12 +56,12 @@ export class List extends Proto {
         this.list = []
         this.refObject = null
 
-        if(o.list){
+        if( o.list ){
             if( o.list instanceof Array ){
                 this.list = o.list
-            } else {
+            } else if( o.list instanceof Object ){
                 this.refObject = o.list
-                for( let g in this.refObject ) this.list.push(g)
+                for( let g in this.refObject ) this.list.push( g )
             }
         }
 
@@ -70,7 +71,7 @@ export class List extends Proto {
 
         this.baseH = this.h;
 
-        this.itemHeight = o.itemHeight || (this.h-3);
+        this.itemHeight = o.itemHeight || this.h//(this.h-3);
 
         // force full list 
         this.full = o.full || false;
@@ -91,7 +92,6 @@ export class List extends Proto {
             this.c[2].style.top = 'auto';
             this.c[3].style.top = 'auto';
             this.c[4].style.top = 'auto';
-            //this.c[5].style.top = 'auto';
 
             this.c[2].style.bottom = this.h-2 + 'px';
             this.c[3].style.bottom = '1px';
@@ -148,13 +148,6 @@ export class List extends Proto {
         if( this.isOpenOnStart ) this.open( true )
 
     }
-
-    /*send ( v ) {
-
-        super.send( v );
-
-        //Proto.prototype.send.call( this, v );
-    }*/
 
     // image list
 
@@ -333,10 +326,10 @@ export class List extends Proto {
 
         } else if( name === 'title' ){
 
-            this.modeTitle(2);
+            this.modeTitle(2)
             if( !this.listOnly ){
-                if( !this.isOpen ) this.open();
-                else this.close();
+                if( !this.isOpen ) this.open()
+                else this.close()
             }
         } else {
             // is item
@@ -345,13 +338,13 @@ export class List extends Proto {
                 this.value = this.list[ this.current.id ]
 
                 if( this.isSelectable ) this.selected()
-                //this.value = this.refObject !== null ? this.refObject[this.list[this.current.id]]  : this.list[this.current.id]
-                //this.value = this.current.textContent;
-                this.send( this.refObject !== null ? this.refObject[this.list[this.current.id]] : this.value );
+
+                //this.send( this.refObject !== null ? this.refObject[ this.list[this.current.id]] : this.value );
+                this.send( this.value )
 
                 if( !this.listOnly ) {
-                    this.close();
-                    this.setTopItem();
+                    this.close()
+                    this.setTopItem()
                 }
             }
             
@@ -522,8 +515,8 @@ export class List extends Proto {
         for( let i=0; i<this.length; i++ ){
 
             n = this.list[i];
-            item = this.dom( 'div', this.css.item + 'width:'+this.ww+'px; height:'+this.itemHeight+'px; line-height:'+(this.itemHeight-5)+'px; color:'+this.colors.text+'; background:'+this.colors.back+';' );
-            item.name = 'item'+i;
+            item = this.dom( 'div', this.css.item + 'padding:0px '+(this.m+1)+'px; width:'+this.ww+'px; height:'+this.itemHeight+'px; line-height:'+(this.itemHeight-2)+'px; color:'+this.colors.text+'; background:'+this.colors.back+';' );
+            item.name = 'item'+ i
             item.id = i;
             item.select = false
             item.posy = (this.itemHeight+1)*i;
@@ -540,6 +533,8 @@ export class List extends Proto {
                 let c = new Image()
                 c.src = this.tmpCanvas.toDataURL()
 
+                //item.style.marginLeft = (this.imageSize[0]+8)+'px'
+
 
                 /*let c = document.createElement('canvas')
 
@@ -548,7 +543,11 @@ export class List extends Proto {
                 let ctx = c.getContext("2d")
                 ctx.fillStyle = this.canvasBg
                 ctx.fillRect(0, 0, this.imageSize[0], this.imageSize[1])*/
-                c.style.cssText = 'position:relative; pointer-events:none; display:inline-block; float:left; margin-left:0px; margin-right:5px; top:2px'
+                
+                //c.style.cssText = 'position:relative; pointer-events:none; display:inline-block; float:left; margin-left:0px; margin-right:5px; top:2px'
+               // c.style.cssText =' flex-shrink: 0;'
+
+                c.style.cssText ='margin-right:4px;'
 
 
                 //c.style.cssText = 'display:flex; align-content: flex-start; flex-wrap: wrap;'
@@ -559,12 +558,12 @@ export class List extends Proto {
 
             }
 
-            if(this.dragout){
+            if( this.dragout ){
 
                 item.img = this.tmpImage[n]
 
                 item.style.pointerEvents = 'auto';
-                item.draggable="true"
+                item.draggable = "true"
 
                 item.addEventListener('dragstart', this.dragstart || function(){ /*console.log('drag start')*/})
                 item.addEventListener('drag', this.drag || function(){ /*console.log('drag start')*/})
@@ -584,6 +583,7 @@ export class List extends Proto {
     }
 
     drawImage( name, image, x,y,w,h ){
+
         this.tmpCtx.clearRect(0, 0, this.imageSize[0], this.imageSize[1]);
         this.tmpCtx.drawImage(image, x, y, w, h, 0, 0, this.imageSize[0], this.imageSize[1])
         this.tmpImage[name].src = this.tmpCanvas.toDataURL()
@@ -614,18 +614,20 @@ export class List extends Proto {
 
     setTopItem (){
 
-        if(this.staticTop) return;
+        if( this.staticTop ) return;
 
-        if( this.isWithImage ){ 
+        if( this.isWithImage ){
 
-            if( !this.preLoadComplete ) return;
+            if(!this.preLoadComplete ) return;
 
             if(!this.c[3].children.length){
                 this.canvas = document.createElement('canvas');
-                this.canvas.width = this.imageSize[0];
-                this.canvas.height = this.imageSize[1];
-                this.canvas.style.cssText = 'position:absolute; top:0px; left:0px;'
+                this.canvas.width = this.imageSize[0]
+                this.canvas.height = this.imageSize[1]
+                this.canvas.style.cssText ='margin-right:4px;'
                 this.ctx = this.canvas.getContext("2d");
+                this.c[3].style.textAlign = 'left'
+                this.c[3].style.justifyContent = 'left'
                 this.c[3].appendChild( this.canvas );
             }
 
@@ -642,13 +644,11 @@ export class List extends Proto {
                 this.canvas = document.createElement('canvas');
                 this.canvas.width = this.imageSize[0];
                 this.canvas.height = this.imageSize[1];
-                let h = ( this.h - this.imageSize[1] ) * 0.5
-                this.canvas.style.cssText = 'position:relative; pointer-events:none; display:inline-block; float:left; margin-left:0px; margin-right:5px; top:2px'
-                //this.canvas.style.cssText = 'position:absolute; top:'+h+'px; left:5px;'
-                this.ctx = this.canvas.getContext("2d");
+                this.canvas.style.cssText ='margin-right:4px;'
+                this.ctx = this.canvas.getContext("2d")
                 this.c[3].style.textAlign = 'left'
-                this.c[3].appendChild( this.canvas );
-
+                this.c[3].style.justifyContent = 'left'
+                this.c[3].appendChild( this.canvas )
             }
 
             this.ctx.drawImage( this.tmpImage[ this.value ], 0, 0 );
