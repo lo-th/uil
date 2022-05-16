@@ -147,6 +147,8 @@ export class List extends Proto {
         this.init();
         if( this.isOpenOnStart ) this.open( true )
 
+        this.baseH += this.mtop
+
     }
 
     // image list
@@ -372,6 +374,7 @@ export class List extends Proto {
             this.modeScroll(1);
             if( this.isDown ){
                 this.modeScroll(2);
+                //this.update( ( e.clientY - top  ) - ( this.sh*0.5 ) );
                 let top = this.zone.y+this.baseH-2;
                 this.update( ( e.clientY - top  ) - ( this.sh*0.5 ) );
             }

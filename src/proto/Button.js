@@ -11,7 +11,7 @@ export class Button extends Proto {
         this.values = o.value || this.txt
         if( o.values ) this.values = o.values
 
-            if( !o.values && !o.value ) this.txt = ''
+        if( !o.values && !o.value ) this.txt = ''
 
         
 
@@ -24,13 +24,13 @@ export class Button extends Proto {
         if(o.bw) this.bw = o.bw
         this.space = o.space || 3
 
-        if( typeof this.values === 'string' ) this.values = [ this.values ];
+        if( typeof this.values === 'string' ) this.values = [ this.values ]
 
         this.isDown = false
         this.neverlock = true
         this.res = 0
 
-        this.lng = this.values.length;
+        this.lng = this.values.length
         this.tmp = []
         this.stat = []
 
@@ -41,7 +41,7 @@ export class Button extends Proto {
             sel = false
             if( this.values[i] === this.value && this.isSelectable ) sel = true
 
-            this.c[i+2] = this.dom( 'div', this.css.txt + this.css.button + 'top:1px; height:'+(this.h-2)+'px; border:'+cc.borderSize+'px solid '+cc.border+'; border-radius:'+this.radius+'px;' );
+            this.c[i+2] = this.dom( 'div', this.css.txt + this.css.button + 'top:1px; height:'+(this.h-2)+'px; border:'+cc.borderSize+'px solid '+cc.border+'; border-radius:'+this.radius+'px;' )
             this.c[i+2].style.background = sel ? cc.select : cc.button
             this.c[i+2].style.color = sel ? cc.textSelect : cc.text
             this.c[i+2].innerHTML = this.values[i];
@@ -49,13 +49,13 @@ export class Button extends Proto {
 
         }
 
-        if( !o.value && !o.values ){
-            if( this.c[1] !== undefined ) {
-                this.c[1].textContent = '';
-                //this.txt = ''
-            }
-        } 
+
         if( this.txt==='' ) this.p = 0 
+
+        if( (!o.value && !o.values) || this.p === 0 ){
+            if( this.c[1] !== undefined ) this.c[1].textContent = ''
+        } 
+        
 
         this.init();
 
@@ -64,7 +64,7 @@ export class Button extends Proto {
     onOff() {
 
         this.on = !this.on;
-        this.label( this.on ? this.onName : this.txt )
+        this.label( this.on ? this.onName : this.value )
         
     }
 
@@ -169,10 +169,10 @@ export class Button extends Proto {
         
             switch( n ){
 
-                case 1: s[i].color = cc.text; s[i].background = cc.button; break;
-                case 2: s[i].color = cc.textOver; s[i].background = cc.overoff; break;
-                case 3: s[i].color = cc.textOver; s[i].background = cc.over; break;
-                case 4: s[i].color = cc.textSelect; s[i].background = cc.select; break;
+                case 1: s[i].color = cc.text; s[i].background = cc.button; break
+                case 2: s[i].color = cc.textOver; s[i].background = cc.overoff; break
+                case 3: s[i].color = cc.textOver; s[i].background = cc.over; break
+                case 4: s[i].color = cc.textSelect; s[i].background = cc.select; break
 
             }
 
@@ -197,7 +197,7 @@ export class Button extends Proto {
     label ( string, n ) {
 
         n = n || 2;
-        this.c[n].textContent = string;
+        this.c[n].textContent = string
 
     }
 
@@ -222,7 +222,7 @@ export class Button extends Proto {
         let i = this.lng;
         let sx = this.colors.sx //this.space;
         //let size = Math.floor( ( w-(dc*(i-1)) ) / i );
-        let size = ( ( w-(sx*(i-1)) ) / i )
+        let size = ( w-(sx*(i-1)) ) / i 
 
         if( this.bw ){ 
             size = this.bw < size ? this.bw : size

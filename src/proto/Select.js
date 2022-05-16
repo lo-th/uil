@@ -4,38 +4,36 @@ export class Select extends Proto {
 
     constructor( o = {} ) {
 
-        super( o );
+        super( o )
 
-        this.value = o.value || '';
-
-        this.isDown = false;
-
-        this.onActif = o.onActif || function(){};
+        this.value = o.value || ''
+        this.isDown = false
+        this.onActif = o.onActif || function(){}
 
         //let prefix = o.prefix || '';
         const cc = this.colors
 
-        this.c[2] = this.dom( 'div', this.css.txt + this.css.button + ' top:1px; background:'+cc.button+'; height:'+(this.h-2)+'px; border:'+ cc.buttonBorder+'; border-radius:15px; width:30px; left:10px;' );
+        this.c[2] = this.dom( 'div', this.css.txt + this.css.button + ' top:1px; background:'+cc.button+'; height:'+(this.h-2)+'px; border:'+ cc.buttonBorder+'; border-radius:15px; width:30px; left:10px;' )
         //this.c[2].style.color = this.fontColor;
 
-        this.c[3] = this.dom( 'div', this.css.txtselect + 'height:' + (this.h-4) + 'px; background:' + cc.inputBg + '; borderColor:' + cc.inputBorder+'; border-radius:'+this.radius+'px;' );
-        this.c[3].textContent = this.value;
+        this.c[3] = this.dom( 'div', this.css.txtselect + 'height:' + (this.h-4) + 'px; background:' + cc.inputBg + '; borderColor:' + cc.inputBorder+'; border-radius:'+this.radius+'px;' )
+        this.c[3].textContent = this.value
 
-        let fltop = Math.floor(this.h*0.5)-7;
-        this.c[4] = this.dom( 'path', this.css.basic + 'position:absolute; width:14px; height:14px; left:5px; top:'+fltop+'px;', { d:this.svgs[ 'cursor' ], fill:cc.text, stroke:'none'});
+        let fltop = Math.floor(this.h*0.5)-7
+        this.c[4] = this.dom( 'path', this.css.basic + 'position:absolute; width:14px; height:14px; left:5px; top:'+fltop+'px;', { d:this.svgs[ 'cursor' ], fill:cc.text, stroke:'none'})
 
-        this.stat = 1;
-        this.isActif = false;
+        this.stat = 1
+        this.isActif = false
 
-        this.init();
+        this.init()
 
     }
 
     testZone ( e ) {
 
-        let l = this.local;
-        if( l.x === -1 && l.y === -1 ) return '';
-        if( l.x > this.sa && l.x < this.sa+30 ) return 'over';
+        let l = this.local
+        if( l.x === -1 && l.y === -1 ) return ''
+        if( l.x > this.sa && l.x < this.sa+30 ) return 'over'
         return '0'
 
     }
@@ -48,47 +46,41 @@ export class Select extends Proto {
     
         if( this.isDown ){
             //this.value = false;
-            this.isDown = false;
+            this.isDown = false
             //this.send();
-            return this.mousemove( e );
+            return this.mousemove( e )
         }
 
-        return false;
+        return false
 
     }
 
     mousedown ( e ) {
 
-        let name = this.testZone( e );
+        let name = this.testZone( e )
 
-        if( !name ) return false;
+        if( !name ) return false
 
-        this.isDown = true;
+        this.isDown = true
         //this.value = this.values[ name-2 ];
         //this.send();
-        return this.mousemove( e );
+        return this.mousemove( e )
 
     }
 
     mousemove ( e ) {
 
-        let up = false;
-
-        let name = this.testZone( e );
-        //let sel = false;
-
-        
-
-        //console.log(name)
+        let up = false
+        let name = this.testZone( e )
 
         if( name === 'over' ){
             this.cursor('pointer');
-            up = this.mode( this.isDown ? 3 : 2 );
+            up = this.mode( this.isDown ? 3 : 2 )
         } else {
-            up = this.reset();
+            up = this.reset()
         }
 
-        return up;
+        return up
 
     }
 
@@ -141,11 +133,11 @@ export class Select extends Proto {
 
             }
 
-            change = true;
+            change = true
 
         }
 
-        return change;
+        return change
 
 
 
@@ -154,25 +146,25 @@ export class Select extends Proto {
     reset () {
 
         this.cursor();
-        return this.mode( this.isActif ? 4 : 1 );
+        return this.mode( this.isActif ? 4 : 1 )
 
     }
 
     text ( txt ) {
 
-        this.c[3].textContent = txt;
+        this.c[3].textContent = txt
 
     }
 
     rSize () {
 
-        super.rSize();
+        super.rSize()
 
-        let s = this.s;
-        s[2].left = this.sa + 'px';
-        s[3].left = (this.sa + 40) + 'px';
-        s[3].width = (this.sb - 40) + 'px';
-        s[4].left = (this.sa+8) + 'px';
+        let s = this.s
+        s[2].left = this.sa + 'px'
+        s[3].left = (this.sa + 40) + 'px'
+        s[3].width = (this.sb - 40) + 'px'
+        s[4].left = (this.sa+8) + 'px'
 
     }
 

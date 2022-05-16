@@ -53,7 +53,6 @@ export class Pad2D extends Proto {
         
         
         this.h = o.h || this.w + 10;
-        this.top = 0;
 
         this.c[0].style.width = this.w + 'px';
 
@@ -66,6 +65,8 @@ export class Pad2D extends Proto {
             this.h += 10;
 
         }
+
+        //this.top -= this.margin
 
         let cc = this.colors
 
@@ -100,6 +101,8 @@ export class Pad2D extends Proto {
 
         if( l.x === -1 && l.y === -1 ) return '';
 
+
+
         if( l.y <= this.c[ 1 ].offsetHeight ) return 'title';
         else if ( l.y > this.h - this.c[ 2 ].offsetHeight ) return 'text';
         else return 'pad';
@@ -116,7 +119,7 @@ export class Pad2D extends Proto {
 
         this.isDown = false;
         return this.mode(0);
-    
+
     }
 
     mousedown ( e ) {
@@ -135,7 +138,9 @@ export class Pad2D extends Proto {
         if( !this.isDown ) return;
 
         let x = (this.w*0.5) - ( e.clientX - this.zone.x )
-        let y = (this.diam*0.5) - ( e.clientY - this.zone.y - this.top )
+        let y = (this.diam*0.5) - ( e.clientY - this.zone.y - this.ytop )
+        
+
         let r = 256 / this.diam
 
         x = -(x*r)

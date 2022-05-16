@@ -250,7 +250,7 @@ const R = {
             e.type = 'mouseup';
         }
 
-        if( event.type === 'pointerleave'){ R.isLeave = true; }
+        if( event.type === 'pointerleave') R.isLeave = true; 
 
         if( event.type === 'pointerdown') e.type = 'mousedown';
         if( event.type === 'pointerup') e.type = 'mouseup';
@@ -300,6 +300,8 @@ const R = {
                 e.clientY = R.ID.mouse.y;
 
             }
+
+            //if( R.ID.marginDiv ) e.clientY -= R.ID.margin * 0.5
 
             R.ID.handleEvent( e );
 
@@ -367,13 +369,13 @@ const R = {
     //   GUI / GROUP FUNCTION
     // ----------------------
 
-    calcUis: function ( uis, zone, py ) {
+    calcUis: ( uis, zone, py ) => {
 
         //console.log('calc_uis')
 
-        let i = uis.length, u, px = 0, n = 0, tw;
+        let i = uis.length, u, px = 0, n = 0, tw, m;
+
         let height = 0;
-        let m = 1;
 
         while( i-- ){
 
@@ -382,33 +384,30 @@ const R = {
 
             if( u.isGroup ) u.calcUis();
 
-            u.zone.w = u.w;
-            u.zone.h = u.h;
             m = u.margin;
+            //div = u.marginDiv
 
+            u.zone.w = u.w;
+            u.zone.h = u.h + m;
+            
             if( !u.autoWidth ){
 
-                if( px===0 ){ 
-                    height += u.h + m;
-
-                } 
+                if( px === 0 ) height += u.h + m;
 
                 u.zone.x = zone.x + px;
-                u.zone.y = py;
+                u.zone.y = py;// + u.mtop
+                //if(div) u.zone.y += m * 0.5
 
                 tw = R.getWidth(u);
                 if( tw ) u.zone.w = u.w = tw;
-                // focrce width if content is canvas
                 else if( u.fw ) u.zone.w = u.w = u.fw;
                 
-
-                //console.log( u.name, u.zone.w, u.w, zone, tw )
-                //console.log(  tw )
                 px += u.zone.w;
 
                 if( px >= zone.w ) { 
-                    py += u.h + m; 
-                    px = 0; 
+                    py += u.h + m;
+                    //if(div) py += m * 0.5
+                    px = 0;
                 }
 
             } else {
@@ -418,6 +417,7 @@ const R = {
                 u.zone.x = zone.x;
                 u.zone.y = py;
                 py += u.h + m;
+
 
                 height += u.h + m;
 
@@ -472,7 +472,12 @@ const R = {
         let mx = x - z.x;
         let my = y - z.y;
 
+        //if( this.marginDiv ) e.clientY -= this.margin * 0.5
+        //if( o.group && o.group.marginDiv ) my += o.group.margin * 0.5
+
         let over = ( mx >= 0 ) && ( my >= 0 ) && ( mx <= z.w ) && ( my <= z.h );
+
+        //if( o.marginDiv ) my -= o.margin * 0.5
 
         if( over ) o.local.set( mx, my );
         else o.local.neg();
@@ -910,7 +915,7 @@ const T = {
     torad: Math.PI / 180,
     todeg: 180 / Math.PI,
 
-    clamp: function (v, min, max) {
+    clamp: ( v, min, max ) => {
 
         v = v < min ? min : v;
         v = v > max ? max : v;
@@ -918,13 +923,15 @@ const T = {
 
     },
 
+    isDivid: ( v ) => ( v*0.5 === Math.floor(v*0.5) ),
+
     size: {  w: 240, h: 20, p: 30, s: 8 },
 
     // ----------------------
     //   COLOR
     // ----------------------
 
-    defineColor: function( o, cc = T.colors ) {
+    defineColor: ( o, cc = T.colors ) => {
 
         let color = { ...cc };
 
@@ -989,8 +996,9 @@ const T = {
 
     colors: {
 
-        sx: 3,
-        sy: 3,
+        sx: 4,//4
+        sy: 2,//2
+        radius:2,
 
         content:'none',
         background: 'rgba(50,50,50,0.15)',
@@ -1025,7 +1033,7 @@ const T = {
         fontShadow: 'none',//'#000',
         fontSize:12,
 
-        radius:4,
+        
         hide: 'rgba(0,0,0,0)',
 
     },
@@ -1036,7 +1044,7 @@ const T = {
 
         basic: 'position:absolute; pointer-events:none; box-sizing:border-box; margin:0; padding:0; overflow:hidden; ' + '-o-user-select:none; -ms-user-select:none; -khtml-user-select:none; -webkit-user-select:none; -moz-user-select:none;',
         button:'display:flex; align-items:center; justify-content:center; text-align:center;',
-        middle:'display:flex; align-items:center; justify-content:left;   text-align:left; flex-direction: row-reverse;'
+        middle:'display:flex; align-items:center; justify-content:left; text-align:left; flex-direction: row-reverse;'
     },
 
     // svg path
@@ -1067,7 +1075,9 @@ const T = {
         object:'M 10 1 L 7 4 4 1 1 1 1 13 4 13 4 5 7 8 10 5 10 13 13 13 13 1 10 1 Z',
         none:'M 9 5 L 5 5 5 9 9 9 9 5 Z',
         cursor:'M 4 7 L 1 10 1 12 2 13 4 13 7 10 9 14 14 0 0 5 4 7 Z',
-        load:'M 14 8 L 12 8 12 12 2 12 2 8 0 8 0 14 14 14 14 8 M 8 5 L 8 0 6 0 6 5 3 5 7 9 11 5 8 5 Z',
+        load:'M 13 8 L 11.5 6.5 9 9 9 3 5 3 5 9 2.5 6.5 1 8 7 14 13 8 M 9 2 L 9 0 5 0 5 2 9 2 Z',
+        save:'M 9 12 L 5 12 5 14 9 14 9 12 M 11.5 7.5 L 13 6 7 0 1 6 2.5 7.5 5 5 5 11 9 11 9 5 11.5 7.5 Z',
+        extern:'M 14 14 L 14 0 0 0 0 14 14 14 M 12 6 L 12 12 2 12 2 6 12 6 M 12 2 L 12 4 2 4 2 2 12 2 Z',
 
     },
 
@@ -1311,6 +1321,8 @@ const T = {
     // ----------------------
 
     ColorLuma : function ( hex, l ) {
+
+        //if( hex.substring(0, 3) === 'rgba' ) hex = '#000';
 
         if( hex === 'n' ) hex = '#000';
 
@@ -2140,6 +2152,9 @@ class Proto {
 
         this.isListen = false;
 
+        this.top = 0;
+        this.ytop = 0;
+
         this.isSelectable = o.selectable !== undefined ? o.selectable : false;
         this.unselectable =  o.unselect !== undefined ? o.unselect : this.isSelectable;
 
@@ -2151,7 +2166,7 @@ class Proto {
 
         this.svgs = Tools.svgs;
 
-        this.zone = { x:0, y:0, w:0, h:0 };
+        this.zone = { x:0, y:0, w:0, h:0, d:0 };
         this.local = new V2().neg();
 
         this.isCanvasOnly = false;
@@ -2243,18 +2258,21 @@ class Proto {
         this.s[0] = this.c[0].style;
 
         // bottom margin
-        this.margin = o.margin || 1;
+        this.margin = this.colors.sy;
+        this.mtop = 0;
+        let marginDiv = Tools.isDivid( this.margin );
+
         if( this.isUI && this.margin ){ 
             this.s[0].boxSizing = 'content-box';
-            //this.s[0].marginBottom = this.margin + 'px';
-            if( this.margin*0.5===Math.floor(this.margin*0.5) ){
-                this.s[0].borderTop = (this.margin*0.5) + 'px solid transparent';
-                this.s[0].borderBottom = (this.margin*0.5) + 'px solid transparent';
+            if( marginDiv ){
+                this.mtop = this.margin * 0.5;
+                //this.s[0].borderTop = '${this.mtop}px solid transparent'
+                //console.log(`${this.mtop}px solid transparent`)
+                this.s[0].borderTop = this.mtop + 'px solid transparent';
+                this.s[0].borderBottom = this.mtop + 'px solid transparent';
             } else {
-                //this.s[0].borderTop = (this.margin*0.5) + 'px solid transparent'
                 this.s[0].borderBottom = this.margin + 'px solid transparent';
             }
-            
         }
         
         // with title
@@ -2287,7 +2305,9 @@ class Proto {
     
     init() {
 
-        this.zone.h = this.h;
+        this.ytop = this.top + this.mtop;
+
+        this.zone.h = this.h + this.margin;
         this.zone.w = this.w;
 
         let s = this.s; // style cache
@@ -2310,8 +2330,6 @@ class Proto {
             s[1] = c[1].style;
             s[1].top = 1 + 'px';
             s[1].height = (this.h-2) + 'px';
-            //s[1].height = (this.h-4) + 'px';
-           // s[1].lineHeight = (this.h-8) + 'px';
         }
 
         let frag = Tools.frag;
@@ -2441,7 +2459,6 @@ class Proto {
     uiout() {
 
         if( this.lock ) return;
-
         if(this.s) this.s[0].background = this.colors.background;
 
     }
@@ -2449,7 +2466,6 @@ class Proto {
     uiover() {
 
         if( this.lock ) return;
-
         if(this.s) this.s[0].background = this.colors.backgroundOver;
 
     }
@@ -2655,6 +2671,7 @@ class Proto {
             case 3: s = 0.001; break;
             case 4: s = 0.0001; break;
             case 5: s = 0.00001; break;
+            case 6: s = 0.000001; break;
         }
 
         this.step = o.step === undefined ?  s : o.step;
@@ -2666,7 +2683,7 @@ class Proto {
     numValue( n ) {
 
         if( this.noNeg ) n = Math.abs( n );
-        return Math.min( this.max, Math.max( this.min, n ) ).toFixed( this.precision ) * 1;
+        return Math.min( this.max, Math.max( this.min, n ) ).toFixed( this.precision ) * 1
 
     }
 
@@ -2678,10 +2695,16 @@ class Proto {
     handleEvent( e ) {
 
         if( this.lock ) return
-
         if( this.neverlock ) Roots.lock = false;
-
         if( !this[e.type] ) return console.error(e.type, 'this type of event no existe !')
+
+
+        // TODO !!!!
+
+        //if( this.marginDiv ) z.d -= this.margin * 0.5
+
+        //if( this.marginDiv ) e.clientY -= this.margin * 0.5
+        //if( this.group && this.group.marginDiv ) e.clientY -= this.group.margin * 0.5
 
         return this[e.type](e)
     
@@ -2805,7 +2828,7 @@ class Bool extends Proto {
         } else {
             this.p = 0;
             if( this.c[1] !== undefined ) this.c[1].textContent = '';
-            this.c[2] = this.dom( 'div', this.css.txt + this.css.button + 'top:1px; background:'+cc.button+'; height:'+(this.h-2)+'px; border:1px solid '+cc.border+'; border-radius:'+this.radius+'px;' );
+            this.c[2] = this.dom( 'div', this.css.txt + this.css.button + 'top:1px; background:'+cc.button+'; height:'+(this.h-2)+'px; border:'+cc.borderSize+'px solid '+cc.border+'; border-radius:'+this.radius+'px;' );
         }
 
         this.stat = -1;
@@ -2919,7 +2942,7 @@ class Bool extends Proto {
             s[3].left = w + 'px';
         } else {
             s[2].left = this.sa + 'px';
-            s[2].width = (this.w- 20)  + 'px';
+            s[2].width = this.sb  + 'px';
         }
         
     }
@@ -2937,7 +2960,7 @@ class Button extends Proto {
         this.values = o.value || this.txt;
         if( o.values ) this.values = o.values;
 
-            if( !o.values && !o.value ) this.txt = '';
+        if( !o.values && !o.value ) this.txt = '';
 
         
 
@@ -2975,13 +2998,13 @@ class Button extends Proto {
 
         }
 
-        if( !o.value && !o.values ){
-            if( this.c[1] !== undefined ) {
-                this.c[1].textContent = '';
-                //this.txt = ''
-            }
-        } 
+
         if( this.txt==='' ) this.p = 0; 
+
+        if( (!o.value && !o.values) || this.p === 0 ){
+            if( this.c[1] !== undefined ) this.c[1].textContent = '';
+        } 
+        
 
         this.init();
 
@@ -2990,7 +3013,7 @@ class Button extends Proto {
     onOff() {
 
         this.on = !this.on;
-        this.label( this.on ? this.onName : this.txt );
+        this.label( this.on ? this.onName : this.value );
         
     }
 
@@ -3095,10 +3118,10 @@ class Button extends Proto {
         
             switch( n ){
 
-                case 1: s[i].color = cc.text; s[i].background = cc.button; break;
-                case 2: s[i].color = cc.textOver; s[i].background = cc.overoff; break;
-                case 3: s[i].color = cc.textOver; s[i].background = cc.over; break;
-                case 4: s[i].color = cc.textSelect; s[i].background = cc.select; break;
+                case 1: s[i].color = cc.text; s[i].background = cc.button; break
+                case 2: s[i].color = cc.textOver; s[i].background = cc.overoff; break
+                case 3: s[i].color = cc.textOver; s[i].background = cc.over; break
+                case 4: s[i].color = cc.textSelect; s[i].background = cc.select; break
 
             }
 
@@ -3148,7 +3171,7 @@ class Button extends Proto {
         let i = this.lng;
         let sx = this.colors.sx; //this.space;
         //let size = Math.floor( ( w-(dc*(i-1)) ) / i );
-        let size = ( ( w-(sx*(i-1)) ) / i );
+        let size = ( w-(sx*(i-1)) ) / i; 
 
         if( this.bw ){ 
             size = this.bw < size ? this.bw : size;
@@ -3193,7 +3216,6 @@ class Circular extends Proto {
         this.offset = new V2();
 
         this.h = o.h || this.w + 10;
-        this.top = 0;
 
         this.c[0].style.width = this.w +'px';
         this.c[0].style.display = 'block';
@@ -3309,7 +3331,7 @@ class Circular extends Proto {
 
         let off = this.offset;
         off.x = (this.w*0.5) - ( e.clientX - this.zone.x );
-        off.y = (this.diam*0.5) - ( e.clientY - this.zone.y - this.top );
+        off.y = (this.diam*0.5) - ( e.clientY - this.zone.y - this.ytop );
 
         this.r = off.angle() - this.pi90;
         this.r = (((this.r%this.twoPi)+this.twoPi)%this.twoPi);
@@ -3414,6 +3436,8 @@ class Color extends Proto {
 	    this.cw = this.sb > 256 ? 256 : this.sb;
 	    if(o.cw != undefined ) this.cw = o.cw;
 
+
+
 	    // color up or down
 	    this.side = o.side || 'down';
 	    this.up = this.side === 'down' ? 0 : 1;
@@ -3424,15 +3448,19 @@ class Color extends Proto {
 	    this.decal = new V2();
 	    this.pp = new V2();
 
-	    this.c[2] = this.dom( 'div', this.css.txt + 'height:'+(this.h-4)+'px;' + 'border-radius:'+this.radius+'px; line-height:'+(this.h-8)+'px;' );
-	    this.s[2] = this.c[2].style;
+	    let cc = this.colors;
 
-	    this.s[2].textShadow = 'none';
+	   // this.c[2] = this.dom( 'div', this.css.txt + this.css.middle + 'top:1px; height:'+(this.h-2)+'px;' + 'border-radius:'+this.radius+'px; text-shadow:none; border:'+cc.borderSize+'px solid '+cc.border+';' )
 
-	    if( this.up ){
+	    this.c[2] = this.dom( 'div', `${this.css.txt} ${this.css.middle} top:1px; height:${this.h-2}px; border-radius:${this.radius}px; text-shadow:none; border:${cc.borderSize}px solid ${cc.border};` );
+	    //this.s[2] = this.c[2].style;
+
+	    //this.s[2].textShadow = 'none'
+
+	    /*if( this.up ){
 	        this.s[2].top = 'auto';
 	        this.s[2].bottom = '2px';
-	    }
+	    }*/
 
 	    //this.c[0].style.textAlign = 'center';
 	    this.c[0].style.display = 'block';
@@ -3460,9 +3488,9 @@ class Color extends Proto {
 	    this.hue = 0;
 	    this.d = 256;
 
-	    this.setColor( this.value );
-
 	    this.init();
+
+	    this.setColor( this.value );
 
 	    if( o.open !== undefined ) this.open();
 
@@ -3471,20 +3499,17 @@ class Color extends Proto {
 	testZone ( mx, my ) {
 
 		let l = this.local;
-		if( l.x === -1 && l.y === -1 ) return '';
-
-
+		if( l.x === -1 && l.y === -1 ) return ''
 
 		if( this.up && this.isOpen ){
 
-			if( l.y > this.wfixe ) return 'title';
-		    else return 'color';
+			if( l.y > this.wfixe ) return 'title'
+		    else return 'color'
 
 		} else {
 
-			if( l.y < this.baseH+2 ) return 'title';
-	    	else if( this.isOpen ) return 'color';
-
+			if( l.y < this.baseH+2 ) return 'title'
+	    	else if( this.isOpen ) return 'color'
 
 		}
 
@@ -3535,7 +3560,7 @@ class Color extends Proto {
 
 	    	off = this.offset;
 		    off.x = e.clientX - ( this.zone.x + this.decal.x + this.mid );
-		    off.y = e.clientY - ( this.zone.y + this.decal.y + this.mid );
+		    off.y = e.clientY - ( this.zone.y + this.decal.y + this.mid ) - this.ytop;
 			d = off.length() * this.ratio;
 			rr = off.angle();
 			if(rr < 0) rr += 2 * T.PI;
@@ -3665,7 +3690,6 @@ class Color extends Proto {
 
 	    this.setSvg( this.c[3], 'fill', cc, 2, 0 );
 
-
 	    this.s[2].background = this.bcolor;
 	    if(!this.notext) this.c[2].textContent = Tools.htmlToHex( this.bcolor );
 
@@ -3773,6 +3797,12 @@ class Color extends Proto {
 	    s[2].width = this.sb + 'px';
 	    s[2].left = this.sa + 'px';
 
+	    //console.log(this.sb)
+
+	    this.cw = this.sb > 256 ? 256 : this.sb;
+
+
+
 	    this.rSizeColor( this.cw );
 
 	    this.decal.x = Math.floor((this.w - this.wfixe) * 0.5);
@@ -3782,9 +3812,14 @@ class Color extends Proto {
 
 	rSizeColor ( w ) {
 
+
 		if( w === this.wfixe ) return;
 
+
+
 		this.wfixe = w;
+
+
 
 		let s = this.s;
 
@@ -4374,7 +4409,7 @@ class Graph extends Proto {
             nup = this.mode( this.isDown ? 2 : 1, name );
             //this.cursor( this.current !== -1 ? 'move' : 'pointer' );
             if(this.isDown){
-            	this.v[name] = this.clamp( 1 - (( e.clientY - this.zone.y - this.top - 10 ) / this.gh) , 0, 1 );
+            	this.v[name] = this.clamp( 1 - (( e.clientY - this.zone.y - this.ytop - 10 ) / this.gh) , 0, 1 );
             	this.update( true );
             }
 
@@ -4407,16 +4442,16 @@ class Graph extends Proto {
     		wm = w + this.iw*0.5;
     		wn = w + this.iw;
 
-    		if(i===0) p+='M '+w+' '+ h + ' T ' + wm +' '+ h;
+    		if( i === 0 ) p+='M '+w+' '+ h + ' T ' + wm +' '+ h;
     		else p += ' C ' + ow +' '+ oh + ',' + w +' '+ h + ',' + wm +' '+ h;
-    		if(i === this.lng-1) p+=' T ' + wn +' '+ h;
+    		if( i === this.lng-1 ) p+=' T ' + wn +' '+ h;
 
     		ow = wn;
     		oh = h; 
 
     	}
 
-    	return p;
+    	return p
 
     }
 
@@ -4430,7 +4465,6 @@ class Graph extends Proto {
 
         let gw = this.w - 28;
         let iw = ((gw-(4*(this.lng-1)))/this.lng);
-
         let t = [];
 
         s[2].width = gw + 'px';
@@ -4478,6 +4512,10 @@ class Group extends Proto {
 
         this.c[2] = this.dom( 'div', this.css.basic + flexible + 'width:100%; left:0; height:auto; overflow:hidden; top:'+(this.h)+'px');
         this.c[3] = this.dom( 'path', this.css.basic + 'position:absolute; width:6px; height:6px; left:0; top:'+fltop+'px;', { d:this.svgs.g1, fill:cc.text, stroke:'none'});
+
+        let bh = this.mtop === 0 ? this.margin : this.mtop;
+        
+        this.c[4] = this.dom( 'div', this.css.basic + 'width:100%; left:0; height:'+(bh+1)+'px; top:'+((this.h-1))+'px; background:none;');
 
         this.s;
         this.c[1].name = 'group';
@@ -4529,10 +4567,12 @@ class Group extends Proto {
 
         let name = '';
 
-        if( l.y < this.baseH ) name = 'title';
+        if( l.y < this.baseH + this.margin ) name = 'title';
         else {
             if( this.isOpen ) name = 'content';
         }
+
+        //console.log(name)
 
         return name;
 
@@ -4577,16 +4617,23 @@ class Group extends Proto {
         switch( name ){
 
             case 'content':
-            this.cursor();
+
+            //this.cursor()
+
+            //if( this.marginDiv ) e.clientY -= this.margin * 0.5
 
             if( Roots.isMobile && type === 'mousedown' ) this.getNext( e, change );
 
-            if( this.proto ) protoChange = this.proto.handleEvent( e );
+            if( this.proto ){ 
+                //e.clientY -= this.margin
+                protoChange = this.proto.handleEvent( e );
+            }
 
             if( !Roots.lock ) this.getNext( e, change );
 
             break;
             case 'title':
+            //this.cursor( this.isOpen ? 'n-resize':'s-resize' );
             this.cursor('pointer');
             if( type === 'mousedown' ){
                 if( this.isOpen ) this.close();
@@ -4644,6 +4691,9 @@ class Group extends Proto {
         }
 
         let u = this.ADD.apply( this, a );
+        //u.margin += this.margin
+
+        //console.log( u.margin )
 
         this.uis.push( u );
 
@@ -4703,9 +4753,9 @@ class Group extends Proto {
         let id = this.uis.indexOf( n );
 
         if ( id !== -1 ) {
-            this.calc( - ( this.uis[ id ].h + 1 ) );
+            this.calc( - ( this.uis[ id ].h + this.margin ) );
             this.c[2].removeChild( this.uis[ id ].c[0] );
-            this.uis.splice( id, 1 ); 
+            this.uis.splice( id, 1 );
 
             if( this.uis.length === 0 ){ 
                 this.isEmpty = true;
@@ -4724,17 +4774,21 @@ class Group extends Proto {
         this.setSvg( this.c[3], 'd', this.svgs.g2 );
         this.rSizeContent();
 
-        this.h - this.baseH;
+        //let t = this.h - this.baseH
 
         const s = this.s;
         const cc = this.colors;
 
-        s[2].top = (this.h-1) + 'px';
+        //s[2].top = (this.h-1) + 'px'
+        s[2].top = (this.h+this.mtop) + 'px';
+        s[4].background = cc.groups;//'#0f0'
 
         if(this.radius){
 
             s[1].borderRadius = '0px';
             s[2].borderRadius = '0px';
+
+
 
             s[1].borderTopLeftRadius = this.radius+'px';
             s[1].borderTopRightRadius = this.radius+'px';
@@ -4743,6 +4797,9 @@ class Group extends Proto {
         }
 
         if( cc.gborder !== 'none' ){
+
+            s[4].borderLeft = cc.borderSize+'px solid '+ cc.gborder;
+            s[4].borderRight = cc.borderSize+'px solid '+ cc.gborder;
 
             s[2].border = cc.borderSize+'px solid '+ cc.gborder;
             s[2].borderTop = 'none';
@@ -4758,7 +4815,7 @@ class Group extends Proto {
 
         super.close();
 
-        this.h - this.baseH;
+        //let t = this.h - this.baseH
 
         this.setSvg( this.c[3], 'd', this.svgs.g1 );
 
@@ -4769,10 +4826,13 @@ class Group extends Proto {
         
         s[0].height = this.h + 'px';
         //s[1].height = (this.h-2) + 'px'
-        s[2].top = this.h + 'px';
+        //s[2].top = this.h + 'px'
+        s[2].top = (this.h+this.mtop) + 'px';
+        s[4].background = 'none';
 
         if( cc.gborder !== 'none' ){
 
+            s[4].border = 'none';
             s[2].border = 'none';
             s[1].border = cc.borderSize+'px solid '+ cc.gborder;
         }
@@ -4786,7 +4846,8 @@ class Group extends Proto {
     calcUis () {
 
         if( !this.isOpen ) this.h = this.baseH;
-        else this.h = Roots.calcUis( this.uis, this.zone, this.zone.y + this.baseH ) + this.baseH;
+        //else this.h = Roots.calcUis( this.uis, this.zone, this.zone.y + this.baseH ) + this.baseH;
+        else this.h = Roots.calcUis( this.uis, this.zone, this.zone.y + this.baseH + this.margin ) + this.baseH;
 
         this.s[0].height = this.h + 'px';
 
@@ -4827,7 +4888,6 @@ class Group extends Proto {
         this.w = this.w - this.decal;
 
         s[3].left = ( this.sa + this.sb - 6 ) + 'px';
-        //s[1].width = this.isbgGroup ? (this.w-5) + 'px' : this.w + 'px'
 
         s[1].width = this.w + 'px';
         s[2].width = this.w + 'px';
@@ -4835,6 +4895,23 @@ class Group extends Proto {
         s[2].left = (this.decal) + 'px';
 
         if( this.isOpen ) this.rSizeContent();
+
+    }
+
+    //
+
+    uiout() {
+
+        if( this.lock ) return;
+        if(this.s) this.s[0].background = this.colors.background;
+
+    }
+
+    uiover() {
+
+        if( this.lock ) return;
+        //if( this.isOpen ) return;
+        if(this.s) this.s[0].background = this.colors.backgroundOver;
 
     }
 
@@ -4870,7 +4947,6 @@ class Joystick extends Proto {
         this.distance = (this.diam*0.5)*0.25;
 
         this.h = o.h || this.w + 10;
-        this.top = 0;
 
         this.c[0].style.width = this.w +'px';
 
@@ -4984,7 +5060,7 @@ class Joystick extends Proto {
         //this.tmp.y = this.radius - ( e.clientY - this.zone.y - this.top );
 
         this.tmp.x = (this.w*0.5) - ( e.clientX - this.zone.x );
-        this.tmp.y = (this.diam*0.5) - ( e.clientY - this.zone.y - this.top );
+        this.tmp.y = (this.diam*0.5) - ( e.clientY - this.zone.y - this.ytop );
 
         let distance = this.tmp.length();
 
@@ -5102,7 +5178,6 @@ class Knob extends Proto {
         this.offset = new V2();
 
         this.h = o.h || this.w + 10;
-        this.top = 0;
 
         this.c[0].style.width = this.w +'px';
         this.c[0].style.display = 'block';
@@ -5221,7 +5296,7 @@ class Knob extends Proto {
         //off.y = this.radius - ( e.clientY - this.zone.y - this.top );
 
         off.x = (this.w*0.5) - ( e.clientX - this.zone.x );
-        off.y = (this.diam*0.5) - ( e.clientY - this.zone.y - this.top );
+        off.y = (this.diam*0.5) - ( e.clientY - this.zone.y - this.ytop );
 
         this.r = - Math.atan2( off.x, off.y );
 
@@ -5484,6 +5559,8 @@ class List extends Proto {
         this.init();
         if( this.isOpenOnStart ) this.open( true );
 
+        this.baseH += this.mtop;
+
     }
 
     // image list
@@ -5709,6 +5786,7 @@ class List extends Proto {
             this.modeScroll(1);
             if( this.isDown ){
                 this.modeScroll(2);
+                //this.update( ( e.clientY - top  ) - ( this.sh*0.5 ) );
                 let top = this.zone.y+this.baseH-2;
                 this.update( ( e.clientY - top  ) - ( this.sh*0.5 ) );
             }
@@ -6130,7 +6208,6 @@ class Numeric extends Proto {
         this.allway = o.allway || false;
 
         this.isDown = false;
-
         this.value = [0];
         this.multy = 1;
         this.invmulty = 1;
@@ -6147,10 +6224,10 @@ class Numeric extends Proto {
         this.isDrag = o.drag || false;
 
         if( o.value !== undefined ){
-            if(!isNaN(o.value)){ 
+            if( !isNaN(o.value) ){
                 this.value = [o.value];
             } else if( o.value instanceof Array ){ 
-                this.value = o.value; 
+                this.value = o.value;
                 this.isSingle = false;
             } else if( o.value instanceof Object ){ 
                 this.value = [];
@@ -6158,15 +6235,13 @@ class Numeric extends Proto {
                 if( o.value.y !== undefined ) this.value[1] = o.value.y;
                 if( o.value.z !== undefined ) this.value[2] = o.value.z;
                 if( o.value.w !== undefined ) this.value[3] = o.value.w;
-                this.isVector = true;
                 this.isSingle = false;
+                this.isVector = true;
             }
         }
 
         this.lng = this.value.length;
         this.tmp = [];
-
-        
 
         this.current = -1;
         this.prev = { x:0, y:0, d:0, v:0 };
@@ -6181,24 +6256,23 @@ class Numeric extends Proto {
         let i = this.lng;
         while(i--){
 
-            if(this.isAngle) this.value[i] = (this.value[i] * 180 / Math.PI).toFixed( this.precision );
-            this.c[3+i] = this.dom( 'div', this.css.txtselect + ' height:'+(this.h-4)+'px; color:' + cc.text + '; background:' + cc.back + '; borderColor:' + cc.border+'; border-radius:'+this.radius+'px;');
+            if( this.isAngle ) this.value[i] = (this.value[i] * 180 / Math.PI).toFixed( this.precision );
+            this.c[3+i] = this.dom( 'div', this.css.txtselect + 'top:1px; height:'+(this.h-2)+'px; color:' + cc.text + '; background:' + cc.back + '; borderColor:' + cc.border+'; border-radius:'+this.radius+'px;');
             if(o.center) this.c[2+i].style.textAlign = 'center';
             this.c[3+i].textContent = this.value[i];
             this.c[3+i].style.color = this.colors.text;
             this.c[3+i].isNum = true;
-
             this.cMode[i] = 0;
 
         }
 
         // selection
         this.selectId = 3 + this.lng;
-        this.c[this.selectId] = this.dom(  'div', this.css.txtselect + 'position:absolute; top:4px; height:' + (this.h-8) + 'px; padding:0px 0px; width:0px; color:' + cc.textSelect + '; background:' + cc.select + '; border:none; border-radius:0px;');
+        this.c[this.selectId] = this.dom(  'div', this.css.txtselect + 'position:absolute; top:2px; height:' + (this.h-4) + 'px; padding:0px 0px; width:0px; color:' + cc.textSelect + '; background:' + cc.select + '; border:none; border-radius:0px;');
 
         // cursor
         this.cursorId = 4 + this.lng;
-        this.c[ this.cursorId ] = this.dom( 'div', this.css.basic + 'top:4px; height:' + (this.h-8) + 'px; width:0px; background:'+cc.text+';' );
+        this.c[ this.cursorId ] = this.dom( 'div', this.css.basic + 'top:2px; height:' + (this.h-4) + 'px; width:0px; background:'+cc.text+';' );
 
         this.init();
     }
@@ -6206,41 +6280,18 @@ class Numeric extends Proto {
     testZone ( e ) {
 
         let l = this.local;
-        if( l.x === -1 && l.y === -1 ) return '';
+        if( l.x === -1 && l.y === -1 ) return ''
 
         let i = this.lng;
         let t = this.tmp;
-        
 
         while( i-- ){
-            if( l.x>t[i][0] && l.x<t[i][2] ) return i;
+            if( l.x>t[i][0] && l.x<t[i][2] ) return i
         }
 
-        return '';
+        return ''
 
     }
-
-   /* mode: function ( n, name ) {
-
-        if( n === this.cMode[name] ) return false;
-
-        //let m;
-
-        /*switch(n){
-
-            case 0: m = this.colors.border; break;
-            case 1: m = this.colors.borderOver; break;
-            case 2: m = this.colors.borderSelect;  break;
-
-        }*/
-
-   /*     this.reset();
-        //this.c[name+2].style.borderColor = m;
-        this.cMode[name] = n;
-
-        return true;
-
-    },*/
 
     // ----------------------
     //   EVENTS
@@ -6254,25 +6305,13 @@ class Numeric extends Proto {
             this.isDown = true;
             if( name !== '' ){ 
             	this.current = name;
-            	this.prev = { x:e.clientX, y:e.clientY, d:0, v: this.isSingle ? parseFloat(this.value) : parseFloat( this.value[ this.current ] )  };
+            	this.prev = { x:e.clientX, y:e.clientY, d:0, v: this.isSingle ? parseFloat(this.value) : parseFloat( this.value[ this.current ] ) };
             	this.setInput( this.c[ 3 + this.current ] );
             }
-            return this.mousemove( e );
+            return this.mousemove( e )
         }
 
-        return false;
-        /*
-
-        if( name === '' ) return false;
-
-
-        this.current = name;
-        this.isDown = true;
-
-        this.prev = { x:e.clientX, y:e.clientY, d:0, v: this.isSingle ? parseFloat(this.value) : parseFloat( this.value[ this.current ] )  };
-
-
-        return this.mode( 2, name );*/
+        return false
 
     }
 
@@ -6281,35 +6320,12 @@ class Numeric extends Proto {
     	if( this.isDown ){
             
             this.isDown = false;
-            //this.current = -1;
             this.prev = { x:0, y:0, d:0, v:0 };
 
-            return this.mousemove( e );
+            return this.mousemove( e )
         }
 
-        return false;
-
-        /*let name = this.testZone( e );
-        this.isDown = false;
-
-        if( this.current !== -1 ){ 
-
-            //let tm = this.current;
-            let td = this.prev.d;
-
-            this.current = -1;
-            this.prev = { x:0, y:0, d:0, v:0 };
-
-            if( !td ){
-
-                this.setInput( this.c[ 3 + name ] );
-                return true;//this.mode( 2, name );
-
-            } else {
-                return this.reset();//this.mode( 0, tm );
-            }
-
-        }*/
+        return false
 
     }
 
@@ -6351,38 +6367,20 @@ class Numeric extends Proto {
 
         	if( this.isDown ) x = e.clientX - this.zone.x -3;
         	if( this.current !== -1 ) x -= this.tmp[this.current][0];
-        	return this.upInput( x, this.isDown );
+        	return this.upInput( x, this.isDown )
 
         }
 
-        
-
-
-        return nup;
+        return nup
 
     }
-
-    //keydown: function ( e ) { return true; },
 
     // ----------------------
 
     reset () {
 
         let nup = false;
-        //this.isDown = false;
-
-        //this.current = 0;
-
-       /* let i = this.lng;
-        while(i--){ 
-            if(this.cMode[i]!==0){
-                this.cMode[i] = 0;
-                //this.c[2+i].style.borderColor = this.colors.border;
-                nup = true;
-            }
-        }*/
-
-        return nup;
+        return nup
 
     }
 
@@ -6390,17 +6388,12 @@ class Numeric extends Proto {
     setValue ( v ) {
 
         if( this.isVector ){
-
             if( v.x !== undefined ) this.value[0] = v.x;
             if( v.y !== undefined ) this.value[1] = v.y;
             if( v.z !== undefined ) this.value[2] = v.z;
             if( v.w !== undefined ) this.value[3] = v.w;
-
         } else {
-
-            if( this.isSingle ) this.value = [v];
-            else this.value = v;
-            
+            this.value = this.isSingle ? [v] : v;  
         }
 
         this.update();
@@ -6436,9 +6429,7 @@ class Numeric extends Proto {
         if( this.objectLink !== null ){ 
 
             if( this.isVector ){
-
                 this.objectLink[ this.objectKey ].fromArray( v );
-
             } else {
                 this.objectLink[ this.objectKey ] = v;
             }
@@ -6446,7 +6437,6 @@ class Numeric extends Proto {
         }
 
         if( this.callback ) this.callback( v, this.objectKey );
-
         this.isSend = false;
 
     }
@@ -6462,9 +6452,6 @@ class Numeric extends Proto {
         let d = this.current !== -1 ? this.tmp[this.current][0] + 5 : 0;
         s[this.cursorId].width = '1px';
         s[this.cursorId].left = ( d + c ) + 'px';
-        //s[2].left = ( d + e ) + 'px';
-        //s[2].width = w + 'px';
-
         s[this.selectId].left =  ( d + e )  + 'px';
         s[this.selectId].width =  w  + 'px';
         this.c[this.selectId].innerHTML = t;
@@ -6474,7 +6461,7 @@ class Numeric extends Proto {
     unselect () {
 
         let s = this.s;
-        if(!s) return;
+        if(!s) return
         this.c[this.selectId].innerHTML = '';
         s[this.selectId].width = 0 + 'px';
         s[this.cursorId].width = 0 + 'px';
@@ -6500,10 +6487,8 @@ class Numeric extends Proto {
         	ar[i] = this.value[i] * this.multy;
         }
 
-        if( !force ) return;
-
-        if( this.isSingle ) this.send( ar[0] );
-        else this.send( ar );
+        if( !force ) return
+        this.send( this.isSingle ? ar[0] : ar );
 
     }
 
@@ -6810,17 +6795,17 @@ class TextInput extends Proto {
         let cc = this.colors;
 
         // text
-        this.c[2] = this.dom( 'div', this.css.txtselect + 'height:' + (this.h-4) + 'px; color:' + cc.text + '; background:' + cc.back + '; borderColor:' + cc.border+'; border-radius:'+this.radius+'px;' );
+        this.c[2] = this.dom( 'div', this.css.txtselect + 'top:1px; height:' + (this.h-2) + 'px; color:' + cc.text + '; background:' + cc.back + '; borderColor:' + cc.border+'; border-radius:'+this.radius+'px;' );
         this.c[2].textContent = this.value;
 
         // selection
-        this.c[3] = this.dom(  'div', this.css.txtselect + 'position:absolute; top:4px; height:' + (this.h-8) + 'px; padding:0px 0px; width:0px; color:' + cc.textSelect + '; background:' + cc.select + '; border:none; border-radius:0px;');
+        this.c[3] = this.dom(  'div', this.css.txtselect + 'position:absolute; top:2px; height:' + (this.h-4) + 'px; padding:0px 0px; width:0px; color:' + cc.textSelect + '; background:' + cc.select + '; border:none; border-radius:0px;');
 
         // cursor
-        this.c[4] = this.dom( 'div', this.css.basic + 'top:4px; height:' + (this.h-8) + 'px; width:0px; background:'+cc.text+';' );
+        this.c[4] = this.dom( 'div', this.css.basic + 'top:2px; height:' + (this.h-4) + 'px; width:0px; background:'+cc.text+';' );
 
         // fake
-        this.c[5] = this.dom( 'div', this.css.txtselect + 'height:' + (this.h-4) + 'px; justify-content: center; font-style: italic; color:'+cc.border+';' );
+        this.c[5] = this.dom( 'div', this.css.txtselect + 'top:1px; height:' + (this.h-2) + 'px; border:none; justify-content: center; font-style: italic; color:'+cc.border+';' );
         if( this.value === '' ) this.c[5].textContent = this.placeHolder;
 
         
@@ -7037,9 +7022,7 @@ class Select extends Proto {
         super( o );
 
         this.value = o.value || '';
-
         this.isDown = false;
-
         this.onActif = o.onActif || function(){};
 
         //let prefix = o.prefix || '';
@@ -7064,8 +7047,8 @@ class Select extends Proto {
     testZone ( e ) {
 
         let l = this.local;
-        if( l.x === -1 && l.y === -1 ) return '';
-        if( l.x > this.sa && l.x < this.sa+30 ) return 'over';
+        if( l.x === -1 && l.y === -1 ) return ''
+        if( l.x > this.sa && l.x < this.sa+30 ) return 'over'
         return '0'
 
     }
@@ -7080,10 +7063,10 @@ class Select extends Proto {
             //this.value = false;
             this.isDown = false;
             //this.send();
-            return this.mousemove( e );
+            return this.mousemove( e )
         }
 
-        return false;
+        return false
 
     }
 
@@ -7091,25 +7074,19 @@ class Select extends Proto {
 
         let name = this.testZone( e );
 
-        if( !name ) return false;
+        if( !name ) return false
 
         this.isDown = true;
         //this.value = this.values[ name-2 ];
         //this.send();
-        return this.mousemove( e );
+        return this.mousemove( e )
 
     }
 
     mousemove ( e ) {
 
         let up = false;
-
         let name = this.testZone( e );
-        //let sel = false;
-
-        
-
-        //console.log(name)
 
         if( name === 'over' ){
             this.cursor('pointer');
@@ -7118,7 +7095,7 @@ class Select extends Proto {
             up = this.reset();
         }
 
-        return up;
+        return up
 
     }
 
@@ -7174,7 +7151,7 @@ class Select extends Proto {
 
         }
 
-        return change;
+        return change
 
 
 
@@ -7183,7 +7160,7 @@ class Select extends Proto {
     reset () {
 
         this.cursor();
-        return this.mode( this.isActif ? 4 : 1 );
+        return this.mode( this.isActif ? 4 : 1 )
 
     }
 
@@ -7556,21 +7533,24 @@ class Grid extends Proto {
         this.value = o.value || null;
 
 
+        let cc = this.colors;
+
+
         this.isSelectable = o.selectable || false;
-        this.spaces = o.spaces || [5,3];
+        this.spaces = o.spaces || [cc.sx,cc.sy];
         this.bsize = o.bsize || [90,20];
 
-        if(o.h) this.bsize[1] = o.h;
+        if( o.h ) this.bsize[1] = o.h;
         this.bsizeMax = this.bsize[0];
 
-        
         this.tmp = [];
         this.stat = [];
         this.grid = [ 2, Math.round( this.lng * 0.5 ) ];
-        this.h = this.grid[1] * ( this.bsize[1] + this.spaces[1] ) + this.spaces[1];
+        this.h = ( this.grid[1] * this.bsize[1] ) + ( (this.grid[1]) * this.spaces[1] ) + 4 - (this.mtop*2); //+ (this.spaces[1] - this.mtop);
 
         this.c[1].textContent = '';
-        this.c[2] = this.dom( 'table', this.css.basic + 'width:100%; top:'+(this.spaces[1]-2)+'px; height:auto; border-collapse:separate; border:none; border-spacing: '+(this.spaces[0]-2)+'px '+(this.spaces[1]-2)+'px;' );
+        //this.c[2] = this.dom( 'table', this.css.basic + 'width:100%; top:'+(this.spaces[1]-2)+'px; height:auto; border-collapse:separate; border:none; border-spacing: '+(this.spaces[0]-2)+'px '+(this.spaces[1]-2)+'px;' );
+        this.c[2] = this.dom( 'table', this.css.basic + 'width:100%; border-spacing: '+(this.spaces[0]-2)+'px '+(this.spaces[1])+'px; border:none;' );
 
         let n = 0, b, td, tr, sel;
 
@@ -7578,12 +7558,10 @@ class Grid extends Proto {
         this.isDown = false;
         this.neverlock = true;
 
-        this.buttons = [];
+        this.buttons = []; 
         this.stat = [];
         this.tmpX = [];
         this.tmpY = [];
-
-        let cc = this.colors;
 
         for( let i = 0; i < this.grid[1]; i++ ){
 
@@ -7625,6 +7603,8 @@ class Grid extends Proto {
             }
         }
 
+        //this.s[0].border = 'none'
+
         this.init();
 
     }
@@ -7633,6 +7613,8 @@ class Grid extends Proto {
 
         let l = this.local;
         if( l.x === -1 && l.y === -1 ) return -1;
+
+        l.y += this.mtop;
         
         let tx = this.tmpX;
         let ty = this.tmpY;
@@ -7887,7 +7869,6 @@ class Pad2D extends Proto {
         
         
         this.h = o.h || this.w + 10;
-        this.top = 0;
 
         this.c[0].style.width = this.w + 'px';
 
@@ -7900,6 +7881,8 @@ class Pad2D extends Proto {
             this.h += 10;
 
         }
+
+        //this.top -= this.margin
 
         let cc = this.colors;
 
@@ -7934,6 +7917,8 @@ class Pad2D extends Proto {
 
         if( l.x === -1 && l.y === -1 ) return '';
 
+
+
         if( l.y <= this.c[ 1 ].offsetHeight ) return 'title';
         else if ( l.y > this.h - this.c[ 2 ].offsetHeight ) return 'text';
         else return 'pad';
@@ -7950,7 +7935,7 @@ class Pad2D extends Proto {
 
         this.isDown = false;
         return this.mode(0);
-    
+
     }
 
     mousedown ( e ) {
@@ -7969,7 +7954,9 @@ class Pad2D extends Proto {
         if( !this.isDown ) return;
 
         let x = (this.w*0.5) - ( e.clientX - this.zone.x );
-        let y = (this.diam*0.5) - ( e.clientY - this.zone.y - this.top );
+        let y = (this.diam*0.5) - ( e.clientY - this.zone.y - this.ytop );
+        
+
         let r = 256 / this.diam;
 
         x = -(x*r);
@@ -8269,6 +8256,9 @@ class Gui {
         this.h = 0;
         //this.prevY = -1;
         this.sw = 0;
+
+        this.margin = this.colors.sy;
+        this.marginDiv = Tools.isDivid( this.margin );
 
         
 
@@ -8591,7 +8581,7 @@ class Gui {
 
     		case 'content':
 
-                e.clientY = this.isScroll ?  e.clientY + this.decal : e.clientY;
+                e.clientY = this.isScroll ? e.clientY + this.decal : e.clientY;
 
                 if( Roots.isMobile && type === 'mousedown' ) this.getNext( e, change );
 
@@ -8651,7 +8641,6 @@ class Gui {
         if( next !== this.current ){
             this.clearTarget();
             this.current = next;
-
             this.isNewTarget = true;
 
         }
@@ -8825,7 +8814,7 @@ class Gui {
         while(i--){ 
             if( this.uis[i].value === name ){ 
                 this.uis[i].selected( true );
-                if( this.isScroll ) this.update( ( i*(this.uis[i].h+1) )*this.ratio );
+                if( this.isScroll ) this.update( ( i*(this.uis[i].h+this.margin) )*this.ratio );
             }
         }
 
@@ -8931,7 +8920,6 @@ class Gui {
 
 
         if( this.forceHeight && this.lockHeight ) this.content.style.height = this.forceHeight + 'px';
-
         if( this.isCanvas ) this.draw( true );
 
     }
@@ -8945,11 +8933,8 @@ class Gui {
         if( w ) this.zone.w = w;
 
         this.zone.w = Math.floor( this.zone.w );
-
         this.content.style.width = this.zone.w + 'px';
-
         if( this.isCenter ) this.content.style.marginLeft = -(Math.floor(this.zone.w*0.5)) + 'px';
-
         this.setItemWidth( this.zone.w - this.sw );
 
     }
@@ -8966,6 +8951,6 @@ class Gui {
 
 }
 
-const REVISION = '4.2.3';
+const REVISION = '4.2.5';
 
 export { Files, Gui, Proto, REVISION, Tools, add };

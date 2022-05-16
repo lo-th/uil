@@ -66,6 +66,9 @@ export class Gui {
         //this.prevY = -1;
         this.sw = 0;
 
+        this.margin = this.colors.sy
+        this.marginDiv = Tools.isDivid( this.margin )
+
         
 
         // bottom and close height
@@ -387,31 +390,31 @@ export class Gui {
 
     		case 'content':
 
-                e.clientY = this.isScroll ?  e.clientY + this.decal : e.clientY;
+                e.clientY = this.isScroll ? e.clientY + this.decal : e.clientY;
 
-                if( Roots.isMobile && type === 'mousedown' ) this.getNext( e, change );
+                if( Roots.isMobile && type === 'mousedown' ) this.getNext( e, change )
 
-	    		if( this.proto ) protoChange = this.proto.handleEvent( e );
+	    		if( this.proto ) protoChange = this.proto.handleEvent( e )
 
 	    		if( type === 'mousemove' ) change = this.mode('def');
-                if( type === 'wheel' && !protoChange && this.isScroll ) change = this.onWheel( e );
+                if( type === 'wheel' && !protoChange && this.isScroll ) change = this.onWheel( e )
                
 	    		if( !Roots.lock ) {
-                    this.getNext( e, change );
+                    this.getNext( e, change )
                 }
 
     		break;
     		case 'bottom':
 
 	    		this.clearTarget();
-	    		if( type === 'mousemove' ) change = this.mode('bottomOver');
+	    		if( type === 'mousemove' ) change = this.mode('bottomOver')
 	    		if( type === 'mousedown' ) {
-	    			this.isOpen = this.isOpen ? false : true;
-		            this.bottom.textContent = this.isOpen ? this.bottomText[1] : this.bottomText[0];
+	    			this.isOpen = this.isOpen ? false : true
+		            this.bottom.textContent = this.isOpen ? this.bottomText[1] : this.bottomText[0]
 		            //this.setHeight();
-                    this.calc();
-		            this.mode('def');
-		            change = true;
+                    this.calc()
+		            this.mode('def')
+		            change = true
 	    		}
 
     		break;
@@ -448,7 +451,6 @@ export class Gui {
             this.clearTarget();
             this.current = next;
             change = true;
-
             this.isNewTarget = true;
 
         }
@@ -622,7 +624,7 @@ export class Gui {
         while(i--){ 
             if( this.uis[i].value === name ){ 
                 this.uis[i].selected( true )
-                if( this.isScroll ) this.update( ( i*(this.uis[i].h+1) )*this.ratio )
+                if( this.isScroll ) this.update( ( i*(this.uis[i].h+this.margin) )*this.ratio )
             }
         }
 
@@ -728,7 +730,6 @@ export class Gui {
 
 
         if( this.forceHeight && this.lockHeight ) this.content.style.height = this.forceHeight + 'px';
-
         if( this.isCanvas ) this.draw( true )
 
     }
@@ -742,11 +743,8 @@ export class Gui {
         if( w ) this.zone.w = w
 
         this.zone.w = Math.floor( this.zone.w )
-
         this.content.style.width = this.zone.w + 'px'
-
         if( this.isCenter ) this.content.style.marginLeft = -(Math.floor(this.zone.w*0.5)) + 'px'
-
         this.setItemWidth( this.zone.w - this.sw )
 
     }

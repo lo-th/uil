@@ -223,7 +223,7 @@ const R = {
 
         if( R.needResize ) R.resize()
 
-        R.findZone();
+        R.findZone()
        
         let e = R.e
         let leave = false
@@ -246,11 +246,10 @@ const R = {
             e.type = 'mouseup'
         }
 
-        if( event.type === 'pointerleave'){ R.isLeave = true };
+        if( event.type === 'pointerleave') R.isLeave = true 
 
-
-        if( event.type === 'pointerdown') e.type = 'mousedown';
-        if( event.type === 'pointerup') e.type = 'mouseup';
+        if( event.type === 'pointerdown') e.type = 'mousedown'
+        if( event.type === 'pointerup') e.type = 'mouseup'
         if( event.type === 'pointermove'){ 
             if( R.isLeave ){ 
                 // if user resize outside this document
@@ -297,6 +296,8 @@ const R = {
                 e.clientY = R.ID.mouse.y;
 
             }
+
+            //if( R.ID.marginDiv ) e.clientY -= R.ID.margin * 0.5
 
             R.ID.handleEvent( e );
 
@@ -364,13 +365,13 @@ const R = {
     //   GUI / GROUP FUNCTION
     // ----------------------
 
-    calcUis: function ( uis, zone, py ) {
+    calcUis: ( uis, zone, py ) => {
 
         //console.log('calc_uis')
 
-        let i = uis.length, u, px = 0, n = 0, tw;
+        let i = uis.length, u, px = 0, n = 0, tw, m, div;
+
         let height = 0
-        let m = 1
 
         while( i-- ){
 
@@ -379,33 +380,30 @@ const R = {
 
             if( u.isGroup ) u.calcUis()
 
-            u.zone.w = u.w
-            u.zone.h = u.h
             m = u.margin
+            //div = u.marginDiv
 
+            u.zone.w = u.w
+            u.zone.h = u.h + m
+            
             if( !u.autoWidth ){
 
-                if( px===0 ){ 
-                    height += u.h + m
+                if( px === 0 ) height += u.h + m
 
-                } 
-
-                u.zone.x = zone.x + px;
-                u.zone.y = py;
+                u.zone.x = zone.x + px
+                u.zone.y = py// + u.mtop
+                //if(div) u.zone.y += m * 0.5
 
                 tw = R.getWidth(u)
-                if( tw ) u.zone.w = u.w = tw;
-                // focrce width if content is canvas
-                else if( u.fw ) u.zone.w = u.w = u.fw;
+                if( tw ) u.zone.w = u.w = tw
+                else if( u.fw ) u.zone.w = u.w = u.fw
                 
-
-                //console.log( u.name, u.zone.w, u.w, zone, tw )
-                //console.log(  tw )
-                px += u.zone.w;
+                px += u.zone.w
 
                 if( px >= zone.w ) { 
-                    py += u.h + m; 
-                    px = 0; 
+                    py += u.h + m
+                    //if(div) py += m * 0.5
+                    px = 0
                 }
 
             } else {
@@ -415,6 +413,7 @@ const R = {
                 u.zone.x = zone.x
                 u.zone.y = py
                 py += u.h + m
+
 
                 height += u.h + m
 
@@ -469,7 +468,12 @@ const R = {
         let mx = x - z.x;
         let my = y - z.y;
 
+        //if( this.marginDiv ) e.clientY -= this.margin * 0.5
+        //if( o.group && o.group.marginDiv ) my += o.group.margin * 0.5
+
         let over = ( mx >= 0 ) && ( my >= 0 ) && ( mx <= z.w ) && ( my <= z.h );
+
+        //if( o.marginDiv ) my -= o.margin * 0.5
 
         if( over ) o.local.set( mx, my );
         else o.local.neg();

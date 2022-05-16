@@ -181,9 +181,7 @@
 				e.type = 'mouseup';
 			}
 
-			if (event.type === 'pointerleave') {
-				R.isLeave = true;
-			}
+			if (event.type === 'pointerleave') R.isLeave = true;
 			if (event.type === 'pointerdown') e.type = 'mousedown';
 			if (event.type === 'pointerup') e.type = 'mouseup';
 
@@ -229,7 +227,8 @@
 				if (R.ID.isCanvasOnly) {
 					e.clientX = R.ID.mouse.x;
 					e.clientY = R.ID.mouse.y;
-				}
+				} //if( R.ID.marginDiv ) e.clientY -= R.ID.margin * 0.5
+
 
 				R.ID.handleEvent(e);
 			}
@@ -283,40 +282,38 @@
 		// ----------------------
 		//	 GUI / GROUP FUNCTION
 		// ----------------------
-		calcUis: function (uis, zone, py) {
+		calcUis: (uis, zone, py) => {
 			//console.log('calc_uis')
 			let i = uis.length,
 					u,
 					px = 0,
 					n = 0,
-					tw;
+					tw,
+					m;
 			let height = 0;
-			let m = 1;
 
 			while (i--) {
 				u = uis[n];
 				n++;
 				if (u.isGroup) u.calcUis();
+				m = u.margin; //div = u.marginDiv
+
 				u.zone.w = u.w;
-				u.zone.h = u.h;
-				m = u.margin;
+				u.zone.h = u.h + m;
 
 				if (!u.autoWidth) {
-					if (px === 0) {
-						height += u.h + m;
-					}
-
+					if (px === 0) height += u.h + m;
 					u.zone.x = zone.x + px;
-					u.zone.y = py;
-					tw = R.getWidth(u);
-					if (tw) u.zone.w = u.w = tw; // focrce width if content is canvas
-					else if (u.fw) u.zone.w = u.w = u.fw; //console.log( u.name, u.zone.w, u.w, zone, tw )
-					//console.log(	tw )
+					u.zone.y = py; // + u.mtop
+					//if(div) u.zone.y += m * 0.5
 
+					tw = R.getWidth(u);
+					if (tw) u.zone.w = u.w = tw;else if (u.fw) u.zone.w = u.w = u.fw;
 					px += u.zone.w;
 
 					if (px >= zone.w) {
-						py += u.h + m;
+						py += u.h + m; //if(div) py += m * 0.5
+
 						px = 0;
 					}
 				} else {
@@ -359,8 +356,11 @@
 			if (x === undefined || y === undefined) return false;
 			let z = o.zone;
 			let mx = x - z.x;
-			let my = y - z.y;
-			let over = mx >= 0 && my >= 0 && mx <= z.w && my <= z.h;
+			let my = y - z.y; //if( this.marginDiv ) e.clientY -= this.margin * 0.5
+			//if( o.group && o.group.marginDiv ) my += o.group.margin * 0.5
+
+			let over = mx >= 0 && my >= 0 && mx <= z.w && my <= z.h; //if( o.marginDiv ) my -= o.margin * 0.5
+
 			if (over) o.local.set(mx, my);else o.local.neg();
 			return over;
 		},
@@ -667,11 +667,12 @@
 		pi60: Math.PI / 3,
 		torad: Math.PI / 180,
 		todeg: 180 / Math.PI,
-		clamp: function (v, min, max) {
+		clamp: (v, min, max) => {
 			v = v < min ? min : v;
 			v = v > max ? max : v;
 			return v;
 		},
+		isDivid: v => v * 0.5 === Math.floor(v * 0.5),
 		size: {
 			w: 240,
 			h: 20,
@@ -681,7 +682,7 @@
 		// ----------------------
 		//	 COLOR
 		// ----------------------
-		defineColor: function (o, cc = T.colors) {
+		defineColor: (o, cc = T.colors) => {
 			let color = { ...cc
 			};
 			let textChange = ['fontFamily', 'fontWeight', 'fontShadow', 'fontSize'];
@@ -740,8 +741,11 @@
 			return color;
 		},
 		colors: {
-			sx: 3,
-			sy: 3,
+			sx: 4,
+			//4
+			sy: 2,
+			//2
+			radius: 2,
 			content: 'none',
 			background: 'rgba(50,50,50,0.15)',
 			backgroundOver: 'rgba(50,50,50,0.3)',
@@ -769,14 +773,13 @@
 			fontShadow: 'none',
 			//'#000',
 			fontSize: 12,
-			radius: 4,
 			hide: 'rgba(0,0,0,0)'
 		},
 		// style css
 		css: {
 			basic: 'position:absolute; pointer-events:none; box-sizing:border-box; margin:0; padding:0; overflow:hidden; ' + '-o-user-select:none; -ms-user-select:none; -khtml-user-select:none; -webkit-user-select:none; -moz-user-select:none;',
 			button: 'display:flex; align-items:center; justify-content:center; text-align:center;',
-			middle: 'display:flex; align-items:center; justify-content:left;	 text-align:left; flex-direction: row-reverse;'
+			middle: 'display:flex; align-items:center; justify-content:left; text-align:left; flex-direction: row-reverse;'
 		},
 		// svg path
 		svgs: {
@@ -801,7 +804,9 @@
 			object: 'M 10 1 L 7 4 4 1 1 1 1 13 4 13 4 5 7 8 10 5 10 13 13 13 13 1 10 1 Z',
 			none: 'M 9 5 L 5 5 5 9 9 9 9 5 Z',
 			cursor: 'M 4 7 L 1 10 1 12 2 13 4 13 7 10 9 14 14 0 0 5 4 7 Z',
-			load: 'M 14 8 L 12 8 12 12 2 12 2 8 0 8 0 14 14 14 14 8 M 8 5 L 8 0 6 0 6 5 3 5 7 9 11 5 8 5 Z'
+			load: 'M 13 8 L 11.5 6.5 9 9 9 3 5 3 5 9 2.5 6.5 1 8 7 14 13 8 M 9 2 L 9 0 5 0 5 2 9 2 Z',
+			save: 'M 9 12 L 5 12 5 14 9 14 9 12 M 11.5 7.5 L 13 6 7 0 1 6 2.5 7.5 5 5 5 11 9 11 9 5 11.5 7.5 Z',
+			extern: 'M 14 14 L 14 0 0 0 0 14 14 14 M 12 6 L 12 12 2 12 2 6 12 6 M 12 2 L 12 4 2 4 2 2 12 2 Z'
 		},
 
 		rezone() {
@@ -992,6 +997,7 @@
 		//	 Color function
 		// ----------------------
 		ColorLuma: function (hex, l) {
+			//if( hex.substring(0, 3) === 'rgba' ) hex = '#000';
 			if (hex === 'n') hex = '#000'; // validate hex string
 
 			hex = String(hex).replace(/[^0-9a-f]/gi, '');
@@ -1932,6 +1938,8 @@
 			this.isUI = o.isUI || false;
 			this.group = o.group || null;
 			this.isListen = false;
+			this.top = 0;
+			this.ytop = 0;
 			this.isSelectable = o.selectable !== undefined ? o.selectable : false;
 			this.unselectable = o.unselect !== undefined ? o.unselect : this.isSelectable;
 			this.ontop = o.ontop ? o.ontop : false; // 'beforebegin' 'afterbegin' 'beforeend' 'afterend'
@@ -1943,7 +1951,8 @@
 				x: 0,
 				y: 0,
 				w: 0,
-				h: 0
+				h: 0,
+				d: 0
 			};
 			this.local = new V2().neg();
 			this.isCanvasOnly = false;
@@ -2009,16 +2018,20 @@
 			this.c[0] = Tools.dom('div', this.css.basic + flexible + 'position:relative; height:20px;');
 			this.s[0] = this.c[0].style; // bottom margin
 
-			this.margin = o.margin || 1;
+			this.margin = this.colors.sy;
+			this.mtop = 0;
+			let marginDiv = Tools.isDivid(this.margin);
 
 			if (this.isUI && this.margin) {
-				this.s[0].boxSizing = 'content-box'; //this.s[0].marginBottom = this.margin + 'px';
+				this.s[0].boxSizing = 'content-box';
 
-				if (this.margin * 0.5 === Math.floor(this.margin * 0.5)) {
-					this.s[0].borderTop = this.margin * 0.5 + 'px solid transparent';
-					this.s[0].borderBottom = this.margin * 0.5 + 'px solid transparent';
+				if (marginDiv) {
+					this.mtop = this.margin * 0.5; //this.s[0].borderTop = '${this.mtop}px solid transparent'
+					//console.log(`${this.mtop}px solid transparent`)
+
+					this.s[0].borderTop = this.mtop + 'px solid transparent';
+					this.s[0].borderBottom = this.mtop + 'px solid transparent';
 				} else {
-					//this.s[0].borderTop = (this.margin*0.5) + 'px solid transparent'
 					this.s[0].borderBottom = this.margin + 'px solid transparent';
 				}
 			} // with title
@@ -2048,7 +2061,8 @@
 
 
 		init() {
-			this.zone.h = this.h;
+			this.ytop = this.top + this.mtop;
+			this.zone.h = this.h + this.margin;
 			this.zone.w = this.w;
 			let s = this.s; // style cache
 
@@ -2069,8 +2083,7 @@
 			if (c[1] !== undefined && this.autoWidth) {
 				s[1] = c[1].style;
 				s[1].top = 1 + 'px';
-				s[1].height = this.h - 2 + 'px'; //s[1].height = (this.h-4) + 'px';
-				// s[1].lineHeight = (this.h-8) + 'px';
+				s[1].height = this.h - 2 + 'px';
 			}
 
 			let frag = Tools.frag;
@@ -2331,6 +2344,10 @@
 				case 5:
 					s = 0.00001;
 					break;
+
+				case 6:
+					s = 0.000001;
+					break;
 			}
 
 			this.step = o.step === undefined ? s : o.step;
@@ -2349,7 +2366,11 @@
 		handleEvent(e) {
 			if (this.lock) return;
 			if (this.neverlock) Roots.lock = false;
-			if (!this[e.type]) return console.error(e.type, 'this type of event no existe !');
+			if (!this[e.type]) return console.error(e.type, 'this type of event no existe !'); // TODO !!!!
+			//if( this.marginDiv ) z.d -= this.margin * 0.5
+			//if( this.marginDiv ) e.clientY -= this.margin * 0.5
+			//if( this.group && this.group.marginDiv ) e.clientY -= this.group.margin * 0.5
+
 			return this[e.type](e);
 		}
 
@@ -2457,7 +2478,7 @@
 			} else {
 				this.p = 0;
 				if (this.c[1] !== undefined) this.c[1].textContent = '';
-				this.c[2] = this.dom('div', this.css.txt + this.css.button + 'top:1px; background:' + cc.button + '; height:' + (this.h - 2) + 'px; border:1px solid ' + cc.border + '; border-radius:' + this.radius + 'px;');
+				this.c[2] = this.dom('div', this.css.txt + this.css.button + 'top:1px; background:' + cc.button + '; height:' + (this.h - 2) + 'px; border:' + cc.borderSize + 'px solid ' + cc.border + '; border-radius:' + this.radius + 'px;');
 			}
 
 			this.stat = -1;
@@ -2577,7 +2598,7 @@
 				s[3].left = w + 'px';
 			} else {
 				s[2].left = this.sa + 'px';
-				s[2].width = this.w - 20 + 'px';
+				s[2].width = this.sb + 'px';
 			}
 		}
 
@@ -2616,19 +2637,18 @@
 				this.stat[i] = sel ? 3 : 1;
 			}
 
-			if (!o.value && !o.values) {
-				if (this.c[1] !== undefined) {
-					this.c[1].textContent = ''; //this.txt = ''
-				}
+			if (this.txt === '') this.p = 0;
+
+			if (!o.value && !o.values || this.p === 0) {
+				if (this.c[1] !== undefined) this.c[1].textContent = '';
 			}
 
-			if (this.txt === '') this.p = 0;
 			this.init();
 		}
 
 		onOff() {
 			this.on = !this.on;
-			this.label(this.on ? this.onName : this.txt);
+			this.label(this.on ? this.onName : this.value);
 		}
 
 		testZone(e) {
@@ -2804,7 +2824,6 @@
 			this.pi90 = Tools.pi90;
 			this.offset = new V2();
 			this.h = o.h || this.w + 10;
-			this.top = 0;
 			this.c[0].style.width = this.w + 'px';
 			this.c[0].style.display = 'block';
 
@@ -2894,7 +2913,7 @@
 
 			let off = this.offset;
 			off.x = this.w * 0.5 - (e.clientX - this.zone.x);
-			off.y = this.diam * 0.5 - (e.clientY - this.zone.y - this.top);
+			off.y = this.diam * 0.5 - (e.clientY - this.zone.y - this.ytop);
 			this.r = off.angle() - this.pi90;
 			this.r = (this.r % this.twoPi + this.twoPi) % this.twoPi;
 
@@ -2981,15 +3000,16 @@
 			this.offset = new V2();
 			this.decal = new V2();
 			this.pp = new V2();
-			this.c[2] = this.dom('div', this.css.txt + 'height:' + (this.h - 4) + 'px;' + 'border-radius:' + this.radius + 'px; line-height:' + (this.h - 8) + 'px;');
-			this.s[2] = this.c[2].style;
-			this.s[2].textShadow = 'none';
+			let cc = this.colors; // this.c[2] = this.dom( 'div', this.css.txt + this.css.middle + 'top:1px; height:'+(this.h-2)+'px;' + 'border-radius:'+this.radius+'px; text-shadow:none; border:'+cc.borderSize+'px solid '+cc.border+';' )
 
-			if (this.up) {
-				this.s[2].top = 'auto';
-				this.s[2].bottom = '2px';
-			} //this.c[0].style.textAlign = 'center';
+			this.c[2] = this.dom('div', `${this.css.txt} ${this.css.middle} top:1px; height:${this.h - 2}px; border-radius:${this.radius}px; text-shadow:none; border:${cc.borderSize}px solid ${cc.border};`); //this.s[2] = this.c[2].style;
+			//this.s[2].textShadow = 'none'
 
+			/*if( this.up ){
+					this.s[2].top = 'auto';
+					this.s[2].bottom = '2px';
+			}*/
+			//this.c[0].style.textAlign = 'center';
 
 			this.c[0].style.display = 'block';
 			this.c[3] = this.getColorRing();
@@ -3009,8 +3029,8 @@
 			this.tsl = Math.sqrt(3) * this.tr;
 			this.hue = 0;
 			this.d = 256;
-			this.setColor(this.value);
 			this.init();
+			this.setColor(this.value);
 			if (o.open !== undefined) this.open();
 		}
 
@@ -3065,7 +3085,7 @@
 			if (name === 'color') {
 				off = this.offset;
 				off.x = e.clientX - (this.zone.x + this.decal.x + this.mid);
-				off.y = e.clientY - (this.zone.y + this.decal.y + this.mid);
+				off.y = e.clientY - (this.zone.y + this.decal.y + this.mid) - this.ytop;
 				d = off.length() * this.ratio;
 				rr = off.angle();
 				if (rr < 0) rr += 2 * T.PI;
@@ -3233,7 +3253,9 @@
 			super.rSize();
 			let s = this.s;
 			s[2].width = this.sb + 'px';
-			s[2].left = this.sa + 'px';
+			s[2].left = this.sa + 'px'; //console.log(this.sb)
+
+			this.cw = this.sb > 256 ? 256 : this.sb;
 			this.rSizeColor(this.cw);
 			this.decal.x = Math.floor((this.w - this.wfixe) * 0.5); //s[3].left = this.decal.x + 'px';
 		}
@@ -3734,7 +3756,7 @@
 				nup = this.mode(this.isDown ? 2 : 1, name); //this.cursor( this.current !== -1 ? 'move' : 'pointer' );
 
 				if (this.isDown) {
-					this.v[name] = this.clamp(1 - (e.clientY - this.zone.y - this.top - 10) / this.gh, 0, 1);
+					this.v[name] = this.clamp(1 - (e.clientY - this.zone.y - this.ytop - 10) / this.gh, 0, 1);
 					this.update(true);
 				}
 			}
@@ -3813,6 +3835,8 @@
 				fill: cc.text,
 				stroke: 'none'
 			});
+			let bh = this.mtop === 0 ? this.margin : this.mtop;
+			this.c[4] = this.dom('div', this.css.basic + 'width:100%; left:0; height:' + (bh + 1) + 'px; top:' + (this.h - 1) + 'px; background:none;');
 			this.s;
 			this.c[1].name = 'group';
 			this.init();
@@ -3850,9 +3874,10 @@
 			let l = this.local;
 			if (l.x === -1 && l.y === -1) return '';
 			let name = '';
-			if (l.y < this.baseH) name = 'title';else {
+			if (l.y < this.baseH + this.margin) name = 'title';else {
 				if (this.isOpen) name = 'content';
-			}
+			} //console.log(name)
+
 			return name;
 		}
 
@@ -3887,13 +3912,20 @@
 
 			switch (name) {
 				case 'content':
-					this.cursor();
+					//this.cursor()
+					//if( this.marginDiv ) e.clientY -= this.margin * 0.5
 					if (Roots.isMobile && type === 'mousedown') this.getNext(e, change);
-					if (this.proto) protoChange = this.proto.handleEvent(e);
+
+					if (this.proto) {
+						//e.clientY -= this.margin
+						protoChange = this.proto.handleEvent(e);
+					}
+
 					if (!Roots.lock) this.getNext(e, change);
 					break;
 
 				case 'title':
+					//this.cursor( this.isOpen ? 'n-resize':'s-resize' );
 					this.cursor('pointer');
 
 					if (type === 'mousedown') {
@@ -3944,7 +3976,9 @@
 				}
 			}
 
-			let u = this.ADD.apply(this, a);
+			let u = this.ADD.apply(this, a); //u.margin += this.margin
+			//console.log( u.margin )
+
 			this.uis.push(u);
 			this.isEmpty = false;
 			return u;
@@ -3986,7 +4020,7 @@
 			let id = this.uis.indexOf(n);
 
 			if (id !== -1) {
-				this.calc(-(this.uis[id].h + 1));
+				this.calc(-(this.uis[id].h + this.margin));
 				this.c[2].removeChild(this.uis[id].c[0]);
 				this.uis.splice(id, 1);
 
@@ -4000,11 +4034,13 @@
 		open() {
 			super.open();
 			this.setSvg(this.c[3], 'd', this.svgs.g2);
-			this.rSizeContent();
-			this.h - this.baseH;
+			this.rSizeContent(); //let t = this.h - this.baseH
+
 			const s = this.s;
-			const cc = this.colors;
-			s[2].top = this.h - 1 + 'px';
+			const cc = this.colors; //s[2].top = (this.h-1) + 'px'
+
+			s[2].top = this.h + this.mtop + 'px';
+			s[4].background = cc.groups; //'#0f0'
 
 			if (this.radius) {
 				s[1].borderRadius = '0px';
@@ -4016,6 +4052,8 @@
 			}
 
 			if (cc.gborder !== 'none') {
+				s[4].borderLeft = cc.borderSize + 'px solid ' + cc.gborder;
+				s[4].borderRight = cc.borderSize + 'px solid ' + cc.gborder;
 				s[2].border = cc.borderSize + 'px solid ' + cc.gborder;
 				s[2].borderTop = 'none';
 				s[1].borderBottom = cc.borderSize + 'px solid rgba(0,0,0,0)';
@@ -4025,17 +4063,20 @@
 		}
 
 		close() {
-			super.close();
-			this.h - this.baseH;
+			super.close(); //let t = this.h - this.baseH
+
 			this.setSvg(this.c[3], 'd', this.svgs.g1);
 			this.h = this.baseH;
 			const s = this.s;
 			const cc = this.colors;
 			s[0].height = this.h + 'px'; //s[1].height = (this.h-2) + 'px'
+			//s[2].top = this.h + 'px'
 
-			s[2].top = this.h + 'px';
+			s[2].top = this.h + this.mtop + 'px';
+			s[4].background = 'none';
 
 			if (cc.gborder !== 'none') {
+				s[4].border = 'none';
 				s[2].border = 'none';
 				s[1].border = cc.borderSize + 'px solid ' + cc.gborder;
 			}
@@ -4045,7 +4086,8 @@
 		}
 
 		calcUis() {
-			if (!this.isOpen) this.h = this.baseH;else this.h = Roots.calcUis(this.uis, this.zone, this.zone.y + this.baseH) + this.baseH;
+			if (!this.isOpen) this.h = this.baseH; //else this.h = Roots.calcUis( this.uis, this.zone, this.zone.y + this.baseH ) + this.baseH;
+			else this.h = Roots.calcUis(this.uis, this.zone, this.zone.y + this.baseH + this.margin) + this.baseH;
 			this.s[0].height = this.h + 'px';
 		}
 
@@ -4072,13 +4114,24 @@
 			super.rSize();
 			let s = this.s;
 			this.w = this.w - this.decal;
-			s[3].left = this.sa + this.sb - 6 + 'px'; //s[1].width = this.isbgGroup ? (this.w-5) + 'px' : this.w + 'px'
-
+			s[3].left = this.sa + this.sb - 6 + 'px';
 			s[1].width = this.w + 'px';
 			s[2].width = this.w + 'px';
 			s[1].left = this.decal + 'px';
 			s[2].left = this.decal + 'px';
 			if (this.isOpen) this.rSizeContent();
+		} //
+
+
+		uiout() {
+			if (this.lock) return;
+			if (this.s) this.s[0].background = this.colors.background;
+		}
+
+		uiover() {
+			if (this.lock) return; //if( this.isOpen ) return;
+
+			if (this.s) this.s[0].background = this.colors.backgroundOver;
 		}
 
 	}
@@ -4102,7 +4155,6 @@
 
 			this.distance = this.diam * 0.5 * 0.25;
 			this.h = o.h || this.w + 10;
-			this.top = 0;
 			this.c[0].style.width = this.w + 'px';
 
 			if (this.c[1] !== undefined) {
@@ -4202,7 +4254,7 @@
 			//this.tmp.y = this.radius - ( e.clientY - this.zone.y - this.top );
 
 			this.tmp.x = this.w * 0.5 - (e.clientX - this.zone.x);
-			this.tmp.y = this.diam * 0.5 - (e.clientY - this.zone.y - this.top);
+			this.tmp.y = this.diam * 0.5 - (e.clientY - this.zone.y - this.ytop);
 			let distance = this.tmp.length();
 
 			if (distance > this.distance) {
@@ -4283,7 +4335,6 @@
 			this.cirRange = this.mPI * 2;
 			this.offset = new V2();
 			this.h = o.h || this.w + 10;
-			this.top = 0;
 			this.c[0].style.width = this.w + 'px';
 			this.c[0].style.display = 'block';
 
@@ -4386,7 +4437,7 @@
 			//off.y = this.radius - ( e.clientY - this.zone.y - this.top );
 
 			off.x = this.w * 0.5 - (e.clientX - this.zone.x);
-			off.y = this.diam * 0.5 - (e.clientY - this.zone.y - this.top);
+			off.y = this.diam * 0.5 - (e.clientY - this.zone.y - this.ytop);
 			this.r = -Math.atan2(off.x, off.y);
 			if (this.oldr !== null) this.r = Math.abs(this.r - this.oldr) > Math.PI ? this.oldr : this.r;
 			this.r = this.r > this.mPI ? this.mPI : this.r;
@@ -4598,6 +4649,7 @@
 			this.setList(this.list);
 			this.init();
 			if (this.isOpenOnStart) this.open(true);
+			this.baseH += this.mtop;
 		} // image list
 
 
@@ -4783,7 +4835,8 @@
 				this.modeScroll(1);
 
 				if (this.isDown) {
-					this.modeScroll(2);
+					this.modeScroll(2); //this.update( ( e.clientY - top	) - ( this.sh*0.5 ) );
+
 					let top = this.zone.y + this.baseH - 2;
 					this.update(e.clientY - top - this.sh * 0.5);
 				} //if(this.isDown) this.listmove(e);
@@ -5146,8 +5199,8 @@
 					if (o.value.y !== undefined) this.value[1] = o.value.y;
 					if (o.value.z !== undefined) this.value[2] = o.value.z;
 					if (o.value.w !== undefined) this.value[3] = o.value.w;
-					this.isVector = true;
 					this.isSingle = false;
+					this.isVector = true;
 				}
 			}
 
@@ -5168,7 +5221,7 @@
 
 			while (i--) {
 				if (this.isAngle) this.value[i] = (this.value[i] * 180 / Math.PI).toFixed(this.precision);
-				this.c[3 + i] = this.dom('div', this.css.txtselect + ' height:' + (this.h - 4) + 'px; color:' + cc.text + '; background:' + cc.back + '; borderColor:' + cc.border + '; border-radius:' + this.radius + 'px;');
+				this.c[3 + i] = this.dom('div', this.css.txtselect + 'top:1px; height:' + (this.h - 2) + 'px; color:' + cc.text + '; background:' + cc.back + '; borderColor:' + cc.border + '; border-radius:' + this.radius + 'px;');
 				if (o.center) this.c[2 + i].style.textAlign = 'center';
 				this.c[3 + i].textContent = this.value[i];
 				this.c[3 + i].style.color = this.colors.text;
@@ -5178,10 +5231,10 @@
 
 
 			this.selectId = 3 + this.lng;
-			this.c[this.selectId] = this.dom('div', this.css.txtselect + 'position:absolute; top:4px; height:' + (this.h - 8) + 'px; padding:0px 0px; width:0px; color:' + cc.textSelect + '; background:' + cc.select + '; border:none; border-radius:0px;'); // cursor
+			this.c[this.selectId] = this.dom('div', this.css.txtselect + 'position:absolute; top:2px; height:' + (this.h - 4) + 'px; padding:0px 0px; width:0px; color:' + cc.textSelect + '; background:' + cc.select + '; border:none; border-radius:0px;'); // cursor
 
 			this.cursorId = 4 + this.lng;
-			this.c[this.cursorId] = this.dom('div', this.css.basic + 'top:4px; height:' + (this.h - 8) + 'px; width:0px; background:' + cc.text + ';');
+			this.c[this.cursorId] = this.dom('div', this.css.basic + 'top:2px; height:' + (this.h - 4) + 'px; width:0px; background:' + cc.text + ';');
 			this.init();
 		}
 
@@ -5196,22 +5249,7 @@
 			}
 
 			return '';
-		}
-		/* mode: function ( n, name ) {
-					 if( n === this.cMode[name] ) return false;
-					 //let m;
-					 /*switch(n){
-							 case 0: m = this.colors.border; break;
-						 case 1: m = this.colors.borderOver; break;
-						 case 2: m = this.colors.borderSelect;	break;
-					 }*/
-
-		/*		 this.reset();
-				 //this.c[name+2].style.borderColor = m;
-				 this.cMode[name] = n;
-					 return true;
-			 },*/
-		// ----------------------
+		} // ----------------------
 		//	 EVENTS
 		// ----------------------
 
@@ -5237,18 +5275,11 @@
 			}
 
 			return false;
-			/*
-				if( name === '' ) return false;
-					this.current = name;
-			this.isDown = true;
-				this.prev = { x:e.clientX, y:e.clientY, d:0, v: this.isSingle ? parseFloat(this.value) : parseFloat( this.value[ this.current ] )	};
-					return this.mode( 2, name );*/
 		}
 
 		mouseup(e) {
 			if (this.isDown) {
-				this.isDown = false; //this.current = -1;
-
+				this.isDown = false;
 				this.prev = {
 					x: 0,
 					y: 0,
@@ -5259,20 +5290,6 @@
 			}
 
 			return false;
-			/*let name = this.testZone( e );
-			this.isDown = false;
-				if( this.current !== -1 ){ 
-						//let tm = this.current;
-					let td = this.prev.d;
-						this.current = -1;
-					this.prev = { x:0, y:0, d:0, v:0 };
-						if( !td ){
-								this.setInput( this.c[ 3 + name ] );
-							return true;//this.mode( 2, name );
-						} else {
-							return this.reset();//this.mode( 0, tm );
-					}
-				}*/
 		}
 
 		mousemove(e) {
@@ -5301,23 +5318,11 @@
 			}
 
 			return nup;
-		} //keydown: function ( e ) { return true; },
-		// ----------------------
+		} // ----------------------
 
 
 		reset() {
-			let nup = false; //this.isDown = false;
-			//this.current = 0;
-
-			/* let i = this.lng;
-			 while(i--){ 
-					 if(this.cMode[i]!==0){
-							 this.cMode[i] = 0;
-							 //this.c[2+i].style.borderColor = this.colors.border;
-							 nup = true;
-					 }
-			 }*/
-
+			let nup = false;
 			return nup;
 		}
 
@@ -5328,7 +5333,7 @@
 				if (v.z !== undefined) this.value[2] = v.z;
 				if (v.w !== undefined) this.value[3] = v.w;
 			} else {
-				if (this.isSingle) this.value = [v];else this.value = v;
+				this.value = this.isSingle ? [v] : v;
 			}
 
 			this.update();
@@ -5374,9 +5379,7 @@
 			let s = this.s;
 			let d = this.current !== -1 ? this.tmp[this.current][0] + 5 : 0;
 			s[this.cursorId].width = '1px';
-			s[this.cursorId].left = d + c + 'px'; //s[2].left = ( d + e ) + 'px';
-			//s[2].width = w + 'px';
-
+			s[this.cursorId].left = d + c + 'px';
 			s[this.selectId].left = d + e + 'px';
 			s[this.selectId].width = w + 'px';
 			this.c[this.selectId].innerHTML = t;
@@ -5409,7 +5412,7 @@
 			}
 
 			if (!force) return;
-			if (this.isSingle) this.send(ar[0]);else this.send(ar);
+			this.send(this.isSingle ? ar[0] : ar);
 		} // ----------------------
 		//	 REZISE
 		// ----------------------
@@ -5655,14 +5658,14 @@
 			this.isDown = false;
 			let cc = this.colors; // text
 
-			this.c[2] = this.dom('div', this.css.txtselect + 'height:' + (this.h - 4) + 'px; color:' + cc.text + '; background:' + cc.back + '; borderColor:' + cc.border + '; border-radius:' + this.radius + 'px;');
+			this.c[2] = this.dom('div', this.css.txtselect + 'top:1px; height:' + (this.h - 2) + 'px; color:' + cc.text + '; background:' + cc.back + '; borderColor:' + cc.border + '; border-radius:' + this.radius + 'px;');
 			this.c[2].textContent = this.value; // selection
 
-			this.c[3] = this.dom('div', this.css.txtselect + 'position:absolute; top:4px; height:' + (this.h - 8) + 'px; padding:0px 0px; width:0px; color:' + cc.textSelect + '; background:' + cc.select + '; border:none; border-radius:0px;'); // cursor
+			this.c[3] = this.dom('div', this.css.txtselect + 'position:absolute; top:2px; height:' + (this.h - 4) + 'px; padding:0px 0px; width:0px; color:' + cc.textSelect + '; background:' + cc.select + '; border:none; border-radius:0px;'); // cursor
 
-			this.c[4] = this.dom('div', this.css.basic + 'top:4px; height:' + (this.h - 8) + 'px; width:0px; background:' + cc.text + ';'); // fake
+			this.c[4] = this.dom('div', this.css.basic + 'top:2px; height:' + (this.h - 4) + 'px; width:0px; background:' + cc.text + ';'); // fake
 
-			this.c[5] = this.dom('div', this.css.txtselect + 'height:' + (this.h - 4) + 'px; justify-content: center; font-style: italic; color:' + cc.border + ';');
+			this.c[5] = this.dom('div', this.css.txtselect + 'top:1px; height:' + (this.h - 2) + 'px; border:none; justify-content: center; font-style: italic; color:' + cc.border + ';');
 			if (this.value === '') this.c[5].textContent = this.placeHolder;
 			this.init();
 		}
@@ -5866,8 +5869,7 @@
 
 		mousemove(e) {
 			let up = false;
-			let name = this.testZone(e); //let sel = false;
-			//console.log(name)
+			let name = this.testZone(e);
 
 			if (name === 'over') {
 				this.cursor('pointer');
@@ -6259,17 +6261,20 @@
 			if (typeof this.values === 'string') this.values = [this.values];
 			this.lng = this.values.length;
 			this.value = o.value || null;
+			let cc = this.colors;
 			this.isSelectable = o.selectable || false;
-			this.spaces = o.spaces || [5, 3];
+			this.spaces = o.spaces || [cc.sx, cc.sy];
 			this.bsize = o.bsize || [90, 20];
 			if (o.h) this.bsize[1] = o.h;
 			this.bsizeMax = this.bsize[0];
 			this.tmp = [];
 			this.stat = [];
 			this.grid = [2, Math.round(this.lng * 0.5)];
-			this.h = this.grid[1] * (this.bsize[1] + this.spaces[1]) + this.spaces[1];
-			this.c[1].textContent = '';
-			this.c[2] = this.dom('table', this.css.basic + 'width:100%; top:' + (this.spaces[1] - 2) + 'px; height:auto; border-collapse:separate; border:none; border-spacing: ' + (this.spaces[0] - 2) + 'px ' + (this.spaces[1] - 2) + 'px;');
+			this.h = this.grid[1] * this.bsize[1] + this.grid[1] * this.spaces[1] + 4 - this.mtop * 2; //+ (this.spaces[1] - this.mtop);
+
+			this.c[1].textContent = ''; //this.c[2] = this.dom( 'table', this.css.basic + 'width:100%; top:'+(this.spaces[1]-2)+'px; height:auto; border-collapse:separate; border:none; border-spacing: '+(this.spaces[0]-2)+'px '+(this.spaces[1]-2)+'px;' );
+
+			this.c[2] = this.dom('table', this.css.basic + 'width:100%; border-spacing: ' + (this.spaces[0] - 2) + 'px ' + this.spaces[1] + 'px; border:none;');
 			let n = 0,
 					b,
 					td,
@@ -6282,7 +6287,6 @@
 			this.stat = [];
 			this.tmpX = [];
 			this.tmpY = [];
-			let cc = this.colors;
 
 			for (let i = 0; i < this.grid[1]; i++) {
 				tr = this.c[2].insertRow();
@@ -6312,7 +6316,8 @@
 					if (j === 0) b.style.cssText += 'float:right;';else b.style.cssText += 'float:left;';
 					n++;
 				}
-			}
+			} //this.s[0].border = 'none'
+
 
 			this.init();
 		}
@@ -6320,6 +6325,7 @@
 		testZone(e) {
 			let l = this.local;
 			if (l.x === -1 && l.y === -1) return -1;
+			l.y += this.mtop;
 			let tx = this.tmpX;
 			let ty = this.tmpY;
 			let id = -1;
@@ -6536,7 +6542,6 @@
 
 			this.value = Array.isArray(o.value) && o.value.length == 2 ? o.value : [0, 0];
 			this.h = o.h || this.w + 10;
-			this.top = 0;
 			this.c[0].style.width = this.w + 'px'; // Title
 
 			if (this.c[1] !== undefined) {
@@ -6545,7 +6550,8 @@
 				this.c[1].style.justifyContent = 'center';
 				this.top = 10;
 				this.h += 10;
-			}
+			} //this.top -= this.margin
+
 
 			let cc = this.colors; // Value
 
@@ -6596,7 +6602,7 @@
 		mousemove(e) {
 			if (!this.isDown) return;
 			let x = this.w * 0.5 - (e.clientX - this.zone.x);
-			let y = this.diam * 0.5 - (e.clientY - this.zone.y - this.top);
+			let y = this.diam * 0.5 - (e.clientY - this.zone.y - this.ytop);
 			let r = 256 / this.diam;
 			x = -(x * r);
 			y = -(y * r);
@@ -6880,7 +6886,9 @@
 			this.mouse = new V2().neg();
 			this.h = 0; //this.prevY = -1;
 
-			this.sw = 0; // bottom and close height
+			this.sw = 0;
+			this.margin = this.colors.sy;
+			this.marginDiv = Tools.isDivid(this.margin); // bottom and close height
 
 			this.isWithClose = o.close !== undefined ? o.close : true;
 			this.bh = !this.isWithClose ? 0 : this.size.h;
@@ -7303,7 +7311,7 @@
 			while (i--) {
 				if (this.uis[i].value === name) {
 					this.uis[i].selected(true);
-					if (this.isScroll) this.update(i * (this.uis[i].h + 1) * this.ratio);
+					if (this.isScroll) this.update(i * (this.uis[i].h + this.margin) * this.ratio);
 				}
 			}
 		} // ----------------------
@@ -7401,7 +7409,7 @@
 
 	}
 
-	const REVISION = '4.2.3';
+	const REVISION = '4.2.5';
 
 	exports.Files = Files;
 	exports.Gui = Gui;

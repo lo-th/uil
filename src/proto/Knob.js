@@ -26,7 +26,6 @@ export class Knob extends Proto {
         this.offset = new V2();
 
         this.h = o.h || this.w + 10;
-        this.top = 0;
 
         this.c[0].style.width = this.w +'px'
         this.c[0].style.display = 'block'
@@ -145,7 +144,7 @@ export class Knob extends Proto {
         //off.y = this.radius - ( e.clientY - this.zone.y - this.top );
 
         off.x = (this.w*0.5) - ( e.clientX - this.zone.x );
-        off.y = (this.diam*0.5) - ( e.clientY - this.zone.y - this.top );
+        off.y = (this.diam*0.5) - ( e.clientY - this.zone.y - this.ytop );
 
         this.r = - Math.atan2( off.x, off.y );
 

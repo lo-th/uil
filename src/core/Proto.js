@@ -29,6 +29,9 @@ export class Proto {
 
         this.isListen = false;
 
+        this.top = 0
+        this.ytop = 0
+
         this.isSelectable = o.selectable !== undefined ? o.selectable : false
         this.unselectable =  o.unselect !== undefined ? o.unselect : this.isSelectable
 
@@ -40,7 +43,7 @@ export class Proto {
 
         this.svgs = Tools.svgs
 
-        this.zone = { x:0, y:0, w:0, h:0 }
+        this.zone = { x:0, y:0, w:0, h:0, d:0 }
         this.local = new V2().neg()
 
         this.isCanvasOnly = false
@@ -132,18 +135,21 @@ export class Proto {
         this.s[0] = this.c[0].style
 
         // bottom margin
-        this.margin = o.margin || 1
+        this.margin = this.colors.sy;
+        this.mtop = 0
+        let marginDiv = Tools.isDivid( this.margin )
+
         if( this.isUI && this.margin ){ 
             this.s[0].boxSizing = 'content-box'
-            //this.s[0].marginBottom = this.margin + 'px';
-            if( this.margin*0.5===Math.floor(this.margin*0.5) ){
-                this.s[0].borderTop = (this.margin*0.5) + 'px solid transparent'
-                this.s[0].borderBottom = (this.margin*0.5) + 'px solid transparent'
+            if( marginDiv ){
+                this.mtop = this.margin * 0.5
+                //this.s[0].borderTop = '${this.mtop}px solid transparent'
+                //console.log(`${this.mtop}px solid transparent`)
+                this.s[0].borderTop = this.mtop + 'px solid transparent'
+                this.s[0].borderBottom = this.mtop + 'px solid transparent'
             } else {
-                //this.s[0].borderTop = (this.margin*0.5) + 'px solid transparent'
                 this.s[0].borderBottom = this.margin + 'px solid transparent'
             }
-            
         }
         
         // with title
@@ -176,8 +182,10 @@ export class Proto {
     
     init() {
 
-        this.zone.h = this.h;
-        this.zone.w = this.w;
+        this.ytop = this.top + this.mtop
+
+        this.zone.h = this.h + this.margin
+        this.zone.w = this.w
 
         let s = this.s; // style cache
         let c = this.c; // div cach
@@ -199,8 +207,6 @@ export class Proto {
             s[1] = c[1].style;
             s[1].top = 1 + 'px';
             s[1].height = (this.h-2) + 'px';
-            //s[1].height = (this.h-4) + 'px';
-           // s[1].lineHeight = (this.h-8) + 'px';
         }
 
         let frag = Tools.frag;
@@ -330,7 +336,6 @@ export class Proto {
     uiout() {
 
         if( this.lock ) return;
-
         if(this.s) this.s[0].background = this.colors.background;
 
     }
@@ -338,7 +343,6 @@ export class Proto {
     uiover() {
 
         if( this.lock ) return;
-
         if(this.s) this.s[0].background = this.colors.backgroundOver;
 
     }
@@ -544,6 +548,7 @@ export class Proto {
             case 3: s = 0.001; break;
             case 4: s = 0.0001; break;
             case 5: s = 0.00001; break;
+            case 6: s = 0.000001; break;
         }
 
         this.step = o.step === undefined ?  s : o.step;
@@ -554,8 +559,8 @@ export class Proto {
 
     numValue( n ) {
 
-        if( this.noNeg ) n = Math.abs( n );
-        return Math.min( this.max, Math.max( this.min, n ) ).toFixed( this.precision ) * 1;
+        if( this.noNeg ) n = Math.abs( n )
+        return Math.min( this.max, Math.max( this.min, n ) ).toFixed( this.precision ) * 1
 
     }
 
@@ -567,10 +572,16 @@ export class Proto {
     handleEvent( e ) {
 
         if( this.lock ) return
-
         if( this.neverlock ) Roots.lock = false
-
         if( !this[e.type] ) return console.error(e.type, 'this type of event no existe !')
+
+
+        // TODO !!!!
+
+        //if( this.marginDiv ) z.d -= this.margin * 0.5
+
+        //if( this.marginDiv ) e.clientY -= this.margin * 0.5
+        //if( this.group && this.group.marginDiv ) e.clientY -= this.group.margin * 0.5
 
         return this[e.type](e)
     

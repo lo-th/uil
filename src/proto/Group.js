@@ -33,6 +33,10 @@ export class Group extends Proto {
         this.c[2] = this.dom( 'div', this.css.basic + flexible + 'width:100%; left:0; height:auto; overflow:hidden; top:'+(this.h)+'px')
         this.c[3] = this.dom( 'path', this.css.basic + 'position:absolute; width:6px; height:6px; left:0; top:'+fltop+'px;', { d:this.svgs.g1, fill:cc.text, stroke:'none'})
 
+        let bh = this.mtop === 0 ? this.margin : this.mtop
+        
+        this.c[4] = this.dom( 'div', this.css.basic + 'width:100%; left:0; height:'+(bh+1)+'px; top:'+((this.h-1))+'px; background:none;')
+
         let s = this.s;
         this.c[1].name = 'group'
 
@@ -83,10 +87,12 @@ export class Group extends Proto {
 
         let name = '';
 
-        if( l.y < this.baseH ) name = 'title';
+        if( l.y < this.baseH + this.margin ) name = 'title';
         else {
             if( this.isOpen ) name = 'content';
         }
+
+        //console.log(name)
 
         return name;
 
@@ -131,20 +137,27 @@ export class Group extends Proto {
         switch( name ){
 
             case 'content':
-            this.cursor();
+
+            //this.cursor()
+
+            //if( this.marginDiv ) e.clientY -= this.margin * 0.5
 
             if( Roots.isMobile && type === 'mousedown' ) this.getNext( e, change )
 
-            if( this.proto ) protoChange = this.proto.handleEvent( e )
+            if( this.proto ){ 
+                //e.clientY -= this.margin
+                protoChange = this.proto.handleEvent( e )
+            }
 
             if( !Roots.lock ) this.getNext( e, change )
 
             break;
             case 'title':
-            this.cursor('pointer');
+            //this.cursor( this.isOpen ? 'n-resize':'s-resize' );
+            this.cursor('pointer')
             if( type === 'mousedown' ){
-                if( this.isOpen ) this.close();
-                else this.open();
+                if( this.isOpen ) this.close()
+                else this.open()
             }
             break;
 
@@ -199,6 +212,9 @@ export class Group extends Proto {
         }
 
         let u = this.ADD.apply( this, a )
+        //u.margin += this.margin
+
+        //console.log( u.margin )
 
         this.uis.push( u )
 
@@ -239,9 +255,9 @@ export class Group extends Proto {
         let i = this.uis.length, item;
 
         while( i-- ){
-            item = this.uis.pop();
-            this.c[2].removeChild( item.c[0] );
-            item.clear( true );
+            item = this.uis.pop()
+            this.c[2].removeChild( item.c[0] )
+            item.clear( true )
 
             //this.uis[i].clear()
         }
@@ -258,9 +274,9 @@ export class Group extends Proto {
         let id = this.uis.indexOf( n );
 
         if ( id !== -1 ) {
-            this.calc( - ( this.uis[ id ].h + 1 ) );
-            this.c[2].removeChild( this.uis[ id ].c[0] );
-            this.uis.splice( id, 1 ); 
+            this.calc( - ( this.uis[ id ].h + this.margin ) )
+            this.c[2].removeChild( this.uis[ id ].c[0] )
+            this.uis.splice( id, 1 )
 
             if( this.uis.length === 0 ){ 
                 this.isEmpty = true;
@@ -279,17 +295,21 @@ export class Group extends Proto {
         this.setSvg( this.c[3], 'd', this.svgs.g2 )
         this.rSizeContent()
 
-        let t = this.h - this.baseH
+        //let t = this.h - this.baseH
 
         const s = this.s
         const cc = this.colors
 
-        s[2].top = (this.h-1) + 'px'
+        //s[2].top = (this.h-1) + 'px'
+        s[2].top = (this.h+this.mtop) + 'px'
+        s[4].background = cc.groups//'#0f0'
 
         if(this.radius){
 
             s[1].borderRadius = '0px'
             s[2].borderRadius = '0px'
+
+
 
             s[1].borderTopLeftRadius = this.radius+'px'
             s[1].borderTopRightRadius = this.radius+'px'
@@ -298,6 +318,9 @@ export class Group extends Proto {
         }
 
         if( cc.gborder !== 'none' ){
+
+            s[4].borderLeft = cc.borderSize+'px solid '+ cc.gborder
+            s[4].borderRight = cc.borderSize+'px solid '+ cc.gborder
 
             s[2].border = cc.borderSize+'px solid '+ cc.gborder
             s[2].borderTop = 'none';
@@ -313,7 +336,7 @@ export class Group extends Proto {
 
         super.close()
 
-        let t = this.h - this.baseH
+        //let t = this.h - this.baseH
 
         this.setSvg( this.c[3], 'd', this.svgs.g1 )
 
@@ -324,10 +347,13 @@ export class Group extends Proto {
         
         s[0].height = this.h + 'px'
         //s[1].height = (this.h-2) + 'px'
-        s[2].top = this.h + 'px'
+        //s[2].top = this.h + 'px'
+        s[2].top = (this.h+this.mtop) + 'px'
+        s[4].background = 'none'
 
         if( cc.gborder !== 'none' ){
 
+            s[4].border = 'none'
             s[2].border = 'none'
             s[1].border = cc.borderSize+'px solid '+ cc.gborder
         }
@@ -340,10 +366,11 @@ export class Group extends Proto {
 
     calcUis () {
 
-        if( !this.isOpen ) this.h = this.baseH;
-        else this.h = Roots.calcUis( this.uis, this.zone, this.zone.y + this.baseH ) + this.baseH;
+        if( !this.isOpen ) this.h = this.baseH
+        //else this.h = Roots.calcUis( this.uis, this.zone, this.zone.y + this.baseH ) + this.baseH;
+        else this.h = Roots.calcUis( this.uis, this.zone, this.zone.y + this.baseH + this.margin ) + this.baseH
 
-        this.s[0].height = this.h + 'px';
+        this.s[0].height = this.h + 'px'
 
     }
 
@@ -382,7 +409,6 @@ export class Group extends Proto {
         this.w = this.w - this.decal
 
         s[3].left = ( this.sa + this.sb - 6 ) + 'px'
-        //s[1].width = this.isbgGroup ? (this.w-5) + 'px' : this.w + 'px'
 
         s[1].width = this.w + 'px'
         s[2].width = this.w + 'px'
@@ -390,6 +416,23 @@ export class Group extends Proto {
         s[2].left = (this.decal) + 'px'
 
         if( this.isOpen ) this.rSizeContent()
+
+    }
+
+    //
+
+    uiout() {
+
+        if( this.lock ) return;
+        if(this.s) this.s[0].background = this.colors.background;
+
+    }
+
+    uiover() {
+
+        if( this.lock ) return;
+        //if( this.isOpen ) return;
+        if(this.s) this.s[0].background = this.colors.backgroundOver;
 
     }
 

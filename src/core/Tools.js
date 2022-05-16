@@ -33,7 +33,7 @@ const T = {
     torad: Math.PI / 180,
     todeg: 180 / Math.PI,
 
-    clamp: function (v, min, max) {
+    clamp: ( v, min, max ) => {
 
         v = v < min ? min : v;
         v = v > max ? max : v;
@@ -41,13 +41,15 @@ const T = {
 
     },
 
+    isDivid: ( v ) => ( v*0.5 === Math.floor(v*0.5) ),
+
     size: {  w: 240, h: 20, p: 30, s: 8 },
 
     // ----------------------
     //   COLOR
     // ----------------------
 
-    defineColor: function( o, cc = T.colors ) {
+    defineColor: ( o, cc = T.colors ) => {
 
         let color = { ...cc }
 
@@ -112,8 +114,9 @@ const T = {
 
     colors: {
 
-        sx: 3,
-        sy: 3,
+        sx: 4,//4
+        sy: 2,//2
+        radius:2,
 
         content:'none',
         background: 'rgba(50,50,50,0.15)',
@@ -148,7 +151,7 @@ const T = {
         fontShadow: 'none',//'#000',
         fontSize:12,
 
-        radius:4,
+        
         hide: 'rgba(0,0,0,0)',
 
     },
@@ -159,7 +162,7 @@ const T = {
 
         basic: 'position:absolute; pointer-events:none; box-sizing:border-box; margin:0; padding:0; overflow:hidden; ' + '-o-user-select:none; -ms-user-select:none; -khtml-user-select:none; -webkit-user-select:none; -moz-user-select:none;',
         button:'display:flex; align-items:center; justify-content:center; text-align:center;',
-        middle:'display:flex; align-items:center; justify-content:left;   text-align:left; flex-direction: row-reverse;'
+        middle:'display:flex; align-items:center; justify-content:left; text-align:left; flex-direction: row-reverse;'
     },
 
     // svg path
@@ -190,7 +193,9 @@ const T = {
         object:'M 10 1 L 7 4 4 1 1 1 1 13 4 13 4 5 7 8 10 5 10 13 13 13 13 1 10 1 Z',
         none:'M 9 5 L 5 5 5 9 9 9 9 5 Z',
         cursor:'M 4 7 L 1 10 1 12 2 13 4 13 7 10 9 14 14 0 0 5 4 7 Z',
-        load:'M 14 8 L 12 8 12 12 2 12 2 8 0 8 0 14 14 14 14 8 M 8 5 L 8 0 6 0 6 5 3 5 7 9 11 5 8 5 Z',
+        load:'M 13 8 L 11.5 6.5 9 9 9 3 5 3 5 9 2.5 6.5 1 8 7 14 13 8 M 9 2 L 9 0 5 0 5 2 9 2 Z',
+        save:'M 9 12 L 5 12 5 14 9 14 9 12 M 11.5 7.5 L 13 6 7 0 1 6 2.5 7.5 5 5 5 11 9 11 9 5 11.5 7.5 Z',
+        extern:'M 14 14 L 14 0 0 0 0 14 14 14 M 12 6 L 12 12 2 12 2 6 12 6 M 12 2 L 12 4 2 4 2 2 12 2 Z',
 
     },
 
@@ -434,6 +439,8 @@ const T = {
     // ----------------------
 
     ColorLuma : function ( hex, l ) {
+
+        //if( hex.substring(0, 3) === 'rgba' ) hex = '#000';
 
         if( hex === 'n' ) hex = '#000';
 

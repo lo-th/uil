@@ -25,7 +25,7 @@ export class Bool extends Proto {
         } else {
             this.p = 0
             if( this.c[1] !== undefined ) this.c[1].textContent = '';
-            this.c[2] = this.dom( 'div', this.css.txt + this.css.button + 'top:1px; background:'+cc.button+'; height:'+(this.h-2)+'px; border:1px solid '+cc.border+'; border-radius:'+this.radius+'px;' )
+            this.c[2] = this.dom( 'div', this.css.txt + this.css.button + 'top:1px; background:'+cc.button+'; height:'+(this.h-2)+'px; border:'+cc.borderSize+'px solid '+cc.border+'; border-radius:'+this.radius+'px;' )
         }
 
         this.stat = -1
@@ -139,7 +139,7 @@ export class Bool extends Proto {
             s[3].left = w + 'px'
         } else {
             s[2].left = this.sa + 'px'
-            s[2].width = (this.w- 20)  + 'px'
+            s[2].width = this.sb  + 'px'
         }
         
     }

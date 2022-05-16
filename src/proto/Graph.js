@@ -235,7 +235,7 @@ export class Graph extends Proto {
             nup = this.mode( this.isDown ? 2 : 1, name );
             //this.cursor( this.current !== -1 ? 'move' : 'pointer' );
             if(this.isDown){
-            	this.v[name] = this.clamp( 1 - (( e.clientY - this.zone.y - this.top - 10 ) / this.gh) , 0, 1 );
+            	this.v[name] = this.clamp( 1 - (( e.clientY - this.zone.y - this.ytop - 10 ) / this.gh) , 0, 1 );
             	this.update( true );
             }
 
@@ -257,27 +257,27 @@ export class Graph extends Proto {
 
     makePath () {
 
-    	let p = "", h, w, wn, wm, ow, oh;
+    	let p = "", h, w, wn, wm, ow, oh
     	//let g = this.iw*0.5
 
     	for(let i = 0; i<this.lng; i++ ){
 
-    		h = 14 + (this.gh - this.v[i]*this.gh);
-    		w = (14 + (i*this.iw) + (i*4));
+    		h = 14 + (this.gh - this.v[i]*this.gh)
+    		w = (14 + (i*this.iw) + (i*4))
 
-    		wm = w + this.iw*0.5;
-    		wn = w + this.iw;
+    		wm = w + this.iw*0.5
+    		wn = w + this.iw
 
-    		if(i===0) p+='M '+w+' '+ h + ' T ' + wm +' '+ h;
-    		else p += ' C ' + ow +' '+ oh + ',' + w +' '+ h + ',' + wm +' '+ h;
-    		if(i === this.lng-1) p+=' T ' + wn +' '+ h;
+    		if( i === 0 ) p+='M '+w+' '+ h + ' T ' + wm +' '+ h
+    		else p += ' C ' + ow +' '+ oh + ',' + w +' '+ h + ',' + wm +' '+ h
+    		if( i === this.lng-1 ) p+=' T ' + wn +' '+ h
 
     		ow = wn
     		oh = h 
 
     	}
 
-    	return p;
+    	return p
 
     }
 
@@ -286,24 +286,23 @@ export class Graph extends Proto {
         super.rSize();
 
         let s = this.s;
-        if( this.c[1] !== undefined ) s[1].width = this.w + 'px';
-        s[3].width = this.w + 'px';
+        if( this.c[1] !== undefined ) s[1].width = this.w + 'px'
+        s[3].width = this.w + 'px'
 
-        let gw = this.w - 28;
-        let iw = ((gw-(4*(this.lng-1)))/this.lng);
-
-        let t = [];
+        let gw = this.w - 28
+        let iw = ((gw-(4*(this.lng-1)))/this.lng)
+        let t = []
 
         s[2].width = gw + 'px'
 
         for( let i = 0; i < this.lng; i++ ){
 
-            t[i] = [ 14 + (i*iw) + (i*4), iw ];
-            t[i][2] = t[i][0] + t[i][1];
+            t[i] = [ 14 + (i*iw) + (i*4), iw ]
+            t[i][2] = t[i][0] + t[i][1]
 
         }
 
-        this.tmp = t;
+        this.tmp = t
 
     }
 

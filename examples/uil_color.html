@@ -47,9 +47,9 @@
     function callback (v){ debug.innerHTML = v; }
 
     let colors = [
-        { bg:'#ddd', text:'#333', button:'#ddd', select:'#0ff',  back:'#ccc', size:16, shadow:'none', borderSize:2, fontSize:'13'  },
+        { bg:'#ddd', text:'#333', button:'#ddd', select:'#0ff',  back:'#ccc', size:16, shadow:'none', borderSize:2, fontSize:'13', sx:6, sy:4, radius:4  },
         { shadow:'#000', font:"'Roboto Mono', monospace", fontSize:14 },
-        { content:'#000', bg:'#000', text:'#0c0', button:'#333', select:'#a00', back:'#222', font:'Tahoma', fontSize:16, weight:'bold', shadow:'none'  }
+        { backgroundOver: 'rgba(50,80,50,0.3)', content:'#000', bg:'#000', text:'#0c0', button:'#333', select:'#a00', back:'#222', font:'Tahoma', fontSize:16, weight:'bold', shadow:'none', sx:12, sy:20  }
     ]
 
     for( let i = 0; i<3; i++ ){
@@ -63,6 +63,12 @@
         ui.add('slide',  { name:'slide', min:-100, max:100, value:0, precision:0, color:'#AA0000' });
         ui.add('slide',  { name:'slide', min:-100, max:100, value:0, precision:0, color:'#00AA00' });
         ui.add('empty', { h:5 });
+
+        ui.add( 'color', { name:'Color', ctype:'html', value:[ 0,1,1,1 ] });
+
+        
+        
+
         ui.add('button', { name:'Button1', value:'B0' })
         ui.add('button', { name:'Button2', value:['B1', 'B2', 'B3'], selectable:true });
         ui.add('string', { name:'String', value:'welcome to uil'});
@@ -76,6 +82,22 @@
         //ui.add('joystick', { name:'joystick', w:100, multiplicator:1, precision:2, });
         ui.add('knob', { name:'knob', w:100, min:0, max:100, value:25, precision:2 })
         ui.add('Pad', { name:'Pad_1', w:100, min:-1, max:1, precision:2 })
+
+        let gg = ui.add('group', { name:'YOOO' })
+        gg.add('button', { value:'B0' })
+        gg.add('button', { value:['B1', 'B2'], selectable:true });
+        gg.add('button', { value:['B1', 'B2', 'B3'], selectable:true });
+        //gg.add( 'grid', { values:['Line','Rectangle', 'Circle', 'Ellipse'], selectable:true, value:'Line' })
+        gg.add('button', { value:['B1', 'B2', 'B3', 'B4'], selectable:true });
+        gg.add('bool', { name:'SHOW CODE', onName:'HIDE CODE', mode:1 })
+        gg.add('Pad', { name:'Pad_1', w:100, min:-1, max:1, precision:2 })
+
+        
+
+        //gg.add('list',   { name:'list', list:['item-0', 'item-1', 'item-2', 'item-3', 'item-4', 'item-5', 'item-6', 'item-7'], itemHeight:30, miniCanvas:true, canvasBg:'green', listOnly:false, dragout:true })
+
+
+        //gg.add( 'graph',  { name:'Graph', h:80, value:[90,30,-40,-90,-40,30,90], neg:true, multiplicator:100, precision:0 })
         //ui.add('Pad2D', { name:'Pad_2', w:100, min:-180, max:180, value:[50, -180], precision:0, mode: 1 })
         //ui.add('Pad2D', { name:'Pad_3', w:100, min:-180, max:180, value:[50, 180], precision:0, mode: 1 })
         //ui.add('Pad2D', { name:'Pad_4', w:100, min:-180, max:180, value:[50, 180], precision:0, mode: 1 })
@@ -88,7 +110,7 @@
 
     // resize event
 
-    resize();
+    resize()
 
     window.addEventListener( 'resize', resize, false );
 

@@ -31,7 +31,6 @@ export class Joystick extends Proto {
         this.distance = (this.diam*0.5)*0.25;
 
         this.h = o.h || this.w + 10;
-        this.top = 0;
 
         this.c[0].style.width = this.w +'px';
 
@@ -147,7 +146,7 @@ export class Joystick extends Proto {
         //this.tmp.y = this.radius - ( e.clientY - this.zone.y - this.top );
 
         this.tmp.x = (this.w*0.5) - ( e.clientX - this.zone.x );
-        this.tmp.y = (this.diam*0.5) - ( e.clientY - this.zone.y - this.top );
+        this.tmp.y = (this.diam*0.5) - ( e.clientY - this.zone.y - this.ytop );
 
         let distance = this.tmp.length();
 

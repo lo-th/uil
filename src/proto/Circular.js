@@ -24,7 +24,6 @@ export class Circular extends Proto {
         this.offset = new V2()
 
         this.h = o.h || this.w + 10
-        this.top = 0
 
         this.c[0].style.width = this.w +'px'
         this.c[0].style.display = 'block'
@@ -140,7 +139,7 @@ export class Circular extends Proto {
 
         let off = this.offset;
         off.x = (this.w*0.5) - ( e.clientX - this.zone.x );
-        off.y = (this.diam*0.5) - ( e.clientY - this.zone.y - this.top );
+        off.y = (this.diam*0.5) - ( e.clientY - this.zone.y - this.ytop );
 
         this.r = off.angle() - this.pi90;
         this.r = (((this.r%this.twoPi)+this.twoPi)%this.twoPi);

@@ -1,6 +1,5 @@
-import { Proto } from '../core/Proto.js';
-import { Button } from './Button.js';
-
+import { Proto } from '../core/Proto.js'
+import { Button } from './Button.js'
 
 export class Grid extends Proto {
 
@@ -16,21 +15,24 @@ export class Grid extends Proto {
         this.value = o.value || null;
 
 
-        this.isSelectable = o.selectable || false;
-        this.spaces = o.spaces || [5,3];
+        let cc = this.colors
+
+
+        this.isSelectable = o.selectable || false
+        this.spaces = o.spaces || [cc.sx,cc.sy]
         this.bsize = o.bsize || [90,20];
 
-        if(o.h) this.bsize[1] = o.h;
-        this.bsizeMax = this.bsize[0];
+        if( o.h ) this.bsize[1] = o.h
+        this.bsizeMax = this.bsize[0]
 
-        
         this.tmp = [];
         this.stat = [];
         this.grid = [ 2, Math.round( this.lng * 0.5 ) ];
-        this.h = this.grid[1] * ( this.bsize[1] + this.spaces[1] ) + this.spaces[1];
+        this.h = ( this.grid[1] * this.bsize[1] ) + ( (this.grid[1]) * this.spaces[1] ) + 4 - (this.mtop*2) //+ (this.spaces[1] - this.mtop);
 
         this.c[1].textContent = '';
-        this.c[2] = this.dom( 'table', this.css.basic + 'width:100%; top:'+(this.spaces[1]-2)+'px; height:auto; border-collapse:separate; border:none; border-spacing: '+(this.spaces[0]-2)+'px '+(this.spaces[1]-2)+'px;' );
+        //this.c[2] = this.dom( 'table', this.css.basic + 'width:100%; top:'+(this.spaces[1]-2)+'px; height:auto; border-collapse:separate; border:none; border-spacing: '+(this.spaces[0]-2)+'px '+(this.spaces[1]-2)+'px;' );
+        this.c[2] = this.dom( 'table', this.css.basic + 'width:100%; border-spacing: '+(this.spaces[0]-2)+'px '+(this.spaces[1])+'px; border:none;' );
 
         let n = 0, b, mid, td, tr, sel;
 
@@ -38,12 +40,10 @@ export class Grid extends Proto {
         this.isDown = false
         this.neverlock = true
 
-        this.buttons = [];
+        this.buttons = []; 
         this.stat = [];
         this.tmpX = [];
         this.tmpY = [];
-
-        let cc = this.colors;
 
         for( let i = 0; i < this.grid[1]; i++ ){
 
@@ -66,14 +66,14 @@ export class Grid extends Proto {
                     b.innerHTML = this.values[n];
                     td.appendChild( b );
 
-                    this.buttons.push(b);
-                    this.stat.push(1);
+                    this.buttons.push(b)
+                    this.stat.push(1)
 
                 } else {
 
-                    b = document.createElement( 'div' );
-                    b.style.cssText = this.css.txt + 'position:static; width:'+this.bsize[0]+'px; height:'+this.bsize[1]+'px; text-align:center; left:auto; right:auto; background:none;';
-                    td.appendChild( b );
+                    b = document.createElement( 'div' )
+                    b.style.cssText = this.css.txt + 'position:static; width:'+this.bsize[0]+'px; height:'+this.bsize[1]+'px; text-align:center; left:auto; right:auto; background:none;'
+                    td.appendChild( b )
 
                 }
 
@@ -85,6 +85,8 @@ export class Grid extends Proto {
             }
         }
 
+        //this.s[0].border = 'none'
+
         this.init();
 
     }
@@ -93,6 +95,8 @@ export class Grid extends Proto {
 
         let l = this.local;
         if( l.x === -1 && l.y === -1 ) return -1;
+
+        l.y += this.mtop
         
         let tx = this.tmpX;
         let ty = this.tmpY;
@@ -148,11 +152,11 @@ export class Grid extends Proto {
     mousemove ( e ) {
 
         let up = false;
-        this.res = this.testZone( e );
+        this.res = this.testZone( e )
 
         if( this.res !== -1 ){
-            this.cursor('pointer');
-            up = this.modes( this.isDown ? 3 : 2, this.res );
+            this.cursor('pointer')
+            up = this.modes( this.isDown ? 3 : 2, this.res )
         } else {
         	up = this.reset();
         }
