@@ -327,6 +327,12 @@ export class Proto {
 
     /////////
 
+    content() {
+
+        return this.c[0]
+
+    }
+
     getDom() {
 
         return this.c[0]

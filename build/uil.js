@@ -12,7 +12,8 @@
 	/**
 	 * @author lth / https://github.com/lo-th
 	 */
-	// INTENAL FUNCTION
+	const REVISION = '4.2.6'; // INTENAL FUNCTION
+
 	const R = {
 		ui: [],
 		dom: null,
@@ -1671,6 +1672,15 @@
 						}
 					}];
 					break;
+
+				case 'icon':
+					t = [{
+						description: 'Icons',
+						accept: {
+							'image/x-ico': ['.ico']
+						}
+					}];
+					break;
 			}
 
 			return t;
@@ -2164,6 +2174,10 @@
 
 		reset() {} /////////
 
+
+		content() {
+			return this.c[0];
+		}
 
 		getDom() {
 			return this.c[0];
@@ -6264,13 +6278,12 @@
 			let cc = this.colors;
 			this.isSelectable = o.selectable || false;
 			this.spaces = o.spaces || [cc.sx, cc.sy];
-			this.bsize = o.bsize || [90, 20];
-			if (o.h) this.bsize[1] = o.h;
+			this.bsize = o.bsize || [90, this.h];
 			this.bsizeMax = this.bsize[0];
 			this.tmp = [];
 			this.stat = [];
 			this.grid = [2, Math.round(this.lng * 0.5)];
-			this.h = this.grid[1] * this.bsize[1] + this.grid[1] * this.spaces[1] + 4 - this.mtop * 2; //+ (this.spaces[1] - this.mtop);
+			this.h = this.grid[1] * this.bsize[1] + this.grid[1] * this.spaces[1]; //+ 4 - (this.mtop*2) //+ (this.spaces[1] - this.mtop);
 
 			this.c[1].textContent = ''; //this.c[2] = this.dom( 'table', this.css.basic + 'width:100%; top:'+(this.spaces[1]-2)+'px; height:auto; border-collapse:separate; border:none; border-spacing: '+(this.spaces[0]-2)+'px '+(this.spaces[1]-2)+'px;' );
 
@@ -6300,7 +6313,7 @@
 						sel = false;
 						if (this.values[n] === this.value && this.isSelectable) sel = true;
 						b = document.createElement('div');
-						b.style.cssText = this.css.txt + this.css.button + 'position:static; width:' + this.bsize[0] + 'px; height:' + this.bsize[1] + 'px; border:' + cc.borderSize + 'px solid ' + cc.border + '; left:auto; right:auto; border-radius:' + this.radius + 'px;';
+						b.style.cssText = this.css.txt + this.css.button + 'position:static; top:1px; width:' + this.bsize[0] + 'px; height:' + (this.bsize[1] - 2) + 'px; border:' + cc.borderSize + 'px solid ' + cc.border + '; left:auto; right:auto; border-radius:' + this.radius + 'px;';
 						b.style.background = sel ? cc.select : cc.button;
 						b.style.color = sel ? cc.textSelect : cc.text;
 						b.innerHTML = this.values[n];
@@ -6316,9 +6329,9 @@
 					if (j === 0) b.style.cssText += 'float:right;';else b.style.cssText += 'float:left;';
 					n++;
 				}
-			} //this.s[0].border = 'none'
+			}
 
-
+			this.s[0].border = 'none';
 			this.init();
 		}
 
@@ -7409,11 +7422,8 @@
 
 	}
 
-	const REVISION = '4.2.5';
-
 	exports.Files = Files;
 	exports.Gui = Gui;
-	exports.Proto = Proto;
 	exports.REVISION = REVISION;
 	exports.Tools = Tools;
 	exports.add = add;

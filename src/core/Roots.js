@@ -3,6 +3,8 @@
  * @author lth / https://github.com/lo-th
  */
 
+export const REVISION = '4.2.6';
+
 // INTENAL FUNCTION
 
 const R = {

@@ -309,8 +309,6 @@ export class Group extends Proto {
             s[1].borderRadius = '0px'
             s[2].borderRadius = '0px'
 
-
-
             s[1].borderTopLeftRadius = this.radius+'px'
             s[1].borderTopRightRadius = this.radius+'px'
             s[2].borderBottomLeftRadius = this.radius+'px'

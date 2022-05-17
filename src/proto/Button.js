@@ -13,8 +13,6 @@ export class Button extends Proto {
 
         if( !o.values && !o.value ) this.txt = ''
 
-        
-
         this.onName = o.onName || null;
 
         this.on = false;

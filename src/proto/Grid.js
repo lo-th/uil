@@ -19,16 +19,16 @@ export class Grid extends Proto {
 
 
         this.isSelectable = o.selectable || false
-        this.spaces = o.spaces || [cc.sx,cc.sy]
-        this.bsize = o.bsize || [90,20];
+        this.spaces = o.spaces || [ cc.sx, cc.sy ]
+        this.bsize = o.bsize || [ 90, this.h ];
 
-        if( o.h ) this.bsize[1] = o.h
         this.bsizeMax = this.bsize[0]
 
         this.tmp = [];
         this.stat = [];
         this.grid = [ 2, Math.round( this.lng * 0.5 ) ];
-        this.h = ( this.grid[1] * this.bsize[1] ) + ( (this.grid[1]) * this.spaces[1] ) + 4 - (this.mtop*2) //+ (this.spaces[1] - this.mtop);
+
+        this.h = ( this.grid[1] * this.bsize[1] ) + ( this.grid[1] * this.spaces[1] ) //+ 4 - (this.mtop*2) //+ (this.spaces[1] - this.mtop);
 
         this.c[1].textContent = '';
         //this.c[2] = this.dom( 'table', this.css.basic + 'width:100%; top:'+(this.spaces[1]-2)+'px; height:auto; border-collapse:separate; border:none; border-spacing: '+(this.spaces[0]-2)+'px '+(this.spaces[1]-2)+'px;' );
@@ -60,7 +60,7 @@ export class Grid extends Proto {
                     if( this.values[n] === this.value && this.isSelectable ) sel = true;
 
                     b = document.createElement( 'div' );
-                    b.style.cssText = this.css.txt + this.css.button + 'position:static; width:'+this.bsize[0]+'px; height:'+this.bsize[1]+'px; border:'+cc.borderSize+'px solid '+cc.border+'; left:auto; right:auto; border-radius:'+this.radius+'px;';
+                    b.style.cssText = this.css.txt + this.css.button + 'position:static; top:1px; width:'+this.bsize[0]+'px; height:'+(this.bsize[1]-2)+'px; border:'+cc.borderSize+'px solid '+cc.border+'; left:auto; right:auto; border-radius:'+this.radius+'px;';
                     b.style.background = sel ? cc.select : cc.button;
                     b.style.color = sel ? cc.textSelect : cc.text;
                     b.innerHTML = this.values[n];
@@ -85,7 +85,7 @@ export class Grid extends Proto {
             }
         }
 
-        //this.s[0].border = 'none'
+        this.s[0].border = 'none'
 
         this.init();
 

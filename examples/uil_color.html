@@ -83,14 +83,24 @@
         ui.add('knob', { name:'knob', w:100, min:0, max:100, value:25, precision:2 })
         ui.add('Pad', { name:'Pad_1', w:100, min:-1, max:1, precision:2 })
 
-        let gg = ui.add('group', { name:'YOOO' })
-        gg.add('button', { value:'B0' })
+        let gg0 = ui.add('group', { name:'YOOO', h:24 })
+
+        gg0.add( 'grid', { values:['Line','Rectangle', 'Circle', 'Ellipse', 'Line2','Rectangle2', 'Circle2', 'Ellipse2'], selectable:true, value:'Line', h:50 })
+
+        let gg1 = ui.add('group', { name:'YOOO', h:24 })
+
+        gg1.add( 'grid', { values:['Line','Rectangle', 'Circle', 'Ellipse', 'Line2','Rectangle2', 'Circle2', 'Ellipse2'], selectable:true, value:'Line', h:50 })
+
+        let gg = ui.add('group', { name:'YOOO', h:24 })
+
+        gg.add( 'grid', { values:['Line','Rectangle', 'Circle', 'Ellipse', 'Line2','Rectangle2', 'Circle2', 'Ellipse2', 'Line3','Rectangle3', 'Circle3', 'Ellipse3', 'Line4','Rectangle4', 'Circle4', 'Ellipse4'], selectable:true, value:'Line', h:24 })
+        /*gg.add('button', { value:'B0' })
         gg.add('button', { value:['B1', 'B2'], selectable:true });
         gg.add('button', { value:['B1', 'B2', 'B3'], selectable:true });
         //gg.add( 'grid', { values:['Line','Rectangle', 'Circle', 'Ellipse'], selectable:true, value:'Line' })
         gg.add('button', { value:['B1', 'B2', 'B3', 'B4'], selectable:true });
         gg.add('bool', { name:'SHOW CODE', onName:'HIDE CODE', mode:1 })
-        gg.add('Pad', { name:'Pad_1', w:100, min:-1, max:1, precision:2 })
+        gg.add('Pad', { name:'Pad_1', w:100, min:-1, max:1, precision:2 })*/
 
         
 

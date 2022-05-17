@@ -7,6 +7,8 @@
  * @author lth / https://github.com/lo-th
  */
 
+const REVISION = '4.2.6';
+
 // INTENAL FUNCTION
 
 const R = {
@@ -1781,6 +1783,9 @@ class Files {
             case 'image':
             t = [ { description: 'Images', accept: { 'image/*': ['.png', '.gif', '.jpeg', '.jpg'] } }, ];
             break;
+            case 'icon':
+            t = [ { description: 'Icons', accept: { 'image/x-ico': ['.ico'] } }, ];
+            break;
 
         }
 
@@ -2450,6 +2455,12 @@ class Proto {
 
     /////////
 
+    content() {
+
+        return this.c[0]
+
+    }
+
     getDom() {
 
         return this.c[0]
@@ -2961,8 +2972,6 @@ class Button extends Proto {
         if( o.values ) this.values = o.values;
 
         if( !o.values && !o.value ) this.txt = '';
-
-        
 
         this.onName = o.onName || null;
 
@@ -4787,8 +4796,6 @@ class Group extends Proto {
 
             s[1].borderRadius = '0px';
             s[2].borderRadius = '0px';
-
-
 
             s[1].borderTopLeftRadius = this.radius+'px';
             s[1].borderTopRightRadius = this.radius+'px';
@@ -7537,16 +7544,16 @@ class Grid extends Proto {
 
 
         this.isSelectable = o.selectable || false;
-        this.spaces = o.spaces || [cc.sx,cc.sy];
-        this.bsize = o.bsize || [90,20];
+        this.spaces = o.spaces || [ cc.sx, cc.sy ];
+        this.bsize = o.bsize || [ 90, this.h ];
 
-        if( o.h ) this.bsize[1] = o.h;
         this.bsizeMax = this.bsize[0];
 
         this.tmp = [];
         this.stat = [];
         this.grid = [ 2, Math.round( this.lng * 0.5 ) ];
-        this.h = ( this.grid[1] * this.bsize[1] ) + ( (this.grid[1]) * this.spaces[1] ) + 4 - (this.mtop*2); //+ (this.spaces[1] - this.mtop);
+
+        this.h = ( this.grid[1] * this.bsize[1] ) + ( this.grid[1] * this.spaces[1] ); //+ 4 - (this.mtop*2) //+ (this.spaces[1] - this.mtop);
 
         this.c[1].textContent = '';
         //this.c[2] = this.dom( 'table', this.css.basic + 'width:100%; top:'+(this.spaces[1]-2)+'px; height:auto; border-collapse:separate; border:none; border-spacing: '+(this.spaces[0]-2)+'px '+(this.spaces[1]-2)+'px;' );
@@ -7578,7 +7585,7 @@ class Grid extends Proto {
                     if( this.values[n] === this.value && this.isSelectable ) sel = true;
 
                     b = document.createElement( 'div' );
-                    b.style.cssText = this.css.txt + this.css.button + 'position:static; width:'+this.bsize[0]+'px; height:'+this.bsize[1]+'px; border:'+cc.borderSize+'px solid '+cc.border+'; left:auto; right:auto; border-radius:'+this.radius+'px;';
+                    b.style.cssText = this.css.txt + this.css.button + 'position:static; top:1px; width:'+this.bsize[0]+'px; height:'+(this.bsize[1]-2)+'px; border:'+cc.borderSize+'px solid '+cc.border+'; left:auto; right:auto; border-radius:'+this.radius+'px;';
                     b.style.background = sel ? cc.select : cc.button;
                     b.style.color = sel ? cc.textSelect : cc.text;
                     b.innerHTML = this.values[n];
@@ -7603,7 +7610,7 @@ class Grid extends Proto {
             }
         }
 
-        //this.s[0].border = 'none'
+        this.s[0].border = 'none';
 
         this.init();
 
@@ -8951,6 +8958,4 @@ class Gui {
 
 }
 
-const REVISION = '4.2.5';
-
-export { Files, Gui, Proto, REVISION, Tools, add };
+export { Files, Gui, REVISION, Tools, add };

@@ -39,6 +39,9 @@ export class Files {
             case 'image':
             t = [ { description: 'Images', accept: { 'image/*': ['.png', '.gif', '.jpeg', '.jpg'] } }, ]
             break;
+            case 'icon':
+            t = [ { description: 'Icons', accept: { 'image/x-ico': ['.ico'] } }, ]
+            break;
 
         }
 
