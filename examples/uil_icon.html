@@ -49,9 +49,10 @@
 
 			}
 
-			const onLoad = ( img, name ) => {
+			const onLoad = ( img, Name ) => {
 
-				name = name.substring( 0, name.lastIndexOf('.') );
+				name = Name.substring( 0, Name.lastIndexOf('.') )
+				console.log(name)
 				ctx.clearRect(0, 0, 256, 256)
 				ctx.drawImage(img, 0, 0, 256, 256);
 				canvas.style.border = '1px solid #314d2f;'
