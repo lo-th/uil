@@ -115,7 +115,7 @@ export class Files {
         } catch(e) {
 
             console.log(e)
-            if( o.callback ) o.callback( null )
+            if( o.always && o.callback ) o.callback( null )
 
         }
 

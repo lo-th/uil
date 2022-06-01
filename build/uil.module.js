@@ -1859,7 +1859,7 @@ class Files {
         } catch(e) {
 
             console.log(e);
-            if( o.callback ) o.callback( null );
+            if( o.always && o.callback ) o.callback( null );
 
         }
 
@@ -2882,7 +2882,7 @@ class Bool extends Proto {
     mode ( over ) {
 
         let change = false;
-        let cc = this.colors, s, s2, n, v = this.value;
+        let cc = this.colors, s = this.s, n, v = this.value;
 
         if( over ) n = v ? 4 : 3;
         else n = v ? 2 : 1;
@@ -2893,14 +2893,12 @@ class Bool extends Proto {
 
             if( this.model !== 0 ){
 
-                s = this.s[2];
-
                 switch( n ){
 
-                    case 1: s.color = cc.text; s.background = cc.button; break;
-                    case 2: s.color = cc.textSelect; s.background = cc.select; break;
-                    case 3: s.color = cc.textOver; s.background = cc.overoff; break;
-                    case 4: s.color = cc.textOver; s.background = cc.over; break;
+                    case 1: s[2].color = cc.text; s[2].background = cc.button; break;
+                    case 2: s[2].color = cc.textSelect; s[2].background = cc.select; break;
+                    case 3: s[2].color = cc.textOver; s[2].background = cc.overoff; break;
+                    case 4: s[2].color = cc.textOver; s[2].background = cc.over; break;
 
                 }
 
@@ -2908,19 +2906,16 @@ class Bool extends Proto {
 
             } else {
 
-                s = this.s[2];
-                s2 = this.s[3];
-
                 switch( n ){
 
-                    case 1: s.background = s.borderColor = cc.back; s2.background = cc.button; break;
-                    case 2: s.background = s.borderColor = cc.select; s2.background = cc.button; break;
-                    case 3: s.background = s.borderColor = cc.back; s2.background = cc.overoff; break;
-                    case 4: s.background = s.borderColor = cc.select; s2.background = cc.over; break;
+                    case 1: s[2].background = s[2].borderColor = cc.backoff; s[3].background = cc.button; break;// off out
+                    case 2: s[2].background = s[2].borderColor = cc.back; s[3].background = cc.textOver; break;// on over
+                    case 3: s[2].background = s[2].borderColor = cc.back; s[3].background = cc.overoff; break;// off over
+                    case 4: s[2].background = s[2].borderColor = cc.backoff; s[3].background = cc.textSelect; break;// on out
 
                 }
 
-                this.s[3].marginLeft = v ? '17px' : '2px';
+                s[3].marginLeft = v ? '17px' : '2px';
                 this.c[1].textContent = v ? this.onName : this.name;
 
             }
