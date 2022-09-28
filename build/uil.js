@@ -12,7 +12,7 @@
 	/**
 	 * @author lth / https://github.com/lo-th
 	 */
-	const REVISION = '4.2.6'; // INTENAL FUNCTION
+	const REVISION = '4.2.7'; // INTENAL FUNCTION
 
 	const R = {
 		ui: [],
