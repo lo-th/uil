@@ -27,7 +27,8 @@
 		isLeave: false,
 		downTime: 0,
 		prevTime: 0,
-		prevDefault: ['contextmenu', 'wheel'],
+		//prevDefault: ['contextmenu', 'wheel'],
+		prevDefault: ['contextmenu'],
 		pointerEvent: ['pointerdown', 'pointermove', 'pointerup'],
 		eventOut: ['pointercancel', 'pointerout', 'pointerleave'],
 		xmlserializer: null,
@@ -6269,8 +6270,23 @@
 	class Grid extends Proto {
 		constructor(o = {}) {
 			super(o);
-			this.values = o.values || [];
-			if (typeof this.values === 'string') this.values = [this.values];
+			/*this.values = o.values || [];
+				if( typeof this.values === 'string' ) this.values = [ this.values ];*/
+
+			this.values = [];
+
+			if (o.values) {
+				if (o.values instanceof Array) {
+					this.values = o.values;
+				} else if (o.values instanceof String) {
+					this.values = [o.values];
+				} else if (o.values instanceof Object) {
+					this.refObject = o.values;
+
+					for (let g in this.refObject) this.values.push(g);
+				}
+			}
+
 			this.lng = this.values.length;
 			this.value = o.value || null;
 			let cc = this.colors;

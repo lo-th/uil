@@ -26,7 +26,8 @@ const R = {
     downTime:0,
     prevTime:0,
 
-    prevDefault: ['contextmenu', 'wheel'],
+    //prevDefault: ['contextmenu', 'wheel'],
+    prevDefault: ['contextmenu'],
     pointerEvent: ['pointerdown', 'pointermove', 'pointerup'],
     eventOut: ['pointercancel', 'pointerout', 'pointerleave'],
 
