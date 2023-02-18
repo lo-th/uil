@@ -199,6 +199,10 @@ export class Button extends Proto {
 
     }
 
+    switchValues( n, string ){
+        this.c[n+2].innerHTML = this.values[n] = string;
+    }
+
     icon ( string, y = 0, n = 2 ) {
 
         //if(y) this.s[n].margin = ( y ) +'px 0px';

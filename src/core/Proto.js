@@ -32,6 +32,8 @@ export class Proto {
         this.top = 0
         this.ytop = 0
 
+        this.dx = o.dx || 0
+
         this.isSelectable = o.selectable !== undefined ? o.selectable : false
         this.unselectable =  o.unselect !== undefined ? o.unselect : this.isSelectable
 
@@ -234,9 +236,6 @@ export class Proto {
             Roots.add( this )
             
         }
-
-        
-        
 
     }
 

@@ -24,7 +24,7 @@ export class Files {
             case 'mp4':
             t = [ { accept: { 'video/mp4': '.mp4'} }, ]
             break;
-            case 'bin':case 'hex':
+            case 'bin': case 'hex':
             t = [ { description: 'Binary Files', accept: { 'application/octet-stream': ['.bin', '.hex'] } }, ]
             break;
             case 'text':
@@ -57,7 +57,7 @@ export class Files {
 	static async load( o = {} ) {
 
         if (typeof window.showOpenFilePicker !== 'function') {
-            window.showOpenFilePicker = this.showOpenFilePickerPolyfill
+            window.showOpenFilePicker = Files.showOpenFilePickerPolyfill
         }
 
         try {
@@ -70,7 +70,7 @@ export class Files {
                 //startIn:'./assets'
             };
 
-            options.types = this.autoTypes( type )
+            options.types = Files.autoTypes( type )
 
             // create a new handle
             const handle = await window.showOpenFilePicker( options )
@@ -155,11 +155,11 @@ export class Files {
 
     static async save( o = {} ) {
 
-        this.usePoly = false;
+        let usePoly = false;
 
         if (typeof window.showSaveFilePicker !== 'function') {
-            window.showSaveFilePicker = this.showSaveFilePickerPolyfill
-            this.usePoly = true;
+            window.showSaveFilePicker = Files.showSaveFilePickerPolyfill
+            usePoly = true;
         }
 
         try {
@@ -171,16 +171,15 @@ export class Files {
                 data: o.data || ''
             };
 
-
-            options.types = this.autoTypes( type )
-            options.finalType = Object.keys(options.types[0].accept )[0]
+            options.types = Files.autoTypes( type )
+            options.finalType = Object.keys( options.types[0].accept )[0]
             options.suggestedName += options.types[0].accept[options.finalType][0]
 
 
             // create a new handle
             const handle = await window.showSaveFilePicker( options );
 
-            if( this.usePoly ) return
+            if( usePoly ) return
 
             // create a FileSystemWritableFileStream to write to
             const file = await handle.createWritable();

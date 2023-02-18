@@ -47,11 +47,12 @@ export const add = function () {
 
         }
 
-        
-
         let name = type.toLowerCase();
 
-        if( name === 'group' ) o.add = add;
+        if( name === 'group' ){ 
+            o.add = add;
+            //o.dx = 8
+        }
 
         switch( name ){
 

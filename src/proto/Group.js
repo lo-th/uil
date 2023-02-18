@@ -20,6 +20,7 @@ export class Group extends Proto {
         this.isEmpty = true
 
         this.decal = o.group ? 8 : 0
+        //this.dd = o.group ? o.group.decal + 8 : 0
 
         this.baseH = this.h
 
@@ -212,9 +213,23 @@ export class Group extends Proto {
         }
 
         let u = this.ADD.apply( this, a )
+
+        if( u.isGroup ){ 
+            //o.add = add;
+            u.dx = 8
+        }
+        
+        //u.dx += 4
+        //console.log(this.decal)
+        //u.zone.d -= 8
+        Roots.forceZone = true
         //u.margin += this.margin
 
         //console.log( u.margin )
+        //Roots.needReZone = true
+
+        //Roots.resize()
+         //console.log(Roots.needResize)
 
         this.uis.push( u )
 
@@ -327,6 +342,9 @@ export class Group extends Proto {
         }
         
         this.parentHeight()
+
+        //Roots.isLeave = true
+        //Roots.needResize = true
 
     }
 

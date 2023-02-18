@@ -54,37 +54,42 @@
 
     	ui = new UIL.Gui( { css:'top:0; left:50%;', center:true, w:maxW, h:30, target:contents[i], colors:colors[i] } ).onChange( callback );
 
-        let g1 = ui.add('group', { name:'G1', h:30, bg:'#800' });
+        ui.add( 'slide',  { name:'slide', min:-100, max:100, value:0, precision:0, h:20 })
 
-        let g1_1 = g1.add('group', { name:'G1_1', h:30, bg:'#905' });
+        let g1 = ui.add('group', { name:'G1', h:30, bg:'#800', open:true });
+
+        let g1_1 = g1.add('group', { name:'G1_1', h:30, bg:'#905', open:true });
         g1_1.add( 'slide',  { name:'slide', min:-100, max:100, value:0, precision:0, h:20 })
         g1_1.add( 'slide',  { name:'slide', min:-100, max:100, value:0, precision:0, h:20 })
-        let g1_2 = g1.add('group', { name:'G1_2', h:30, bg:'#950' })
+        let g1_2 = g1.add('group', { name:'G1_2', h:30, bg:'#950', open:true })
         g1_2.add( 'slide',  { name:'slide', min:-100, max:100, value:0, precision:0, h:20 })
         g1_2.add( 'slide',  { name:'slide', min:-100, max:100, value:0, precision:0, h:20 })
 
-        let g1_2_1 = g1_2.add('group', { name:'G1_2_1', h:30, bg:'#990' })
+
+        let g1_2_1 = g1_2.add('group', { name:'G1_2_1', h:30, bg:'#990', open:true })
         g1_2_1.add( 'slide',  { name:'slide', min:-100, max:100, value:0, precision:0, h:20 })
         g1_2_1.add( 'slide',  { name:'slide', min:-100, max:100, value:0, precision:0, h:20 })
         g1_2_1.add( 'slide',  { name:'slide', min:-100, max:100, value:0, precision:0, h:20 })
         g1_2_1.add( 'slide',  { name:'slide', min:-100, max:100, value:0, precision:0, h:20 })
+
+        g1_2_1.add( 'grid', { values:['hello', 'test', 'yooo', 'truc'], selectable:true, h:20  } )
 
         ////
 
-        let g2 = ui.add('group', { name:'G1', h:30 });
+        let g2 = ui.add('group', { name:'G1', h:30, open:true });
 
-        let g2_1 = g2.add('group', { name:'G2_1', h:30 });
-        g2_1.add( 'slide',  { name:'slide', min:-100, max:100, value:0, precision:0, h:20 })
-        g2_1.add( 'slide',  { name:'slide', min:-100, max:100, value:0, precision:0, h:20 })
-        let g2_2 = g2.add('group', { name:'G2_2', h:30 })
-        g2_2.add( 'slide',  { name:'slide', min:-100, max:100, value:0, precision:0, h:20 })
-        g2_2.add( 'slide',  { name:'slide', min:-100, max:100, value:0, precision:0, h:20 })
+        let g2_1 = g2.add('group', { name:'G2_1', h:30, open:true });
+        g2_1.add( 'slide',  { name:'slide', min:-100, max:100, value:0, precision:0, h:20, open:true })
+        g2_1.add( 'slide',  { name:'slide', min:-100, max:100, value:0, precision:0, h:20, open:true })
+        let g2_2 = g2.add('group', { name:'G2_2', h:30, open:true })
+        g2_2.add( 'slide',  { name:'slide', min:-100, max:100, value:0, precision:0, h:20, open:true })
+        g2_2.add( 'slide',  { name:'slide', min:-100, max:100, value:0, precision:0, h:20, open:true })
 
         let g2_2_1 = g2_2.add('group', { name:'G1_2_1', h:30 })
-        g2_2_1.add( 'slide',  { name:'slide', min:-100, max:100, value:0, precision:0, h:20 })
-        g2_2_1.add( 'slide',  { name:'slide', min:-100, max:100, value:0, precision:0, h:20 })
-        g2_2_1.add( 'slide',  { name:'slide', min:-100, max:100, value:0, precision:0, h:20 })
-        g2_2_1.add( 'slide',  { name:'slide', min:-100, max:100, value:0, precision:0, h:20 })
+        g2_2_1.add( 'slide',  { name:'slide', min:-100, max:100, value:0, precision:0, h:20, open:true })
+        g2_2_1.add( 'slide',  { name:'slide', min:-100, max:100, value:0, precision:0, h:20, open:true })
+        g2_2_1.add( 'slide',  { name:'slide', min:-100, max:100, value:0, precision:0, h:20, open:true })
+        g2_2_1.add( 'slide',  { name:'slide', min:-100, max:100, value:0, precision:0, h:20, open:true })
 
     	guis.push( ui );
 

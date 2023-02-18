@@ -3,7 +3,7 @@
  * @author lth / https://github.com/lo-th
  */
 
-export const REVISION = '4.2.7';
+export const REVISION = '4.2.8';
 
 // INTENAL FUNCTION
 
@@ -20,6 +20,7 @@ const R = {
 
 	needReZone: true,
     needResize:false,
+    forceZone:false,
     isEventsInit: false,
     isLeave:false,
 
@@ -226,7 +227,7 @@ const R = {
 
         if( R.needResize ) R.resize()
 
-        R.findZone()
+        R.findZone(R.forceZone)
        
         let e = R.e
         let leave = false
@@ -271,6 +272,7 @@ const R = {
             if( time < 200 ) { R.selectAll(); return false }
    
             R.prevTime = R.downTime
+            R.forceZone = false
         }
 
         // for imput
@@ -413,10 +415,9 @@ const R = {
 
                 px = 0
 
-                u.zone.x = zone.x
+                u.zone.x = zone.x+u.dx
                 u.zone.y = py
                 py += u.h + m
-
 
                 height += u.h + m
 
@@ -461,6 +462,7 @@ const R = {
 
         R.needReZone = false
 
+
     },
 
     onZone: function ( o, x, y ) {
@@ -468,11 +470,12 @@ const R = {
         if( x === undefined || y === undefined ) return false;
 
         let z = o.zone;
-        let mx = x - z.x;
+        let mx = x - z.x;// - o.dx;
         let my = y - z.y;
 
         //if( this.marginDiv ) e.clientY -= this.margin * 0.5
         //if( o.group && o.group.marginDiv ) my += o.group.margin * 0.5
+        //if( o.group !== null ) mx -= o.dx
 
         let over = ( mx >= 0 ) && ( my >= 0 ) && ( mx <= z.w ) && ( my <= z.h );
 

@@ -12,7 +12,7 @@
 	/**
 	 * @author lth / https://github.com/lo-th
 	 */
-	const REVISION = '4.2.7'; // INTENAL FUNCTION
+	const REVISION = '4.2.8'; // INTENAL FUNCTION
 
 	const R = {
 		ui: [],
@@ -23,6 +23,7 @@
 		current: -1,
 		needReZone: true,
 		needResize: false,
+		forceZone: false,
 		isEventsInit: false,
 		isLeave: false,
 		downTime: 0,
@@ -166,7 +167,7 @@
 			//if(!event.type) return;
 			if (R.prevDefault.indexOf(event.type) !== -1) event.preventDefault();
 			if (R.needResize) R.resize();
-			R.findZone();
+			R.findZone(R.forceZone);
 			let e = R.e;
 			let leave = false;
 			if (event.type === 'keydown') R.keydown(event);
@@ -208,6 +209,7 @@
 				}
 
 				R.prevTime = R.downTime;
+				R.forceZone = false;
 			} // for imput
 
 
@@ -320,7 +322,7 @@
 					}
 				} else {
 					px = 0;
-					u.zone.x = zone.x;
+					u.zone.x = zone.x + u.dx;
 					u.zone.y = py;
 					py += u.h + m;
 					height += u.h + m;
@@ -357,9 +359,11 @@
 		onZone: function (o, x, y) {
 			if (x === undefined || y === undefined) return false;
 			let z = o.zone;
-			let mx = x - z.x;
+			let mx = x - z.x; // - o.dx;
+
 			let my = y - z.y; //if( this.marginDiv ) e.clientY -= this.margin * 0.5
 			//if( o.group && o.group.marginDiv ) my += o.group.margin * 0.5
+			//if( o.group !== null ) mx -= o.dx
 
 			let over = mx >= 0 && my >= 0 && mx <= z.w && my <= z.h; //if( o.marginDiv ) my -= o.margin * 0.5
 
@@ -1532,6 +1536,14 @@
 					t[1] = "<path id='logoin' fill='" + color + "' stroke='none' d='" + T.logo_neo + "'/>";
 					break;
 
+				case 'phy':
+					t[1] = "<path id='logoin' stroke='" + color + "' stroke-width='49' stroke-linejoin='round' stroke-linecap='butt' fill='none' d='" + T.logo_phy + "'/>";
+					break;
+
+				case 'config':
+					t[1] = "<path id='logoin' stroke='" + color + "' stroke-width='49' stroke-linejoin='round' stroke-linecap='butt' fill='none' d='" + T.logo_config + "'/>";
+					break;
+
 				case 'github':
 					t[1] = "<path id='logoin' fill='" + color + "' stroke='none' d='" + T.logo_github + "'/>";
 					break;
@@ -1564,6 +1576,15 @@
 		186.75 221 202.95 204.85 219 188.8 219 166 L 219 52 M 194 52 L 181 52 181 166 Q 181 173 176.05 178 171.05 183 164 183 157 183 152 178 147 173 147 166 L 147 90 Q 147 
 		67.2 130.85 51.15 114.8 35 92 35 69.25 35 53.05 51.15 37 67.2 37 90 L 37 204 50 204 50 90 Q 50 72.6 62.25 60.35 74.6 48 92 48 109.4 48 121.65 60.35 134 72.6 134 90 L 
 		134 166 Q 134 178.4 142.85 187.15 151.6 196 164 196 176.45 196 185.25 187.15 194 178.4 194 166 L 194 52 Z
+		`,
+		logo_phy: `
+		M 103.55 37.95 L 127.95 37.95 Q 162.35 37.95 186.5 55 210.9 72.35 210.9 96.5 210.9 120.65 186.5 137.7 162.35 155 127.95 155 L 127.95 237.95 M 127.95 155 
+		Q 93.55 155 69.15 137.7 45 120.65 45 96.5 45 72.35 69.15 55 70.9 53.8 72.85 52.85 M 127.95 155 L 127.95 37.95
+		`,
+		logo_config: `
+		M 204.35 51.65 L 173.25 82.75 Q 192 101.5 192 128 L 236 128 M 192 128 Q 192 154.55 173.25 173.25 L 204.4 204.4 M 51.65 51.65 L 82.75 82.75 Q 101.5 64 128 64 
+		L 128 20 M 51.6 204.4 L 82.75 173.25 Q 64 154.55 64 128 L 20 128 M 128 236 L 128 192 Q 101.5 192 82.75 173.25 M 64 128 Q 64 101.5 82.75 82.75 M 173.25 173.25 
+		Q 154.55 192 128 192 M 128 64 Q 154.55 64 173.25 82.75
 		`,
 		logo_donate: `
 		M 171.3 80.3 Q 179.5 62.15 171.3 45.8 164.1 32.5 141.35 30.1 L 94.35 30.1 Q 89.35 30.4 88.3 35.15 L 70.5 148.05 Q 70.2 152.5 73.7 152.6 L 100.95 152.6 107 111.6 Q 108.75 
@@ -1692,7 +1713,7 @@
 
 		static async load(o = {}) {
 			if (typeof window.showOpenFilePicker !== 'function') {
-				window.showOpenFilePicker = this.showOpenFilePickerPolyfill;
+				window.showOpenFilePicker = Files.showOpenFilePickerPolyfill;
 			}
 
 			try {
@@ -1702,7 +1723,7 @@
 					multiple: false //startIn:'./assets'
 
 				};
-				options.types = this.autoTypes(type); // create a new handle
+				options.types = Files.autoTypes(type); // create a new handle
 
 				const handle = await window.showOpenFilePicker(options);
 				const file = await handle[0].getFile(); //let content = await file.text()
@@ -1767,11 +1788,11 @@
 
 
 		static async save(o = {}) {
-			this.usePoly = false;
+			let usePoly = false;
 
 			if (typeof window.showSaveFilePicker !== 'function') {
-				window.showSaveFilePicker = this.showSaveFilePickerPolyfill;
-				this.usePoly = true;
+				window.showSaveFilePicker = Files.showSaveFilePickerPolyfill;
+				usePoly = true;
 			}
 
 			try {
@@ -1780,12 +1801,12 @@
 					suggestedName: o.name || 'hello',
 					data: o.data || ''
 				};
-				options.types = this.autoTypes(type);
+				options.types = Files.autoTypes(type);
 				options.finalType = Object.keys(options.types[0].accept)[0];
 				options.suggestedName += options.types[0].accept[options.finalType][0]; // create a new handle
 
 				const handle = await window.showSaveFilePicker(options);
-				if (this.usePoly) return; // create a FileSystemWritableFileStream to write to
+				if (usePoly) return; // create a FileSystemWritableFileStream to write to
 
 				const file = await handle.createWritable();
 				let blob = new Blob([options.data], {
@@ -1951,6 +1972,7 @@
 			this.isListen = false;
 			this.top = 0;
 			this.ytop = 0;
+			this.dx = o.dx || 0;
 			this.isSelectable = o.selectable !== undefined ? o.selectable : false;
 			this.unselectable = o.unselect !== undefined ? o.unselect : this.isSelectable;
 			this.ontop = o.ontop ? o.ontop : false; // 'beforebegin' 'afterbegin' 'beforeend' 'afterend'
@@ -2786,6 +2808,10 @@
 		label(string, n) {
 			n = n || 2;
 			this.c[n].textContent = string;
+		}
+
+		switchValues(n, string) {
+			this.c[n + 2].innerHTML = this.values[n] = string;
 		}
 
 		icon(string, y = 0, n = 2) {
@@ -3836,7 +3862,8 @@
 			this.current = -1;
 			this.proto = null;
 			this.isEmpty = true;
-			this.decal = o.group ? 8 : 0;
+			this.decal = o.group ? 8 : 0; //this.dd = o.group ? o.group.decal + 8 : 0
+
 			this.baseH = this.h;
 			let fltop = Math.floor(this.h * 0.5) - 3;
 			const cc = this.colors;
@@ -3989,8 +4016,21 @@
 				}
 			}
 
-			let u = this.ADD.apply(this, a); //u.margin += this.margin
+			let u = this.ADD.apply(this, a);
+
+			if (u.isGroup) {
+				//o.add = add;
+				u.dx = 8;
+			} //u.dx += 4
+			//console.log(this.decal)
+			//u.zone.d -= 8
+
+
+			Roots.forceZone = true; //u.margin += this.margin
 			//console.log( u.margin )
+			//Roots.needReZone = true
+			//Roots.resize()
+			//console.log(Roots.needResize)
 
 			this.uis.push(u);
 			this.isEmpty = false;
@@ -4072,7 +4112,8 @@
 				s[1].borderBottom = cc.borderSize + 'px solid rgba(0,0,0,0)';
 			}
 
-			this.parentHeight();
+			this.parentHeight(); //Roots.isLeave = true
+			//Roots.needResize = true
 		}
 
 		close() {
@@ -6753,7 +6794,10 @@
 		}
 
 		let name = type.toLowerCase();
-		if (name === 'group') o.add = add;
+
+		if (name === 'group') {
+			o.add = add; //o.dx = 8
+		}
 
 		switch (name) {
 			case 'bool':
