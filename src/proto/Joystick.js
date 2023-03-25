@@ -25,12 +25,13 @@ export class Joystick extends Proto {
 
         this.interval = null;
         this.c[0].style.display = 'block'
+        this.haveText = o.text !== undefined ? o.text : true 
 
         //this.radius = this.w * 0.5;
         //this.distance = this.radius*0.25;
         this.distance = (this.diam*0.5)*0.25;
 
-        this.h = o.h || this.w + 10;
+        this.h = o.h || this.w + (this.haveText ? 10 : 0);
 
         this.c[0].style.width = this.w +'px';
 
@@ -46,11 +47,13 @@ export class Joystick extends Proto {
         let cc = this.colors
 
         this.c[2] = this.dom( 'div', this.css.txt + 'justify-content:center; top:'+(this.h-20)+'px; width:100%; color:'+ cc.text );
-        this.c[2].textContent = this.value;
+        this.c[2].textContent = this.haveText ? this.value : '';
 
         this.c[3] = this.getJoystick( this.model );
         this.setSvg( this.c[3], 'viewBox', '0 0 '+this.diam+' '+this.diam );
         this.setCss( this.c[3], { width:this.diam, height:this.diam, left:0, top:this.top });
+
+        this.mode(0)
 
 
         this.ratio = 128/this.w;
@@ -71,9 +74,9 @@ export class Joystick extends Proto {
                     this.setSvg( this.c[3], 'fill', 'url(#gradIn)', 4 );
                     this.setSvg( this.c[3], 'stroke', '#000', 4 );
                 } else {
-                    this.setSvg( this.c[3], 'stroke', 'rgba(100,100,100,0.25)', 2 );
+                    this.setSvg( this.c[3], 'stroke', cc.joyOut, 2 );
                     //this.setSvg( this.c[3], 'stroke', 'rgb(0,0,0,0.1)', 3 );
-                    this.setSvg( this.c[3], 'stroke', '#666', 4 );
+                    this.setSvg( this.c[3], 'stroke', cc.joyOut, 4 );
                     this.setSvg( this.c[3], 'fill', 'none', 4 );
                 }
                 
@@ -83,10 +86,10 @@ export class Joystick extends Proto {
                     this.setSvg( this.c[3], 'fill', 'url(#gradIn2)', 4 );
                     this.setSvg( this.c[3], 'stroke', 'rgba(0,0,0,0)', 4 );
                 } else {
-                    this.setSvg( this.c[3], 'stroke', 'rgba(48,138,255,0.25)', 2 );
+                    this.setSvg( this.c[3], 'stroke', cc.joyOver, 2 );
                     //this.setSvg( this.c[3], 'stroke', 'rgb(0,0,0,0.3)', 3 );
-                    this.setSvg( this.c[3], 'stroke', cc.select, 4 );
-                    this.setSvg( this.c[3], 'fill', 'rgba(48,138,255,0.25)', 4 );
+                    this.setSvg( this.c[3], 'stroke', cc.joySelect, 4 );
+                    this.setSvg( this.c[3], 'fill', cc.joyOver, 4 );
                 }
             break;
             case 2: // edit
@@ -207,7 +210,7 @@ export class Joystick extends Proto {
         let x = (this.diam*0.5) - ( -this.pos.x * this.distance );
         let y = (this.diam*0.5) - ( -this.pos.y * this.distance );
 
-         if(this.model === 0){
+        if(this.model === 0){
 
             let sx = x + ((this.pos.x)*5) + 5;
             let sy = y + ((this.pos.y)*5) + 10;
@@ -227,7 +230,7 @@ export class Joystick extends Proto {
         this.value[0] =  ( this.pos.x * this.multiplicator ).toFixed( this.precision ) * 1;
         this.value[1] =  ( this.pos.y * this.multiplicator ).toFixed( this.precision ) * 1;
 
-        this.c[2].textContent = this.value;
+        if(this.haveText) this.c[2].textContent = this.value;
 
     }
 

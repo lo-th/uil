@@ -151,6 +151,10 @@ const T = {
         fontShadow: 'none',//'#000',
         fontSize:12,
 
+        joyOver:'rgba(48,138,255,0.25)',
+        joyOut: 'rgba(100,100,100,0.5)',
+        joySelect: '#308AFF',
+
         
         hide: 'rgba(0,0,0,0)',
 

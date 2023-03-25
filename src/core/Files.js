@@ -42,6 +42,9 @@ export class Files {
             case 'icon':
             t = [ { description: 'Icons', accept: { 'image/x-ico': ['.ico'] } }, ]
             break;
+            case 'lut':
+            t = [ { description: 'Lut', accept: { 'text/plain': ['.cube', '.3dl'] } }, ]
+            break;
 
         }
 
@@ -98,15 +101,15 @@ export class Files {
                     case 'image':
                         let img = new Image;
                         img.onload = function() {
-                            if( o.callback ) o.callback( img, fname )
+                            if( o.callback ) o.callback( img, fname, ftype )
                         }
                         img.src = content
                     break;
                     case 'json':
-                        if( o.callback ) o.callback( JSON.parse( content ), fname )
+                        if( o.callback ) o.callback( JSON.parse( content ), fname, ftype )
                     break;
                     default:
-                        if( o.callback ) o.callback( content, fname )
+                        if( o.callback ) o.callback( content, fname, ftype )
                     break;
                 }
 
