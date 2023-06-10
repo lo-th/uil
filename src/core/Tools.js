@@ -99,7 +99,7 @@ const T = {
         if( o.bgOver ) color.backgroundOver = o.bgOver
 
         for( let m in color ){
-            if(o[m]) color[m] = o[m]
+            if(o[m]!==undefined) color[m] = o[m]
         }
 
         for( let m in o ){
@@ -117,6 +117,9 @@ const T = {
         sx: 4,//4
         sy: 2,//2
         radius:2,
+
+        showOver : 1,
+        //groupOver : 1,
 
         content:'none',
         background: 'rgba(50,50,50,0.15)',
@@ -137,6 +140,7 @@ const T = {
 
         gborder : 'none',
         groups : 'none',
+        
 
         button : '#3c3c3c',
         overoff : '#5c5c5c',

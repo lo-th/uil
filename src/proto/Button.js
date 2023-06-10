@@ -6,7 +6,8 @@ export class Button extends Proto {
 
         super( o )
 
-        this.value = o.value || '';
+        this.value = '';
+        if( o.value !== undefined ) this.value = o.value
 
         this.values = o.value || this.txt
         if( o.values ) this.values = o.values

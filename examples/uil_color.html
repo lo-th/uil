@@ -42,14 +42,12 @@
     let ui;
     let maxW = 450;
 
-
-
     function callback (v){ debug.innerHTML = v; }
 
     let colors = [
-        { bg:'#ddd', text:'#333', button:'#ddd', select:'#0ff',  back:'#ccc', size:16, shadow:'none', borderSize:2, fontSize:'13', sx:6, sy:4, radius:4  },
+        { bg:'#ddd', text:'#333', button:'#ddd', select:'#0ff',  back:'#ccc', size:16, shadow:'none', borderSize:2, fontSize:'13', sx:6, sy:4, radius:12, showOver:0  },
         { shadow:'#000', font:"'Roboto Mono', monospace", fontSize:14 },
-        { backgroundOver: 'rgba(50,80,50,0.3)', content:'#000', bg:'#000', text:'#0c0', button:'#333', select:'#a00', back:'#222', font:'Tahoma', fontSize:16, weight:'bold', shadow:'none', sx:12, sy:20  }
+        { backgroundOver: 'rgba(50,80,50,0.3)', content:'#000', bg:'#000', text:'#0c0', button:'#333', select:'#a00', back:'#222', font:'Tahoma', fontSize:16, weight:'bold', shadow:'none', sx:12, sy:10  }
     ]
 
     for( let i = 0; i<3; i++ ){
@@ -84,8 +82,9 @@
         ui.add('Pad', { name:'Pad_1', w:100, min:-1, max:1, precision:2 })
 
         let gg0 = ui.add('group', { name:'YOOO', h:24 })
+        gg0.add('button', { name:'Button1', value:'B0' })
 
-        gg0.add( 'grid', { values:['Line','Rectangle', 'Circle', 'Ellipse', 'Line2','Rectangle2', 'Circle2', 'Ellipse2'], selectable:true, value:'Line', h:50 })
+        //gg0.add( 'grid', { values:['Line','Rectangle', 'Circle', 'Ellipse', 'Line2','Rectangle2', 'Circle2', 'Ellipse2'], selectable:true, value:'Line', h:50 })
 
         let gg1 = ui.add('group', { name:'YOOO', h:24 })
 

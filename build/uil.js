@@ -12,7 +12,7 @@
 	/**
 	 * @author lth / https://github.com/lo-th
 	 */
-	const REVISION = '4.2.8'; // INTENAL FUNCTION
+	const REVISION = '4.3.0'; // INTENAL FUNCTION
 
 	const R = {
 		ui: [],
@@ -286,7 +286,7 @@
 		// ----------------------
 		//	 GUI / GROUP FUNCTION
 		// ----------------------
-		calcUis: (uis, zone, py) => {
+		calcUis: (uis, zone, py, group = false) => {
 			//console.log('calc_uis')
 			let i = uis.length,
 					u,
@@ -299,7 +299,7 @@
 			while (i--) {
 				u = uis[n];
 				n++;
-				if (u.isGroup) u.calcUis();
+				if (!group && u.isGroup) u.calcUis();
 				m = u.margin; //div = u.marginDiv
 
 				u.zone.w = u.w;
@@ -736,7 +736,7 @@
 			if (o.bgOver) color.backgroundOver = o.bgOver;
 
 			for (let m in color) {
-				if (o[m]) color[m] = o[m];
+				if (o[m] !== undefined) color[m] = o[m];
 			}
 
 			for (let m in o) {
@@ -752,6 +752,8 @@
 			sy: 2,
 			//2
 			radius: 2,
+			showOver: 1,
+			//groupOver : 1,
 			content: 'none',
 			background: 'rgba(50,50,50,0.15)',
 			backgroundOver: 'rgba(50,50,50,0.3)',
@@ -1991,6 +1993,7 @@
 
 			this.css = this.main ? this.main.css : Tools.css;
 			this.colors = Tools.defineColor(o, this.main ? this.group ? this.group.colors : this.main.colors : Tools.colors);
+			this.overEffect = this.colors.showOver;
 			this.svgs = Tools.svgs;
 			this.zone = {
 				x: 0,
@@ -2220,11 +2223,13 @@
 
 		uiout() {
 			if (this.lock) return;
+			if (!this.overEffect) return;
 			if (this.s) this.s[0].background = this.colors.background;
 		}
 
 		uiover() {
 			if (this.lock) return;
+			if (!this.overEffect) return;
 			if (this.s) this.s[0].background = this.colors.backgroundOver;
 		}
 
@@ -2654,7 +2659,8 @@
 	class Button extends Proto {
 		constructor(o = {}) {
 			super(o);
-			this.value = o.value || '';
+			this.value = '';
+			if (o.value !== undefined) this.value = o.value;
 			this.values = o.value || this.txt;
 			if (o.values) this.values = o.values;
 			if (!o.values && !o.value) this.txt = '';
@@ -3864,6 +3870,17 @@
 
 	}
 
+	class Empty extends Proto {
+		constructor(o = {}) {
+			o.isSpace = true;
+			o.margin = 0;
+			if (!o.h) o.h = 10;
+			super(o);
+			this.init();
+		}
+
+	}
+
 	class Group extends Proto {
 		constructor(o = {}) {
 			super(o);
@@ -3877,11 +3894,14 @@
 			this.decal = o.group ? 8 : 0; //this.dd = o.group ? o.group.decal + 8 : 0
 
 			this.baseH = this.h;
+			this.spaceY = new Empty({
+				h: this.margin
+			});
 			let fltop = Math.floor(this.h * 0.5) - 3;
 			const cc = this.colors;
 			this.useFlex = true;
 			let flexible = this.useFlex ? 'display:flex; flex-flow: row wrap;' : '';
-			this.c[2] = this.dom('div', this.css.basic + flexible + 'width:100%; left:0; height:auto; overflow:hidden; top:' + this.h + 'px');
+			this.c[2] = this.dom('div', this.css.basic + flexible + 'width:100%; left:0;	overflow:hidden; top:' + this.h + 'px');
 			this.c[3] = this.dom('path', this.css.basic + 'position:absolute; width:6px; height:6px; left:0; top:' + fltop + 'px;', {
 				d: this.svgs.g1,
 				fill: cc.text,
@@ -4152,9 +4172,10 @@
 		}
 
 		calcUis() {
-			if (!this.isOpen) this.h = this.baseH; //else this.h = Roots.calcUis( this.uis, this.zone, this.zone.y + this.baseH ) + this.baseH;
-			else this.h = Roots.calcUis(this.uis, this.zone, this.zone.y + this.baseH + this.margin) + this.baseH;
+			if (!this.isOpen || this.isEmpty) this.h = this.baseH; //else this.h = Roots.calcUis( this.uis, this.zone, this.zone.y + this.baseH ) + this.baseH;
+			else this.h = Roots.calcUis([...this.uis, this.spaceY], this.zone, this.zone.y + this.baseH + this.margin, true) + this.baseH;
 			this.s[0].height = this.h + 'px';
+			this.s[2].height = this.h - this.baseH + 'px';
 		}
 
 		parentHeight(t) {
@@ -4165,6 +4186,7 @@
 			if (!this.isOpen) return;
 			if (this.isUI) this.main.calc();else this.calcUis();
 			this.s[0].height = this.h + 'px';
+			this.s[2].height = this.h + 'px';
 		}
 
 		rSizeContent() {
@@ -4188,17 +4210,25 @@
 			if (this.isOpen) this.rSizeContent();
 		} //
 
+		/*
+				uiout() {
+		
+						if( this.lock ) return;
+						if(!this.overEffect) return;
+						if(this.s) this.s[0].background = this.colors.background;
+		
+				}
+		
+				uiover() {
+		
+						if( this.lock ) return;
+						if(!this.overEffect) return;
+						//if( this.isOpen ) return;
+						if(this.s) this.s[0].background = this.colors.backgroundOver;
+		
+				}
+		*/
 
-		uiout() {
-			if (this.lock) return;
-			if (this.s) this.s[0].background = this.colors.background;
-		}
-
-		uiover() {
-			if (this.lock) return; //if( this.isOpen ) return;
-
-			if (this.s) this.s[0].background = this.colors.backgroundOver;
-		}
 
 	}
 
@@ -4608,7 +4638,9 @@
 
 	class List extends Proto {
 		constructor(o = {}) {
-			super(o); // images
+			super(o); // TODO not work
+
+			this.hideCurrent = false; // images
 
 			this.path = o.path || '';
 			this.format = o.format || '';
@@ -4656,6 +4688,7 @@
 
 			this.items = [];
 			this.prevName = '';
+			this.tmpId = 0;
 			this.baseH = this.h;
 			this.itemHeight = o.itemHeight || this.h; //(this.h-3);
 			// force full list 
@@ -4712,10 +4745,11 @@
 			this.dragout = o.dragout || false;
 			this.dragstart = o.dragstart || null;
 			this.dragend = o.dragend || null; //this.c[0].style.background = '#FF0000'
+			///if( this.isWithImage ) this.preloadImage();
 
-			if (this.isWithImage) this.preloadImage();
 			this.setList(this.list);
 			this.init();
+			if (this.isWithImage) this.preloadImage();
 			if (this.isOpenOnStart) this.open(true);
 			this.baseH += this.mtop;
 		} // image list
@@ -4731,6 +4765,7 @@
 		}
 
 		nextImg() {
+			if (this.c === null) return;
 			this.tmpUrl.shift();
 
 			if (this.tmpUrl.length === 0) {
@@ -4780,13 +4815,19 @@
 
 		testItems(y) {
 			let name = '';
-			let i = this.items.length,
+			let items = this.items;
+			/*if(this.hideCurrent){
+					//items = [...this.items]
+					items = this.items.slice(this.tmpId)
+				}*/
+
+			let i = items.length,
 					item,
 					a,
 					b;
 
 			while (i--) {
-				item = this.items[i];
+				item = items[i];
 				a = item.posy + this.topList;
 				b = item.posy + this.itemHeight + 1 + this.topList;
 
@@ -4849,6 +4890,33 @@
 				this.items[i].style.background = this.colors.back;
 				this.items[i].style.color = this.colors.text;
 			}
+		}
+
+		hideActive() {
+			if (!this.hideCurrent) return; //if( !this.current ) return
+
+			if (this.current) this.tmpId = this.current.id;
+			this.resetHide(); //this.items[this.tmpId].style.height = 0+'px'
+		}
+
+		resetHide() {
+			console.log(this.tmpId);
+			let i = this.items.length;
+
+			while (i--) {
+				if (i === this.tmpId) {
+					this.items[i].style.height = 0 + 'px';
+					this.items[i].posy = -1;
+				} else {
+					this.items[i].style.height = this.itemHeight + 'px';
+					this.items[i].posy = (this.itemHeight + 1) * (i - 1);
+				} //this.items[i].style.display = 'flex'
+
+				/*this.items[i].select = false
+				this.items[i].style.background = this.colors.back;
+				this.items[i].style.color = this.colors.text;*/
+
+			}
 		} // ----------------------
 		//	 EVENTS
 		// ----------------------
@@ -4869,19 +4937,21 @@
 				this.modeTitle(2);
 
 				if (!this.listOnly) {
+					this.hideActive();
 					if (!this.isOpen) this.open();else this.close();
 				}
 			} else {
 				// is item
 				if (this.current) {
-					this.value = this.list[this.current.id];
+					this.value = this.list[this.current.id]; //this.tmpId = this.current.id
+
 					if (this.isSelectable) this.selected(); //this.send( this.refObject !== null ? this.refObject[ this.list[this.current.id]] : this.value );
 
 					this.send(this.value);
 
 					if (!this.listOnly) {
 						this.close();
-						this.setTopItem();
+						this.setTopItem(); //this.hideActive()
 					}
 				}
 			}
@@ -5000,10 +5070,11 @@
 			this.clearList();
 			this.list = list;
 			this.length = this.list.length;
-			this.maxItem = this.full ? this.length : 5;
-			this.maxItem = this.length < this.maxItem ? this.length : this.maxItem;
+			let lng = this.hideCurrent ? this.length - 1 : this.length;
+			this.maxItem = this.full ? lng : 5;
+			this.maxItem = lng < this.maxItem ? lng : this.maxItem;
 			this.maxHeight = this.maxItem * (this.itemHeight + 1) + 2;
-			this.max = this.length * (this.itemHeight + 1) + 2;
+			this.max = lng * (this.itemHeight + 1) + 2;
 			this.ratio = this.maxHeight / this.max;
 			this.sh = this.maxHeight * this.ratio;
 			this.range = this.maxHeight - this.sh;
@@ -5105,7 +5176,8 @@
 		}
 
 		setValue(value) {
-			if (!isNaN(value)) this.value = this.list[value];else this.value = value;
+			if (!isNaN(value)) this.value = this.list[value];else this.value = value; //this.tmpId = value
+
 			this.setTopItem();
 		}
 
@@ -6211,17 +6283,6 @@
 
 	}
 
-	class Empty extends Proto {
-		constructor(o = {}) {
-			o.isSpace = true;
-			o.margin = 0;
-			if (!o.h) o.h = 10;
-			super(o);
-			this.init();
-		}
-
-	}
-
 	class Item extends Proto {
 		constructor(o = {}) {
 			super(o);
@@ -6939,7 +7000,8 @@
 			this.plane = o.plane || null; // color
 
 			if (o.config) o.colors = o.config;
-			if (o.colors) this.setConfig(o.colors);else this.colors = Tools.defineColor(o); // style
+			if (o.colors) this.setConfig(o.colors);else this.colors = Tools.defineColor(o); //this.cleanning = false
+			// style
 
 			this.css = Tools.cloneCss();
 			this.isReset = true;
@@ -7036,7 +7098,7 @@
 			} // height transition
 
 
-			this.transition = o.transition || Tools.transition;
+			this.transition = o.transition !== undefined ? o.transition : Tools.transition;
 			if (this.transition) setTimeout(this.addTransition.bind(this), 1000);
 			this.setWidth();
 			if (this.isCanvas) this.makeCanvas();
@@ -7201,6 +7263,7 @@
 
 
 		handleEvent(e) {
+			//if( this.cleanning ) return
 			let type = e.type;
 			let change = false;
 			let protoChange = false;
@@ -7300,6 +7363,7 @@
 
 
 		add() {
+			//if(this.cleanning) this.cleanning = false
 			let a = arguments;
 			let ontop = false;
 
@@ -7346,6 +7410,7 @@
 
 
 		empty() {
+			//this.cleanning = true
 			//this.close();
 			let i = this.uis.length,
 					item;
@@ -7363,6 +7428,10 @@
 
 		clear() {
 			this.empty();
+		}
+
+		clear2() {
+			setTimeout(this.empty.bind(this), 0);
 		}
 
 		dispose() {

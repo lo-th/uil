@@ -22,6 +22,8 @@ export class Proto {
         // only simple space 
         this.isSpace = o.isSpace || false
 
+
+
         // if is on gui or group
         this.main = o.main || null;
         this.isUI = o.isUI || false;
@@ -42,6 +44,9 @@ export class Proto {
         this.css = this.main ? this.main.css : Tools.css
 
         this.colors = Tools.defineColor( o, this.main ? ( this.group ? this.group.colors : this.main.colors ) : Tools.colors )
+
+
+        this.overEffect = this.colors.showOver
 
         this.svgs = Tools.svgs
 
@@ -341,6 +346,7 @@ export class Proto {
     uiout() {
 
         if( this.lock ) return;
+        if(!this.overEffect) return;
         if(this.s) this.s[0].background = this.colors.background;
 
     }
@@ -348,6 +354,7 @@ export class Proto {
     uiover() {
 
         if( this.lock ) return;
+        if(!this.overEffect) return;
         if(this.s) this.s[0].background = this.colors.backgroundOver;
 
     }

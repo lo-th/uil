@@ -1,6 +1,7 @@
 
 import { Roots } from '../core/Roots.js';
 import { Proto } from '../core/Proto.js';
+import { Empty } from './Empty.js';
 
 export class Group extends Proto {
 
@@ -24,6 +25,10 @@ export class Group extends Proto {
 
         this.baseH = this.h
 
+        this.spaceY = new Empty({h:this.margin});
+
+
+
         let fltop = Math.floor(this.h*0.5)-3
 
         const cc = this.colors
@@ -31,7 +36,7 @@ export class Group extends Proto {
         this.useFlex = true 
         let flexible = this.useFlex ? 'display:flex; flex-flow: row wrap;' : ''
 
-        this.c[2] = this.dom( 'div', this.css.basic + flexible + 'width:100%; left:0; height:auto; overflow:hidden; top:'+(this.h)+'px')
+        this.c[2] = this.dom( 'div', this.css.basic + flexible + 'width:100%; left:0;  overflow:hidden; top:'+(this.h)+'px')
         this.c[3] = this.dom( 'path', this.css.basic + 'position:absolute; width:6px; height:6px; left:0; top:'+fltop+'px;', { d:this.svgs.g1, fill:cc.text, stroke:'none'})
 
         let bh = this.mtop === 0 ? this.margin : this.mtop
@@ -382,11 +387,12 @@ export class Group extends Proto {
 
     calcUis () {
 
-        if( !this.isOpen ) this.h = this.baseH
+        if( !this.isOpen || this.isEmpty ) this.h = this.baseH
         //else this.h = Roots.calcUis( this.uis, this.zone, this.zone.y + this.baseH ) + this.baseH;
-        else this.h = Roots.calcUis( this.uis, this.zone, this.zone.y + this.baseH + this.margin ) + this.baseH
+        else this.h = Roots.calcUis( [...this.uis, this.spaceY ], this.zone, this.zone.y + this.baseH + this.margin, true ) + this.baseH
 
         this.s[0].height = this.h + 'px'
+        this.s[2].height =( this.h - this.baseH )+ 'px'
 
     }
 
@@ -403,6 +409,7 @@ export class Group extends Proto {
         if( this.isUI ) this.main.calc()
         else this.calcUis()
         this.s[0].height = this.h + 'px'
+        this.s[2].height = this.h + 'px'
 
     }
 
@@ -436,10 +443,11 @@ export class Group extends Proto {
     }
 
     //
-
+/*
     uiout() {
 
         if( this.lock ) return;
+        if(!this.overEffect) return;
         if(this.s) this.s[0].background = this.colors.background;
 
     }
@@ -447,9 +455,10 @@ export class Group extends Proto {
     uiover() {
 
         if( this.lock ) return;
+        if(!this.overEffect) return;
         //if( this.isOpen ) return;
         if(this.s) this.s[0].background = this.colors.backgroundOver;
 
     }
-
+*/
 }

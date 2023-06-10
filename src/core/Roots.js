@@ -3,7 +3,7 @@
  * @author lth / https://github.com/lo-th
  */
 
-export const REVISION = '4.2.9';
+export const REVISION = '4.3.0';
 
 // INTENAL FUNCTION
 
@@ -370,7 +370,7 @@ const R = {
     //   GUI / GROUP FUNCTION
     // ----------------------
 
-    calcUis: ( uis, zone, py ) => {
+    calcUis: ( uis, zone, py, group = false ) => {
 
         //console.log('calc_uis')
 
@@ -383,7 +383,7 @@ const R = {
             u = uis[n]
             n++
 
-            if( u.isGroup ) u.calcUis()
+            if( !group && u.isGroup ) u.calcUis()
 
             m = u.margin
             //div = u.marginDiv

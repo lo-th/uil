@@ -7,6 +7,9 @@ export class List extends Proto {
 
         super( o );
 
+        // TODO not work
+        this.hideCurrent = false
+
         // images
         this.path = o.path || '';
         this.format = o.format || '';
@@ -68,6 +71,9 @@ export class List extends Proto {
         this.items = [];
 
         this.prevName = '';
+
+        
+        this.tmpId = 0
 
         this.baseH = this.h;
 
@@ -141,10 +147,11 @@ export class List extends Proto {
         
 
         //this.c[0].style.background = '#FF0000'
-        if( this.isWithImage ) this.preloadImage();
+        ///if( this.isWithImage ) this.preloadImage();
             
         this.setList( this.list );
         this.init();
+        if( this.isWithImage ) this.preloadImage();
         if( this.isOpenOnStart ) this.open( true )
 
         this.baseH += this.mtop
@@ -155,6 +162,8 @@ export class List extends Proto {
 
     preloadImage () {
 
+
+
         this.preLoadComplete = false;
 
         this.tmpImage = {};
@@ -164,6 +173,8 @@ export class List extends Proto {
     }
 
     nextImg () {
+
+        if(this.c === null) return
 
         this.tmpUrl.shift();
         if( this.tmpUrl.length === 0 ){ 
@@ -232,9 +243,17 @@ export class List extends Proto {
 
         let name = '';
 
-        let i = this.items.length, item, a, b;
+        let items = this.items
+
+        /*if(this.hideCurrent){
+            //items = [...this.items]
+            items = this.items.slice(this.tmpId)
+
+        }*/
+
+        let i = items.length, item, a, b;
         while(i--){
-            item = this.items[i];
+            item = items[i];
             a = item.posy + this.topList;
             b = item.posy + this.itemHeight + 1 + this.topList;
             if( y >= a && y <= b ){ 
@@ -291,6 +310,8 @@ export class List extends Proto {
         this.modeItem(2)
         this.current.select = true
 
+        
+
     }
 
     resetItems() {
@@ -300,6 +321,38 @@ export class List extends Proto {
             this.items[i].select = false
             this.items[i].style.background = this.colors.back;
             this.items[i].style.color = this.colors.text;
+        }
+
+    }
+
+    hideActive() {
+
+        if( !this.hideCurrent ) return
+        //if( !this.current ) return
+        if( this.current )this.tmpId = this.current.id
+        this.resetHide()
+        //this.items[this.tmpId].style.height = 0+'px'
+        
+    }
+
+    resetHide() {
+
+        console.log(this.tmpId)
+
+        let i = this.items.length
+        while(i--){
+            if(i===this.tmpId){
+                this.items[i].style.height = 0+'px'
+                this.items[i].posy = -1;
+            } else {
+                this.items[i].style.height = this.itemHeight+'px'
+                this.items[i].posy = (this.itemHeight+1)*(i-1);
+            }
+            //this.items[i].style.display = 'flex'
+            
+            /*this.items[i].select = false
+            this.items[i].style.background = this.colors.back;
+            this.items[i].style.color = this.colors.text;*/
         }
 
     }
@@ -330,6 +383,7 @@ export class List extends Proto {
 
             this.modeTitle(2)
             if( !this.listOnly ){
+                this.hideActive()
                 if( !this.isOpen ) this.open()
                 else this.close()
             }
@@ -338,6 +392,7 @@ export class List extends Proto {
             if( this.current ){
 
                 this.value = this.list[ this.current.id ]
+                //this.tmpId = this.current.id
 
                 if( this.isSelectable ) this.selected()
 
@@ -347,6 +402,7 @@ export class List extends Proto {
                 if( !this.listOnly ) {
                     this.close()
                     this.setTopItem()
+                    //this.hideActive()
                 }
             }
             
@@ -484,12 +540,16 @@ export class List extends Proto {
         this.list = list;
         this.length = this.list.length;
 
-        this.maxItem = this.full ? this.length : 5;
-        this.maxItem = this.length < this.maxItem ? this.length : this.maxItem;
+        let lng = this.hideCurrent? this.length-1 : this.length
+
+        this.maxItem = this.full ? lng : 5;
+        this.maxItem = lng < this.maxItem ? lng : this.maxItem;
 
         this.maxHeight = this.maxItem * (this.itemHeight+1) + 2;
+        
 
-        this.max = this.length * (this.itemHeight+1) + 2;
+
+        this.max = lng * (this.itemHeight+1) + 2;
         this.ratio = this.maxHeight / this.max;
         this.sh = this.maxHeight * this.ratio;
         this.range = this.maxHeight - this.sh;
@@ -611,6 +671,8 @@ export class List extends Proto {
         if(!isNaN(value)) this.value = this.list[ value ];
         else this.value = value;
 
+        //this.tmpId = value
+
         this.setTopItem();
 
     }
@@ -639,7 +701,6 @@ export class List extends Proto {
 
         }
         else this.c[3].textContent = this.value;
-
 
         if( this.miniCanvas ){
 

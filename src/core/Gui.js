@@ -27,6 +27,9 @@ export class Gui {
         if ( o.colors ) this.setConfig( o.colors )
         else this.colors = Tools.defineColor( o )
 
+        //this.cleanning = false
+        
+
         // style
         this.css = Tools.cloneCss()
 
@@ -149,7 +152,7 @@ export class Gui {
 
 
         // height transition
-        this.transition = o.transition || Tools.transition
+        this.transition = o.transition!==undefined? o.transition : Tools.transition
         if( this.transition ) setTimeout( this.addTransition.bind( this ), 1000 );
         
 
@@ -372,6 +375,8 @@ export class Gui {
 
     handleEvent ( e ) {
 
+        //if( this.cleanning ) return
+
     	let type = e.type;
 
     	let change = false;
@@ -501,6 +506,8 @@ export class Gui {
 
     add () {
 
+        //if(this.cleanning) this.cleanning = false
+
         let a = arguments
         let ontop = false
 
@@ -564,6 +571,8 @@ export class Gui {
 
     empty() {
 
+        //this.cleanning = true
+
         //this.close();
 
         let i = this.uis.length, item
@@ -583,6 +592,12 @@ export class Gui {
     clear() {
 
         this.empty()
+
+    }
+
+    clear2() {
+
+        setTimeout( this.empty.bind(this), 0 )
 
     }
 
