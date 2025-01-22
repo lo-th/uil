@@ -6,7 +6,7 @@
 <link rel="shortcut icon" href="./assets/favicon.ico">
 <link rel="stylesheet" type="text/css" href="./assets/style.css">
 
-<script type="text/javascript" src="../build/uil.js"></script>
+<!--<script type="text/javascript" src="../build/uil.js"></script>-->
 
 </head>
 
@@ -14,12 +14,15 @@
 <div id='logo'></div>
 <div id='version'></div>
 <div id='debug3'></div>
-<script>
+
+<!--<script>-->
+<script type="module">
+
+import { UIL } from '../src/Uil_dev.js'
 
 const debug = document.getElementById('debug3')
 const obj1 = { speed: 5 }
 const obj2 = { speed: 5, ready:false }
-
 
 document.getElementById('logo').innerHTML = UIL.Tools.icon('logo', '#FFF', 64);
 document.getElementById('version').innerHTML = 'Uil '+ UIL.REVISION;
@@ -44,7 +47,7 @@ ui.add( obj2, 'ready', { type:'bool' } ).listen();
 
 //
 
-var ui2 = new UIL.Gui({css:'top:0px; left:10px;'}).onChange( callback )
+var ui2 = new UIL.Gui({ css:'left:10px;', bottom:40 }).onChange( callback )
 
 ui2.add( obj2, 'speed', { min:-5, max:5, rename:'speed L', fontColor:'#D4B87B' } ).listen();
 ui2.add( obj2, 'speed', { min:-5, max:5, fontColor:'#D4B87B', stype:1 } ).listen();

@@ -10,7 +10,7 @@ export class Slide extends Proto {
         this.setTypeNumber( o );
 
 
-        this.model = o.stype || 0;
+        this.model = o.stype!== undefined ? o.stype : 2;
         if( o.mode !== undefined ) this.model = o.mode;
 
         //this.defaultBorderColor = this.colors.hide;
@@ -18,6 +18,9 @@ export class Slide extends Proto {
         this.isDown = false;
         this.isOver = false;
         this.allway = o.allway || false;
+
+        this.autoValue = true
+        if(o.autoValue!==undefined) this.autoValue = false
 
         this.isDeg = o.isDeg || false;
         this.isCyclic = o.cyclic || false;
@@ -57,12 +60,14 @@ export class Slide extends Proto {
             this.c[4].style.borderRadius = r1 + 'px';
             this.c[4].style.height = h2 + 'px';
             this.c[4].style.top = (this.h*0.5) - h1 + 'px';
+
             this.c[5].style.borderRadius = (r1*0.5) + 'px';
             this.c[5].style.height = h1 + 'px';
             this.c[5].style.top = (this.h*0.5)-(h1*0.5) + 'px';
 
             //this.c[6] = this.dom( 'div', this.css.basic + 'border-radius:'+ra+'px; margin-left:'+(-ww*0.5)+'px; border:1px solid '+cc.border+'; background:'+cc.button+'; left:4px; top:2px; height:'+(this.h-4)+'px; width:'+ww+'px;' );
-            this.c[6] = this.dom( 'div', this.css.basic + 'border-radius:'+ra+'px; margin-left:'+(-ww*0.5)+'px; background:'+cc.text+'; left:4px; top:3px; height:'+(this.h-6)+'px; width:'+ww+'px;' )
+            //this.c[6] = this.dom( 'div', this.css.basic + 'border-radius:'+ra+'px; margin-left:'+(-ww*0.5)+'px; background:'+cc.text+'; left:4px; top:3px; height:'+(this.h-6)+'px; width:'+ww+'px;' )
+            this.c[6] = this.dom( 'div', this.css.basic + 'border-radius:'+ra+'px; margin-left:'+(-ww*0.5)+'px; background:'+cc.text+'; left:4px; top:'+((this.h-ww)*0.5)+'px; height:'+ww+'px; width:'+ww+'px;' )
         }
 
         this.init();
@@ -181,7 +186,9 @@ export class Slide extends Proto {
             this.update(true); 
         }
 
-        else this.c[2].textContent = this.value + (this.isDeg ? '°':'');
+        else {
+            if(this.autoValue) this.c[2].textContent = this.value + (this.isDeg ? '°':'');
+        }
 
     }
 
@@ -224,7 +231,7 @@ export class Slide extends Proto {
        
         if(this.model !== 3) this.s[5].width = ww + 'px';
         if(this.s[6]) this.s[6].left = ( this.sa + ww + 3 ) + 'px';
-        this.c[2].textContent = this.value + (this.isDeg ? '°':'');
+        if(this.autoValue) this.c[2].textContent = this.value + (this.isDeg ? '°':'');
 
         if( up ) this.send();
 

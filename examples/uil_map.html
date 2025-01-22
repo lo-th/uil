@@ -16,10 +16,10 @@
 
 			const debug = document.querySelector('#debug3');
 
-			
-
 		    let name = '', img
 		    let images = []
+
+		    let tmpImage = {}
 
 		    //let formats = [256,128,64,48,32,24,16]//,512,1024
 		    let formats = [256,128,64,48,40,32,24,20,16]//,512,1024
@@ -28,23 +28,30 @@
 
 		    let tmpCanvas = document.createElement("canvas");
 			let canvas = document.createElement("canvas");
-			canvas.width = 256
-			canvas.height = 256
-
-			canvas.style.cssText = 'position:absolute; left:8px; top:0px; border:1px solid #393939; border-radius:2px; box-sizing: border-box;'
+			canvas.width = canvas.height = 512
+			canvas.style.cssText = 'position:absolute; left:5px; top:0px; border-radius:2px;'
 
 			let ctx = canvas.getContext('2d')
-			ctx.rect(0, 0, 256, 256);
-			ctx.fill()
+			ctx.fillRect(0, 0, 512, 512);
 
 			//document.body.appendChild( canvas )
 
 			const callbackLoader = ( name ) => {
 
 				switch(name){
-		            case 'LOAD' :
-		                UIL.Files.load( { callback:onLoad, type:'image' } )
+
+		            case 'LOAD ROUGHT' :
+		                UIL.Files.load( { callback:onLoad, type:'image', 'R' } )
 		            break;
+
+		            case 'LOAD METAL' :
+		                UIL.Files.load( { callback:onLoad, type:'image', 'M' } )
+		            break;
+
+		            case 'LOAD AO' :
+		                UIL.Files.load( { callback:onLoad, type:'image', 'A' } )
+		            break;
+
 		            case 'SAVE' :
 		                convert()
 		            break;
@@ -52,13 +59,15 @@
 
 			}
 
-			const onLoad = ( img, Name ) => {
+			const onLoad = ( img, Name, type ) => {
 
 				name = Name.substring( 0, Name.lastIndexOf('.') )
-				console.log(name)
-				ctx.clearRect(0, 0, 256, 256)
-				ctx.drawImage(img, 0, 0, 256, 256);
-				canvas.style.border = '1px solid #314d2f;'
+				//console.log(name)
+				//ctx.clearRect(0, 0, 256, 256)
+				//ctx.drawImage(img, 0, 0, 256, 256);
+				//canvas.style.border = '1px solid #314d2f;'
+
+				tmpImage[type] = img
 
 			}
 
@@ -167,6 +176,7 @@
 
 			    }
 
+
 			}
 
 			document.addEventListener( 'dragover', function(e){ e.preventDefault() }, false );
@@ -174,12 +184,40 @@
 			document.addEventListener( 'dragleave', function(e){ e.preventDefault()}, false );
 			document.addEventListener( 'drop', dropElement, false );
 
+			const Canvas = []
+			const names = ['AO', 'METAL', 'ROUGHT']
+			let ui0 = new UIL.Gui( { w:128, close:false, css:'top:10px; left:10px;', colors:{sx:0} } )
+
+			let i = 3, c, ct
+
+			while(i--){
+
+				c = document.createElement("canvas");
+				c.width = c.height = 128
+				ct = c.getContext('2d')
+				ct.fillRect(0, 0, 128, 128)
+
+				//ui0.add( 'title',  { name:names[i], h:30, align:'center' })
+				ui0.add( 'empty', { h:138 }).appendChild( c )
+				ui0.add('button', { name:'LOAD ' + names[i], h:30 }).onChange( callbackLoader )
+
+				Canvas[i] = c
+
+			}
+
+			
+
+
+			
+			
+
 			// GUI
-			let ui = new UIL.Gui( { w:276, close:false, css:'top:10px; left:50%;', center: true } )
-			ui.add( 'title',  { name:'IMAGE to ICON', h:30, align:'center' })
-			ui.add( 'empty', { h:264 }).content().appendChild( canvas )
-			ui.add('button', { value:[ 'LOAD', 'SAVE' ], h:30 }).onChange( callbackLoader )
-			ui.add( 'empty', { h:6 })
+			let ui = new UIL.Gui( { w:512, close:false, css:'top:10px; left:50%;', center: true, colors:{sx:0} } )
+			//ui.add( 'title',  { name:'IMAGE to ICON', h:30, align:'center' })
+			ui.add( 'empty', { h:522 }).appendChild( canvas )
+			//ui.add('button', { name:'LOAD', h:30 }).onChange( callbackLoader )
+			ui.add('button', { name:'SAVE', h:30 }).onChange( callbackLoader )
+			//ui.add('button', { value:[ 'LOAD', 'SAVE' ], h:30 }).onChange( callbackLoader )
 
 			//debug.innerHTML = 'Load or drag Image file'
 

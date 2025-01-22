@@ -47,12 +47,13 @@ export class Color extends Proto {
 	    this.c[0].style.display = 'block'
 
 	    this.c[3] = this.getColorRing()
-	    this.c[3].style.visibility  = 'hidden'
+	    this.c[3].style.visibility  = 'hidden';
 
 	    this.hsl = null
-	    this.value = '#ffffff'
+	    this.value = '#ffffff';
 	    if( o.value !== undefined ){
-	        if( o.value instanceof Array ) this.value = Tools.rgbToHex( o.value )
+	    	if( o.value.isColor ){ this.value = '#' + o.value.getHexString(); }
+	        else if( o.value instanceof Array ) this.value = Tools.rgbToHex( o.value )
 	        else if(!isNaN(o.value)) this.value = Tools.hexToHtml( o.value )
 	        else this.value = o.value
 	    }

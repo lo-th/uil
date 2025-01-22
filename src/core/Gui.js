@@ -72,8 +72,6 @@ export class Gui {
         this.margin = this.colors.sy
         this.marginDiv = Tools.isDivid( this.margin )
 
-        
-
         // bottom and close height
         this.isWithClose = o.close !== undefined ? o.close : true;
         this.bh = !this.isWithClose ? 0 : this.size.h;
@@ -81,7 +79,10 @@ export class Gui {
         this.autoResize = o.autoResize === undefined ? true : o.autoResize;
 
         // default position
-        this.isCenter = o.center || false
+        this.isCenter = o.center || false;
+        this.isBottom = o.bottom || false;
+        this.bottomPosition = o.bottom || 0;
+
         this.cssGui = o.css !== undefined ? o.css : (this.isCenter ? '' : 'right:10px;')
 
         this.isOpen = o.open !== undefined ? o.open : true;
@@ -96,19 +97,20 @@ export class Gui {
         this.ratio = 1
         this.oy = 0
 
-
         this.isNewTarget = false;
 
         let cc = this.colors
 
-        this.content = Tools.dom( 'div', this.css.basic + ' width:0px; height:auto; top:0px; background:'+cc.content+'; ' + this.cssGui );
+        let border = 'border: 2px solid ' + cc.content + '; '
 
+        this.content = Tools.dom( 'div', this.css.basic + ' width:0px; height:auto; top:0px; background:'+cc.content+'; ' + this.cssGui + border );
+        
         this.innerContent = Tools.dom( 'div', this.css.basic + 'width:100%; top:0; left:0; height:auto; overflow:hidden;');
         //this.innerContent = Tools.dom( 'div', this.css.basic + this.css.button + 'width:100%; top:0; left:0; height:auto; overflow:hidden;');
         this.content.appendChild( this.innerContent );
 
         //this.inner = Tools.dom( 'div', this.css.basic + 'width:100%; left:0; ')
-        this.useFlex = true 
+        this.useFlex = true; 
         let flexible = this.useFlex ? 'display:flex; flex-flow: row wrap;' : '' //' display:flex; justify-content:start; align-items:start;flex-direction: column; justify-content: center; align-items: center;';
         this.inner = Tools.dom( 'div', this.css.basic + flexible + 'width:100%; left:0; ');
         this.innerContent.appendChild(this.inner);
@@ -161,6 +163,13 @@ export class Gui {
         if( this.isCanvas ) this.makeCanvas();
 
         Roots.add( this );
+
+    }
+
+    setLeft( v ) {
+
+        this.content.style.left = v + 'px';
+        Roots.needReZone = true;
 
     }
 
@@ -696,8 +705,9 @@ export class Gui {
     // ----------------------
 
     calcUis() {
-        
-        return Roots.calcUis( this.uis, this.zone, this.zone.y )
+
+        return Roots.calcUis( this.uis, this.zone, this.zone.y );
+
     }
 
     calc() {
@@ -711,16 +721,21 @@ export class Gui {
 
         if( this.tmp ) clearTimeout( this.tmp )
 
-        this.zone.h = this.bh
-        this.isScroll = false
+        this.zone.h = this.bh;
+        //if(this.isBottom) this.zone.y =((window.innerHeight-this.zone.h)-this.bottomPosition)
+        this.isScroll = false;
 
         if( this.isOpen ){
 
-            this.h = this.calcUis()
+            this.h = this.calcUis();
+
+            //console.log(this.h)
 
             let hhh = this.forceHeight ? this.forceHeight + this.zone.y : window.innerHeight;
 
-            this.maxHeight = hhh - this.zone.y - this.bh;
+            let py = this.isBottom ? this.bottomPosition : this.zone.y;
+
+            this.maxHeight = hhh - py - this.bh;
 
             let diff = this.h - this.maxHeight;
 
@@ -737,21 +752,34 @@ export class Gui {
 
         }
 
-        this.upScroll( this.isScroll )
+        this.upScroll( this.isScroll );
 
-        this.innerContent.style.height = this.zone.h - this.bh + 'px'
-        this.content.style.height = this.zone.h + 'px'
-        this.bottom.style.top = this.zone.h - this.bh + 'px'
+        this.innerContent.style.height = this.zone.h - this.bh + 'px';
+        this.content.style.height = this.zone.h + 'px';
+        this.bottom.style.top = (this.zone.h - this.bh) + 'px';
+
+        if( this.isBottom ){
+            this.content.style.top = ((window.innerHeight-this.zone.h)-this.bottomPosition)+'px';
+            this.rezone();
+            //this.content.style.marginTop = (window.innerHeight-this.zone.h)+'px'
+        }
 
 
         if( this.forceHeight && this.lockHeight ) this.content.style.height = this.forceHeight + 'px';
-        if( this.isCanvas ) this.draw( true )
+        if( this.isCanvas ) this.draw( true );
 
     }
 
     rezone () {
         Roots.needReZone = true;
     }
+
+    zoneReset () {
+        //console.log(Roots)
+        //Roots.findZone(true);
+    }
+
+    
 
     setWidth ( w ) {
 

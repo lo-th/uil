@@ -155,7 +155,7 @@ export class Proto {
                 this.s[0].borderTop = this.mtop + 'px solid transparent'
                 this.s[0].borderBottom = this.mtop + 'px solid transparent'
             } else {
-                this.s[0].borderBottom = this.margin + 'px solid transparent'
+                this.s[0].borderBottom =  + 'px solid transparent'
             }
         }
         
@@ -200,6 +200,7 @@ export class Proto {
         s[0].height = this.h + 'px';
 
         if( this.isUI ) s[0].background = this.colors.background
+           
 
         if(!this.autoWidth && this.useFlex ){
             s[0].flex = '1 0 auto'
@@ -331,6 +332,10 @@ export class Proto {
 
     /////////
 
+    appendChild( m ){
+        this.c[0].appendChild( m )
+    }
+
     content() {
 
         return this.c[0]
@@ -347,6 +352,8 @@ export class Proto {
 
         if( this.lock ) return;
         if(!this.overEffect) return;
+        if(this.isGroup)return;
+        if(this.isTitle)return;
         if(this.s) this.s[0].background = this.colors.background;
 
     }
@@ -355,6 +362,8 @@ export class Proto {
 
         if( this.lock ) return;
         if(!this.overEffect) return;
+        if(this.isGroup)return;
+        if(this.isTitle)return;
         if(this.s) this.s[0].background = this.colors.backgroundOver;
 
     }
@@ -444,7 +453,10 @@ export class Proto {
         if( v instanceof Array && v.length === 1 ) v = v[0];
 
         this.isSend = true
-        if( this.objectLink !== null ) this.objectLink[ this.objectKey ] = v
+        if( this.objectLink !== null ){ 
+            if( this.objectLink[ this.objectKey ] && this.objectLink[ this.objectKey ].isColor ) this.objectLink[ this.objectKey ].setHex( v );
+            else this.objectLink[ this.objectKey ] = v
+        }
         if( this.callback ) this.callback( v, this.objectKey )
         this.isSend = false
 

@@ -11,6 +11,8 @@ const R = {
 
 	ui: [],
 
+    debug:false,
+
     dom:null,
 
 	ID: null,
@@ -75,20 +77,24 @@ const R = {
         return ( self.performance && self.performance.now ) ? self.performance.now.bind( performance ) : Date.now;
     },
 
+    testMobile: function () {
+
+        let n = navigator.userAgent;
+        if (n.match(/Android/i) || n.match(/webOS/i) || n.match(/iPhone/i) || n.match(/iPad/i) || n.match(/iPod/i) || n.match(/BlackBerry/i) || n.match(/Windows Phone/i)) return true;
+        else return false;  
+
+    },
+
+    // ----------------------
+    //   ADD / REMOVE
+    // ----------------------
+
 	add: function ( o ) {
 
         R.ui.push( o );
         R.getZone( o );
 
         if( !R.isEventsInit ) R.initEvents();
-
-    },
-
-    testMobile: function () {
-
-        let n = navigator.userAgent;
-        if (n.match(/Android/i) || n.match(/webOS/i) || n.match(/iPhone/i) || n.match(/iPad/i) || n.match(/iPod/i) || n.match(/BlackBerry/i) || n.match(/Windows Phone/i)) return true;
-        else return false;  
 
     },
 
@@ -117,8 +123,8 @@ const R = {
 
         let dom = document.body;
 
-        R.isMobile = R.testMobile()
-        R.now = R.getTime()
+        R.isMobile = R.testMobile();
+        R.now = R.getTime();
 
 
         if(!R.isMobile){
@@ -146,7 +152,7 @@ const R = {
 
 
         R.isEventsInit = true;
-        R.dom = dom
+        R.dom = dom;
 
     },
 
@@ -180,17 +186,19 @@ const R = {
 
     resize: function () {
 
+        //console.log('resize !!')
+
         let i = R.ui.length, u;
         
         while( i-- ){
 
-            u = R.ui[i]
-            if( u.isGui && !u.isCanvasOnly && u.autoResize ) u.calc()
+            u = R.ui[i];
+            if( u.isGui && !u.isCanvasOnly && u.autoResize ) u.calc();
         
         }
 
-        R.needReZone = true
-        R.needResize = false
+        R.needReZone = true;
+        R.needResize = false;
 
     },
 
@@ -223,14 +231,15 @@ const R = {
 
         //if(!event.type) return;
 
-        if( R.prevDefault.indexOf( event.type ) !== -1 ) event.preventDefault(); 
+        //if( R.prevDefault.indexOf( event.type ) !== -1 ) event.preventDefault(); 
 
         if( R.needResize ) R.resize()
 
-        R.findZone(R.forceZone)
+
+        R.findZone( R.forceZone );
        
-        let e = R.e
-        let leave = false
+        let e = R.e;
+        let leave = false;
         
         if( event.type === 'keydown') R.keydown( event );
         if( event.type === 'keyup') R.keyup( event );
@@ -243,22 +252,22 @@ const R = {
         e.clientX = ( ptype === 'touch' ? event.pageX : event.clientX ) || 0
         e.clientY = ( ptype === 'touch' ? event.pageY : event.clientY ) || 0
 
-        e.type = event.type
+        e.type = event.type;
 
         if( R.eventOut.indexOf( event.type ) !== -1 ){ 
             leave = true
             e.type = 'mouseup'
         }
 
-        if( event.type === 'pointerleave') R.isLeave = true 
+        if( event.type === 'pointerleave') R.isLeave = true; 
 
-        if( event.type === 'pointerdown') e.type = 'mousedown'
-        if( event.type === 'pointerup') e.type = 'mouseup'
+        if( event.type === 'pointerdown') e.type = 'mousedown';
+        if( event.type === 'pointerup') e.type = 'mouseup';
         if( event.type === 'pointermove'){ 
             if( R.isLeave ){ 
                 // if user resize outside this document
-                R.isLeave = false
-                R.resize()
+                R.isLeave = false;
+                R.resize();
             }
             e.type = 'mousemove';
         }
@@ -310,7 +319,6 @@ const R = {
 
         if( R.isMobile && e.type === 'mouseup' ) R.clearOldID();
         if( leave ) R.clearOldID();
-
 
     },
 
@@ -367,29 +375,28 @@ const R = {
     },
 
     // ----------------------
-    //   GUI / GROUP FUNCTION
+    //  GUI / GROUP FUNCTION
     // ----------------------
 
     calcUis: ( uis, zone, py, group = false ) => {
 
-        //console.log('calc_uis')
+        if( R.debug ) console.log('calc_uis !!')
 
-        let i = uis.length, u, px = 0, n = 0, tw, m, div;
+        let i = uis.length, u, px = 0, n = 0, tw, div;
 
-        let height = 0
+        let height = 0;
 
         while( i-- ){
 
-            u = uis[n]
-            n++
+            u = uis[n];
+            n++;
 
-            if( !group && u.isGroup ) u.calcUis()
+            if( !group && u.isGroup ) u.calcUis();
 
-            m = u.margin
-            //div = u.marginDiv
+            let m = u.margin || 0;
 
-            u.zone.w = u.w
-            u.zone.h = u.h + m
+            u.zone.w = u.w;
+            u.zone.h = u.h + m;
             
             if( !u.autoWidth ){
 
@@ -399,7 +406,7 @@ const R = {
                 u.zone.y = py// + u.mtop
                 //if(div) u.zone.y += m * 0.5
 
-                tw = R.getWidth(u)
+                tw = R.getWidth(u);
                 if( tw ) u.zone.w = u.w = tw
                 else if( u.fw ) u.zone.w = u.w = u.fw
                 
@@ -415,11 +422,11 @@ const R = {
 
                 px = 0
 
-                u.zone.x = zone.x+u.dx
-                u.zone.y = py
-                py += u.h + m
+                u.zone.x = zone.x + u.dx;
+                u.zone.y = py;
+                py += u.h + m;
 
-                height += u.h + m
+                height += (u.h + m) //-0.5;// ???
 
             }
 
@@ -454,9 +461,9 @@ const R = {
 
         while( i-- ){ 
 
-            u = R.ui[i]
-            R.getZone( u )
-            if( u.isGui ) u.calcUis()
+            u = R.ui[i];
+            R.getZone( u );
+            //if( u.isGui ) u.calcUis(); // no need ?!
 
         }
 
@@ -493,7 +500,7 @@ const R = {
 
 
         //return o.getDom().offsetWidth
-        return o.getDom().clientWidth
+        return o.getDom().clientWidth;
 
         //let r = o.getDom().getBoundingClientRect();
         //return (r.width)

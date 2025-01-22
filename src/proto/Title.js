@@ -7,9 +7,12 @@ export class Title extends Proto {
 
         super( o );
 
-        let prefix = o.prefix || '';
+        this.isTitle = true;
 
-        this.c[2] = this.dom( 'div', this.css.txt + 'justify-content:right; width:60px; line-height:'+ (this.h-8) + 'px; color:' + this.colors.text );
+        let prefix = o.prefix || '';
+        let color = o.color || this.colors.text;
+
+        this.c[2] = this.dom( 'div', this.css.txt + 'justify-content:right; width:60px; line-height:'+ (this.h-8) + 'px; color:' + color );
 
         if( this.h === 31 ){
 
@@ -24,6 +27,7 @@ export class Title extends Proto {
         s[1].justifyContent = o.align || 'left';
         //s[1].textAlign = o.align || 'left';
         s[1].fontWeight = o.fontWeight || 'bold';
+        s[1].color = o.color || this.colors.text;
 
 
         this.c[1].textContent = this.txt.substring(0,1).toUpperCase() + this.txt.substring(1).replace("-", " ");

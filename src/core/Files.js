@@ -36,8 +36,26 @@ export class Files {
             case 'js':
             t = [ { description: 'JavaScript Files', accept: { 'text/javascript': ['.js'] } }, ]
             break;
+            case 'ktx2':
+            t = [ { description: 'ktx2', accept: { 'image/ktx2': ['.ktx2'] } }, ]
+            break;
             case 'image':
-            t = [ { description: 'Images', accept: { 'image/*': ['.png', '.gif', '.jpeg', '.jpg'] } }, ]
+            t = [ { description: 'Images', accept: { 'image/*': ['.png', '.gif', '.jpeg', '.jpg', '.hdr', '.exr'] } }, ]
+            break;
+            case 'gif':
+            t = [ { description: 'Images', accept: { 'image/*': ['.gif'] } }, ]
+            break;
+            case 'png':
+            t = [ { description: 'Images', accept: { 'image/*': ['.png'] } }, ]
+            break;
+            case 'exr':
+            t = [ { description: 'Images', accept: { 'image/exr': ['.exr'] } }, ]
+            break;
+            case 'hdr':
+            t = [ { description: 'Images', accept: { 'image/hdr': ['.hdr'] } }, ]
+            break;
+            case 'jpg':
+            t = [ { description: 'Images', accept: { 'image/*': ['.jpg', '.jpeg'] } }, ]
             break;
             case 'icon':
             t = [ { description: 'Icons', accept: { 'image/x-ico': ['.ico'] } }, ]
@@ -84,24 +102,36 @@ export class Files {
 
             let fname = file.name;
             let ftype = fname.substring( fname.lastIndexOf('.')+1, fname.length );
+            let realType = ''
 
             const dataUrl = [ 'png', 'jpg', 'jpeg', 'mp4', 'webm', 'ogg', 'mp3' ];
-            const dataBuf = [ 'sea', 'z', 'hex', 'bvh', 'BVH', 'glb', 'gltf' ];
+            const dataBuf = [ 'sea', 'z', 'hex', 'bvh', 'BVH', 'glb', 'gltf', 'exr', 'ktx2', 'hdr' ];
             const reader = new FileReader();
 
-            if( dataUrl.indexOf( ftype ) !== -1 ) reader.readAsDataURL( file )
-            else if( dataBuf.indexOf( ftype ) !== -1 ) reader.readAsArrayBuffer( file )
-            else reader.readAsText( file )
+            if(o.forceType === 'ArrayBuffer') {
+                reader.readAsArrayBuffer( file );
+                type = ''
 
+            } else {
+                if( dataUrl.indexOf( ftype ) !== -1 ) reader.readAsDataURL( file )
+                else if( dataBuf.indexOf( ftype ) !== -1 ) reader.readAsArrayBuffer( file )
+                else reader.readAsText( file )
+            }
+
+            
             reader.onload = function(e) {
 
                 let content = e.target.result
 
+                //console.log(type, files)
+
                 switch(type){
                     case 'image':
-                        let img = new Image;
+                        let img = new Image();
                         img.onload = function() {
-                            if( o.callback ) o.callback( img, fname, ftype )
+                            img.width = img.width;
+                            img.height = img.height;
+                            if( o.callback ) o.callback( img, fname, ftype, [img.width, img.height] )
                         }
                         img.src = content
                     break;
@@ -109,7 +139,10 @@ export class Files {
                         if( o.callback ) o.callback( JSON.parse( content ), fname, ftype )
                     break;
                     default:
+                        
                         if( o.callback ) o.callback( content, fname, ftype )
+                        
+                        
                     break;
                 }
 

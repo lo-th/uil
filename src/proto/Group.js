@@ -25,7 +25,9 @@ export class Group extends Proto {
 
         this.baseH = this.h
 
-        this.spaceY = new Empty({h:this.margin});
+        //this.spaceY = new Empty({h:this.margin});
+
+        this.radius = 0
 
 
 
@@ -40,15 +42,19 @@ export class Group extends Proto {
         this.c[3] = this.dom( 'path', this.css.basic + 'position:absolute; width:6px; height:6px; left:0; top:'+fltop+'px;', { d:this.svgs.g1, fill:cc.text, stroke:'none'})
 
         let bh = this.mtop === 0 ? this.margin : this.mtop
+
         
-        this.c[4] = this.dom( 'div', this.css.basic + 'width:100%; left:0; height:'+(bh+1)+'px; top:'+((this.h-1))+'px; background:none;')
+        //this.c[4] = this.dom( 'div', this.css.basic + 'width:100%; left:0; height:'+(bh+1)+'px; top:'+((this.h-1))+'px; background:#f00;')
 
         let s = this.s;
         this.c[1].name = 'group'
+        this.c[1].style.color = cc.text;
 
         this.init();
 
         this.setBG( o.bg )
+
+        //console.log(this.margin)
 
         if( o.open ) this.open()
 
@@ -61,11 +67,15 @@ export class Group extends Proto {
 
         if( bg !== undefined ) cc.groups = bg
         if(cc.groups === 'none') cc.groups = cc.background
-            cc.background = 'none'
+        //    cc.background = 'none'
 
-        s[0].background = 'none';
-        s[1].background = cc.groups
-        s[2].background = cc.groups
+        s[0].background = bg !== undefined ? 'none' : cc.content;
+        s[1].background = bg !== undefined ? cc.groups : cc.content;
+        //s[2].background = bg !== undefined ? cc.groups : cc.content
+
+        //s[0].background = '#FF0';
+        //s[4].background = '#FF0';
+        //s[2].background = cc.background
 
         if( cc.gborder !== 'none' ){
             s[1].border = cc.borderSize+'px solid '+ cc.gborder
@@ -322,7 +332,7 @@ export class Group extends Proto {
 
         //s[2].top = (this.h-1) + 'px'
         s[2].top = (this.h+this.mtop) + 'px'
-        s[4].background = cc.groups//'#0f0'
+        //s[4].background = '#0f0'
 
         if(this.radius){
 
@@ -370,7 +380,7 @@ export class Group extends Proto {
         //s[1].height = (this.h-2) + 'px'
         //s[2].top = this.h + 'px'
         s[2].top = (this.h+this.mtop) + 'px'
-        s[4].background = 'none'
+        //s[4].background = 'none'
 
         if( cc.gborder !== 'none' ){
 
@@ -389,10 +399,11 @@ export class Group extends Proto {
 
         if( !this.isOpen || this.isEmpty ) this.h = this.baseH
         //else this.h = Roots.calcUis( this.uis, this.zone, this.zone.y + this.baseH ) + this.baseH;
-        else this.h = Roots.calcUis( [...this.uis, this.spaceY ], this.zone, this.zone.y + this.baseH + this.margin, true ) + this.baseH
+        else this.h = Roots.calcUis( [...this.uis ], this.zone, this.zone.y + this.baseH + this.margin, true ) + this.baseH
+       // else this.h = Roots.calcUis( [...this.uis, this.spaceY ], this.zone, this.zone.y + this.baseH + this.margin, true ) + this.baseH
 
         this.s[0].height = this.h + 'px'
-        this.s[2].height =( this.h - this.baseH )+ 'px'
+        this.s[2].height = ( this.h - this.baseH ) + 'px'
 
     }
 
@@ -408,6 +419,7 @@ export class Group extends Proto {
         if( !this.isOpen ) return
         if( this.isUI ) this.main.calc()
         else this.calcUis()
+
         this.s[0].height = this.h + 'px'
         this.s[2].height = this.h + 'px'
 

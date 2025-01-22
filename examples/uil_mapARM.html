@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>UIL ARM creator</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+        <link rel="shortcut icon" href="./assets/favicon.ico">
+        <link rel="stylesheet" type="text/css" href="./assets/style.css">
+	</head>
+	<body>
+        <div id='debug3'></div>
+		<script type="module">
+
+
+			import {UIL} from '../src/Uil_dev.js'
+
+			const debug = document.querySelector('#debug3');
+			const colors = ['#FF6000', '#00FF00', '#0090ff'];
+
+		    let name = '', img;
+		    let size = {w:256, h:256}
+		    let psize = 128;
+		    let images = [];
+		    let saveFormat = "image/png";
+		    let saveQuality = 0.95;
+
+		    let tmpCanvas = document.createElement("canvas");
+		    let tmpCtx = tmpCanvas.getContext('2d', { willReadFrequently: true } );
+			let canvas = document.createElement("canvas");
+			canvas.width = 256
+			canvas.height = 256
+			canvas.style.cssText = 'position:absolute; left:8px; top:338px; border:1px solid #393939;'
+			let ctx = canvas.getContext( '2d', { willReadFrequently: true } )
+		
+			let canvas_R = document.createElement("canvas");
+			canvas_R.width = canvas_R.height = psize;
+			canvas_R.style.cssText = 'position:absolute; left:8px; top:4px; border:1px solid '+colors[0]+';'
+			let ctx_R = canvas_R.getContext('2d');
+			ctx_R.rect(0, 0, psize, psize);
+			ctx_R.fill();
+
+			let canvas_G = document.createElement("canvas");
+			canvas_G.width = canvas_G.height = psize;
+			canvas_G.style.cssText = 'position:absolute; left:8px; top:4px; border:1px solid '+colors[1]+';'
+			let ctx_G = canvas_G.getContext('2d');
+			ctx_G.rect(0, 0, psize, psize);
+			ctx_G.fill();
+
+			let canvas_B = document.createElement("canvas");
+			canvas_B.width = canvas_B.height = psize;
+			canvas_B.style.cssText = 'position:absolute; left:8px; top:4px; border:1px solid '+colors[2]+';'
+			let ctx_B = canvas_B.getContext('2d');
+			ctx_B.rect(0, 0, psize, psize);
+			ctx_B.fill();
+
+			//document.body.appendChild( canvas )
+
+			const callbackResize = (s) => {
+
+				size.w = s;
+				size.h = s;
+				canvas.width = s;
+				canvas.height = s;
+				tmpCanvas.width = s;
+				tmpCanvas.height = s;
+				ctx = canvas.getContext( '2d', { willReadFrequently: true } );
+				tmpCtx = tmpCanvas.getContext('2d', { willReadFrequently: true } );
+				canvas.style.left = 'calc(50% - '+(s*0.5)+'px)';
+
+			}
+
+			callbackResize(512)
+
+			const onLoadR = ( img, Name ) => {
+
+				name = Name.substring( 0, Name.lastIndexOf('.') )
+				ctx_R.clearRect(0, 0, psize, psize)
+				ctx_R.drawImage(img, 0, 0, psize, psize);
+				canvas_R.style.border = '1px solid #314d2f;'
+				copyChannel( 'R', img )
+
+			}
+
+			const onLoadG = ( img, Name ) => {
+
+				name = Name.substring( 0, Name.lastIndexOf('.') )
+				ctx_G.clearRect(0, 0, psize, psize)
+				ctx_G.drawImage(img, 0, 0, psize, psize);
+				canvas_G.style.border = '1px solid #314d2f;'
+				copyChannel( 'G', img )
+
+			}
+
+			const onLoadB = ( img, Name ) => {
+
+				name = Name.substring( 0, Name.lastIndexOf('.') )
+				ctx_B.clearRect(0, 0, psize, psize)
+				ctx_B.drawImage(img, 0, 0, psize, psize);
+				canvas_B.style.border = '1px solid #314d2f;'
+				copyChannel( 'B', img )
+
+			}
+
+			const copyChannel = ( channel, img ) => {
+
+				let w = size.w;
+				let h = size.h;
+
+	    		tmpCtx.clearRect( 0, 0, w, h );
+	    		tmpCtx.drawImage( img, 0, 0, w, h );
+
+	    		let imageDataC  = tmpCtx.getImageData(0, 0, w, h);
+	    		let dataC = imageDataC.data;
+
+	    		let imageData  = ctx.getImageData(0, 0, w, h);
+	    		let data = imageData.data;
+
+	    		for (let i = 0; i < data.length; i += 4) {
+	    			if(channel==='R') data[i] = dataC[i]
+	    			if(channel==='G') data[i + 1] = dataC[i + 1]
+	    			if(channel==='B') data[i + 2] = dataC[i + 2]
+				    data[i + 3] = 255;
+				}
+
+			    ctx.putImageData(imageData, 0, 0);
+
+			}
+
+			const changeFormat = (f) => {
+
+				if(f==='png') saveFormat = "image/png";
+				else saveFormat = "image/jpg";
+
+			}
+
+			const saveResult = () => {
+
+				let w = size.w;
+				let h = size.h;
+	    		let c = tmpCanvas;
+	    		c.width = w;
+	    		c.height = h;
+
+	    		let ct = c.getContext('2d')
+	    		ct.clearRect( 0, 0, w, h )
+	    		ct.drawImage( canvas, 0, 0, w, h )
+
+	    		c.toBlob( function (blob) {
+
+	    			const reader = new FileReader()
+	    			reader.addEventListener('loadend', () => {
+	    				let im = new Uint8Array(reader.result)
+	    				UIL.Files.save( { name:name, data:im, type:saveFormat==='image/png'? 'png':'jpg' } )
+	    			})
+	    			reader.readAsArrayBuffer(blob);
+
+	    		}, saveFormat, saveQuality )
+
+		    }
+
+			const dropElement = ( e ) => {
+
+				e.preventDefault();
+				let file
+				if (e.dataTransfer.items) file = e.dataTransfer.files[0]
+				else return;
+
+				var reader = new FileReader()
+			    var type = file.name.substring(file.name.lastIndexOf('.')+1, file.name.length );;
+
+			    if ( type === 'jpg' ||  type === 'png' ) reader.readAsDataURL( file );
+			    else { 
+			    	debug.innerHTML = 'Bad files format ?'
+			    	return
+			    }
+
+			    reader.onload = function ( e ) {
+
+			    	name = file.name.substring(0, file.name.lastIndexOf('.'))
+			    	img = new Image()
+					img.src = e.target.result
+					img.onload = function () {
+
+						onLoad( img, name )
+						//ctx.clearRect(0, 0, 256, 256)
+						//ctx.drawImage(img, 0, 0, 256, 256);
+					}
+
+			    }
+
+
+			}
+
+			document.addEventListener( 'dragover', function(e){ e.preventDefault() }, false );
+			document.addEventListener( 'dragend', function(e){ e.preventDefault() }, false );
+			document.addEventListener( 'dragleave', function(e){ e.preventDefault()}, false );
+			document.addEventListener( 'drop', dropElement, false );
+
+			// GUI side
+
+			let ui = new UIL.Gui( { w:274, close:false, css:'top:210px; left:50%;', center: true } )
+			ui.add( 'title',  { name:'COMBINE', h:20, align:'center' })
+			
+			//ui.add('button', { value:[ 256, 512, 1024, 2048 ], h:30 }).onChange( callbackResize )
+			ui.add('selector', { name:'selector', h:30,  values:[256, 512, 1024, 2048], value:512, p:0 }).onChange( callbackResize )
+			ui.add('empty', { h:4 })
+			ui.add('selector', { name:'format', h:30,  values:['png', 'jpg'], value:'png', p:0 }).onChange( changeFormat )
+			ui.add('empty', { h:4 })
+			ui.add('button', { value:[ 'SAVE' ], h:30 }).onChange( saveResult )
+			document.body.appendChild( canvas );
+			
+			let lefter = psize+18+10;
+
+			let ui_B = new UIL.Gui( { w:psize+18, close:false, css:'top:10px; left:calc(50% - '+lefter+'px);', center: true } )
+			ui_B.add('title', { name:'AoMap', h:20, align:'center', color:colors[0] })
+			ui_B.add('empty', { h:psize+11 }).content().appendChild( canvas_R )
+			ui_B.add('button', { value:[ 'LOAD' ], h:30 }).onChange( ()=>{ UIL.Files.load({ callback:onLoadR, type:'image' }) } )
+
+			let ui_G = new UIL.Gui( { w:psize+18, close:false, css:'top:10px; left:50%;', center: true } )
+			ui_G.add('title', { name:'Roughness', h:20, align:'center', color:colors[1] })
+			ui_G.add('empty', { h:psize+11 }).content().appendChild( canvas_G )
+			ui_G.add('button', { value:[ 'LOAD' ], h:30 }).onChange( ()=>{ UIL.Files.load({ callback:onLoadG, type:'image' }) } )
+
+			let ui_R = new UIL.Gui( { w:psize+18, close:false, css:'top:10px; left:calc(50% + '+lefter+'px);', center: true } )
+			ui_R.add('title', { name:'Metalness', h:20, align:'center', color:colors[2] })
+			ui_R.add('empty', { h:psize+11 }).content().appendChild( canvas_B )
+			ui_R.add('button', { value:[ 'LOAD' ], h:30 }).onChange( ()=>{ UIL.Files.load({ callback:onLoadB, type:'image' }) } )
+
+		</script>
+	</body>
+</html>

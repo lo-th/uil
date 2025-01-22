@@ -144,6 +144,8 @@ export class SuperSky extends THREE.Mesh {
 
 	init(){
 
+		console.log(this.noiseMap)
+
 		this.materialSky = new THREE.ShaderMaterial( {
 
 			uniforms: {

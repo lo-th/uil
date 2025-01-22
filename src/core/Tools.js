@@ -6,7 +6,12 @@ import { Roots } from './Roots.js';
 
 const T = {
 
-    transition: 0.2,
+    size: {  w:320, h:24, p:30, s:8 },
+
+    // three reference class
+    texture: null,
+
+    transition: 0.1,
 
     frag: document.createDocumentFragment(),
 
@@ -43,7 +48,7 @@ const T = {
 
     isDivid: ( v ) => ( v*0.5 === Math.floor(v*0.5) ),
 
-    size: {  w: 240, h: 20, p: 30, s: 8 },
+    
 
     // ----------------------
     //   COLOR
@@ -115,15 +120,15 @@ const T = {
     colors: {
 
         sx: 4,//4
-        sy: 2,//2
-        radius:2,
+        sy: 0,//2
+        radius:6,//2
 
         showOver : 1,
         //groupOver : 1,
 
-        content:'none',
-        background: 'rgba(50,50,50,0.15)',
-        backgroundOver: 'rgba(50,50,50,0.3)',
+        content:'#37383d',//#28292e',//'none',
+        background: '#28292e',//'rgba(30,30,30,0)',
+        backgroundOver: 'rgba(40,40,40,0)',
 
         title : '#CCC',
         titleoff : '#BBB',
@@ -149,7 +154,9 @@ const T = {
         action: '#FF3300',
         
         //fontFamily: 'Tahoma',
-        fontFamily: 'Consolas, monospace',
+        //fontFamily: 'Consolas, monospace',
+        fontFamily:"'SegoeUI', 'Segoe UI', 'Helvetica Neue', -apple-system, BlinkMacSystemFont, Roboto, Oxygen-Sans, Ubuntu, Cantarell, sans-serif",
+        
         //fontFamily: "'Roboto Mono', 'Source Code Pro', Menlo, Courier, monospace",
         fontWeight: 'normal',
         fontShadow: 'none',//'#000',
@@ -205,6 +212,10 @@ const T = {
         save:'M 9 12 L 5 12 5 14 9 14 9 12 M 11.5 7.5 L 13 6 7 0 1 6 2.5 7.5 5 5 5 11 9 11 9 5 11.5 7.5 Z',
         extern:'M 14 14 L 14 0 0 0 0 14 14 14 M 12 6 L 12 12 2 12 2 6 12 6 M 12 2 L 12 4 2 4 2 2 12 2 Z',
 
+    },
+
+    setDebug ( v ) {
+        Roots.debug = v;
     },
 
     rezone () {
@@ -528,7 +539,13 @@ const T = {
 
     },
 
-    htmlRgb: function( c ){
+    htmlRgba: function( c, a ){
+         c = T.unpack(c)
+        return 'rgba(' + Math.round(c[0] * 255) + ','+ Math.round(c[1] * 255) + ','+ Math.round(c[2] * 255) + ','+ a + ')';
+
+    },
+
+    htmlRgb: function( c, a ){
 
         return 'rgb(' + Math.round(c[0] * 255) + ','+ Math.round(c[1] * 255) + ','+ Math.round(c[2] * 255) + ')';
 

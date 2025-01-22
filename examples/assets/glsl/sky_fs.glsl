@@ -169,7 +169,7 @@ vec3 makeSky( in vec3 r, in vec3 s, out float t){
 				float S,U,V,W;
 				S = float(R)*N;
 				vec3 T=I+p*S;
-				W = 0.0;
+				//W = 0.0;
 				cloudLayer( T, U, V, W );
 				O+=U*N;
 				P+=V*N;

@@ -12,9 +12,10 @@
 		<script type="module">
 
 			import * as THREE from './three/build/three.module.js';
-			import * as UIL from '../build/uil.module.js';
+			//import * as UIL from '../build/uil.module.js';
+			import { UIL } from '../src/Uil_dev.js'
 
-			let camera, scene, renderer, texture, mesh
+			let camera, scene, renderer, texture, mesh, material
 
 			const setting = {
 				color: 0xFFFFFF,
@@ -23,10 +24,9 @@
 				map:'check.jpg'
 			}
 
-			init()
-			initGui()
-			animate()
-
+			init();
+			animate();
+			
 			function init() {
 
 				camera = new THREE.PerspectiveCamera( 70, window.innerWidth / window.innerHeight, 1, 1000 )
@@ -34,10 +34,8 @@
 
 				scene = new THREE.Scene();
 
-				texture = makeCheck( setting.repeat )
-
 				const geometry = new THREE.BoxGeometry( 1, 1, 1 )
-				const material = new THREE.MeshBasicMaterial( { map: texture, color:setting.color } )
+				material = new THREE.MeshBasicMaterial( { map:makeCheck( setting.repeat ), color:setting.color } )
 
 				mesh = new THREE.Mesh( geometry, material )
 				mesh.scale.set(1,1,1).multiplyScalar( setting.size )
@@ -47,11 +45,11 @@
 				renderer.setPixelRatio( window.devicePixelRatio )
 				renderer.setSize( window.innerWidth, window.innerHeight )
 				renderer.setClearColor( 0x000000, 0 )
-				document.body.appendChild( renderer.domElement )
+				document.body.appendChild( renderer.domElement );
 
 				//
 
-				window.addEventListener( 'resize', onWindowResize )
+				window.addEventListener( 'resize', onWindowResize );
 
 			}
 
@@ -77,9 +75,12 @@
 
 			    let check = new THREE.Texture( img )
 			    check.repeat = new THREE.Vector2( r, r )
-			    check.wrapS = check.wrapT = THREE.RepeatWrapping
+			    check.wrapS = check.wrapT = THREE.RepeatWrapping;
 
-			    img.onload = function(){ check.needsUpdate = true; }
+			    img.onload = function(){ 
+			    	check.needsUpdate = true; 
+			    	initGui();
+			    }
 
 			    return check
 
@@ -87,30 +88,44 @@
 
 			function initGui() {
 
+				UIL.Tools.texture = THREE.Texture;
+
 				let ui = new UIL.Gui()
+				ui.add( mesh, 'position',  { h:30 })
+
 				ui.add( setting, 'size', { min:30, max:300, precision:0 } ).onChange( function( s ){ mesh.scale.set(1,1,1).multiplyScalar( s ); } )
-				ui.add( setting, 'repeat', { min:1, max:10, precision:0 } ).onChange( function( r ){ texture.repeat.set(r,r); } )
-				ui.add( setting, 'color', { type:'color' } ).onChange( function( c ){ mesh.material.color.setHex( c ); } )
-				ui.add( setting, 'map',  { type:'bitmap' }).onChange( setTexure )
+				ui.add( setting, 'repeat', { min:1, max:10, precision:0 } ).onChange( function( r ){ material.map.repeat.set(r,r); } )
+				
+
+				ui.add( material, 'color' )
+				ui.add( material, 'map',  { h:30 })
 
 			}
 
-			function setTexure( file, img, name ){
+			/*function setTexure( file, img, name ){
 
-				let im = new Image()
-				let r = setting.repeat
-				im.src = img
-				im.onload = function (){
+				//console.log(file)
 
-					texture = new THREE.Texture( im )
-					texture.wrapS = texture.wrapT = THREE.RepeatWrapping
-				    texture.repeat.set(r,r);
-				    texture.needsUpdate = true;
-				    mesh.material.map = texture
+				if( file === null ){ 
+					mesh.material.map = null
+					mesh.material.needsUpdate = true;
+				} else {
+					let im = new Image()
+					let r = setting.repeat;
+					im.src = img
+					im.onload = function (){
 
+						texture = new THREE.Texture( im )
+						texture.wrapS = texture.wrapT = THREE.RepeatWrapping
+					    texture.repeat.set(r,r);
+					    texture.needsUpdate = true;
+					    mesh.material.map = texture
+					    mesh.material.needsUpdate = true;
+
+					}
 				}
 				
-			}
+			}*/
 
 			function onWindowResize() {
 

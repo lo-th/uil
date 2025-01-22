@@ -183,6 +183,12 @@ export class Grid extends Proto {
 
     }
 
+    update () {
+
+        this.modes( 2, this.values.indexOf(this.value) )
+
+    }
+
     // ----------------------
     //   MODE
     // -----------------------

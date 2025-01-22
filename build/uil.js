@@ -16,6 +16,7 @@
 
 	const R = {
 		ui: [],
+		debug: false,
 		dom: null,
 		ID: null,
 		lock: false,
@@ -65,14 +66,17 @@
 		getTime: function () {
 			return self.performance && self.performance.now ? self.performance.now.bind(performance) : Date.now;
 		},
+		testMobile: function () {
+			let n = navigator.userAgent;
+			if (n.match(/Android/i) || n.match(/webOS/i) || n.match(/iPhone/i) || n.match(/iPad/i) || n.match(/iPod/i) || n.match(/BlackBerry/i) || n.match(/Windows Phone/i)) return true;else return false;
+		},
+		// ----------------------
+		//	 ADD / REMOVE
+		// ----------------------
 		add: function (o) {
 			R.ui.push(o);
 			R.getZone(o);
 			if (!R.isEventsInit) R.initEvents();
-		},
-		testMobile: function () {
-			let n = navigator.userAgent;
-			if (n.match(/Android/i) || n.match(/webOS/i) || n.match(/iPhone/i) || n.match(/iPad/i) || n.match(/iPod/i) || n.match(/BlackBerry/i) || n.match(/Windows Phone/i)) return true;else return false;
 		},
 		remove: function (o) {
 			let i = R.ui.indexOf(o);
@@ -137,6 +141,7 @@
 			R.isEventsInit = false;
 		},
 		resize: function () {
+			//console.log('resize !!')
 			let i = R.ui.length,
 					u;
 
@@ -165,7 +170,7 @@
 		},
 		handleEvent: function (event) {
 			//if(!event.type) return;
-			if (R.prevDefault.indexOf(event.type) !== -1) event.preventDefault();
+			//if( R.prevDefault.indexOf( event.type ) !== -1 ) event.preventDefault(); 
 			if (R.needResize) R.resize();
 			R.findZone(R.forceZone);
 			let e = R.e;
@@ -284,24 +289,22 @@
 			R.cursor();
 		},
 		// ----------------------
-		//	 GUI / GROUP FUNCTION
+		//	GUI / GROUP FUNCTION
 		// ----------------------
 		calcUis: (uis, zone, py, group = false) => {
-			//console.log('calc_uis')
+			if (R.debug) console.log('calc_uis !!');
 			let i = uis.length,
 					u,
 					px = 0,
 					n = 0,
-					tw,
-					m;
+					tw;
 			let height = 0;
 
 			while (i--) {
 				u = uis[n];
 				n++;
 				if (!group && u.isGroup) u.calcUis();
-				m = u.margin; //div = u.marginDiv
-
+				let m = u.margin || 0;
 				u.zone.w = u.w;
 				u.zone.h = u.h + m;
 
@@ -325,7 +328,7 @@
 					u.zone.x = zone.x + u.dx;
 					u.zone.y = py;
 					py += u.h + m;
-					height += u.h + m;
+					height += u.h + m; //-0.5;// ???
 				}
 			}
 
@@ -350,8 +353,7 @@
 
 			while (i--) {
 				u = R.ui[i];
-				R.getZone(u);
-				if (u.isGui) u.calcUis();
+				R.getZone(u); //if( u.isGui ) u.calcUis(); // no need ?!
 			}
 
 			R.needReZone = false;
@@ -653,7 +655,15 @@
 	 * @author lth / https://github.com/lo-th
 	 */
 	const T = {
-		transition: 0.2,
+		size: {
+			w: 320,
+			h: 24,
+			p: 30,
+			s: 8
+		},
+		// three reference class
+		texture: null,
+		transition: 0.1,
 		frag: document.createDocumentFragment(),
 		colorRing: null,
 		joystick_0: null,
@@ -679,12 +689,6 @@
 			return v;
 		},
 		isDivid: v => v * 0.5 === Math.floor(v * 0.5),
-		size: {
-			w: 240,
-			h: 20,
-			p: 30,
-			s: 8
-		},
 		// ----------------------
 		//	 COLOR
 		// ----------------------
@@ -749,14 +753,16 @@
 		colors: {
 			sx: 4,
 			//4
-			sy: 2,
+			sy: 0,
 			//2
 			radius: 2,
 			showOver: 1,
 			//groupOver : 1,
-			content: 'none',
-			background: 'rgba(50,50,50,0.15)',
-			backgroundOver: 'rgba(50,50,50,0.3)',
+			content: '#37383d',
+			//#28292e',//'none',
+			background: '#28292e',
+			//'rgba(30,30,30,0)',
+			backgroundOver: 'rgba(40,40,40,0)',
 			title: '#CCC',
 			titleoff: '#BBB',
 			text: '#DDD',
@@ -775,7 +781,8 @@
 			select: '#308AFF',
 			action: '#FF3300',
 			//fontFamily: 'Tahoma',
-			fontFamily: 'Consolas, monospace',
+			//fontFamily: 'Consolas, monospace',
+			fontFamily: "'SegoeUI', 'Segoe UI', 'Helvetica Neue', -apple-system, BlinkMacSystemFont, Roboto, Oxygen-Sans, Ubuntu, Cantarell, sans-serif",
 			//fontFamily: "'Roboto Mono', 'Source Code Pro', Menlo, Courier, monospace",
 			fontWeight: 'normal',
 			fontShadow: 'none',
@@ -818,6 +825,10 @@
 			load: 'M 13 8 L 11.5 6.5 9 9 9 3 5 3 5 9 2.5 6.5 1 8 7 14 13 8 M 9 2 L 9 0 5 0 5 2 9 2 Z',
 			save: 'M 9 12 L 5 12 5 14 9 14 9 12 M 11.5 7.5 L 13 6 7 0 1 6 2.5 7.5 5 5 5 11 9 11 9 5 11.5 7.5 Z',
 			extern: 'M 14 14 L 14 0 0 0 0 14 14 14 M 12 6 L 12 12 2 12 2 6 12 6 M 12 2 L 12 4 2 4 2 2 12 2 Z'
+		},
+
+		setDebug(v) {
+			Roots.debug = v;
 		},
 
 		rezone() {
@@ -1067,7 +1078,11 @@
 		pack: function (c) {
 			return '#' + T.p255(c[0]) + T.p255(c[1]) + T.p255(c[2]);
 		},
-		htmlRgb: function (c) {
+		htmlRgba: function (c, a) {
+			c = T.unpack(c);
+			return 'rgba(' + Math.round(c[0] * 255) + ',' + Math.round(c[1] * 255) + ',' + Math.round(c[2] * 255) + ',' + a + ')';
+		},
+		htmlRgb: function (c, a) {
 			return 'rgb(' + Math.round(c[0] * 255) + ',' + Math.round(c[1] * 255) + ',' + Math.round(c[2] * 255) + ')';
 		},
 		pad: function (n) {
@@ -1691,11 +1706,65 @@
 					}];
 					break;
 
+				case 'ktx2':
+					t = [{
+						description: 'ktx2',
+						accept: {
+							'image/ktx2': ['.ktx2']
+						}
+					}];
+					break;
+
 				case 'image':
 					t = [{
 						description: 'Images',
 						accept: {
-							'image/*': ['.png', '.gif', '.jpeg', '.jpg']
+							'image/*': ['.png', '.gif', '.jpeg', '.jpg', '.hdr', '.exr']
+						}
+					}];
+					break;
+
+				case 'gif':
+					t = [{
+						description: 'Images',
+						accept: {
+							'image/*': ['.gif']
+						}
+					}];
+					break;
+
+				case 'png':
+					t = [{
+						description: 'Images',
+						accept: {
+							'image/*': ['.png']
+						}
+					}];
+					break;
+
+				case 'exr':
+					t = [{
+						description: 'Images',
+						accept: {
+							'image/exr': ['.exr']
+						}
+					}];
+					break;
+
+				case 'hdr':
+					t = [{
+						description: 'Images',
+						accept: {
+							'image/hdr': ['.hdr']
+						}
+					}];
+					break;
+
+				case 'jpg':
+					t = [{
+						description: 'Images',
+						accept: {
+							'image/*': ['.jpg', '.jpeg']
 						}
 					}];
 					break;
@@ -1745,20 +1814,29 @@
 				if (!file) return null;
 				let fname = file.name;
 				let ftype = fname.substring(fname.lastIndexOf('.') + 1, fname.length);
+				let realType = '';
 				const dataUrl = ['png', 'jpg', 'jpeg', 'mp4', 'webm', 'ogg', 'mp3'];
-				const dataBuf = ['sea', 'z', 'hex', 'bvh', 'BVH', 'glb', 'gltf'];
+				const dataBuf = ['sea', 'z', 'hex', 'bvh', 'BVH', 'glb', 'gltf', 'exr', 'ktx2', 'hdr'];
 				const reader = new FileReader();
-				if (dataUrl.indexOf(ftype) !== -1) reader.readAsDataURL(file);else if (dataBuf.indexOf(ftype) !== -1) reader.readAsArrayBuffer(file);else reader.readAsText(file);
+
+				if (o.forceType === 'ArrayBuffer') {
+					reader.readAsArrayBuffer(file);
+					type = '';
+				} else {
+					if (dataUrl.indexOf(ftype) !== -1) reader.readAsDataURL(file);else if (dataBuf.indexOf(ftype) !== -1) reader.readAsArrayBuffer(file);else reader.readAsText(file);
+				}
 
 				reader.onload = function (e) {
-					let content = e.target.result;
+					let content = e.target.result; //console.log(type, files)
 
 					switch (type) {
 						case 'image':
 							let img = new Image();
 
 							img.onload = function () {
-								if (o.callback) o.callback(img, fname, ftype);
+								img.width = img.width;
+								img.height = img.height;
+								if (o.callback) o.callback(img, fname, ftype, [img.width, img.height]);
 							};
 
 							img.src = content;
@@ -2213,6 +2291,10 @@
 		reset() {} /////////
 
 
+		appendChild(m) {
+			this.c[0].appendChild(m);
+		}
+
 		content() {
 			return this.c[0];
 		}
@@ -2224,12 +2306,14 @@
 		uiout() {
 			if (this.lock) return;
 			if (!this.overEffect) return;
+			if (this.isGroup) return;
 			if (this.s) this.s[0].background = this.colors.background;
 		}
 
 		uiover() {
 			if (this.lock) return;
 			if (!this.overEffect) return;
+			if (this.isGroup) return;
 			if (this.s) this.s[0].background = this.colors.backgroundOver;
 		}
 
@@ -2294,7 +2378,11 @@
 			v = v || this.value;
 			if (v instanceof Array && v.length === 1) v = v[0];
 			this.isSend = true;
-			if (this.objectLink !== null) this.objectLink[this.objectKey] = v;
+
+			if (this.objectLink !== null) {
+				if (this.objectLink[this.objectKey] && this.objectLink[this.objectKey].isColor) this.objectLink[this.objectKey].setHex(v);else this.objectLink[this.objectKey] = v;
+			}
+
 			if (this.callback) this.callback(v, this.objectKey);
 			this.isSend = false;
 		}
@@ -3075,7 +3163,9 @@
 			this.value = '#ffffff';
 
 			if (o.value !== undefined) {
-				if (o.value instanceof Array) this.value = Tools.rgbToHex(o.value);else if (!isNaN(o.value)) this.value = Tools.hexToHtml(o.value);else this.value = o.value;
+				if (o.value.isColor) {
+					this.value = '#' + o.value.getHexString();
+				} else if (o.value instanceof Array) this.value = Tools.rgbToHex(o.value);else if (!isNaN(o.value)) this.value = Tools.hexToHtml(o.value);else this.value = o.value;
 			}
 
 			this.bcolor = null;
@@ -3911,6 +4001,7 @@
 			this.c[4] = this.dom('div', this.css.basic + 'width:100%; left:0; height:' + (bh + 1) + 'px; top:' + (this.h - 1) + 'px; background:none;');
 			this.s;
 			this.c[1].name = 'group';
+			this.c[1].style.color = cc.text;
 			this.init();
 			this.setBG(o.bg);
 			if (o.open) this.open();
@@ -3920,11 +4011,14 @@
 			const cc = this.colors;
 			const s = this.s;
 			if (bg !== undefined) cc.groups = bg;
-			if (cc.groups === 'none') cc.groups = cc.background;
-			cc.background = 'none';
-			s[0].background = 'none';
-			s[1].background = cc.groups;
-			s[2].background = cc.groups;
+			if (cc.groups === 'none') cc.groups = cc.background; //		cc.background = 'none'
+
+			s[0].background = bg !== undefined ? 'none' : cc.content;
+			s[1].background = bg !== undefined ? cc.groups : cc.content;
+			s[2].background = bg !== undefined ? cc.groups : cc.content; // s[0].background = '#FF0';
+			// s[1].background = '#FF0';
+
+			s[2].background = cc.background;
 
 			if (cc.gborder !== 'none') {
 				s[1].border = cc.borderSize + 'px solid ' + cc.gborder;
@@ -5582,12 +5676,14 @@
 		constructor(o = {}) {
 			super(o);
 			this.setTypeNumber(o);
-			this.model = o.stype || 0;
+			this.model = o.stype !== undefined ? o.stype : 2;
 			if (o.mode !== undefined) this.model = o.mode; //this.defaultBorderColor = this.colors.hide;
 
 			this.isDown = false;
 			this.isOver = false;
 			this.allway = o.allway || false;
+			this.autoValue = true;
+			if (o.autoValue !== undefined) this.autoValue = false;
 			this.isDeg = o.isDeg || false;
 			this.isCyclic = o.cyclic || false;
 			this.firstImput = false;
@@ -5627,8 +5723,9 @@
 				this.c[5].style.borderRadius = r1 * 0.5 + 'px';
 				this.c[5].style.height = h1 + 'px';
 				this.c[5].style.top = this.h * 0.5 - h1 * 0.5 + 'px'; //this.c[6] = this.dom( 'div', this.css.basic + 'border-radius:'+ra+'px; margin-left:'+(-ww*0.5)+'px; border:1px solid '+cc.border+'; background:'+cc.button+'; left:4px; top:2px; height:'+(this.h-4)+'px; width:'+ww+'px;' );
+				//this.c[6] = this.dom( 'div', this.css.basic + 'border-radius:'+ra+'px; margin-left:'+(-ww*0.5)+'px; background:'+cc.text+'; left:4px; top:3px; height:'+(this.h-6)+'px; width:'+ww+'px;' )
 
-				this.c[6] = this.dom('div', this.css.basic + 'border-radius:' + ra + 'px; margin-left:' + -ww * 0.5 + 'px; background:' + cc.text + '; left:4px; top:3px; height:' + (this.h - 6) + 'px; width:' + ww + 'px;');
+				this.c[6] = this.dom('div', this.css.basic + 'border-radius:' + ra + 'px; margin-left:' + -ww * 0.5 + 'px; background:' + cc.text + '; left:4px; top:' + (this.h - ww) * 0.5 + 'px; height:' + ww + 'px; width:' + ww + 'px;');
 			}
 
 			this.init();
@@ -5721,7 +5818,9 @@
 			if (!isNaN(n)) {
 				this.value = this.numValue(n);
 				this.update(true);
-			} else this.c[2].textContent = this.value + (this.isDeg ? '°' : '');
+			} else {
+				if (this.autoValue) this.c[2].textContent = this.value + (this.isDeg ? '°' : '');
+			}
 		}
 
 		reset() {
@@ -5761,7 +5860,7 @@
 			let ww = Math.floor(this.ww * ((this.value - this.min) / this.range));
 			if (this.model !== 3) this.s[5].width = ww + 'px';
 			if (this.s[6]) this.s[6].left = this.sa + ww + 3 + 'px';
-			this.c[2].textContent = this.value + (this.isDeg ? '°' : '');
+			if (this.autoValue) this.c[2].textContent = this.value + (this.isDeg ? '°' : '');
 			if (up) this.send();
 		}
 
@@ -5913,7 +6012,8 @@
 		constructor(o = {}) {
 			super(o);
 			let prefix = o.prefix || '';
-			this.c[2] = this.dom('div', this.css.txt + 'justify-content:right; width:60px; line-height:' + (this.h - 8) + 'px; color:' + this.colors.text);
+			let color = o.color || this.colors.text;
+			this.c[2] = this.dom('div', this.css.txt + 'justify-content:right; width:60px; line-height:' + (this.h - 8) + 'px; color:' + color);
 
 			if (this.h === 31) {
 				this.s[0].height = this.h + 'px';
@@ -5925,6 +6025,7 @@
 			s[1].justifyContent = o.align || 'left'; //s[1].textAlign = o.align || 'left';
 
 			s[1].fontWeight = o.fontWeight || 'bold';
+			s[1].color = o.color || this.colors.text;
 			this.c[1].textContent = this.txt.substring(0, 1).toUpperCase() + this.txt.substring(1).replace("-", " ");
 			this.c[2].textContent = prefix;
 			this.init();
@@ -6114,21 +6215,32 @@
 		constructor(o = {}) {
 			super(o);
 			this.value = o.value || '';
-			this.refTexture = o.texture || null;
+			this.colorSpace = o.colorSpace || ''; //this.refTexture = o.texture || null;
+
 			this.img = null;
+
+			if (this.value.isTexture) {
+				if (this.value.image) {
+					this.img = this.value.image;
+				}
+			}
+
 			this.isDown = false;
 			this.neverlock = true;
 			const cc = this.colors;
-			this.c[2] = this.dom('div', this.css.txt + this.css.button + ' top:1px; background:' + cc.button + '; height:' + (this.h - 2) + 'px; border:' + cc.buttonBorder + '; border-radius:15px; width:30px; left:10px;');
-			this.c[3] = this.dom('div', this.css.txtselect + 'height:' + (this.h - 4) + 'px; background:' + cc.inputBg + '; borderColor:' + cc.inputBorder + '; border-radius:' + this.radius + 'px;');
-			this.c[3].textContent = this.value;
+			this.c[2] = this.dom('div', this.css.txt + this.css.button + ' top:1px; background:' + cc.button + '; height:' + (this.h - 2) + 'px; border:' + cc.buttonBorder + '; border-radius:2px; width:30px; ');
+			this.c[3] = this.dom('div', this.css.txtselect + 'height:' + (this.h - 4) + 'px; background:' + cc.back + '; borderColor:' + cc.inputBorder + '; border-radius:' + this.radius + 'px;'); //this.c[3].textContent = this.value;
+
+			if (!this.img) this.c[3].textContent = 'null';
 			let fltop = Math.floor(this.h * 0.5) - 7;
 			this.c[4] = this.dom('path', this.css.basic + 'position:absolute; width:14px; height:14px; left:5px; top:' + fltop + 'px;', {
 				d: this.svgs['load'],
 				fill: cc.text,
 				stroke: 'none'
-			});
+			}); //this.c[5] = this.dom( 'div', this.css.txt + this.css.button + ' top:1px; background:'+cc.button+'; height:'+(this.h-2)+'px; border:'+cc.buttonBorder+'; border-radius:2px; width:30px; ' )
+
 			this.stat = 1;
+			this.makePreview();
 			this.init();
 		}
 
@@ -6136,6 +6248,7 @@
 			let l = this.local;
 			if (l.x === -1 && l.y === -1) return '';
 			if (l.x > this.sa && l.x < this.sa + 30) return 'over';
+			if (l.x > this.sa - 30 && l.x < this.sa) return 'delete';
 			return '0';
 		} // ----------------------
 		//	 EVENTS
@@ -6160,7 +6273,9 @@
 			if (name === 'over') {
 				this.isDown = true;
 				Files.load({
-					callback: this.changeBitmap.bind(this)
+					callback: this.changeBitmap.bind(this),
+					always: true,
+					type: 'image'
 				});
 			} //this.value = this.values[ name-2 ];
 			//this.send();
@@ -6184,7 +6299,21 @@
 		} // ----------------------
 
 
-		changeBitmap(img, fname) {
+		makePreview() {
+			if (this.img) {
+				//let src = this.img.src ? this.img.src : this.img;
+				this.c[3].style.background = 'url(' + this.img.src + ')';
+				this.c[3].style.backgroundSize = this.sb - 40 + 'px ' + (this.sb - 40) + 'px'; //this.c[3].style.backgroundSize = 20 + 'px ' + 20 + 'px'
+
+				this.c[3].style.backgroundPosition = 'center';
+				this.c[3].style.backgroundRepeat = 'no-repeat';
+			} else {
+				this.c[3].style.background = this.colors.back;
+				this.c[3].style.backgroundImage = 'none';
+			}
+		}
+
+		changeBitmap(img, fname, type) {
 			if (img) {
 				this.img = img;
 				this.apply(fname);
@@ -6192,19 +6321,53 @@
 				this.img = null;
 				this.apply('null');
 			}
+
+			this.makePreview();
+			this.threeTexture();
 		} // ----------------------
 
 
+		threeTexture() {
+			// need define UIL.Tools.texture = THREE.Texture;
+			if (this.objectLink === null) return;
+			let texture = this.objectLink[this.objectKey];
+
+			if (this.img) {
+				if (texture !== null) {
+					texture.image = this.img;
+					this.objectLink[this.objectKey] = texture.clone();
+					texture.dispose();
+					this.objectLink[this.objectKey].needsUpdate = true;
+				} else if (Tools.texture) {
+					texture = new Tools.texture(this.img); //console.log('colorSpace',	texture.colorSpace )
+
+					if (this.colorSpace) texture.colorSpace = this.colorSpace; //'srgb';
+
+					this.objectLink[this.objectKey] = texture;
+					this.objectLink[this.objectKey].needsUpdate = true;
+				}
+			} else {
+				this.objectLink[this.objectKey] = null;
+			}
+
+			this.objectLink.needsUpdate = true;
+		}
+
 		apply(v) {
 			v = v || '';
+			let name = this.objectLink !== null ? this.objectKey : this.name;
 
 			if (v !== this.value) {
 				this.value = v;
-				this.c[3].textContent = this.value;
 
 				if (this.img !== null) {
-					if (this.objectLink !== null) this.objectLink[this.val] = v;
-					if (this.callback) this.callback(this.value, this.img, this.name);
+					this.c[3].textContent = ''; //if( this.objectLink !== null ) this.objectLink[ this.val ] = v
+
+					if (this.callback) this.callback(this.value, this.img, name);
+				} else {
+					this.c[3].textContent = 'null'; //if( this.objectLink !== null ) this.objectLink[ this.val ] = v
+
+					if (this.callback) this.callback(null, null, name);
 				}
 			}
 
@@ -6215,7 +6378,7 @@
 			this.mode(3);
 		}
 
-		mode(n) {
+		mode(n, id) {
 			let change = false;
 			let cc = this.colors;
 
@@ -6269,7 +6432,8 @@
 			s[2].left = this.sa + 'px';
 			s[3].left = this.sa + 40 + 'px';
 			s[3].width = this.sb - 40 + 'px';
-			s[4].left = this.sa + 8 + 'px';
+			s[4].left = this.sa + 8 + 'px'; //s[3].backgroundSize = (this.sb - 40) + 'px' + (this.sb - 40) + 'px'
+			//s[5].left = (this.w-30) + 'px';
 		}
 
 	}
@@ -6527,6 +6691,10 @@
 			}
 
 			return up;
+		}
+
+		update() {
+			this.modes(2, this.values.indexOf(this.value));
 		} // ----------------------
 		//	 MODE
 		// -----------------------
@@ -6974,14 +7142,16 @@
 	};
 	const autoType = function (v, o) {
 		let type = 'slide';
-		if (typeof v === 'boolean') type = 'bool';else if (typeof v === 'string') {
-			if (v.substring(0, 1) === '#') type = 'color';else type = 'string';
-		} else if (typeof v === 'number') {
-			if (o.ctype) type = 'color';else type = 'slide';
-		} else if (typeof v === 'array' && v instanceof Array) {
-			if (typeof v[0] === 'number') type = 'number';else if (typeof v[0] === 'string') type = 'list';
-		} else if (typeof v === 'object' && v instanceof Object) {
-			if (v.x !== undefined) type = 'number';else type = 'list';
+		if (v.isColor) type = 'color';else if (v.isTexture) type = 'bitmap';else {
+			if (typeof v === 'boolean') type = 'bool';else if (typeof v === 'string') {
+				if (v.substring(0, 1) === '#') type = 'color';else type = 'string';
+			} else if (typeof v === 'number') {
+				if (o.ctype) type = 'color';else type = 'slide';
+			} else if (typeof v === 'array' && v instanceof Array) {
+				if (typeof v[0] === 'number') type = 'number';else if (typeof v[0] === 'string') type = 'list';
+			} else if (typeof v === 'object' && v instanceof Object) {
+				if (v.x !== undefined) type = 'number';else type = 'list';
+			}
 		}
 		return type;
 	};
@@ -7042,6 +7212,8 @@
 			this.autoResize = o.autoResize === undefined ? true : o.autoResize; // default position
 
 			this.isCenter = o.center || false;
+			this.isBottom = o.bottom || false;
+			this.bottomPosition = o.bottom || 0;
 			this.cssGui = o.css !== undefined ? o.css : this.isCenter ? '' : 'right:10px;';
 			this.isOpen = o.open !== undefined ? o.open : true;
 			this.isDown = false;
@@ -7055,7 +7227,8 @@
 			this.oy = 0;
 			this.isNewTarget = false;
 			let cc = this.colors;
-			this.content = Tools.dom('div', this.css.basic + ' width:0px; height:auto; top:0px; background:' + cc.content + '; ' + this.cssGui);
+			let border = 'border: 2px solid ' + cc.content + '; ';
+			this.content = Tools.dom('div', this.css.basic + ' width:0px; height:auto; top:0px; background:' + cc.content + '; ' + this.cssGui + border);
 			this.innerContent = Tools.dom('div', this.css.basic + 'width:100%; top:0; left:0; height:auto; overflow:hidden;'); //this.innerContent = Tools.dom( 'div', this.css.basic + this.css.button + 'width:100%; top:0; left:0; height:auto; overflow:hidden;');
 
 			this.content.appendChild(this.innerContent); //this.inner = Tools.dom( 'div', this.css.basic + 'width:100%; left:0; ')
@@ -7103,6 +7276,11 @@
 			this.setWidth();
 			if (this.isCanvas) this.makeCanvas();
 			Roots.add(this);
+		}
+
+		setLeft(v) {
+			this.content.style.left = v + 'px';
+			Roots.needReZone = true;
 		}
 
 		setTop(t, h) {
@@ -7515,13 +7693,16 @@
 
 		setHeight() {
 			if (this.tmp) clearTimeout(this.tmp);
-			this.zone.h = this.bh;
+			this.zone.h = this.bh; //if(this.isBottom) this.zone.y =((window.innerHeight-this.zone.h)-this.bottomPosition)
+
 			this.isScroll = false;
 
 			if (this.isOpen) {
-				this.h = this.calcUis();
+				this.h = this.calcUis(); //console.log(this.h)
+
 				let hhh = this.forceHeight ? this.forceHeight + this.zone.y : window.innerHeight;
-				this.maxHeight = hhh - this.zone.y - this.bh;
+				let py = this.isBottom ? this.bottomPosition : this.zone.y;
+				this.maxHeight = hhh - py - this.bh;
 				let diff = this.h - this.maxHeight;
 
 				if (diff > 1) {
@@ -7536,12 +7717,22 @@
 			this.innerContent.style.height = this.zone.h - this.bh + 'px';
 			this.content.style.height = this.zone.h + 'px';
 			this.bottom.style.top = this.zone.h - this.bh + 'px';
+
+			if (this.isBottom) {
+				this.content.style.top = window.innerHeight - this.zone.h - this.bottomPosition + 'px';
+				this.rezone(); //this.content.style.marginTop = (window.innerHeight-this.zone.h)+'px'
+			}
+
 			if (this.forceHeight && this.lockHeight) this.content.style.height = this.forceHeight + 'px';
 			if (this.isCanvas) this.draw(true);
 		}
 
 		rezone() {
 			Roots.needReZone = true;
+		}
+
+		zoneReset() {//console.log(Roots)
+			//Roots.findZone(true);
 		}
 
 		setWidth(w) {

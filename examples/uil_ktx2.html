@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>UIL KTX2 creator</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+        <link rel="shortcut icon" href="./assets/favicon.ico">
+        <link rel="stylesheet" type="text/css" href="./assets/style.css">
+	</head>
+	<body>
+        <div id='debug3'></div>
+		<script type="module">
+
+
+			import {UIL} from '../src/Uil_dev.js'
+			import {Renderer} from './libs/Renderer.js';
+			import {Ktx} from './libs/Ktx.js';
+
+
+			const setting = {
+
+				supported_formats:'',
+				Multithreading:true,
+				Worker_Threads:18,
+
+				Debug:false,
+				ComputeStats:false,
+
+				format:'',
+				name:'',
+				canvas:null,
+
+				basis_tex_format:0,
+
+				// ETC1S LDR Options
+				ETC1S_Quality:255,
+				ETC1S_Compression:2,
+			    // UASTC LDR 4x4 Options
+			    UASTC_LDR_Quality:1,
+			    RDO_Quality:1,
+			    UASTC_LDR_RDO:false,
+			    //UASTC HDR 4x4 Options:
+			    UASTC_HDR_Quality:0,
+				//ASTC HDR 6x6 Options:
+				astc_hdr6x6_comp_level:0,
+				astc6x6_rdo_lambda:0.0,
+				Rec2020:false,
+				// LDR->HDR Upconversion Options:
+				ConvertLDRToLinear:true,
+				ldr_to_hdr_multiplier:100,
+
+				// Other Options
+				SRGB:true,
+				Mipmaps:true,
+
+				//Visualization/Display Options
+				linear_to_srgb:false,
+				Exposure:0.5,
+				realExposure:null,
+				etc1s_bc7_transcoder_no_chroma_filtering:false,
+				highquality_transcoding:true,
+
+			}
+
+			// Function to check for WebAssembly threading support
+		    function isWasmThreadingSupported() {
+		        try {
+		            if (typeof WebAssembly === "object" && typeof WebAssembly.Memory === "function") {
+		                const testMemory = new WebAssembly.Memory({
+		                    initial: 1,
+		                    maximum: 1,
+		                    shared: true,
+		                });
+		                return testMemory instanceof WebAssembly.Memory;
+		            }
+		            return false;
+		        } catch (e) {
+		            return false;
+		        }
+		    }
+
+		    async function loadBasisModule() {
+
+		        const threadingSupported = isWasmThreadingSupported();
+		        window.isThreaded = threadingSupported; // Set global variable to indicate threading support
+
+		        const scriptSrc = threadingSupported ? "./libs/basis_encoder_threads.js" : "./libs/basis_encoder.js";
+
+		        const script = document.createElement("script");
+		        script.src = scriptSrc;
+		        script.onload = () => {
+		            BASIS({
+		                onRuntimeInitialized: () => {
+		                     
+		                    console.warn('isThreaded: ' + window.isThreaded);
+		               
+		                    init()
+		                   
+		                    if (!threadingSupported){
+		                        setting.Multithreading = false;
+		                    } else {
+		                        setting.Multithreading = true
+		                    }
+
+		                    
+		                   
+		               }
+		            }).then( 
+		                module => { 
+		                	window.Module = module;
+		             
+				            if (module.initializeBasis) {
+				                module.initializeBasis();
+				                console.log("module.initializeBasis() called successfully.");
+				                startGUI()
+				            } else {
+				                console.error("module.initializeBasis() is not available on the Module object.");
+				            }
+		             
+		                }
+		           
+		            );
+		        };
+
+		        script.onerror = () => {
+		           console.error("Failed to load the Basis module.");
+		        };
+
+		        document.head.appendChild(script);
+		    }
+
+			let canvas, renderer, gl;
+			const formatList = ['ETC1S', 'UASTC LDR 4x4', 'UASTC HDR 4x4', 'RDO ASTC HDR 6x6', 'ASTC HDR 6x6 Intermediate'];
+
+			document.addEventListener('DOMContentLoaded', loadBasisModule);
+
+
+		    function init(){
+
+		    	window.setting = setting;
+
+		    	setting.SRGB = true;
+
+		    	canvas = document.createElement("canvas");
+				canvas.width = 256
+				canvas.height = 256
+				canvas.style.cssText =  "position:absolute; top:10px; left:10px;"//" width:calc( 100% - 20px); color:#7c806c; text-shadow: 1px 1px 1px #000;"
+				document.body.appendChild(canvas);
+				setting.canvas = canvas;
+				
+				gl = canvas.getContext('webgl2');
+				window.renderer = new Renderer(gl);
+				Ktx.checkForGPUFormatSupport(gl);
+				
+				
+				setting.loader = document.createElement("div");
+				setting.loader.cssText =  "position:absolute; top:10px; left:10px; width:10px; height:10px; background:red; display:none; "
+				document.body.appendChild(setting.loader);
+
+		    }
+
+		    function startGUI(){
+
+				document.addEventListener( 'dragover', function(e){ e.preventDefault() }, false );
+				document.addEventListener( 'dragend', function(e){ e.preventDefault() }, false );
+				document.addEventListener( 'dragleave', function(e){ e.preventDefault()}, false );
+				document.addEventListener( 'drop', dropElement, false );
+				//ktx = new Ktx2(renderer)
+
+				initGUI();
+
+		    }
+
+		    function setFormat(v){
+		    	setting.basis_tex_format = formatList.indexOf(v);
+		    }
+
+		    function initGUI(){
+
+		    	
+
+		    	// GUI
+				let ui = new UIL.Gui( { w:274, close:false, h:24 } )
+				ui.add( 'title',  { name:'IMAGE to KTX2' + (setting.Multithreading? ' THREAD':' SIMPLE'), h:30, align:'center' })
+
+
+
+				ui.add('button', { value:[ 'LOAD', 'ENCODE', 'SAVE' ], h:30 }).onChange( callbackLoader );
+				ui.add( 'title',  { name:'Drop file anywhere', h:30, align:'center' })
+
+				if( setting.Multithreading ) ui.add( setting, 'Worker_Threads', { rename:'Num Threads', min:1, max:18, precision:0, step:1 });
+
+				setting.tex_format = ui.add( 'list', { name:'Format', list:formatList, miniCanvas:true, canvasBg:'green', h:30 }).onChange( setFormat )
+
+			
+
+				ui.add( 'empty', { h:6 })
+
+				ui.add( setting, 'ETC1S_Quality', { rename:'Quality', min:1, max:255, precision:0, step:1 });
+				ui.add( setting, 'ETC1S_Compression', { rename:'Compression', min:0, max:6, precision:0, step:1 })
+
+				let gr = ui.add('group', { name:'ETC1S LDR Option', h:30, open:true });
+				gr.add( setting, 'ETC1S_Quality', { rename:'Quality', min:1, max:255, precision:0, step:1 });
+				gr.add( setting, 'ETC1S_Compression', { rename:'Compression', min:0, max:6, precision:0, step:1 })
+
+				let gr2 = ui.add('group', { name:'UASTC LDR 4x4 Options', h:30, open:true });
+				gr2.add( setting, 'UASTC_LDR_Quality', { rename:'LDR Quality', min:0, max:3, precision:0, step:1 });
+				gr2.add( setting, 'RDO_Quality', { rename:'RDO Quality', min:0.1, max:10, precision:1, step:0.1 });
+				gr2.add( setting, 'UASTC_LDR_RDO', { rename:'LDR RDO' });
+
+				let gr23 = ui.add('group', { name:'UASTC HDR 4x4 Options', h:30, open:true });
+				gr23.add( setting, 'UASTC_HDR_Quality', { rename:'HDR Quality', min:0, max:3, precision:0, step:1 });
+
+				let gr22 = ui.add('group', { name:'ASTC HDR 6x6 Options', h:30, open:true });
+				gr22.add( setting, 'astc_hdr6x6_comp_level', { rename:'Comp Level', min:0, max:12, precision:0, step:1 });
+				gr22.add( setting, 'astc6x6_rdo_lambda', { rename:'RDO Quality', min:0.0, max:50, precision:1, type:'number' });
+				gr22.add( setting, 'Rec2020', { rename:'Rec 2020 Color' });
+
+				let gr33 = ui.add('group', { name:'LDR->HDR Upconversion Option', h:30, open:true });
+				gr33.add( setting, 'ConvertLDRToLinear', { rename:'LDR To Linear' });
+				gr33.add( setting, 'ldr_to_hdr_multiplier', { rename:'Nit Multiplier', min:0.1, max:1000, precision:1, type:'number' });
+
+				let gr4 = ui.add('group', { name:'Other Options', h:30, open:true });
+				gr4.add( setting, 'SRGB', { rename:'SRGB metrics' });
+				gr4.add( setting, 'Mipmaps', { rename:'Add Mipmaps' });
+
+				let gr5 = ui.add('group', { name:'Display Options', h:30, open:false });
+				gr5.add( setting, 'linear_to_srgb', { rename:'Linear To Srgb' }).onChange(Ktx.linearToSRGB).listen();
+				let exp = gr5.add( setting, 'Exposure', { rename:'Exposure', min:0, max:1, precision:2, step:0.01, autoValue:false }).onChange(Ktx.updateScale);
+				gr5.add('button', { value:[ 'FULL', 'RGB', 'ALPHA' ], selectable:true }).onChange( changeMode )
+				gr5.add( setting, 'etc1s_bc7_transcoder_no_chroma_filtering', { rename:'No chroma filtering' });
+				gr5.add( setting, 'highquality_transcoding', { rename:'Higher quality' });
+
+				ui.add( 'empty', { h:6 })
+
+				setting.realExposure = exp.c[2];
+				//Ktx.updateScale(setting.Exposure)
+				
+		    }
+
+		    const changeMode = ( name ) => {
+
+				switch(name){
+		            case 'FULL' :
+		                Ktx.alphaBlend()
+		            break;
+		            case 'RGB' :
+		                Ktx.viewRGB()
+		            break;
+		            case 'ALPHA' :
+		                Ktx.viewAlpha()
+		            break;
+		        }
+
+			}
+
+		    const callbackLoader = ( name ) => {
+
+				switch(name){
+		            case 'LOAD' :
+		                UIL.Files.load( { callback:Ktx.dataLoaded, type:'image', forceType:'ArrayBuffer' } )
+		            break;
+		            case 'ENCODE' :
+		                Ktx.runEncode();
+		            break;
+		            case 'SAVE' :
+		                saveResult();
+		            break;
+		        }
+
+			}
+
+			const dropElement = ( e ) => {
+
+				e.preventDefault();
+				let file
+				if (e.dataTransfer.items) file = e.dataTransfer.files[0]
+				else return;
+
+				var reader = new FileReader()
+			    var type = file.name.substring(file.name.lastIndexOf('.')+1, file.name.length );
+
+			    reader.readAsArrayBuffer( file );
+
+			    reader.onload = function ( e ) {
+			    	let content = e.target.result
+			    	let name = file.name.substring(0, file.name.lastIndexOf('.'))
+			    	Ktx.dataLoaded( content, name, type );
+			    }
+			}
+
+			const saveResult = () => {
+
+				let blob = Ktx.getBlob();
+
+				if(blob){
+					let fileName = setting.name;// + '.ktx2';
+
+					const reader = new FileReader()
+	    			reader.addEventListener('loadend', () => {
+	    				let im = new Uint8Array(reader.result)
+	    				UIL.Files.save( { name:fileName, data:im, type:'ktx2' } )
+	    			})
+	    			reader.readAsArrayBuffer(blob);
+
+				} else {
+					console.log('Load image first !!')
+				}
+
+
+		    }
+
+
+		</script>
+	</body>
+</html>

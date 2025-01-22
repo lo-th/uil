@@ -97,27 +97,23 @@ export const autoType = function ( v, o ) {
 
     let type = 'slide'
 
-    if( typeof v === 'boolean' ) type = 'bool' 
-    else if( typeof v === 'string' ){ 
-
-        if( v.substring(0,1) === '#' ) type = 'color'
-        else type = 'string' 
-
-    } else if( typeof v === 'number' ){ 
-
-        if( o.ctype ) type = 'color'
-        else type = 'slide'
-
-    } else if( typeof v === 'array' && v instanceof Array ){
-
-        if( typeof v[0] === 'number' ) type = 'number'
-        else if( typeof v[0] === 'string' ) type = 'list'
-
-    } else if( typeof v === 'object' && v instanceof Object ){
-
-        if( v.x !== undefined ) type = 'number'
-        else type = 'list'
-
+    if( v.isColor ) type = 'color';
+    else if( v.isTexture ) type = 'bitmap';
+    else {
+        if( typeof v === 'boolean' ) type = 'bool' 
+        else if( typeof v === 'string' ){ 
+            if( v.substring(0,1) === '#' ) type = 'color'
+            else type = 'string' 
+        } else if( typeof v === 'number' ){ 
+            if( o.ctype ) type = 'color'
+            else type = 'slide'
+        } else if( typeof v === 'array' && v instanceof Array ){
+            if( typeof v[0] === 'number' ) type = 'number'
+            else if( typeof v[0] === 'string' ) type = 'list'
+        } else if( typeof v === 'object' && v instanceof Object ){
+            if( v.x !== undefined ) type = 'number'
+            else type = 'list'
+        }
     }
 
     return type
