@@ -59,3 +59,12 @@ ui.clear();
 **7 - uil is on npm**
 ```sh
 npm i uil
+```
+
+**8 - creator Tools**
+
+[**uil icon creator**](http://lo-th.github.io/uil/examples/uil_icon.html)
+
+[**uil ARM creator**](http://lo-th.github.io/uil/examples/uil_mapARM.html)
+
+[**uil KTX2 creator**](http://lo-th.github.io/uil/examples/uil_ktx2.html)
