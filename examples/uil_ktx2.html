@@ -144,7 +144,7 @@
 		    	canvas = document.createElement("canvas");
 				canvas.width = 256
 				canvas.height = 256
-				canvas.style.cssText =  "position:absolute; top:10px; left:10px;"//" width:calc( 100% - 20px); color:#7c806c; text-shadow: 1px 1px 1px #000;"
+				canvas.style.cssText =  "position:absolute; top:10px; left:10px;"
 				document.body.appendChild(canvas);
 				setting.canvas = canvas;
 				
@@ -152,10 +152,10 @@
 				window.renderer = new Renderer(gl);
 				Ktx.checkForGPUFormatSupport(gl);
 				
-				
-				setting.loader = document.createElement("div");
-				setting.loader.cssText =  "position:absolute; top:10px; left:10px; width:10px; height:10px; background:red; display:none; "
-				document.body.appendChild(setting.loader);
+				const loaderIcon = document.createElement('div');
+				loaderIcon.style.cssText = "position:absolute; top:20px; left:20px; width:40px; height:40px; background:red; border-radius:6px; display:none;"
+				document.body.appendChild(loaderIcon);
+				setting.loader = loaderIcon;
 
 		    }
 
@@ -195,9 +195,6 @@
 			
 
 				ui.add( 'empty', { h:6 })
-
-				ui.add( setting, 'ETC1S_Quality', { rename:'Quality', min:1, max:255, precision:0, step:1 });
-				ui.add( setting, 'ETC1S_Compression', { rename:'Compression', min:0, max:6, precision:0, step:1 })
 
 				let gr = ui.add('group', { name:'ETC1S LDR Option', h:30, open:true });
 				gr.add( setting, 'ETC1S_Quality', { rename:'Quality', min:1, max:255, precision:0, step:1 });
