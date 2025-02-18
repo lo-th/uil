@@ -80,7 +80,8 @@ export class Gui {
 
         // default position
         this.isCenter = o.center || false;
-        this.isBottom = o.bottom || false;
+        this.isBottom = o.bottom !== undefined ? true : false;
+        this.realTop = 0;
         this.bottomPosition = o.bottom || 0;
 
         this.cssGui = o.css !== undefined ? o.css : (this.isCenter ? '' : 'right:10px;')
@@ -362,8 +363,12 @@ export class Gui {
 
     testZone ( e ) {
 
+
+
         let l = this.local;
         if( l.x === -1 && l.y === -1 ) return '';
+
+        //console.log('test', this.zone)
 
         this.isReset = false;
 
@@ -456,8 +461,6 @@ export class Gui {
     }
 
     getNext ( e, change ) {
-
-
 
         let next = Roots.findTarget( this.uis, e );
 
@@ -626,7 +629,6 @@ export class Gui {
     resetItem () {
 
         if( !this.isItemMode ) return;
-
         let i = this.uis.length;
         while(i--) this.uis[i].selected()
 
@@ -713,13 +715,15 @@ export class Gui {
     calc() {
 
         clearTimeout( this.tmp )
-        this.tmp = setTimeout( this.setHeight.bind( this ), 10 )
+        this.tmp = setTimeout( this.setHeight.bind( this ), 10 );
 
     }
 
     setHeight() {
 
-        if( this.tmp ) clearTimeout( this.tmp )
+        if( this.tmp ) clearTimeout( this.tmp );
+
+        //console.log('gui setHeight')
 
         this.zone.h = this.bh;
         //if(this.isBottom) this.zone.y =((window.innerHeight-this.zone.h)-this.bottomPosition)
@@ -759,19 +763,32 @@ export class Gui {
         this.bottom.style.top = (this.zone.h - this.bh) + 'px';
 
         if( this.isBottom ){
-            this.content.style.top = ((window.innerHeight-this.zone.h)-this.bottomPosition)+'px';
-            this.rezone();
-            //this.content.style.marginTop = (window.innerHeight-this.zone.h)+'px'
+
+            this.realTop = window.innerHeight-this.zone.h-this.bottomPosition;
+            this.zone.y = this.realTop;
+            this.content.style.top = this.realTop+'px';
+            this.calcUis()
+
         }
 
 
         if( this.forceHeight && this.lockHeight ) this.content.style.height = this.forceHeight + 'px';
         if( this.isCanvas ) this.draw( true );
 
+
+    }
+
+    resizeRoot () {
+        Roots.resize();
+        Roots.initEvents();
     }
 
     rezone () {
         Roots.needReZone = true;
+    }
+
+    getRoot () {
+        return Roots;
     }
 
     zoneReset () {

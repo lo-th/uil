@@ -3,9 +3,19 @@
  * @author lth / https://github.com/lo-th
  */
 
-export const REVISION = '4.3.0';
+export const REVISION = '4.4.0';
 
 // INTENAL FUNCTION
+
+/*const observer = new IntersectionObserver((entries) => {
+    for (const entry of entries) {
+        console.log(entry)
+        //const bounds = entry.boundingClientRect;
+        entry.target.bounds = entry.boundingClientRect;
+    }
+    observer.disconnect();
+})*/
+
 
 const R = {
 
@@ -73,6 +83,8 @@ const R = {
 
     now: null,
 
+    
+
     getTime: function() {
         return ( self.performance && self.performance.now ) ? self.performance.now.bind( performance ) : Date.now;
     },
@@ -109,7 +121,10 @@ const R = {
 
         if( R.ui.length === 0 ){
             R.removeEvents();
+
         }
+
+        //console.log('remove:', R.ui.length)
 
     },
 
@@ -154,6 +169,10 @@ const R = {
         R.isEventsInit = true;
         R.dom = dom;
 
+       
+
+        //console.log('event is add !')
+
     },
 
     removeEvents: function () {
@@ -181,6 +200,8 @@ const R = {
         window.removeEventListener( 'resize', R.resize  );
 
         R.isEventsInit = false;
+
+        //console.log('event is remove !')
 
     },
 
@@ -330,9 +351,13 @@ const R = {
 
         let i = R.ui.length, next = -1, u, x, y;
 
+
+
         while( i-- ){
 
             u = R.ui[i]
+
+
 
             if( u.isCanvasOnly ) {
 
@@ -376,6 +401,7 @@ const R = {
 
     // ----------------------
     //  GUI / GROUP FUNCTION
+    //  need update if zone change !!
     // ----------------------
 
     calcUis: ( uis, zone, py, group = false ) => {
@@ -453,11 +479,12 @@ const R = {
     //   ZONE
     // ----------------------
 
-    findZone: function ( force ) {
+    findZone: function ( force = false ) {
 
-        if( !R.needReZone && !force ) return;
+        if( force ) R.needReZone = force;
+        if( !R.needReZone ) return;
 
-        var i = R.ui.length, u;
+        let i = R.ui.length, u;
 
         while( i-- ){ 
 
@@ -467,8 +494,7 @@ const R = {
 
         }
 
-        R.needReZone = false
-
+        R.needReZone = false;
 
     },
 
@@ -511,14 +537,13 @@ const R = {
     getZone: function ( o ) {
 
         if( o.isCanvasOnly ) return;
-        let r = o.getDom().getBoundingClientRect();
+        if( o.isEmpty ) return;
 
-        //if( !r.width ) return
-        //o.zone = { x:Math.floor(r.left), y:Math.floor(r.top), w:Math.floor(r.width), h:Math.floor(r.height) };
-        //o.zone = { x:Math.round(r.left), y:Math.round(r.top), w:Math.round(r.width), h:Math.round(r.height) };
+        const element = o.getDom()
+        const r = element.getBoundingClientRect();
         o.zone = { x:r.left, y:r.top, w:r.width, h:r.height };
+        if( o.isBottom ) o.zone.y = o.realTop;
 
-        //console.log(o.name, o.zone)
 
     },
 
