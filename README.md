@@ -1,3 +1,7 @@
+[![NPM Package][npm]][npm-url]
+[![Build Size][build-size]][build-size-url]
+[![NPM Downloads][npm-downloads]][npmtrends-url]
+
 <p align="center"><a href="http://lo-th.github.io/uil/"><img src="http://lo-th.github.io/uil/examples/assets/uil.jpg"/></a><br>UIL v4.3.0</p>
 
 uil.js is a lightweight ui for javascript with a complete 3d display support.<br>
