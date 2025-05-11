@@ -2,7 +2,7 @@ name: Publish to NPM
 on:
   push:
     branches:
-      - 'main'
+      - 'gh-pages'
 jobs:
   build:
     runs-on: ubuntu-latest
