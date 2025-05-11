@@ -3,9 +3,15 @@
   "version": "4.4.4",
   "description": "JavaScript gui library",
   "type": "module",
-  "main": "build/uil.js",
-  "jsnext:main": "build/uil.module.js",
-  "module": "build/uil.module.js",
+  "main": "./build/uil.cjs",
+  "module": "./build/uil.module.js",
+  "exports": {
+    ".": {
+      "import": "./build/uil.module.js",
+      "require": "./build/uil.cjs"
+    },
+    "./build/*": "./build/*"
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/lo-th/uil"
@@ -14,18 +20,14 @@
     "package.json",
     "LICENSE",
     "README.md",
-    "build/uil.js",
-    "build/uil.min.js",
-    "build/uil.module.js"
+    "build"
   ],
   "directories": {
     "doc": "docs",
     "example": "examples"
   },
   "scripts": {
-    "build": "rollup -c utils/rollup.config.js",
-    "dev": "concurrently --names \"ROLLUP,HTTP\" -c \"bgBlue.bold,bgGreen.bold\" \"rollup -c utils/rollup.config.js -w -m inline\" \"servez -p 8111 --index\"",
-    "start": "concurrently --names \"ROLLUP,HTTP\" -c \"bgBlue.bold,bgGreen.bold\" \"rollup -c utils/rollup.config.js -w -m inline\" \"http-server -c-1 -p 8111 -o index.html\""
+    "build": "rollup -c utils/rollup.config.js"
   },
   "keywords": [
     "uil",
@@ -41,8 +43,6 @@
   "devDependencies": {
     "@rollup/plugin-node-resolve": "^16.0.0",
     "@rollup/plugin-terser": "^0.4.0",
-    "rollup": "^4.6.0",
-    "concurrently": "^9.0.0",
-    "servez": "^2.2.4"
+    "rollup": "^4.6.0"
   }
 }

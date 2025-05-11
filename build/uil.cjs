@@ -1,3 +1,5 @@
+'use strict';
+
 /**
  * @author lth / https://github.com/lo-th
  */
@@ -9392,4 +9394,8 @@ class Gui {
 
 }
 
-export { Files, Gui, REVISION, Tools, add };
+exports.Files = Files;
+exports.Gui = Gui;
+exports.REVISION = REVISION;
+exports.Tools = Tools;
+exports.add = add;
