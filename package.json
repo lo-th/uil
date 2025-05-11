@@ -1,6 +1,6 @@
 {
   "name": "uil",
-  "version": "4.4.21",
+  "version": "4.4.3",
   "description": "JavaScript gui library",
   "type": "module",
   "main": "build/uil.js",
