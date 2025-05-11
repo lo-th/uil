@@ -72,3 +72,11 @@ npm i uil
 [**uil ARM creator**](http://lo-th.github.io/uil/examples/uil_mapARM.html)
 
 [**uil KTX2 creator**](http://lo-th.github.io/uil/examples/uil_ktx2.html)
+
+
+[npm]: https://img.shields.io/npm/v/uil
+[npm-url]: https://www.npmjs.com/package/uil
+[build-size]: https://badgen.net/bundlephobia/minzip/uil
+[build-size-url]: https://bundlephobia.com/result?p=uil
+[npm-downloads]: https://img.shields.io/npm/dw/uil
+[npmtrends-url]: https://www.npmtrends.com/uil
