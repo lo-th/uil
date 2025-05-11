@@ -88,6 +88,21 @@
 
 	    now: null,
 
+	    injectCss (css, styleName, parent) {
+	        const CSS_ID = styleName || 'codeflask-style';
+	        const PARENT = parent || document.head;
+
+	        if (!css) return false
+
+	        if (document.getElementById(CSS_ID)) return true
+
+	        const style = document.createElement('style');
+	        style.innerHTML = css;
+	        style.id = CSS_ID;
+	        PARENT.appendChild(style);
+	        return true
+	    },
+
 	    
 
 	    getTime: function() {
@@ -495,7 +510,9 @@
 
 	            u = R.ui[i];
 	            R.getZone( u );
-	            //if( u.isGui ) u.calcUis(); // no need ?!
+
+	            // TODO need for group open at start !!!
+	            if( u.isGui ) u.calcUis();
 
 	        }
 
@@ -504,6 +521,8 @@
 	    },
 
 	    onZone: function ( o, x, y ) {
+
+	        //console.log(o, x, y)
 
 	        if( x === undefined || y === undefined ) return false;
 
@@ -925,6 +944,7 @@
 	 * @author lth / https://github.com/lo-th
 	 */
 
+	//import { PixelFont } from './PixelFont.js';
 
 	const T = {
 
@@ -976,6 +996,8 @@
 	    // ----------------------
 
 	    defineColor: ( o, cc = T.colors ) => {
+
+	        //Roots.injectCss(PixelFont, null)
 
 	        let color = { ...cc };
 
@@ -1076,12 +1098,13 @@
 	        
 	        //fontFamily: 'Tahoma',
 	        //fontFamily: 'Consolas, monospace',
-	        fontFamily:"'SegoeUI', 'Segoe UI', 'Helvetica Neue', -apple-system, BlinkMacSystemFont, Roboto, Oxygen-Sans, Ubuntu, Cantarell, sans-serif",
+	        //fontFamily:"'SegoeUI', 'Segoe UI', 'Helvetica Neue', -apple-system, BlinkMacSystemFont, Roboto, Oxygen-Sans, Ubuntu, Cantarell, sans-serif",
+	        fontFamily:"Roboto Mono, Source Code Pro, Menlo, Courier, monospace",
 	        
 	        //fontFamily: "'Roboto Mono', 'Source Code Pro', Menlo, Courier, monospace",
 	        fontWeight: 'normal',
 	        fontShadow: 'none',//'#000',
-	        fontSize:12,
+	        fontSize:11,
 
 	        joyOver:'rgba(48,138,255,0.25)',
 	        joyOut: 'rgba(100,100,100,0.5)',
@@ -1185,7 +1208,7 @@
 
 	        //let align = 'display:flex; justify-content:left; align-items:center; text-align:left;'
 
-	        T.css.txt = T.css.basic + T.css.middle + ' font-family:'+ font +'; font-weight:'+weight+'; font-size:'+size+'; color:'+cc.text+'; padding:0px 8px; left:0; top:2px; height:16px; width:100px; overflow:hidden; white-space: nowrap; letter-spacing: normal;';
+	        T.css.txt = T.css.basic + T.css.middle + ' font-family:'+ font +'; font-weight:'+weight+'; font-size:'+size+'; color:'+cc.text+'; padding:0px 8px; left:0; top:2px; height:16px; width:100px; overflow:hidden; white-space: nowrap; letter-spacing:normal;';//letter-spacing: normal;
 	        if( shadow !== 'none' ) T.css.txt += ' text-shadow: 1px 1px 1px '+shadow+';';
 
 	        T.css.txtselect = T.css.txt + 'padding:0px 4px; border:1px dashed ' + cc.border + ';';
@@ -4691,7 +4714,16 @@
 
 	        //console.log(this.margin)
 
-	        if( o.open ) this.open();
+	        if( o.open ){ 
+	            //setTimeout( this.open.bind(this), 100 )
+	            this.open();
+
+	            //if(this.isUI) this.main.calcUis();
+	            //this.rezone()
+	            //Roots.needReZone = true;
+	            //Roots.resize();
+	            //this.calcUis()
+	        }
 
 	    }
 
@@ -4733,6 +4765,8 @@
 
 	    testZone ( e ) {
 
+	        //console.log( this.local)
+
 	        let l = this.local;
 	        if( l.x === -1 && l.y === -1 ) return '';
 
@@ -4743,7 +4777,7 @@
 	            if( this.isOpen ) name = 'content';
 	        }
 
-	        //console.log(name)
+	        
 
 	        return name;
 
@@ -4789,6 +4823,8 @@
 
 	            case 'content':
 
+
+
 	            //this.cursor()
 
 	            //if( this.marginDiv ) e.clientY -= this.margin * 0.5
@@ -4825,6 +4861,8 @@
 	    getNext ( e, change ) {
 
 	        let next = Roots.findTarget( this.uis, e );
+
+
 
 	        if( next !== this.current ){
 	            this.clearTarget();
@@ -5042,6 +5080,7 @@
 	    }
 
 	    parentHeight ( t ) {
+
 
 	        if ( this.group !== null ) this.group.calc( t );
 	        else if ( this.isUI ) this.main.calc( t );

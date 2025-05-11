@@ -83,6 +83,21 @@ const R = {
 
     now: null,
 
+    injectCss (css, styleName, parent) {
+        const CSS_ID = styleName || 'codeflask-style'
+        const PARENT = parent || document.head
+
+        if (!css) return false
+
+        if (document.getElementById(CSS_ID)) return true
+
+        const style = document.createElement('style')
+        style.innerHTML = css
+        style.id = CSS_ID
+        PARENT.appendChild(style)
+        return true
+    },
+
     
 
     getTime: function() {
@@ -490,7 +505,9 @@ const R = {
 
             u = R.ui[i];
             R.getZone( u );
-            //if( u.isGui ) u.calcUis(); // no need ?!
+
+            // TODO need for group open at start !!!
+            if( u.isGui ) u.calcUis();
 
         }
 
@@ -499,6 +516,8 @@ const R = {
     },
 
     onZone: function ( o, x, y ) {
+
+        //console.log(o, x, y)
 
         if( x === undefined || y === undefined ) return false;
 

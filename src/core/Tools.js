@@ -3,6 +3,7 @@
  */
 
 import { Roots } from './Roots.js';
+//import { PixelFont } from './PixelFont.js';
 
 const T = {
 
@@ -54,6 +55,8 @@ const T = {
     // ----------------------
 
     defineColor: ( o, cc = T.colors ) => {
+
+        //Roots.injectCss(PixelFont, null)
 
         let color = { ...cc }
 
@@ -154,12 +157,13 @@ const T = {
         
         //fontFamily: 'Tahoma',
         //fontFamily: 'Consolas, monospace',
-        fontFamily:"'SegoeUI', 'Segoe UI', 'Helvetica Neue', -apple-system, BlinkMacSystemFont, Roboto, Oxygen-Sans, Ubuntu, Cantarell, sans-serif",
+        //fontFamily:"'SegoeUI', 'Segoe UI', 'Helvetica Neue', -apple-system, BlinkMacSystemFont, Roboto, Oxygen-Sans, Ubuntu, Cantarell, sans-serif",
+        fontFamily:"Roboto Mono, Source Code Pro, Menlo, Courier, monospace",
         
         //fontFamily: "'Roboto Mono', 'Source Code Pro', Menlo, Courier, monospace",
         fontWeight: 'normal',
         fontShadow: 'none',//'#000',
-        fontSize:12,
+        fontSize:11,
 
         joyOver:'rgba(48,138,255,0.25)',
         joyOut: 'rgba(100,100,100,0.5)',
@@ -263,7 +267,7 @@ const T = {
 
         //let align = 'display:flex; justify-content:left; align-items:center; text-align:left;'
 
-        T.css.txt = T.css.basic + T.css.middle + ' font-family:'+ font +'; font-weight:'+weight+'; font-size:'+size+'; color:'+cc.text+'; padding:0px 8px; left:0; top:2px; height:16px; width:100px; overflow:hidden; white-space: nowrap; letter-spacing: normal;';
+        T.css.txt = T.css.basic + T.css.middle + ' font-family:'+ font +'; font-weight:'+weight+'; font-size:'+size+'; color:'+cc.text+'; padding:0px 8px; left:0; top:2px; height:16px; width:100px; overflow:hidden; white-space: nowrap; letter-spacing:normal;';//letter-spacing: normal;
         if( shadow !== 'none' ) T.css.txt += ' text-shadow: 1px 1px 1px '+shadow+';';
 
         T.css.txtselect = T.css.txt + 'padding:0px 4px; border:1px dashed ' + cc.border + ';';

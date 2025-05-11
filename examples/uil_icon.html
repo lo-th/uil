@@ -16,7 +16,12 @@
 
 			const debug = document.querySelector('#debug3');
 
-			
+			const shadowOption = {
+				offsetX:3,
+				offsetY:3,
+				blur:16,
+				color:"#000000"
+			} 
 
 		    let name = '', img
 		    let images = []
@@ -45,6 +50,9 @@
 		            case 'LOAD' :
 		                UIL.Files.load( { callback:onLoad, type:'image' } )
 		            break;
+		            case 'SHADOW' :
+		                shadow()
+		            break;
 		            case 'SAVE' :
 		                convert()
 		            break;
@@ -55,8 +63,23 @@
 			const onLoad = ( img, Name ) => {
 
 				name = Name.substring( 0, Name.lastIndexOf('.') )
-				console.log(name)
 				ctx.clearRect(0, 0, 256, 256)
+				ctx.drawImage(img, 0, 0, 256, 256);
+				canvas.style.border = '1px solid #314d2f;'
+
+			}
+
+			const shadow = () => {
+
+				if( !name ){ 
+		    		debug.innerHTML = 'Load image first !'
+		    		return
+		    	}
+				ctx.clearRect(0, 0, 256, 256)
+				ctx.shadowColor = shadowOption.color;
+				ctx.shadowOffsetX = shadowOption.offsetX;
+				ctx.shadowOffsetY = shadowOption.offsetY;
+				ctx.shadowBlur = shadowOption.blur;
 				ctx.drawImage(img, 0, 0, 256, 256);
 				canvas.style.border = '1px solid #314d2f;'
 
@@ -147,7 +170,7 @@
 				var reader = new FileReader()
 			    var type = file.name.substring(file.name.lastIndexOf('.')+1, file.name.length );;
 
-			    if ( type === 'jpg' ||  type === 'png' ) reader.readAsDataURL( file );
+			    if ( type === 'jpg' ||  type === 'png'||  type === 'gif' ) reader.readAsDataURL( file );
 			    else { 
 			    	debug.innerHTML = 'Bad files format ?'
 			    	return
@@ -155,15 +178,9 @@
 
 			    reader.onload = function ( e ) {
 
-			    	name = file.name.substring(0, file.name.lastIndexOf('.'))
 			    	img = new Image()
 					img.src = e.target.result
-					img.onload = function () {
-
-						onLoad( img, name )
-						//ctx.clearRect(0, 0, 256, 256)
-						//ctx.drawImage(img, 0, 0, 256, 256);
-					}
+					img.onload = () => {onLoad( img, file.name )}
 
 			    }
 
@@ -178,9 +195,15 @@
 			let ui = new UIL.Gui( { w:276, close:false, css:'top:10px; left:50%;', center: true } )
 			ui.add( 'title',  { name:'IMAGE to ICON', h:30, align:'center' })
 			ui.add( 'empty', { h:264 }).content().appendChild( canvas )
-			ui.add('button', { value:[ 'LOAD', 'SAVE' ], h:30 }).onChange( callbackLoader )
+			ui.add('button', { value:[ 'LOAD','SHADOW', 'SAVE' ], h:30 }).onChange( callbackLoader )
+			//ui.add('button', { value:[ 'LOAD', 'SAVE' ], h:30 }).onChange( callbackLoader )
 			ui.add( 'empty', { h:6 })
 
+			let gr = ui.add('group', { name:'shadow option', h:30, color:'#0FF' })
+			gr.add( shadowOption, 'offsetX',{  min:-10, max:10, step:1, precision:0, mode:2 });
+			gr.add( shadowOption, 'offsetY',{  min:-10, max:10, step:1, precision:0, mode:2 });
+			gr.add( shadowOption, 'blur',{  min:0, max:30, step:1, precision:0, mode:2 });
+			gr.add( shadowOption, 'color',{ ctype:'html' });
 			//debug.innerHTML = 'Load or drag Image file'
 
 		</script>

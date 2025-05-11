@@ -56,7 +56,16 @@ export class Group extends Proto {
 
         //console.log(this.margin)
 
-        if( o.open ) this.open()
+        if( o.open ){ 
+            //setTimeout( this.open.bind(this), 100 )
+            this.open()
+
+            //if(this.isUI) this.main.calcUis();
+            //this.rezone()
+            //Roots.needReZone = true;
+            //Roots.resize();
+            //this.calcUis()
+        }
 
     }
 
@@ -98,6 +107,8 @@ export class Group extends Proto {
 
     testZone ( e ) {
 
+        //console.log( this.local)
+
         let l = this.local;
         if( l.x === -1 && l.y === -1 ) return '';
 
@@ -108,7 +119,7 @@ export class Group extends Proto {
             if( this.isOpen ) name = 'content';
         }
 
-        //console.log(name)
+        
 
         return name;
 
@@ -154,6 +165,8 @@ export class Group extends Proto {
 
             case 'content':
 
+
+
             //this.cursor()
 
             //if( this.marginDiv ) e.clientY -= this.margin * 0.5
@@ -190,6 +203,8 @@ export class Group extends Proto {
     getNext ( e, change ) {
 
         let next = Roots.findTarget( this.uis, e );
+
+
 
         if( next !== this.current ){
             this.clearTarget();
@@ -408,6 +423,7 @@ export class Group extends Proto {
     }
 
     parentHeight ( t ) {
+
 
         if ( this.group !== null ) this.group.calc( t )
         else if ( this.isUI ) this.main.calc( t )
