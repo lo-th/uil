@@ -45,10 +45,16 @@ body { font-family: "Lucida Console", Monaco, monospace; background-color:#717b8
         linear:10,
         easein:10,
         easeout:10,
+        listen:0.,
+        axis:"x"
     }
 
     window.params=params;   
 
+    setInterval(function(){
+        params.listen+=0.1;
+        if (params.listen>20) params.listen=0;
+    },50);
     
     function initGUI () {
 
@@ -95,19 +101,6 @@ body { font-family: "Lucida Console", Monaco, monospace; background-color:#717b8
         gRender.add(params,"bloom",{type:"slide",displayName:"bloom",min:0,max:10,step:0.01}).listen();
         gRender.open();
 
-        //ui.add("button", { name: "setOrbitalCam", values: ["save", "load"] });        
-        /*
-        ui.add(params,"speed", { type:"slide", min: 0, max: 1, precision:3, name:"mongo",displayName:"speedFactor" })
-            .onChange((v)=>{
-                params.speedMapped = Math.pow(v,2)*10;
-            }).listen();
-        ui.add("slide", { name:"value1", min: 0, max: 1, precision:3, value:8 })
-            */
-        //ui.add('title', { name: 'LOD' }) 
-        //ui.add('list', { name: 'defaultLOD', list: ['250K', '500K', '1M', '2M'], listOnly: false })        
-        //ui.add('list', { name: 'includeEvery', list: ['1', '2', '4', '8'], listOnly: false })
-        //ui.add("slide", { name: "minSize", min: 1, max: 50, step: 1,value:14 });
-
         // test item removal
         gCam.remove(o1)
         o1=gCam.add(params,"fov",{displayName:"FOV",min:20,max:30,step:0.1})
@@ -117,6 +110,9 @@ body { font-family: "Lucida Console", Monaco, monospace; background-color:#717b8
         gTest.add(params,"linear",{type:"slide",displayName:"linear",min:0,max:20,easing:1,precision:4}).listen();
         gTest.add(params,"easein",{type:"slide",displayName:"easein",min:0,max:20,easing:5,precision:4}).listen();
         gTest.add(params,"easeout",{type:"slide",displayName:"easeout",min:0,max:20,easing:0.2,precision:4}).listen();
+        gTest.add(params,"listen",{type:"slide",displayName:"listen",min:0,max:20,easing:0.25,precision:4}).listen();
+        gTest.add(params,"axis",{type:"selector",values:["x","y","z"],value:"x"})
+        gTest.add(params,"axis",{type:"list",values:["1","2","3"],value:"2"})
     }
 
     initGUI();

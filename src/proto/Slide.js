@@ -261,7 +261,12 @@ export class Slide extends Proto {
   }
 
   update(up) {
-    let ww = Math.floor(this.ww * ((this.sliderValue - this.min) / this.range));
+    let normalized = (this.value - this.min) / this.range;
+
+    let uneased =
+      this.easing == 1 ? normalized : Math.pow(normalized, 1 / this.easing);
+
+    let ww = Math.floor(this.ww * uneased);
     //let ww = Math.floor(this.ww * ((this.value - this.min) / this.range));
 
     if (this.model !== 3) this.s[5].width = ww + "px";
