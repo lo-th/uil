@@ -1,0 +1,78 @@
+# Especificación de un selector jerárquico por niveles (agnóstico de UI)
+
+## Objetivo
+Implementar un selector jerárquico “por niveles” que permita elegir una ruta dentro de un árbol. 
+Al seleccionar una opción en un nivel intermedio, el componente recorta la ruta hasta ese nivel y autocompleta descendiendo por la 
+primera opción de cada rama hasta llegar a la hoja (sin elegir automáticamente el ítem final).
+
+---
+
+## Modelo de datos
+- **Árbol**  
+  - Nodos intermedios: mapa `clave → subárbol`.  
+  - Nodos hoja: listas de opciones finales.
+- **Ruta seleccionada (`value`)**  
+  Arreglo de strings que codifica las elecciones desde raíz hasta (posible) hoja; determina qué opción está marcada como *seleccionada* en cada nivel.
+- **Ruta de foco (`focusPath`)** y **nivel de foco (`focusLevel`)**  
+  Permiten previsualizar y resaltar una rama sin modificar la selección definitiva. Cuando hay foco, la construcción visual sigue `focusPath`; si no, sigue `value`.
+
+---
+
+## Entradas requeridas
+- `tree` (objeto o array)  
+- `value` (array de strings)  
+- `focused` (boolean), `focusPath` (array), `focusLevel` (number)  
+- Identificadores de contexto a devolver en el cambio (p. ej., `tabIndex`, `itemIndex`)  
+- `onChange(...)` (callback de notificación)  
+Estas entradas deben estar disponibles como API pública del componente.
+
+---
+
+## Salida / eventos
+- **`onChange(tabIndex, itemIndex, newPath)`** al seleccionar una opción en cualquier nivel.  
+  `newPath` debe incluir la ruta recortada hasta el nivel elegido y la autocompletación posterior hasta la hoja (sin elegir el ítem final de la hoja).
+
+---
+
+## Reglas de construcción de niveles (render lógico)
+- La “ruta activa” para construir niveles es `focusPath` si `focused=true`; de lo contrario, `value`.
+- Por nivel:
+  - Si el nodo es **mapa**: las opciones son sus **claves** (nivel intermedio).  
+  - Si el nodo es **lista**: las opciones son los **elementos** (nivel hoja).  
+  - En cada nivel, la opción *seleccionada* es la que coincide con `value[nivel]`.
+
+---
+
+## Reglas de selección y autocompletado
+- Selección en nivel **L**:
+  1) Recortar `value` hasta **L** e insertar la opción elegida.  
+  2) Mientras el nodo actual sea un **mapa**, avanzar determinísticamente por su **primera clave** hasta alcanzar una **lista** (hoja).  
+  3) Notificar `onChange(...)` con la nueva ruta.
+
+---
+
+## Estados visuales y foco (semántica)
+- **Seleccionado**: opción que coincide con `value[nivel]`.  
+- **En foco**: si `focused=true` y `focusLevel === nivel`, resaltar la opción que coincide con `focusPath[nivel]`. Esto no modifica `value` hasta que el usuario confirme una selección.
+
+---
+
+## Layout y alineación 
+- Niveles intermedios (mapa): disposición **horizontal** de opciones.  
+- Último nivel (lista/hoja): disposición **vertical** de opciones.  
+- Calcular el **máximo tamaño de hoja** del árbol y reservar ese alto para el último nivel;
+ completar con espacio vacio para estabilizar el layout.
+
+---
+
+## Interacción mínima requerida
+- Click/tap en una opción de nivel **L** → disparar `onChange(...)` con la ruta recortada hasta **L**, opción elegida y autocompletado hasta la hoja.
+- El modo **foco** solo afecta lo resaltado y la expansión visual; no altera `value` hasta una selección efectiva.
+
+---
+
+## Invariantes y validaciones
+- Si la ruta activa apunta a una clave inexistente, **detener** la expansión de niveles.  
+- No asumir que siempre existen opciones: si un mapa está vacío, **detener** el autocompletado.
+
+---
