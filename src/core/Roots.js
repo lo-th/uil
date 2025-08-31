@@ -787,12 +787,23 @@ const R = {
   //
   // ----------------------
 
+  /*
+    // esta era la funcion original
+    loop: function () {
+
+        if( R.isLoop ) requestAnimationFrame( R.loop );
+        R.update();
+
+    },
+
+  */
+
   loop: function () {
     // modified by Fedemarino
     if (R.isLoop) requestAnimationFrame(R.loop);
     R.needsUpdate = R.update();
     // if there is a change in a value generated externally, the GUI needs to be redrawn
-    if (R.ui[0]) R.ui[0].draw();
+    if (R.ui[0] && R.needsUpdate) R.ui[0].draw();
   },
 
   update: function () {
