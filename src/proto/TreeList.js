@@ -5,11 +5,11 @@ import { Roots } from '../core/Roots.js';
 
 export class TreeList extends Proto {
   constructor(o = {}) {
-    // Propiedades públicas esperadas (API)
-    // o.tree (obj/array), o.value (array), o.focused (bool),
-    // o.focusPath (array), o.focusLevel (number),
+    // API pública esperada:
+    // o.tree (obj/array), o.value (array)
+    // o.focused (bool), o.focusPath (array), o.focusLevel (number)
     // o.tabIndex, o.itemIndex, o.onChange (fn)
-    o.selectable = true;           // navegable por teclado si activas flechas
+    o.selectable = true;
     o.name = o.name || 'TreeList';
     super(o);
 
@@ -23,34 +23,31 @@ export class TreeList extends Proto {
     this.tabIndex   = o.tabIndex ?? null;
     this.itemIndex  = o.itemIndex ?? null;
 
-    // Callback de notificación
-    this.changeCb   = typeof o.onChange === 'function' ? o.onChange : (/*tabIdx, itemIdx, newPath*/) => {};
+    // Callback
+    this.changeCb = typeof o.onChange === 'function' ? o.onChange : () => {};
 
-    // Layout interno
-    this.levels = [];   // [{type:'map'|'list', items:[{key,label,zone}], zone:{x,y,w,h}}...]
-    this.leafMax = 0;   // alto reservado para el último nivel (máximo tamaño de hoja)
-    this.levelGap = 2;  // gap vertical entre niveles
-    this.hItem    = this.h;  // alto por ítem
+    // Layout interno / publicación de altura
+    this.lineH    = this.h;               // alto de UNA fila
+    this.levelGap = this.colors.sy || 2;  // separación vertical entre niveles
+    this.leafMax  = 0;                    // se calcula en rSize()
 
-    // Hover / foco de mouse
-    this.hover = { level: -1, index: -1 };
+    // Modelo visual
+    this.levels   = [];   // [{type:'map'|'list', items:[{key,label,zone}], zone:{x,y,w,h}}...]
+    this.itemsDom = [];   // espejo DOM por nivel
+    this.hover    = { level: -1, index: -1 };
 
-    // DOM visual (sin listeners directos; los eventos llegan vía Roots->handleEvent)
-    this.c[2] = this.dom('div', this.css.basic + 'left:0; top:0; width:100%; height:100%;'); // container interno
+    // Contenedor interno (absoluto)
+    this.c[2] = this.dom('div', this.css.basic + 'left:0; top:0; width:100%; height:100%;');
     this.s[2] = this.c[2].style;
-
-    // Inicializa nodos visuales de forma perezosa en rSize()
-    this.itemsDom = []; // mirror de this.levels (matriz de nodos)
 
     this.init();
   }
 
-  // =============== Helpers de datos ===============
-
+  // ======= Helpers de tipo =======
   static isMap(node)  { return node && typeof node === 'object' && !Array.isArray(node); }
   static isList(node) { return Array.isArray(node); }
 
-  // Devuelve el subnodo al seguir path (se detiene si no existe)
+  // ======= Recorrido de datos =======
   getNodeAtPath(path) {
     let node = this.tree;
     for (let i = 0; i < path.length; i++) {
@@ -58,8 +55,8 @@ export class TreeList extends Proto {
         if (!Object.prototype.hasOwnProperty.call(node, path[i])) return { node: null, depth: i };
         node = node[path[i]];
       } else if (TreeList.isList(node)) {
-        // Al llegar a lista, ya no hay más descendencia válida para claves
-        if (i < path.length) return { node, depth: i }; 
+        // Llegamos a una lista: ya no hay más claves válidas
+        if (i < path.length) return { node, depth: i };
       } else {
         return { node: null, depth: i };
       }
@@ -67,32 +64,30 @@ export class TreeList extends Proto {
     return { node, depth: path.length };
   }
 
-  // Autocompleta descendiendo por la primera clave de cada mapa hasta alcanzar una lista
+  // Autocompletar: baja por primeras claves de cada mapa hasta alcanzar una lista
   autoCompleteToLeaf(basePath) {
-    let nodeInfo = this.getNodeAtPath(basePath);
-    let node = nodeInfo.node;
+    let { node } = this.getNodeAtPath(basePath);
     const path = basePath.slice();
-
     while (TreeList.isMap(node)) {
       const keys = Object.keys(node);
-      if (!keys.length) break; // mapa vacío
+      if (!keys.length) break;
       const k0 = keys[0];
       path.push(k0);
       node = node[k0];
     }
-    // Si termina en lista, NO agrega selección final de elemento hoja
+    // Si termina en lista, NO agrega un ítem final de la hoja
     return path;
   }
 
-  // Ruta activa para construir niveles (focusPath si focused, si no value)
+  // Ruta activa (focusPath si focused, sino value)
   getActivePath() {
     return this.focused ? this.focusPath : this.value;
   }
 
-  // Calcula el máximo tamaño de hoja del árbol (para reservar alto estable)
+  // ======= Tamaño de hoja máximo (para layout estable) =======
   computeLeafMax(node = this.tree) {
-    if (TreeList.isList(node)) return node.length;
-    if (!TreeList.isMap(node)) return 0;
+    if (Array.isArray(node)) return node.length;
+    if (!node || typeof node !== 'object') return 0;
     let m = 0;
     for (const k of Object.keys(node)) {
       m = Math.max(m, this.computeLeafMax(node[k]));
@@ -100,8 +95,7 @@ export class TreeList extends Proto {
     return m;
   }
 
-  // =============== Construcción de niveles (modelo lógico) ===============
-
+  // ======= Construcción de niveles (modelo lógico) =======
   buildLevels() {
     this.levels.length = 0;
     const activePath = this.getActivePath();
@@ -111,38 +105,39 @@ export class TreeList extends Proto {
 
     while (node) {
       if (TreeList.isMap(node)) {
-        // Opciones = claves del mapa (nivel intermedio)
+        // Nivel intermedio: claves del mapa (horizontal)
         const keys = Object.keys(node);
-        if (!keys.length) break; // detener expansión si vacío
-        this.levels.push({ type: 'map', items: keys.map(k => ({ key: k, label: k, zone: {x:0,y:0,w:0,h:0} })), zone: {x:0,y:0,w:0,h:this.hItem} });
+        if (!keys.length) break;
+        this.levels.push({
+          type: 'map',
+          items: keys.map(k => ({ key: k, label: k, zone: { x:0,y:0,w:0,h:0 } })),
+          zone: { x:0,y:0,w:0,h: this.lineH }
+        });
 
-        // Avanza según la ruta activa (si existe), sino se detiene
         const nextKey = activePath[level];
         if (!nextKey || !node.hasOwnProperty(nextKey)) break;
         node = node[nextKey];
       } else if (TreeList.isList(node)) {
-        // Último nivel: lista/hoja (vertical)
-        const items = node.map(label => ({ key: label, label, zone: {x:0,y:0,w:0,h:0} }));
-        this.levels.push({ type: 'list', items, zone: {x:0,y:0,w:0,h: Math.max(items.length, this.leafMax) * this.hItem } });
-        break; // fin
+        // Nivel hoja: lista vertical
+        const items = node.map(label => ({ key: label, label, zone: { x:0,y:0,w:0,h:0 } }));
+        const hList = Math.max(items.length, this.leafMax) * this.lineH;
+        this.levels.push({ type: 'list', items, zone: { x:0, y:0, w:0, h: hList } });
+        break;
       } else {
-        break; // nodo inválido
+        break;
       }
       level++;
     }
   }
 
-  // =============== Layout (zonas internas) ===============
-
-  // Calcula zonas internas de cada ítem/level y construye/actualiza dom
+  // ======= Layout (zonas & DOM) =======
   layoutLevels() {
     const padX = 8;
     const w = this.zone.w - padX * 2;
     let y = 0;
 
-    // Asegura `itemsDom` anidado por nivel
+    // Ajustar itemsDom a cantidad de niveles
     while (this.itemsDom.length < this.levels.length) this.itemsDom.push([]);
-    // Limpia extra DOM si niveles disminuyen
     for (let L = this.levels.length; L < this.itemsDom.length; L++) {
       for (const el of this.itemsDom[L]) if (el && el.parentNode) el.parentNode.removeChild(el);
     }
@@ -153,32 +148,26 @@ export class TreeList extends Proto {
       if (lvl.type === 'map') {
         const n = Math.max(1, lvl.items.length);
         const cellW = Math.floor(w / n);
-        lvl.zone = { x: padX, y, w, h: this.hItem };
+        lvl.zone = { x: padX, y, w, h: this.lineH };
         let x = padX;
-        // Asegura contenedor dom de nivel si querés uno (opcional)
         for (let i = 0; i < lvl.items.length; i++) {
           const it = lvl.items[i];
-          it.zone = { x, y, w: cellW, h: this.hItem };
-
-          // crea/actualiza nodo visual
+          it.zone = { x, y, w: cellW, h: this.lineH };
           const dom = this.ensureItemDom(L, i);
           this.paintItemDom(dom, L, i, it, 'map');
-
           x += cellW;
         }
-        y += this.hItem + this.levelGap;
+        y += this.lineH + this.levelGap;
       } else {
-        // lista/hoja vertical
+        // lista/hoja: reservar h según leafMax
         const n = lvl.items.length;
-        const hList = Math.max(n, this.leafMax) * this.hItem;
+        const hList = Math.max(n, this.leafMax) * this.lineH;
         lvl.zone = { x: padX, y, w, h: hList };
 
         for (let i = 0; i < Math.max(n, this.leafMax); i++) {
-          // Puede haber "espacio vacío" si n < leafMax
           const isReal = i < n;
-          const it = isReal ? lvl.items[i] : { key: null, label: '', zone: {x:0,y:0,w:0,h:0} };
-          it.zone = { x: padX, y: y + i * this.hItem, w, h: this.hItem };
-
+          const it = isReal ? lvl.items[i] : { key: null, label: '', zone: { x:0,y:0,w:0,h:0 } };
+          it.zone = { x: padX, y: y + i * this.lineH, w, h: this.lineH };
           const dom = this.ensureItemDom(L, i);
           this.paintItemDom(dom, L, i, it, 'list', isReal);
         }
@@ -186,18 +175,20 @@ export class TreeList extends Proto {
       }
     }
 
-    // Ajusta alto visible del control
+    // Ajustes de alto interno del contenedor visual
     const totalH = y;
-    this.zone.h = totalH + this.margin; // Proto se encarga del margen
+    this.zone.h = totalH + this.margin;
     this.s[0].height = this.zone.h + 'px';
     this.s[2].height = totalH + 'px';
+
+    // Publicar alto total al GUI (sumará u.h)
+    this._publishHeight();
   }
 
   ensureItemDom(L, i) {
     const row = this.itemsDom[L];
     while (row.length <= i) row.push(null);
     if (!row[i]) {
-      // Cada ítem es un DIV posicionado absoluto dentro de this.c[2]
       const div = this.dom('div', Tools.css.txt + 'position:absolute; pointer-events:none;');
       this.c[2].appendChild(div);
       row[i] = div;
@@ -205,40 +196,32 @@ export class TreeList extends Proto {
     return row[i];
   }
 
-  // Colorea y posiciona el DOM del ítem según estados (seleccionado / foco)
   paintItemDom(div, L, i, it, kind, isReal = true) {
     const s = div.style;
     const cc = this.colors;
 
     // Posición
-    s.left = it.zone.x + 'px';
-    s.top  = it.zone.y + 'px';
+    s.left   = it.zone.x + 'px';
+    s.top    = it.zone.y + 'px';
     s.width  = it.zone.w + 'px';
-    s.height = (it.zone.h - 2) + 'px';  // -2 para evitar overlap de bordes
+    s.height = (it.zone.h - 2) + 'px';
 
     // Texto
     div.textContent = isReal ? it.label : '';
 
-    // Estados semánticos
-    const value = this.value;
-    const selected = (value[L] !== undefined) && (value[L] === it.key) && isReal;
-
-    const inFocusLevel = this.focused && (this.focusLevel === L);
-    const focusMatch   = inFocusLevel && (this.focusPath[L] === it.key) && isReal;
-
-    // Hover (mouse)
-    const isHover = (this.hover.level === L && this.hover.index === i && isReal);
+    // Estados
+    const selected   = isReal && this.value[L] !== undefined && this.value[L] === it.key;
+    const inFocusLvl = this.focused && (this.focusLevel === L);
+    const focusMatch = isReal && inFocusLvl && (this.focusPath[L] === it.key);
+    const isHover    = isReal && (this.hover.level === L && this.hover.index === i);
 
     // Estilos base
     s.background = cc.back;
     s.color      = cc.text;
     s.border     = '1px solid ' + cc.border;
+    s.textAlign  = kind === 'map' ? 'center' : 'left';
 
-    // Mapa = horizontal, Lista = vertical
-    if (kind === 'map') s.textAlign = 'center';
-    else s.textAlign = 'left';
-
-    // Priorización visual: seleccionado > foco > hover > base
+    // Prioridad visual: seleccionado > foco > hover > base
     if (selected) {
       s.background = cc.select;
       s.color = cc.textSelect;
@@ -249,35 +232,30 @@ export class TreeList extends Proto {
       s.background = cc.overoff;
       s.color = cc.textOver;
     }
-    // Deshabilitar DOM si no hay ítem real en filas de padding
+
+    // Filas de padding invisibles en hoja
     s.opacity = isReal ? '1' : '0';
   }
 
-  // =============== Ciclo de vida visual ===============
-
+  // ======= Ciclo de vida =======
   rSize() {
-    // Recalcula leafMax y niveles cada vez que cambia tamaño/datos
     this.leafMax = this.computeLeafMax(this.tree);
     this.buildLevels();
     this.layoutLevels();
   }
 
   update() {
-    // Redibuja cuando cambian estados de hover/focus/value externamente
     this.buildLevels();
     this.layoutLevels();
   }
 
-  // =============== Interacción (hit-testing y selección) ===============
-
-  // Convierte coords globales a locales del control (igual que Proto)
+  // ======= Interacción =======
   _toLocal(e) {
     const mx = e.clientX - this.zone.x;
     const my = e.clientY - this.zone.y;
     return { x: mx, y: my };
   }
 
-  // Busca qué ítem (L,i) está bajo el mouse; respeta zonas por nivel
   _hitTest(mx, my) {
     for (let L = 0; L < this.levels.length; L++) {
       const lvl = this.levels[L];
@@ -292,11 +270,10 @@ export class TreeList extends Proto {
           }
         }
       } else {
-        // hoja: puede contener filas de padding
         const nRows = Math.max(lvl.items.length, this.leafMax);
         for (let i = 0; i < nRows; i++) {
           const isReal = i < lvl.items.length;
-          const itz = isReal ? lvl.items[i].zone : { x: z.x, y: z.y + i * this.hItem, w: z.w, h: this.hItem };
+          const itz = isReal ? lvl.items[i].zone : { x: z.x, y: z.y + i * this.lineH, w: z.w, h: this.lineH };
           if (mx >= itz.x && my >= itz.y && mx <= itz.x + itz.w && my <= itz.y + itz.h) {
             return { L, i, real: isReal };
           }
@@ -309,12 +286,11 @@ export class TreeList extends Proto {
   handleEvent(e) {
     if (this.lock) return false;
 
-    // Delega estados de hover / click
     if (e.type === 'mousemove') {
       const { x, y } = this._toLocal(e);
       const ht = this._hitTest(x, y);
       this.hover = (ht.L !== -1 && ht.real) ? { level: ht.L, index: ht.i } : { level: -1, index: -1 };
-      this.update(); // repintar con hover
+      this.update();
       return true;
     }
 
@@ -328,52 +304,75 @@ export class TreeList extends Proto {
     }
 
     if (e.type === 'mouseup') {
-      // nada por ahora
       return true;
     }
 
-    // Soporte básico para teclado (opcional: Up/Down/Left/Right)
-    if (e.type === 'keydown') {
-      // Puedes integrar navegación de flechas aquí si lo deseas,
-      // reutilizando this.isSelectable (ya marcada en ctor).
-      // Recomendación: mover foco entre niveles/ítems con Roots+Gui. :contentReference[oaicite:1]{index=1} :contentReference[oaicite:2]{index=2}
-    }
-
+    // (Opcional) teclado: integrar navegación en Gui y reenviar aquí si se desea
     return false;
   }
 
-  // Regla de selección y autocompletado
+  // Selección + autocompletado + notificación
   _selectAt(L, i) {
     const lvl = this.levels[L];
     const chosen = lvl.items[i];
     if (!chosen || !chosen.key) return;
 
-    // 1) Recortar value hasta L e insertar la opción elegida
     const base = this.value.slice(0, L);
     base[L] = chosen.key;
 
-    // 2) Autocompletar por primera clave descendiendo hasta una lista
     const newPath = this.autoCompleteToLeaf(base);
 
-    // 3) Notificar
-    this.value = newPath.slice(); // reflejar selección interna
+    this.value = newPath.slice();
     this.update();
     this.changeCb(this.tabIndex, this.itemIndex, newPath);
   }
 
-  // API pública para sincronización externa (por si quieres settear desde afuera)
+  // ======= API pública =======
   setValue(path) {
     this.value = Array.isArray(path) ? path.slice() : [];
     this.update();
   }
+
   setTree(tree) {
     this.tree = tree || {};
+    // recalcular leafMax en próxima pasada
+    this.leafMax = this.computeLeafMax(this.tree);
     this.update();
   }
+
   setFocus({ focused, focusPath, focusLevel }) {
     if (typeof focused === 'boolean') this.focused = focused;
     if (Array.isArray(focusPath)) this.focusPath = focusPath.slice();
     if (typeof focusLevel === 'number') this.focusLevel = focusLevel;
     this.update();
+  }
+
+  // ======= Publicación de altura =======
+  _countVisibleIntermediates() {
+    let c = 0;
+    for (let i = 0; i < this.levels.length; i++) if (this.levels[i].type === 'map') c++;
+    return c;
+  }
+
+  _getCurrentLeafLength() {
+    const last = this.levels[this.levels.length - 1];
+    return last && last.type === 'list' ? last.items.length : 0;
+  }
+
+  _publishHeight() {
+    const inter = this._countVisibleIntermediates();
+    const leafLen = Math.max(this.leafMax, this._getCurrentLeafLength());
+    const leafH  = leafLen * this.lineH;
+    const interH = inter * (this.lineH + this.levelGap);
+    const totalH = interH + (inter ? this.levelGap : 0) + leafH;
+
+    // Actualiza métricas del proto (lo que suma el GUI)
+    this.h = totalH;
+    this.zone.h = this.h + this.margin;
+    this.s[0].height = this.h + 'px';
+
+    // Avisar al GUI y refrescar zonas
+    if (this.isUI && this.main) this.main.calc();
+    Roots.needReZone = true;
   }
 }
