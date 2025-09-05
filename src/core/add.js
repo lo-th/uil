@@ -21,6 +21,7 @@ import { Item } from '../proto/Item.js';
 import { Grid } from '../proto/Grid.js';
 import { Pad2D } from '../proto/Pad2D.js';
 import { Roots } from './Roots.js';
+import { TreeList } from '../proto/TreeList.js';
 
 export const add = function () {
 
@@ -79,6 +80,7 @@ export const add = function () {
             case 'item': n = new Item(o); break;
             case 'grid': n = new Grid(o); break;
             case 'pad2d': case 'pad': n = new Pad2D(o); break;
+            case 'treelist': n = new TreeList(o); break;
 
         }
 
