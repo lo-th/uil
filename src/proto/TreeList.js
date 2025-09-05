@@ -132,8 +132,12 @@ export class TreeList extends Proto {
 
   // ======= Layout (zonas & DOM) =======
   layoutLevels() {
-    const padX = 8;
-    const w = this.zone.w - padX * 2;
+    
+    const contentX = (this.sa || 100) + 8;   // columna de label + padding
+    const padRight = 8;
+    const w = this.zone.w - contentX - padRight;
+
+    
     let y = 0;
 
     // Ajustar itemsDom a cantidad de niveles
@@ -145,11 +149,15 @@ export class TreeList extends Proto {
 
     for (let L = 0; L < this.levels.length; L++) {
       const lvl = this.levels[L];
+      const row = this.itemsDom[L];
       if (lvl.type === 'map') {
         const n = Math.max(1, lvl.items.length);
         const cellW = Math.floor(w / n);
-        lvl.zone = { x: padX, y, w, h: this.lineH };
-        let x = padX;
+
+        lvl.zone = { x: contentX, y, w, h: this.lineH };
+        let x = contentX;
+        
+
         for (let i = 0; i < lvl.items.length; i++) {
           const it = lvl.items[i];
           it.zone = { x, y, w: cellW, h: this.lineH };
@@ -157,20 +165,27 @@ export class TreeList extends Proto {
           this.paintItemDom(dom, L, i, it, 'map');
           x += cellW;
         }
+        // eliminar DOM sobrante si antes había más celdas
+        this._pruneRow(L, lvl.items.length);
         y += this.lineH + this.levelGap;
       } else {
         // lista/hoja: reservar h según leafMax
         const n = lvl.items.length;
         const hList = Math.max(n, this.leafMax) * this.lineH;
-        lvl.zone = { x: padX, y, w, h: hList };
+        
+        lvl.zone = { x: contentX, y, w, h: hList };
 
-        for (let i = 0; i < Math.max(n, this.leafMax); i++) {
+         const rows = Math.max(n, this.leafMax);
+         for (let i = 0; i < rows; i++) {
           const isReal = i < n;
           const it = isReal ? lvl.items[i] : { key: null, label: '', zone: { x:0,y:0,w:0,h:0 } };
-          it.zone = { x: padX, y: y + i * this.lineH, w, h: this.lineH };
+          
+           it.zone = { x: contentX, y: y + i * this.lineH, w, h: this.lineH };
           const dom = this.ensureItemDom(L, i);
           this.paintItemDom(dom, L, i, it, 'list', isReal);
         }
+        // eliminar DOM sobrante si antes había más filas
+        this._pruneRow(L, rows);
         y += hList;
       }
     }
@@ -184,6 +199,21 @@ export class TreeList extends Proto {
     // Publicar alto total al GUI (sumará u.h)
     this._publishHeight();
   }
+
+
+
+  // Elimina nodos DOM sobrantes en la fila L a partir del índice keep
+  _pruneRow(L, keep) {
+    const row = this.itemsDom[L];
+    // si nunca se creó, nada que hacer
+    if (!row) return;
+    for (let j = keep; j < row.length; j++) {
+      const el = row[j];
+      if (el && el.parentNode) el.parentNode.removeChild(el);
+    }
+    row.length = keep;
+  }
+
 
   ensureItemDom(L, i) {
     const row = this.itemsDom[L];
@@ -257,10 +287,10 @@ export class TreeList extends Proto {
   }
 
   _hitTest(mx, my) {
-    for (let L = 0; L < this.levels.length; L++) {
-      const lvl = this.levels[L];
-      const z = lvl.zone;
-      if (mx < z.x || my < z.y || mx > z.x + z.w || my > z.y + z.h) continue;
+  for (let L = 0; L < this.levels.length; L++) {
+    const lvl = this.levels[L];
+    const z = lvl.zone;  // x y w ya incluyen contentX
+    if (mx < z.x || my < z.y || mx > z.x + z.w || my > z.y + z.h) continue;
 
       if (lvl.type === 'map') {
         for (let i = 0; i < lvl.items.length; i++) {
