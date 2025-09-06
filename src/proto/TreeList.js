@@ -36,11 +36,17 @@ export class TreeList extends Proto {
     this.itemsDom = [];   // espejo DOM por nivel
     this.hover    = { level: -1, index: -1 };
 
+    // 🔸 NUEVO: recordar la última hoja seleccionada (persistente)
+    this.lastLeaf = { parentPath: [], key: null }; // parentPath es la ruta hasta el mapa padre
+
     // Contenedor interno (absoluto)
     this.c[2] = this.dom('div', this.css.basic + 'left:0; top:0; width:100%; height:100%;');
     this.s[2] = this.c[2].style;
 
     this.init();
+
+    // Si el valor inicial ya apunta a una hoja válida, recordar esa hoja
+    this._maybeUpdateLastLeafFromValue();
   }
 
   // ======= Helpers de tipo =======
@@ -132,12 +138,10 @@ export class TreeList extends Proto {
 
   // ======= Layout (zonas & DOM) =======
   layoutLevels() {
-    
     const contentX = (this.sa || 100) + 8;   // columna de label + padding
     const padRight = 8;
     const w = this.zone.w - contentX - padRight;
 
-    
     let y = 0;
 
     // Ajustar itemsDom a cantidad de niveles
@@ -149,15 +153,11 @@ export class TreeList extends Proto {
 
     for (let L = 0; L < this.levels.length; L++) {
       const lvl = this.levels[L];
-      const row = this.itemsDom[L];
       if (lvl.type === 'map') {
         const n = Math.max(1, lvl.items.length);
         const cellW = Math.floor(w / n);
-
         lvl.zone = { x: contentX, y, w, h: this.lineH };
         let x = contentX;
-        
-
         for (let i = 0; i < lvl.items.length; i++) {
           const it = lvl.items[i];
           it.zone = { x, y, w: cellW, h: this.lineH };
@@ -172,15 +172,13 @@ export class TreeList extends Proto {
         // lista/hoja: reservar h según leafMax
         const n = lvl.items.length;
         const hList = Math.max(n, this.leafMax) * this.lineH;
-        
         lvl.zone = { x: contentX, y, w, h: hList };
 
-         const rows = Math.max(n, this.leafMax);
-         for (let i = 0; i < rows; i++) {
+        const rows = Math.max(n, this.leafMax);
+        for (let i = 0; i < rows; i++) {
           const isReal = i < n;
           const it = isReal ? lvl.items[i] : { key: null, label: '', zone: { x:0,y:0,w:0,h:0 } };
-          
-           it.zone = { x: contentX, y: y + i * this.lineH, w, h: this.lineH };
+          it.zone = { x: contentX, y: y + i * this.lineH, w, h: this.lineH };
           const dom = this.ensureItemDom(L, i);
           this.paintItemDom(dom, L, i, it, 'list', isReal);
         }
@@ -200,12 +198,9 @@ export class TreeList extends Proto {
     this._publishHeight();
   }
 
-
-
   // Elimina nodos DOM sobrantes en la fila L a partir del índice keep
   _pruneRow(L, keep) {
     const row = this.itemsDom[L];
-    // si nunca se creó, nada que hacer
     if (!row) return;
     for (let j = keep; j < row.length; j++) {
       const el = row[j];
@@ -213,7 +208,6 @@ export class TreeList extends Proto {
     }
     row.length = keep;
   }
-
 
   ensureItemDom(L, i) {
     const row = this.itemsDom[L];
@@ -245,16 +239,35 @@ export class TreeList extends Proto {
     const focusMatch = isReal && inFocusLvl && (this.focusPath[L] === it.key);
     const isHover    = isReal && (this.hover.level === L && this.hover.index === i);
 
+    // 🔸 NUEVO: ¿esta fila es la última hoja seleccionada?
+    let isLastLeaf = false;
+    if (isReal && kind === 'list' && this.lastLeaf.key != null) {
+      // La hoja visible corresponde si el padre de esta lista coincide con parentPath guardado
+      // El padre actual es this.value.slice(0, L) cuando la lista está desplegada por value/focus
+      const parentNow = this.getActivePath().slice(0, L);
+      if (this._pathsEqual(parentNow, this.lastLeaf.parentPath) && it.key === this.lastLeaf.key) {
+        isLastLeaf = true;
+      }
+    }
+
     // Estilos base
     s.background = cc.back;
     s.color      = cc.text;
     s.border     = '1px solid ' + cc.border;
     s.textAlign  = kind === 'map' ? 'center' : 'left';
 
-    // Prioridad visual: seleccionado > foco > hover > base
+    // Prioridad visual:
+    // 1) seleccionado (azul)
+    // 2) última hoja (nuevo color)
+    // 3) foco
+    // 4) hover
     if (selected) {
       s.background = cc.select;
       s.color = cc.textSelect;
+    } else if (isLastLeaf) {
+      // color distintivo para "última hoja" (amarillo suave)
+      s.background = 'rgba(255, 200, 0, 0.25)';
+      s.color = cc.text;
     } else if (focusMatch) {
       s.background = cc.backgroundOver;
       s.color = cc.textOver;
@@ -265,6 +278,12 @@ export class TreeList extends Proto {
 
     // Filas de padding invisibles en hoja
     s.opacity = isReal ? '1' : '0';
+  }
+
+  _pathsEqual(a, b) {
+    if (!a || !b || a.length !== b.length) return false;
+    for (let i = 0; i < a.length; i++) if (a[i] !== b[i]) return false;
+    return true;
   }
 
   // ======= Ciclo de vida =======
@@ -282,15 +301,16 @@ export class TreeList extends Proto {
   // ======= Interacción =======
   _toLocal(e) {
     const mx = e.clientX - this.zone.x;
-    const my = e.clientY - this.zone.y;
+       const my = e.clientY - this.zone.y;
     return { x: mx, y: my };
   }
 
   _hitTest(mx, my) {
-  for (let L = 0; L < this.levels.length; L++) {
-    const lvl = this.levels[L];
-    const z = lvl.zone;  // x y w ya incluyen contentX
-    if (mx < z.x || my < z.y || mx > z.x + z.w || my > z.y + z.h) continue;
+    for (let L = 0; L < this.levels.length; L++) {
+      const lvl = this.levels[L];
+      const z = lvl.zone;  // x y w ya incluyen contentX
+      if (mx < z.x || my < z.y || mx > z.x + z.w || my > z.x + z.w) continue;
+      if (mx < z.x || my < z.y || mx > z.x + z.w || my > z.y + z.h) continue;
 
       if (lvl.type === 'map') {
         for (let i = 0; i < lvl.items.length; i++) {
@@ -352,24 +372,30 @@ export class TreeList extends Proto {
 
     const newPath = this.autoCompleteToLeaf(base);
 
+    // 🔸 Si el usuario selecciona explícitamente en el nivel hoja, recordarlo
+    if (lvl.type === 'list') {
+      this.lastLeaf.parentPath = this.value.slice(0, L); // padre de la lista actual
+      this.lastLeaf.key = chosen.key;
+    }
+
     this.value = newPath.slice();
     this.update();
 
-    // ✅ Actualiza objeto enlazado (si existe) y dispara callbacks “clásicos”
-    this.send(newPath); // escribe en objectLink[objectKey] si hay referencia
+    // si está referenciado, propaga a objeto externo
+    this.send(newPath);
     this.changeCb(this.tabIndex, this.itemIndex, newPath);
   }
-
 
   // ======= API pública =======
   setValue(path) {
     this.value = Array.isArray(path) ? path.slice() : [];
+    // Si desde afuera nos setean una hoja válida, también la recordamos
+    this._maybeUpdateLastLeafFromValue();
     this.update();
   }
 
   setTree(tree) {
     this.tree = tree || {};
-    // recalcular leafMax en próxima pasada
     this.leafMax = this.computeLeafMax(this.tree);
     this.update();
   }
@@ -379,6 +405,17 @@ export class TreeList extends Proto {
     if (Array.isArray(focusPath)) this.focusPath = focusPath.slice();
     if (typeof focusLevel === 'number') this.focusLevel = focusLevel;
     this.update();
+  }
+
+  _maybeUpdateLastLeafFromValue() {
+    // Si value apunta a padre+hoja (…,[leaf]) y es válida, recordar esa hoja
+    if (!Array.isArray(this.value) || this.value.length === 0) return;
+    const parent = this.value.slice(0, this.value.length - 1);
+    const leaf   = this.value[this.value.length - 1];
+    const info = this.getNodeAtPath(parent);
+    if (info && Array.isArray(info.node) && info.node.includes(leaf)) {
+      this.lastLeaf = { parentPath: parent, key: leaf };
+    }
   }
 
   // ======= Publicación de altura =======
