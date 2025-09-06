@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <title>UIL – TreeList demo</title>
+    <meta charset="utf-8" />
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0" />
+    <link rel="shortcut icon" href="./assets/favicon.ico" />
+    <style>
+      html { overflow: hidden; width: 100%; height: 100%; }
+      body { font-family: "Lucida Console", Monaco, monospace;
+             background-color:#2f3340; font-size:11px; color:#fff; margin:0; }
+      #log  { white-space: pre; margin: 10px; }
+    </style>
+  </head>
+  <body>
+    <div id="log"></div>
+
+  <script type="module">
+  
+      import * as UIL from '../build/uil.module.js';
+
+  // Árbol de ejemplo
+  const tree = {
+    Animales: { Aves: ['Gorrión','Águila','Colibrí'], Mamíferos: ['Perro','Gato','Delfín','Elefante'] },
+    Vehículos: ['Auto','Bicicleta','Avión','Barco'],
+    Colores: { Cálidos: ['Rojo','Naranja','Amarillo'], Fríos: ['Azul','Verde','Violeta'], Neutros: ['Blanco','Negro','Gris'] }
+  };
+
+  // Objeto de estado EXTERNO a la UI (fuente de verdad)
+  const state = {
+    path: ['Animales','Aves'] // estado inicial que debe seguir el TreeList
+  };
+
+  const ui = new UIL.Gui({ w: 128*3, open: true, isCanvas: false, addDOMEventListeners: true });
+
+  const g = ui.add('group', { name: 'TreeList Demo', bg: '#446666' });
+
+  // MODO REFERENCIA: (objeto, 'propiedad', { type:'treelist', ... })
+  const treelist = g.add(state, 'path', {
+    type: 'treelist',
+    name: 'Ruta',
+    tree,
+    // (opcional) cualquier otro parámetro tuyo, por ej. focus inicial:
+    focused: false,
+    tabIndex: 1,
+    itemIndex: 7,
+    onChange: (tabIndex, itemIndex, newPath) => {
+      // newPath ya se envió a state.path vía this.send(newPath), pero dejamos log
+      log(`onChange(tab=${tabIndex}, item=${itemIndex})\nnewPath = ${JSON.stringify(newPath)}`);
+    }
+  }).listen(); // <- activa el seguimiento de cambios externos en state.path  :contentReference[oaicite:5]{index=5}
+
+  
+
+  function log(msg){ document.getElementById('log').textContent = msg; }
+  g.open();
+
+  function onClickSetState1(){
+    state.path = ['Colores','Fríos'];
+  }
+
+  // create button on the DOM
+  const button = document.createElement('button');
+  button.textContent = 'Set State to Colores/Fríos';
+  button.onclick = onClickSetState1;
+  document.body.appendChild(button);
+
+</script>
+
+  </body>
+</html>
