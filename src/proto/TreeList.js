@@ -354,8 +354,12 @@ export class TreeList extends Proto {
 
     this.value = newPath.slice();
     this.update();
+
+    // ✅ Actualiza objeto enlazado (si existe) y dispara callbacks “clásicos”
+    this.send(newPath); // escribe en objectLink[objectKey] si hay referencia
     this.changeCb(this.tabIndex, this.itemIndex, newPath);
   }
+
 
   // ======= API pública =======
   setValue(path) {

@@ -16,113 +16,57 @@
   <body>
     <div id="log"></div>
 
-    <script type="module">
-      // Igual que en tu ejemplo original: import del bundle ESM
-      import * as UIL from '../build/uil.module.js'; // Gui, add, Tools, Files, REVISION
-      // (exportados por Uil.js) :contentReference[oaicite:4]{index=4}
+  <script type="module">
+  
+      import * as UIL from '../build/uil.module.js';
 
-      // -----------------------------
-      // Datos de ejemplo para TreeList
-      // -----------------------------
-      // Árbol: niveles intermedios = mapas (claves), hojas = listas
-      const tree = {
-        "Animales": {
-          "Aves":       ["Gorrión", "Águila", "Colibrí"],
-          "Mamíferos":  ["Perro", "Gato", "Delfín", "Elefante"]
-        },
-        "Vehículos": ["Auto", "Bicicleta", "Avión", "Barco"],
-        "Colores": {
-          "Cálidos": ["Rojo", "Naranja", "Amarillo"],
-          "Fríos":   ["Azul", "Verde", "Violeta"],
-          "Neutros": ["Blanco", "Negro", "Gris"]
-        }
-      };
+  // Árbol de ejemplo
+  const tree = {
+    Animales: { Aves: ['Gorrión','Águila','Colibrí'], Mamíferos: ['Perro','Gato','Delfín','Elefante'] },
+    Vehículos: ['Auto','Bicicleta','Avión','Barco'],
+    Colores: { Cálidos: ['Rojo','Naranja','Amarillo'], Fríos: ['Azul','Verde','Violeta'], Neutros: ['Blanco','Negro','Gris'] }
+  };
 
-      // Ruta seleccionada inicial
-      let value = ["Animales", "Aves"]; // se mostrará hoja "Aves"
-      // Estado de foco (previsualización sin confirmar)
-      let focused    = false;
-      let focusPath  = [];
-      let focusLevel = -1;
+  // Objeto de estado EXTERNO a la UI (fuente de verdad)
+  const state = {
+    path: ['Animales','Aves'] // estado inicial que debe seguir el TreeList
+  };
 
-      // -----------------------------
-      // GUI
-      // -----------------------------
-      const ui = new UIL.Gui({
-        w: 128 * 3,
-        open: true,
-        isCanvas: false,
-        addDOMEventListeners: true, // listeners globales
-      }); // se agrega a <body> por defecto :contentReference[oaicite:5]{index=5}
+  const ui = new UIL.Gui({ w: 128*3, open: true, isCanvas: false, addDOMEventListeners: true });
 
-      const g = ui.add('group', { name: 'TreeList Demo', bg: '#446666' });
+  const g = ui.add('group', { name: 'TreeList Demo', bg: '#446666' });
 
-      // --- TreeList principal ---
-      const treelist = g.add('treelist', {
-        name: 'Ruta',
-        tree,
-        value,
-        focused,
-        focusPath,
-        focusLevel,
-        tabIndex: 1,
-        itemIndex: 7,
-        onChange: (tabIndex, itemIndex, newPath) => {
-          value = newPath; // sincronizá si querés mantener el estado afuera
-          log(
-            `onChange(tab=${tabIndex}, item=${itemIndex})\n` +
-            `newPath = ${JSON.stringify(newPath)}`
-          );
-        },
-      }); // add() ya soporta "treelist" en el switch del factory :contentReference[oaicite:6]{index=6}
-/*
-      // Botones utilitarios para mostrar el modo foco y cambio de datos
-      g.add('button', {
-        name: '',
-        value: ['Previsualizar Mamíferos', 'Limpiar foco'],
-        callback: (label) => {
-          if (label === 'Previsualizar Mamíferos') {
-            treelist.setFocus({
-              focused: true,
-              focusPath: ['Animales', 'Mamíferos'],
-              focusLevel: 1, // resalta nivel 1
-            });
-          } else {
-            treelist.setFocus({ focused: false, focusPath: [], focusLevel: -1 });
-          }
-          log(`focus = ${JSON.stringify({ focused: treelist.focused, focusPath: treelist.focusPath, focusLevel: treelist.focusLevel })}`);
-        }
-      });
+  // MODO REFERENCIA: (objeto, 'propiedad', { type:'treelist', ... })
+  const treelist = g.add(state, 'path', {
+    type: 'treelist',
+    name: 'Ruta',
+    tree,
+    // (opcional) cualquier otro parámetro tuyo, por ej. focus inicial:
+    focused: false,
+    tabIndex: 1,
+    itemIndex: 7,
+    onChange: (tabIndex, itemIndex, newPath) => {
+      // newPath ya se envió a state.path vía this.send(newPath), pero dejamos log
+      log(`onChange(tab=${tabIndex}, item=${itemIndex})\nnewPath = ${JSON.stringify(newPath)}`);
+    }
+  }).listen(); // <- activa el seguimiento de cambios externos en state.path  :contentReference[oaicite:5]{index=5}
 
-      g.add('button', {
-        name: '',
-        value: ['Ir a Vehículos', 'Ir a Colores > Fríos'],
-        callback: (label) => {
-          if (label === 'Ir a Vehículos') {
-            treelist.setValue(['Vehículos']); // autocompleta hasta hoja "Vehículos"
-          } else {
-            treelist.setValue(['Colores', 'Fríos']);
-          }
-          log(`value = ${JSON.stringify(treelist.value)}`);
-        }
-      });
+  
 
-      // Un selector adicional cualquiera para mostrar convivencia con otros componentes
-      g.add('list', {
-        name: 'Otra lista',
-        list: ['Opción 1', 'Opción 2', 'Opción 3'],
-        value: 'Opción 2',
-        callback: (v) => log(`Otra lista: ${v}`)
-      });
-*/
-      g.open();
+  function log(msg){ document.getElementById('log').textContent = msg; }
+  g.open();
 
-      // -----------------------------
-      // Utilidad de logging
-      // -----------------------------
-      function log(msg) {
-        document.getElementById('log').textContent = msg;
-      }
-    </script>
+  function onClickSetState1(){
+    state.path = ['Colores','Fríos'];
+  }
+
+  // create button on the DOM
+  const button = document.createElement('button');
+  button.textContent = 'Set State to Colores/Fríos';
+  button.onclick = onClickSetState1;
+  document.body.appendChild(button);
+
+</script>
+
   </body>
 </html>
