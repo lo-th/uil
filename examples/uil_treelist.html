@@ -18,53 +18,90 @@
 
   <script type="module">
   
-      import * as UIL from '../build/uil.module.js';
+    import * as UIL from '../build/uil.module.js';
 
-  // Árbol de ejemplo
-  const tree = {
-    Animales: { Aves: ['Gorrión','Águila','Colibrí'], Mamíferos: ['Perro','Gato','Delfín','Elefante'] },
-    Vehículos: ['Auto','Bicicleta','Avión','Barco'],
-    Colores: { Cálidos: ['Rojo','Naranja','Amarillo'], Fríos: ['Azul','Verde','Violeta'], Neutros: ['Blanco','Negro','Gris'] }
-  };
-
-  // Objeto de estado EXTERNO a la UI (fuente de verdad)
-  const state = {
-    path: ['Animales','Aves'] // estado inicial que debe seguir el TreeList
-  };
-
-  const ui = new UIL.Gui({ w: 128*3, open: true, isCanvas: false, addDOMEventListeners: true });
-
-  const g = ui.add('group', { name: 'TreeList Demo', bg: '#446666' });
-
-  // MODO REFERENCIA: (objeto, 'propiedad', { type:'treelist', ... })
-  const treelist = g.add(state, 'path', {
-    type: 'treelist',
-    name: 'Ruta',
-    tree,
-    // (opcional) cualquier otro parámetro tuyo, por ej. focus inicial:
-    focused: false,
-    tabIndex: 1,
-    itemIndex: 7,
-    onChange: (tabIndex, itemIndex, newPath) => {
-      // newPath ya se envió a state.path vía this.send(newPath), pero dejamos log
-      log(`onChange(tab=${tabIndex}, item=${itemIndex})\nnewPath = ${JSON.stringify(newPath)}`);
+    let params={
+        applyJSON:false,
+        currentModel:"cloud03.glb",
+        currentCamera:"drone",
+        speed:0.34,
+        speedMapped:2.4,
+        fov:45,
+        focalDistance:1500,
+        focalRange:2000,
+        particleOpacity:1.5,
+        particleSize:2.5,
+        particleDOFSizeMultiplier:2,
+        particleDOFOpacityDecay:0.3,
+        gamma:1.1,
+        bloom:1.5,
+        linear:10,
+        easein:10,
+        easeout:10,
+        listen:0.,
+        axis:"x"
     }
-  }).listen(); // <- activa el seguimiento de cambios externos en state.path  :contentReference[oaicite:5]{index=5}
 
-  
+    // Árbol de ejemplo
+    const tree = {
+      Animales: { Aves: ['Gorrión','Águila','Colibrí'], Mamíferos: ['Perro','Gato','Delfín','Elefante'] },
+      Vehículos: ['Auto','Bicicleta','Avión','Barco'],
+      Colores: { Cálidos: ['Rojo','Naranja','Amarillo'], Fríos: ['Azul','Verde','Violeta'], Neutros: ['Blanco','Negro','Gris'] }
+    };
 
-  function log(msg){ document.getElementById('log').textContent = msg; }
-  g.open();
+    // Objeto de estado EXTERNO a la UI (fuente de verdad)
+    const state = {
+      path: ['Animales','Aves'] // estado inicial que debe seguir el TreeList
+    };
 
-  function onClickSetState1(){
-    state.path = ['Colores','Fríos'];
-  }
+    const ui = new UIL.Gui({ w: 128*3, open: true, isCanvas: true, addDOMEventListeners: true ,parent:document.body});
 
-  // create button on the DOM
-  const button = document.createElement('button');
-  button.textContent = 'Set State to Colores/Fríos';
-  button.onclick = onClickSetState1;
-  document.body.appendChild(button);
+
+    let gPart=ui.add("group",{name:"Particles",bg:"#444466"})
+    gPart.add(params,"particleOpacity",{type:"slide",displayName:"opacity",min:0,max:10,step:0.01})
+    gPart.add(params,"particleSize",{type:"slide",displayName:"size",min:0,max:10,step:0.01})
+    gPart.add(params,"particleDOFSizeMultiplier",{type:"slide",displayName:"DOF size multiplier",min:0,max:5,step:0.01})
+    gPart.add(params,"particleDOFOpacityDecay",{type:"slide",displayName:"DOF opacity decay",min:0,max:5,step:0.01})
+    gPart.open();
+
+    const g = ui.add('group', { name: 'TreeList Demo', bg: '#446666' });
+
+    // MODO REFERENCIA: (objeto, 'propiedad', { type:'treelist', ... })
+    
+    const treelist = g.add(state, 'path', {
+      type: 'treelist',
+      name: 'Ruta',
+      tree,
+      // (opcional) cualquier otro parámetro tuyo, por ej. focus inicial:
+      focused: false,
+      tabIndex: 1,
+      itemIndex: 7,
+      enableHover:false
+      //onChange: (tabIndex, itemIndex, newPath) => {
+        // newPath ya se envió a state.path vía this.send(newPath), pero dejamos log
+        //log(`onChange(tab=${tabIndex}, item=${itemIndex})\nnewPath = ${JSON.stringify(newPath)}`);
+      //}
+    })//.listen(); // <- activa el seguimiento de cambios externos en state.path  :contentReference[oaicite:5]{index=5}
+
+    ui.onDraw = (e) => {
+      // Aquí podríamos hacer otras cosas en cada frame...
+      // Por ejemplo, podríamos cambiar el estado EXTERNO (state.path) desde otro sitio
+      // y el TreeList lo detectaría y actualizaría su UI automáticamente (por el .listen())
+      console.log("onDraw",e);
+    };
+
+    function log(msg){ document.getElementById('log').textContent = msg; }
+    g.open();
+
+    function onClickSetState1(){
+      state.path = ['Colores','Fríos'];
+    }
+
+    // create button on the DOM
+    const button = document.createElement('button');
+    button.textContent = 'Set State to Colores/Fríos';
+    button.onclick = onClickSetState1;
+    document.body.appendChild(button);
 
 </script>
 
