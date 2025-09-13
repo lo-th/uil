@@ -54,7 +54,7 @@
       path: ['Animales','Aves'] // estado inicial que debe seguir el TreeList
     };
 
-    const ui = new UIL.Gui({ w: 128*3, open: true, isCanvas: true, addDOMEventListeners: true ,parent:document.body});
+    const ui = new UIL.Gui({ w: 128*3, open: true, isCanvas: true, addDOMEventListeners: true ,parent:null});
 
 
     let gPart=ui.add("group",{name:"Particles",bg:"#444466"})
@@ -90,6 +90,8 @@
       console.log("onDraw",e);
     };
 
+
+    document.body.appendChild(ui.canvas);
     function log(msg){ document.getElementById('log').textContent = msg; }
     g.open();
 

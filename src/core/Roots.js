@@ -293,6 +293,10 @@ const R = {
       if (R.ID.isCanvasOnly) {
         e.clientX = R.ID.mouse.x;
         e.clientY = R.ID.mouse.y;
+      } else if (R.ID.isCanvas) {
+        // NUEVO: si es canvas con parent, usar mouse virtual + offset del GUI
+        e.clientX = R.ID.zone.x + R.ID.mouse.x;
+        e.clientY = R.ID.zone.y + R.ID.mouse.y;
       }
 
       //if( R.ID.marginDiv ) e.clientY -= R.ID.margin * 0.5
