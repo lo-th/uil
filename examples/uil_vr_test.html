@@ -271,19 +271,19 @@ body { font-family: "Lucida Console", Monaco, monospace; background-color:#717b8
 
     function onMouseUp( e ){
         console.log("onMouseUp()")
-        ui.triggerMouseUp();
+        ui.triggerMouseUpUV();
       
     }
 
     function onMouseDown( e ){
         console.log("onMouseDown()")
-        ui.triggerMouseDown();
+        ui.triggerMouseDownUV();
 
     }
 
     function onMouseMove( e ) {
         console.log("onMouseMove()")
-        ui.triggerMouseMove();
+        ui.triggerMouseMoveUV();
         raytest( e );
     }
 
@@ -316,17 +316,15 @@ body { font-family: "Lucida Console", Monaco, monospace; background-color:#717b8
 
     window.faceAction1=function(){
         ui.setMouse({x:0.75,y:0.76});
-        ui.triggerMouseMove();
-        ui.triggerMouseDown();
-        ui.triggerMouseUp();
-        
-        
+        ui.triggerMouseMoveUV();
+        ui.triggerMouseDownUV();
+        ui.triggerMouseUpUV();
 
         setTimeout(()=>{
             ui.setMouse({x:0.4,y:0.93});    
-            ui.triggerMouseMove();
-            ui.triggerMouseDown();
-            ui.triggerMouseUp();
+            ui.triggerMouseMoveUV();
+            ui.triggerMouseDownUV();
+            ui.triggerMouseUpUV();
         },200)
 
     }

@@ -293,6 +293,15 @@ const R = {
       if (R.ID.isCanvasOnly) {
         e.clientX = R.ID.mouse.x;
         e.clientY = R.ID.mouse.y;
+      } else if (R.ID.isCanvas) {
+        // Solo usar mouse virtual si el evento es "programático" (coords -1)
+        // y además el mouse virtual ya fue seteado (>=0).
+        const wantsVirtual = (e.clientX === -1 || e.clientY === -1);
+        const hasMouse = (R.ID.mouse.x >= 0 && R.ID.mouse.y >= 0);
+        if (wantsVirtual && hasMouse) {
+          e.clientX = R.ID.zone.x + R.ID.mouse.x;
+          e.clientY = R.ID.zone.y + R.ID.mouse.y;
+        }
       }
 
       //if( R.ID.marginDiv ) e.clientY -= R.ID.margin * 0.5

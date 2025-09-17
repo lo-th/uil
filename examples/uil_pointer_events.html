@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <title>UIL – TreeList demo</title>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0"
+    />
+    <link rel="shortcut icon" href="./assets/favicon.ico" />
+    <style>
+      html {
+        overflow: hidden;
+        width: 100%;
+        height: 100%;
+      }
+      body {
+        font-family: "Lucida Console", Monaco, monospace;
+        background-color: #2f3340;
+        font-size: 11px;
+        color: #fff;
+        margin: 0;
+      }
+      #log {
+        white-space: pre;
+        margin: 10px;
+      }
+      #mousePad {
+        position: absolute;
+
+        width: 200px;
+        height: 200px;
+        border: 1px solid cyan;
+        background-color: rgb(49, 10, 110);
+        position: absolute;
+        bottom: 5%;
+        right: 35%;
+        color: white;
+        user-select: none;
+      }
+
+      #pointer {
+        position: absolute;
+        width: 4px;
+        height: 4px;
+        border-radius: 50%;
+        background-color: red;
+        position: absolute;
+        transform: translate(-50%, -50%);
+        bottom: 5%;
+        left: 5%;
+        z-index: 99999;
+      }
+      #uiContainer {
+        position: absolute;
+        top: 100px;
+        left: 100px;   
+        width:512px;
+        height:512px;
+        border: 1px solid yellow;     
+      }
+    </style>
+  </head>
+  <body>
+    <div id="log"></div>
+    <div id="mousePad">mouse pad</div>
+    <div id="uiContainer"><div id="pointer"></div></div>
+
+    <script type="module">
+      import * as UIL from "../build/uil.module.js";
+
+      let params = {
+        applyJSON: false,
+        currentModel: "cloud03.glb",
+        currentCamera: "drone",
+        speed: 0.34,
+        speedMapped: 2.4,
+        fov: 45,
+        focalDistance: 1500,
+        focalRange: 2000,
+        particleOpacity: 1.5,
+        particleSize: 2.5,
+        particleDOFSizeMultiplier: 2,
+        particleDOFOpacityDecay: 0.3,
+        gamma: 1.1,
+        bloom: 1.5,
+        linear: 10,
+        easein: 10,
+        easeout: 10,
+        listen: 0,
+        axis: "x",
+      };
+
+      let ui;
+      // Árbol de ejemplo
+      const tree = {
+        Animales: {
+          Aves: ["Gorrión", "Águila", "Colibrí"],
+          Mamíferos: ["Perro", "Gato", "Delfín", "Elefante"],
+        },
+        Vehículos: ["Auto", "Bicicleta", "Avión", "Barco"],
+        Colores: {
+          Cálidos: ["Rojo", "Naranja", "Amarillo"],
+          Fríos: ["Azul", "Verde", "Violeta"],
+          Neutros: ["Blanco", "Negro", "Gris"],
+        },
+      };
+
+      // Objeto de estado EXTERNO a la UI (fuente de verdad)
+      const state = {
+        path: ["Animales", "Aves"], // estado inicial que debe seguir el TreeList
+      };
+
+      function builUI() {
+        const ui = new UIL.Gui({
+          w: 128 * 3,
+          open: true,
+          isCanvas: true,
+          addDOMEventListeners: true,
+          parent: document.body,
+        });
+
+        let gPart = ui.add("group", { name: "Particles", bg: "#444466" });
+        gPart.add(params, "particleOpacity", {
+          type: "slide",
+          displayName: "opacity",
+          min: 0,
+          max: 10,
+          step: 0.01,
+        });
+        gPart.add(params, "particleSize", {
+          type: "slide",
+          displayName: "size",
+          min: 0,
+          max: 10,
+          step: 0.01,
+        });
+        gPart.add(params, "particleDOFSizeMultiplier", {
+          type: "slide",
+          displayName: "DOF size multiplier",
+          min: 0,
+          max: 5,
+          step: 0.01,
+        });
+        gPart.add(params, "particleDOFOpacityDecay", {
+          type: "slide",
+          displayName: "DOF opacity decay",
+          min: 0,
+          max: 5,
+          step: 0.01,
+        });
+        gPart.open();
+
+        const g = ui.add("group", { name: "TreeList Demo", bg: "#446666" });
+
+        // MODO REFERENCIA: (objeto, 'propiedad', { type:'treelist', ... })
+
+        const treelist = g.add(state, "path", {
+          type: "treelist",
+          name: "Ruta",
+          tree,
+          // (opcional) cualquier otro parámetro tuyo, por ej. focus inicial:
+          focused: false,
+          tabIndex: 1,
+          itemIndex: 7,
+          enableHover: false,
+          //onChange: (tabIndex, itemIndex, newPath) => {
+          // newPath ya se envió a state.path vía this.send(newPath), pero dejamos log
+          //log(`onChange(tab=${tabIndex}, item=${itemIndex})\nnewPath = ${JSON.stringify(newPath)}`);
+          //}
+        }); //.listen(); // <- activa el seguimiento de cambios externos en state.path  :contentReference[oaicite:5]{index=5}
+
+        function log(msg) {
+          document.getElementById("log").textContent = msg;
+        }
+        g.open();
+
+        function onClickSetState1() {
+          state.path = ["Colores", "Fríos"];
+        }
+
+        // create button on the DOM
+        const button = document.createElement("button");
+        button.textContent = "Set State to Colores/Fríos";
+        button.onclick = onClickSetState1;
+        document.body.appendChild(button);
+      }
+
+      function setupMousePad() {
+        let mousePad = document.getElementById("mousePad");
+
+        document
+          .getElementById("mousePad")
+          .addEventListener("mousedown", (e) => {
+            onMousePadEvent("mousedown", e);
+          });
+
+        document.getElementById("mousePad").addEventListener("mouseup", (e) => {
+          onMousePadEvent("mouseup", e);
+        });
+
+        document
+          .getElementById("mousePad")
+          .addEventListener("mousemove", (e) => {
+            onMousePadEvent("mousemove", e);
+          });
+
+        const uiDomElement = document.getElementById("mainmenu");
+
+        function onMousePadEvent(type, e) {
+          // compute local coordinates
+          let rect = mousePad.getBoundingClientRect();
+          let x = e.clientX - rect.left;
+          let y = e.clientY - rect.top;
+          // normalize
+          let u=x / rect.width;
+          let v=1-y / rect.height;
+            //console.log("xy normalizados",x, y);
+          
+          updatePointer(u, v);
+          // metodo 2
+          switch (type) {
+            case "mousedown":
+              ui.setMouse({ x:u, y:v });
+              ui.triggerMouseMoveUV(u,v);
+              ui.triggerMouseDownUV(u,v);
+              break;
+            case "mousemove":
+              ui.setMouse({ x:u, y:v });
+              ui.triggerMouseMoveUV(u,v);
+              break;
+            case "mouseup":
+              ui.triggerMouseUpUV(u,v);
+              break;
+          }
+        }
+      }
+
+      function buildUI2() {
+         ui = new UIL.Gui({
+          w: 512,
+          css:"",
+          addDOMEventListeners: false,
+          isCanvas: true,
+          parent: document.getElementById("uiContainer"),
+        });
+
+        ui.add("button", { name: "setOrbitalCam", values: ["save", "load"] });
+        ui.add("slide", {
+          name: "Drone initial Speed",
+          min: 1,
+          max: 10,
+          step: 0.01,
+          value: 5,
+        });
+        ui.add("title", { name: "LOD" });
+        ui.add("list", {
+          name: "defaultLOD",
+          list: ["250K", "500K", "1M", "2M"],
+          listOnly: false,
+        });
+        ui.add("list", {
+          name: "includeEvery",
+          list: ["1", "2", "4", "8"],
+          listOnly: false,
+        });
+        ui.add("slide", {
+          name: "minSize",
+          min: 1,
+          max: 50,
+          step: 1,
+          value: 14,
+        });
+
+
+        let g1 = ui.add("group", { name: "Mute controls" });
+/*
+        let canvas=ui.canvas;
+        document.getElementById("uiContainer").appendChild(canvas);
+*/
+        ui.onDraw = function () {};
+      }
+
+      function updatePointer(u, v) {
+        // position #pointer over #mainmenu using x,y, use local mainmenu coordinate system
+        let pointer = document.getElementById("pointer");
+        let uiContainter = document.getElementById("uiContainer")
+
+        // get last child of uiContainer
+        let menu = uiContainter.lastChild;
+        let menuRect = menu.getBoundingClientRect();
+        let pointerRect = pointer.getBoundingClientRect();
+        let pointerX = u * menuRect.width //+ menuRect.left;
+        let pointerY = (1-v) * menuRect.height //+ menuRect.top;
+        pointer.style.left = pointerX + "px";
+        pointer.style.top = pointerY + "px";
+      }
+
+      buildUI2();
+      setupMousePad();
+    </script>
+  </body>
+</html>
