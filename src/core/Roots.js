@@ -286,7 +286,8 @@ const R = {
 
     //console.log("p4 "+R.isMobile+" "+e.type+" "+R.lock)
 
-    if (R.isMobile && e.type === "mousedown") R.findID(e);
+    //if (R.isMobile && e.type === "mousedown") R.findID(e);
+    if (e.type === "mousedown") R.findID(e);
     if (e.type === "mousemove" && !R.lock) R.findID(e);
 
     if (R.ID !== null) {

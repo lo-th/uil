@@ -32,7 +32,7 @@ export class Gui {
 		this.tmpAdd = null;
 		//this.tmpH = 0
 
-		this.isCanvas = o.isCanvas || false;
+		this.isCanvas = o.isCanvas || false;		
 		this.isCanvasOnly = false;
 
 		// Modified by Fedemarino
@@ -522,7 +522,8 @@ export class Gui {
 			case "content":
 				e.clientY = this.isScroll ? e.clientY + this.decal : e.clientY;
 
-				if (Roots.isMobile && type === "mousedown")
+				//if (Roots.isMobile && type === "mousedown")
+				if (type === "mousedown")
 					this.getNext(e, change);
 
 				if (this.proto) protoChange = this.proto.handleEvent(e);
@@ -532,7 +533,8 @@ export class Gui {
 					change = this.onWheel(e);
 
 				if (!Roots.lock) {
-					this.getNext(e, change);
+					// en mousedown ya hicimos getNext con lock activo; en otros casos, mantené la lógica existente
+					if (!Roots.lock && type !== "mousedown") this.getNext(e, change);
 				}
 
 				break;

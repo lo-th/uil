@@ -148,14 +148,17 @@ export class Group extends Proto {
 
             //if( this.marginDiv ) e.clientY -= this.margin * 0.5
 
-            if( Roots.isMobile && type === 'mousedown' ) this.getNext( e, change )
+            //if( Roots.isMobile && type === 'mousedown' ) this.getNext( e, change )
+            if( type === 'mousedown' ) this.getNext( e, change )
 
             if( this.proto ){ 
                 //e.clientY -= this.margin
                 protoChange = this.proto.handleEvent( e )
+                
             }
 
-            if( !Roots.lock ) this.getNext( e, change )
+           //if( !Roots.lock ) this.getNext( e, change )
+            if (!Roots.lock && type !== 'mousedown') this.getNext(e, change)
 
             break;
             case 'title':
