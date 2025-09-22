@@ -175,6 +175,8 @@
         }
         g.open();
 
+
+
         function onClickSetState1() {
           state.path = ["Colores", "Fríos"];
         }
@@ -221,15 +223,16 @@
           // metodo 2
           switch (type) {
             case "mousedown":
-              ui.setMouse({ x:u, y:v });
+              ui.setMouseUV(u,v);
               ui.triggerMouseMoveUV(u,v);
               ui.triggerMouseDownUV(u,v);
               break;
             case "mousemove":
-              ui.setMouse({ x:u, y:v });
+              ui.setMouseUV(u,v);
               ui.triggerMouseMoveUV(u,v);
               break;
             case "mouseup":
+              ui.setMouseUV(u,v);
               ui.triggerMouseUpUV(u,v);
               break;
           }
@@ -273,11 +276,75 @@
         });
 
 
-        let g1 = ui.add("group", { name: "Mute controls" });
-/*
-        let canvas=ui.canvas;
-        document.getElementById("uiContainer").appendChild(canvas);
-*/
+        
+
+        
+
+        let g2 = ui.add('group', { name: 'Speed', bg: '#006677' });
+        g2.open();
+        g2.add(params, 'torusSpeed', { min: 0, max: 10 });
+        g2.add(params, 'cubeSpeed', { min: 0, max: 10 });
+
+        let g1 = ui.add('group', { name: 'Light', bg: '#442222' });
+        
+        g1.add(params, 'lightHUE', { name: ' light HUE', min: 0, max: 1 });
+
+        g1.open();
+
+        // Árbol de ejemplo
+        const tree = {
+          Animales: { Aves: ['Gorrión', 'Águila', 'Colibrí'], Mamíferos: ['Perro', 'Gato', 'Delfín', 'Elefante'] },
+          Vehículos: ['Auto', 'Bicicleta', 'Avión', 'Barco'],
+          Colores: {
+            Cálidos: ['Rojo', 'Naranja', 'Amarillo'],
+            Fríos: ['Azul', 'Verde', 'Violeta'],
+            Neutros: ['Blanco', 'Negro', 'Gris'],
+          },
+        };
+
+        // Objeto de estado EXTERNO a la UI (fuente de verdad)
+        const state = {
+          path: ['Animales', 'Aves'], // estado inicial que debe seguir el TreeList
+        };
+
+        const g3 = ui.add('group', { name: 'TreeList Demo', bg: '#446666' });
+        g3.open();
+
+        // MODO REFERENCIA: (objeto, 'propiedad', { type:'treelist', ... })
+        const treelist2 = g3.add(state, 'path', {
+          type: 'treelist',
+          name: 'Ruta',
+          tree,
+          // (opcional) cualquier otro parámetro tuyo, por ej. focus inicial:
+          focused: false,
+          tabIndex: 1,
+          itemIndex: 7,
+        });
+        //.listen(); // <- activa el seguimiento de cambios externos en state.path  :contentReference[oaicite:5]{index=5}
+
+        // create a tree of building types
+        const tree2 = {
+          Edificios: {
+            Residenciales: ['Casa', 'Departamento'],
+            Comerciales: ['Oficina', 'Tienda'],
+            Industriales: ['Fábrica', 'Almacén', 'Nave'],
+          },
+          Monumentos: {
+            Históricos: ['Torre Eiffel', 'Estatua de la Libertad'],
+            Modernos: ['Burj Khalifa', 'Museo Guggenheim'],
+          },
+          Infraestructura: {
+            Transporte: ['Puente', 'Carretera', 'Aeropuerto'],
+            Energía: ['Planta Solar', 'Planta Eólica'],
+          },
+        };
+        const state2 = {
+          path: ['Monumentos', 'Históricos'], // estado inicial que debe seguir el TreeList
+        };
+
+       
+
+
         ui.onDraw = function () {};
       }
 
