@@ -1,0 +1,10 @@
+
+
+21/9/25
+para usar UIL con eventos de mouse sinteticos (en WebXR) habria que
+hacer una modificacion cuando se usan groups para que al hacer clic sobre un lemento de un grupo
+no sea necesaria una primera interacción que fije el foco y luego haga que hacer un segundo mouseup 
+para efectivizar el cambio
+una opcion podria ser desde WebXR tener un metodo UPDATE en interactive object
+que monitore el Ray de los controles en cada frame y genere un mousemove virtual
+o sea que se dispare ui.mouseMoveUV cada vez que el puntero del controller pasa por encima del menu
