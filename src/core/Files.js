@@ -108,10 +108,11 @@ export class Files {
             const dataBuf = [ 'sea', 'z', 'hex', 'bvh', 'BVH', 'glb', 'gltf', 'exr', 'ktx2', 'hdr' ];
             const reader = new FileReader();
 
+            const cleanupReader = () => reader.removeEventListener('load', onLoad);
+
             if(o.forceType === 'ArrayBuffer') {
                 reader.readAsArrayBuffer( file );
-                type = ''
-
+                //type = ''
             } else {
                 if( dataUrl.indexOf( ftype ) !== -1 ) reader.readAsDataURL( file )
                 else if( dataBuf.indexOf( ftype ) !== -1 ) reader.readAsArrayBuffer( file )
@@ -119,11 +120,11 @@ export class Files {
             }
 
             
-            reader.onload = function(e) {
+            const onLoad = (e) => {
 
                 let content = e.target.result
 
-                //console.log(type, files)
+                cleanupReader();
 
                 switch(type){
                     case 'image':
@@ -139,14 +140,13 @@ export class Files {
                         if( o.callback ) o.callback( JSON.parse( content ), fname, ftype )
                     break;
                     default:
-                        
-                        if( o.callback ) o.callback( content, fname, ftype )
-                        
-                        
+                        if( o.callback ) o.callback( content, fname, ftype );
                     break;
                 }
 
             }
+
+            reader.addEventListener('load', onLoad);
 
         } catch(e) {
 
@@ -167,7 +167,23 @@ export class Files {
                 .flatMap((inst) => Object.keys(inst).flatMap((key) => inst[key]))
                 .join(",");
 
-            input.addEventListener("change", () => {
+            const cleanup = () => {
+                input.removeEventListener("change", onChange);
+                if (input.parentNode) input.parentNode.removeChild(input);
+            };
+
+            const onChange = (e) => {
+                resolve(
+                    [...input.files].map((file) => ({
+                        getFile: async () => file
+                    }))
+                );
+                cleanup(); // Nettoyage immédiat
+            };
+
+            input.addEventListener("change", onChange)
+
+            /*input.addEventListener("change", () => {
                 resolve(
                     [...input.files].map((file) => {
                         return {
@@ -178,7 +194,7 @@ export class Files {
                         };
                     })
                 );
-            });
+            });*/
 
             input.click();
         })
@@ -243,12 +259,24 @@ export class Files {
             let blob = new Blob([ options.data ], { type:options.finalType });
             a.href = URL.createObjectURL( blob )
 
+            const revoke = () => URL.revokeObjectURL(a.href);
+
             a.addEventListener("click", () => {
+                resolve(
+                    setTimeout(() => {
+                        revoke();
+                        if (a.parentNode) a.parentNode.removeChild(a);
+                    }, 1000)
+                );
+            });
+            a.click();
+
+            /*a.addEventListener("click", () => {
                 resolve(
                     setTimeout( () => URL.revokeObjectURL(a.href), 1000 )
                 )
             })
-            a.click()
+            a.click()*/
         })
     }
 

@@ -20,6 +20,7 @@ import { Empty } from '../proto/Empty.js';
 import { Item } from '../proto/Item.js';
 import { Grid } from '../proto/Grid.js';
 import { Pad2D } from '../proto/Pad2D.js';
+import { Checker } from '../proto/Checker.js';
 import { Roots } from './Roots.js';
 
 export const add = function () {
@@ -69,7 +70,7 @@ export const add = function () {
             case 'numeric': case 'number': n = new Numeric(o); break;
             case 'slide': n = new Slide(o); break;
             case 'textInput': case 'string': n = new TextInput(o); break;
-            case 'title': case 'text': n = new Title(o); break;
+            case 'title': case 'text': case 'note': n = new Title(o); break;
             case 'select': n = new Select(o); break;
             case 'bitmap': n = new Bitmap(o); break;
             case 'selector': n = new Selector(o); break;
@@ -77,6 +78,7 @@ export const add = function () {
             case 'item': n = new Item(o); break;
             case 'grid': n = new Grid(o); break;
             case 'pad2d': case 'pad': n = new Pad2D(o); break;
+            case 'checker': n = new Checker(o); break;
 
         }
 

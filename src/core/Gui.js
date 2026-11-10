@@ -42,6 +42,8 @@ export class Gui {
         
         this.callback = o.callback  === undefined ? null : o.callback
 
+        this.autoShow = o.autoShow  === undefined ? true : o.autoShow
+
         this.forceHeight = o.maxHeight || 0
         this.lockHeight = o.lockHeight || false
 
@@ -131,6 +133,7 @@ export class Gui {
         this.content.appendChild( this.bottom )
         this.bottom.textContent = this.isOpen ? this.bottomText[1] : this.bottomText[0]
         this.bottom.style.background = cc.background
+        if(this.bh===0) this.bottom.style.visible = 'hidden' 
 
         //
 
@@ -760,6 +763,7 @@ export class Gui {
 
         this.innerContent.style.height = this.zone.h - this.bh + 'px';
         this.content.style.height = this.zone.h + 'px';
+        if( this.autoShow )this.content.style.visibility = this.zone.h !== 0 ? 'visible' : 'hidden'
         this.bottom.style.top = (this.zone.h - this.bh) + 'px';
 
         if( this.isBottom ){

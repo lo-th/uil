@@ -36,6 +36,7 @@ export class Proto {
 
         this.dx = o.dx || 0
 
+        this.isSelectMulty = o.selectmulty !== undefined ? o.selectmulty : false
         this.isSelectable = o.selectable !== undefined ? o.selectable : false
         this.unselectable =  o.unselect !== undefined ? o.unselect : this.isSelectable
 
@@ -113,6 +114,7 @@ export class Proto {
 
         this.txt = o.name || '';
         this.name = o.rename || this.txt;
+        if(o.parent && !o.target) o.target = o.parent
         this.target = o.target || null;
 
         // callback
@@ -286,6 +288,13 @@ export class Proto {
 
     }
 
+    getCkecker( model ) {
+
+        if( !Tools[ 'checker' ] ) Tools.makeChecker( model )
+        return Tools.clone( Tools[ 'checker' ] )
+
+    }
+
     getJoystick( model ) {
 
         if( !Tools[ 'joystick_'+ model ] ) Tools.makeJoystick( model )
@@ -451,6 +460,9 @@ export class Proto {
 
         v = v || this.value;
         if( v instanceof Array && v.length === 1 ) v = v[0];
+
+        // for list
+        if(this.refObject) v = this.refObject[v]
 
         this.isSend = true
         if( this.objectLink !== null ){ 

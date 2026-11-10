@@ -21,6 +21,8 @@ export class List extends Proto {
         this.tmpImage = {};
         this.tmpUrl = [];
 
+        this.openItem = o.openItem || 5
+
         this.m = o.m !== undefined ? o.m : 5
 
 
@@ -72,7 +74,6 @@ export class List extends Proto {
 
         this.prevName = '';
 
-        
         this.tmpId = 0
 
         this.baseH = this.h;
@@ -117,11 +118,21 @@ export class List extends Proto {
         this.c[2].appendChild( this.scroller );
 
         if( o.value !== undefined ){
-            if(!isNaN(o.value)) this.value = this.list[ o.value ];
-            else this.value = o.value;
+
+            if(this.refObject){
+                let ccc = null
+                for( let g in this.refObject ){ if(this.refObject[g] === o.value ) ccc = g }
+                if(ccc) this.value = this.list[ this.list.indexOf(ccc) ];
+            } else {
+                if(!isNaN(o.value)) this.value = this.list[ o.value ];
+                else this.value = o.value;
+            }
+            
         }else{
             this.value = this.list[0];
         }
+
+
 
         this.isOpenOnStart = o.open || false;
 
@@ -132,6 +143,12 @@ export class List extends Proto {
             this.c[2].style.top = this.baseH+'px'
             this.isOpenOnStart = true;
         }
+
+        this.miniIcon = o.miniIcon || false 
+        this.emojii = o.emojii || [];
+        this.extraSpace = o.extraSpace || 5;
+
+        //if(this.miniIcon) this.m += this.itemHeight
 
 
         this.miniCanvas = o.miniCanvas || false 
@@ -161,8 +178,6 @@ export class List extends Proto {
     // image list
 
     preloadImage () {
-
-
 
         this.preLoadComplete = false;
 
@@ -310,8 +325,6 @@ export class List extends Proto {
         this.modeItem(2)
         this.current.select = true
 
-        
-
     }
 
     resetItems() {
@@ -329,7 +342,7 @@ export class List extends Proto {
 
         if( !this.hideCurrent ) return
         //if( !this.current ) return
-        if( this.current )this.tmpId = this.current.id
+        if( this.current ) this.tmpId = this.current.id
         this.resetHide()
         //this.items[this.tmpId].style.height = 0+'px'
         
@@ -542,13 +555,11 @@ export class List extends Proto {
 
         let lng = this.hideCurrent? this.length-1 : this.length
 
-        this.maxItem = this.full ? lng : 5;
+        this.maxItem = this.full ? lng : this.openItem;
         this.maxItem = lng < this.maxItem ? lng : this.maxItem;
 
         this.maxHeight = this.maxItem * (this.itemHeight+1) + 2;
         
-
-
         this.max = lng * (this.itemHeight+1) + 2;
         this.ratio = this.maxHeight / this.max;
         this.sh = this.maxHeight * this.ratio;
@@ -591,6 +602,32 @@ export class List extends Proto {
             //if( this.isWithImage ) item.appendChild( this.tmpImage[n] );
             if( !this.isWithImage ) item.textContent = n;
 
+            if( this.miniIcon ){
+
+
+
+                /*let c = this.dom( 'div', this.css.basic + 'margin-right:4px; width:'+this.itemHeight+'px; height:'+this.itemHeight+'px' );
+                c.innerHTML = '◉'
+                item.appendChild( c )
+                this.tmpImage[n] = c*/
+
+
+
+                let t = ''
+                let tn = this.extraSpace
+                while(tn--)t += '&nbsp;'
+
+                item.innerHTML =t+n
+
+                let ic = document.createElement("div")
+                ic.style.cssText ='font-size:'+(this.itemHeight-4)+'px; line-height:'+(this.itemHeight-4)+'px; left:0px; top0px; position:absolute; left:0px;'
+                ic.innerHTML = this.emojii[i] ? this.emojii[i] : '🟢';
+                item.appendChild( ic )
+                //document.body.appendChild(ic)
+                this.tmpImage[n] = ic
+
+            }
+
             if( this.miniCanvas ){
 
                 let c = new Image()
@@ -623,18 +660,34 @@ export class List extends Proto {
 
             if( this.dragout ){
 
+
+
                 item.img = this.tmpImage[n]
+                item.name = this.list[i]
 
                 item.style.pointerEvents = 'auto';
                 item.draggable = "true"
 
-                item.addEventListener('dragstart', this.dragstart || function(){ /*console.log('drag start')*/})
+                item.addEventListener('dragstart', this.dragstart || function(e){ 
+
+                    e.stopPropagation();
+                    e.dataTransfer.effectAllowed = 'all';
+                    e.dataTransfer.dropEffect = 'move';
+                    e.dataTransfer.setData('text/html', this.name );
+                    this.img.style.transform = "translateX(-100%)";
+                    e.dataTransfer.setDragImage( this.img, this.img.offsetWidth*0.5 , this.img.offsetHeight*0.5 );
+
+
+                })
                 item.addEventListener('drag', this.drag || function(){ /*console.log('drag start')*/})
                 //item.addEventListener('dragover', this);
                 //item.addEventListener('dragenter', this);
                 item.addEventListener('dragleave', function(){ Roots.fakeUp(); } );
-                item.addEventListener('dragend', this.dragend || function(){ /*console.log('drag end')*/ }.bind(this) )
+                item.addEventListener('dragend', this.dragend || function(){ 
+                    this.img.style.transform = "translateX(0)";
+                /*console.log('drag end')*/ } )
                 //item.addEventListener('drop', function(){console.log('drop')})
+                
 
             }
 
@@ -668,10 +721,14 @@ export class List extends Proto {
 
     setValue ( value ) {
 
-        if(!isNaN(value)) this.value = this.list[ value ];
-        else this.value = value;
-
-        //this.tmpId = value
+        if(this.refObject){
+            let ccc = null
+            for( let g in this.refObject ){ if(this.refObject[g] === o.value ) ccc = g }
+            if(ccc) this.value = this.list[ this.list.indexOf(ccc) ];
+        } else {
+            if(!isNaN(value)) this.value = this.list[ value ];
+            else this.value = value;
+        }
 
         this.setTopItem();
 
@@ -680,6 +737,8 @@ export class List extends Proto {
     setTopItem (){
 
         if( this.staticTop ) return;
+
+        
 
         if( this.isWithImage ){
 
@@ -702,6 +761,28 @@ export class List extends Proto {
         }
         else this.c[3].textContent = this.value;
 
+        if( this.miniIcon ){
+
+            if(this.c[3].children.length) this.c[3].removeChild( this.c[3].children[0] )
+
+            let t = ''
+            let tn = this.extraSpace
+            while(tn--) t += '&nbsp;'
+
+            this.c[3].innerHTML =t+this.value
+
+            if(this.current){
+
+                let id = this.current.id
+
+                let ic = document.createElement("div")
+                ic.style.cssText ='font-size:'+(this.itemHeight-4)+'px; line-height:'+(this.itemHeight-4)+'px; left:0px; top0px; position:absolute; left:0px;'
+                ic.innerHTML = this.emojii[id] ? this.emojii[id] : '🟢';
+                this.c[3].appendChild( ic )
+            }
+
+        }
+
         if( this.miniCanvas ){
 
             if(!this.c[3].children.length){
@@ -716,7 +797,6 @@ export class List extends Proto {
             }
 
             this.ctx.drawImage( this.tmpImage[ this.value ], 0, 0 );
-
 
         }
 
@@ -752,7 +832,7 @@ export class List extends Proto {
 
         super.open();
 
-        this.update( 0 )
+        this.update( this.py )
 
         this.h = this.maxHeight + this.baseH + 5;
         if( !this.scroll ){

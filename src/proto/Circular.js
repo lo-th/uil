@@ -16,6 +16,8 @@ export class Circular extends Proto {
         this.minw = this.w
         this.diam = o.diam || this.w 
 
+        //this.fw = this.w
+
         this.setTypeNumber( o )
 
         this.twoPi = Tools.TwoPI
@@ -32,8 +34,8 @@ export class Circular extends Proto {
 
             this.c[1].style.width = '100%'
             this.c[1].style.justifyContent = 'center'
-            this.top = 10
-            this.h += 10
+            this.top = 14
+            this.h += 14
 
         }
 
@@ -43,7 +45,7 @@ export class Circular extends Proto {
         this.cmode = 0
         let cc = this.colors
 
-        this.c[2] = this.dom( 'div', this.css.txt + 'justify-content:center; top:'+(this.h-20)+'px; width:100%; color:'+ cc.text )
+        this.c[2] = this.dom( 'div', this.css.txt + 'justify-content:center; top:'+(this.h-16)+'px; width:100%; color:'+ cc.text )
 
         // svg
         
@@ -136,6 +138,7 @@ export class Circular extends Proto {
         if( !this.isDown ) return;
 
         //console.log('over')
+        this.cursor('pointer');
 
         let off = this.offset;
         off.x = (this.w*0.5) - ( e.clientX - this.zone.x );

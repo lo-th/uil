@@ -17,6 +17,24 @@
 
 			let camera, scene, renderer, texture, mesh, material
 
+			const BlendOption = {
+				ZeroFactor:200,
+				OneFactor:201,
+				SrcColorFactor:202,
+				OneMinusSrcColorFactor:203,
+				SrcAlphaFactor:204,
+				OneMinusSrcAlphaFactor:205,
+				DstAlphaFactor:206,
+				OneMinusDstAlphaFactor:207,
+				DstColorFactor:208,
+				OneMinusDstColorFactor:209,
+				SrcAlphaSaturateFactor:210,
+				ConstantColorFactor:211,
+				OneMinusConstantColorFactor:212,
+				ConstantAlphaFactor:213,
+				OneMinusConstantAlphaFactor:214
+			}
+
 			const setting = {
 				color: 0xFFFFFF,
 				size: 150,
@@ -34,8 +52,14 @@
 
 				scene = new THREE.Scene();
 
+				const textureLoader = new THREE.TextureLoader();
+				const textureTest = textureLoader.load( 'assets/textures/check.jpg', ready );
+				textureTest.repeat = new THREE.Vector2( setting.repeat, setting.repeat )
+			    textureTest.wrapS = textureTest.wrapT = THREE.RepeatWrapping;
+
 				const geometry = new THREE.BoxGeometry( 1, 1, 1 )
-				material = new THREE.MeshBasicMaterial( { map:makeCheck( setting.repeat ), color:setting.color } )
+				//material = new THREE.MeshBasicMaterial( { map:makeCheck( setting.repeat ), color:setting.color } )
+				material = new THREE.MeshBasicMaterial( { map:textureTest, color:setting.color } )
 
 				mesh = new THREE.Mesh( geometry, material )
 				mesh.scale.set(1,1,1).multiplyScalar( setting.size )
@@ -49,8 +73,15 @@
 
 				//
 
+				
+
 				window.addEventListener( 'resize', onWindowResize );
 
+			}
+
+			function ready( ) {
+				//console.log('ready')
+				initGui();
 			}
 
 			function makeCheck( r, c1, c2 ) {
@@ -99,6 +130,13 @@
 
 				ui.add( material, 'color' )
 				ui.add( material, 'map',  { h:30 })
+
+				let m = material
+
+				console.log(m.blendSrc)
+
+				if(m.blendSrc!==undefined) ui.add( m, 'blendSrc', { type:'list', list:BlendOption }).onChange( ( c )=>{ console.log(m.blendSrc, c) })
+		        if(m.blendDst!==undefined) ui.add( m, 'blendDst', { type:'list', list:BlendOption }).onChange( ( c )=>{ console.log(m.blendDst, c) })
 
 			}
 

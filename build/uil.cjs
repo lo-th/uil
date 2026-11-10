@@ -4,7 +4,7 @@
  * @author lth / https://github.com/lo-th
  */
 
-const REVISION = '4.4.0';
+const REVISION = '4.5.0';
 
 // INTENAL FUNCTION
 
@@ -50,6 +50,8 @@ const R = {
     tmpImage: null,
 
     oldCursor:'auto',
+
+    resizeTimeout:null,
 
     input: null,
     parent: null,
@@ -176,7 +178,14 @@ const R = {
 
         dom.addEventListener( 'keydown', R, false );
         dom.addEventListener( 'keyup', R, false );
-        window.addEventListener( 'resize', R.resize , false );
+
+        R.onResize = () => {
+            R.needReZone = true;
+            R.needResize = true;
+            R.resize();
+        };
+
+        window.addEventListener( 'resize', R.onResize , { passive: true } );
 
         //window.onblur = R.out;
         //window.onfocus = R.in;
@@ -213,7 +222,7 @@ const R = {
 
         dom.removeEventListener( 'keydown', R );
         dom.removeEventListener( 'keyup', R );
-        window.removeEventListener( 'resize', R.resize  );
+        window.removeEventListener( 'resize', R.onResize );
 
         R.isEventsInit = false;
 
@@ -223,19 +232,27 @@ const R = {
 
     resize: function () {
 
-        //console.log('resize !!')
+        if (R.resizeTimeout) clearTimeout(R.resizeTimeout);
 
-        let i = R.ui.length, u;
-        
-        while( i-- ){
+        R.resizeTimeout = setTimeout( () => {
 
-            u = R.ui[i];
-            if( u.isGui && !u.isCanvasOnly && u.autoResize ) u.calc();
-        
-        }
+            let i = R.ui.length, u;
+            
+            while( i-- ){
 
-        R.needReZone = true;
-        R.needResize = false;
+                u = R.ui[i];
+                if( u.isGui && !u.isCanvasOnly && u.autoResize ){
+                    u.calc();
+                    if(u.innerHeight) u.innerHeight = u.content.offsetHeight;
+                }
+            
+            }
+
+            R.needReZone = true;
+            R.needResize = false;
+            R.resizeTimeout = null;
+
+        }, 100);
 
     },
 
@@ -274,9 +291,22 @@ const R = {
 
 
         R.findZone( R.forceZone );
+
+        let ptype = event.pointerType; // mouse, pen, touch
        
-        let e = R.e;
-        let leave = false;
+        //let e = R.e;
+        // Normalisation propre
+        let e = {
+            type: event.type,
+            clientX: event.clientX,
+            clientY: event.clientY,
+            pageX: event.pageX,
+            pageY: event.pageY,
+            pressure: event.pressure, // ✅ Garde la pression du stylet/toucher
+            isPrimary: event.isPrimary, // ✅ Garde l'info du doigt principal
+            delta: 0,
+            pointerType: ptype
+        };
         
         if( event.type === 'keydown') R.keydown( event );
         if( event.type === 'keyup') R.keyup( event );
@@ -284,7 +314,7 @@ const R = {
         if( event.type === 'wheel' ) e.delta = event.deltaY > 0 ? 1 : -1;
         else e.delta = 0;
 
-        let ptype = event.pointerType; // mouse, pen, touch
+        
 
         e.clientX = ( ptype === 'touch' ? event.pageX : event.clientX ) || 0;
         e.clientY = ( ptype === 'touch' ? event.pageY : event.clientY ) || 0;
@@ -292,8 +322,9 @@ const R = {
         e.type = event.type;
 
         if( R.eventOut.indexOf( event.type ) !== -1 ){ 
-            leave = true;
+            //leave = true
             e.type = 'mouseup';
+            R.isLeave = true;
         }
 
         if( event.type === 'pointerleave') R.isLeave = true; 
@@ -355,7 +386,6 @@ const R = {
         }
 
         if( R.isMobile && e.type === 'mouseup' ) R.clearOldID();
-        if( leave ) R.clearOldID();
 
     },
 
@@ -367,13 +397,9 @@ const R = {
 
         let i = R.ui.length, next = -1, u, x, y;
 
-
-
         while( i-- ){
 
             u = R.ui[i];
-
-
 
             if( u.isCanvasOnly ) {
 
@@ -449,12 +475,19 @@ const R = {
                 //if(div) u.zone.y += m * 0.5
 
                 tw = R.getWidth(u);
+                //if(u.isKnob) console.log(tw)
                 if( tw ) u.zone.w = u.w = tw;
                 else if( u.fw ) u.zone.w = u.w = u.fw;
-                
-                px += u.zone.w;
 
-                if( px >= zone.w ) { 
+                //if(u.isKnob) u.zone.w = 93//console.log('knob', tw)
+                //if(u.isKnob) console.log(u.zone.w)
+                
+                px += u.zone.w+1;
+
+                if( px >= zone.w ) {
+
+                // TODO solve stress test but break all ?
+                //if( px+u.zone.w >= zone.w ) { 
                     py += u.h + m;
                     //if(div) py += m * 0.5
                     px = 0;
@@ -518,7 +551,7 @@ const R = {
 
     onZone: function ( o, x, y ) {
 
-        //console.log(o, x, y)
+        //
 
         if( x === undefined || y === undefined ) return false;
 
@@ -1040,6 +1073,7 @@ const T = {
 
         //if( o.transparent ) o.bg = 'none'
         //if( o.bg ) color.background = color.backgroundOver = o.bg
+        if( o.bg ) color.background = o.bg;
         if( o.bgOver ) color.backgroundOver = o.bgOver;
 
         for( let m in color ){
@@ -1117,7 +1151,8 @@ const T = {
 
         basic: 'position:absolute; pointer-events:none; box-sizing:border-box; margin:0; padding:0; overflow:hidden; ' + '-o-user-select:none; -ms-user-select:none; -khtml-user-select:none; -webkit-user-select:none; -moz-user-select:none;',
         button:'display:flex; align-items:center; justify-content:center; text-align:center;',
-        middle:'display:flex; align-items:center; justify-content:left; text-align:left; flex-direction: row-reverse;'
+        middle:'display:flex; align-items:center; justify-content:left; text-align:left; flex-direction: row-reverse;',
+        edit:'display:flex; align-items:left; justify-content:left; text-align:left; flex-direction: row | row-reverse | column | column-reverse;'
     },
 
     // svg path
@@ -1207,7 +1242,7 @@ const T = {
         T.css.txt = T.css.basic + T.css.middle + ' font-family:'+ font +'; font-weight:'+weight+'; font-size:'+size+'; color:'+cc.text+'; padding:0px 8px; left:0; top:2px; height:16px; width:100px; overflow:hidden; white-space: nowrap; letter-spacing:normal;';//letter-spacing: normal;
         if( shadow !== 'none' ) T.css.txt += ' text-shadow: 1px 1px 1px '+shadow+';';
 
-        T.css.txtselect = T.css.txt + 'padding:0px 4px; border:1px dashed ' + cc.border + ';';
+        T.css.txtselect = T.css.txt + T.css.edit + 'line-height: normal; padding:0px 4px; border:1px dashed ' + cc.border + ';';
         T.css.item = T.css.txt + 'padding:0px 4px; position:relative; margin-bottom:1px; ';
 
     },
@@ -1580,6 +1615,42 @@ const T = {
 
     },*/
 
+    makeChecker: function ( model ) {
+
+        let ww = 128;
+        let space = 2;
+        let box = ww/6 - (space*4);
+        let hh = (box*4) + (space*2);
+
+        let svg = T.dom( 'svg', T.css.basic + 'position:relative;', { viewBox:'0 0 '+ww+' '+hh, width:ww, height:hh, preserveAspectRatio:'none' } );
+
+        let x = 0;
+        let y = 0;
+        let n = 0;
+
+        for(let i = 0; i<24; i++){
+
+            Tools.dom( 'rect', '', { x: x, y: y,  width: box, height: box, fill:T.colors.back }, svg );
+            x += box+space;
+            n ++;
+            if(n>5){
+                x = 0;
+                y += box+space;
+                n = 0;
+            }
+        }
+        /*let w = 200; 
+        let d = (ww-w)*0.5, m = 20;
+        Tools.dom( 'rect', '', { x: d, y: d,  width: w, height: w, fill:T.colors.back }, svg ); // 0
+        Tools.dom( 'rect', '', { x: d+m*0.5, y: d+m*0.5, width: w - m , height: w - m, fill:T.colors.button }, svg ); // 1
+        // Pointer
+        Tools.dom( 'line', '', { x1: d+(m*0.5), y1: ww *0.5, x2: d+(w-m*0.5), y2: ww * 0.5, stroke:T.colors.back, 'stroke-width': 2 }, svg ); // 2
+        Tools.dom( 'line', '', { x1: ww * 0.5, x2: ww * 0.5, y1: d+(m*0.5), y2: d+(w-m*0.5), stroke:T.colors.back, 'stroke-width': 2 }, svg ); // 3
+        Tools.dom( 'circle', '', { cx: ww * 0.5, cy: ww * 0.5, r:5, stroke: T.colors.text, 'stroke-width': 5, fill:'none' }, svg ); // 4*/
+        T.checker = svg;
+
+    },
+
     makePad: function ( model ) {
 
         let ww = 256;
@@ -1602,9 +1673,13 @@ const T = {
         let radius = 34;
         let svg = T.dom( 'svg', T.css.basic + 'position:relative;', { viewBox:'0 0 '+w+' '+w, width:w, height:w, preserveAspectRatio:'none' } );
         T.dom( 'circle', '', { cx:64, cy:64, r:radius, fill:T.colors.button, stroke:'rgba(0,0,0,0.3)', 'stroke-width':8 }, svg );//0
-        T.dom( 'path', '', { d:'', stroke:T.colors.text, 'stroke-width':4, fill:'none', 'stroke-linecap':'round' }, svg );//1
-        T.dom( 'circle', '', { cx:64, cy:64, r:radius+7, stroke:'rgba(0,0,0,0.1)', 'stroke-width':7 , fill:'none'}, svg );//2
-        T.dom( 'path', '', { d:'', stroke:'rgba(255,255,255,0.3)', 'stroke-width':2, fill:'none', 'stroke-linecap':'round', 'stroke-opacity':0.5 }, svg );//3
+        T.dom( 'circle', '', { cx:64, cy:64, r:radius-10, fill:'rgba(255,255,255,0.1)', stroke:'none'  }, svg );//1
+        T.dom( 'path', '', { d:'', stroke:T.colors.text, 'stroke-width':4, fill:'none', 'stroke-linecap':'round' }, svg );//2
+        T.dom( 'circle', '', { cx:64, cy:64, r:radius+7, stroke:'rgba(0,0,0,0.1)', 'stroke-width':7 , fill:'none'}, svg );//3
+        T.dom( 'path', '', { d:'', stroke:'rgba(255,255,255,0.3)', 'stroke-width':2, fill:'none', 'stroke-linecap':'round', 'stroke-opacity':0.5 }, svg );//4
+
+        //
+
         T.knob = svg;
 
     },
@@ -1950,10 +2025,11 @@ class Files {
             const dataBuf = [ 'sea', 'z', 'hex', 'bvh', 'BVH', 'glb', 'gltf', 'exr', 'ktx2', 'hdr' ];
             const reader = new FileReader();
 
+            const cleanupReader = () => reader.removeEventListener('load', onLoad);
+
             if(o.forceType === 'ArrayBuffer') {
                 reader.readAsArrayBuffer( file );
-                type = '';
-
+                //type = ''
             } else {
                 if( dataUrl.indexOf( ftype ) !== -1 ) reader.readAsDataURL( file );
                 else if( dataBuf.indexOf( ftype ) !== -1 ) reader.readAsArrayBuffer( file );
@@ -1961,11 +2037,11 @@ class Files {
             }
 
             
-            reader.onload = function(e) {
+            const onLoad = (e) => {
 
                 let content = e.target.result;
 
-                //console.log(type, files)
+                cleanupReader();
 
                 switch(type){
                     case 'image':
@@ -1981,14 +2057,13 @@ class Files {
                         if( o.callback ) o.callback( JSON.parse( content ), fname, ftype );
                     break;
                     default:
-                        
                         if( o.callback ) o.callback( content, fname, ftype );
-                        
-                        
                     break;
                 }
 
             };
+
+            reader.addEventListener('load', onLoad);
 
         } catch(e) {
 
@@ -2009,7 +2084,23 @@ class Files {
                 .flatMap((inst) => Object.keys(inst).flatMap((key) => inst[key]))
                 .join(",");
 
-            input.addEventListener("change", () => {
+            const cleanup = () => {
+                input.removeEventListener("change", onChange);
+                if (input.parentNode) input.parentNode.removeChild(input);
+            };
+
+            const onChange = (e) => {
+                resolve(
+                    [...input.files].map((file) => ({
+                        getFile: async () => file
+                    }))
+                );
+                cleanup(); // Nettoyage immédiat
+            };
+
+            input.addEventListener("change", onChange);
+
+            /*input.addEventListener("change", () => {
                 resolve(
                     [...input.files].map((file) => {
                         return {
@@ -2020,7 +2111,7 @@ class Files {
                         };
                     })
                 );
-            });
+            });*/
 
             input.click();
         })
@@ -2085,12 +2176,24 @@ class Files {
             let blob = new Blob([ options.data ], { type:options.finalType });
             a.href = URL.createObjectURL( blob );
 
+            const revoke = () => URL.revokeObjectURL(a.href);
+
             a.addEventListener("click", () => {
                 resolve(
-                    setTimeout( () => URL.revokeObjectURL(a.href), 1000 )
+                    setTimeout(() => {
+                        revoke();
+                        if (a.parentNode) a.parentNode.removeChild(a);
+                    }, 1000)
                 );
             });
             a.click();
+
+            /*a.addEventListener("click", () => {
+                resolve(
+                    setTimeout( () => URL.revokeObjectURL(a.href), 1000 )
+                )
+            })
+            a.click()*/
         })
     }
 
@@ -2297,6 +2400,7 @@ class Proto {
 
         this.dx = o.dx || 0;
 
+        this.isSelectMulty = o.selectmulty !== undefined ? o.selectmulty : false;
         this.isSelectable = o.selectable !== undefined ? o.selectable : false;
         this.unselectable =  o.unselect !== undefined ? o.unselect : this.isSelectable;
 
@@ -2374,6 +2478,7 @@ class Proto {
 
         this.txt = o.name || '';
         this.name = o.rename || this.txt;
+        if(o.parent && !o.target) o.target = o.parent;
         this.target = o.target || null;
 
         // callback
@@ -2547,6 +2652,13 @@ class Proto {
 
     }
 
+    getCkecker( model ) {
+
+        if( !Tools[ 'checker' ] ) Tools.makeChecker( model );
+        return Tools.clone( Tools[ 'checker' ] )
+
+    }
+
     getJoystick( model ) {
 
         if( !Tools[ 'joystick_'+ model ] ) Tools.makeJoystick( model );
@@ -2712,6 +2824,9 @@ class Proto {
 
         v = v || this.value;
         if( v instanceof Array && v.length === 1 ) v = v[0];
+
+        // for list
+        if(this.refObject) v = this.refObject[v];
 
         this.isSend = true;
         if( this.objectLink !== null ){ 
@@ -3368,6 +3483,8 @@ class Circular extends Proto {
         this.minw = this.w;
         this.diam = o.diam || this.w; 
 
+        //this.fw = this.w
+
         this.setTypeNumber( o );
 
         this.twoPi = Tools.TwoPI;
@@ -3384,8 +3501,8 @@ class Circular extends Proto {
 
             this.c[1].style.width = '100%';
             this.c[1].style.justifyContent = 'center';
-            this.top = 10;
-            this.h += 10;
+            this.top = 14;
+            this.h += 14;
 
         }
 
@@ -3395,7 +3512,7 @@ class Circular extends Proto {
         this.cmode = 0;
         let cc = this.colors;
 
-        this.c[2] = this.dom( 'div', this.css.txt + 'justify-content:center; top:'+(this.h-20)+'px; width:100%; color:'+ cc.text );
+        this.c[2] = this.dom( 'div', this.css.txt + 'justify-content:center; top:'+(this.h-16)+'px; width:100%; color:'+ cc.text );
 
         // svg
         
@@ -3488,6 +3605,7 @@ class Circular extends Proto {
         if( !this.isDown ) return;
 
         //console.log('over')
+        this.cursor('pointer');
 
         let off = this.offset;
         off.x = (this.w*0.5) - ( e.clientX - this.zone.x );
@@ -4678,6 +4796,7 @@ class Group extends Proto {
         //this.dd = o.group ? o.group.decal + 8 : 0
 
         this.baseH = this.h;
+        //this.margin = 0 
 
         //this.spaceY = new Empty({h:this.margin});
 
@@ -4732,8 +4851,8 @@ class Group extends Proto {
         if(cc.groups === 'none') cc.groups = cc.background;
         //    cc.background = 'none'
 
-        s[0].background = bg !== undefined ? 'none' : cc.content;
-        s[1].background = bg !== undefined ? cc.groups : cc.content;
+        s[0].background = 'none';//bg !== undefined ? 'none' : cc.content;
+        s[1].background = cc.groups;//bg !== undefined ? cc.groups : cc.content;
         //s[2].background = bg !== undefined ? cc.groups : cc.content
 
         //s[0].background = '#FF0';
@@ -5066,7 +5185,7 @@ class Group extends Proto {
     calcUis () {
 
         if( !this.isOpen || this.isEmpty ) this.h = this.baseH;
-        //else this.h = Roots.calcUis( this.uis, this.zone, this.zone.y + this.baseH ) + this.baseH;
+        //else this.h = Roots.calcUis( this.uis, this.zone, this.zone.y + this.baseH, true ) + this.baseH;
         else this.h = Roots.calcUis( [...this.uis ], this.zone, this.zone.y + this.baseH + this.margin, true ) + this.baseH;
        // else this.h = Roots.calcUis( [...this.uis, this.spaceY ], this.zone, this.zone.y + this.baseH + this.margin, true ) + this.baseH
 
@@ -5390,6 +5509,8 @@ class Knob extends Proto {
 
         super( o );
 
+        this.isKnob = true;
+
         this.isCyclic = o.cyclic || false;
         this.model = o.stype || 0;
         if( o.mode !== undefined ) this.model = o.mode;
@@ -5400,6 +5521,8 @@ class Knob extends Proto {
 
         this.minw  = this.w;
         this.diam = o.diam || this.w; 
+
+        this.limiteRange = o.limit || false;
 
         this.mPI = Math.PI * 0.8;
         this.toDeg = 180 / Math.PI;
@@ -5412,12 +5535,13 @@ class Knob extends Proto {
         this.c[0].style.width = this.w +'px';
         this.c[0].style.display = 'block';
 
+
         if(this.c[1] !== undefined) {
 
             this.c[1].style.width = '100%';
             this.c[1].style.justifyContent = 'center';
-            this.top = 10;
-            this.h += 10;
+            this.top = 14;
+            this.h += 14;
 
         }
 
@@ -5426,13 +5550,13 @@ class Knob extends Proto {
         this.cmode = 0;
         let cc = this.colors;
 
-        this.c[2] = this.dom( 'div', this.css.txt + 'justify-content:center; top:'+(this.h-20)+'px; width:100%; color:'+ cc.text );
+        this.c[2] = this.dom( 'div', this.css.txt + 'justify-content:center; top:'+(this.h-16)+'px; width:100%; color:'+ cc.text );
 
         this.c[3] = this.getKnob();
         this.setSvg( this.c[3], 'fill', cc.button, 0 );
-        this.setSvg( this.c[3], 'stroke', cc.text, 1 );
-        this.setSvg( this.c[3], 'stroke', cc.text, 3 );
-        this.setSvg( this.c[3], 'd', this.makeGrad(), 3 );
+        this.setSvg( this.c[3], 'stroke', cc.text, 2 );
+        this.setSvg( this.c[3], 'stroke', cc.text, 4 );
+        this.setSvg( this.c[3], 'd', this.makeGrad(), 4 );
         
         this.setSvg( this.c[3], 'viewBox', '0 0 ' + this.diam + ' ' + this.diam );
         this.setCss( this.c[3], { width:this.diam, height:this.diam, left:0, top:this.top });
@@ -5444,7 +5568,7 @@ class Knob extends Proto {
             if ( this.model == 2) {
             
                 Tools.addSVGGlowEffect();
-                this.setSvg( this.c[3], 'style', 'filter: url("#UILGlow");', 4 );
+                this.setSvg( this.c[3], 'style', 'filter: url("#UILGlow");', 5 );
             
             }
 
@@ -5453,6 +5577,7 @@ class Knob extends Proto {
         this.r = 0;
 
         this.init();
+
 
         this.update();
 
@@ -5469,13 +5594,13 @@ class Knob extends Proto {
                 this.s[2].color = cc.text;
                 this.setSvg( this.c[3], 'fill', cc.button, 0);
                 //this.setSvg( this.c[3], 'stroke','rgba(255,0,0,0.2)', 2);
-                this.setSvg( this.c[3], 'stroke', cc.text, 1 );
+                this.setSvg( this.c[3], 'stroke', cc.text, 2 );
             break;
             case 1: // down
                 this.s[2].color = cc.textOver;
                 this.setSvg( this.c[3], 'fill', cc.select, 0);
                 //this.setSvg( this.c[3], 'stroke','rgba(0,0,0,0.6)', 2);
-                this.setSvg( this.c[3], 'stroke', cc.textOver, 1 );
+                this.setSvg( this.c[3], 'stroke', cc.textOver, 2 );
             break;
         }
 
@@ -5519,6 +5644,8 @@ class Knob extends Proto {
     mousemove ( e ) {
 
         if( !this.isDown ) return;
+
+        this.cursor('pointer');
 
         let off = this.offset;
 
@@ -5582,8 +5709,8 @@ class Knob extends Proto {
         let endangle = Math.PI - this.mPI;
         //let step = this.step>5 ? this.step : 1;
 
-        if(this.step>5){
-            range =  this.range / this.step;
+        if(this.step>5 || this.limiteRange){
+            range = this.range / this.step;
             step = ( startangle - endangle ) / range;
         } else {
             step = (( startangle - endangle ) / r)*2;
@@ -5621,7 +5748,7 @@ class Knob extends Proto {
         let x2 = ( 20 * sin ) + 64;
         let y2 = -( 20 * cos ) + 64;
 
-        this.setSvg( this.c[3], 'd', 'M ' + x1 +' ' + y1 + ' L ' + x2 +' ' + y2, 1 );
+        this.setSvg( this.c[3], 'd', 'M ' + x1 +' ' + y1 + ' L ' + x2 +' ' + y2, 2 );
         
         if ( this.model > 0 ) {
 
@@ -5630,10 +5757,10 @@ class Knob extends Proto {
             let x2 = 36 * sin + 64;
             let y2 = -36 * cos + 64;
             let big = ea <= Math.PI - this.mPI ? 0 : 1;
-            this.setSvg( this.c[3], 'd', 'M ' + x1 + ',' + y1 + ' A ' + 36 + ',' + 36 + ' 1 ' + big + ' 1 ' + x2 + ',' + y2, 4 );
+            this.setSvg( this.c[3], 'd', 'M ' + x1 + ',' + y1 + ' A ' + 36 + ',' + 36 + ' 1 ' + big + ' 1 ' + x2 + ',' + y2, 5 );
 
             let color = Tools.pack( Tools.lerpColor( Tools.unpack( Tools.ColorLuma( this.colors.text, -0.75) ), Tools.unpack( this.colors.text ), this.percent ) );
-            this.setSvg( this.c[3], 'stroke', color, 4 );
+            this.setSvg( this.c[3], 'stroke', color, 5 );
         
         }
 
@@ -5662,6 +5789,8 @@ class List extends Proto {
 
         this.tmpImage = {};
         this.tmpUrl = [];
+
+        this.openItem = o.openItem || 5;
 
         this.m = o.m !== undefined ? o.m : 5;
 
@@ -5714,7 +5843,6 @@ class List extends Proto {
 
         this.prevName = '';
 
-        
         this.tmpId = 0;
 
         this.baseH = this.h;
@@ -5759,11 +5887,21 @@ class List extends Proto {
         this.c[2].appendChild( this.scroller );
 
         if( o.value !== undefined ){
-            if(!isNaN(o.value)) this.value = this.list[ o.value ];
-            else this.value = o.value;
+
+            if(this.refObject){
+                let ccc = null;
+                for( let g in this.refObject ){ if(this.refObject[g] === o.value ) ccc = g; }
+                if(ccc) this.value = this.list[ this.list.indexOf(ccc) ];
+            } else {
+                if(!isNaN(o.value)) this.value = this.list[ o.value ];
+                else this.value = o.value;
+            }
+            
         }else {
             this.value = this.list[0];
         }
+
+
 
         this.isOpenOnStart = o.open || false;
 
@@ -5774,6 +5912,12 @@ class List extends Proto {
             this.c[2].style.top = this.baseH+'px';
             this.isOpenOnStart = true;
         }
+
+        this.miniIcon = o.miniIcon || false; 
+        this.emojii = o.emojii || [];
+        this.extraSpace = o.extraSpace || 5;
+
+        //if(this.miniIcon) this.m += this.itemHeight
 
 
         this.miniCanvas = o.miniCanvas || false; 
@@ -5803,8 +5947,6 @@ class List extends Proto {
     // image list
 
     preloadImage () {
-
-
 
         this.preLoadComplete = false;
 
@@ -5952,8 +6094,6 @@ class List extends Proto {
         this.modeItem(2);
         this.current.select = true;
 
-        
-
     }
 
     resetItems() {
@@ -5971,7 +6111,7 @@ class List extends Proto {
 
         if( !this.hideCurrent ) return
         //if( !this.current ) return
-        if( this.current )this.tmpId = this.current.id;
+        if( this.current ) this.tmpId = this.current.id;
         this.resetHide();
         //this.items[this.tmpId].style.height = 0+'px'
         
@@ -6184,13 +6324,11 @@ class List extends Proto {
 
         let lng = this.hideCurrent? this.length-1 : this.length;
 
-        this.maxItem = this.full ? lng : 5;
+        this.maxItem = this.full ? lng : this.openItem;
         this.maxItem = lng < this.maxItem ? lng : this.maxItem;
 
         this.maxHeight = this.maxItem * (this.itemHeight+1) + 2;
         
-
-
         this.max = lng * (this.itemHeight+1) + 2;
         this.ratio = this.maxHeight / this.max;
         this.sh = this.maxHeight * this.ratio;
@@ -6233,6 +6371,32 @@ class List extends Proto {
             //if( this.isWithImage ) item.appendChild( this.tmpImage[n] );
             if( !this.isWithImage ) item.textContent = n;
 
+            if( this.miniIcon ){
+
+
+
+                /*let c = this.dom( 'div', this.css.basic + 'margin-right:4px; width:'+this.itemHeight+'px; height:'+this.itemHeight+'px' );
+                c.innerHTML = '◉'
+                item.appendChild( c )
+                this.tmpImage[n] = c*/
+
+
+
+                let t = '';
+                let tn = this.extraSpace;
+                while(tn--)t += '&nbsp;';
+
+                item.innerHTML =t+n;
+
+                let ic = document.createElement("div");
+                ic.style.cssText ='font-size:'+(this.itemHeight-4)+'px; line-height:'+(this.itemHeight-4)+'px; left:0px; top0px; position:absolute; left:0px;';
+                ic.innerHTML = this.emojii[i] ? this.emojii[i] : '🟢';
+                item.appendChild( ic );
+                //document.body.appendChild(ic)
+                this.tmpImage[n] = ic;
+
+            }
+
             if( this.miniCanvas ){
 
                 let c = new Image();
@@ -6265,18 +6429,34 @@ class List extends Proto {
 
             if( this.dragout ){
 
+
+
                 item.img = this.tmpImage[n];
+                item.name = this.list[i];
 
                 item.style.pointerEvents = 'auto';
                 item.draggable = "true";
 
-                item.addEventListener('dragstart', this.dragstart || function(){ /*console.log('drag start')*/});
+                item.addEventListener('dragstart', this.dragstart || function(e){ 
+
+                    e.stopPropagation();
+                    e.dataTransfer.effectAllowed = 'all';
+                    e.dataTransfer.dropEffect = 'move';
+                    e.dataTransfer.setData('text/html', this.name );
+                    this.img.style.transform = "translateX(-100%)";
+                    e.dataTransfer.setDragImage( this.img, this.img.offsetWidth*0.5 , this.img.offsetHeight*0.5 );
+
+
+                });
                 item.addEventListener('drag', this.drag || function(){ /*console.log('drag start')*/});
                 //item.addEventListener('dragover', this);
                 //item.addEventListener('dragenter', this);
                 item.addEventListener('dragleave', function(){ Roots.fakeUp(); } );
-                item.addEventListener('dragend', this.dragend || function(){ /*console.log('drag end')*/ }.bind(this) );
+                item.addEventListener('dragend', this.dragend || function(){ 
+                    this.img.style.transform = "translateX(0)";
+                /*console.log('drag end')*/ } );
                 //item.addEventListener('drop', function(){console.log('drop')})
+                
 
             }
 
@@ -6310,10 +6490,14 @@ class List extends Proto {
 
     setValue ( value ) {
 
-        if(!isNaN(value)) this.value = this.list[ value ];
-        else this.value = value;
-
-        //this.tmpId = value
+        if(this.refObject){
+            let ccc = null;
+            for( let g in this.refObject ){ if(this.refObject[g] === o.value ) ccc = g; }
+            if(ccc) this.value = this.list[ this.list.indexOf(ccc) ];
+        } else {
+            if(!isNaN(value)) this.value = this.list[ value ];
+            else this.value = value;
+        }
 
         this.setTopItem();
 
@@ -6322,6 +6506,8 @@ class List extends Proto {
     setTopItem (){
 
         if( this.staticTop ) return;
+
+        
 
         if( this.isWithImage ){
 
@@ -6344,6 +6530,28 @@ class List extends Proto {
         }
         else this.c[3].textContent = this.value;
 
+        if( this.miniIcon ){
+
+            if(this.c[3].children.length) this.c[3].removeChild( this.c[3].children[0] );
+
+            let t = '';
+            let tn = this.extraSpace;
+            while(tn--) t += '&nbsp;';
+
+            this.c[3].innerHTML =t+this.value;
+
+            if(this.current){
+
+                let id = this.current.id;
+
+                let ic = document.createElement("div");
+                ic.style.cssText ='font-size:'+(this.itemHeight-4)+'px; line-height:'+(this.itemHeight-4)+'px; left:0px; top0px; position:absolute; left:0px;';
+                ic.innerHTML = this.emojii[id] ? this.emojii[id] : '🟢';
+                this.c[3].appendChild( ic );
+            }
+
+        }
+
         if( this.miniCanvas ){
 
             if(!this.c[3].children.length){
@@ -6358,7 +6566,6 @@ class List extends Proto {
             }
 
             this.ctx.drawImage( this.tmpImage[ this.value ], 0, 0 );
-
 
         }
 
@@ -6394,7 +6601,7 @@ class List extends Proto {
 
         super.open();
 
-        this.update( 0 );
+        this.update( this.py );
 
         this.h = this.maxHeight + this.baseH + 5;
         if( !this.scroll ){
@@ -6831,6 +7038,7 @@ class Slide extends Proto {
 
         this.isDeg = o.isDeg || false;
         this.isCyclic = o.cyclic || false;
+        this.isTime = o.isTime || false;
 
         this.firstImput = false;
 
@@ -6984,6 +7192,29 @@ class Slide extends Proto {
 
     // ----------------------
 
+    formatOutput(){
+
+        let v = this.value;
+        if(this.isDeg) v+='°';
+        if(this.isTime){
+
+            const heures = Math.floor(this.value);
+            const minutes = Math.round((this.value - heures) * 60);
+
+            if(minutes === 60) { v = `${heures + 1}h00`; }
+            else {
+                const minutesFormatees = minutes < 10 ? '0' + minutes : minutes;
+                v = `${heures}h${minutesFormatees}`;
+            }
+
+        }
+
+        return v 
+
+    }
+
+    // ----------------------
+
     validate () {
         
         let n = this.c[2].textContent;
@@ -6994,7 +7225,7 @@ class Slide extends Proto {
         }
 
         else {
-            if(this.autoValue) this.c[2].textContent = this.value + (this.isDeg ? '°':'');
+            if(this.autoValue) this.c[2].textContent = this.formatOutput();
         }
 
     }
@@ -7038,7 +7269,7 @@ class Slide extends Proto {
        
         if(this.model !== 3) this.s[5].width = ww + 'px';
         if(this.s[6]) this.s[6].left = ( this.sa + ww + 3 ) + 'px';
-        if(this.autoValue) this.c[2].textContent = this.value + (this.isDeg ? '°':'');
+        if(this.autoValue) this.c[2].textContent = this.formatOutput();
 
         if( up ) this.send();
 
@@ -7262,29 +7493,30 @@ class Title extends Proto {
 
         this.isTitle = true;
 
-        let prefix = o.prefix || '';
-        let color = o.color || this.colors.text;
+        //let prefix = o.prefix || '';
+        //let color = o.color || this.colors.text;
 
-        this.c[2] = this.dom( 'div', this.css.txt + 'justify-content:right; width:60px; line-height:'+ (this.h-8) + 'px; color:' + color );
+        //this.c[2] = this.dom( 'div', this.css.txt + ' justify-content:right; width:60px; line-height:'+ (this.h-8) + 'px; color:' + color );
 
-        if( this.h === 31 ){
+        /*if( this.h === 31 ){
 
             this.s[0].height = this.h + 'px';
             this.s[1].top = 8 + 'px';
-            this.c[2].style.top = 8 + 'px';
+            //this.c[2].style.top = 8 + 'px';
 
-        }
+        }*/
 
         let s = this.s;
 
         s[1].justifyContent = o.align || 'left';
-        //s[1].textAlign = o.align || 'left';
-        s[1].fontWeight = o.fontWeight || 'bold';
+        s[1].textAlign = o.align || 'left';
+        if(o.fontSize) s[1].fontSize = o.fontSize;
+        s[1].fontWeight = o.weight || 'normal';
         s[1].color = o.color || this.colors.text;
 
 
-        this.c[1].textContent = this.txt.substring(0,1).toUpperCase() + this.txt.substring(1).replace("-", " ");
-        this.c[2].textContent = prefix;
+        this.c[1].innerHTML = this.txt;//.substring(0,1).toUpperCase() + this.txt.substring(1).replace("-", " ");
+        //this.c[2].textContent = prefix;
 
         this.init();
 
@@ -7292,13 +7524,13 @@ class Title extends Proto {
 
     text( txt ) {
 
-        this.c[1].textContent = txt;
+        this.c[1].innerHTML = txt;
 
     }
 
     text2( txt ) {
 
-        this.c[2].textContent = txt;
+        //this.c[2].textContent = txt;
 
     }
 
@@ -7306,13 +7538,13 @@ class Title extends Proto {
 
         super.rSize();
         this.s[1].width = this.w + 'px'; //- 50 + 'px';
-        this.s[2].left = this.w + 'px';//- ( 50 + 26 ) + 'px';
+        //this.s[2].left = this.w + 'px';//- ( 50 + 26 ) + 'px';
 
     }
 
     setColor( c ) {
         this.s[1].color = c;
-        this.s[2].color = c;
+        //this.s[2].color = c
     }
 
 }
@@ -7501,7 +7733,8 @@ class Bitmap extends Proto {
 
         if( this.value.isTexture ){
             if( this.value.image ){
-                this.img = this.value.image;   
+                this.img = this.value.image; 
+                //console.log(this.value, this.img)
             }
         }
 
@@ -7602,12 +7835,40 @@ class Bitmap extends Proto {
     makePreview(){
 
         if( this.img ){
-            //let src = this.img.src ? this.img.src : this.img;
-            this.c[3].style.background = 'url('+this.img.src+')';
-            this.c[3].style.backgroundSize = (this.sb - 40) + 'px ' + (this.sb - 40) + 'px';
-            //this.c[3].style.backgroundSize = 20 + 'px ' + 20 + 'px'
-            this.c[3].style.backgroundPosition = 'center';
-            this.c[3].style.backgroundRepeat = 'no-repeat';
+
+            let src = this.img.src;
+
+            if(src.search('blob:')!==-1){ 
+                src.substring(5);
+
+                //  TODO find a way to display blob ???
+
+                
+                /*let reader = new FileReader();
+                reader.onload = () => {
+                    console.log( reader.result );
+                };
+                reader.readAsDataURL( src2 );
+                console.log(src, src2)*/
+                //src = URL.createObjectURL(src)
+                //this.c[3].style.background = 'url('+src2+')';
+                //this.c[3].style.backgroundSize = (this.sb - 40) + 'px ' + (this.sb - 40) + 'px'
+                //this.c[3].style.backgroundSize = 20 + 'px ' + 20 + 'px'
+                //this.c[3].style.backgroundPosition = 'center';
+                //this.c[3].style.backgroundRepeat = 'no-repeat';
+                this.c[3].style.background = '#00ff00';
+                this.c[3].style.backgroundImage = 'none';
+            } else {
+                //console.log(this.value)
+                //let src = this.img.src ? this.img.src : this.img;
+                this.c[3].style.background = 'url('+src+')';
+                this.c[3].style.backgroundSize = (this.sb - 40) + 'px ' + (this.sb - 40) + 'px';
+                //this.c[3].style.backgroundSize = 20 + 'px ' + 20 + 'px'
+                this.c[3].style.backgroundPosition = 'center';
+                this.c[3].style.backgroundRepeat = 'no-repeat';
+            }
+
+            
         } else {
             this.c[3].style.background = this.colors.back;
             this.c[3].style.backgroundImage = 'none';
@@ -8227,15 +8488,12 @@ class Pad2D extends Proto {
         this.range = (this.max - this.min)*0.5;  
 
         this.cmode = 0;
+        this.flipY = o.flipY || false;
 
 
         //console.log(this.range)
 
         this.c[0].style.display = 'block';
-
-        
-
-
 
         this.precision = o.precision === undefined ? 2 : o.precision;
 
@@ -8440,8 +8698,10 @@ class Pad2D extends Proto {
 
         let r = 1/this.maxPos;
 
+        let m = this.flipY ? 1:-1;
+
         this.value[0] = ((p[0]*r)*this.range).toFixed( this.precision );
-        this.value[1] = ((p[1]*r)*this.range).toFixed( this.precision );
+        this.value[1] = m * ((p[1]*r)*this.range).toFixed( this.precision );
 
     }
 
@@ -8449,17 +8709,12 @@ class Pad2D extends Proto {
 
         if( v === undefined ) v = this.value;
 
-        /*if ( v[0] < this.bounds.x1 ) v[0] = this.bounds.x1;
-        if ( v[0] > this.bounds.x2 ) v[0] = this.bounds.x2;
-        if ( v[1] < this.bounds.y1 ) v[1] = this.bounds.y1;
-        if ( v[1] > this.bounds.y2 ) v[1] = this.bounds.y2;*/
+        let m = this.flipY ? 1:-1;
 
         this.value[0] = Math.min( this.max, Math.max( this.min, v[0] ) ).toFixed( this.precision ) * 1;
         this.value[1] = Math.min( this.max, Math.max( this.min, v[1] ) ).toFixed( this.precision ) * 1;
 
-        this.pos.set( ((this.value[0]/this.range)*this.maxPos)+128  , ((this.value[1]/this.range)*this.maxPos)+128 );
-
-        //console.log(this.pos)
+        this.pos.set( ((this.value[0]/this.range)*this.maxPos)+128  , m*((this.value[1]/this.range)*this.maxPos)+128 );
 
         this.update( up );
 
@@ -8477,6 +8732,238 @@ class Pad2D extends Proto {
 
     }*/
 
+}
+
+class Checker extends Proto {
+
+    constructor( o = {} ) {
+
+        super( o );
+
+        this.round = Math.round;
+
+        //this.autoHeight = true;
+
+        this.wfixe = 128;
+        this.hfixe = 84;
+
+        this.ratio = this.hfixe/this.wfixe;
+
+        this.hhh = this.w*this.ratio;
+
+        this.baseH = this.h;
+        this.hplus = o.hplus || 50;
+
+        this.res = o.res || 40;
+        this.l = 1;
+
+        this.precision = o.precision || 0;
+        
+
+        this.custom = o.custom || false;
+        this.names = o.names || ['FPS', 'MS'];
+        let cc = o.cc || ['220,220,220', '255,255,0'];
+
+       // this.divid = [ 100, 100, 100 ];
+       // this.multy = [ 30, 30, 30 ];
+
+        this.adding = o.adding || false;
+
+        this.range = o.range || [ 165, 100, 100 ];
+
+        this.alpha = o.alpha || 0.25;
+
+        this.values = [];
+        this.points = [];
+        this.textDisplay = [];
+
+        if(!this.custom){
+
+            this.now = Roots.getTime();
+            this.startTime = 0;//this.now()
+            this.prevTime = 0;//this.startTime;
+            this.frames = 0;
+
+            this.ms = 0;
+            this.fps = 0;
+            this.mem = 0;
+            this.mm = 0;
+
+            this.isMem = ( self.performance && self.performance.memory ) ? true : false;
+
+           // this.divid = [ 100, 200, 1 ];
+           // this.multy = [ 30, 30, 30 ];
+
+            if( this.isMem ){
+
+                this.names.push('MEM');
+                cc.push('0,255,255');
+
+            }
+
+            this.txt = o.name || 'Checker';
+
+        }
+
+
+        let fltop = Math.floor(this.h*0.5)-3;
+        const ccc = this.colors;
+
+        this.c[1].textContent = this.txt;
+        //this.c[1].innerHTML = '&#160;' + this.txt
+        this.c[0].style.cursor = 'pointer';
+        this.c[0].style.pointerEvents = 'auto';
+
+        //let panelCss = 'display:none; left:10px; top:'+ this.h + 'px; height:'+(this.hplus - 8)+'px; box-sizing:border-box; background: rgba(0, 0, 0, 0.2); border:1px solid '+ ccc.border +';';
+
+        //if( this.radius !== 0 ) panelCss += 'border-radius:' + this.radius+'px;'; 
+
+        this.model = 'to';
+
+        this.c[2] = this.getCkecker( this.model );
+        this.setSvg( this.c[2], 'viewBox', '0 0 '+this.w+' '+this.hhh );
+        this.setCss( this.c[2], { width:this.w, height:this.hhh, left:0, top:this.top });
+
+       /* this.c[2] = this.dom( 'path', this.css.basic + panelCss , {} );*/
+
+        //this.c[2].setAttribute('viewBox', '0 0 '+this.res+' 50' );
+        //this.c[2].setAttribute('height', '100%' );
+        //this.c[2].setAttribute('width', '100%' );
+        //this.c[2].setAttribute('preserveAspectRatio', 'none' );
+         this.c[2].setAttribute('display', 'none' );
+       // this.s[2].display = 'none';
+
+
+        //this.dom( 'path', null, { fill:'rgba(255,255,0,0.3)', 'stroke-width':1, stroke:'#FF0', 'vector-effect':'non-scaling-stroke' }, this.c[2] );
+        //this.dom( 'path', null, { fill:'rgba(0,255,255,0.3)', 'stroke-width':1, stroke:'#0FF', 'vector-effect':'non-scaling-stroke' }, this.c[2] );
+        
+        // arrow
+        this.c[3] = this.dom( 'path', this.css.basic + 'position:absolute; width:6px; height:6px; left:0; top:'+fltop+'px;', { d:this.svgs.g1, fill:ccc.text, stroke:'none'});
+        //this.c[3] = this.dom( 'path', this.css.basic + 'position:absolute; width:10px; height:10px; left:4px; top:'+fltop+'px;', { d:this.svgs.arrow, fill:this.colors.text, stroke:'none'});
+
+        // result test
+        //this.c[4] = this.dom( 'div', this.css.txt + 'position:absolute; left:10px; top:'+(this.h+2) +'px; display:none; width:100%; text-align:center;' );
+
+        // bottom line
+        //if( o.bottomLine ) this.c[4] = this.dom( 'div', this.css.basic + 'width:100%; bottom:0px; height:1px; background: rgba(255, 255, 255, 0.2);');
+
+        this.isShow = false;
+
+
+
+        let s = this.s;
+
+        //s[1].marginLeft = '10px';
+        s[1].lineHeight = this.h-4;
+        s[1].color = ccc.text;
+        //s[1].paddingLeft = '18px';
+        //s[1].fontWeight = 'bold';
+
+        if( this.radius !== 0 )  s[0].borderRadius = this.radius+'px';
+        if( this.colors.gborder!=='none') s[0].border = '1px solid ' + ccc.gborder;
+
+
+
+
+        /*let j = 0;
+
+        for( j=0; j<this.names.length; j++ ){
+
+            let base = [];
+            let i = this.res+1;
+            while( i-- ) base.push(50);
+
+            this.range[j] = ( 1 / this.range[j] ) * 49;
+            
+            this.points.push( base );
+            this.values.push(0);
+           //  this.dom( 'path', null, { fill:'rgba('+cc[j]+',0.5)', 'stroke-width':1, stroke:'rgba('+cc[j]+',1)', 'vector-effect':'non-scaling-stroke' }, this.c[2] );
+            this.textDisplay.push( "<span style='color:rgb("+cc[j]+")'> " + this.names[j] +" ");
+
+        }
+
+        j = this.names.length;
+        while(j--){
+            this.dom( 'path', null, { fill:'rgba('+cc[j]+','+this.alpha+')', 'stroke-width':1, stroke:'rgba('+cc[j]+',1)', 'vector-effect':'non-scaling-stroke' }, this.c[2] );
+        }*/
+
+
+        this.init();
+
+        //if( this.isShow ) this.show();
+
+    }
+
+    // ----------------------
+    //   EVENTS
+    // ----------------------
+
+    mousedown ( e ) {
+
+        if( this.isShow ) this.close();
+        else this.open();
+
+    }
+
+    open () {
+
+        super.open();
+
+        this.h = this.hplus + this.baseH;
+
+        this.setSvg( this.c[3], 'd', this.svgs.g2 );
+
+        if( this.group !== null ){ this.group.calc( this.hplus );}
+        else if( this.isUI ) this.main.calc( this.hplus );
+
+        this.s[0].height = this.h +'px';
+        this.s[2].display = 'block'; 
+        //this.s[4].display = 'block';
+        this.isShow = true;
+
+        //if( !this.custom ) Roots.addListen( this );
+
+    }
+
+    close () {
+
+        super.close();
+
+        this.h = this.baseH;
+
+        this.setSvg( this.c[3], 'd', this.svgs.g1 );
+
+        if( this.group !== null ){ this.group.calc( -this.hplus );}
+        else if( this.isUI ) this.main.calc( -this.hplus );
+        
+        this.s[0].height = this.h +'px';
+        this.s[2].display = 'none';
+        //this.s[4].display = 'none';
+        this.isShow = false;
+
+        //if( !this.custom ) Roots.removeListen( this );
+
+        //this.c[4].innerHTML = '';
+        
+    }
+
+
+    rSize () {
+
+        let s = this.s;
+        let w = this.w;
+
+        s[3].left = ( this.sa + this.sb - 6 ) + 'px';
+
+        s[0].width = w + 'px';
+        s[1].width = w + 'px';
+        s[2].left = 0 + 'px';
+       // s[2].width = w + 'px';
+
+        //s[4].width = (w-20) + 'px';
+        
+    }
+    
 }
 
 const add = function () {
@@ -8526,7 +9013,7 @@ const add = function () {
             case 'numeric': case 'number': n = new Numeric(o); break;
             case 'slide': n = new Slide(o); break;
             case 'textInput': case 'string': n = new TextInput(o); break;
-            case 'title': case 'text': n = new Title(o); break;
+            case 'title': case 'text': case 'note': n = new Title(o); break;
             case 'select': n = new Select(o); break;
             case 'bitmap': n = new Bitmap(o); break;
             case 'selector': n = new Selector(o); break;
@@ -8534,6 +9021,7 @@ const add = function () {
             case 'item': n = new Item(o); break;
             case 'grid': n = new Grid(o); break;
             case 'pad2d': case 'pad': n = new Pad2D(o); break;
+            case 'checker': n = new Checker(o); break;
 
         }
 
@@ -8615,6 +9103,8 @@ class Gui {
         this.isCanvasOnly = false;
         
         this.callback = o.callback  === undefined ? null : o.callback;
+
+        this.autoShow = o.autoShow  === undefined ? true : o.autoShow;
 
         this.forceHeight = o.maxHeight || 0;
         this.lockHeight = o.lockHeight || false;
@@ -8705,6 +9195,7 @@ class Gui {
         this.content.appendChild( this.bottom );
         this.bottom.textContent = this.isOpen ? this.bottomText[1] : this.bottomText[0];
         this.bottom.style.background = cc.background;
+        if(this.bh===0) this.bottom.style.visible = 'hidden'; 
 
         //
 
@@ -9333,6 +9824,7 @@ class Gui {
 
         this.innerContent.style.height = this.zone.h - this.bh + 'px';
         this.content.style.height = this.zone.h + 'px';
+        if( this.autoShow )this.content.style.visibility = this.zone.h !== 0 ? 'visible' : 'hidden';
         this.bottom.style.top = (this.zone.h - this.bh) + 'px';
 
         if( this.isBottom ){

@@ -24,6 +24,7 @@ export class Slide extends Proto {
 
         this.isDeg = o.isDeg || false;
         this.isCyclic = o.cyclic || false;
+        this.isTime = o.isTime || false;
 
         this.firstImput = false;
 
@@ -177,6 +178,29 @@ export class Slide extends Proto {
 
     // ----------------------
 
+    formatOutput(){
+
+        let v = this.value;
+        if(this.isDeg) v+='°'
+        if(this.isTime){
+
+            const heures = Math.floor(this.value);
+            const minutes = Math.round((this.value - heures) * 60);
+
+            if(minutes === 60) { v = `${heures + 1}h00`; }
+            else {
+                const minutesFormatees = minutes < 10 ? '0' + minutes : minutes;
+                v = `${heures}h${minutesFormatees}`;
+            }
+
+        }
+
+        return v 
+
+    }
+
+    // ----------------------
+
     validate () {
         
         let n = this.c[2].textContent;
@@ -187,7 +211,7 @@ export class Slide extends Proto {
         }
 
         else {
-            if(this.autoValue) this.c[2].textContent = this.value + (this.isDeg ? '°':'');
+            if(this.autoValue) this.c[2].textContent = this.formatOutput();
         }
 
     }
@@ -231,7 +255,7 @@ export class Slide extends Proto {
        
         if(this.model !== 3) this.s[5].width = ww + 'px';
         if(this.s[6]) this.s[6].left = ( this.sa + ww + 3 ) + 'px';
-        if(this.autoValue) this.c[2].textContent = this.value + (this.isDeg ? '°':'');
+        if(this.autoValue) this.c[2].textContent = this.formatOutput();
 
         if( up ) this.send();
 

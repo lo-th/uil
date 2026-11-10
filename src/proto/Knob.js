@@ -8,6 +8,8 @@ export class Knob extends Proto {
 
         super( o );
 
+        this.isKnob = true;
+
         this.isCyclic = o.cyclic || false;
         this.model = o.stype || 0;
         if( o.mode !== undefined ) this.model = o.mode;
@@ -18,6 +20,8 @@ export class Knob extends Proto {
 
         this.minw  = this.w
         this.diam = o.diam || this.w 
+
+        this.limiteRange = o.limit || false;
 
         this.mPI = Math.PI * 0.8;
         this.toDeg = 180 / Math.PI;
@@ -30,12 +34,13 @@ export class Knob extends Proto {
         this.c[0].style.width = this.w +'px'
         this.c[0].style.display = 'block'
 
+
         if(this.c[1] !== undefined) {
 
             this.c[1].style.width = '100%'
             this.c[1].style.justifyContent = 'center'
-            this.top = 10;
-            this.h += 10;
+            this.top = 14;
+            this.h += 14;
 
         }
 
@@ -44,13 +49,13 @@ export class Knob extends Proto {
         this.cmode = 0;
         let cc = this.colors
 
-        this.c[2] = this.dom( 'div', this.css.txt + 'justify-content:center; top:'+(this.h-20)+'px; width:100%; color:'+ cc.text );
+        this.c[2] = this.dom( 'div', this.css.txt + 'justify-content:center; top:'+(this.h-16)+'px; width:100%; color:'+ cc.text );
 
         this.c[3] = this.getKnob();
         this.setSvg( this.c[3], 'fill', cc.button, 0 )
-        this.setSvg( this.c[3], 'stroke', cc.text, 1 )
-        this.setSvg( this.c[3], 'stroke', cc.text, 3 )
-        this.setSvg( this.c[3], 'd', this.makeGrad(), 3 )
+        this.setSvg( this.c[3], 'stroke', cc.text, 2 )
+        this.setSvg( this.c[3], 'stroke', cc.text, 4 )
+        this.setSvg( this.c[3], 'd', this.makeGrad(), 4 )
         
         this.setSvg( this.c[3], 'viewBox', '0 0 ' + this.diam + ' ' + this.diam )
         this.setCss( this.c[3], { width:this.diam, height:this.diam, left:0, top:this.top })
@@ -62,7 +67,7 @@ export class Knob extends Proto {
             if ( this.model == 2) {
             
                 Tools.addSVGGlowEffect();
-                this.setSvg( this.c[3], 'style', 'filter: url("#UILGlow");', 4 );
+                this.setSvg( this.c[3], 'style', 'filter: url("#UILGlow");', 5 );
             
             }
 
@@ -71,6 +76,7 @@ export class Knob extends Proto {
         this.r = 0;
 
         this.init();
+
 
         this.update();
 
@@ -87,13 +93,13 @@ export class Knob extends Proto {
                 this.s[2].color = cc.text;
                 this.setSvg( this.c[3], 'fill', cc.button, 0);
                 //this.setSvg( this.c[3], 'stroke','rgba(255,0,0,0.2)', 2);
-                this.setSvg( this.c[3], 'stroke', cc.text, 1 );
+                this.setSvg( this.c[3], 'stroke', cc.text, 2 );
             break;
             case 1: // down
                 this.s[2].color = cc.textOver;
                 this.setSvg( this.c[3], 'fill', cc.select, 0);
                 //this.setSvg( this.c[3], 'stroke','rgba(0,0,0,0.6)', 2);
-                this.setSvg( this.c[3], 'stroke', cc.textOver, 1 );
+                this.setSvg( this.c[3], 'stroke', cc.textOver, 2 );
             break;
         }
 
@@ -137,6 +143,8 @@ export class Knob extends Proto {
     mousemove ( e ) {
 
         if( !this.isDown ) return;
+
+        this.cursor('pointer');
 
         let off = this.offset;
 
@@ -200,8 +208,8 @@ export class Knob extends Proto {
         let endangle = Math.PI - this.mPI;
         //let step = this.step>5 ? this.step : 1;
 
-        if(this.step>5){
-            range =  this.range / this.step;
+        if(this.step>5 || this.limiteRange){
+            range = this.range / this.step;
             step = ( startangle - endangle ) / range;
         } else {
             step = (( startangle - endangle ) / r)*2;
@@ -239,7 +247,7 @@ export class Knob extends Proto {
         let x2 = ( 20 * sin ) + 64;
         let y2 = -( 20 * cos ) + 64;
 
-        this.setSvg( this.c[3], 'd', 'M ' + x1 +' ' + y1 + ' L ' + x2 +' ' + y2, 1 );
+        this.setSvg( this.c[3], 'd', 'M ' + x1 +' ' + y1 + ' L ' + x2 +' ' + y2, 2 );
         
         if ( this.model > 0 ) {
 
@@ -248,10 +256,10 @@ export class Knob extends Proto {
             let x2 = 36 * sin + 64;
             let y2 = -36 * cos + 64;
             let big = ea <= Math.PI - this.mPI ? 0 : 1;
-            this.setSvg( this.c[3], 'd', 'M ' + x1 + ',' + y1 + ' A ' + 36 + ',' + 36 + ' 1 ' + big + ' 1 ' + x2 + ',' + y2, 4 );
+            this.setSvg( this.c[3], 'd', 'M ' + x1 + ',' + y1 + ' A ' + 36 + ',' + 36 + ' 1 ' + big + ' 1 ' + x2 + ',' + y2, 5 );
 
             let color = Tools.pack( Tools.lerpColor( Tools.unpack( Tools.ColorLuma( this.colors.text, -0.75) ), Tools.unpack( this.colors.text ), this.percent ) );
-            this.setSvg( this.c[3], 'stroke', color, 4 );
+            this.setSvg( this.c[3], 'stroke', color, 5 );
         
         }
 

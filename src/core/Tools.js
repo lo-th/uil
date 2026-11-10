@@ -103,6 +103,7 @@ const T = {
 
         //if( o.transparent ) o.bg = 'none'
         //if( o.bg ) color.background = color.backgroundOver = o.bg
+        if( o.bg ) color.background = o.bg
         if( o.bgOver ) color.backgroundOver = o.bgOver
 
         for( let m in color ){
@@ -180,7 +181,8 @@ const T = {
 
         basic: 'position:absolute; pointer-events:none; box-sizing:border-box; margin:0; padding:0; overflow:hidden; ' + '-o-user-select:none; -ms-user-select:none; -khtml-user-select:none; -webkit-user-select:none; -moz-user-select:none;',
         button:'display:flex; align-items:center; justify-content:center; text-align:center;',
-        middle:'display:flex; align-items:center; justify-content:left; text-align:left; flex-direction: row-reverse;'
+        middle:'display:flex; align-items:center; justify-content:left; text-align:left; flex-direction: row-reverse;',
+        edit:'display:flex; align-items:left; justify-content:left; text-align:left; flex-direction: row | row-reverse | column | column-reverse;'
     },
 
     // svg path
@@ -270,7 +272,7 @@ const T = {
         T.css.txt = T.css.basic + T.css.middle + ' font-family:'+ font +'; font-weight:'+weight+'; font-size:'+size+'; color:'+cc.text+'; padding:0px 8px; left:0; top:2px; height:16px; width:100px; overflow:hidden; white-space: nowrap; letter-spacing:normal;';//letter-spacing: normal;
         if( shadow !== 'none' ) T.css.txt += ' text-shadow: 1px 1px 1px '+shadow+';';
 
-        T.css.txtselect = T.css.txt + 'padding:0px 4px; border:1px dashed ' + cc.border + ';';
+        T.css.txtselect = T.css.txt + T.css.edit + 'line-height: normal; padding:0px 4px; border:1px dashed ' + cc.border + ';';
         T.css.item = T.css.txt + 'padding:0px 4px; position:relative; margin-bottom:1px; '
 
     },
@@ -643,6 +645,42 @@ const T = {
 
     },*/
 
+    makeChecker: function ( model ) {
+
+        let ww = 128;
+        let space = 2
+        let box = ww/6 - (space*4);
+        let hh = (box*4) + (space*2)
+
+        let svg = T.dom( 'svg', T.css.basic + 'position:relative;', { viewBox:'0 0 '+ww+' '+hh, width:ww, height:hh, preserveAspectRatio:'none' } );
+
+        let x = 0
+        let y = 0
+        let n = 0
+
+        for(let i = 0; i<24; i++){
+
+            Tools.dom( 'rect', '', { x: x, y: y,  width: box, height: box, fill:T.colors.back }, svg )
+            x += box+space;
+            n ++
+            if(n>5){
+                x = 0
+                y += box+space
+                n = 0
+            }
+        }
+        /*let w = 200; 
+        let d = (ww-w)*0.5, m = 20;
+        Tools.dom( 'rect', '', { x: d, y: d,  width: w, height: w, fill:T.colors.back }, svg ); // 0
+        Tools.dom( 'rect', '', { x: d+m*0.5, y: d+m*0.5, width: w - m , height: w - m, fill:T.colors.button }, svg ); // 1
+        // Pointer
+        Tools.dom( 'line', '', { x1: d+(m*0.5), y1: ww *0.5, x2: d+(w-m*0.5), y2: ww * 0.5, stroke:T.colors.back, 'stroke-width': 2 }, svg ); // 2
+        Tools.dom( 'line', '', { x1: ww * 0.5, x2: ww * 0.5, y1: d+(m*0.5), y2: d+(w-m*0.5), stroke:T.colors.back, 'stroke-width': 2 }, svg ); // 3
+        Tools.dom( 'circle', '', { cx: ww * 0.5, cy: ww * 0.5, r:5, stroke: T.colors.text, 'stroke-width': 5, fill:'none' }, svg ); // 4*/
+        T.checker = svg;
+
+    },
+
     makePad: function ( model ) {
 
         let ww = 256
@@ -665,9 +703,13 @@ const T = {
         let radius = 34;
         let svg = T.dom( 'svg', T.css.basic + 'position:relative;', { viewBox:'0 0 '+w+' '+w, width:w, height:w, preserveAspectRatio:'none' } );
         T.dom( 'circle', '', { cx:64, cy:64, r:radius, fill:T.colors.button, stroke:'rgba(0,0,0,0.3)', 'stroke-width':8 }, svg );//0
-        T.dom( 'path', '', { d:'', stroke:T.colors.text, 'stroke-width':4, fill:'none', 'stroke-linecap':'round' }, svg );//1
-        T.dom( 'circle', '', { cx:64, cy:64, r:radius+7, stroke:'rgba(0,0,0,0.1)', 'stroke-width':7 , fill:'none'}, svg );//2
-        T.dom( 'path', '', { d:'', stroke:'rgba(255,255,255,0.3)', 'stroke-width':2, fill:'none', 'stroke-linecap':'round', 'stroke-opacity':0.5 }, svg );//3
+        T.dom( 'circle', '', { cx:64, cy:64, r:radius-10, fill:'rgba(255,255,255,0.1)', stroke:'none'  }, svg );//1
+        T.dom( 'path', '', { d:'', stroke:T.colors.text, 'stroke-width':4, fill:'none', 'stroke-linecap':'round' }, svg );//2
+        T.dom( 'circle', '', { cx:64, cy:64, r:radius+7, stroke:'rgba(0,0,0,0.1)', 'stroke-width':7 , fill:'none'}, svg );//3
+        T.dom( 'path', '', { d:'', stroke:'rgba(255,255,255,0.3)', 'stroke-width':2, fill:'none', 'stroke-linecap':'round', 'stroke-opacity':0.5 }, svg );//4
+
+        //
+
         T.knob = svg;
 
     },

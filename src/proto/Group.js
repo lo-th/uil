@@ -24,6 +24,7 @@ export class Group extends Proto {
         //this.dd = o.group ? o.group.decal + 8 : 0
 
         this.baseH = this.h
+        //this.margin = 0 
 
         //this.spaceY = new Empty({h:this.margin});
 
@@ -78,8 +79,8 @@ export class Group extends Proto {
         if(cc.groups === 'none') cc.groups = cc.background
         //    cc.background = 'none'
 
-        s[0].background = bg !== undefined ? 'none' : cc.content;
-        s[1].background = bg !== undefined ? cc.groups : cc.content;
+        s[0].background = 'none'//bg !== undefined ? 'none' : cc.content;
+        s[1].background = cc.groups//bg !== undefined ? cc.groups : cc.content;
         //s[2].background = bg !== undefined ? cc.groups : cc.content
 
         //s[0].background = '#FF0';
@@ -413,7 +414,7 @@ export class Group extends Proto {
     calcUis () {
 
         if( !this.isOpen || this.isEmpty ) this.h = this.baseH
-        //else this.h = Roots.calcUis( this.uis, this.zone, this.zone.y + this.baseH ) + this.baseH;
+        //else this.h = Roots.calcUis( this.uis, this.zone, this.zone.y + this.baseH, true ) + this.baseH;
         else this.h = Roots.calcUis( [...this.uis ], this.zone, this.zone.y + this.baseH + this.margin, true ) + this.baseH
        // else this.h = Roots.calcUis( [...this.uis, this.spaceY ], this.zone, this.zone.y + this.baseH + this.margin, true ) + this.baseH
 

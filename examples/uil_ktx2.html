@@ -85,6 +85,7 @@
 		        window.isThreaded = threadingSupported; // Set global variable to indicate threading support
 
 		        const scriptSrc = threadingSupported ? "./libs/basis_encoder_threads.js" : "./libs/basis_encoder.js";
+		        //const scriptSrc = threadingSupported ? "./libs/new/basis_encoder_threads_wasm64.js" : "./libs/new/basis_encoder_threads_wasm64.js";
 
 		        const script = document.createElement("script");
 		        script.src = scriptSrc;

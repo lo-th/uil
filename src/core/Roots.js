@@ -3,7 +3,7 @@
  * @author lth / https://github.com/lo-th
  */
 
-export const REVISION = '4.4.0';
+export const REVISION = '4.5.0';
 
 // INTENAL FUNCTION
 
@@ -49,6 +49,8 @@ const R = {
     tmpImage: null,
 
     oldCursor:'auto',
+
+    resizeTimeout:null,
 
     input: null,
     parent: null,
@@ -175,7 +177,14 @@ const R = {
 
         dom.addEventListener( 'keydown', R, false )
         dom.addEventListener( 'keyup', R, false )
-        window.addEventListener( 'resize', R.resize , false )
+
+        R.onResize = () => {
+            R.needReZone = true;
+            R.needResize = true;
+            R.resize()
+        }
+
+        window.addEventListener( 'resize', R.onResize , { passive: true } )
 
         //window.onblur = R.out;
         //window.onfocus = R.in;
@@ -212,7 +221,7 @@ const R = {
 
         dom.removeEventListener( 'keydown', R );
         dom.removeEventListener( 'keyup', R );
-        window.removeEventListener( 'resize', R.resize  );
+        window.removeEventListener( 'resize', R.onResize );
 
         R.isEventsInit = false;
 
@@ -222,19 +231,27 @@ const R = {
 
     resize: function () {
 
-        //console.log('resize !!')
+        if (R.resizeTimeout) clearTimeout(R.resizeTimeout);
 
-        let i = R.ui.length, u;
-        
-        while( i-- ){
+        R.resizeTimeout = setTimeout( () => {
 
-            u = R.ui[i];
-            if( u.isGui && !u.isCanvasOnly && u.autoResize ) u.calc();
-        
-        }
+            let i = R.ui.length, u;
+            
+            while( i-- ){
 
-        R.needReZone = true;
-        R.needResize = false;
+                u = R.ui[i];
+                if( u.isGui && !u.isCanvasOnly && u.autoResize ){
+                    u.calc();
+                    if(u.innerHeight) u.innerHeight = u.content.offsetHeight;
+                }
+            
+            }
+
+            R.needReZone = true;
+            R.needResize = false;
+            R.resizeTimeout = null;
+
+        }, 100);
 
     },
 
@@ -273,8 +290,23 @@ const R = {
 
 
         R.findZone( R.forceZone );
+
+        let ptype = event.pointerType // mouse, pen, touch
        
-        let e = R.e;
+        //let e = R.e;
+        // Normalisation propre
+        let e = {
+            type: event.type,
+            clientX: event.clientX,
+            clientY: event.clientY,
+            pageX: event.pageX,
+            pageY: event.pageY,
+            pressure: event.pressure, // ✅ Garde la pression du stylet/toucher
+            isPrimary: event.isPrimary, // ✅ Garde l'info du doigt principal
+            delta: 0,
+            pointerType: ptype
+        };
+
         let leave = false;
         
         if( event.type === 'keydown') R.keydown( event );
@@ -283,7 +315,7 @@ const R = {
         if( event.type === 'wheel' ) e.delta = event.deltaY > 0 ? 1 : -1;
         else e.delta = 0;
 
-        let ptype = event.pointerType // mouse, pen, touch
+        
 
         e.clientX = ( ptype === 'touch' ? event.pageX : event.clientX ) || 0
         e.clientY = ( ptype === 'touch' ? event.pageY : event.clientY ) || 0
@@ -291,8 +323,9 @@ const R = {
         e.type = event.type;
 
         if( R.eventOut.indexOf( event.type ) !== -1 ){ 
-            leave = true
-            e.type = 'mouseup'
+            //leave = true
+            e.type = 'mouseup';
+            R.isLeave = true;
         }
 
         if( event.type === 'pointerleave') R.isLeave = true; 
@@ -366,13 +399,9 @@ const R = {
 
         let i = R.ui.length, next = -1, u, x, y;
 
-
-
         while( i-- ){
 
             u = R.ui[i]
-
-
 
             if( u.isCanvasOnly ) {
 
@@ -448,12 +477,19 @@ const R = {
                 //if(div) u.zone.y += m * 0.5
 
                 tw = R.getWidth(u);
+                //if(u.isKnob) console.log(tw)
                 if( tw ) u.zone.w = u.w = tw
                 else if( u.fw ) u.zone.w = u.w = u.fw
-                
-                px += u.zone.w
 
-                if( px >= zone.w ) { 
+                //if(u.isKnob) u.zone.w = 93//console.log('knob', tw)
+                //if(u.isKnob) console.log(u.zone.w)
+                
+                px += u.zone.w+1
+
+                if( px >= zone.w ) {
+
+                // TODO solve stress test but break all ?
+                //if( px+u.zone.w >= zone.w ) { 
                     py += u.h + m
                     //if(div) py += m * 0.5
                     px = 0
@@ -517,7 +553,7 @@ const R = {
 
     onZone: function ( o, x, y ) {
 
-        //console.log(o, x, y)
+        //
 
         if( x === undefined || y === undefined ) return false;
 

@@ -45,7 +45,7 @@
     function callback (v){ debug.innerHTML = v; }
 
     let colors = [
-        { bg:'#ddd', text:'#333', button:'#ddd', select:'#0ff',  back:'#ccc', size:16, shadow:'none', borderSize:2, fontSize:'13', sx:6, sy:4, radius:12, showOver:0  },
+        { content:'#aaa', bg:'#ddd', text:'#333', button:'#ddd', select:'#0ff', back:'#ccc', size:16, shadow:'none', borderSize:2, fontSize:'13', sx:6, sy:4, radius:12, showOver:0  },
         { shadow:'#000', font:"'Roboto Mono', monospace", fontSize:14 },
         { backgroundOver: 'rgba(50,80,50,0.3)', content:'#000', bg:'#000', text:'#0c0', button:'#333', select:'#a00', back:'#222', font:'Tahoma', fontSize:16, weight:'bold', shadow:'none', sx:12, sy:10  }
     ]
@@ -73,13 +73,10 @@
         ui.add('number', { name:'Vector3', value:[0,0,0] });
         ui.add('list',   { name:'list', list:['item-0', 'item-1', 'item-2', 'item-3', 'item-4', 'item-5', 'item-6', 'item-7'], itemHeight:30, miniCanvas:true, canvasBg:'green', listOnly:false, dragout:true })
 
-        ui.add('circular', { name:'circular1', w:100, min:0, max:100, value:25, precision:2 });
-        //ui.add('circular', { name:'circular2', w:100, min:0, max:100, value:25, precision:2 });
-
+        /*ui.add('circular', { name:'circular1', w:100, min:0, max:100, value:25, precision:2 });
         ui.add('joystick', { name:'joystick', w:100, multiplicator:1, precision:2, mode:1 });
-        //ui.add('joystick', { name:'joystick', w:100, multiplicator:1, precision:2, });
-        ui.add('knob', { name:'knob', w:100, min:0, max:100, value:25, precision:2 })
-        ui.add('Pad', { name:'Pad_1', w:100, min:-1, max:1, precision:2 })
+        ui.add('knob', { name:'knob', w:100, min:0, max:100, value:25, precision:2 })*/
+        //ui.add('Pad', { name:'Pad_1', w:100, min:-1, max:1, precision:2 })
 
         let gg0 = ui.add('group', { name:'YOOO', h:24 })
         gg0.add('button', { name:'Button1', value:'B0' })

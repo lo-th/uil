@@ -17,7 +17,8 @@ export class Bitmap extends Proto {
 
         if( this.value.isTexture ){
             if( this.value.image ){
-                this.img = this.value.image;   
+                this.img = this.value.image; 
+                //console.log(this.value, this.img)
             }
         }
 
@@ -118,12 +119,40 @@ export class Bitmap extends Proto {
     makePreview(){
 
         if( this.img ){
-            //let src = this.img.src ? this.img.src : this.img;
-            this.c[3].style.background = 'url('+this.img.src+')';
-            this.c[3].style.backgroundSize = (this.sb - 40) + 'px ' + (this.sb - 40) + 'px'
-            //this.c[3].style.backgroundSize = 20 + 'px ' + 20 + 'px'
-            this.c[3].style.backgroundPosition = 'center';
-            this.c[3].style.backgroundRepeat = 'no-repeat';
+
+            let src = this.img.src
+
+            if(src.search('blob:')!==-1){ 
+                let src2 = src.substring(5)
+
+                //  TODO find a way to display blob ???
+
+                
+                /*let reader = new FileReader();
+                reader.onload = () => {
+                    console.log( reader.result );
+                };
+                reader.readAsDataURL( src2 );
+                console.log(src, src2)*/
+                //src = URL.createObjectURL(src)
+                //this.c[3].style.background = 'url('+src2+')';
+                //this.c[3].style.backgroundSize = (this.sb - 40) + 'px ' + (this.sb - 40) + 'px'
+                //this.c[3].style.backgroundSize = 20 + 'px ' + 20 + 'px'
+                //this.c[3].style.backgroundPosition = 'center';
+                //this.c[3].style.backgroundRepeat = 'no-repeat';
+                this.c[3].style.background = '#00ff00';
+                this.c[3].style.backgroundImage = 'none';
+            } else {
+                //console.log(this.value)
+                //let src = this.img.src ? this.img.src : this.img;
+                this.c[3].style.background = 'url('+src+')';
+                this.c[3].style.backgroundSize = (this.sb - 40) + 'px ' + (this.sb - 40) + 'px'
+                //this.c[3].style.backgroundSize = 20 + 'px ' + 20 + 'px'
+                this.c[3].style.backgroundPosition = 'center';
+                this.c[3].style.backgroundRepeat = 'no-repeat';
+            }
+
+            
         } else {
             this.c[3].style.background = this.colors.back;
             this.c[3].style.backgroundImage = 'none';
