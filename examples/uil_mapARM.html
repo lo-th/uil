@@ -31,7 +31,7 @@
 
 		    let name = '', img;
 		    let size = {w:256, h:256}
-		    let psize = 128;
+		    const psize = 128;
 		    let images = [];
 		    let saveFormat = "image/png";
 		    let saveQuality = 0.95;
@@ -47,6 +47,11 @@
 			    left: 0;
 			    pointer-events: none;
 		    `
+
+		    let tmpMiniCanvas = document.createElement("canvas");
+		    tmpMiniCanvas.width = psize
+		    tmpMiniCanvas.height = psize
+		    let tmpMiniCtx = tmpMiniCanvas.getContext('2d', ctxOption );
 
 		    let tmpCanvas = document.createElement("canvas");
 		    let tmpCtx = tmpCanvas.getContext('2d', ctxOption );
@@ -132,14 +137,21 @@
 
 				name = Name.substring( 0, Name.lastIndexOf('.') )
 
-				//console.log(img, name, 'ALL')
-
 				let w = size.w;
 				let h = size.h;
 
 				ctx.clearRect( 0, 0, w, h );
 	    		ctx.drawImage( img, 0, 0, w, h );
-				let imageDataR  = ctx.getImageData(0, 0, w, h);
+
+	    		tmpImg.R = img;
+	    		tmpImg.G = img;
+	    		tmpImg.B = img;
+
+
+	    		tmpMiniCtx.clearRect( 0, 0, psize, psize );
+	    		tmpMiniCtx.drawImage( img, 0, 0, psize, psize );
+
+				let imageDataR = tmpMiniCtx.getImageData(0, 0, psize, psize);
 	    		let dataR = imageDataR.data;
 	    		for (let i = 0; i < dataR.length; i += 4) {
 	    			dataR[i + 1] = dataR[i]
@@ -147,15 +159,15 @@
 				}
 				ctx_R.putImageData(imageDataR, 0, 0);
 
-				let imageDataG  = ctx.getImageData(0, 0, w, h);
+				let imageDataG = tmpMiniCtx.getImageData(0, 0, psize, psize);
 	    		let dataG = imageDataG.data;
-	    		for (let i = 0; i < dataR.length; i += 4) {
+	    		for (let i = 0; i < dataG.length; i += 4) {
 	    			dataG[i] = dataG[i+1]
 	    			dataG[i + 2] = dataG[i+1]
 				}
 				ctx_G.putImageData(imageDataG, 0, 0);
 
-				let imageDataB  = ctx.getImageData(0, 0, w, h);
+				let imageDataB = tmpMiniCtx.getImageData(0, 0, psize, psize)
 	    		let dataB = imageDataB.data;
 	    		for (let i = 0; i < dataB.length; i += 4) {
 	    			dataB[i] = dataB[i+2]
