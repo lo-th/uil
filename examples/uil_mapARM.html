@@ -53,6 +53,7 @@
 			let canvas = document.createElement("canvas");
 			canvas.width = 256
 			canvas.height = 256
+			canvas.id = 'ALL';
 			canvas.style.cssText =  `
 			    display: block;
 			    pointer-events: auto; 
@@ -103,7 +104,6 @@
 				tmpImg.R = img;
 				copyChannel( 'R', img )
 				
-
 			}
 
 			const onLoadG = ( img, Name ) => {
@@ -115,7 +115,6 @@
 				tmpImg.G = img;
 				copyChannel( 'G', img )
 				
-
 			}
 
 			const onLoadB = ( img, Name ) => {
@@ -127,7 +126,43 @@
 				tmpImg.B = img;
 				copyChannel( 'B', img )
 				
+			}
 
+			const onLoadALL = ( img, Name ) => {
+
+				name = Name.substring( 0, Name.lastIndexOf('.') )
+
+				//console.log(img, name, 'ALL')
+
+				let w = size.w;
+				let h = size.h;
+
+				ctx.clearRect( 0, 0, w, h );
+	    		ctx.drawImage( img, 0, 0, w, h );
+				let imageDataR  = ctx.getImageData(0, 0, w, h);
+	    		let dataR = imageDataR.data;
+	    		for (let i = 0; i < dataR.length; i += 4) {
+	    			dataR[i + 1] = dataR[i]
+	    			dataR[i + 2] = dataR[i]
+				}
+				ctx_R.putImageData(imageDataR, 0, 0);
+
+				let imageDataG  = ctx.getImageData(0, 0, w, h);
+	    		let dataG = imageDataG.data;
+	    		for (let i = 0; i < dataR.length; i += 4) {
+	    			dataG[i] = dataG[i+1]
+	    			dataG[i + 2] = dataG[i+1]
+				}
+				ctx_G.putImageData(imageDataG, 0, 0);
+
+				let imageDataB  = ctx.getImageData(0, 0, w, h);
+	    		let dataB = imageDataB.data;
+	    		for (let i = 0; i < dataB.length; i += 4) {
+	    			dataB[i] = dataB[i+2]
+	    			dataB[i + 1] = dataB[i+2]
+				}
+				ctx_B.putImageData(imageDataB, 0, 0);
+				
 			}
 
 			const copyChannel = ( channel, img ) => {
@@ -271,6 +306,8 @@
 							case 'R': onLoadR( img, name ); break;
 							case 'G': onLoadG( img, name ); break;
 							case 'B': onLoadB( img, name ); break;
+
+							case 'ALL': onLoadALL( img, name ); break;
 						}
 					}
 
@@ -290,7 +327,7 @@
 		    	 bg:'none', radius:6, borderSize:0, showOver:0  
 		    }
 
-			let ui = new UIL.Gui( { w:274, close:false, css:'top:215px; left:50%;', center: true, colors:config } )
+			let ui = new UIL.Gui( { w:274, close:false, css:'top:212px; left:50%;', center: true, colors:config } )
 			ui.add( 'title',  { name:'MIX', h:24, align:'center' })
 			
 			//ui.add('button', { value:[ 256, 512, 1024, 2048 ], h:30 }).onChange( callbackResize )
