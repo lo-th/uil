@@ -39,6 +39,7 @@ export class Gui {
 
         this.isCanvas = o.isCanvas || false
         this.isCanvasOnly = false
+        this.canvasScale = o.canvasScale || 1
         
         this.callback = o.callback  === undefined ? null : o.callback
 
@@ -52,7 +53,7 @@ export class Gui {
         this.cn = ''
         
         // size define
-        this.size = Tools.size;
+        this.size = { ...Tools.size };//Tools.size;
         if( o.p !== undefined ) this.size.p = o.p;
         if( o.w !== undefined ) this.size.w = o.w;
         if( o.h !== undefined ) this.size.h = o.h;
@@ -105,6 +106,7 @@ export class Gui {
         let cc = this.colors
 
         let border = 'border: 2px solid ' + cc.content + '; '
+        //let border = 'border-left: 2px solid ' + cc.content + '; border-right: 2px solid ' + cc.content + '; ';
 
         this.content = Tools.dom( 'div', this.css.basic + ' width:0px; height:auto; top:0px; background:'+cc.content+'; ' + this.cssGui + border );
         
@@ -133,7 +135,7 @@ export class Gui {
         this.content.appendChild( this.bottom )
         this.bottom.textContent = this.isOpen ? this.bottomText[1] : this.bottomText[0]
         this.bottom.style.background = cc.background
-        if(this.bh===0) this.bottom.style.visible = 'hidden' 
+        if(this.bh===0) this.bottom.style.visibility = 'hidden' 
 
         //
 
@@ -213,8 +215,6 @@ export class Gui {
     	this.canvas.width = this.zone.w;
     	this.canvas.height = this.forceHeight ? this.forceHeight : this.zone.h;
 
-        //console.log( this.canvas.width, this.canvas.height )
-
     }
 
     draw ( force ) {
@@ -223,7 +223,7 @@ export class Gui {
 
     	let w = this.zone.w;
     	let h = this.forceHeight ? this.forceHeight : this.zone.h;
-    	Roots.toCanvas( this, w, h, force );
+    	Roots.toCanvas( this, w, h, force, this.canvasScale );
 
     }
 
@@ -245,7 +245,7 @@ export class Gui {
 
         if(flip) this.mouse.set( Math.round( uv.x * this.canvas.width ), this.canvas.height - Math.round( uv.y * this.canvas.height ) );
         else this.mouse.set( Math.round( uv.x * this.canvas.width ), Math.round( uv.y * this.canvas.height ) );
-        //this.mouse.set( m.x, m.y );
+        this.mouse.multiplyScalar(1/this.canvasScale);
 
     }
 
@@ -280,6 +280,8 @@ export class Gui {
     }
 
     onChange ( f ) {
+
+        
 
         this.callback = f || null;
         return this;
@@ -350,10 +352,6 @@ export class Gui {
         
         this.proto = null;
         this.current = -1;
-
-        ///console.log(this.isDown)//if(this.isDown)Roots.clearInput();
-
-        
 
         Roots.cursor();
         return true;
@@ -455,9 +453,8 @@ export class Gui {
 
     	if( this.isDown ) change = true;
     	if( protoChange ) change = true;
-
-        if( type === 'keyup' ) change = true;
-        if( type === 'keydown' ) change = true;
+        if( this.isNewTarget ) change = true;
+        if( type === 'keyup' || type === 'keydown' ) change = true;
 
     	if( change ) this.draw();
 
@@ -586,11 +583,17 @@ export class Gui {
 
     empty() {
 
+        while (this.uis.length) {
+            this.uis[this.uis.length - 1].dispose();
+        }
+        this.isEmpty = true;
+        this.calc();
+
         //this.cleanning = true
 
         //this.close();
 
-        let i = this.uis.length, item
+        /*let i = this.uis.length, item
 
         while( i-- ){
             item = this.uis.pop()
@@ -600,7 +603,7 @@ export class Gui {
 
         this.uis = []
         this.isEmpty = true
-        this.calc()
+        this.calc()*/
 
     }
 
@@ -697,13 +700,54 @@ export class Gui {
     update ( y ) {
 
         y = Tools.clamp( y, 0, this.range );
-
         this.decal = Math.floor( y / this.ratio );
-        this.inner.style.top = - this.decal + 'px';
-        this.scroll.style.top = Math.floor( y ) + 'px';
+        //this.inner.style.top = - this.decal + 'px';
+        //this.scroll.style.top = Math.floor( y ) + 'px';
+
+        this.inner.style.transform = `translate3d(0, ${-this.decal}px, 0)`;
+        this.scroll.style.transform = `translate3d(0, ${Math.floor(y)}px, 0)`;
         this.oy = y;
 
+        //if ( this.isScroll ) this.cull();
+        //if ( !this.isScroll && this.isCull) this.uncull();
+
     }
+
+    /*cull () {
+
+        const top = this.zone.y + this.decal;
+        const bottom = top + this.maxView;
+        const uis = this.uis;
+        let i = uis.length;
+
+        this.isCull = true;
+
+        while ( i-- ) {
+            const u = uis[ i ];
+            const uy = u.zone.y;
+            const visible = ( uy + u.zone.h >= top ) && ( uy <= bottom );
+            if ( u._vis !== visible ) {
+                u._vis = visible;
+                u.s[0].visibility = visible ? 'visible' : 'hidden';
+            }
+        }
+
+    }
+
+    uncull() {
+
+        const uis = this.uis;
+        let i = uis.length;
+
+        while ( i-- ) {
+            const u = uis[ i ];
+            if ( u._vis !== true ) {
+                u._vis = visible;
+                u.s[0].visibility = 'visible';
+            }
+        }
+
+    }*/
 
     // ----------------------
     //   RESIZE FUNCTION
@@ -717,16 +761,15 @@ export class Gui {
 
     calc() {
 
-        clearTimeout( this.tmp )
-        this.tmp = setTimeout( this.setHeight.bind( this ), 10 );
+        if (this.tmp) clearTimeout(this.tmp);
+        this.tmp = setTimeout(() => {
+            this.tmp = null;
+            this.setHeight();
+        }, 10);
 
     }
 
     setHeight() {
-
-        if( this.tmp ) clearTimeout( this.tmp );
-
-        //console.log('gui setHeight')
 
         this.zone.h = this.bh;
         //if(this.isBottom) this.zone.y =((window.innerHeight-this.zone.h)-this.bottomPosition)
@@ -735,6 +778,7 @@ export class Gui {
         if( this.isOpen ){
 
             this.h = this.calcUis();
+            if ( this.uis.length > 0 ) this.h -= this.uis[ this.uis.length - 1 ].margin;
 
             //console.log(this.h)
 
@@ -761,10 +805,10 @@ export class Gui {
 
         this.upScroll( this.isScroll );
 
-        this.innerContent.style.height = this.zone.h - this.bh + 'px';
-        this.content.style.height = this.zone.h + 'px';
+        this.innerContent.style.height = ( this.zone.h - this.bh ) + 'px';
+        this.content.style.height = ( this.zone.h ) + 'px';
         if( this.autoShow )this.content.style.visibility = this.zone.h !== 0 ? 'visible' : 'hidden'
-        this.bottom.style.top = (this.zone.h - this.bh) + 'px';
+        this.bottom.style.top = ( this.zone.h - this.bh ) + 'px';
 
         if( this.isBottom ){
 

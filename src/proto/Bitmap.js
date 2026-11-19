@@ -31,9 +31,13 @@ export class Bitmap extends Proto {
 
         const cc = this.colors
 
-        this.c[2] = this.dom( 'div', this.css.txt + this.css.button + ' top:1px; background:'+cc.button+'; height:'+(this.h-2)+'px; border:'+cc.buttonBorder+'; border-radius:2px; width:30px; ' )
+        this.c[2] = this.dom( 'div', this.css.txt + this.css.button + ' top:1px; background:' + cc.button + '; height:' + (this.h - 2) + 'px; border:' + cc.borderSize + 'px solid ' + cc.border + '; border-radius:' + this.radius + 'px; width:30px;' );
+        this.c[3] = this.dom( 'div', this.css.txtselect + 'top:1px; height:' + (this.h - 2) + 'px; background:' + cc.back + '; border:' + cc.borderSize + 'px solid ' + cc.border + '; border-radius:' + this.radius + 'px; justify-content:center;' );
 
-        this.c[3] = this.dom( 'div', this.css.txtselect + 'height:' + (this.h-4) + 'px; background:' + cc.back + '; borderColor:' + cc.inputBorder+'; border-radius:'+this.radius+'px;' )
+
+        //this.c[2] = this.dom( 'div', this.css.txt + this.css.button + ' top:1px; background:'+cc.button+'; height:'+(this.h-2)+'px; border:'+cc.buttonBorder+'; border-radius:2px; width:30px; ' )
+
+        //this.c[3] = this.dom( 'div', this.css.txtselect + 'height:' + (this.h-4) + 'px; background:' + cc.back + '; borderColor:' + cc.inputBorder+'; border-radius:'+this.radius+'px;' )
         //this.c[3].textContent = this.value;
         if(!this.img) this.c[3].textContent = 'null';
         
@@ -81,18 +85,16 @@ export class Bitmap extends Proto {
     mousedown ( e ) {
 
         let name = this.testZone( e );
-
         if( !name ) return false;
 
         if( name === 'over' ){
             this.isDown = true
             Files.load( { callback:this.changeBitmap.bind(this), always:true, type:'image' } )
 
+        } else if ( name === 'delete' ) {
+            this.changeBitmap( null );
         }
 
-        
-        //this.value = this.values[ name-2 ];
-        //this.send();
         return this.mousemove( e );
 
     }
@@ -116,7 +118,34 @@ export class Bitmap extends Proto {
 
     // ----------------------
 
-    makePreview(){
+    makePreview () {
+
+        const el = this.c[3];
+
+        if ( this.img ) {
+            let url = this.img.src;
+
+            // Si c'est un ImageBitmap (sans .src) ou un blob:, on dessine une miniature via Canvas
+            if ( !url || url.startsWith('blob:') ) {
+                const c = document.createElement('canvas');
+                c.width = 64;
+                c.height = 64;
+                c.getContext('2d').drawImage( this.img, 0, 0, 64, 64 );
+                url = c.toDataURL();
+            }
+
+            el.style.backgroundImage = `url("${url}")`;
+            el.style.backgroundSize = 'cover';
+            el.style.backgroundPosition = 'center';
+            el.style.backgroundRepeat = 'no-repeat';
+        } else {
+            el.style.background = this.colors.back;
+            el.style.backgroundImage = 'none';
+        }
+
+    }
+
+    /*makePreview(){
 
         if( this.img ){
 
@@ -140,7 +169,7 @@ export class Bitmap extends Proto {
                 //this.c[3].style.backgroundSize = 20 + 'px ' + 20 + 'px'
                 //this.c[3].style.backgroundPosition = 'center';
                 //this.c[3].style.backgroundRepeat = 'no-repeat';
-                this.c[3].style.background = '#00ff00';
+       /*         this.c[3].style.background = '#00ff00';
                 this.c[3].style.backgroundImage = 'none';
             } else {
                 //console.log(this.value)
@@ -158,7 +187,7 @@ export class Bitmap extends Proto {
             this.c[3].style.backgroundImage = 'none';
         }
 
-    }
+    }*/
 
     changeBitmap( img, fname, type ){
 
@@ -177,7 +206,41 @@ export class Bitmap extends Proto {
 
     // ----------------------
 
-    threeTexture() {
+    threeTexture () {
+
+        if ( this.objectLink === null ) return;
+
+        let texture = this.objectLink[ this.objectKey ];
+        let colorSpace = ''
+
+        if(this.objectKey === 'map') colorSpace = 'srgb'
+
+
+        if ( this.img ) {
+            if ( texture && texture.isTexture ) {
+                const old = texture;
+                texture = old.clone();
+                texture.image = this.img;
+                texture.colorSpace = colorSpace;
+                texture.needsUpdate = true;
+                this.objectLink[ this.objectKey ] = texture;
+                old.dispose();
+            } else if ( Tools.texture ) {
+                texture = new Tools.texture( this.img );
+                texture.colorSpace = colorSpace;
+                texture.needsUpdate = true;
+                this.objectLink[ this.objectKey ] = texture;
+            }
+        } else {
+            if ( texture && texture.isTexture ) texture.dispose();
+            this.objectLink[ this.objectKey ] = null;
+        }
+
+        this.objectLink.needsUpdate = true;
+
+    }
+
+    /*threeTexture() {
 
         // need define UIL.Tools.texture = THREE.Texture;
 
@@ -202,7 +265,7 @@ export class Bitmap extends Proto {
             this.objectLink[this.objectKey] = null;
         }
         this.objectLink.needsUpdate = true;
-    }
+    }*/
 
     apply ( v ) {
 
@@ -253,6 +316,8 @@ export class Bitmap extends Proto {
                 case 4: this.s[ 2 ].color = cc.textSelect; this.s[ 2 ].background = cc.select; break; // actif
 
             }
+
+            this.setSvg( this.c[4], 'fill', this.s[ 2 ].color, -1 )
 
             change = true;
 

@@ -23,6 +23,7 @@
     let title, ny =0, graph, graphUp, display = false
 
     const list = ['item-0', 'item-1', 'item-2', 'item-3', 'item-4', 'item-5', 'item-6', 'item-7', 'item-8', 'item-9', 'item-10', 'item-11', 'item-12']
+    const listE = ['💪', '📦', '😅', '🌸', '🧩', '😎', '❤️‍🩹', '⚖️', '🔴', '💚', '🍓', '🟢', '👇']
     const list2 = ['item-0', 'item-1', 'item-2']
 
     const debug = document.getElementById('debug')
@@ -79,8 +80,8 @@
 
             let gr = ui.add('group', { name:'Examples', h:30, color:'#0FF' }).onChange( callbackLink )
 
-            gr.add( 'button', { value: ['uil_3d', 'uil_3d_2'], color: '#EEE' })
-            gr.add( 'button', { value: ['uil_color', 'uil_three'] })
+            gr.add( 'button', { value: ['uil_3d_1', 'uil_3d_2'], color: '#EEE' })
+            gr.add( 'button', { value: ['uil_style', 'uil_three'] })
             gr.add( 'button', { value: ['uil_group', 'uil_imagelist'] })
             gr.add( 'button', { value: ['uil_item', 'uil_listen'] })
             gr.add( 'button', { value: ['uil_pad2d', 'uil_to_canvas'] })
@@ -96,9 +97,9 @@
 
             ui.add( 'empty', { h:5 })
 
-            ui.add( obj, 'Bool_v', { h:20 })
+            ui.add( obj, 'Bool_v', { h:20, mode:2 })
             
-            ui.add( 'space', { h:5 })
+            ui.add( 'empty', { h:5 })
 
             ui.add( obj, 'Color_v', { ctype:'html' }).onChange( callbackLogo );
             ui.add( 'color', { name:'Color', ctype:'html', value:[ 0,1,1,1 ] });
@@ -115,7 +116,7 @@
 
             ui.add( 'empty', { h:5 })
 
-            ui.add( 'list',   { name:'List', list:list, miniCanvas:true, canvasBg:'green', h:30 })
+            ui.add( 'list',   { name:'List', list:list, miniIcon:true, emojii:listE, canvasBg:'green', h:30 })
             
 
             ui.add( 'number', { name:'Number', value:20, min:-60, max:200, h:25 })

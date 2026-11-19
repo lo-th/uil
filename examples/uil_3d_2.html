@@ -5,22 +5,30 @@
 <title>Uil to Three</title>
 <link rel="shortcut icon" href="./assets/favicon.ico">
 <link rel="stylesheet" type="text/css" href="./assets/style.css">
-
+<script type="importmap">
+  {
+    "imports": {
+      "three": "../three/build/three.module.js",
+      "three/addons/": "../three/examples/jsm/"
+    }
+  }
+</script>
 </head>
 
 <body>
 <script type="module">
 
-    import * as THREE from './three/build/three.module.js';
-    import { OrbitControls } from './three/examples/jsm/controls/OrbitControls.js';
-    import { GLTFLoader } from './three/examples/jsm/loaders/GLTFLoader.js';
-    import { DRACOLoader } from './three/examples/jsm/loaders/DRACOLoader.js';
-    import { RGBELoader } from './three/examples/jsm/loaders/RGBELoader.js';
-    import * as UIL from '../build/uil.module.js';
+    //import * as UIL from '../build/uil.module.js';
+    import { UIL } from '../src/Uil_dev.js';
+
+    import * as THREE from 'three';
+    import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+    import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+    import { HDRLoader } from 'three/addons/loaders/HDRLoader.js';
+    import { DRACOLoader } from './libs/DRACOLoader.min.js';
+    
 
     let ui, simpleButton, display = false;
-
-    
 
     let debug, debug2, camera, scene, renderer, controls, loader, mesh, mat, screen = null, interactive;
     let temp=0, fps=0, count=0; 
@@ -41,9 +49,8 @@
         renderer.setPixelRatio( window.devicePixelRatio );
         renderer.setSize( window.innerWidth, window.innerHeight );
         renderer.setClearColor( 0x000000, 0 )
-        renderer.toneMapping = THREE.ACESFilmicToneMapping;
-        renderer.toneMappingExposure = 1.4;
-        renderer.outputEncoding = THREE.sRGBEncoding;
+        renderer.toneMapping = THREE.NeutralToneMapping;
+        renderer.toneMappingExposure = 1.0;
         document.body.appendChild( renderer.domElement )
 
         camera = new THREE.PerspectiveCamera( 45, window.innerWidth / window.innerHeight, 1, 1000 );
@@ -87,7 +94,7 @@
 
         loader = new THREE.TextureLoader();
 
-        new RGBELoader()
+        new HDRLoader()
         .setPath( './assets/textures/' )
         .load( 'basic.hdr', function ( texture ) {
 
@@ -98,7 +105,7 @@
             var s8 = loader.load( './assets/textures/s8px.png' );
             s8.flipY = false;
             s8.minFilter = THREE.LinearFilter;
-            s8.encoding == THREE.sRGBEncoding;
+            s8.colorSpace = THREE.SRGBColorSpace
             
             mat = {};
             mat['glass_f'] = new THREE.MeshStandardMaterial( { roughness:0.1, metalness:0.8, color:0x000000, opacity:0.2, transparent:true, depthTest:true } );
@@ -237,12 +244,15 @@
 
     function initGUI( r ) {
 
+        
+
 
         simpleButton = UIL.add( 'button', { target:document.body, name:'populate', w:100, h:30, radius:10, pos:{ left:'10px', top:'10px' }, simple:true }).onChange( populate );
 
         // canvas GUI element
-        let cw = 300, ch = 640//Math.floor(cw*r)//617;
-        ui = new UIL.Gui( { w:cw, maxHeight:ch, parent:null, isCanvas:true } ).onChange( function( v ){ debug.innerHTML = v; } );
+        let colors = {}// content:'rgba(25,25,25,0.2)',  background:'rgba(25,25,25,0.5)',  backgroundOver:'rgba(25,25,25,0.8)'   }
+        let cw = 300, ch = 640;
+        ui = new UIL.Gui( { w:cw, maxHeight:ch, parent:null, isCanvas:true, colors:colors } ).onChange( function( v ){ debug.innerHTML = v; } );
 
         ui.onDraw = function (){
 
@@ -251,7 +261,7 @@
                 screen = new THREE.Texture( this.canvas );
                 screen.flipY = false;
                 //screen.minFilter = THREE.LinearFilter;
-                screen.encoding = THREE.sRGBEncoding
+                screen.colorSpace = THREE.SRGBColorSpace
                 mat.screen.map = screen;
                 mat.screen.needsUpdate = true;
 

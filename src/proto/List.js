@@ -44,6 +44,10 @@ export class List extends Proto {
 
         if( this.txt === '' ) this.p = 0;
 
+        this.targetPy = 0;
+        this.lastWheelTime = 0;
+        this.wheelSpeed = 1;
+
 
         let fltop = Math.floor(this.h*0.5)-3;
         let cc = this.colors
@@ -53,7 +57,9 @@ export class List extends Proto {
         this.c[4] = this.dom( 'path', this.css.basic + 'position:absolute; width:6px; height:6px; top:'+fltop+'px;', { d:this.svgs.g1, fill:cc.text, stroke:'none'});
 
         this.scrollerBack = this.dom( 'div', this.css.basic + 'right:0px; width:'+ss+'px; background:'+cc.back+'; display:none;');
-        this.scroller = this.dom( 'div', this.css.basic + 'right:'+((ss-(ss*0.25))*0.5)+'px; width:'+(ss*0.25)+'px; background:'+cc.text+'; display:none; ');
+        //this.scroller = this.dom( 'div', this.css.basic + 'right:'+((ss-(ss*0.25))*0.5)+'px; width:'+(ss*0.25)+'px; background:'+cc.text+'; display:none; ');
+        this.scroller = this.dom( 'div', this.css.basic + 'right:'+(2)+'px; width:'+(ss-4)+'px; background:'+cc.text+'; display:none;  transition: transform 0.2s ease-out;');
+
 
         this.c[3].style.color = cc.text;
 
@@ -108,7 +114,7 @@ export class List extends Proto {
             this.c[2].style.top = this.baseH + 'px';
         }
 
-        this.listIn = this.dom( 'div', this.css.basic + 'left:0; top:0; width:100%; background:none;');
+        this.listIn = this.dom( 'div', this.css.basic + 'left:0; top:0; width:100%; background:none; will-change: transform; transition: transform 0.2s ease-out;');
         this.listIn.name = 'list';
 
         this.topList = 0;
@@ -254,23 +260,55 @@ export class List extends Proto {
 
     }
 
+    getVisualTop () {
+
+        if( !this.scroll ) return 0;
+
+        // Récupère le transform calculé par le navigateur (ex: "matrix(1, 0, 0, 1, 0, -45.5)")
+        let transform = window.getComputedStyle( this.listIn ).transform;
+        
+        if( transform && transform !== 'none' ){
+            let matrix = new DOMMatrix( transform );
+            return matrix.m42; // m42 est la translation Y actuelle en pixels
+        }
+
+        return this.topList;
+
+    }
+
     testItems ( y ) {
 
-        let name = '';
+        const pos = y - this.topList;
+        const id = Math.floor( pos / (this.itemHeight + 1) );
 
+        if ( id >= 0 && id < this.items.length ) {
+            const item = this.items[id];
+            if ( this.current !== item ) {
+                this.modeItem(0);
+                this.current = item;
+                this.modeItem(1);
+            }
+            return 'item' + id;
+        }
+        return '';
+
+    }
+
+    /*testItems ( y ) {
+
+        let name = '';
         let items = this.items
 
-        /*if(this.hideCurrent){
-            //items = [...this.items]
-            items = this.items.slice(this.tmpId)
-
-        }*/
+        // Position visuelle exacte, même en plein milieu de la transition CSS
+        let currentTop = this.getVisualTop();
 
         let i = items.length, item, a, b;
         while(i--){
+
             item = items[i];
-            a = item.posy + this.topList;
-            b = item.posy + this.itemHeight + 1 + this.topList;
+            a = item.posy + currentTop//this.topList;
+            b = item.posy + this.itemHeight + 1 + currentTop//this.topList;
+
             if( y >= a && y <= b ){ 
                 name = 'item' + i;
                 this.modeItem(0)
@@ -283,7 +321,7 @@ export class List extends Proto {
 
         return name;
 
-    }
+    }*/
 
     modeItem ( mode ) {
 
@@ -377,6 +415,11 @@ export class List extends Proto {
 
     mouseup ( e ) {
 
+        if( this.isDown ){
+            this.listIn.style.transition = 'transform 0.2s ease-out';
+            this.scroller.style.transition = 'transform 0.2s ease-out';
+        }
+
         this.isDown = false;
 
     }
@@ -387,9 +430,13 @@ export class List extends Proto {
 
         if( !name ) return false;
 
+        //this.scroll = false
+
         if( name === 'scroll' ){
 
             this.isDown = true;
+            this.listIn.style.transition = 'none';
+            this.scroller.style.transition = 'none';
             this.mousemove( e );
 
         } else if( name === 'title' ){
@@ -446,6 +493,7 @@ export class List extends Proto {
                 //this.update( ( e.clientY - top  ) - ( this.sh*0.5 ) );
                 let top = this.zone.y+this.baseH-2;
                 this.update( ( e.clientY - top  ) - ( this.sh*0.5 ) );
+                nup = true;
             }
             //if(this.isDown) this.listmove(e);
         } else {
@@ -467,14 +515,50 @@ export class List extends Proto {
     wheel ( e ) {
 
         let name = this.testZone( e );
-        if( name === 'title' ) return false; 
-        this.py += e.delta*10;
-        this.update(this.py);
+        if( name === 'title' || !this.scroll ) return false;
+
+        let now = performance.now();
+        let dt = now - this.lastWheelTime;
+        this.lastWheelTime = now;
+
+        // Accélération progressive si on tourne la molette vite (coups espacés de moins de 120ms)
+        if ( dt < 120 ) {
+            this.wheelSpeed = Math.min( this.wheelSpeed + 0.5, 4 ); // Plafond à 6x
+        } else {
+            this.wheelSpeed = 1; // Retour à la vitesse normale
+        }
+
+        // Bonus proportionnel à la longueur de la liste (ex: +1 item tous les 40 éléments)
+        let listBoost = Math.max( 1, Math.floor( this.length / 50 ) );
+
+        // Calcul du déplacement final
+        let itemsToScroll = listBoost * this.wheelSpeed;
+        let step = itemsToScroll * ( this.itemHeight + 1 ) * this.ratio;
+
+        this.py += ( e.delta > 0 ? 1 : -1 ) * step;
+        this.update( this.py );
+        this.testZone( e );
+
         return true;
 
     }
 
+    /*wheel ( e ) {
 
+        let name = this.testZone( e );
+        if( name === 'title' || !this.scroll ) return false
+        //this.py += e.delta*10;
+        
+        let step = ( this.itemHeight + 1 ) * this.ratio;
+        this.py += ( e.delta > 0 ? 1 : -1 ) * step;
+
+        this.update(this.py);
+        
+        this.testZone( e );
+
+        return true;
+
+    }*/
 
     // ----------------------
 
@@ -541,8 +625,13 @@ export class List extends Proto {
 
     clearList () {
 
-        while ( this.listIn.children.length ) this.listIn.removeChild( this.listIn.lastChild );
+        this.listIn.replaceChildren();
         this.items = [];
+        this.scroll = false;
+        this.ww = this.sb;
+
+        //while ( this.listIn.children.length ) this.listIn.removeChild( this.listIn.lastChild );
+        //this.items = [];
 
     }
 
@@ -562,7 +651,10 @@ export class List extends Proto {
         
         this.max = lng * (this.itemHeight+1) + 2;
         this.ratio = this.maxHeight / this.max;
-        this.sh = this.maxHeight * this.ratio;
+        //this.sh = this.maxHeight * this.ratio;
+        //this.range = this.maxHeight - this.sh;
+
+        this.sh = Math.max( 20, this.maxHeight * this.ratio );
         this.range = this.maxHeight - this.sh;
 
         this.c[2].style.height = this.maxHeight + 'px';
@@ -620,7 +712,7 @@ export class List extends Proto {
                 item.innerHTML =t+n
 
                 let ic = document.createElement("div")
-                ic.style.cssText ='font-size:'+(this.itemHeight-4)+'px; line-height:'+(this.itemHeight-4)+'px; left:0px; top0px; position:absolute; left:0px;'
+                ic.style.cssText ='font-size:'+(this.itemHeight-4)+'px; line-height:'+(this.itemHeight-4)+'px; left:0px; top:0px; position:absolute;'
                 ic.innerHTML = this.emojii[i] ? this.emojii[i] : '🟢';
                 item.appendChild( ic )
                 //document.body.appendChild(ic)
@@ -721,9 +813,25 @@ export class List extends Proto {
 
     setValue ( value ) {
 
+        if ( this.refObject ) {
+            for ( let g in this.refObject ) {
+                if ( this.refObject[g] === value ) {
+                    this.value = g;
+                    break;
+                }
+            }
+        } else {
+            this.value = !isNaN(value) ? this.list[value] : value;
+        }
+        this.setTopItem();
+
+    }
+
+    /*setValue ( value ) {
+
         if(this.refObject){
             let ccc = null
-            for( let g in this.refObject ){ if(this.refObject[g] === o.value ) ccc = g }
+            for( let g in this.refObject ){ if(this.refObject[g] === this.value ) ccc = g }
             if(ccc) this.value = this.list[ this.list.indexOf(ccc) ];
         } else {
             if(!isNaN(value)) this.value = this.list[ value ];
@@ -732,7 +840,7 @@ export class List extends Proto {
 
         this.setTopItem();
 
-    }
+    }*/
 
     setTopItem (){
 
@@ -776,7 +884,7 @@ export class List extends Proto {
                 let id = this.current.id
 
                 let ic = document.createElement("div")
-                ic.style.cssText ='font-size:'+(this.itemHeight-4)+'px; line-height:'+(this.itemHeight-4)+'px; left:0px; top0px; position:absolute; left:0px;'
+                ic.style.cssText ='font-size:'+(this.itemHeight-4)+'px; line-height:'+(this.itemHeight-4)+'px; left:0px; top:0px; position:absolute;'
                 ic.innerHTML = this.emojii[id] ? this.emojii[id] : '🟢';
                 this.c[3].appendChild( ic )
             }
@@ -805,6 +913,16 @@ export class List extends Proto {
 
     // ----- LIST
 
+    /*smoothScroll () {
+
+        if ( !this.scroll || Math.abs( this.targetPy - this.py ) < 0.1 ) return;
+
+        // 0.2 = facteur de fluidité (plus il est bas, plus l'inertie est longue)
+        this.py += ( this.targetPy - this.py ) * 0.2;
+        this.update( this.py );
+
+    }*/
+
     update ( y ) {
 
         if( !this.scroll ) return;
@@ -814,8 +932,15 @@ export class List extends Proto {
 
         this.topList = -Math.floor( y / this.ratio );
 
-        this.listIn.style.top = this.topList+'px';
-        this.scroller.style.top = Math.floor( y )  + 'px';
+        //this.listIn.style.top = this.topList+'px';
+        //this.listIn.style.transform = 'translate3d(0,' + this.topList + 'px, 0)'
+        //this.scroller.style.top = Math.floor( y )  + 'px';
+
+        // Accélération GPU + déclenchement automatique de la transition CSS
+        this.listIn.style.transform = 'translate3d(0, ' + this.topList + 'px, 0)';
+        this.scroller.style.transform = 'translate3d(0, ' + Math.floor( y ) + 'px, 0)';
+
+
 
         this.py = y;
 

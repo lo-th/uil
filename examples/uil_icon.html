@@ -16,7 +16,9 @@
 
 			const debug = document.querySelector('#debug3');
 
-			const shadowOption = {
+			const option = {
+				Size:1,
+				Shadow:true,
 				offsetX:3,
 				offsetY:3,
 				blur:16,
@@ -24,6 +26,8 @@
 			} 
 
 		    let name = '', img
+		    let cachedImg = null;
+		    let animationFrameId = null;
 		    let images = []
 
 		    //let formats = [256,128,64,48,32,24,16]//,512,1024
@@ -32,15 +36,45 @@
 		    //let formats = [256,128,64,48,32,16]//,512,1024
 
 		    let tmpCanvas = document.createElement("canvas");
+
+		    const PhotosDraft = (ctx, tailleCarreau = 16) => {
+				const motifCanvas = document.createElement('canvas');
+				motifCanvas.width = tailleCarreau * 2;
+				motifCanvas.height = tailleCarreau * 2;
+				const mCtx = motifCanvas.getContext('2d');
+				const couleur1 = '#666';
+				const couleur2 = '#555';
+				mCtx.fillStyle = couleur1;
+				mCtx.fillRect(0, 0, tailleCarreau, tailleCarreau);
+				mCtx.fillRect(tailleCarreau, tailleCarreau, tailleCarreau, tailleCarreau);
+				mCtx.fillStyle = couleur2;
+				mCtx.fillRect(tailleCarreau, 0, tailleCarreau, tailleCarreau);
+				mCtx.fillRect(0, tailleCarreau, tailleCarreau, tailleCarreau);
+				const pattern = ctx.createPattern(motifCanvas, 'repeat');
+				ctx.fillStyle = pattern;
+				ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+    		}
+
+		    let bgCanvas = document.createElement("canvas");
+			bgCanvas.width = 256
+			bgCanvas.height = 256
+			bgCanvas.style.cssText = 'position:absolute; left:8px; top:0px; border:1px solid #393939; border-radius:2px; box-sizing: border-box;'
+
+			let ctxBG = bgCanvas.getContext('2d')
+			ctxBG.rect(0, 0, 256, 256);
+			//ctxBG.fill()
+
+			PhotosDraft(ctxBG)
+
+
 			let canvas = document.createElement("canvas");
 			canvas.width = 256
 			canvas.height = 256
-
 			canvas.style.cssText = 'position:absolute; left:8px; top:0px; border:1px solid #393939; border-radius:2px; box-sizing: border-box;'
 
 			let ctx = canvas.getContext('2d')
 			ctx.rect(0, 0, 256, 256);
-			ctx.fill()
+			//ctx.fill()
 
 			//document.body.appendChild( canvas )
 
@@ -50,9 +84,7 @@
 		            case 'LOAD' :
 		                UIL.Files.load( { callback:onLoad, type:'image' } )
 		            break;
-		            case 'SHADOW' :
-		                shadow()
-		            break;
+		            
 		            case 'SAVE' :
 		                convert()
 		            break;
@@ -60,28 +92,63 @@
 
 			}
 
-			const onLoad = ( img, Name ) => {
+			const requestDisplayImage = () => {
+
+			    if (animationFrameId) return; 
+			  
+			    animationFrameId = requestAnimationFrame(() => {
+			    	displayImage();
+			    	animationFrameId = null;
+			    });
+			};
+
+			const onLoad = async ( img, Name ) => {
 
 				name = Name.substring( 0, Name.lastIndexOf('.') )
-				ctx.clearRect(0, 0, 256, 256)
-				ctx.drawImage(img, 0, 0, 256, 256);
+
+				cachedImg = await createImageBitmap(img, { 
+				    resizeWidth: 256, 
+				    resizeHeight: 256,
+				    resizeQuality: 'high' 
+				});
+
+				requestDisplayImage()
+
+				//ctx.clearRect(0, 0, 256, 256)
+				//ctx.drawImage(img, 0, 0, 256, 256);
 				canvas.style.border = '1px solid #314d2f;'
 
 			}
 
-			const shadow = () => {
+			const displayImage = () => {
 
-				if( !name ){ 
+				if( !cachedImg ){ 
 		    		debug.innerHTML = 'Load image first !'
 		    		return
 		    	}
-				ctx.clearRect(0, 0, 256, 256)
-				ctx.shadowColor = shadowOption.color;
-				ctx.shadowOffsetX = shadowOption.offsetX;
-				ctx.shadowOffsetY = shadowOption.offsetY;
-				ctx.shadowBlur = shadowOption.blur;
-				ctx.drawImage(img, 0, 0, 256, 256);
-				canvas.style.border = '1px solid #314d2f;'
+
+		    	ctx.clearRect(0, 0, 256, 256)
+
+		    	ctx.shadowColor = option.color;
+
+		    	if( option.Shadow === true ){
+
+		    		ctx.shadowColor = option.color;
+					ctx.shadowOffsetX = option.offsetX;
+					ctx.shadowOffsetY = option.offsetY;
+					ctx.shadowBlur = option.blur;
+
+		    	}  else if ( ctx.shadowColor !== 'transparent') {
+		    		ctx.shadowColor = 'transparent';
+					ctx.shadowBlur = 0;
+					ctx.shadowOffsetX = 0;
+					ctx.shadowOffsetY = 0;
+		    	}
+
+		    	const w = 256 * option.Size;
+		    	const x = (256 - w) * 0.5;
+				
+				ctx.drawImage(cachedImg, x, x, w, w);
 
 			}
 
@@ -192,19 +259,29 @@
 			document.addEventListener( 'drop', dropElement, false );
 
 			// GUI
-			let ui = new UIL.Gui( { w:276, close:false, css:'top:10px; left:50%;', center: true } )
+			let ui = new UIL.Gui( { w:276, close:false, css:'top:10px; left:50%;', center: true } ).onChange( requestDisplayImage );
 			ui.add( 'title',  { name:'IMAGE to ICON', h:30, align:'center' })
-			ui.add( 'empty', { h:264 }).content().appendChild( canvas )
-			ui.add('button', { value:[ 'LOAD','SHADOW', 'SAVE' ], h:30 }).onChange( callbackLoader )
+			const draft = ui.add( 'empty', { h:264 })
+			
+			draft.content().appendChild( bgCanvas )
+			draft.content().appendChild( canvas )
+
+			ui.add( 'button', { value:[ 'LOAD', 'SAVE' ], h:30 }).onChange( callbackLoader )
 			//ui.add('button', { value:[ 'LOAD', 'SAVE' ], h:30 }).onChange( callbackLoader )
 			ui.add( 'empty', { h:6 })
 
-			let gr = ui.add('group', { name:'shadow option', h:30, color:'#0FF' })
-			gr.add( shadowOption, 'offsetX',{  min:-10, max:10, step:1, precision:0, mode:2 });
-			gr.add( shadowOption, 'offsetY',{  min:-10, max:10, step:1, precision:0, mode:2 });
-			gr.add( shadowOption, 'blur',{  min:0, max:30, step:1, precision:0, mode:2 });
-			gr.add( shadowOption, 'color',{ ctype:'html' });
+			let gr = ui.add('group', { name:'option', h:30, color:'#0FF', open:true })
+			gr.add( option, 'Size',{  min:0.5, max:1, step:0.01, precision:2, mode:2 })
+			gr.add( option, 'Shadow',{ mode:2 })
+			gr.add( option, 'offsetX',{  min:-10, max:10, step:1, precision:0, mode:2 })
+			gr.add( option, 'offsetY',{  min:-10, max:10, step:1, precision:0, mode:2 })
+			gr.add( option, 'blur',{  min:0, max:30, step:1, precision:0, mode:2 })
+			gr.add( option, 'color',{ ctype:'html' })
+			gr.add( 'empty',{ h:10 })
 			//debug.innerHTML = 'Load or drag Image file'
+
+
+			
 
 		</script>
 	</body>

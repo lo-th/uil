@@ -6,8 +6,6 @@
 <link rel="shortcut icon" href="./assets/favicon.ico">
 <link rel="stylesheet" type="text/css" href="./assets/style.css">
 
-<script type="text/javascript" src="../build/uil.min.js"></script>
-
 </head>
 
 <body>
@@ -15,7 +13,9 @@
 <div id='version'></div>
 <div id='debug3'></div>
 <div id='debug2'></div>
-<script>
+<script type="module">
+
+import { UIL } from '../src/Uil_dev.js'
 
 const debug = document.getElementById('debug3');
 const debug2 = document.getElementById('debug2');
@@ -84,7 +84,6 @@ function onMouseMove ( e ) {
 }
 
 ui.onDraw = function (){
-    //console.log('ui draw')
 }
 
 
@@ -112,7 +111,7 @@ function populate(){
         ui.add('number', { name:'vector4', value:[0,0,0,0], step:1, precision:0, height:30 });
         ui.add('button', { name:'button', callback:callbackButton, fontColor:'#D4B87B', height:30 });
 
-        gr0 = ui.add('group', { name:'Group', fontColor:'#D4B87B', height:30 });
+        let gr0 = ui.add('group', { name:'Group', fontColor:'#D4B87B', height:30 });
         gr0.add('list',   { name:'listH', list:list, fontColor:'#D4B87B', height:30});
         gr0.add('slide',  { name:'slide', min:-100, max:100, value:0, precision:0 });
         gr0.add('slide',  { name:'slide', min:-100, max:100, value:0, precision:0 });
@@ -120,21 +119,21 @@ function populate(){
         gr0.add('slide',  { name:'slide', min:-100, max:100, value:0, precision:0 });
         gr0.add('slide',  { name:'slide', min:-100, max:100, value:0, precision:0 });
 
-        gr1 = ui.add('group', { name:'circulars', fontColor:'#D4B87B' });
+        let gr1 = ui.add('group', { name:'circulars', fontColor:'#D4B87B' });
 
         gr1.add('circular', { name:'circular', w:70, min:0, max:100, step:10, value:20, precision:0 , fontColor:'#D4B87B' });
         gr1.add('circular', { name:'circular', w:70, min:0, max:100, value:50, precision:2 , fontColor:'#D4B87B' });
         gr1.add('circular', { name:'circular', w:70, min:0, max:100, value:75, precision:2 , fontColor:'#D4B87B' });
         gr1.add('circular', { name:'circular', w:70, min:0, max:100, value:100, precision:0 , fontColor:'#D4B87B' });
 
-        gr2 = ui.add('group', { name:'knobs', fontColor:'#D4B87B' });
+        let gr2 = ui.add('group', { name:'knobs', fontColor:'#D4B87B' });
 
         gr2.add('knob', { name:'knob', w:70, min:0, max:100, step:10, value:20, precision:0 , fontColor:'#D4B87B' });
         gr2.add('knob', { name:'knob', w:70, min:0, max:100, value:50, precision:2 , fontColor:'#D4B87B' });
         gr2.add('knob', { name:'knob', w:70, min:0, max:100, value:75, precision:2 , fontColor:'#D4B87B' });
         gr2.add('knob', { name:'knob', w:70, min:0, max:100, value:100, step:1, precision:0 , fontColor:'#D4B87B' });
 
-        gr3 = ui.add('group', { name:'joysticks', fontColor:'#D4B87B' });
+        let gr3 = ui.add('group', { name:'joysticks', fontColor:'#D4B87B' });
 
         gr3.add('joystick', { name:'joystick', w:140, multiplicator:1, precision:2, fontColor:'#D4B87B' });
         gr3.add('joystick', { name:'joystick', w:140, multiplicator:1, precision:2, fontColor:'#D4B87B' });

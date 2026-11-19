@@ -1,5 +1,5 @@
 import { Proto } from '../core/Proto.js';
-
+import { Roots } from '../core/Roots.js';
 
 export class Slide extends Proto {
 
@@ -19,6 +19,8 @@ export class Slide extends Proto {
         this.isOver = false;
         this.allway = o.allway || false;
 
+        this.editable = o.editable !== undefined ? o.editable : false;
+
         this.autoValue = true
         if(o.autoValue!==undefined) this.autoValue = false
 
@@ -27,6 +29,7 @@ export class Slide extends Proto {
         this.isTime = o.isTime || false;
 
         this.firstImput = false;
+        this.cmode = 0;
 
         let cc = this.colors
 
@@ -56,7 +59,7 @@ export class Slide extends Proto {
                 ww = (this.h-6)*0.5
             }
 
-            if( this.model === 3 ) this.c[5].style.visible = 'none';
+            if( this.model === 3 ) this.c[5].style.visibility = 'hidden';
 
             this.c[4].style.borderRadius = r1 + 'px';
             this.c[4].style.height = h2 + 'px';
@@ -70,6 +73,8 @@ export class Slide extends Proto {
             //this.c[6] = this.dom( 'div', this.css.basic + 'border-radius:'+ra+'px; margin-left:'+(-ww*0.5)+'px; background:'+cc.text+'; left:4px; top:3px; height:'+(this.h-6)+'px; width:'+ww+'px;' )
             this.c[6] = this.dom( 'div', this.css.basic + 'border-radius:'+ra+'px; margin-left:'+(-ww*0.5)+'px; background:'+cc.text+'; left:4px; top:'+((this.h-ww)*0.5)+'px; height:'+ww+'px; width:'+ww+'px;' )
         }
+
+        
 
         this.init();
 
@@ -90,9 +95,90 @@ export class Slide extends Proto {
     //   EVENTS
     // ----------------------
 
+    mousedown ( e ) {
+        let name = this.testZone( e );
+        if ( !name ) return false;
+
+        if ( !this.isDown ) {
+            this.isDown = true;
+            if ( name === 'scroll' ) {
+                this.isScroll = true; 
+                this.old = this.value;
+            } else if ( name === 'text' && this.editable ) {
+                this.isScroll = false;
+                this.c[2].textContent = this.value;
+                this.setInput( this.c[2] );
+            }
+            return this.mousemove( e );
+        }
+        return false;
+    }
+
     mouseup ( e ) {
+        if ( this.isDown ) {
+            this.isDown = false;
+            if ( this.isScroll ) {
+                this.isScroll = false;
+                this.sendEnd();
+                return false;
+            }
+            return this.mousemove( e );
+        }
+        return false;
+    }
+
+    mousemove ( e ) {
+        let nup = false;
+        let name = this.testZone( e );
+
+        if ( name === 'text' && this.editable ) {
+            this.cursor('text');
+        } else if ( name === 'scroll' ) {
+            if ( this.mode(1) ) nup = true;
+            this.cursor('w-resize');
+        } else {
+            if ( this.mode(0) ) nup = true;
+            this.cursor();
+        }
+
+        if ( this.isScroll && this.isDown ) {
+            let n = ((( e.clientX - (this.zone.x + this.sa) - 3 ) / this.ww ) * this.range + this.min ) - this.old;
+            if ( n >= this.step || n <= -this.step ) {
+                n = Math.floor( n / this.step );
+                this.value = this.numValue( this.old + ( n * this.step ) );
+                this.update( true );
+                this.old = this.value;
+            }
+            return true;
+        }
+
+        if ( this.editable && !this.isScroll ) {
+            let x = 0;
+            if ( this.isDown ) {
+                const el = this.c[ 2 ];
+                const full = Roots.hiddenSizer ? Roots.hiddenSizer.clientWidth : 0;
+                const left = el.clientWidth - 5 - full;
+                x = ( e.clientX - this.zone.x - 3 - ( this.txl + 4 ) ) - left;
+            }
+            return this.upInput( x, this.isDown );
+            /*let x = 0;
+            if ( this.isDown ) x = e.clientX - this.zone.x - 3 - ( this.txl + 4 );
+            return this.upInput( x, this.isDown );*/
+        }
+
+        return nup;
+    }
+
+    /*mouseup ( e ) {
         
-        if( this.isDown ) this.isDown = false;
+        if ( this.isDown ) {
+            this.isDown = false;
+            if ( this.editable && Roots.parent === this ) {
+                this.upInput( 0, false );
+                return;
+            }
+            this.sendEnd();
+        }
         
     }
 
@@ -107,11 +193,13 @@ export class Slide extends Proto {
             this.old = this.value;
             this.mousemove( e );
             
+        } else if ( name === 'text' && this.editable ) {
+            this.isDown = true;
+            this.c[2].textContent = this.value; // Affiche la valeur brute sans ° ou h
+            this.setInput( this.c[2] );
+            return this.mousemove( e );
         }
 
-        /*if( name === 'text' ){
-            this.setInput( this.c[2], function(){ this.validate() }.bind(this) );
-        }*/
 
         return true;
 
@@ -123,12 +211,22 @@ export class Slide extends Proto {
 
         let name = this.testZone( e );
 
+        if ( name === 'text' && this.editable ) {
+            this.cursor('text');
+            if ( this.isDown ) {
+                let x = e.clientX - ( this.zone.x + this.txl + 4 );
+                return this.upInput( x, true );
+            }
+            return false;
+        }
+
         if( name === 'scroll' ) {
-            this.mode(1);
+            
+            if ( this.mode(1) ) nup = true;
             this.cursor('w-resize');
-        //} else if(name === 'text'){ 
-            //this.cursor('pointer');
+
         } else {
+            if ( this.mode(0) ) nup = true;
             this.cursor();
         }
 
@@ -172,7 +270,7 @@ export class Slide extends Proto {
               
         return false;
     
-    }
+    }*/
 
     //keydown: function ( e ) { return true; },
 
@@ -201,9 +299,26 @@ export class Slide extends Proto {
 
     // ----------------------
 
-    validate () {
-        
+    validate ( force ) {
+
+        if ( this.allway ) force = true;
         let n = this.c[2].textContent;
+        if ( !isNaN( n ) && n !== '' ) {
+            this.value = this.numValue( n );
+            this.update( force );
+        } else if ( force && this.autoValue ) {
+            this.c[2].textContent = this.formatOutput();
+        }
+
+        /*let n = this.c[2].textContent;
+        if ( !isNaN( n ) && n !== '' ) {
+            this.value = this.numValue( n );
+            this.update( force || this.allway );
+        } else if ( force && this.autoValue ) {
+            this.c[2].textContent = this.formatOutput();
+        }*/
+        
+        /*let n = this.c[2].textContent;
 
         if(!isNaN( n )){ 
             this.value = this.numValue( n ); 
@@ -212,7 +327,7 @@ export class Slide extends Proto {
 
         else {
             if(this.autoValue) this.c[2].textContent = this.formatOutput();
-        }
+        }*/
 
     }
 
@@ -226,6 +341,21 @@ export class Slide extends Proto {
     }
 
     mode ( mode ) {
+
+        if ( this.cmode === mode ) return false;
+        this.cmode = mode;
+        let s = this.s, cc = this.colors;
+        const isOver = mode === 1;
+
+        s[2].color = isOver ? cc.textOver : cc.text;
+        s[4].background = cc.back;
+        s[5].background = isOver ? cc.textOver : cc.text;
+        if ( this.model !== 0 ) s[6].background = isOver ? cc.textOver : cc.text;
+        return true;
+
+    }
+
+    /*mode ( mode ) {
 
         let s = this.s;
         let cc = this.colors
@@ -247,18 +377,110 @@ export class Slide extends Proto {
             break;
 
         }
-    }
+    }*/
 
     update ( up ) {
 
-        let ww = Math.floor( this.ww * (( this.value - this.min ) / this.range ));
-       
+        const pct = this.range > 0 ? ( this.value - this.min ) / this.range : 0;
+        let ww = Math.floor( this.ww * pct );
+
         if(this.model !== 3) this.s[5].width = ww + 'px';
         if(this.s[6]) this.s[6].left = ( this.sa + ww + 3 ) + 'px';
-        if(this.autoValue) this.c[2].textContent = this.formatOutput();
+        if( !this.isEdit && this.autoValue) this.c[2].textContent = this.formatOutput();
 
         if( up ) this.send();
+        
+    }
 
+    /*select ( c, e, w, t ) {
+        if ( !this.editable ) return;
+        const cc = this.colors;
+        const pad = 5; // padding horizontal de css.txtselect
+        const el = this.c;
+
+        // Mesure la largeur totale du texte complet via Roots.textWidth
+        const fullW = w//Roots.textWidth( el.textContent );
+        const boxW = el.clientWidth;
+
+        // Calcule le point de départ X du texte selon l'alignement
+        let offset = pad;
+        const align = el.style.textAlign || el.style.justifyContent;
+        if ( align === 'right' || align === 'flex-end' ) {
+            offset = boxW - pad - fullW;
+        } else if ( align === 'center' ) {
+            offset = ( boxW - fullW ) * 0.5;
+        }
+
+        const start = Math.max( 0, offset + e );
+        const end = Math.max( start, offset + e + w );
+        const cur = Math.max( 0, offset + c );
+
+        this.s.background = `linear-gradient(90deg, 
+            ${cc.backoff} 0px, ${cc.backoff} ${start}px, 
+            ${cc.select} ${start}px, ${cc.select} ${end}px, 
+            ${cc.backoff} ${end}px, ${cc.backoff} ${cur}px, 
+            ${cc.text} ${cur}px, ${cc.text} ${cur + 1}px, 
+            ${cc.backoff} ${cur + 1}px)`;
+    }*/
+
+    /*select ( c, e, w, t ) {
+        if ( !this.editable ) return;
+        const cc = this.colors;
+        const pad = 5;
+        const full = this.c.scrollWidth - pad * 2;
+        const start = this.c.clientWidth - pad - ( full - e );
+        const end = start + w;
+        const cur = this.c.clientWidth - pad - ( full - c );
+
+        this.s.background = `linear-gradient(90deg, 
+            ${cc.backoff} 0px, ${cc.backoff} ${start}px, 
+            ${cc.select} ${start}px, ${cc.select} ${end}px, 
+            ${cc.backoff} ${end}px, ${cc.backoff} ${cur}px, 
+            ${cc.text} ${cur}px, ${cc.text} ${cur + 1}px, 
+            ${cc.backoff} ${cur + 1}px)`;
+    }*/
+
+    select ( c, e, w, t, full ) {
+        if ( !this.editable ) return;
+        const cc = this.colors;
+        const pad = 5;
+        const el = this.c[ 2 ];
+        const st = this.s[ 2 ];
+
+        const left = el.clientWidth - pad - ( full || 0 );
+        const start = left + e;
+        const end = start + w;
+        const cur = left + c;
+
+        st.background = `linear-gradient(90deg, 
+            ${cc.backoff} 0px, ${cc.backoff} ${start}px, 
+            ${cc.select} ${start}px, ${cc.select} ${end}px, 
+            ${cc.backoff} ${end}px, ${cc.backoff} ${cur}px, 
+            ${cc.text} ${cur}px, ${cc.text} ${cur + 1}px, 
+            ${cc.backoff} ${cur + 1}px)`;
+    }
+
+    /*select ( c, e, w, t, full ) {
+        if ( !this.editable ) return;
+        const cc = this.colors;
+        const pad = 5; // padding gauche de css.txtselect
+        const start = pad + e;
+        const end = start + w;
+        const cur = pad + c;
+
+        // Dessine la sélection (cc.select) et le curseur de 1px (cc.text) sur le fond de c[2]
+        this.s[2].background = `linear-gradient(90deg, 
+            ${cc.backoff} 0px, ${cc.backoff} ${start}px, 
+            ${cc.select} ${start}px, ${cc.select} ${end}px, 
+            ${cc.backoff} ${end}px, ${cc.backoff} ${cur}px, 
+            ${cc.text} ${cur}px, ${cc.text} ${cur + 1}px, 
+            ${cc.backoff} ${cur + 1}px)`;
+    }*/
+
+    unselect () {
+        if ( !this.s ) return;
+        this.s[2].background = 'none';
+        if ( this.autoValue ) this.c[2].textContent = this.formatOutput();
     }
 
     rSize () {

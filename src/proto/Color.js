@@ -29,6 +29,8 @@ export class Color extends Proto {
 	    this.decal = new V2();
 	    this.pp = new V2();
 
+	    this.third = (2/3) * Tools.PI;
+
 	    let cc = this.colors
 
 	   // this.c[2] = this.dom( 'div', this.css.txt + this.css.middle + 'top:1px; height:'+(this.h-2)+'px;' + 'border-radius:'+this.radius+'px; text-shadow:none; border:'+cc.borderSize+'px solid '+cc.border+';' )
@@ -52,7 +54,7 @@ export class Color extends Proto {
 	    this.hsl = null
 	    this.value = '#ffffff';
 	    if( o.value !== undefined ){
-	    	if( o.value.isColor ){ this.value = '#' + o.value.getHexString(); }
+	    	if( o.value.isColor ){ this.value = '#' + o.value.getHexString('srgb'); }
 	        else if( o.value instanceof Array ) this.value = Tools.rgbToHex( o.value )
 	        else if(!isNaN(o.value)) this.value = Tools.hexToHtml( o.value )
 	        else this.value = o.value
@@ -105,6 +107,12 @@ export class Color extends Proto {
 
 	    this.isDown = false;
 	    this.d = 256;
+	    this.sendEnd();
+
+	    /*if ( this.ctype === 'array' ) this.sendEnd( this.rgb );
+		else if ( this.ctype === 'rgb' ) this.sendEnd( Tools.htmlRgb( this.rgb ) );
+		else if ( this.ctype === 'hex' ) this.sendEnd( Tools.htmlToHex( this.value ) );
+		else this.sendEnd();*/
 
 	}
 
@@ -200,9 +208,13 @@ export class Color extends Proto {
 
 						lum = ((Math.sin(rad0) * r) / this.tsl) + 0.5;
 				
-						let w = 1 - (Math.abs(lum - 0.5) * 2);
+						/*let w = 1 - (Math.abs(lum - 0.5) * 2);
 						sat = (((Math.cos(rad0) * r) + (this.tr / 2)) / (1.5 * this.tr)) / w;
-						sat = T.clamp( sat, 0, 1 );
+						sat = T.clamp( sat, 0, 1 );*/
+
+						let w = 1 - (Math.abs(lum - 0.5) * 2);
+						sat = w > 0.0001 ? (((Math.cos(rad0) * r) + (this.tr / 2)) / (1.5 * this.tr)) / w : 0;
+						sat = T.clamp(sat, 0, 1);
 						
 				        this.setHSL([this.hsl[0], sat, lum]);
 
@@ -266,6 +278,7 @@ export class Color extends Proto {
 
 	    let cc = Tools.rgbToHex( Tools.hslToRgb([ this.hsl[0], 1, 0.5 ]) );
 
+	    this.invert = Tools.findDeepInver( this.rgb );
 	    this.moveMarkers();
 	    
 	    this.value = this.bcolor;
@@ -275,7 +288,7 @@ export class Color extends Proto {
 	    this.s[2].background = this.bcolor;
 	    if(!this.notext) this.c[2].textContent = Tools.htmlToHex( this.bcolor );
 
-	    this.invert = Tools.findDeepInver( this.rgb );
+	    
 	    this.s[2].color = this.invert ? '#fff' : '#000';
 
 	    if(!up) return;
@@ -289,12 +302,12 @@ export class Color extends Proto {
 
 	setValue ( v ){
 
-		if( v instanceof Array ) this.value = Tools.rgbToHex( v );
+		//if ( v && v.isColor ) this.value = '#' + v.getHexString();
+	    if( v instanceof Array ) this.value = Tools.rgbToHex( v );
         else if(!isNaN(v)) this.value = Tools.hexToHtml( v );
         else this.value = v;
 
 		this.setColor( this.value )
-        this.update();
 
 	}
 
@@ -332,7 +345,7 @@ export class Color extends Proto {
 
 	    let c1 = this.invert ? '#fff' : '#000';
 	    let a = this.hsl[0] * T.TwoPI;
-	    let third = (2/3) * T.PI;
+	    
 	    let r = this.tr;
 	    let h = this.hsl[0];
 	    let s = this.hsl[1];
@@ -344,10 +357,10 @@ export class Color extends Proto {
 
 		let hx = Math.cos(h) * r;
 		let hy = -Math.sin(h) * r;
-		let sx = Math.cos(h - third) * r;
-		let sy = -Math.sin(h - third) * r;
-		let vx = Math.cos(h + third) * r;
-		let vy = -Math.sin(h + third) * r;
+		let sx = Math.cos(h - this.third) * r;
+		let sy = -Math.sin(h - this.third) * r;
+		let vx = Math.cos(h + this.third) * r;
+		let vy = -Math.sin(h + this.third) * r;
 		let mx = (sx + vx) / 2, my = (sy + vy) / 2;
 		a  = (1 - 2 * Math.abs(l - .5)) * s;
 		let x = sx + (vx - sx) * l + (hx - mx) * a;
@@ -363,8 +376,8 @@ export class Color extends Proto {
 	    this.setSvg( this.c[3], 'cx', p.x, 3 );
 	    this.setSvg( this.c[3], 'cy', p.y, 3 );
 	    
-	    this.setSvg( this.c[3], 'stroke', this.invert ? '#fff' : '#000', 2, 3 );
-	    this.setSvg( this.c[3], 'stroke', this.invert ? '#fff' : '#000', 3 );
+	    this.setSvg( this.c[3], 'stroke', c1, 2, 3 );
+	    this.setSvg( this.c[3], 'stroke', c1, 3 );
 	    this.setSvg( this.c[3], 'fill',this.bcolor, 3 );
 
 	}

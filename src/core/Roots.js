@@ -3,7 +3,7 @@
  * @author lth / https://github.com/lo-th
  */
 
-export const REVISION = '4.5.0';
+export const REVISION = '5.0.0';
 
 // INTENAL FUNCTION
 
@@ -56,19 +56,20 @@ const R = {
     parent: null,
     firstImput: true,
     
-    hiddenImput:null,
-    hiddenSizer:null,
-    hasFocus:false,
-    startInput:false,
-    inputRange : [0,0],
-    cursorId : 0,
+    hiddenImput: null,
+    measureCtx: null, // Remplace hiddenSizer pour des mesures sans reflow DOM
+    hiddenSizer: null,
+    hasFocus: false,
+    startInput: false,
+    inputRange: [0,0],
+    cursorId: 0,
     str:'',
-    pos:0,
+    pos: 0,
     startX:-1,
     moveX:-1,
-
     debugInput:false,
 
+    // Animation loo
     isLoop: false,
     listens: [],
 
@@ -76,16 +77,21 @@ const R = {
         type:null,
         clientX:0,
         clientY:0,
+        pageX: 0,
+        pageY: 0,
+        pressure: 0,
+        isPrimary: true,
+        pointerType: '',
         keyCode:NaN,
         key:null,
         delta:0,
     },
 
     isMobile: false,
-
     now: null,
 
-    injectCss (css, styleName, parent) {
+    injectCss: (css, styleName, parent) => {
+
         const CSS_ID = styleName || 'codeflask-style'
         const PARENT = parent || document.head
 
@@ -98,15 +104,14 @@ const R = {
         style.id = CSS_ID
         PARENT.appendChild(style)
         return true
+
     },
 
-    
-
-    getTime: function() {
+    getTime: () => {
         return ( self.performance && self.performance.now ) ? self.performance.now.bind( performance ) : Date.now;
     },
 
-    testMobile: function () {
+    testMobile: () => {
 
         let n = navigator.userAgent;
         if (n.match(/Android/i) || n.match(/webOS/i) || n.match(/iPhone/i) || n.match(/iPad/i) || n.match(/iPod/i) || n.match(/BlackBerry/i) || n.match(/Windows Phone/i)) return true;
@@ -118,7 +123,7 @@ const R = {
     //   ADD / REMOVE
     // ----------------------
 
-	add: function ( o ) {
+	add: ( o ) => {
 
         R.ui.push( o );
         R.getZone( o );
@@ -127,7 +132,7 @@ const R = {
 
     },
 
-    remove: function ( o ) {
+    remove: ( o ) => {
 
         let i = R.ui.indexOf( o );
         
@@ -149,7 +154,7 @@ const R = {
     //   EVENTS
     // ----------------------
 
-    initEvents: function () {
+    initEvents: () => {
 
         if( R.isEventsInit ) return;
 
@@ -199,7 +204,7 @@ const R = {
 
     },
 
-    removeEvents: function () {
+    removeEvents: () => {
 
         if( !R.isEventsInit ) return;
 
@@ -212,13 +217,10 @@ const R = {
         
         dom.removeEventListener( 'pointercancel', R );
         dom.removeEventListener( 'pointerleave', R );
-        //dom.removeEventListener( 'pointerout', R );
-
         dom.removeEventListener( 'pointermove', R );
         dom.removeEventListener( 'pointerdown', R );
         dom.removeEventListener( 'pointerup', R );
         
-
         dom.removeEventListener( 'keydown', R );
         dom.removeEventListener( 'keyup', R );
         window.removeEventListener( 'resize', R.onResize );
@@ -229,7 +231,7 @@ const R = {
 
     },
 
-    resize: function () {
+    resize: () => {
 
         if (R.resizeTimeout) clearTimeout(R.resizeTimeout);
 
@@ -255,14 +257,14 @@ const R = {
 
     },
 
-    out: function () {
+    out: () => {
 
         console.log('im am out')
         R.clearOldID();
 
     },
 
-    in: function () {
+    in: () => {
 
         console.log('im am in')
       //  R.clearOldID();
@@ -273,14 +275,14 @@ const R = {
     //   HANDLE EVENTS
     // ----------------------
 
-    fakeUp: function(){
+    fakeUp: () => {
 
-        this.handleEvent( {type:'pointerup'} )
+        R.handleEvent( {type:'pointerup'} )
 
     },
     
 
-    handleEvent: function ( event ) {
+    handleEvent: ( event ) => {
 
         //if(!event.type) return;
 
@@ -295,7 +297,18 @@ const R = {
        
         //let e = R.e;
         // Normalisation propre
-        let e = {
+
+        const e = R.e;
+        e.type = event.type;
+        e.pageX = event.pageX || 0;
+        e.pageY = event.pageY || 0;
+        e.clientX = (ptype === 'touch' ? event.pageX : event.clientX) || 0;
+        e.clientY = (ptype === 'touch' ? event.pageY : event.clientY) || 0;
+        e.pressure = event.pressure || 0;
+        e.isPrimary = event.isPrimary !== undefined ? event.isPrimary : true;
+        e.pointerType = ptype || '';
+        e.delta = event.type === 'wheel' ? (event.deltaY > 0 ? 1 : -1) : 0
+        /*let e = {
             type: event.type,
             clientX: event.clientX,
             clientY: event.clientY,
@@ -305,7 +318,7 @@ const R = {
             isPrimary: event.isPrimary, // ✅ Garde l'info du doigt principal
             delta: 0,
             pointerType: ptype
-        };
+        };*/
 
         let leave = false;
         
@@ -395,7 +408,7 @@ const R = {
     //   ID
     // ----------------------
 
-    findID: function ( e ) {
+    findID: ( e ) => {
 
         let i = R.ui.length, next = -1, u, x, y;
 
@@ -433,7 +446,7 @@ const R = {
 
     },
 
-    clearOldID: function () {
+    clearOldID: () => {
 
         if( !R.ID ) return;
         R.current = -1;
@@ -462,6 +475,7 @@ const R = {
             n++;
 
             if( !group && u.isGroup ) u.calcUis();
+            //if( u.isGroup ) u.calcUis();
 
             let m = u.margin || 0;
 
@@ -501,8 +515,10 @@ const R = {
 
                 u.zone.x = zone.x + u.dx;
                 u.zone.y = py;
-                py += u.h + m;
 
+                if ( u.isGroup ) u.calcUis();
+
+                py += u.h + m;
                 height += (u.h + m) //-0.5;// ???
 
             }
@@ -513,24 +529,62 @@ const R = {
 
     },
 
+    findTarget: ( uis, e ) => {
 
-	findTarget: function ( uis, e ) {
+        let low = 0;
+        let high = uis.length - 1;
+        const y = e.clientY;
 
-        let i = uis.length;
+        while ( low <= high ) {
+            const mid = ( low + high ) >> 1;
+            const u = uis[ mid ];
+            const z = u.zone;
 
-        while( i-- ){
-            if( R.onZone( uis[i], e.clientX, e.clientY ) ) return i
+            if ( y < z.y ) {
+                high = mid - 1;
+            } else if ( y > z.y + z.h ) {
+                low = mid + 1;
+            } else {
+                // La souris est dans la bande verticale Y, on vérifie X (et les éléments sur la même ligne si autoWidth = false)
+                if ( R.onZone( u, e.clientX, y ) ) return mid;
+                // Si plusieurs boutons sont côte à côte sur la même ligne Y, on vérifie les voisins proches
+                let left = mid - 1;
+                while ( left >= 0 && uis[left].zone.y === z.y ) {
+                    if ( R.onZone( uis[left], e.clientX, y ) ) return left;
+                    left--;
+                }
+                let right = mid + 1;
+                while ( right < uis.length && uis[right].zone.y === z.y ) {
+                    if ( R.onZone( uis[right], e.clientX, y ) ) return right;
+                    right++;
+                }
+                return -1;
+            }
         }
 
         return -1;
 
     },
 
+
+	/*findTarget: ( uis, e ) => {
+
+        let i = uis.length;
+
+        while( i-- ){
+            if ( uis[i]._vis === false ) continue;
+            if( R.onZone( uis[i], e.clientX, e.clientY ) ) return i
+        }
+
+        return -1;
+
+    },*/
+
     // ----------------------
     //   ZONE
     // ----------------------
 
-    findZone: function ( force = false ) {
+    findZone: ( force = false ) => {
 
         if( force ) R.needReZone = force;
         if( !R.needReZone ) return;
@@ -551,7 +605,7 @@ const R = {
 
     },
 
-    onZone: function ( o, x, y ) {
+    onZone: ( o, x, y ) => {
 
         //
 
@@ -576,7 +630,7 @@ const R = {
 
     },
 
-    getWidth: function ( o ) {
+    getWidth: ( o ) => {
 
 
 
@@ -589,7 +643,7 @@ const R = {
 
     },
 
-    getZone: function ( o ) {
+    getZone: ( o ) => {
 
         if( o.isCanvasOnly ) return;
         if( o.isEmpty ) return;
@@ -599,14 +653,13 @@ const R = {
         o.zone = { x:r.left, y:r.top, w:r.width, h:r.height };
         if( o.isBottom ) o.zone.y = o.realTop;
 
-
     },
 
     // ----------------------
     //   CURSOR
     // ----------------------
 
-    cursor: function ( name ) {
+    cursor: ( name ) => {
 
         name = name ? name : 'auto';
         if( name !== R.oldCursor ){
@@ -620,7 +673,9 @@ const R = {
     //   CANVAS
     // ----------------------
 
-    toCanvas: function ( o, w, h, force ) {
+    
+
+    toCanvas: ( o, w, h, force, scale = 1 ) => {
 
         if( !R.xmlserializer ) R.xmlserializer = new XMLSerializer()
 
@@ -630,32 +685,39 @@ const R = {
 
         if( R.tmpTime !== null ) return;
 
-        if( R.lock ) R.tmpTime = setTimeout( function(){ R.tmpTime = null; }, 10 );
+        if( R.lock ) R.tmpTime = setTimeout( ()=>{ R.tmpTime = null; }, 16 );
+
+
+        const targetW = Math.round( w * scale );
+        const targetH = Math.round( h * scale );
 
         ///
 
         let isNewSize = false;
-        if( w !== o.canvas.width || h !== o.canvas.height ) isNewSize = true;
+        if( targetW !== o.canvas.width || targetH !== o.canvas.height ) isNewSize = true;
 
         if( R.tmpImage === null ) R.tmpImage = new Image();
 
         let img = R.tmpImage; //new Image();
 
         let htmlString = R.xmlserializer.serializeToString( o.content );
-        
-        let svg = '<svg xmlns="http://www.w3.org/2000/svg" width="'+w+'" height="'+h+'"><foreignObject style="pointer-events: none; left:0;" width="100%" height="100%">'+ htmlString +'</foreignObject></svg>';
+        //let svg = '<svg xmlns="http://www.w3.org/2000/svg" width="'+targetW+'" height="'+targetH+'"><foreignObject style="pointer-events: none; left:0;" width="'+w+'" height="'+h+'">'+ htmlString +'</foreignObject></svg>';
+
+        let svg = '<svg xmlns="http://www.w3.org/2000/svg" width="'+targetW+'" height="'+targetH+'" viewBox="0 0 '+w+' '+h+'">' +
+              '<foreignObject style="pointer-events: none; left:0;" width="'+w+'" height="'+h+'">'+ htmlString +'</foreignObject>' +
+              '</svg>';
 
         img.onload = function() {
 
             let ctx = o.canvas.getContext("2d");
 
             if( isNewSize ){ 
-                o.canvas.width = w;
-                o.canvas.height = h
+                o.canvas.width = targetW;
+                o.canvas.height = targetH
             }else{
-                ctx.clearRect( 0, 0, w, h );
+                ctx.clearRect( 0, 0, targetW, targetH );
             }
-            ctx.drawImage( this, 0, 0 );
+            ctx.drawImage( this, 0, 0, targetW, targetH );
 
             o.onDraw();
 
@@ -672,7 +734,7 @@ const R = {
     //   INPUT
     // ----------------------
 
-    setHidden: function () {
+    setHidden: () => {
 
 
         if( R.hiddenImput === null ){
@@ -693,7 +755,7 @@ const R = {
 
         }
 
-        let hide = R.debugInput ? '' : 'opacity:0; zIndex:0;';
+        let hide = R.debugInput ? '' : 'opacity:0; z-index:0;';
         let css = R.parent.css.txtselect + 'padding:0; width:auto; height:auto; left:10px; top:auto; color:#FFF; background:#000;'+ hide;
         R.hiddenImput.style.cssText = css + 'bottom:10px;' + (R.debugInput ? '' : 'transform:scale(0);');
         R.hiddenSizer.style.cssText = css + 'bottom:40px;';
@@ -706,14 +768,14 @@ const R = {
 
     },
 
-    clearHidden: function ( p ) {
+    clearHidden: ( p ) => {
 
         if( R.hiddenImput === null ) return;
         R.hasFocus = false;
 
     },
 
-    clickPos: function( x ){
+    clickPos: ( x ) => {
 
         let i = R.str.length, l = 0, n = 0;
         while( i-- ){
@@ -725,7 +787,7 @@ const R = {
 
     },
 
-    upInput: function ( x, down ) {
+    upInput: ( x, down ) => {
 
         if( R.parent === null ) return false;
 
@@ -777,7 +839,7 @@ const R = {
 
     },
 
-    selectAll: function (){
+    selectAll: () => {
 
         if(!R.parent) return
 
@@ -792,27 +854,42 @@ const R = {
 
     },
 
-    selectParent: function (){
+    selectParent: () => {
 
-        var c = R.textWidth( R.str.substring( 0, R.cursorId ));
-        var e = R.textWidth( R.str.substring( 0, R.inputRange[0] ));
-        var s = R.textWidth( R.str.substring( R.inputRange[0],  R.inputRange[1] ));
+        const c = R.textWidth( R.str.substring( 0, R.cursorId ));
+        const e = R.textWidth( R.str.substring( 0, R.inputRange[0] ));
+        const s = R.textWidth( R.str.substring( R.inputRange[0],  R.inputRange[1] ));
+        const full = R.textWidth( R.str )
 
-        R.parent.select( c, e, s, R.hiddenSizer.innerHTML );
+        R.parent.select( c, e, s, R.hiddenSizer.innerHTML, full );
 
     },
 
-    textWidth: function ( text ){
+    textWidth: ( text ) => {
 
-        if( R.hiddenSizer === null ) return 0;
+        if (!text) return 0;
+
+        if (!R.measureCtx) {
+            R.measureCtx = document.createElement('canvas').getContext('2d');
+        }
+
+        /*if (R.input) {
+            const s = window.getComputedStyle(R.input);
+            R.measureCtx.font = `${s.fontWeight} ${s.fontSize} ${s.fontFamily}`;
+        }*/
+
+        //if( R.hiddenSizer === null ) return 0;
         text = text.replace(/ /g, '&nbsp;');
         R.hiddenSizer.innerHTML = text;
+
+        //console.log(R.hiddenSizer.clientWidth, R.measureCtx.measureText(text).width)
+        //return R.measureCtx.measureText(text).width
         return R.hiddenSizer.clientWidth;
 
     },
 
 
-    clearInput: function () {
+    clearInput: () => {
 
         if( R.parent === null ) return;
         if( !R.firstImput ) R.parent.validate( true );
@@ -821,7 +898,8 @@ const R = {
         R.parent.unselect();
 
         //R.input.style.background = 'none';
-        R.input.style.background = R.parent.colors.back;
+        //R.input.style.background = R.parent.colors.back;
+        R.input.style.background = R.parent.colors.back || 'none';
         R.input.style.borderColor = R.parent.colors.border;
         //R.input.style.color = R.parent.colors.text;
         R.parent.isEdit = false;
@@ -833,7 +911,7 @@ const R = {
 
     },
 
-    setInput: function ( Input, parent ) {
+    setInput: ( Input, parent ) => {
 
         R.clearInput();
         
@@ -849,11 +927,11 @@ const R = {
 
     },
 
-    keydown: function ( e ) {
+    keydown: ( e ) => {
 
         if( R.parent === null ) return;
 
-        let keyCode = e.which, isShift = e.shiftKey;
+        //let keyCode = e.which, isShift = e.shiftKey;
 
         //console.log( keyCode )
 
@@ -870,6 +948,15 @@ const R = {
 
         R.parent.isEdit = true;
 
+        if (e.key === 'Enter') {
+            R.clearInput();
+        } else if (R.input.isNum) {
+            const ok = /^[0-9.\-]$/.test(e.key) || ['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'Tab'].includes(e.key) || e.ctrlKey || e.metaKey;
+            R.hiddenImput.readOnly = !ok;
+        } else {
+            R.hiddenImput.readOnly = false;
+        }
+
        // e.preventDefault();
 
         // add support for Ctrl/Cmd+A selection
@@ -879,7 +966,7 @@ const R = {
             //return self.render();
         //}
 
-        if( keyCode === 13 ){ //enter
+        /*if( keyCode === 13 ){ //enter
 
             R.clearInput();
 
@@ -899,11 +986,11 @@ const R = {
                 R.hiddenImput.readOnly = false;
             }
 
-        }
+        }*/
 
     },
 
-    keyup: function ( e ) {
+    keyup: ( e ) => {
 
         if( R.parent === null ) return;
 
@@ -928,21 +1015,21 @@ const R = {
     //
     // ----------------------
 
-    loop: function () {
+    loop: () => {
 
         if( R.isLoop ) requestAnimationFrame( R.loop );
         R.update();
 
     },
 
-    update: function () {
+    update: () => {
 
         let i = R.listens.length;
         while( i-- ) R.listens[i].listening();
 
     },
 
-    removeListen: function ( proto ) {
+    removeListen: ( proto ) => {
 
         let id = R.listens.indexOf( proto );
         if( id !== -1 ) R.listens.splice(id, 1);
@@ -950,7 +1037,7 @@ const R = {
 
     },
 
-    addListen: function ( proto ) {
+    addListen: ( proto ) => {
 
         let id = R.listens.indexOf( proto );
 

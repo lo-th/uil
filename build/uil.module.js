@@ -2,7 +2,7 @@
  * @author lth / https://github.com/lo-th
  */
 
-const REVISION = '4.5.0';
+const REVISION = '5.0.0';
 
 // INTENAL FUNCTION
 
@@ -55,19 +55,20 @@ const R = {
     parent: null,
     firstImput: true,
     
-    hiddenImput:null,
-    hiddenSizer:null,
-    hasFocus:false,
-    startInput:false,
-    inputRange : [0,0],
-    cursorId : 0,
+    hiddenImput: null,
+    measureCtx: null, // Remplace hiddenSizer pour des mesures sans reflow DOM
+    hiddenSizer: null,
+    hasFocus: false,
+    startInput: false,
+    inputRange: [0,0],
+    cursorId: 0,
     str:'',
-    pos:0,
+    pos: 0,
     startX:-1,
     moveX:-1,
-
     debugInput:false,
 
+    // Animation loo
     isLoop: false,
     listens: [],
 
@@ -75,16 +76,21 @@ const R = {
         type:null,
         clientX:0,
         clientY:0,
+        pageX: 0,
+        pageY: 0,
+        pressure: 0,
+        isPrimary: true,
+        pointerType: '',
         keyCode:NaN,
         key:null,
         delta:0,
     },
 
     isMobile: false,
-
     now: null,
 
-    injectCss (css, styleName, parent) {
+    injectCss: (css, styleName, parent) => {
+
         const CSS_ID = styleName || 'codeflask-style';
         const PARENT = parent || document.head;
 
@@ -97,15 +103,14 @@ const R = {
         style.id = CSS_ID;
         PARENT.appendChild(style);
         return true
+
     },
 
-    
-
-    getTime: function() {
+    getTime: () => {
         return ( self.performance && self.performance.now ) ? self.performance.now.bind( performance ) : Date.now;
     },
 
-    testMobile: function () {
+    testMobile: () => {
 
         let n = navigator.userAgent;
         if (n.match(/Android/i) || n.match(/webOS/i) || n.match(/iPhone/i) || n.match(/iPad/i) || n.match(/iPod/i) || n.match(/BlackBerry/i) || n.match(/Windows Phone/i)) return true;
@@ -117,7 +122,7 @@ const R = {
     //   ADD / REMOVE
     // ----------------------
 
-	add: function ( o ) {
+	add: ( o ) => {
 
         R.ui.push( o );
         R.getZone( o );
@@ -126,7 +131,7 @@ const R = {
 
     },
 
-    remove: function ( o ) {
+    remove: ( o ) => {
 
         let i = R.ui.indexOf( o );
         
@@ -148,7 +153,7 @@ const R = {
     //   EVENTS
     // ----------------------
 
-    initEvents: function () {
+    initEvents: () => {
 
         if( R.isEventsInit ) return;
 
@@ -198,7 +203,7 @@ const R = {
 
     },
 
-    removeEvents: function () {
+    removeEvents: () => {
 
         if( !R.isEventsInit ) return;
 
@@ -211,13 +216,10 @@ const R = {
         
         dom.removeEventListener( 'pointercancel', R );
         dom.removeEventListener( 'pointerleave', R );
-        //dom.removeEventListener( 'pointerout', R );
-
         dom.removeEventListener( 'pointermove', R );
         dom.removeEventListener( 'pointerdown', R );
         dom.removeEventListener( 'pointerup', R );
         
-
         dom.removeEventListener( 'keydown', R );
         dom.removeEventListener( 'keyup', R );
         window.removeEventListener( 'resize', R.onResize );
@@ -228,7 +230,7 @@ const R = {
 
     },
 
-    resize: function () {
+    resize: () => {
 
         if (R.resizeTimeout) clearTimeout(R.resizeTimeout);
 
@@ -254,14 +256,14 @@ const R = {
 
     },
 
-    out: function () {
+    out: () => {
 
         console.log('im am out');
         R.clearOldID();
 
     },
 
-    in: function () {
+    in: () => {
 
         console.log('im am in');
       //  R.clearOldID();
@@ -272,14 +274,14 @@ const R = {
     //   HANDLE EVENTS
     // ----------------------
 
-    fakeUp: function(){
+    fakeUp: () => {
 
-        this.handleEvent( {type:'pointerup'} );
+        R.handleEvent( {type:'pointerup'} );
 
     },
     
 
-    handleEvent: function ( event ) {
+    handleEvent: ( event ) => {
 
         //if(!event.type) return;
 
@@ -294,17 +296,17 @@ const R = {
        
         //let e = R.e;
         // Normalisation propre
-        let e = {
-            type: event.type,
-            clientX: event.clientX,
-            clientY: event.clientY,
-            pageX: event.pageX,
-            pageY: event.pageY,
-            pressure: event.pressure, // ✅ Garde la pression du stylet/toucher
-            isPrimary: event.isPrimary, // ✅ Garde l'info du doigt principal
-            delta: 0,
-            pointerType: ptype
-        };
+
+        const e = R.e;
+        e.type = event.type;
+        e.pageX = event.pageX || 0;
+        e.pageY = event.pageY || 0;
+        e.clientX = (ptype === 'touch' ? event.pageX : event.clientX) || 0;
+        e.clientY = (ptype === 'touch' ? event.pageY : event.clientY) || 0;
+        e.pressure = event.pressure || 0;
+        e.isPrimary = event.isPrimary !== undefined ? event.isPrimary : true;
+        e.pointerType = ptype || '';
+        e.delta = event.type === 'wheel' ? (event.deltaY > 0 ? 1 : -1) : 0;
         
         if( event.type === 'keydown') R.keydown( event );
         if( event.type === 'keyup') R.keyup( event );
@@ -391,7 +393,7 @@ const R = {
     //   ID
     // ----------------------
 
-    findID: function ( e ) {
+    findID: ( e ) => {
 
         let i = R.ui.length, next = -1, u, x, y;
 
@@ -429,7 +431,7 @@ const R = {
 
     },
 
-    clearOldID: function () {
+    clearOldID: () => {
 
         if( !R.ID ) return;
         R.current = -1;
@@ -458,6 +460,7 @@ const R = {
             n++;
 
             if( !group && u.isGroup ) u.calcUis();
+            //if( u.isGroup ) u.calcUis();
 
             let m = u.margin || 0;
 
@@ -497,8 +500,10 @@ const R = {
 
                 u.zone.x = zone.x + u.dx;
                 u.zone.y = py;
-                py += u.h + m;
 
+                if ( u.isGroup ) u.calcUis();
+
+                py += u.h + m;
                 height += (u.h + m); //-0.5;// ???
 
             }
@@ -509,24 +514,62 @@ const R = {
 
     },
 
+    findTarget: ( uis, e ) => {
 
-	findTarget: function ( uis, e ) {
+        let low = 0;
+        let high = uis.length - 1;
+        const y = e.clientY;
 
-        let i = uis.length;
+        while ( low <= high ) {
+            const mid = ( low + high ) >> 1;
+            const u = uis[ mid ];
+            const z = u.zone;
 
-        while( i-- ){
-            if( R.onZone( uis[i], e.clientX, e.clientY ) ) return i
+            if ( y < z.y ) {
+                high = mid - 1;
+            } else if ( y > z.y + z.h ) {
+                low = mid + 1;
+            } else {
+                // La souris est dans la bande verticale Y, on vérifie X (et les éléments sur la même ligne si autoWidth = false)
+                if ( R.onZone( u, e.clientX, y ) ) return mid;
+                // Si plusieurs boutons sont côte à côte sur la même ligne Y, on vérifie les voisins proches
+                let left = mid - 1;
+                while ( left >= 0 && uis[left].zone.y === z.y ) {
+                    if ( R.onZone( uis[left], e.clientX, y ) ) return left;
+                    left--;
+                }
+                let right = mid + 1;
+                while ( right < uis.length && uis[right].zone.y === z.y ) {
+                    if ( R.onZone( uis[right], e.clientX, y ) ) return right;
+                    right++;
+                }
+                return -1;
+            }
         }
 
         return -1;
 
     },
 
+
+	/*findTarget: ( uis, e ) => {
+
+        let i = uis.length;
+
+        while( i-- ){
+            if ( uis[i]._vis === false ) continue;
+            if( R.onZone( uis[i], e.clientX, e.clientY ) ) return i
+        }
+
+        return -1;
+
+    },*/
+
     // ----------------------
     //   ZONE
     // ----------------------
 
-    findZone: function ( force = false ) {
+    findZone: ( force = false ) => {
 
         if( force ) R.needReZone = force;
         if( !R.needReZone ) return;
@@ -547,7 +590,7 @@ const R = {
 
     },
 
-    onZone: function ( o, x, y ) {
+    onZone: ( o, x, y ) => {
 
         //
 
@@ -572,7 +615,7 @@ const R = {
 
     },
 
-    getWidth: function ( o ) {
+    getWidth: ( o ) => {
 
 
 
@@ -585,7 +628,7 @@ const R = {
 
     },
 
-    getZone: function ( o ) {
+    getZone: ( o ) => {
 
         if( o.isCanvasOnly ) return;
         if( o.isEmpty ) return;
@@ -595,14 +638,13 @@ const R = {
         o.zone = { x:r.left, y:r.top, w:r.width, h:r.height };
         if( o.isBottom ) o.zone.y = o.realTop;
 
-
     },
 
     // ----------------------
     //   CURSOR
     // ----------------------
 
-    cursor: function ( name ) {
+    cursor: ( name ) => {
 
         name = name ? name : 'auto';
         if( name !== R.oldCursor ){
@@ -616,7 +658,9 @@ const R = {
     //   CANVAS
     // ----------------------
 
-    toCanvas: function ( o, w, h, force ) {
+    
+
+    toCanvas: ( o, w, h, force, scale = 1 ) => {
 
         if( !R.xmlserializer ) R.xmlserializer = new XMLSerializer();
 
@@ -626,32 +670,39 @@ const R = {
 
         if( R.tmpTime !== null ) return;
 
-        if( R.lock ) R.tmpTime = setTimeout( function(){ R.tmpTime = null; }, 10 );
+        if( R.lock ) R.tmpTime = setTimeout( ()=>{ R.tmpTime = null; }, 16 );
+
+
+        const targetW = Math.round( w * scale );
+        const targetH = Math.round( h * scale );
 
         ///
 
         let isNewSize = false;
-        if( w !== o.canvas.width || h !== o.canvas.height ) isNewSize = true;
+        if( targetW !== o.canvas.width || targetH !== o.canvas.height ) isNewSize = true;
 
         if( R.tmpImage === null ) R.tmpImage = new Image();
 
         let img = R.tmpImage; //new Image();
 
         let htmlString = R.xmlserializer.serializeToString( o.content );
-        
-        let svg = '<svg xmlns="http://www.w3.org/2000/svg" width="'+w+'" height="'+h+'"><foreignObject style="pointer-events: none; left:0;" width="100%" height="100%">'+ htmlString +'</foreignObject></svg>';
+        //let svg = '<svg xmlns="http://www.w3.org/2000/svg" width="'+targetW+'" height="'+targetH+'"><foreignObject style="pointer-events: none; left:0;" width="'+w+'" height="'+h+'">'+ htmlString +'</foreignObject></svg>';
+
+        let svg = '<svg xmlns="http://www.w3.org/2000/svg" width="'+targetW+'" height="'+targetH+'" viewBox="0 0 '+w+' '+h+'">' +
+              '<foreignObject style="pointer-events: none; left:0;" width="'+w+'" height="'+h+'">'+ htmlString +'</foreignObject>' +
+              '</svg>';
 
         img.onload = function() {
 
             let ctx = o.canvas.getContext("2d");
 
             if( isNewSize ){ 
-                o.canvas.width = w;
-                o.canvas.height = h;
+                o.canvas.width = targetW;
+                o.canvas.height = targetH;
             }else {
-                ctx.clearRect( 0, 0, w, h );
+                ctx.clearRect( 0, 0, targetW, targetH );
             }
-            ctx.drawImage( this, 0, 0 );
+            ctx.drawImage( this, 0, 0, targetW, targetH );
 
             o.onDraw();
 
@@ -668,7 +719,7 @@ const R = {
     //   INPUT
     // ----------------------
 
-    setHidden: function () {
+    setHidden: () => {
 
 
         if( R.hiddenImput === null ){
@@ -689,7 +740,7 @@ const R = {
 
         }
 
-        let hide = R.debugInput ? '' : 'opacity:0; zIndex:0;';
+        let hide = R.debugInput ? '' : 'opacity:0; z-index:0;';
         let css = R.parent.css.txtselect + 'padding:0; width:auto; height:auto; left:10px; top:auto; color:#FFF; background:#000;'+ hide;
         R.hiddenImput.style.cssText = css + 'bottom:10px;' + (R.debugInput ? '' : 'transform:scale(0);');
         R.hiddenSizer.style.cssText = css + 'bottom:40px;';
@@ -702,14 +753,14 @@ const R = {
 
     },
 
-    clearHidden: function ( p ) {
+    clearHidden: ( p ) => {
 
         if( R.hiddenImput === null ) return;
         R.hasFocus = false;
 
     },
 
-    clickPos: function( x ){
+    clickPos: ( x ) => {
 
         let i = R.str.length, l = 0, n = 0;
         while( i-- ){
@@ -721,7 +772,7 @@ const R = {
 
     },
 
-    upInput: function ( x, down ) {
+    upInput: ( x, down ) => {
 
         if( R.parent === null ) return false;
 
@@ -773,7 +824,7 @@ const R = {
 
     },
 
-    selectAll: function (){
+    selectAll: () => {
 
         if(!R.parent) return
 
@@ -788,27 +839,42 @@ const R = {
 
     },
 
-    selectParent: function (){
+    selectParent: () => {
 
-        var c = R.textWidth( R.str.substring( 0, R.cursorId ));
-        var e = R.textWidth( R.str.substring( 0, R.inputRange[0] ));
-        var s = R.textWidth( R.str.substring( R.inputRange[0],  R.inputRange[1] ));
+        const c = R.textWidth( R.str.substring( 0, R.cursorId ));
+        const e = R.textWidth( R.str.substring( 0, R.inputRange[0] ));
+        const s = R.textWidth( R.str.substring( R.inputRange[0],  R.inputRange[1] ));
+        const full = R.textWidth( R.str );
 
-        R.parent.select( c, e, s, R.hiddenSizer.innerHTML );
+        R.parent.select( c, e, s, R.hiddenSizer.innerHTML, full );
 
     },
 
-    textWidth: function ( text ){
+    textWidth: ( text ) => {
 
-        if( R.hiddenSizer === null ) return 0;
+        if (!text) return 0;
+
+        if (!R.measureCtx) {
+            R.measureCtx = document.createElement('canvas').getContext('2d');
+        }
+
+        /*if (R.input) {
+            const s = window.getComputedStyle(R.input);
+            R.measureCtx.font = `${s.fontWeight} ${s.fontSize} ${s.fontFamily}`;
+        }*/
+
+        //if( R.hiddenSizer === null ) return 0;
         text = text.replace(/ /g, '&nbsp;');
         R.hiddenSizer.innerHTML = text;
+
+        //console.log(R.hiddenSizer.clientWidth, R.measureCtx.measureText(text).width)
+        //return R.measureCtx.measureText(text).width
         return R.hiddenSizer.clientWidth;
 
     },
 
 
-    clearInput: function () {
+    clearInput: () => {
 
         if( R.parent === null ) return;
         if( !R.firstImput ) R.parent.validate( true );
@@ -817,7 +883,8 @@ const R = {
         R.parent.unselect();
 
         //R.input.style.background = 'none';
-        R.input.style.background = R.parent.colors.back;
+        //R.input.style.background = R.parent.colors.back;
+        R.input.style.background = R.parent.colors.back || 'none';
         R.input.style.borderColor = R.parent.colors.border;
         //R.input.style.color = R.parent.colors.text;
         R.parent.isEdit = false;
@@ -829,7 +896,7 @@ const R = {
 
     },
 
-    setInput: function ( Input, parent ) {
+    setInput: ( Input, parent ) => {
 
         R.clearInput();
         
@@ -845,11 +912,11 @@ const R = {
 
     },
 
-    keydown: function ( e ) {
+    keydown: ( e ) => {
 
         if( R.parent === null ) return;
 
-        let keyCode = e.which; e.shiftKey;
+        //let keyCode = e.which, isShift = e.shiftKey;
 
         //console.log( keyCode )
 
@@ -866,6 +933,15 @@ const R = {
 
         R.parent.isEdit = true;
 
+        if (e.key === 'Enter') {
+            R.clearInput();
+        } else if (R.input.isNum) {
+            const ok = /^[0-9.\-]$/.test(e.key) || ['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'Tab'].includes(e.key) || e.ctrlKey || e.metaKey;
+            R.hiddenImput.readOnly = !ok;
+        } else {
+            R.hiddenImput.readOnly = false;
+        }
+
        // e.preventDefault();
 
         // add support for Ctrl/Cmd+A selection
@@ -875,7 +951,7 @@ const R = {
             //return self.render();
         //}
 
-        if( keyCode === 13 ){ //enter
+        /*if( keyCode === 13 ){ //enter
 
             R.clearInput();
 
@@ -895,11 +971,11 @@ const R = {
                 R.hiddenImput.readOnly = false;
             }
 
-        }
+        }*/
 
     },
 
-    keyup: function ( e ) {
+    keyup: ( e ) => {
 
         if( R.parent === null ) return;
 
@@ -924,21 +1000,21 @@ const R = {
     //
     // ----------------------
 
-    loop: function () {
+    loop: () => {
 
         if( R.isLoop ) requestAnimationFrame( R.loop );
         R.update();
 
     },
 
-    update: function () {
+    update: () => {
 
         let i = R.listens.length;
         while( i-- ) R.listens[i].listening();
 
     },
 
-    removeListen: function ( proto ) {
+    removeListen: ( proto ) => {
 
         let id = R.listens.indexOf( proto );
         if( id !== -1 ) R.listens.splice(id, 1);
@@ -946,7 +1022,7 @@ const R = {
 
     },
 
-    addListen: function ( proto ) {
+    addListen: ( proto ) => {
 
         let id = R.listens.indexOf( proto );
 
@@ -966,6 +1042,326 @@ const R = {
 };
 
 const Roots = R;
+
+///https://wicg.github.io/file-system-access/#api-filesystemfilehandle-getfile
+
+
+class Files {
+
+    //-----------------------------
+    //  FILE TYPE
+    //-----------------------------
+
+    static autoTypes( type ) {
+
+        let t = [];
+
+        switch( type ){
+            case 'svg':
+            t = [ { accept: { 'image/svg+xml': '.svg'} }, ];
+            break;
+            case 'wav':
+            t = [ { accept: { 'audio/wav': '.wav'} }, ];
+            break;
+            case 'mp3':
+            t = [ { accept: { 'audio/mpeg': '.mp3'} }, ];
+            break;
+            case 'mp4':
+            t = [ { accept: { 'video/mp4': '.mp4'} }, ];
+            break;
+            case 'bin': case 'hex':
+            t = [ { description: 'Binary Files', accept: { 'application/octet-stream': ['.bin', '.hex'] } }, ];
+            break;
+            case 'text':
+            t = [ { description: 'Text Files', accept: { 'text/plain': ['.txt', '.text'], 'text/html': ['.html', '.htm'] } }, ];
+            break;
+            case 'json':
+            t = [ { description: 'JSON Files', accept: { 'application/json': ['.json'] } }, ];//text/plain
+            break;
+            case 'js':
+            t = [ { description: 'JavaScript Files', accept: { 'text/javascript': ['.js'] } }, ];
+            break;
+            case 'ktx2':
+            t = [ { description: 'ktx2', accept: { 'image/ktx2': ['.ktx2'] } }, ];
+            break;
+            case 'image':
+            t = [ { description: 'Images', accept: { 'image/*': ['.png', '.gif', '.jpeg', '.jpg', '.hdr', '.exr'] } }, ];
+            break;
+            case 'gif':
+            t = [ { description: 'Images', accept: { 'image/*': ['.gif'] } }, ];
+            break;
+            case 'png':
+            t = [ { description: 'Images', accept: { 'image/*': ['.png'] } }, ];
+            break;
+            case 'exr':
+            t = [ { description: 'Images', accept: { 'image/exr': ['.exr'] } }, ];
+            break;
+            case 'hdr':
+            t = [ { description: 'Images', accept: { 'image/hdr': ['.hdr'] } }, ];
+            break;
+            case 'jpg':
+            t = [ { description: 'Images', accept: { 'image/*': ['.jpg', '.jpeg'] } }, ];
+            break;
+            case 'icon':
+            t = [ { description: 'Icons', accept: { 'image/x-ico': ['.ico'] } }, ];
+            break;
+            case 'lut':
+            t = [ { description: 'Lut', accept: { 'text/plain': ['.cube', '.3dl'] } }, ];
+            break;
+
+        }
+
+        return t
+
+    }
+
+
+    //-----------------------------
+    //  LOAD
+    //-----------------------------
+
+	static async load( o = {} ) {
+
+        if (typeof window.showOpenFilePicker !== 'function') {
+            window.showOpenFilePicker = Files.showOpenFilePickerPolyfill;
+        }
+
+        try {
+
+        	let type = o.type || '';
+
+            const options = {
+                excludeAcceptAllOption: type ? true : false,
+                multiple: false,
+                //startIn:'./assets'
+            };
+
+            options.types = Files.autoTypes( type );
+
+            // create a new handle
+            const handle = await window.showOpenFilePicker( options );
+            const file = await handle[0].getFile();
+            //let content = await file.text()
+
+            if( !file ) return null
+
+            let fname = file.name;
+            let ftype = fname.substring( fname.lastIndexOf('.')+1, fname.length );
+            let realType = '';
+
+            const dataUrl = [ 'png', 'jpg', 'jpeg', 'mp4', 'webm', 'ogg', 'mp3' ];
+            const dataBuf = [ 'sea', 'z', 'hex', 'bvh', 'BVH', 'glb', 'gltf', 'exr', 'ktx2', 'hdr' ];
+            const reader = new FileReader();
+
+            const cleanupReader = () => reader.removeEventListener('load', onLoad);
+
+            if(o.forceType === 'ArrayBuffer') {
+                reader.readAsArrayBuffer( file );
+                //type = ''
+            } else {
+                if( dataUrl.indexOf( ftype ) !== -1 ) reader.readAsDataURL( file );
+                else if( dataBuf.indexOf( ftype ) !== -1 ) reader.readAsArrayBuffer( file );
+                else reader.readAsText( file );
+            }
+
+            
+            const onLoad = (e) => {
+
+                let content = e.target.result;
+
+                cleanupReader();
+
+                switch(type){
+                    case 'image':
+                        let img = new Image();
+                        img.onload = function() {
+                            img.width = img.width;
+                            img.height = img.height;
+                            if( o.callback ) o.callback( img, fname, ftype, [img.width, img.height] );
+                        };
+                        img.src = content;
+                    break;
+                    case 'json':
+                        if( o.callback ) o.callback( JSON.parse( content ), fname, ftype );
+                    break;
+                    default:
+                        if( o.callback ) o.callback( content, fname, ftype );
+                    break;
+                }
+
+            };
+
+            reader.addEventListener('load', onLoad);
+
+        } catch(e) {
+
+            console.log(e);
+            if( o.always && o.callback ) o.callback( null );
+
+        }
+
+    }
+
+	static showOpenFilePickerPolyfill( options ) {
+        return new Promise((resolve) => {
+            const input = document.createElement("input");
+            input.type = "file";
+            input.multiple = options.multiple;
+            input.accept = options.types
+                .map((type) => type.accept)
+                .flatMap((inst) => Object.keys(inst).flatMap((key) => inst[key]))
+                .join(",");
+
+            const cleanup = () => {
+                input.removeEventListener("change", onChange);
+                if (input.parentNode) input.parentNode.removeChild(input);
+            };
+
+            const onChange = (e) => {
+                resolve(
+                    [...input.files].map((file) => ({
+                        getFile: async () => file
+                    }))
+                );
+                cleanup(); // Nettoyage immédiat
+            };
+
+            input.addEventListener("change", onChange);
+
+            /*input.addEventListener("change", () => {
+                resolve(
+                    [...input.files].map((file) => {
+                        return {
+                            getFile: async () =>
+                                new Promise((resolve) => {
+                                    resolve(file);
+                                }),
+                        };
+                    })
+                );
+            });*/
+
+            input.click();
+        })
+    }
+
+
+    //-----------------------------
+    //  SAVE
+    //-----------------------------
+
+    static async save( o = {} ) {
+
+        let usePoly = false;
+
+        if (typeof window.showSaveFilePicker !== 'function') {
+            window.showSaveFilePicker = Files.showSaveFilePickerPolyfill;
+            usePoly = true;
+        }
+
+        try {
+
+            let type = o.type || '';
+
+            const options = {
+                suggestedName: o.name || 'hello',
+                data: o.data || ''
+            };
+
+            options.types = Files.autoTypes( type );
+            options.finalType = Object.keys( options.types[0].accept )[0];
+            options.suggestedName += options.types[0].accept[options.finalType][0];
+
+
+            // create a new handle
+            const handle = await window.showSaveFilePicker( options );
+
+            if( usePoly ) return
+
+            // create a FileSystemWritableFileStream to write to
+            const file = await handle.createWritable();
+
+            let blob = new Blob([ options.data ], { type: options.finalType });
+
+            // write our file
+            await file.write(blob);
+
+            // close the file and write the contents to disk.
+            await file.close();
+
+        } catch(e) {
+
+            console.log(e);
+
+        }
+
+    }
+
+    static showSaveFilePickerPolyfill( options ) {
+        return new Promise((resolve) => {
+            const a = document.createElement("a");
+            a.download = options.suggestedName || "my-file.txt";
+            let blob = new Blob([ options.data ], { type:options.finalType });
+            a.href = URL.createObjectURL( blob );
+
+            const revoke = () => URL.revokeObjectURL(a.href);
+
+            a.addEventListener("click", () => {
+                resolve(
+                    setTimeout(() => {
+                        revoke();
+                        if (a.parentNode) a.parentNode.removeChild(a);
+                    }, 1000)
+                );
+            });
+            a.click();
+
+            /*a.addEventListener("click", () => {
+                resolve(
+                    setTimeout( () => URL.revokeObjectURL(a.href), 1000 )
+                )
+            })
+            a.click()*/
+        })
+    }
+
+
+    //-----------------------------
+    //  FOLDER not possible in poly
+    //-----------------------------
+
+    static async getFolder() {
+
+        try {
+    
+            const handle = await window.showDirectoryPicker();
+            const files = [];
+            for await (const entry of handle.values()) {
+                const file = await entry.getFile();
+                files.push(file);
+            }
+
+            console.log(files);
+            return files;
+
+        } catch(e) {
+
+            console.log(e);
+
+        }
+    
+    }
+
+
+
+
+
+
+
+
+    
+
+}
 
 /**
  * @author lth / https://github.com/lo-th
@@ -995,9 +1391,14 @@ const T = {
     links: "http://www.w3.org/1999/xlink",
     htmls: "http://www.w3.org/1999/xhtml",
 
-    DOM_SIZE: [ 'height', 'width', 'top', 'left', 'bottom', 'right', 'margin-left', 'margin-right', 'margin-top', 'margin-bottom'],
+    //DOM_SIZE: [ 'height', 'width', 'top', 'left', 'bottom', 'right', 'margin-left', 'margin-right', 'margin-top', 'margin-bottom'],
+    /*DOM_SIZE: [ 'height', 'width', 'top', 'left', 'bottom', 'right', 'marginLeft', 'marginRight', 'marginTop', 'marginBottom'],
     SVG_TYPE_D: [ 'pattern', 'defs', 'transform', 'stop', 'animate', 'radialGradient', 'linearGradient', 'animateMotion', 'use', 'filter', 'feColorMatrix' ],
-    SVG_TYPE_G: [ 'svg', 'rect', 'circle', 'path', 'polygon', 'text', 'g', 'line', 'foreignObject' ],
+    SVG_TYPE_G: [ 'svg', 'rect', 'circle', 'path', 'polygon', 'text', 'g', 'line', 'foreignObject' ],*/
+
+    DOM_SIZE: new Set(['height', 'width', 'top', 'left', 'bottom', 'right', 'marginLeft', 'marginRight', 'marginTop', 'marginBottom']),
+    SVG_TYPE_D: new Set(['pattern', 'defs', 'transform', 'stop', 'animate', 'radialGradient', 'linearGradient', 'animateMotion', 'use', 'filter', 'feColorMatrix']),
+    SVG_TYPE_G: new Set(['svg', 'rect', 'circle', 'path', 'polygon', 'text', 'g', 'line', 'foreignObject']),
 
     PI: Math.PI,
     TwoPI: Math.PI*2,
@@ -1092,7 +1493,7 @@ const T = {
 
         sx: 4,//4
         sy: 0,//2
-        radius:6,//2
+        radius:0,//2
 
         showOver : 1,
         //groupOver : 1,
@@ -1127,7 +1528,9 @@ const T = {
         //fontFamily: 'Tahoma',
         //fontFamily: 'Consolas, monospace',
         //fontFamily:"'SegoeUI', 'Segoe UI', 'Helvetica Neue', -apple-system, BlinkMacSystemFont, Roboto, Oxygen-Sans, Ubuntu, Cantarell, sans-serif",
-        fontFamily:"Roboto Mono, Source Code Pro, Menlo, Courier, monospace",
+        //fontFamily:"'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace",
+        //fontFamily:"'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+        fontFamily: "'Roboto Mono', Source Code Pro, Menlo, Courier, monospace",
         
         //fontFamily: "'Roboto Mono', 'Source Code Pro', Menlo, Courier, monospace",
         fontWeight: 'normal',
@@ -1147,10 +1550,11 @@ const T = {
 
     css : {
 
-        basic: 'position:absolute; pointer-events:none; box-sizing:border-box; margin:0; padding:0; overflow:hidden; ' + '-o-user-select:none; -ms-user-select:none; -khtml-user-select:none; -webkit-user-select:none; -moz-user-select:none;',
+        basic: 'position:absolute; pointer-events:none; box-sizing:border-box; margin:0; padding:0; overflow:hidden; ' + '-o-user-select:none; -ms-user-select:none; -khtml-user-select:none; -webkit-user-select:none; -moz-user-select:none;'+'letter-spacing: -0.01em; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; ',
         button:'display:flex; align-items:center; justify-content:center; text-align:center;',
         middle:'display:flex; align-items:center; justify-content:left; text-align:left; flex-direction: row-reverse;',
-        edit:'display:flex; align-items:left; justify-content:left; text-align:left; flex-direction: row | row-reverse | column | column-reverse;'
+        //edit:'display:flex; align-items:left; justify-content:left; text-align:left; flex-direction: row | row-reverse | column | column-reverse;',
+        edit:'display:flex; align-items:right; justify-content:right; text-align:right; flex-direction: row | row-reverse | column | column-reverse;'
     },
 
     // svg path
@@ -1283,7 +1687,8 @@ const T = {
     setCss: function( dom, css ){
 
         for( let r in css ){
-            if( T.DOM_SIZE.indexOf(r) !== -1 ) dom.style[r] = css[r] + 'px';
+            if(T.DOM_SIZE.has(r)) dom.style[r] = css[r] + 'px';
+            //if( T.DOM_SIZE.indexOf(r) !== -1 ) dom.style[r] = css[r] + 'px';
             else dom.style[r] = css[r];
         }
 
@@ -1291,11 +1696,17 @@ const T = {
 
     set: function( g, o ){
 
-        for( let att in o ){
+        for (let att in o) {
+            if (att === 'txt') g.textContent = o[att];
+            else if (att === 'link') g.setAttributeNS(T.links, 'xlink:href', o[att]);
+            else g.setAttributeNS(null, att, o[att]);
+        }
+
+        /*for( let att in o ){
             if( att === 'txt' ) g.textContent = o[ att ];
             if( att === 'link' ) g.setAttributeNS( T.links, 'xlink:href', o[ att ] );
             else g.setAttributeNS( null, att, o[ att ] );
-        }
+        }*/
         
     },
 
@@ -1314,7 +1725,8 @@ const T = {
 
         type = type || 'div';
 
-        if( T.SVG_TYPE_D.indexOf(type) !== -1 || T.SVG_TYPE_G.indexOf(type) !== -1 ){ // is svg element
+        // if( T.SVG_TYPE_D.indexOf(type) !== -1 || T.SVG_TYPE_G.indexOf(type) !== -1 ){ // is svg element
+        if (T.SVG_TYPE_D.has(type) || T.SVG_TYPE_G.has(type)){ // is svg element
 
             if( type ==='svg' ){
 
@@ -1352,22 +1764,25 @@ const T = {
         let g = document.createElementNS( T.svgns, type );
         T.set( g, o );
         T.get( dom, id ).appendChild( g );
-        if( T.SVG_TYPE_G.indexOf(type) !== -1 ) g.style.pointerEvents = 'none';
+        //if( T.SVG_TYPE_G.indexOf(type) !== -1 ) g.style.pointerEvents = 'none';
+        if( T.SVG_TYPE_G.has(type) ) g.style.pointerEvents = 'none';
         return g;
 
     },
 
     clear : function( dom ){
 
-        T.purge( dom );
+        dom.replaceChildren();
+
+        /*T.purge( dom );
         while (dom.firstChild) {
             if ( dom.firstChild.firstChild ) T.clear( dom.firstChild );
             dom.removeChild( dom.firstChild ); 
-        }
+        }*/
 
     },
 
-    purge : function ( dom ) {
+    /*purge : function ( dom ) {
 
         let a = dom.attributes, i, n;
         if (a) {
@@ -1385,7 +1800,7 @@ const T = {
             }
         }
 
-    },
+    },*/
 
     // ----------------------
     //   SVG Effects function
@@ -1430,9 +1845,10 @@ const T = {
     //   Color function
     // ----------------------
 
-    ColorLuma : function ( hex, l ) {
+    ColorLuma : ( hex, l ) => {
 
         //if( hex.substring(0, 3) === 'rgba' ) hex = '#000';
+        if ( typeof hex === 'number' ) hex = T.hexToHtml( hex );
 
         if( hex === 'n' ) hex = '#000';
 
@@ -1455,13 +1871,9 @@ const T = {
 
     },
 
-    findDeepInver: function ( c ) { 
+    findDeepInver: ( c ) => ( (c[0] * 0.3 + c[1] * .59 + c[2] * .11) <= 0.6 ),
 
-        return (c[0] * 0.3 + c[1] * .59 + c[2] * .11) <= 0.6;
-        
-    },
-
-    lerpColor: function( c1, c2, factor ) {
+    lerpColor: ( c1, c2, factor ) => {
         let newColor = {};
         for ( let i = 0; i < 3; i++ ) {
           newColor[i] = c1[ i ] + ( c2[ i ] - c1[ i ] ) * factor;
@@ -1469,78 +1881,56 @@ const T = {
         return newColor;
     },
 
-    hexToHtml: function ( v ) { 
-        v = v === undefined ? 0x000000 : v;
-        return "#" + ("000000" + v.toString(16)).substr(-6);
-        
-    },
+    hexToHtml: ( v = 0x000000 ) => ('#' + v.toString(16).padStart(6, '0')),
+    htmlToHex: ( v ) => ( v.toUpperCase().replace("#", "0x") ),
+    u255: ( c, i ) => ( parseInt(c.substring(i, i + 2), 16) / 255 ),
+    u16: ( c, i ) => ( parseInt(c.substring(i, i + 1), 16) / 15 ),
 
-    htmlToHex: function ( v ) { 
-
-        return v.toUpperCase().replace("#", "0x");
-
-    },
-
-    u255: function (c, i) {
-
-        return parseInt(c.substring(i, i + 2), 16) / 255;
-
-    },
-
-    u16: function ( c, i ) {
-
-        return parseInt(c.substring(i, i + 1), 16) / 15;
-
-    },
-
-    unpack: function( c ){
+    unpack: ( c ) => {
 
         if (c.length == 7) return [ T.u255(c, 1), T.u255(c, 3), T.u255(c, 5) ];
         else if (c.length == 4) return [ T.u16(c,1), T.u16(c,2), T.u16(c,3) ];
 
     },
 
-    p255: function ( c ) {
+    p255: ( c ) => {
         let h = Math.round( ( c * 255 ) ).toString( 16 );
         if ( h.length < 2 ) h = '0' + h;
         return h;
     },
 
-    pack: function ( c ) {
+    pack: ( c ) => ( '#' + T.p255( c[ 0 ] ) + T.p255( c[ 1 ] ) + T.p255( c[ 2 ] )),
+    htmlRgb: ( c, a ) => ( 'rgb(' + Math.round(c[0] * 255) + ','+ Math.round(c[1] * 255) + ','+ Math.round(c[2] * 255) + ')'),
 
-        return '#' + T.p255( c[ 0 ] ) + T.p255( c[ 1 ] ) + T.p255( c[ 2 ] );
-
-    },
-
-    htmlRgba: function( c, a ){
+    htmlRgba: ( c, a ) => {
          c = T.unpack(c);
         return 'rgba(' + Math.round(c[0] * 255) + ','+ Math.round(c[1] * 255) + ','+ Math.round(c[2] * 255) + ','+ a + ')';
-
     },
 
-    htmlRgb: function( c, a ){
+    
 
-        return 'rgb(' + Math.round(c[0] * 255) + ','+ Math.round(c[1] * 255) + ','+ Math.round(c[2] * 255) + ')';
-
-    },
-
-    pad: function( n ){
-        if(n.length == 1)n = '0' + n;
+    pad: ( n ) => {
+        if(n.length == 1) n = '0' + n;
         return n;
     },
 
-    rgbToHex : function( c ){
+    rgbToHex : ( c ) => {
 
-        let r = Math.round(c[0] * 255).toString(16);
+        const r = Math.round(c[0] * 255).toString(16).padStart(2, '0');
+        const g = Math.round(c[1] * 255).toString(16).padStart(2, '0');
+        const b = Math.round(c[2] * 255).toString(16).padStart(2, '0');
+        return '#' + r + g + b;
+
+        /*let r = Math.round(c[0] * 255).toString(16);
         let g = Math.round(c[1] * 255).toString(16);
         let b = Math.round(c[2] * 255).toString(16);
-        return '#' + T.pad(r) + T.pad(g) + T.pad(b);
+        return '#' + T.pad(r) + T.pad(g) + T.pad(b);*/
 
        // return '#' + ( '000000' + ( ( c[0] * 255 ) << 16 ^ ( c[1] * 255 ) << 8 ^ ( c[2] * 255 ) << 0 ).toString( 16 ) ).slice( - 6 );
 
     },
 
-    hueToRgb: function( p, q, t ){
+    hueToRgb: ( p, q, t ) => {
 
         if ( t < 0 ) t += 1;
         if ( t > 1 ) t -= 1;
@@ -1551,7 +1941,7 @@ const T = {
 
     },
 
-    rgbToHsl: function ( c ) {
+    rgbToHsl: ( c ) => {
 
         let r = c[0], g = c[1], b = c[2], min = Math.min(r, g, b), max = Math.max(r, g, b), delta = max - min, h = 0, s = 0, l = (min + max) / 2;
         if (l > 0 && l < 1) s = delta / (l < 0.5 ? (2 * l) : (2 - 2 * l));
@@ -1565,7 +1955,7 @@ const T = {
 
     },
 
-    hslToRgb: function ( c ) {
+    hslToRgb: ( c ) => {
 
         let p, q, h = c[0], s = c[1], l = c[2];
 
@@ -1913,326 +2303,6 @@ T.setText();
 
 const Tools = T;
 
-///https://wicg.github.io/file-system-access/#api-filesystemfilehandle-getfile
-
-
-class Files {
-
-    //-----------------------------
-    //  FILE TYPE
-    //-----------------------------
-
-    static autoTypes( type ) {
-
-        let t = [];
-
-        switch( type ){
-            case 'svg':
-            t = [ { accept: { 'image/svg+xml': '.svg'} }, ];
-            break;
-            case 'wav':
-            t = [ { accept: { 'audio/wav': '.wav'} }, ];
-            break;
-            case 'mp3':
-            t = [ { accept: { 'audio/mpeg': '.mp3'} }, ];
-            break;
-            case 'mp4':
-            t = [ { accept: { 'video/mp4': '.mp4'} }, ];
-            break;
-            case 'bin': case 'hex':
-            t = [ { description: 'Binary Files', accept: { 'application/octet-stream': ['.bin', '.hex'] } }, ];
-            break;
-            case 'text':
-            t = [ { description: 'Text Files', accept: { 'text/plain': ['.txt', '.text'], 'text/html': ['.html', '.htm'] } }, ];
-            break;
-            case 'json':
-            t = [ { description: 'JSON Files', accept: { 'application/json': ['.json'] } }, ];//text/plain
-            break;
-            case 'js':
-            t = [ { description: 'JavaScript Files', accept: { 'text/javascript': ['.js'] } }, ];
-            break;
-            case 'ktx2':
-            t = [ { description: 'ktx2', accept: { 'image/ktx2': ['.ktx2'] } }, ];
-            break;
-            case 'image':
-            t = [ { description: 'Images', accept: { 'image/*': ['.png', '.gif', '.jpeg', '.jpg', '.hdr', '.exr'] } }, ];
-            break;
-            case 'gif':
-            t = [ { description: 'Images', accept: { 'image/*': ['.gif'] } }, ];
-            break;
-            case 'png':
-            t = [ { description: 'Images', accept: { 'image/*': ['.png'] } }, ];
-            break;
-            case 'exr':
-            t = [ { description: 'Images', accept: { 'image/exr': ['.exr'] } }, ];
-            break;
-            case 'hdr':
-            t = [ { description: 'Images', accept: { 'image/hdr': ['.hdr'] } }, ];
-            break;
-            case 'jpg':
-            t = [ { description: 'Images', accept: { 'image/*': ['.jpg', '.jpeg'] } }, ];
-            break;
-            case 'icon':
-            t = [ { description: 'Icons', accept: { 'image/x-ico': ['.ico'] } }, ];
-            break;
-            case 'lut':
-            t = [ { description: 'Lut', accept: { 'text/plain': ['.cube', '.3dl'] } }, ];
-            break;
-
-        }
-
-        return t
-
-    }
-
-
-    //-----------------------------
-    //  LOAD
-    //-----------------------------
-
-	static async load( o = {} ) {
-
-        if (typeof window.showOpenFilePicker !== 'function') {
-            window.showOpenFilePicker = Files.showOpenFilePickerPolyfill;
-        }
-
-        try {
-
-        	let type = o.type || '';
-
-            const options = {
-                excludeAcceptAllOption: type ? true : false,
-                multiple: false,
-                //startIn:'./assets'
-            };
-
-            options.types = Files.autoTypes( type );
-
-            // create a new handle
-            const handle = await window.showOpenFilePicker( options );
-            const file = await handle[0].getFile();
-            //let content = await file.text()
-
-            if( !file ) return null
-
-            let fname = file.name;
-            let ftype = fname.substring( fname.lastIndexOf('.')+1, fname.length );
-            let realType = '';
-
-            const dataUrl = [ 'png', 'jpg', 'jpeg', 'mp4', 'webm', 'ogg', 'mp3' ];
-            const dataBuf = [ 'sea', 'z', 'hex', 'bvh', 'BVH', 'glb', 'gltf', 'exr', 'ktx2', 'hdr' ];
-            const reader = new FileReader();
-
-            const cleanupReader = () => reader.removeEventListener('load', onLoad);
-
-            if(o.forceType === 'ArrayBuffer') {
-                reader.readAsArrayBuffer( file );
-                //type = ''
-            } else {
-                if( dataUrl.indexOf( ftype ) !== -1 ) reader.readAsDataURL( file );
-                else if( dataBuf.indexOf( ftype ) !== -1 ) reader.readAsArrayBuffer( file );
-                else reader.readAsText( file );
-            }
-
-            
-            const onLoad = (e) => {
-
-                let content = e.target.result;
-
-                cleanupReader();
-
-                switch(type){
-                    case 'image':
-                        let img = new Image();
-                        img.onload = function() {
-                            img.width = img.width;
-                            img.height = img.height;
-                            if( o.callback ) o.callback( img, fname, ftype, [img.width, img.height] );
-                        };
-                        img.src = content;
-                    break;
-                    case 'json':
-                        if( o.callback ) o.callback( JSON.parse( content ), fname, ftype );
-                    break;
-                    default:
-                        if( o.callback ) o.callback( content, fname, ftype );
-                    break;
-                }
-
-            };
-
-            reader.addEventListener('load', onLoad);
-
-        } catch(e) {
-
-            console.log(e);
-            if( o.always && o.callback ) o.callback( null );
-
-        }
-
-    }
-
-	static showOpenFilePickerPolyfill( options ) {
-        return new Promise((resolve) => {
-            const input = document.createElement("input");
-            input.type = "file";
-            input.multiple = options.multiple;
-            input.accept = options.types
-                .map((type) => type.accept)
-                .flatMap((inst) => Object.keys(inst).flatMap((key) => inst[key]))
-                .join(",");
-
-            const cleanup = () => {
-                input.removeEventListener("change", onChange);
-                if (input.parentNode) input.parentNode.removeChild(input);
-            };
-
-            const onChange = (e) => {
-                resolve(
-                    [...input.files].map((file) => ({
-                        getFile: async () => file
-                    }))
-                );
-                cleanup(); // Nettoyage immédiat
-            };
-
-            input.addEventListener("change", onChange);
-
-            /*input.addEventListener("change", () => {
-                resolve(
-                    [...input.files].map((file) => {
-                        return {
-                            getFile: async () =>
-                                new Promise((resolve) => {
-                                    resolve(file);
-                                }),
-                        };
-                    })
-                );
-            });*/
-
-            input.click();
-        })
-    }
-
-
-    //-----------------------------
-    //  SAVE
-    //-----------------------------
-
-    static async save( o = {} ) {
-
-        let usePoly = false;
-
-        if (typeof window.showSaveFilePicker !== 'function') {
-            window.showSaveFilePicker = Files.showSaveFilePickerPolyfill;
-            usePoly = true;
-        }
-
-        try {
-
-            let type = o.type || '';
-
-            const options = {
-                suggestedName: o.name || 'hello',
-                data: o.data || ''
-            };
-
-            options.types = Files.autoTypes( type );
-            options.finalType = Object.keys( options.types[0].accept )[0];
-            options.suggestedName += options.types[0].accept[options.finalType][0];
-
-
-            // create a new handle
-            const handle = await window.showSaveFilePicker( options );
-
-            if( usePoly ) return
-
-            // create a FileSystemWritableFileStream to write to
-            const file = await handle.createWritable();
-
-            let blob = new Blob([ options.data ], { type: options.finalType });
-
-            // write our file
-            await file.write(blob);
-
-            // close the file and write the contents to disk.
-            await file.close();
-
-        } catch(e) {
-
-            console.log(e);
-
-        }
-
-    }
-
-    static showSaveFilePickerPolyfill( options ) {
-        return new Promise((resolve) => {
-            const a = document.createElement("a");
-            a.download = options.suggestedName || "my-file.txt";
-            let blob = new Blob([ options.data ], { type:options.finalType });
-            a.href = URL.createObjectURL( blob );
-
-            const revoke = () => URL.revokeObjectURL(a.href);
-
-            a.addEventListener("click", () => {
-                resolve(
-                    setTimeout(() => {
-                        revoke();
-                        if (a.parentNode) a.parentNode.removeChild(a);
-                    }, 1000)
-                );
-            });
-            a.click();
-
-            /*a.addEventListener("click", () => {
-                resolve(
-                    setTimeout( () => URL.revokeObjectURL(a.href), 1000 )
-                )
-            })
-            a.click()*/
-        })
-    }
-
-
-    //-----------------------------
-    //  FOLDER not possible in poly
-    //-----------------------------
-
-    static async getFolder() {
-
-        try {
-    
-            const handle = await window.showDirectoryPicker();
-            const files = [];
-            for await (const entry of handle.values()) {
-                const file = await entry.getFile();
-                files.push(file);
-            }
-
-            console.log(files);
-            return files;
-
-        } catch(e) {
-
-            console.log(e);
-
-        }
-    
-    }
-
-
-
-
-
-
-
-
-    
-
-}
-
 class V2 {
 
 	constructor( x = 0, y = 0 ) {
@@ -2500,7 +2570,11 @@ class Proto {
         this.useFlex = this.isUI ? this.main.useFlex : false; 
         let flexible = this.useFlex ? 'display:flex; justify-content:center; align-items:center; text-align:center; flex: 1 100%;' : 'float:left;';
 
-        this.c[0] = Tools.dom( 'div', this.css.basic + flexible + 'position:relative; height:20px;');
+        const virtual = this.isUI ? 'content-visibility:auto; contain-intrinsic-size:auto ' + this.h + 'px;' : '';
+        this.c[0] = Tools.dom( 'div', this.css.basic + flexible + 'position:relative; height:20px;' + virtual );
+
+        //this.c[0] = Tools.dom( 'div', this.css.basic + flexible + 'position:relative; height:20px;');
+        //this.c[0] = Tools.dom( 'div', this.css.basic + flexible + 'position:relative; height:20px; content-visibility:auto; contain-intrinsic-size:auto 24px;' );
 
 
         this.s[0] = this.c[0].style;
@@ -2512,14 +2586,12 @@ class Proto {
 
         if( this.isUI && this.margin ){ 
             this.s[0].boxSizing = 'content-box';
-            if( marginDiv ){
+            if (marginDiv) {
                 this.mtop = this.margin * 0.5;
-                //this.s[0].borderTop = '${this.mtop}px solid transparent'
-                //console.log(`${this.mtop}px solid transparent`)
-                this.s[0].borderTop = this.mtop + 'px solid transparent';
-                this.s[0].borderBottom = this.mtop + 'px solid transparent';
+                this.s[0].borderTop = `${this.mtop}px solid transparent`;
+                this.s[0].borderBottom = `${this.mtop}px solid transparent`;
             } else {
-                this.s[0].borderBottom =  NaN;
+                this.s[0].borderBottom = `${this.margin}px solid transparent`;
             }
         }
         
@@ -2563,7 +2635,11 @@ class Proto {
 
         s[0].height = this.h + 'px';
 
-        if( this.isUI ) s[0].background = this.colors.background;
+        //if( this.isUI ) s[0].background = this.colors.background
+        if ( this.isUI ) {
+            s[0].background = this.colors.background;
+            //s[0].backgroundClip = 'padding-box';
+        }
            
 
         if(!this.autoWidth && this.useFlex ){
@@ -2820,7 +2896,8 @@ class Proto {
 
     send( v ) {
 
-        v = v || this.value;
+        //v = v || this.value;
+        v = v ?? this.value;
         if( v instanceof Array && v.length === 1 ) v = v[0];
 
         // for list
@@ -2838,11 +2915,38 @@ class Proto {
 
     sendEnd( v ) {
 
-        v = v || this.value;
+        if ( this.endCallback === null ) return;
+
+        v = v ?? this.value;
+        if ( v instanceof Array && v.length === 1 ) v = v[0];
+
+        if ( this.refObject ) v = this.refObject[v];
+
+        this.isSend = true;
+        if ( this.objectLink !== null ) { 
+            if ( this.objectLink[ this.objectKey ] && this.objectLink[ this.objectKey ].isColor ) this.objectLink[ this.objectKey ].setHex( v );
+            else this.objectLink[ this.objectKey ] = v;
+        }
+        this.endCallback( v );
+        this.isSend = false;
+
+        /*if( this.endCallback === null ) return;
+
+        //v = v || this.value;
+        v = v ?? this.value;
         if( v instanceof Array && v.length === 1 ) v = v[0];
 
-        if( this.endCallback ) this.endCallback( v );
-        if( this.objectLink !== null ) this.objectLink[ this.objectKey ] = v;
+        if(this.refObject) v = this.refObject[v]
+
+        this.isSend = true
+        if( this.objectLink !== null ){ 
+            if( this.objectLink[ this.objectKey ] && this.objectLink[ this.objectKey ].isColor ) this.objectLink[ this.objectKey ].setHex( v );
+            else this.objectLink[ this.objectKey ] = v
+        }
+        this.endCallback( v )*/
+
+        //if( this.endCallback ) this.endCallback( v );
+        //if( this.objectLink !== null ) this.objectLink[ this.objectKey ] = v;
 
     }
 
@@ -2851,6 +2955,8 @@ class Proto {
     // ----------------------
 
     dispose(){
+
+        this.clear();
 
         if( this.isListen ) Roots.removeListen( this );
 
@@ -2935,11 +3041,15 @@ class Proto {
 
         this.min = o.min === undefined ? -Infinity : o.min;
         this.max = o.max === undefined ?  Infinity : o.max;
-        this.precision = o.precision === undefined ? 2 : o.precision;
+        //this.precision = o.precision === undefined ? 2 : o.precision;
 
-        let s;
+        //let s;
 
-        switch(this.precision){
+        this.precision = o.precision ?? 2;
+        this.step = o.step ?? Number(Math.pow(10, -this.precision).toFixed(this.precision));
+
+
+        /*switch(this.precision){
             case 0: s = 1; break;
             case 1: s = 0.1; break;
             case 2: s = 0.01; break;
@@ -2947,9 +3057,9 @@ class Proto {
             case 4: s = 0.0001; break;
             case 5: s = 0.00001; break;
             case 6: s = 0.000001; break;
-        }
+        }*/
 
-        this.step = o.step === undefined ?  s : o.step;
+        //this.step = o.step === undefined ?  s : o.step;
         this.range = this.max - this.min;
         this.value = this.numValue( this.value );
         
@@ -3100,6 +3210,12 @@ class Bool extends Proto {
             let t = Math.floor(this.h*0.5)-((this.inh-2)*0.5);
             this.c[2] = this.dom( 'div', this.css.basic + 'background:'+ cc.inputBg +'; height:'+(this.inh-2)+'px; width:'+this.inw+'px; top:'+t+'px; border-radius:10px; border:2px solid '+ cc.back );
             this.c[3] = this.dom( 'div', this.css.basic + 'height:'+(this.inh-6)+'px; width:16px; top:'+(t+2)+'px; border-radius:10px; background:'+ cc.button+';' );
+        } else if ( this.model === 2 ) {
+            let box = this.inh - 2;
+            let t = Math.floor( (this.h - box) * 0.5 );
+            this.inw = box;
+            this.c[2] = this.dom( 'div', this.css.txt + this.css.middle + 'justify-content:center; background:' + cc.inputBg + '; height:' + box + 'px; width:' + box + 'px; top:' + t + 'px; border-radius:' + this.radius + 'px; border:' + cc.borderSize + 'px solid ' + cc.border + '; font-size:' + (box ) + 'px;' );
+            //this.c[2] = this.dom( 'div', this.css.txt + this.css.button + 'top:1px; background:'+cc.button+'; height:'+(this.h-2)+'px; border:'+cc.borderSize+'px solid '+cc.border+'; border-radius:'+this.radius+'px;' )
         } else {
             this.p = 0;
             if( this.c[1] !== undefined ) this.c[1].textContent = '';
@@ -3135,7 +3251,8 @@ class Bool extends Proto {
     reset () {
 
         this.cursor();
-        return this.mode()
+        //return this.mode()
+        return this.mode( false );
 
     }
 
@@ -3145,17 +3262,21 @@ class Bool extends Proto {
 
     mode ( over ) {
 
-        let change = false;
-        let cc = this.colors, s = this.s, n, v = this.value;
+        if ( over !== undefined ) this.isOver = over;
 
-        if( over ) n = v ? 4 : 3;
-        else n = v ? 2 : 1;
+        let change = false;
+        let cc = this.colors, s = this.s, v = this.value;
+
+        let n = this.isOver ? ( v ? 4 : 3 ) : ( v ? 2 : 1 );
+
+        //if( over ) n = v ? 4 : 3
+        //else n = v ? 2 : 1
 
         if( this.stat !== n ){
 
             this.stat = n;
 
-            if( this.model !== 0 ){
+            if( this.model === 1 ){
 
                 switch( n ){
 
@@ -3166,7 +3287,18 @@ class Bool extends Proto {
 
                 }
 
-                this.c[2].innerHTML = v ? this.onName : this.name;
+                this.c[2].textContent = v ? this.onName : this.name;
+
+            } else if ( this.model === 2 ) {
+
+                    switch ( n ) {
+                        case 1: s[2].background = cc.backoff; s[2].borderColor = cc.border; break; // off out
+                        case 2: s[2].background = cc.back; s[2].borderColor = cc.overoff; s.color = cc.textSelect; break; // on out
+                        case 3: s[2].background = cc.back; s[2].borderColor = cc.overoff; break; // off over
+                        case 4: s[2].background = cc.backoff; s[2].borderColor = cc.border; s[2].color = cc.textOver; break; // on over
+                    }
+                    this.c[2].textContent = v ? '✖' : '';
+                    this.c[1].textContent = v ? this.onName : this.name;
 
             } else {
 
@@ -3179,7 +3311,8 @@ class Bool extends Proto {
 
                 }
 
-                s[3].marginLeft = v ? '17px' : '2px';
+                //s[3].marginLeft = v ? '17px' : '2px'
+                s[3].marginLeft = v ? ( this.inw - 19 ) + 'px' : '2px';
                 this.c[1].textContent = v ? this.onName : this.name;
 
             }
@@ -3210,6 +3343,8 @@ class Bool extends Proto {
         if( this.model === 0 ){
             s[2].left = w + 'px';
             s[3].left = w + 'px';
+        } else if( this.model === 2 ){
+            s[2].left = w + 'px';
         } else {
             s[2].left = this.sa + 'px';
             s[2].width = this.sb  + 'px';
@@ -3240,7 +3375,7 @@ class Button extends Proto {
         // force button width
         this.bw = o.forceWidth || 0;
         if(o.bw) this.bw = o.bw;
-        this.space = o.space || 3;
+        this.space = o.space || this.colors.sx;
 
         if( typeof this.values === 'string' ) this.values = [ this.values ];
 
@@ -3364,7 +3499,7 @@ class Button extends Proto {
                 if( w ) n = 4;
             }
 
-            //if( this.mode( n, i ) ) r = true
+            if( this.mode( n, i ) ) r = true;
             r = this.mode( n, i );
 
         }
@@ -3406,10 +3541,16 @@ class Button extends Proto {
 
     reset () {
 
+        this.isDown = false;
         this.res = -1;
         this.cursor();
         return this.modes()
 
+    }
+
+    setValue ( v ) {
+        this.value = v;
+        this.modes();
     }
 
     label ( string, n ) {
@@ -3442,7 +3583,7 @@ class Button extends Proto {
         let d = this.sa;
 
         let i = this.lng;
-        let sx = this.colors.sx; //this.space;
+        let sx = this.space;// !== undefined ? this.colors.sx //this.space;
         //let size = Math.floor( ( w-(dc*(i-1)) ) / i );
         let size = ( w-(sx*(i-1)) ) / i; 
 
@@ -3454,8 +3595,13 @@ class Button extends Proto {
 
         while( i-- ){
 
+            if ( !this.tmp[i] ) this.tmp[i] = [];
+
+            this.tmp[i][0] = ( d + ( size * i ) + ( sx * i ));
+            this.tmp[i][1] = size;
+
         	//this.tmp[i] = [ Math.floor( d + ( size * i ) + ( dc * i )), size ];
-            this.tmp[i] = [ ( d + ( size * i ) + ( sx * i )), size ];
+            //this.tmp[i] = [ ( d + ( size * i ) + ( sx * i )), size ];
         	this.tmp[i][2] = this.tmp[i][0] + this.tmp[i][1];
 
             s[i+2].left = this.tmp[i][0] + 'px';
@@ -3476,6 +3622,8 @@ class Circular extends Proto {
         this.isCyclic = o.cyclic || false;
         this.model = o.stype || 0;
         if( o.mode !== undefined ) this.model = o.mode;
+
+
 
         this.autoWidth = false;
         this.minw = this.w;
@@ -3523,6 +3671,13 @@ class Circular extends Proto {
         this.setSvg( this.c[3], 'viewBox', '0 0 '+this.diam+' '+this.diam );
         this.setCss( this.c[3], { width:this.diam, height:this.diam, left:0, top:this.top });
 
+        if ( this.model > 0 ) {
+
+            this.colors01 = Tools.unpack( Tools.ColorLuma( cc.text, -0.75) );
+            this.colors02 = Tools.unpack( cc.text );
+            
+        }
+
         this.init();
         this.update();
 
@@ -3562,6 +3717,8 @@ class Circular extends Proto {
     reset () {
 
         this.isDown = false;
+        this.cursor();
+        return this.mode(0);
         
     }
 
@@ -3569,10 +3726,13 @@ class Circular extends Proto {
 
         let l = this.local;
         if( l.x === -1 && l.y === -1 ) return '';
+        if( this.c[1] && l.y <= this.c[1].offsetHeight ) return 'title';
+        else if ( l.y > this.h - this.c[2].offsetHeight ) return 'text';
+        else return 'circular'; 
         
-        if( l.y <= this.c[ 1 ].offsetHeight ) return 'title';
+        /*if( l.y <= this.c[ 1 ].offsetHeight ) return 'title';
         else if ( l.y > this.h - this.c[ 2 ].offsetHeight ) return 'text';
-        else return 'circular';
+        else return 'circular';*/
 
     }
 
@@ -3600,7 +3760,14 @@ class Circular extends Proto {
 
     mousemove ( e ) {
 
-        if( !this.isDown ) return;
+        if( !this.isDown ) {
+            let name = this.testZone( e );
+            if( name === 'circular' || name === 'knob' ) {
+                this.cursor('pointer');
+                return this.mode(1);
+            }
+            return this.reset();
+        }
 
         //console.log('over')
         this.cursor('pointer');
@@ -3685,8 +3852,10 @@ class Circular extends Proto {
 
         if ( this.model > 0 ) {
 
-            let cc = this.colors;
-            let color = Tools.pack( Tools.lerpColor( Tools.unpack( Tools.ColorLuma( cc.text, -0.75) ), Tools.unpack( cc.text ), this.percent ) );
+            
+
+            this.colors;
+            let color = Tools.pack( Tools.lerpColor( this.colors01, this.colors02, this.percent ) );
             this.setSvg( this.c[3], 'stroke', color, 1 );
         
         }
@@ -3724,6 +3893,8 @@ class Color extends Proto {
 	    this.decal = new V2();
 	    this.pp = new V2();
 
+	    this.third = (2/3) * Tools.PI;
+
 	    let cc = this.colors;
 
 	   // this.c[2] = this.dom( 'div', this.css.txt + this.css.middle + 'top:1px; height:'+(this.h-2)+'px;' + 'border-radius:'+this.radius+'px; text-shadow:none; border:'+cc.borderSize+'px solid '+cc.border+';' )
@@ -3747,7 +3918,7 @@ class Color extends Proto {
 	    this.hsl = null;
 	    this.value = '#ffffff';
 	    if( o.value !== undefined ){
-	    	if( o.value.isColor ){ this.value = '#' + o.value.getHexString(); }
+	    	if( o.value.isColor ){ this.value = '#' + o.value.getHexString('srgb'); }
 	        else if( o.value instanceof Array ) this.value = Tools.rgbToHex( o.value );
 	        else if(!isNaN(o.value)) this.value = Tools.hexToHtml( o.value );
 	        else this.value = o.value;
@@ -3800,6 +3971,12 @@ class Color extends Proto {
 
 	    this.isDown = false;
 	    this.d = 256;
+	    this.sendEnd();
+
+	    /*if ( this.ctype === 'array' ) this.sendEnd( this.rgb );
+		else if ( this.ctype === 'rgb' ) this.sendEnd( Tools.htmlRgb( this.rgb ) );
+		else if ( this.ctype === 'hex' ) this.sendEnd( Tools.htmlToHex( this.value ) );
+		else this.sendEnd();*/
 
 	}
 
@@ -3895,9 +4072,13 @@ class Color extends Proto {
 
 						lum = ((Math.sin(rad0) * r) / this.tsl) + 0.5;
 				
-						let w = 1 - (Math.abs(lum - 0.5) * 2);
+						/*let w = 1 - (Math.abs(lum - 0.5) * 2);
 						sat = (((Math.cos(rad0) * r) + (this.tr / 2)) / (1.5 * this.tr)) / w;
-						sat = T.clamp( sat, 0, 1 );
+						sat = T.clamp( sat, 0, 1 );*/
+
+						let w = 1 - (Math.abs(lum - 0.5) * 2);
+						sat = w > 0.0001 ? (((Math.cos(rad0) * r) + (this.tr / 2)) / (1.5 * this.tr)) / w : 0;
+						sat = T.clamp(sat, 0, 1);
 						
 				        this.setHSL([this.hsl[0], sat, lum]);
 
@@ -3961,6 +4142,7 @@ class Color extends Proto {
 
 	    let cc = Tools.rgbToHex( Tools.hslToRgb([ this.hsl[0], 1, 0.5 ]) );
 
+	    this.invert = Tools.findDeepInver( this.rgb );
 	    this.moveMarkers();
 	    
 	    this.value = this.bcolor;
@@ -3970,7 +4152,7 @@ class Color extends Proto {
 	    this.s[2].background = this.bcolor;
 	    if(!this.notext) this.c[2].textContent = Tools.htmlToHex( this.bcolor );
 
-	    this.invert = Tools.findDeepInver( this.rgb );
+	    
 	    this.s[2].color = this.invert ? '#fff' : '#000';
 
 	    if(!up) return;
@@ -3984,12 +4166,12 @@ class Color extends Proto {
 
 	setValue ( v ){
 
-		if( v instanceof Array ) this.value = Tools.rgbToHex( v );
+		//if ( v && v.isColor ) this.value = '#' + v.getHexString();
+	    if( v instanceof Array ) this.value = Tools.rgbToHex( v );
         else if(!isNaN(v)) this.value = Tools.hexToHtml( v );
         else this.value = v;
 
 		this.setColor( this.value );
-        this.update();
 
 	}
 
@@ -4025,9 +4207,9 @@ class Color extends Proto {
 		let p = this.pp;
 		let T = Tools;
 
-	    this.invert ? '#fff' : '#000';
+	    let c1 = this.invert ? '#fff' : '#000';
 	    let a = this.hsl[0] * T.TwoPI;
-	    let third = (2/3) * T.PI;
+	    
 	    let r = this.tr;
 	    let h = this.hsl[0];
 	    let s = this.hsl[1];
@@ -4039,10 +4221,10 @@ class Color extends Proto {
 
 		let hx = Math.cos(h) * r;
 		let hy = -Math.sin(h) * r;
-		let sx = Math.cos(h - third) * r;
-		let sy = -Math.sin(h - third) * r;
-		let vx = Math.cos(h + third) * r;
-		let vy = -Math.sin(h + third) * r;
+		let sx = Math.cos(h - this.third) * r;
+		let sy = -Math.sin(h - this.third) * r;
+		let vx = Math.cos(h + this.third) * r;
+		let vy = -Math.sin(h + this.third) * r;
 		let mx = (sx + vx) / 2, my = (sy + vy) / 2;
 		a  = (1 - 2 * Math.abs(l - .5)) * s;
 		let x = sx + (vx - sx) * l + (hx - mx) * a;
@@ -4058,8 +4240,8 @@ class Color extends Proto {
 	    this.setSvg( this.c[3], 'cx', p.x, 3 );
 	    this.setSvg( this.c[3], 'cy', p.y, 3 );
 	    
-	    this.setSvg( this.c[3], 'stroke', this.invert ? '#fff' : '#000', 2, 3 );
-	    this.setSvg( this.c[3], 'stroke', this.invert ? '#fff' : '#000', 3 );
+	    this.setSvg( this.c[3], 'stroke', c1, 2, 3 );
+	    this.setSvg( this.c[3], 'stroke', c1, 3 );
 	    this.setSvg( this.c[3], 'fill',this.bcolor, 3 );
 
 	}
@@ -4759,19 +4941,7 @@ class Graph extends Proto {
 
 }
 
-class Empty extends Proto {
-
-    constructor( o = {} ) {
-
-	    o.isSpace = true;
-        o.margin = 0;
-        if(!o.h) o.h = 10;
-        super( o );
-        this.init();
-
-    }
-    
-}
+//import { Empty } from './Empty.js';
 
 class Group extends Proto {
 
@@ -4790,14 +4960,10 @@ class Group extends Proto {
         this.proto = null;
         this.isEmpty = true;
 
-        this.decal = o.group ? 8 : 0;
-        //this.dd = o.group ? o.group.decal + 8 : 0
+        this.borderCC = o.mark ? 6 : 0;
 
+        this.decal = o.group ? 8-this.borderCC : 0;
         this.baseH = this.h;
-        //this.margin = 0 
-
-        //this.spaceY = new Empty({h:this.margin});
-
         this.radius = 0;
 
 
@@ -4823,34 +4989,60 @@ class Group extends Proto {
 
         this.init();
 
-        this.setBG( o.bg );
 
-        //console.log(this.margin)
 
-        if( o.open ){ 
-            //setTimeout( this.open.bind(this), 100 )
-            this.open();
+        this.setBG( o.mark );
 
-            //if(this.isUI) this.main.calcUis();
-            //this.rezone()
-            //Roots.needReZone = true;
-            //Roots.resize();
-            //this.calcUis()
-        }
+
+        if( o.open ) this.open();
+        
 
     }
 
     setBG ( bg ) {
 
+        //return
+
         const cc = this.colors;
         const s = this.s;
 
-        if( bg !== undefined ) cc.groups = bg;
-        if(cc.groups === 'none') cc.groups = cc.background;
+        //if ( bg !== undefined ) cc.groups = bg;
+
+        const hasBg = bg !== undefined && bg !== 'none';
+        const borderCol = hasBg ? bg : ( cc.gborder !== 'none' ? cc.gborder : 'none' );
+
+        //s[ 0 ].background = 'none';
+        // Fond subtil pour le titre : légèrement teinté si bg est défini, sinon couleur de groupe par défaut
+        s[ 1 ].background = hasBg ? Tools.ColorLuma( bg, -0.65 ) : ( cc.groups === 'none' ? cc.background : cc.groups );
+        // Fond très léger pour le contenu du sous-groupe
+        //s[ 2 ].background = hasBg ? Tools.ColorLuma( bg, -0.8 ) : 'none';
+
+        // Mémorise la couleur de bordure du groupe
+        this.borderCol = borderCol;
+
+        if ( borderCol !== 'none' ) {
+            s[ 1 ].borderLeft = this.borderCC + 'px solid ' + borderCol;
+            s[ 2 ].borderLeft = this.borderCC + 'px solid ' + borderCol;
+        }
+
+        if ( this.radius !== 0 ) {
+            s[ 1 ].borderRadius = this.radius + 'px';
+            s[ 2 ].borderRadius = this.radius + 'px';
+        }
+
+    }
+
+    /*setBG ( bg ) {
+
+        const cc = this.colors
+        const s = this.s
+
+        if( bg !== undefined ) cc.groups = bg
+        if(cc.groups === 'none') cc.groups = cc.background
         //    cc.background = 'none'
 
-        s[0].background = 'none';//bg !== undefined ? 'none' : cc.content;
-        s[1].background = cc.groups;//bg !== undefined ? cc.groups : cc.content;
+        s[0].background = 'none'//bg !== undefined ? 'none' : cc.content;
+        s[1].background = cc.groups//bg !== undefined ? cc.groups : cc.content;
         //s[2].background = bg !== undefined ? cc.groups : cc.content
 
         //s[0].background = '#FF0';
@@ -4858,13 +5050,13 @@ class Group extends Proto {
         //s[2].background = cc.background
 
         if( cc.gborder !== 'none' ){
-            s[1].border = cc.borderSize+'px solid '+ cc.gborder;
+            s[1].border = cc.borderSize+'px solid '+ cc.gborder
         }
 
         if( this.radius !== 0 ){
 
-            s[1].borderRadius = this.radius+'px';
-            s[2].borderRadius = this.radius+'px';
+            s[1].borderRadius = this.radius+'px'
+            s[2].borderRadius = this.radius+'px'
 
         }
 
@@ -4874,7 +5066,7 @@ class Group extends Proto {
             //this.uis[i].setBG( this.colors.background );
         }*/
 
-    }
+    //}
 
     testZone ( e ) {
 
@@ -5003,7 +5195,7 @@ class Group extends Proto {
             a[1].main = this.main;
             a[1].group = this;
         } else if( typeof arguments[1] === 'string' ){
-            if( a[2] === undefined ) [].push.call( a, { isUI:true, target:this.c[2], main:this.main });
+            if( a[2] === undefined ) [].push.call( a, { isUI:true, target:this.c[2], main:this.main, group:this });
             else { 
                 a[2].isUI = true;
                 a[2].target = this.c[2];
@@ -5018,6 +5210,10 @@ class Group extends Proto {
             //o.add = add;
             u.dx = 8;
         }
+
+        /*if ( !u.isGroup && u.s[1] ) {
+            u.s[1].background = 'none';
+        }*/
         
         //u.dx += 4
         //console.log(this.decal)
@@ -5066,19 +5262,26 @@ class Group extends Proto {
     empty () {
 
         this.close();
+        while ( this.uis.length ) {
+            this.uis[ this.uis.length - 1 ].dispose();
+        }
+        this.isEmpty = true;
+        this.h = this.baseH;
+
+        /*this.close();
 
         let i = this.uis.length, item;
 
         while( i-- ){
-            item = this.uis.pop();
-            this.c[2].removeChild( item.c[0] );
-            item.clear( true );
+            item = this.uis.pop()
+            this.c[2].removeChild( item.c[0] )
+            item.clear( true )
 
             //this.uis[i].clear()
         }
 
         this.isEmpty = true;
-        this.h = this.baseH;
+        this.h = this.baseH;*/
 
     }
 
@@ -5110,14 +5313,10 @@ class Group extends Proto {
         this.setSvg( this.c[3], 'd', this.svgs.g2 );
         this.rSizeContent();
 
-        //let t = this.h - this.baseH
-
         const s = this.s;
         const cc = this.colors;
 
-        //s[2].top = (this.h-1) + 'px'
         s[2].top = (this.h+this.mtop) + 'px';
-        //s[4].background = '#0f0'
 
         if(this.radius){
 
@@ -5132,16 +5331,20 @@ class Group extends Proto {
 
         if( cc.gborder !== 'none' ){
 
-            s[4].borderLeft = cc.borderSize+'px solid '+ cc.gborder;
-            s[4].borderRight = cc.borderSize+'px solid '+ cc.gborder;
-
             s[2].border = cc.borderSize+'px solid '+ cc.gborder;
             s[2].borderTop = 'none';
             s[1].borderBottom = cc.borderSize+'px solid rgba(0,0,0,0)';
 
         }
+
+        if ( this.borderCol !== 'none' ) ;
         
-        this.parentHeight();
+        Roots.getZone( this );
+        this.zone.w = this.w - this.decal;
+        this.calcUis();
+        this.parentHeight( this.h - this.baseH );
+
+        Roots.needReZone = true;
 
         //Roots.isLeave = true
         //Roots.needResize = true
@@ -5152,7 +5355,7 @@ class Group extends Proto {
 
         super.close();
 
-        //let t = this.h - this.baseH
+        let t = this.h - this.baseH;
 
         this.setSvg( this.c[3], 'd', this.svgs.g1 );
 
@@ -5162,33 +5365,34 @@ class Group extends Proto {
         const cc = this.colors;
         
         s[0].height = this.h + 'px';
-        //s[1].height = (this.h-2) + 'px'
-        //s[2].top = this.h + 'px'
-        s[2].top = (this.h+this.mtop) + 'px';
-        //s[4].background = 'none'
+        s[2].top = ( this.h + this.mtop ) + 'px';
 
         if( cc.gborder !== 'none' ){
-
-            s[4].border = 'none';
             s[2].border = 'none';
             s[1].border = cc.borderSize+'px solid '+ cc.gborder;
         }
 
+        if ( this.borderCol !== 'none' ) ;
+
         if(this.radius) s[1].borderRadius = this.radius+'px';
 
-        this.parentHeight();
+        this.parentHeight(-t);
+
+        Roots.needReZone = true;
 
     }
 
     calcUis () {
 
         if( !this.isOpen || this.isEmpty ) this.h = this.baseH;
+        else this.h = Roots.calcUis( this.uis, this.zone, this.zone.y + this.baseH + this.margin, true ) + this.baseH;
         //else this.h = Roots.calcUis( this.uis, this.zone, this.zone.y + this.baseH, true ) + this.baseH;
-        else this.h = Roots.calcUis( [...this.uis ], this.zone, this.zone.y + this.baseH + this.margin, true ) + this.baseH;
+        //else this.h = Roots.calcUis( [...this.uis ], this.zone, this.zone.y + this.baseH + this.margin, true ) + this.baseH
        // else this.h = Roots.calcUis( [...this.uis, this.spaceY ], this.zone, this.zone.y + this.baseH + this.margin, true ) + this.baseH
 
         this.s[0].height = this.h + 'px';
         this.s[2].height = ( this.h - this.baseH ) + 'px';
+        this.zone.h = this.h;
 
     }
 
@@ -5202,41 +5406,57 @@ class Group extends Proto {
 
     calc ( y ) {
 
-        if( !this.isOpen ) return
-        if( this.isUI ) this.main.calc();
-        else this.calcUis();
-
-        this.s[0].height = this.h + 'px';
-        this.s[2].height = this.h + 'px';
-
-    }
-
-    rSizeContent () {
-
-        let i = this.uis.length;
-        while(i--){
-            this.uis[i].setSize( this.w );
-            this.uis[i].rSize();
+        if ( !this.isOpen ) return;
+        if ( y !== undefined ) {
+            this.h += y;
+            this.parentHeight( y );
+        } else {
+            this.calcUis();
         }
+        this.s[0].height = this.h + 'px';
+        this.s[2].height = ( this.h - this.baseH ) + 'px';
+        this.zone.h = this.h;
 
     }
+
+    /*calc ( y ) {
+
+        if( !this.isOpen ) return
+        if( this.isUI ) this.main.calc()
+        else this.calcUis()
+
+        this.s[0].height = this.h + 'px'
+        this.s[2].height = this.h + 'px'
+
+    }*/
+
+    
 
     rSize () {
 
         super.rSize();
 
         let s = this.s;
-
-        this.w = this.w - this.decal;
+        let w = this.w - this.decal;
 
         s[3].left = ( this.sa + this.sb - 6 ) + 'px';
 
-        s[1].width = this.w + 'px';
-        s[2].width = this.w + 'px';
-        s[1].left = (this.decal) + 'px';
-        s[2].left = (this.decal) + 'px';
+        s[1].width = w + 'px';
+        s[2].width = w + 'px';
+        s[1].left = this.decal + 'px';
+        s[2].left = this.decal + 'px';
 
         if( this.isOpen ) this.rSizeContent();
+
+    }
+
+    rSizeContent ( w = this.w - this.decal ) {
+
+        let i = this.uis.length;
+        while(i--){
+            this.uis[i].setSize( w );
+            this.uis[i].rSize();
+        }
 
     }
 
@@ -5499,6 +5719,11 @@ class Joystick extends Proto {
 
     }
 
+    dispose(){
+        super.dispose();
+        this.clear();
+    }
+
 }
 
 class Knob extends Proto {
@@ -5572,6 +5797,13 @@ class Knob extends Proto {
 
         }
 
+        if ( this.model > 0 ) {
+
+            this.colors01 = Tools.unpack( Tools.ColorLuma( cc.text, -0.75) );
+            this.colors02 = Tools.unpack( cc.text );
+            
+        }
+
         this.r = 0;
 
         this.init();
@@ -5611,10 +5843,24 @@ class Knob extends Proto {
 
         let l = this.local;
         if( l.x === -1 && l.y === -1 ) return '';
+        if( this.c[1] && l.y <= this.c[1].offsetHeight ) return 'title';
+        else if ( l.y > this.h - this.c[2].offsetHeight ) return 'text';
+        else return 'knob'; 
+
+        /*let l = this.local;
+        if( l.x === -1 && l.y === -1 ) return '';
         if( l.y <= this.c[ 1 ].offsetHeight ) return 'title';
         else if ( l.y > this.h - this.c[ 2 ].offsetHeight ) return 'text';
-        else return 'knob';
+        else return 'knob';*/
 
+    }
+
+    reset () {
+
+        this.isDown = false;
+        this.cursor();
+        return this.mode(0);
+        
     }
 
     // ----------------------
@@ -5641,7 +5887,16 @@ class Knob extends Proto {
 
     mousemove ( e ) {
 
-        if( !this.isDown ) return;
+        //if( !this.isDown ) return;
+
+        if( !this.isDown ) {
+            let name = this.testZone( e );
+            if( name === 'circular' || name === 'knob' ) {
+                this.cursor('pointer');
+                return this.mode(1);
+            }
+            return this.reset();
+        }
 
         this.cursor('pointer');
 
@@ -5757,7 +6012,7 @@ class Knob extends Proto {
             let big = ea <= Math.PI - this.mPI ? 0 : 1;
             this.setSvg( this.c[3], 'd', 'M ' + x1 + ',' + y1 + ' A ' + 36 + ',' + 36 + ' 1 ' + big + ' 1 ' + x2 + ',' + y2, 5 );
 
-            let color = Tools.pack( Tools.lerpColor( Tools.unpack( Tools.ColorLuma( this.colors.text, -0.75) ), Tools.unpack( this.colors.text ), this.percent ) );
+            let color = Tools.pack( Tools.lerpColor( this.colors01, this.colors02, this.percent ) );
             this.setSvg( this.c[3], 'stroke', color, 5 );
         
         }
@@ -5811,6 +6066,10 @@ class List extends Proto {
 
         if( this.txt === '' ) this.p = 0;
 
+        this.targetPy = 0;
+        this.lastWheelTime = 0;
+        this.wheelSpeed = 1;
+
 
         let fltop = Math.floor(this.h*0.5)-3;
         let cc = this.colors;
@@ -5820,7 +6079,9 @@ class List extends Proto {
         this.c[4] = this.dom( 'path', this.css.basic + 'position:absolute; width:6px; height:6px; top:'+fltop+'px;', { d:this.svgs.g1, fill:cc.text, stroke:'none'});
 
         this.scrollerBack = this.dom( 'div', this.css.basic + 'right:0px; width:'+ss+'px; background:'+cc.back+'; display:none;');
-        this.scroller = this.dom( 'div', this.css.basic + 'right:'+((ss-(ss*0.25))*0.5)+'px; width:'+(ss*0.25)+'px; background:'+cc.text+'; display:none; ');
+        //this.scroller = this.dom( 'div', this.css.basic + 'right:'+((ss-(ss*0.25))*0.5)+'px; width:'+(ss*0.25)+'px; background:'+cc.text+'; display:none; ');
+        this.scroller = this.dom( 'div', this.css.basic + 'right:'+(2)+'px; width:'+(ss-4)+'px; background:'+cc.text+'; display:none;  transition: transform 0.2s ease-out;');
+
 
         this.c[3].style.color = cc.text;
 
@@ -5875,7 +6136,7 @@ class List extends Proto {
             this.c[2].style.top = this.baseH + 'px';
         }
 
-        this.listIn = this.dom( 'div', this.css.basic + 'left:0; top:0; width:100%; background:none;');
+        this.listIn = this.dom( 'div', this.css.basic + 'left:0; top:0; width:100%; background:none; will-change: transform; transition: transform 0.2s ease-out;');
         this.listIn.name = 'list';
 
         this.topList = 0;
@@ -6021,28 +6282,60 @@ class List extends Proto {
 
     }
 
+    getVisualTop () {
+
+        if( !this.scroll ) return 0;
+
+        // Récupère le transform calculé par le navigateur (ex: "matrix(1, 0, 0, 1, 0, -45.5)")
+        let transform = window.getComputedStyle( this.listIn ).transform;
+        
+        if( transform && transform !== 'none' ){
+            let matrix = new DOMMatrix( transform );
+            return matrix.m42; // m42 est la translation Y actuelle en pixels
+        }
+
+        return this.topList;
+
+    }
+
     testItems ( y ) {
 
-        let name = '';
+        const pos = y - this.topList;
+        const id = Math.floor( pos / (this.itemHeight + 1) );
 
-        let items = this.items;
-
-        /*if(this.hideCurrent){
-            //items = [...this.items]
-            items = this.items.slice(this.tmpId)
-
-        }*/
-
-        let i = items.length, item, a, b;
-        while(i--){
-            item = items[i];
-            a = item.posy + this.topList;
-            b = item.posy + this.itemHeight + 1 + this.topList;
-            if( y >= a && y <= b ){ 
-                name = 'item' + i;
+        if ( id >= 0 && id < this.items.length ) {
+            const item = this.items[id];
+            if ( this.current !== item ) {
                 this.modeItem(0);
                 this.current = item;
                 this.modeItem(1);
+            }
+            return 'item' + id;
+        }
+        return '';
+
+    }
+
+    /*testItems ( y ) {
+
+        let name = '';
+        let items = this.items
+
+        // Position visuelle exacte, même en plein milieu de la transition CSS
+        let currentTop = this.getVisualTop();
+
+        let i = items.length, item, a, b;
+        while(i--){
+
+            item = items[i];
+            a = item.posy + currentTop//this.topList;
+            b = item.posy + this.itemHeight + 1 + currentTop//this.topList;
+
+            if( y >= a && y <= b ){ 
+                name = 'item' + i;
+                this.modeItem(0)
+                this.current = item;
+                this.modeItem(1)
                 return name;
             }
 
@@ -6050,7 +6343,7 @@ class List extends Proto {
 
         return name;
 
-    }
+    }*/
 
     modeItem ( mode ) {
 
@@ -6144,6 +6437,11 @@ class List extends Proto {
 
     mouseup ( e ) {
 
+        if( this.isDown ){
+            this.listIn.style.transition = 'transform 0.2s ease-out';
+            this.scroller.style.transition = 'transform 0.2s ease-out';
+        }
+
         this.isDown = false;
 
     }
@@ -6154,9 +6452,13 @@ class List extends Proto {
 
         if( !name ) return false;
 
+        //this.scroll = false
+
         if( name === 'scroll' ){
 
             this.isDown = true;
+            this.listIn.style.transition = 'none';
+            this.scroller.style.transition = 'none';
             this.mousemove( e );
 
         } else if( name === 'title' ){
@@ -6213,6 +6515,7 @@ class List extends Proto {
                 //this.update( ( e.clientY - top  ) - ( this.sh*0.5 ) );
                 let top = this.zone.y+this.baseH-2;
                 this.update( ( e.clientY - top  ) - ( this.sh*0.5 ) );
+                nup = true;
             }
             //if(this.isDown) this.listmove(e);
         } else {
@@ -6234,14 +6537,50 @@ class List extends Proto {
     wheel ( e ) {
 
         let name = this.testZone( e );
-        if( name === 'title' ) return false; 
-        this.py += e.delta*10;
-        this.update(this.py);
+        if( name === 'title' || !this.scroll ) return false;
+
+        let now = performance.now();
+        let dt = now - this.lastWheelTime;
+        this.lastWheelTime = now;
+
+        // Accélération progressive si on tourne la molette vite (coups espacés de moins de 120ms)
+        if ( dt < 120 ) {
+            this.wheelSpeed = Math.min( this.wheelSpeed + 0.5, 4 ); // Plafond à 6x
+        } else {
+            this.wheelSpeed = 1; // Retour à la vitesse normale
+        }
+
+        // Bonus proportionnel à la longueur de la liste (ex: +1 item tous les 40 éléments)
+        let listBoost = Math.max( 1, Math.floor( this.length / 50 ) );
+
+        // Calcul du déplacement final
+        let itemsToScroll = listBoost * this.wheelSpeed;
+        let step = itemsToScroll * ( this.itemHeight + 1 ) * this.ratio;
+
+        this.py += ( e.delta > 0 ? 1 : -1 ) * step;
+        this.update( this.py );
+        this.testZone( e );
+
         return true;
 
     }
 
+    /*wheel ( e ) {
 
+        let name = this.testZone( e );
+        if( name === 'title' || !this.scroll ) return false
+        //this.py += e.delta*10;
+        
+        let step = ( this.itemHeight + 1 ) * this.ratio;
+        this.py += ( e.delta > 0 ? 1 : -1 ) * step;
+
+        this.update(this.py);
+        
+        this.testZone( e );
+
+        return true;
+
+    }*/
 
     // ----------------------
 
@@ -6308,8 +6647,13 @@ class List extends Proto {
 
     clearList () {
 
-        while ( this.listIn.children.length ) this.listIn.removeChild( this.listIn.lastChild );
+        this.listIn.replaceChildren();
         this.items = [];
+        this.scroll = false;
+        this.ww = this.sb;
+
+        //while ( this.listIn.children.length ) this.listIn.removeChild( this.listIn.lastChild );
+        //this.items = [];
 
     }
 
@@ -6329,7 +6673,10 @@ class List extends Proto {
         
         this.max = lng * (this.itemHeight+1) + 2;
         this.ratio = this.maxHeight / this.max;
-        this.sh = this.maxHeight * this.ratio;
+        //this.sh = this.maxHeight * this.ratio;
+        //this.range = this.maxHeight - this.sh;
+
+        this.sh = Math.max( 20, this.maxHeight * this.ratio );
         this.range = this.maxHeight - this.sh;
 
         this.c[2].style.height = this.maxHeight + 'px';
@@ -6387,7 +6734,7 @@ class List extends Proto {
                 item.innerHTML =t+n;
 
                 let ic = document.createElement("div");
-                ic.style.cssText ='font-size:'+(this.itemHeight-4)+'px; line-height:'+(this.itemHeight-4)+'px; left:0px; top0px; position:absolute; left:0px;';
+                ic.style.cssText ='font-size:'+(this.itemHeight-4)+'px; line-height:'+(this.itemHeight-4)+'px; left:0px; top:0px; position:absolute;';
                 ic.innerHTML = this.emojii[i] ? this.emojii[i] : '🟢';
                 item.appendChild( ic );
                 //document.body.appendChild(ic)
@@ -6488,9 +6835,25 @@ class List extends Proto {
 
     setValue ( value ) {
 
+        if ( this.refObject ) {
+            for ( let g in this.refObject ) {
+                if ( this.refObject[g] === value ) {
+                    this.value = g;
+                    break;
+                }
+            }
+        } else {
+            this.value = !isNaN(value) ? this.list[value] : value;
+        }
+        this.setTopItem();
+
+    }
+
+    /*setValue ( value ) {
+
         if(this.refObject){
-            let ccc = null;
-            for( let g in this.refObject ){ if(this.refObject[g] === o.value ) ccc = g; }
+            let ccc = null
+            for( let g in this.refObject ){ if(this.refObject[g] === this.value ) ccc = g }
             if(ccc) this.value = this.list[ this.list.indexOf(ccc) ];
         } else {
             if(!isNaN(value)) this.value = this.list[ value ];
@@ -6499,7 +6862,7 @@ class List extends Proto {
 
         this.setTopItem();
 
-    }
+    }*/
 
     setTopItem (){
 
@@ -6543,7 +6906,7 @@ class List extends Proto {
                 let id = this.current.id;
 
                 let ic = document.createElement("div");
-                ic.style.cssText ='font-size:'+(this.itemHeight-4)+'px; line-height:'+(this.itemHeight-4)+'px; left:0px; top0px; position:absolute; left:0px;';
+                ic.style.cssText ='font-size:'+(this.itemHeight-4)+'px; line-height:'+(this.itemHeight-4)+'px; left:0px; top:0px; position:absolute;';
                 ic.innerHTML = this.emojii[id] ? this.emojii[id] : '🟢';
                 this.c[3].appendChild( ic );
             }
@@ -6572,6 +6935,16 @@ class List extends Proto {
 
     // ----- LIST
 
+    /*smoothScroll () {
+
+        if ( !this.scroll || Math.abs( this.targetPy - this.py ) < 0.1 ) return;
+
+        // 0.2 = facteur de fluidité (plus il est bas, plus l'inertie est longue)
+        this.py += ( this.targetPy - this.py ) * 0.2;
+        this.update( this.py );
+
+    }*/
+
     update ( y ) {
 
         if( !this.scroll ) return;
@@ -6581,8 +6954,15 @@ class List extends Proto {
 
         this.topList = -Math.floor( y / this.ratio );
 
-        this.listIn.style.top = this.topList+'px';
-        this.scroller.style.top = Math.floor( y )  + 'px';
+        //this.listIn.style.top = this.topList+'px';
+        //this.listIn.style.transform = 'translate3d(0,' + this.topList + 'px, 0)'
+        //this.scroller.style.top = Math.floor( y )  + 'px';
+
+        // Accélération GPU + déclenchement automatique de la transition CSS
+        this.listIn.style.transform = 'translate3d(0, ' + this.topList + 'px, 0)';
+        this.scroller.style.transform = 'translate3d(0, ' + Math.floor( y ) + 'px, 0)';
+
+
 
         this.py = y;
 
@@ -6742,6 +7122,8 @@ class Numeric extends Proto {
         this.current = -1;
         this.prev = { x:0, y:0, d:0, v:0 };
 
+        this.center = o.center || false;
+
         let cc = this.colors;
 
         // bg
@@ -6753,8 +7135,11 @@ class Numeric extends Proto {
         while(i--){
 
             if( this.isAngle ) this.value[i] = (this.value[i] * 180 / Math.PI).toFixed( this.precision );
-            this.c[3+i] = this.dom( 'div', this.css.txtselect + 'top:1px; height:'+(this.h-2)+'px; color:' + cc.text + '; background:' + cc.back + '; borderColor:' + cc.border+'; border-radius:'+this.radius+'px;');
-            if(o.center) this.c[2+i].style.textAlign = 'center';
+            //this.c[3+i] = this.dom( 'div', this.css.txtselect + 'top:1px; height:'+(this.h-2)+'px; color:' + cc.text + '; background:' + cc.back + '; borderColor:' + cc.border+'; border-radius:'+this.radius+'px;')
+            //if(o.center) this.c[2+i].style.textAlign = 'center'
+
+            this.c[3+i] = this.dom( 'div', this.css.txtselect + 'top:1px; height:'+(this.h-2)+'px; color:' + cc.text + '; background:' + cc.back + '; border:' + cc.borderSize + 'px solid ' + cc.border + '; border-radius:'+this.radius+'px;' );
+            if ( o.center ) this.c[3+i].style.justifyContent = 'center';
             this.c[3+i].textContent = this.value[i];
             this.c[3+i].style.color = this.colors.text;
             this.c[3+i].isNum = true;
@@ -6763,12 +7148,12 @@ class Numeric extends Proto {
         }
 
         // selection
-        this.selectId = 3 + this.lng;
+        /*this.selectId = 3 + this.lng;
         this.c[this.selectId] = this.dom(  'div', this.css.txtselect + 'position:absolute; top:2px; height:' + (this.h-4) + 'px; padding:0px 0px; width:0px; color:' + cc.textSelect + '; background:' + cc.select + '; border:none; border-radius:0px;');
 
         // cursor
         this.cursorId = 4 + this.lng;
-        this.c[ this.cursorId ] = this.dom( 'div', this.css.basic + 'top:2px; height:' + (this.h-4) + 'px; width:0px; background:'+cc.text+';' );
+        this.c[ this.cursorId ] = this.dom( 'div', this.css.basic + 'top:2px; height:' + (this.h-4) + 'px; width:0px; background:'+cc.text+';' );*/
 
         this.init();
     }
@@ -6801,7 +7186,12 @@ class Numeric extends Proto {
             this.isDown = true;
             if( name !== '' ){ 
             	this.current = name;
-            	this.prev = { x:e.clientX, y:e.clientY, d:0, v: this.isSingle ? parseFloat(this.value) : parseFloat( this.value[ this.current ] ) };
+                this.prev.x = e.clientX;
+                this.prev.y = e.clientY;
+                this.prev.d = 0;
+                //this.prev.v = parseFloat( this.value[ this.current ] );
+                this.prev.v = this.isSingle ? parseFloat(this.value) : parseFloat( this.value[ this.current ] );
+            	//this.prev = { x:e.clientX, y:e.clientY, d:0, v: this.isSingle ? parseFloat(this.value) : parseFloat( this.value[ this.current ] ) }
             	this.setInput( this.c[ 3 + this.current ] );
             }
             return this.mousemove( e )
@@ -6813,10 +7203,18 @@ class Numeric extends Proto {
 
     mouseup ( e ) {
 
-    	if( this.isDown ){
+        if( this.isDown ){
             
             this.isDown = false;
-            this.prev = { x:0, y:0, d:0, v:0 };
+            this.prev.x = 0;
+            this.prev.y = 0;
+            this.prev.d = 0;
+            this.prev.v = 0;
+
+            if ( this.isDrag ) {
+                this.current = -1;
+                this.validate( true );
+            }
 
             return this.mousemove( e )
         }
@@ -6824,6 +7222,23 @@ class Numeric extends Proto {
         return false
 
     }
+
+    /*mouseup ( e ) {
+
+    	if( this.isDown ){ 
+            this.isDown = false;
+            this.current = -1;
+            this.prev.x = 0;
+            this.prev.y = 0;
+            this.prev.d = 0;
+            this.prev.v = 0;
+            this.validate( true );
+            return this.mousemove( e );
+        }
+
+        return false
+
+    }*/
 
     mousemove ( e ) {
 
@@ -6838,8 +7253,6 @@ class Numeric extends Proto {
         	else this.cursor( this.current !== -1 ? 'move' : 'pointer' );
         }
 
-        
-
         if( this.isDrag ){
 
         	if( this.current !== -1 ){
@@ -6851,7 +7264,8 @@ class Numeric extends Proto {
                 this.value[ this.current ] = this.numValue(n);
                 this.c[ 3 + this.current ].textContent = this.value[this.current];
 
-                this.validate();
+                //this.validate()
+                this.validate( true );
 
                 this.prev.x = e.clientX;
                 this.prev.y = e.clientY;
@@ -6861,9 +7275,17 @@ class Numeric extends Proto {
 
         } else {
 
-        	if( this.isDown ) x = e.clientX - this.zone.x -3;
-        	if( this.current !== -1 ) x -= this.tmp[this.current][0];
-        	return this.upInput( x, this.isDown )
+            if ( this.isDown && this.current !== -1 ) {
+                const el = this.c[ 3 + this.current ];
+                const full = Roots.hiddenSizer ? Roots.hiddenSizer.clientWidth : 0;
+                const left = this.center ? ( el.clientWidth - full ) * 0.5 : ( el.clientWidth - 5 - full );
+                x = ( e.clientX - this.zone.x - this.tmp[ this.current ][ 0 ] ) - left;
+            }
+            return this.upInput( x, this.isDown );
+
+        	/*if( this.isDown ) x = e.clientX - this.zone.x -3
+        	if( this.current !== -1 ) x -= this.tmp[this.current][0]
+        	return this.upInput( x, this.isDown )*/
 
         }
 
@@ -6918,51 +7340,108 @@ class Numeric extends Proto {
 
     send ( v ) {
 
-        v = v || this.value;
+        v = v ?? ( this.isSingle ? this.value[0] * this.multy : this.value.map( n => n * this.multy ) );
 
         this.isSend = true;
+        if ( this.objectLink !== null ) {
+            if ( this.isVector ) this.objectLink[ this.objectKey ].fromArray( v );
+            else this.objectLink[ this.objectKey ] = v;
+        }
+        if ( this.callback ) this.callback( v, this.objectKey );
+        this.isSend = false;
+
+    }
+
+    /*send ( v ) {
+
+        v = v || this.value
+
+        this.isSend = true
 
         if( this.objectLink !== null ){ 
 
             if( this.isVector ){
-                this.objectLink[ this.objectKey ].fromArray( v );
+                this.objectLink[ this.objectKey ].fromArray( v )
             } else {
-                this.objectLink[ this.objectKey ] = v;
+                this.objectLink[ this.objectKey ] = v
             }
 
         }
 
-        if( this.callback ) this.callback( v, this.objectKey );
-        this.isSend = false;
+        if( this.callback ) this.callback( v, this.objectKey )
+        this.isSend = false
 
-    }
+    }*/
 
 
     // ----------------------
     //   INPUT
     // ----------------------
 
-    select ( c, e, w, t ) {
+   select ( c, e, w, t, full ) {
+        if ( this.current === -1 ) return;
+        const cc = this.colors;
+        const el = this.c[ 3 + this.current ];
+        const st = this.s[ 3 + this.current ];
 
-        let s = this.s;
-        let d = this.current !== -1 ? this.tmp[this.current][0] + 5 : 0;
-        s[this.cursorId].width = '1px';
-        s[this.cursorId].left = ( d + c ) + 'px';
-        s[this.selectId].left =  ( d + e )  + 'px';
-        s[this.selectId].width =  w  + 'px';
-        this.c[this.selectId].innerHTML = t;
+        const pad = 5 - this.colors.borderSize;
+        const left = this.center ? ( el.clientWidth - (full || 0) ) * 0.5 : ( el.clientWidth - pad - (full || 0) );
+
+        //const left = this.center ? ( el.clientWidth - (full || 0) ) * 0.5 : ( el.clientWidth - 5 - (full || 0) );
+        const start = left + e;
+        const end = start + w;
+        const cur = left + c;
+
+        st.background = `linear-gradient(90deg, 
+            ${cc.backoff} 0px, ${cc.backoff} ${start}px, 
+            ${cc.select} ${start}px, ${cc.select} ${end}px, 
+            ${cc.backoff} ${end}px, ${cc.backoff} ${cur}px, 
+            ${cc.text} ${cur}px, ${cc.text} ${cur + 1}px, 
+            ${cc.backoff} ${cur + 1}px)`;
+    }
+
+    /*select ( c, e, w, t, full ) {
+        if ( this.current === -1 ) return;
+        const cc = this.colors;
+        const pad = 5;
+        const start = pad + e;
+        const end = start + w;
+        const cur = pad + c;
+
+        this.s[ 3 + this.current ].background = `linear-gradient(90deg, 
+            ${cc.backoff} 0px, ${cc.backoff} ${start}px, 
+            ${cc.select} ${start}px, ${cc.select} ${end}px, 
+            ${cc.backoff} ${end}px, ${cc.backoff} ${cur}px, 
+            ${cc.text} ${cur}px, ${cc.text} ${cur + 1}px, 
+            ${cc.backoff} ${cur + 1}px)`;
+    }*/
+
+    unselect () {
+        if ( !this.s || this.current === -1 ) return;
+        this.s[ 3 + this.current ].background = this.colors.back;
+    }
+
+    /*select ( c, e, w, t ) {
+
+        let s = this.s
+        let d = this.current !== -1 ? this.tmp[this.current][0] + 5 : 0
+        s[this.cursorId].width = '1px'
+        s[this.cursorId].left = ( d + c ) + 'px'
+        s[this.selectId].left =  ( d + e )  + 'px'
+        s[this.selectId].width =  w  + 'px'
+        this.c[this.selectId].textContent = t
     
     }
 
     unselect () {
 
-        let s = this.s;
+        let s = this.s
         if(!s) return
-        this.c[this.selectId].innerHTML = '';
-        s[this.selectId].width = 0 + 'px';
-        s[this.cursorId].width = 0 + 'px';
+        this.c[this.selectId].textContent = ''
+        s[this.selectId].width = 0 + 'px'
+        s[this.cursorId].width = 0 + 'px'
 
-    }
+    }*/
 
     validate ( force ) {
 
@@ -7031,6 +7510,8 @@ class Slide extends Proto {
         this.isOver = false;
         this.allway = o.allway || false;
 
+        this.editable = o.editable !== undefined ? o.editable : false;
+
         this.autoValue = true;
         if(o.autoValue!==undefined) this.autoValue = false;
 
@@ -7039,6 +7520,7 @@ class Slide extends Proto {
         this.isTime = o.isTime || false;
 
         this.firstImput = false;
+        this.cmode = 0;
 
         let cc = this.colors;
 
@@ -7068,7 +7550,7 @@ class Slide extends Proto {
                 ww = (this.h-6)*0.5;
             }
 
-            if( this.model === 3 ) this.c[5].style.visible = 'none';
+            if( this.model === 3 ) this.c[5].style.visibility = 'hidden';
 
             this.c[4].style.borderRadius = r1 + 'px';
             this.c[4].style.height = h2 + 'px';
@@ -7082,6 +7564,8 @@ class Slide extends Proto {
             //this.c[6] = this.dom( 'div', this.css.basic + 'border-radius:'+ra+'px; margin-left:'+(-ww*0.5)+'px; background:'+cc.text+'; left:4px; top:3px; height:'+(this.h-6)+'px; width:'+ww+'px;' )
             this.c[6] = this.dom( 'div', this.css.basic + 'border-radius:'+ra+'px; margin-left:'+(-ww*0.5)+'px; background:'+cc.text+'; left:4px; top:'+((this.h-ww)*0.5)+'px; height:'+ww+'px; width:'+ww+'px;' );
         }
+
+        
 
         this.init();
 
@@ -7102,9 +7586,90 @@ class Slide extends Proto {
     //   EVENTS
     // ----------------------
 
+    mousedown ( e ) {
+        let name = this.testZone( e );
+        if ( !name ) return false;
+
+        if ( !this.isDown ) {
+            this.isDown = true;
+            if ( name === 'scroll' ) {
+                this.isScroll = true; 
+                this.old = this.value;
+            } else if ( name === 'text' && this.editable ) {
+                this.isScroll = false;
+                this.c[2].textContent = this.value;
+                this.setInput( this.c[2] );
+            }
+            return this.mousemove( e );
+        }
+        return false;
+    }
+
     mouseup ( e ) {
+        if ( this.isDown ) {
+            this.isDown = false;
+            if ( this.isScroll ) {
+                this.isScroll = false;
+                this.sendEnd();
+                return false;
+            }
+            return this.mousemove( e );
+        }
+        return false;
+    }
+
+    mousemove ( e ) {
+        let nup = false;
+        let name = this.testZone( e );
+
+        if ( name === 'text' && this.editable ) {
+            this.cursor('text');
+        } else if ( name === 'scroll' ) {
+            if ( this.mode(1) ) nup = true;
+            this.cursor('w-resize');
+        } else {
+            if ( this.mode(0) ) nup = true;
+            this.cursor();
+        }
+
+        if ( this.isScroll && this.isDown ) {
+            let n = ((( e.clientX - (this.zone.x + this.sa) - 3 ) / this.ww ) * this.range + this.min ) - this.old;
+            if ( n >= this.step || n <= -this.step ) {
+                n = Math.floor( n / this.step );
+                this.value = this.numValue( this.old + ( n * this.step ) );
+                this.update( true );
+                this.old = this.value;
+            }
+            return true;
+        }
+
+        if ( this.editable && !this.isScroll ) {
+            let x = 0;
+            if ( this.isDown ) {
+                const el = this.c[ 2 ];
+                const full = Roots.hiddenSizer ? Roots.hiddenSizer.clientWidth : 0;
+                const left = el.clientWidth - 5 - full;
+                x = ( e.clientX - this.zone.x - 3 - ( this.txl + 4 ) ) - left;
+            }
+            return this.upInput( x, this.isDown );
+            /*let x = 0;
+            if ( this.isDown ) x = e.clientX - this.zone.x - 3 - ( this.txl + 4 );
+            return this.upInput( x, this.isDown );*/
+        }
+
+        return nup;
+    }
+
+    /*mouseup ( e ) {
         
-        if( this.isDown ) this.isDown = false;
+        if ( this.isDown ) {
+            this.isDown = false;
+            if ( this.editable && Roots.parent === this ) {
+                this.upInput( 0, false );
+                return;
+            }
+            this.sendEnd();
+        }
         
     }
 
@@ -7119,11 +7684,13 @@ class Slide extends Proto {
             this.old = this.value;
             this.mousemove( e );
             
+        } else if ( name === 'text' && this.editable ) {
+            this.isDown = true;
+            this.c[2].textContent = this.value; // Affiche la valeur brute sans ° ou h
+            this.setInput( this.c[2] );
+            return this.mousemove( e );
         }
 
-        /*if( name === 'text' ){
-            this.setInput( this.c[2], function(){ this.validate() }.bind(this) );
-        }*/
 
         return true;
 
@@ -7135,12 +7702,22 @@ class Slide extends Proto {
 
         let name = this.testZone( e );
 
+        if ( name === 'text' && this.editable ) {
+            this.cursor('text');
+            if ( this.isDown ) {
+                let x = e.clientX - ( this.zone.x + this.txl + 4 );
+                return this.upInput( x, true );
+            }
+            return false;
+        }
+
         if( name === 'scroll' ) {
-            this.mode(1);
+            
+            if ( this.mode(1) ) nup = true;
             this.cursor('w-resize');
-        //} else if(name === 'text'){ 
-            //this.cursor('pointer');
+
         } else {
+            if ( this.mode(0) ) nup = true;
             this.cursor();
         }
 
@@ -7184,7 +7761,7 @@ class Slide extends Proto {
               
         return false;
     
-    }
+    }*/
 
     //keydown: function ( e ) { return true; },
 
@@ -7213,9 +7790,26 @@ class Slide extends Proto {
 
     // ----------------------
 
-    validate () {
-        
+    validate ( force ) {
+
+        if ( this.allway ) force = true;
         let n = this.c[2].textContent;
+        if ( !isNaN( n ) && n !== '' ) {
+            this.value = this.numValue( n );
+            this.update( force );
+        } else if ( force && this.autoValue ) {
+            this.c[2].textContent = this.formatOutput();
+        }
+
+        /*let n = this.c[2].textContent;
+        if ( !isNaN( n ) && n !== '' ) {
+            this.value = this.numValue( n );
+            this.update( force || this.allway );
+        } else if ( force && this.autoValue ) {
+            this.c[2].textContent = this.formatOutput();
+        }*/
+        
+        /*let n = this.c[2].textContent;
 
         if(!isNaN( n )){ 
             this.value = this.numValue( n ); 
@@ -7224,7 +7818,7 @@ class Slide extends Proto {
 
         else {
             if(this.autoValue) this.c[2].textContent = this.formatOutput();
-        }
+        }*/
 
     }
 
@@ -7239,8 +7833,23 @@ class Slide extends Proto {
 
     mode ( mode ) {
 
+        if ( this.cmode === mode ) return false;
+        this.cmode = mode;
+        let s = this.s, cc = this.colors;
+        const isOver = mode === 1;
+
+        s[2].color = isOver ? cc.textOver : cc.text;
+        s[4].background = cc.back;
+        s[5].background = isOver ? cc.textOver : cc.text;
+        if ( this.model !== 0 ) s[6].background = isOver ? cc.textOver : cc.text;
+        return true;
+
+    }
+
+    /*mode ( mode ) {
+
         let s = this.s;
-        let cc = this.colors;
+        let cc = this.colors
 
         switch(mode){
             case 0: // base
@@ -7248,29 +7857,121 @@ class Slide extends Proto {
                 s[2].color = cc.text;
                 s[4].background = cc.back;
                 s[5].background = cc.text;
-                if(this.model !== 0) s[6].background = cc.text;//cc.button;
+                if(this.model !== 0) s[6].background = cc.text//cc.button;
             break;
             case 1: // scroll over
                 //s[2].border = '1px dashed ' + this.colors.hide;
                 s[2].color = cc.textOver;
                 s[4].background = cc.back;
                 s[5].background = cc.textOver;
-                if(this.model !== 0) s[6].background = cc.textOver;//cc.overoff;
+                if(this.model !== 0) s[6].background = cc.textOver//cc.overoff;
             break;
 
         }
-    }
+    }*/
 
     update ( up ) {
 
-        let ww = Math.floor( this.ww * (( this.value - this.min ) / this.range ));
-       
+        const pct = this.range > 0 ? ( this.value - this.min ) / this.range : 0;
+        let ww = Math.floor( this.ww * pct );
+
         if(this.model !== 3) this.s[5].width = ww + 'px';
         if(this.s[6]) this.s[6].left = ( this.sa + ww + 3 ) + 'px';
-        if(this.autoValue) this.c[2].textContent = this.formatOutput();
+        if( !this.isEdit && this.autoValue) this.c[2].textContent = this.formatOutput();
 
         if( up ) this.send();
+        
+    }
 
+    /*select ( c, e, w, t ) {
+        if ( !this.editable ) return;
+        const cc = this.colors;
+        const pad = 5; // padding horizontal de css.txtselect
+        const el = this.c;
+
+        // Mesure la largeur totale du texte complet via Roots.textWidth
+        const fullW = w//Roots.textWidth( el.textContent );
+        const boxW = el.clientWidth;
+
+        // Calcule le point de départ X du texte selon l'alignement
+        let offset = pad;
+        const align = el.style.textAlign || el.style.justifyContent;
+        if ( align === 'right' || align === 'flex-end' ) {
+            offset = boxW - pad - fullW;
+        } else if ( align === 'center' ) {
+            offset = ( boxW - fullW ) * 0.5;
+        }
+
+        const start = Math.max( 0, offset + e );
+        const end = Math.max( start, offset + e + w );
+        const cur = Math.max( 0, offset + c );
+
+        this.s.background = `linear-gradient(90deg, 
+            ${cc.backoff} 0px, ${cc.backoff} ${start}px, 
+            ${cc.select} ${start}px, ${cc.select} ${end}px, 
+            ${cc.backoff} ${end}px, ${cc.backoff} ${cur}px, 
+            ${cc.text} ${cur}px, ${cc.text} ${cur + 1}px, 
+            ${cc.backoff} ${cur + 1}px)`;
+    }*/
+
+    /*select ( c, e, w, t ) {
+        if ( !this.editable ) return;
+        const cc = this.colors;
+        const pad = 5;
+        const full = this.c.scrollWidth - pad * 2;
+        const start = this.c.clientWidth - pad - ( full - e );
+        const end = start + w;
+        const cur = this.c.clientWidth - pad - ( full - c );
+
+        this.s.background = `linear-gradient(90deg, 
+            ${cc.backoff} 0px, ${cc.backoff} ${start}px, 
+            ${cc.select} ${start}px, ${cc.select} ${end}px, 
+            ${cc.backoff} ${end}px, ${cc.backoff} ${cur}px, 
+            ${cc.text} ${cur}px, ${cc.text} ${cur + 1}px, 
+            ${cc.backoff} ${cur + 1}px)`;
+    }*/
+
+    select ( c, e, w, t, full ) {
+        if ( !this.editable ) return;
+        const cc = this.colors;
+        const pad = 5;
+        const el = this.c[ 2 ];
+        const st = this.s[ 2 ];
+
+        const left = el.clientWidth - pad - ( full || 0 );
+        const start = left + e;
+        const end = start + w;
+        const cur = left + c;
+
+        st.background = `linear-gradient(90deg, 
+            ${cc.backoff} 0px, ${cc.backoff} ${start}px, 
+            ${cc.select} ${start}px, ${cc.select} ${end}px, 
+            ${cc.backoff} ${end}px, ${cc.backoff} ${cur}px, 
+            ${cc.text} ${cur}px, ${cc.text} ${cur + 1}px, 
+            ${cc.backoff} ${cur + 1}px)`;
+    }
+
+    /*select ( c, e, w, t, full ) {
+        if ( !this.editable ) return;
+        const cc = this.colors;
+        const pad = 5; // padding gauche de css.txtselect
+        const start = pad + e;
+        const end = start + w;
+        const cur = pad + c;
+
+        // Dessine la sélection (cc.select) et le curseur de 1px (cc.text) sur le fond de c[2]
+        this.s[2].background = `linear-gradient(90deg, 
+            ${cc.backoff} 0px, ${cc.backoff} ${start}px, 
+            ${cc.select} ${start}px, ${cc.select} ${end}px, 
+            ${cc.backoff} ${end}px, ${cc.backoff} ${cur}px, 
+            ${cc.text} ${cur}px, ${cc.text} ${cur + 1}px, 
+            ${cc.backoff} ${cur + 1}px)`;
+    }*/
+
+    unselect () {
+        if ( !this.s ) return;
+        this.s[2].background = 'none';
+        if ( this.autoValue ) this.c[2].textContent = this.formatOutput();
     }
 
     rSize () {
@@ -7309,10 +8010,8 @@ class TextInput extends Proto {
 
         super( o );
 
-        this.cmode = 0;
-
         this.value = o.value !== undefined ? o.value : '';
-        this.placeHolder = o.placeHolder || '';
+        this.placeHolder = o.placeHolder || 'text';
 
         this.allway = o.allway || false;
         this.editable = o.edit !== undefined ? o.edit : true;
@@ -7322,21 +8021,13 @@ class TextInput extends Proto {
         let cc = this.colors;
 
         // text
-        this.c[2] = this.dom( 'div', this.css.txtselect + 'top:1px; height:' + (this.h-2) + 'px; color:' + cc.text + '; background:' + cc.back + '; borderColor:' + cc.border+'; border-radius:'+this.radius+'px;' );
+        this.c[2] = this.dom( 'div', this.css.txtselect + 'top:1px; height:' + (this.h-2) + 'px; color:' + cc.text + '; background:' + cc.back + '; border:' + cc.borderSize + 'px solid ' + cc.border + '; border-radius:' + this.radius + 'px;' );
+        //this.c[2] = this.dom( 'div', this.css.txtselect + 'top:1px; height:' + (this.h-2) + 'px; color:' + cc.text + '; background:' + cc.back + '; borderColor:' + cc.border+'; border-radius:'+this.radius+'px;' );
         this.c[2].textContent = this.value;
 
-        // selection
-        this.c[3] = this.dom(  'div', this.css.txtselect + 'position:absolute; top:2px; height:' + (this.h-4) + 'px; padding:0px 0px; width:0px; color:' + cc.textSelect + '; background:' + cc.select + '; border:none; border-radius:0px;');
-
-        // cursor
-        this.c[4] = this.dom( 'div', this.css.basic + 'top:2px; height:' + (this.h-4) + 'px; width:0px; background:'+cc.text+';' );
-
         // fake
-        this.c[5] = this.dom( 'div', this.css.txtselect + 'top:1px; height:' + (this.h-2) + 'px; border:none; justify-content: center; font-style: italic; color:'+cc.border+';' );
-        if( this.value === '' ) this.c[5].textContent = this.placeHolder;
-
-        
-
+        this.c[3] = this.dom( 'div', this.css.txtselect + 'top:1px; height:' + (this.h-2) + 'px; border:none; justify-content: center; font-style: italic; color:'+cc.border+';' );
+        if( this.value === '' ) this.c[3].textContent = this.placeHolder;
 
         this.init();
 
@@ -7390,20 +8081,25 @@ class TextInput extends Proto {
 
         let name = this.testZone( e );
 
-        //let l = this.local;
-        //if( l.x === -1 && l.y === -1 ){ return;}
-
-        //if( l.x >= this.sa ) this.cursor('text');
-        //else this.cursor();
-
         let x = 0;
 
         if( name === 'text' ) this.cursor('text');
         else this.cursor();
 
-        if( this.isDown ) x = e.clientX - this.zone.x;
+        if ( this.isDown ) {
+            const el = this.c[ 2 ];
+            const pad = 5 - this.colors.borderSize;
+            Roots.hiddenSizer.innerHTML = el.textContent.replace(/ /g, '&nbsp;');
+            const full = Roots.hiddenSizer.clientWidth;
+            const left = el.clientWidth - pad - full;
+            x = ( e.clientX - this.zone.x - this.sa ) - left;
+        }
 
-        return this.upInput( x - this.sa -3, this.isDown );
+        return this.upInput( x, this.isDown );
+
+       //if( this.isDown ) x = e.clientX - this.zone.x;
+
+        //return this.upInput( x - this.sa -3, this.isDown );
 
     }
 
@@ -7425,27 +8121,68 @@ class TextInput extends Proto {
     //   INPUT
     // ----------------------
 
-    select ( c, e, w, t ) {
+    /*select ( c, e, w, t ) {
+        if ( !this.editable ) return;
 
-        let s = this.s;
-        let d = this.sa + 5;
-        s[4].width = '1px';
-        s[4].left = ( d + e ) + 'px';
+        console.log(c,e,w)
+        const cc = this.colors;
+        const pad = 5;
+        const right = this.c[2].clientWidth - pad;
+        const start = right - w - e;
+        const end = right - e;
+        //const cur = right - c;
 
-        s[3].left =  ( d + e )  + 'px';
-        s[3].width =  w  + 'px';
-        this.c[3].innerHTML = t;
-    
+        //const start = right + w - e;
+        //const end = right - e;
+        const cur = right + c;
+        //const cur = c - right
+
+        this.s[2].background = `linear-gradient(90deg, 
+            ${cc.backoff} 0px, ${cc.backoff} ${start}px, 
+            ${cc.select} ${start}px, ${cc.select} ${end}px, 
+            ${cc.backoff} ${end}px, ${cc.backoff} ${cur}px, 
+            ${cc.text} ${cur}px, ${cc.text} ${cur + 1}px, 
+            ${cc.backoff} ${cur + 1}px)`;
+    }*/
+
+    select ( c, e, w, t, full ) {
+        if ( !this.editable ) return;
+        const cc = this.colors;
+        const pad = 5 - cc.borderSize;
+        const el = this.c[ 2 ];
+        const st = this.s[ 2 ];
+
+        const left = el.clientWidth - pad - ( full || 0 );
+        const start = left + e;
+        const end = start + w;
+        const cur = left + c;
+
+        st.background = `linear-gradient(90deg, 
+            ${cc.backoff} 0px, ${cc.backoff} ${start}px, 
+            ${cc.select} ${start}px, ${cc.select} ${end}px, 
+            ${cc.backoff} ${end}px, ${cc.backoff} ${cur}px, 
+            ${cc.text} ${cur}px, ${cc.text} ${cur + 1}px, 
+            ${cc.backoff} ${cur + 1}px)`;
     }
 
+    /*select ( c, e, w, t, full ) {
+        const cc = this.colors;
+        const pad = 5;
+        const start = pad + e;
+        const end = start + w;
+        const cur = pad + c;
+
+        this.s[2].background = `linear-gradient(90deg, 
+            ${cc.backoff} 0px, ${cc.backoff} ${start}px, 
+            ${cc.select} ${start}px, ${cc.select} ${end}px, 
+            ${cc.backoff} ${end}px, ${cc.backoff} ${cur}px, 
+            ${cc.text} ${cur}px, ${cc.text} ${cur + 1}px, 
+            ${cc.backoff} ${cur + 1}px)`;
+    }*/
+
     unselect () {
-
-        let s = this.s;
-        if(!s) return;
-        s[3].width =  0  + 'px';
-        this.c[3].innerHTML = 't';
-        s[4].width = 0 + 'px';
-
+        if ( !this.s ) return;
+        this.s[2].background = this.colors.back;
     }
 
     validate ( force ) {
@@ -7454,8 +8191,8 @@ class TextInput extends Proto {
 
         this.value = this.c[2].textContent;
 
-        if(this.value !== '') this.c[5].textContent = '';
-        else this.c[5].textContent = this.placeHolder;
+        if(this.value !== '') this.c[3].textContent = '';
+        else this.c[3].textContent = this.placeHolder;
 
         if( !force ) return;
 
@@ -7475,8 +8212,8 @@ class TextInput extends Proto {
         s[2].left = this.sa + 'px';
         s[2].width = this.sb + 'px';
 
-        s[5].left = this.sa + 'px';
-        s[5].width = this.sb + 'px';
+        s[3].left = this.sa + 'px';
+        s[3].width = this.sb + 'px';
      
     }
 
@@ -7490,19 +8227,6 @@ class Title extends Proto {
         super( o );
 
         this.isTitle = true;
-
-        //let prefix = o.prefix || '';
-        //let color = o.color || this.colors.text;
-
-        //this.c[2] = this.dom( 'div', this.css.txt + ' justify-content:right; width:60px; line-height:'+ (this.h-8) + 'px; color:' + color );
-
-        /*if( this.h === 31 ){
-
-            this.s[0].height = this.h + 'px';
-            this.s[1].top = 8 + 'px';
-            //this.c[2].style.top = 8 + 'px';
-
-        }*/
 
         let s = this.s;
 
@@ -7745,9 +8469,13 @@ class Bitmap extends Proto {
 
         const cc = this.colors;
 
-        this.c[2] = this.dom( 'div', this.css.txt + this.css.button + ' top:1px; background:'+cc.button+'; height:'+(this.h-2)+'px; border:'+cc.buttonBorder+'; border-radius:2px; width:30px; ' );
+        this.c[2] = this.dom( 'div', this.css.txt + this.css.button + ' top:1px; background:' + cc.button + '; height:' + (this.h - 2) + 'px; border:' + cc.borderSize + 'px solid ' + cc.border + '; border-radius:' + this.radius + 'px; width:30px;' );
+        this.c[3] = this.dom( 'div', this.css.txtselect + 'top:1px; height:' + (this.h - 2) + 'px; background:' + cc.back + '; border:' + cc.borderSize + 'px solid ' + cc.border + '; border-radius:' + this.radius + 'px; justify-content:center;' );
 
-        this.c[3] = this.dom( 'div', this.css.txtselect + 'height:' + (this.h-4) + 'px; background:' + cc.back + '; borderColor:' + cc.inputBorder+'; border-radius:'+this.radius+'px;' );
+
+        //this.c[2] = this.dom( 'div', this.css.txt + this.css.button + ' top:1px; background:'+cc.button+'; height:'+(this.h-2)+'px; border:'+cc.buttonBorder+'; border-radius:2px; width:30px; ' )
+
+        //this.c[3] = this.dom( 'div', this.css.txtselect + 'height:' + (this.h-4) + 'px; background:' + cc.back + '; borderColor:' + cc.inputBorder+'; border-radius:'+this.radius+'px;' )
         //this.c[3].textContent = this.value;
         if(!this.img) this.c[3].textContent = 'null';
         
@@ -7795,18 +8523,16 @@ class Bitmap extends Proto {
     mousedown ( e ) {
 
         let name = this.testZone( e );
-
         if( !name ) return false;
 
         if( name === 'over' ){
             this.isDown = true;
             Files.load( { callback:this.changeBitmap.bind(this), always:true, type:'image' } );
 
+        } else if ( name === 'delete' ) {
+            this.changeBitmap( null );
         }
 
-        
-        //this.value = this.values[ name-2 ];
-        //this.send();
         return this.mousemove( e );
 
     }
@@ -7830,14 +8556,41 @@ class Bitmap extends Proto {
 
     // ----------------------
 
-    makePreview(){
+    makePreview () {
+
+        const el = this.c[3];
+
+        if ( this.img ) {
+            let url = this.img.src;
+
+            // Si c'est un ImageBitmap (sans .src) ou un blob:, on dessine une miniature via Canvas
+            if ( !url || url.startsWith('blob:') ) {
+                const c = document.createElement('canvas');
+                c.width = 64;
+                c.height = 64;
+                c.getContext('2d').drawImage( this.img, 0, 0, 64, 64 );
+                url = c.toDataURL();
+            }
+
+            el.style.backgroundImage = `url("${url}")`;
+            el.style.backgroundSize = 'cover';
+            el.style.backgroundPosition = 'center';
+            el.style.backgroundRepeat = 'no-repeat';
+        } else {
+            el.style.background = this.colors.back;
+            el.style.backgroundImage = 'none';
+        }
+
+    }
+
+    /*makePreview(){
 
         if( this.img ){
 
-            let src = this.img.src;
+            let src = this.img.src
 
             if(src.search('blob:')!==-1){ 
-                src.substring(5);
+                let src2 = src.substring(5)
 
                 //  TODO find a way to display blob ???
 
@@ -7854,13 +8607,13 @@ class Bitmap extends Proto {
                 //this.c[3].style.backgroundSize = 20 + 'px ' + 20 + 'px'
                 //this.c[3].style.backgroundPosition = 'center';
                 //this.c[3].style.backgroundRepeat = 'no-repeat';
-                this.c[3].style.background = '#00ff00';
+       /*         this.c[3].style.background = '#00ff00';
                 this.c[3].style.backgroundImage = 'none';
             } else {
                 //console.log(this.value)
                 //let src = this.img.src ? this.img.src : this.img;
                 this.c[3].style.background = 'url('+src+')';
-                this.c[3].style.backgroundSize = (this.sb - 40) + 'px ' + (this.sb - 40) + 'px';
+                this.c[3].style.backgroundSize = (this.sb - 40) + 'px ' + (this.sb - 40) + 'px'
                 //this.c[3].style.backgroundSize = 20 + 'px ' + 20 + 'px'
                 this.c[3].style.backgroundPosition = 'center';
                 this.c[3].style.backgroundRepeat = 'no-repeat';
@@ -7872,7 +8625,7 @@ class Bitmap extends Proto {
             this.c[3].style.backgroundImage = 'none';
         }
 
-    }
+    }*/
 
     changeBitmap( img, fname, type ){
 
@@ -7891,7 +8644,41 @@ class Bitmap extends Proto {
 
     // ----------------------
 
-    threeTexture() {
+    threeTexture () {
+
+        if ( this.objectLink === null ) return;
+
+        let texture = this.objectLink[ this.objectKey ];
+        let colorSpace = '';
+
+        if(this.objectKey === 'map') colorSpace = 'srgb';
+
+
+        if ( this.img ) {
+            if ( texture && texture.isTexture ) {
+                const old = texture;
+                texture = old.clone();
+                texture.image = this.img;
+                texture.colorSpace = colorSpace;
+                texture.needsUpdate = true;
+                this.objectLink[ this.objectKey ] = texture;
+                old.dispose();
+            } else if ( Tools.texture ) {
+                texture = new Tools.texture( this.img );
+                texture.colorSpace = colorSpace;
+                texture.needsUpdate = true;
+                this.objectLink[ this.objectKey ] = texture;
+            }
+        } else {
+            if ( texture && texture.isTexture ) texture.dispose();
+            this.objectLink[ this.objectKey ] = null;
+        }
+
+        this.objectLink.needsUpdate = true;
+
+    }
+
+    /*threeTexture() {
 
         // need define UIL.Tools.texture = THREE.Texture;
 
@@ -7905,7 +8692,7 @@ class Bitmap extends Proto {
                 texture.dispose();
                 this.objectLink[this.objectKey].needsUpdate = true;
             } else if( Tools.texture ){
-                texture = new Tools.texture(this.img);
+                texture = new Tools.texture(this.img)
                 //console.log('colorSpace',  texture.colorSpace )
                 if( this.colorSpace ) texture.colorSpace = this.colorSpace;//'srgb';
                 this.objectLink[this.objectKey] = texture;
@@ -7916,7 +8703,7 @@ class Bitmap extends Proto {
             this.objectLink[this.objectKey] = null;
         }
         this.objectLink.needsUpdate = true;
-    }
+    }*/
 
     apply ( v ) {
 
@@ -7967,6 +8754,8 @@ class Bitmap extends Proto {
                 case 4: this.s[ 2 ].color = cc.textSelect; this.s[ 2 ].background = cc.select; break; // actif
 
             }
+
+            this.setSvg( this.c[4], 'fill', this.s[ 2 ].color, -1 );
 
             change = true;
 
@@ -8019,6 +8808,20 @@ class Selector extends Button {
      
     }
 
+}
+
+class Empty extends Proto {
+
+    constructor( o = {} ) {
+
+	    o.isSpace = true;
+        o.margin = 0;
+        if(!o.h) o.h = 10;
+        super( o );
+        this.init();
+
+    }
+    
 }
 
 class Item extends Proto {
@@ -8543,7 +9346,8 @@ class Pad2D extends Proto {
         this.setSvg( pad, 'stroke', cc.back, 3 );
         this.setSvg( pad, 'stroke', cc.text, 4 );
 
-        this.setSvg( pad, 'viewBox', '0 0 '+this.diam+' '+this.diam );
+        //this.setSvg( pad, 'viewBox', '0 0 '+this.diam+' '+this.diam )
+        this.setSvg( pad, 'viewBox', '0 0 256 256' );
         this.setCss( pad, { width:this.diam, height:this.diam, left:0, top:this.top });
 
         this.c[3] = pad;
@@ -8561,7 +9365,7 @@ class Pad2D extends Proto {
 
 
 
-        if( l.y <= this.c[ 1 ].offsetHeight ) return 'title';
+        if( this.c[ 1 ] !== undefined && l.y <= this.c[ 1 ].offsetHeight ) return 'title';
         else if ( l.y > this.h - this.c[ 2 ].offsetHeight ) return 'text';
         else return 'pad';
 
@@ -8576,6 +9380,7 @@ class Pad2D extends Proto {
     mouseup ( e ) {
 
         this.isDown = false;
+        this.sendEnd();
         return this.mode(0);
 
     }
@@ -8593,7 +9398,16 @@ class Pad2D extends Proto {
 
     mousemove ( e ) {
 
-        if( !this.isDown ) return;
+        if ( !this.isDown ) {
+            if ( this.testZone( e ) === 'pad' ) {
+                this.cursor('pointer');
+                return this.mode(1);
+            }
+            this.cursor();
+            return this.mode(0);
+        }
+
+        //if( !this.isDown ) return;
 
         let x = (this.w*0.5) - ( e.clientX - this.zone.x );
         let y = (this.diam*0.5) - ( e.clientY - this.zone.y - this.ytop );
@@ -8620,6 +9434,15 @@ class Pad2D extends Proto {
         this.setPos( [ x , y ] );
         
         this.update( true );
+        return true;
+
+    }
+
+    reset () {
+
+        this.isDown = false;
+        this.cursor();
+        return this.mode(0)
 
     }
 
@@ -8695,11 +9518,13 @@ class Pad2D extends Proto {
         this.pos.set( p[0]+128 , p[1]+128 );
 
         let r = 1/this.maxPos;
-
         let m = this.flipY ? 1:-1;
 
-        this.value[0] = ((p[0]*r)*this.range).toFixed( this.precision );
-        this.value[1] = m * ((p[1]*r)*this.range).toFixed( this.precision );
+        //this.value[0] = ((p[0]*r)*this.range).toFixed( this.precision );
+        //this.value[1] = m * ((p[1]*r)*this.range).toFixed( this.precision );
+
+        this.value[0] = ((p[0] * r) * this.range).toFixed( this.precision ) * 1;
+        this.value[1] = m * ((p[1] * r) * this.range).toFixed( this.precision ) * 1;
 
     }
 
@@ -8716,6 +9541,12 @@ class Pad2D extends Proto {
 
         this.update( up );
 
+    }
+
+    rSize () {
+        super.rSize();
+        let x = Math.floor( ( this.w - this.diam ) * 0.5 );
+        this.s.left = x + 'px';
     }
 
     /*lerp( s1, s2, d1, d2, c = true ) {
@@ -9099,6 +9930,7 @@ class Gui {
 
         this.isCanvas = o.isCanvas || false;
         this.isCanvasOnly = false;
+        this.canvasScale = o.canvasScale || 1;
         
         this.callback = o.callback  === undefined ? null : o.callback;
 
@@ -9112,7 +9944,7 @@ class Gui {
         this.cn = '';
         
         // size define
-        this.size = Tools.size;
+        this.size = { ...Tools.size };//Tools.size;
         if( o.p !== undefined ) this.size.p = o.p;
         if( o.w !== undefined ) this.size.w = o.w;
         if( o.h !== undefined ) this.size.h = o.h;
@@ -9165,6 +9997,7 @@ class Gui {
         let cc = this.colors;
 
         let border = 'border: 2px solid ' + cc.content + '; ';
+        //let border = 'border-left: 2px solid ' + cc.content + '; border-right: 2px solid ' + cc.content + '; ';
 
         this.content = Tools.dom( 'div', this.css.basic + ' width:0px; height:auto; top:0px; background:'+cc.content+'; ' + this.cssGui + border );
         
@@ -9193,7 +10026,7 @@ class Gui {
         this.content.appendChild( this.bottom );
         this.bottom.textContent = this.isOpen ? this.bottomText[1] : this.bottomText[0];
         this.bottom.style.background = cc.background;
-        if(this.bh===0) this.bottom.style.visible = 'hidden'; 
+        if(this.bh===0) this.bottom.style.visibility = 'hidden'; 
 
         //
 
@@ -9273,8 +10106,6 @@ class Gui {
     	this.canvas.width = this.zone.w;
     	this.canvas.height = this.forceHeight ? this.forceHeight : this.zone.h;
 
-        //console.log( this.canvas.width, this.canvas.height )
-
     }
 
     draw ( force ) {
@@ -9283,7 +10114,7 @@ class Gui {
 
     	let w = this.zone.w;
     	let h = this.forceHeight ? this.forceHeight : this.zone.h;
-    	Roots.toCanvas( this, w, h, force );
+    	Roots.toCanvas( this, w, h, force, this.canvasScale );
 
     }
 
@@ -9305,7 +10136,7 @@ class Gui {
 
         if(flip) this.mouse.set( Math.round( uv.x * this.canvas.width ), this.canvas.height - Math.round( uv.y * this.canvas.height ) );
         else this.mouse.set( Math.round( uv.x * this.canvas.width ), Math.round( uv.y * this.canvas.height ) );
-        //this.mouse.set( m.x, m.y );
+        this.mouse.multiplyScalar(1/this.canvasScale);
 
     }
 
@@ -9340,6 +10171,8 @@ class Gui {
     }
 
     onChange ( f ) {
+
+        
 
         this.callback = f || null;
         return this;
@@ -9410,10 +10243,6 @@ class Gui {
         
         this.proto = null;
         this.current = -1;
-
-        ///console.log(this.isDown)//if(this.isDown)Roots.clearInput();
-
-        
 
         Roots.cursor();
         return true;
@@ -9515,9 +10344,8 @@ class Gui {
 
     	if( this.isDown ) change = true;
     	if( protoChange ) change = true;
-
-        if( type === 'keyup' ) change = true;
-        if( type === 'keydown' ) change = true;
+        if( this.isNewTarget ) change = true;
+        if( type === 'keyup' || type === 'keydown' ) change = true;
 
     	if( change ) this.draw();
 
@@ -9645,21 +10473,27 @@ class Gui {
 
     empty() {
 
+        while (this.uis.length) {
+            this.uis[this.uis.length - 1].dispose();
+        }
+        this.isEmpty = true;
+        this.calc();
+
         //this.cleanning = true
 
         //this.close();
 
-        let i = this.uis.length, item;
+        /*let i = this.uis.length, item
 
         while( i-- ){
-            item = this.uis.pop();
-            this.inner.removeChild( item.c[0] );
-            item.dispose();
+            item = this.uis.pop()
+            this.inner.removeChild( item.c[0] )
+            item.dispose()
         }
 
-        this.uis = [];
-        this.isEmpty = true;
-        this.calc();
+        this.uis = []
+        this.isEmpty = true
+        this.calc()*/
 
     }
 
@@ -9756,13 +10590,54 @@ class Gui {
     update ( y ) {
 
         y = Tools.clamp( y, 0, this.range );
-
         this.decal = Math.floor( y / this.ratio );
-        this.inner.style.top = - this.decal + 'px';
-        this.scroll.style.top = Math.floor( y ) + 'px';
+        //this.inner.style.top = - this.decal + 'px';
+        //this.scroll.style.top = Math.floor( y ) + 'px';
+
+        this.inner.style.transform = `translate3d(0, ${-this.decal}px, 0)`;
+        this.scroll.style.transform = `translate3d(0, ${Math.floor(y)}px, 0)`;
         this.oy = y;
 
+        //if ( this.isScroll ) this.cull();
+        //if ( !this.isScroll && this.isCull) this.uncull();
+
     }
+
+    /*cull () {
+
+        const top = this.zone.y + this.decal;
+        const bottom = top + this.maxView;
+        const uis = this.uis;
+        let i = uis.length;
+
+        this.isCull = true;
+
+        while ( i-- ) {
+            const u = uis[ i ];
+            const uy = u.zone.y;
+            const visible = ( uy + u.zone.h >= top ) && ( uy <= bottom );
+            if ( u._vis !== visible ) {
+                u._vis = visible;
+                u.s[0].visibility = visible ? 'visible' : 'hidden';
+            }
+        }
+
+    }
+
+    uncull() {
+
+        const uis = this.uis;
+        let i = uis.length;
+
+        while ( i-- ) {
+            const u = uis[ i ];
+            if ( u._vis !== true ) {
+                u._vis = visible;
+                u.s[0].visibility = 'visible';
+            }
+        }
+
+    }*/
 
     // ----------------------
     //   RESIZE FUNCTION
@@ -9776,16 +10651,15 @@ class Gui {
 
     calc() {
 
-        clearTimeout( this.tmp );
-        this.tmp = setTimeout( this.setHeight.bind( this ), 10 );
+        if (this.tmp) clearTimeout(this.tmp);
+        this.tmp = setTimeout(() => {
+            this.tmp = null;
+            this.setHeight();
+        }, 10);
 
     }
 
     setHeight() {
-
-        if( this.tmp ) clearTimeout( this.tmp );
-
-        //console.log('gui setHeight')
 
         this.zone.h = this.bh;
         //if(this.isBottom) this.zone.y =((window.innerHeight-this.zone.h)-this.bottomPosition)
@@ -9794,6 +10668,7 @@ class Gui {
         if( this.isOpen ){
 
             this.h = this.calcUis();
+            if ( this.uis.length > 0 ) this.h -= this.uis[ this.uis.length - 1 ].margin;
 
             //console.log(this.h)
 
@@ -9820,10 +10695,10 @@ class Gui {
 
         this.upScroll( this.isScroll );
 
-        this.innerContent.style.height = this.zone.h - this.bh + 'px';
-        this.content.style.height = this.zone.h + 'px';
+        this.innerContent.style.height = ( this.zone.h - this.bh ) + 'px';
+        this.content.style.height = ( this.zone.h ) + 'px';
         if( this.autoShow )this.content.style.visibility = this.zone.h !== 0 ? 'visible' : 'hidden';
-        this.bottom.style.top = (this.zone.h - this.bh) + 'px';
+        this.bottom.style.top = ( this.zone.h - this.bh ) + 'px';
 
         if( this.isBottom ){
 
@@ -9884,4 +10759,14 @@ class Gui {
 
 }
 
-export { Files, Gui, REVISION, Tools, add };
+const UIL = {
+
+	REVISION : REVISION,
+	Tools:Tools,
+	Files:Files,
+	Gui:Gui,
+	add:add,
+
+};
+
+export { Files, Gui, REVISION, Tools, UIL, add };

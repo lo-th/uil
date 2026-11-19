@@ -1,0 +1,1260 @@
+<!--
+   Simple .KTX2/.DDS encode/transcode testbed.
+   Supports numerous texture formats: ETC1, PVRTC1, BC1-BC7, BC6H, ASTC LDR 4x4-12x12, ASTC HDR 4x4 and 6x6, and various uncompressed fallbacks (16-bit 565, 32bpp, 64bpp).
+   Supports loading .PNG, .JPG, .QOI, .EXR and .HDR files using the basisu library compiled to WASM with emscripten.
+   Also supports .WebP, .AVIF, .GIF, .BMP, .TIFF, .HEIC, .HEIF, and .JXL files via browser-assisted decoding (browser support varies).
+   Thanks to Evan Parker for providing webgl-texture-utils and the original test bed.
+   Script wasm-feature-detect.js was from: https://unpkg.com/wasm-feature-detect/dist/umd/index.js, see https://github.com/GoogleChromeLabs/wasm-feature-detect (Apache 2.0).
+-->
+
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<script src="./ktx2_encoder/renderer.js"></script>
+<script src="./ktx2_encoder/wasm-feature-detect.js"></script>
+<script src="./ktx2_encoder/encode_dto_apply.js"></script>
+<script src="./ktx2_encoder/Ktx2.js"></script>
+
+
+<style>
+  /* NEW: make the page use the full viewport height */
+  html, body { margin: 0; height: 100%; background: radial-gradient(circle at 50% 15%, #28292e 15%, #121214 85%, #070708 100%); color:#fff;}
+
+  .wrap {
+    display:flex;
+    gap:16px;
+    align-items:flex-start;
+    padding:12px;
+
+    /* NEW: make the flex row fill the viewport and respect padding */
+    height: 100vh;
+    box-sizing: border-box;
+    overflow: hidden;
+  }
+
+  /* Fixed-width controls column (never shrinks), scrolls independently */
+  .controls { flex: 0 0 600px; width: 600px; overflow-y: auto; max-height: calc(100vh - 24px); }
+
+  /* Viewer takes the remaining space and scrolls when texture is huge */
+  /* EDIT: cap height so vertical scrolling appears inside the viewer */
+  .viewer {
+    flex: 1 1 0;
+    min-width: 0;
+    overflow: auto;
+    max-height: calc(100vh - 24px); /* 24px = 12px top + 12px bottom padding in .wrap */
+    cursor: grab;
+  }
+  .viewer.dragging {
+    cursor: grabbing;
+    user-select: none;
+  }
+  .active-btn {
+    background-color: #4a90d9;
+    color: white;
+    border-style: inset;
+  }
+
+  /* IMPORTANT: do NOT scale the canvas with CSS; let JS size it 1:1 */
+  #canvas { display:block; image-rendering: pixelated; }
+
+  /* Small screens: stack vertically so it's still usable */
+  @media (max-width: 1100px){
+    .wrap{ flex-direction:column; height:auto; overflow:auto; }
+    .controls{ flex: 0 0 auto; width:auto; max-height:none; overflow-y:visible; }
+    .viewer{ flex: 1 1 auto; max-height:none; }
+  }
+  
+  .log-panel 
+  {
+    margin-top: 12px;
+    background: #111;
+    color: #0f0;
+    padding: 10px;
+    font-family: monospace;
+    font-size: 12px;
+    line-height: 1.4em;
+
+    border: 1px solid #333;
+    border-radius: 4px;
+
+    height: 250px;     /* adjust as desired */
+    overflow-y: scroll;
+    white-space: pre-wrap;
+  }
+  
+</style>
+
+</head>
+
+<body>
+<div id="safari-bug-banner" style="display:none; background:#c0392b; color:#ffffff; font-weight:bold; padding:10px 14px; text-align:center; border-bottom:2px solid #7b241c; font-family:sans-serif;">
+&#9888; Your Safari version (26.0-26.2) has a WebAssembly memory bug that crashes multithreaded encoding. Encoding is running single-threaded (slower) as a workaround. For full speed, update to Safari 26.3+, or use Chrome or Firefox.
+</div>
+
+<div class="wrap">
+  <div class="controls">
+
+    <br>
+    <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+    <div style="font-size: 24pt; font-weight: bold">
+    Basis Universal .KTX2/.DDS Studio v2.50
+      </div>
+      <button type="button" onclick="document.getElementById('help-dialog').showModal()"
+              style="font-size: 11pt; padding: 4px 10px;">Help / About</button>
+    </div>
+
+    <br>This tool uses the <a href="https://github.com/BinomialLLC/basis_universal/">Basis Universal</a> C++ transcoder (compiled to WebAssembly using Emscripten) to transcode a .ktx2 file to:
+    <br><b id='format'>FORMAT</b>
+    <br>
+    <dialog id="help-dialog" style="max-width: 640px; padding: 20px; border: 1px solid #888; border-radius: 6px;"
+            onclick="if (event.target === this) this.close();">
+      <h2 style="margin-top: 0;">About Basis Universal .KTX2/.DDS Studio</h2>
+      <p>The viewer is implemented in WebGL and renders a single textured quad. It also supports encoding .PNG, .JPG, .QOI, .EXR or .HDR files to LDR or HDR .KTX2 files.</p>
+      <p>Additional image formats (.WebP, .AVIF, .GIF, .BMP, .TIFF, .HEIC, .HEIF, .JXL) are supported via browser-assisted decoding (browser support varies by format).</p>
+      <p>Thanks to Evan Parker for providing <a href="https://github.com/toji/webgl-texture-utils">webgl-texture-utils</a> and this test bed. <a href="../index.html">Go back.</a></p>
+      <p><b>Notes:</b> Enable your browser debug console (F12 on Chrome/Firefox) to see debug output.
+      The largest image resolution that can be compressed in the browser with this library is limited to either 16 megapixels or 4 megapixels (depending on format and WASM64/WASM32) to avoid running out of WASM memory.</p>
+      <div style="text-align: right; margin-top: 16px;">
+        <button type="button" onclick="document.getElementById('help-dialog').close()"
+                style="padding: 4px 14px;">Close</button>
+      </div>
+    </dialog>
+
+    <br>
+    <div id="supported-formats">
+    Supported WebGL formats:
+    </div>
+
+    <br>
+    <div id="error-line">
+    </div>
+
+    <div id="disable-buttons" style="margin-top: 10px;">
+    <!-- Buttons will be dynamically added here -->
+    </div>
+
+    <br>
+    <div id="threading-indicator"> </div>
+    
+    <br>
+    <input type="checkbox" id="multithreaded_encoding" checked>Use Multithreading (if available)
+
+    <br>Additional Worker Threads (Max 32):
+    <input type="number" id="num_worker_threads" value="12" min="0" max="32">
+    <br><br>
+    
+    <div id="deblocking-indicator"> </div>
+    
+    <hr style="width: 40%; margin: 10px 0; background-color: #ccc; border: none; height: 1px;">
+    <b>Source Image / File Input:</b>
+    <br>
+    <div id="drop-area" style="width: 40%; height: 75px; border: 2px dashed #ccc; display: flex; justify-content: center; align-items: center; margin-top: 20px;">
+    <p>Drag and drop a .KTX2, .DDS, or image file here, or click to select a file.</p>
+    <input type="file" id="file-input" style="display: none;">
+    </div>
+
+    <br>
+    .ktx2 file:
+    <input id="file" type="text" size=30 value="../redgrid.ktx2"></input>
+    <input type="button" value="Transcode!" onclick="runLoadFile()"></input>
+    <br>
+    <div style="margin: 2px 0 0 60px; font-size: 0.85em; color: var(--ink-dim, #666); word-break: break-all;">
+        Loaded:
+        <span id="loaded-ktx2-uri-display" title="URI of the currently loaded .ktx2 file">(none)</span>
+        <button id="copy-loaded-ktx2-uri-btn" type="button"
+                style="margin-left: 6px; padding: 0 6px; font-size: 0.85em;"
+                title="Copy this URI to the clipboard"
+                disabled>Copy</button>
+    </div>
+
+    <br>
+    .png/.jpg/.webp/.exr/.hdr file:
+    <input id="imagefile" type="text" size=30 value="assets/kodim06.png"></input>
+    <input type="button" value="Encode!" onclick="encodeViaWorker()" title="Encode on a background worker thread: the UI stays responsive and a modal progress dialog is shown."></input>
+    <input type="button" value="Encode (on Main Thread)" onclick="runEncodeImageFile()" title="Legacy/testing path: encodes on the main thread (freezes the UI). Also runs the on-main DTO validation check."></input>
+    <br>
+    <div style="margin: 2px 0 0 60px; font-size: 0.85em; color: var(--ink-dim, #666); word-break: break-all;">
+        Loaded:
+        <span id="loaded-source-uri-display" title="URI/filename of the currently loaded source image">(none)</span>
+        <button id="copy-loaded-source-uri-btn" type="button"
+                style="margin-left: 6px; padding: 0 6px; font-size: 0.85em;"
+                title="Copy this URI to the clipboard"
+                disabled>Copy</button>
+    </div>
+    <br>
+    <select id="filename-dropdown" onchange="onFilenameSelect()">
+    <option value="">--Select Example Image--</option>
+    <option value="assets/desk.exr">desk.exr</option>
+    <option value="assets/MtTamWest.exr">MtTamWest.exr</option>
+    <option value="assets/sponza.exr">sponza.exr</option>
+    <option value="assets/CandleGlass.exr">CandleGlass.exr</option>
+
+    <option value="assets/src_atrium.exr">src_atrium.exr</option>
+    <option value="assets/src_backyard.exr">src_backyard.exr</option>
+
+    <option value="assets/src_memorial.exr">src_memorial.exr</option>
+    <option value="assets/src_yucca.exr">src_yucca.exr</option>
+    <option value="assets/Tree.exr">Tree.exr</option>
+
+    <option value="assets/kodim18_512x512.png">kodim18_512x512.png</option>
+    <option value="assets/kodim18_64x64.png">kodim18_64x64.png</option>
+
+    <option value="assets/kodim01.png">kodim01.png</option>
+    <option value="assets/kodim02.png">kodim02.png</option>
+    <option value="assets/kodim03.png">kodim03.png</option>
+    <option value="assets/kodim04.png">kodim04.png</option>
+    <option value="assets/kodim05.png">kodim05.png</option>
+    <option value="assets/kodim06.png">kodim06.png</option>
+    <option value="assets/kodim07.png">kodim07.png</option>
+    <option value="assets/kodim08.png">kodim08.png</option>
+    <option value="assets/kodim09.png">kodim09.png</option>
+    <option value="assets/kodim10.png">kodim10.png</option>
+    <option value="assets/kodim11.png">kodim11.png</option>
+    <option value="assets/kodim12.png">kodim12.png</option>
+    <option value="assets/kodim13.png">kodim13.png</option>
+    <option value="assets/kodim14.png">kodim14.png</option>
+    <option value="assets/kodim15.png">kodim15.png</option>
+    <option value="assets/kodim16.png">kodim16.png</option>
+    <option value="assets/kodim17.png">kodim17.png</option>
+    <option value="assets/kodim18.png">kodim18.png</option>
+    <option value="assets/kodim19.png">kodim19.png</option>
+    <option value="assets/kodim20.png">kodim20.png</option>
+    <option value="assets/kodim21.png">kodim21.png</option>
+    <option value="assets/kodim22.png">kodim22.png</option>
+    <option value="assets/kodim23.png">kodim23.png</option>
+
+    <option value="assets/kodim24.png">kodim24.png</option>
+    <option value="assets/kodim25.png">kodim25.png</option>
+    <option value="assets/kodim26.png">kodim26.png</option>
+
+    <option value="assets/xmen.png">xmen.png</option>
+    <option value="assets/tng.png">tng.png</option>
+    <option value="assets/base.png">base.png</option>
+
+    </select>
+        
+    <br><br>
+
+    <input type="button" value="Download Encoded .KTX2/.DDS File" onclick="downloadEncodedFile()">
+    <input type="button" value="Paste and Encode Image from Clipboard" onclick="pasteImageFromClipboard()">
+
+    <hr style="width: 40%; margin: 10px 0; background-color: #ccc; border: none; height: 1px;">
+    <b>Encoding Settings Preset:</b>
+    <select id="encoding-preset"
+            onchange="applyEncodingPreset(this.value)"
+            title="Encode-time presets. Sets sRGB perceptual flag and XUASTC LDR channel weights. Display-side options unchanged. Individual fields stay editable.">
+    <option value="srgb_photo" selected
+            title="sRGB perceptual: ON. Channel weights R=3 G=11 B=1 A=11 (RGB Rec. 709 luminance). Sharpening: Disabled. Encode deblocking: Auto. Deblocking-aware encoding: ON.">sRGB Photo (default)</option>
+    <option value="linear_texture"
+            title="sRGB perceptual: OFF. Channel weights R=1 G=1 B=1 A=1 (equal). Sharpening: Disabled. Encode deblocking: Disabled. Deblocking-aware encoding: OFF. Disables perceptual ops that distort linear data.">Linear Texture / Normal Map</option>
+    </select>
+    <hr style="width: 40%; margin: 10px 0; background-color: #ccc; border: none; height: 1px;">
+    
+    <b>KTX2 Texture Format to Encode:</b>
+    <select id="basis-tex-format">
+    <option value="0">ETC1S</option>
+    <option value="1">UASTC LDR 4x4</option>
+    <option value="2">UASTC HDR 4x4</option>
+    <option value="3">RDO ASTC HDR 6x6</option>
+    <option value="4">UASTC HDR 6x6 Intermediate</option>
+
+    <option value="5" selected>XUASTC LDR 4x4</option>
+    <option value="6">XUASTC LDR 5x4</option>
+    <option value="7">XUASTC LDR 5x5</option>
+    <option value="8">XUASTC LDR 6x5</option>
+    <option value="9">XUASTC LDR 6x6</option>
+    <option value="10">XUASTC LDR 8x5</option>
+    <option value="11">XUASTC LDR 8x6</option>
+    <option value="12">XUASTC LDR 10x5</option>
+    <option value="13">XUASTC LDR 10x6</option>
+    <option value="14">XUASTC LDR 8x8</option>
+    <option value="15">XUASTC LDR 10x8</option>
+    <option value="16">XUASTC LDR 10x10</option>
+    <option value="17">XUASTC LDR 12x10</option>
+    <option value="18">XUASTC LDR 12x12</option>
+
+    <option value="19">ASTC LDR 4x4</option>
+    <option value="20">ASTC LDR 5x4</option>
+    <option value="21">ASTC LDR 5x5</option>
+    <option value="22">ASTC LDR 6x5</option>
+    <option value="23">ASTC LDR 6x6</option>
+    <option value="24">ASTC LDR 8x5</option>
+    <option value="25">ASTC LDR 8x6</option>
+    <option value="26">ASTC LDR 10x5</option>
+    <option value="27">ASTC LDR 10x6</option>
+    <option value="28">ASTC LDR 8x8</option>
+    <option value="29">ASTC LDR 10x8</option>
+    <option value="30">ASTC LDR 10x10</option>
+    <option value="31">ASTC LDR 12x10</option>
+    <option value="32">ASTC LDR 12x12</option>
+    <option value="33">XUBC7</option>
+
+    </select>
+    
+    <br><br>
+
+    <b>XUASTC LDR Syntax:</b>
+    <select id="xuastc_ldr_syntax">
+    <option value="0" selected>Full arithmetic (slowest transcoding, highest compression)</option>
+    <option value="1">Hybrid arithmetic+Zstd</option>
+    <option value="2">Full ZStd (fastest transcoding, lowest compression)</option>
+    </select>
+
+    <br><br>
+
+    <b>XUBC7 RDO Level (higher=smaller):</b>
+    <input type="range" id="xubc7_rdo_level_slider" min="0" max="100" step="1" value="0">
+    <span id="xubc7_rdo_level_value">0</span>
+            
+    <br>
+    <hr style="width: 40%; margin: 10px 0; background-color: #ccc; border: none; height: 1px;">
+    
+    <b>Primary compression quality/effort options:</b>
+
+    <br>
+    Use unified quality/effort options (overrides many below low-level options):
+    <input type="checkbox" id="use_new_style_quality_effort" checked></input>   
+
+    <br>
+    <label for="unified-effort-slider"><b>Effort:</b></label>
+    <input type="range"
+       id="unified-effort-slider"
+       min="0"
+       max="10"
+       step="1"
+       value="3"
+       style="width: 300px;">
+    <span id="unified-effort-value">3</span>
+
+    <br><br>
+
+    <label for="unified-quality-slider"><b>Quality:</b></label>
+    <input type="range"
+       id="unified-quality-slider"
+       min="1"
+       max="100"
+       step="1"
+       value="80"
+       style="width: 300px;">
+    <span id="unified-quality-value">80</span>
+        
+    <br>
+    <hr style="width: 40%; margin: 10px 0; background-color: #ccc; border: none; height: 1px;">    
+            
+    <b>Display/Visualization Options:</b>
+    <input type="button" value="Reset" onclick="resetDisplayOptions()" style="margin-left: 10px;">
+    <br>
+    
+    <input type="button" id="btn-alpha-blend" value="Alpha blend" onclick="alphaBlend()"></input>
+    <input type="button" id="btn-view-rgb" value="View RGB" onclick="viewRGB()"></input>
+    <input type="button" id="btn-view-alpha" value="View Alpha" onclick="viewAlpha()"></input>
+    <input type="button" id="btn-view-r" value="View R" onclick="viewR()"></input>
+    <input type="button" id="btn-view-g" value="View G" onclick="viewG()"></input>
+    <input type="button" id="btn-view-b" value="View B" onclick="viewB()"></input>
+
+    <br>
+
+    <br>
+    <input type="button" value="LinearToSRGB" onclick="linearToSRGB()"></input> <b id='linear_to_srgb'>Disabled</b>
+
+    <br>
+
+    <label for="scale-slider">Exposure:</label>
+    <input type="range" id="scale-slider" min="0" max="1" step=".01" value=".5" style="width: 300px;" oninput="updateScale(this.value)">
+    <span id="scale-value">1.0000</span>
+    
+    <br>
+
+    <label for="display-zoom-slider">Display Zoom:</label>
+    <input type="range" id="display-zoom-slider" min="0" max="8" step="1" value="1" style="width: 300px;" oninput="updateDisplayZoom(this.value)">
+    <span id="display-zoom-value">1x</span>
+        
+    <br>
+
+    <label for="mipmap-level-slider">Mipmap Level:</label>
+    <input type="range" id="mipmap-level-slider" min="0" max="0" step="1" value="0" style="width: 300px;" oninput="updateMipmapLevel(this.value)" disabled>
+    <span id="mipmap-level-value">0</span>
+
+    <br>
+
+    <label for="cubemap-face-slider">Cubemap Face:</label>
+    <input type="range" id="cubemap-face-slider" min="0" max="0" step="1" value="0" style="width: 300px;" oninput="updateCubemapFace(this.value)" disabled>
+    <span id="cubemap-face-value">0</span>
+
+    <br>
+
+    <label for="array-layer-slider">Array Layer:</label>
+    <input type="range" id="array-layer-slider" min="0" max="0" step="1" value="0" style="width: 300px;" oninput="updateArrayLayer(this.value)" disabled>
+    <span id="array-layer-value">0</span>
+    <input type="number" id="array-layer-input" min="0" max="0" value="0" style="width: 60px; margin-left: 8px;" onchange="updateArrayLayerFromInput(this.value)" disabled>
+        
+    <br>
+
+    Canvas Bilinear Filtering:
+    <input type="checkbox" id="bilinear-filtering" onclick="toggleBilinearFiltering()">
+    <br>
+    <label for="canvas-colorspace-select">Canvas Color Space:</label>
+    <select id="canvas-colorspace-select" onchange="updateCanvasColorSpace(this.value)">
+      <option value="default" selected>Default (browser)</option>
+      <option value="srgb">sRGB</option>
+      <option value="display-p3">Display P3</option>
+    </select>
+    
+    <br>
+    XUASTC/ASTC LDR: Visualize GPU deblocking edge weights:
+    <input type="checkbox" id="xuastc_ldr_gpu_deblocking_show_edge_weights" onclick="XUASTCGPUDeblockingFilterClicked()"></input>
+
+    <br>
+
+    <hr style="width: 40%; margin: 10px 0; background-color: #ccc; border: none; height: 1px;">
+    
+    <b>Transcoder Options (Decode Flags):</b>
+    
+    <br>
+    
+    <label for="deblocking-filter-select">Deblocking Filter Mode:</label>
+    <select id="deblocking-filter-select" onchange="DeblockingFilterModeChanged()">
+    <option value="0">Disabled</option> 
+    <option value="1" selected>Auto: Use file's FilterID - GPU if enabled by texture file, otherwise disabled</option>    
+    <option value="2">Force GPU deblocking on >=10x8 blocks, ignore file FilterID</option>  
+    <option value="3">Force CPU deblocking on >=10x8 blocks, ignore file FilterID (if available for tex fmt)</option>  
+    </select>
+    
+    <br>
+    Apply deblocking filter to all block sizes when forced, not just to large block sizes:
+    <input type="checkbox" id="xuastc_ldr_force_deblocking_on_all_block_sizes" onclick="XUASTCDeblockingFilterClicked()"></input>
+    
+    <br>
+    ETC1S: No BC7 Chroma Artifact Filtering (faster transcoding):
+    <input type="checkbox" id="etc1s_bc7_transcoder_no_chroma_filtering" onclick="BC7ChromaFilterClicked()"></input>
+
+    <br>
+    XUASTC LDR 4x4/6x6/8x6: No direct BC7 transcoding (slower/higher quality):
+    <input type="checkbox" id="xuastc_ldr_disable_fast_bc7_transcoding" onclick="XUASTCDeblockingFilterClicked()"></input>
+
+    <br>
+
+    Prefer higher quality transcoding when supported (slower):
+    <input type="checkbox" id="highquality_transcoding" onclick="highQualityTranscodingClicked()">
+
+    <br>
+
+    <span title="Only specific opaque-only formats like ETC1 and PVRTC1_RGB support this flag, so textures with alpha can be transcoded to two textures (one for RGB, another for alpha).">Transcode alpha to opaque (ETC1/PVRTC1_RGB):</span>
+    <input type="checkbox" id="transcode_alpha_to_opaque_formats" onclick="alphaToOpaqueFormatsClicked()"
+           title="Only specific opaque-only formats like ETC1 and PVRTC1_RGB support this flag, so textures with alpha can be transcoded to two textures (one for RGB, another for alpha).">
+
+    <br>
+
+    <hr style="width: 40%; margin: 10px 0; background-color: #ccc; border: none; height: 1px;">
+
+    <details>
+    <summary style="cursor: pointer; font-weight: bold;">Mipmap Generation Options</summary>
+
+    Generate mipmap levels:
+    <input type="checkbox" id="Mipmaps">
+
+    <br>
+
+    <label for="mip-filter-select">Mip Filter:</label>
+    <select id="mip-filter-select">
+      <option value="0">box</option>
+      <option value="1">tent</option>
+      <option value="2">bell</option>
+      <option value="3">b-spline</option>
+      <option value="4">mitchell</option>
+      <option value="5">blackman</option>
+      <option value="6">lanczos3</option>
+      <option value="7">lanczos4</option>
+      <option value="8">lanczos6</option>
+      <option value="9">lanczos12</option>
+      <option value="10" selected>kaiser</option>
+      <option value="11">gaussian</option>
+      <option value="12">catmullrom</option>
+      <option value="13">quadratic_interp</option>
+      <option value="14">quadratic_approx</option>
+      <option value="15">quadratic_mix</option>
+    </select>
+
+    <br>
+
+    <label for="mip-scale-input">Mip Scale:</label>
+    <input type="number" id="mip-scale-input" value="1.0" min="0.000125" max="4.0" step="0.1" style="width: 80px;">
+
+    <br>
+
+    <label for="mip-smallest-dim-input">Smallest Mip Dimension:</label>
+    <input type="number" id="mip-smallest-dim-input" value="1" min="1" max="16384" step="1" style="width: 80px;">
+
+    <br>
+
+    Mip Wrapping:
+    <input type="checkbox" id="MipWrapping">
+
+    Mip Renormalize:
+    <input type="checkbox" id="MipRenormalize">
+
+    </details>
+
+    <hr style="width: 40%; margin: 10px 0; background-color: #ccc; border: none; height: 1px;">
+    <details>
+    <summary style="cursor: pointer; font-weight: bold;">.DDS/.KTX Developer Tools</summary>
+
+    <input type="button" value="Save Framebuffer as .PNG" onclick="saveFramebufferAsPNG()">
+    <input type="button" value="Copy Framebuffer to Clipboard" onclick="copyFramebufferToClipboard()">
+
+    <hr style="width: 40%; margin: 10px 0; background-color: #ccc; border: none; height: 1px;">
+    <b>Export encoded .KTX2 to .DDS:</b>
+    <select id="dds-export-format" title="GPU format to transcode the encoded .KTX2 into when exporting a .DDS file. Note: HDR textures support only BC6H.">
+    <option value="2">BC1 (RGB)</option>
+    <option value="3">BC3 (RGBA)</option>
+    <option value="4">BC4 (R)</option>
+    <option value="5">BC5 (RG)</option>
+    <option value="22">BC6H (HDR RGB)</option>
+    <option value="6" selected>BC7 (RGBA)</option>
+    <option value="13">RGBA32 (uncompressed)</option>
+    </select>
+    <input type="button" value="Download Exported .DDS File" onclick="downloadExportedDDS()">
+
+    <hr style="width: 40%; margin: 10px 0; background-color: #ccc; border: none; height: 1px;">
+    <b>Export encoded .KTX2 to .KTX (v1):</b>
+    <select id="ktx-export-format" title="GPU format to transcode the encoded .KTX2 into when exporting a compressed KTX1 (.ktx) file. Compressed formats only; HDR textures support only BC6H / ASTC HDR; PVRTC1 needs power-of-2 dimensions. For ASTC, the chosen block size must match the .KTX2 texture's block size.">
+    <option value="2">BC1 (RGB)</option>
+    <option value="3">BC3 (RGBA)</option>
+    <option value="4">BC4 (R)</option>
+    <option value="5">BC5 (RG)</option>
+    <option value="22">BC6H (HDR RGB)</option>
+    <option value="6" selected>BC7 (RGBA)</option>
+    <option value="0">ETC1 (RGB)</option>
+    <option value="1">ETC2 (RGBA)</option>
+    <option value="20">EAC R11</option>
+    <option value="21">EAC RG11</option>
+    <option value="8">PVRTC1 4bpp RGB</option>
+    <option value="9">PVRTC1 4bpp RGBA</option>
+    <option value="18">PVRTC2 4bpp RGB</option>
+    <option value="19">PVRTC2 4bpp RGBA</option>
+    <option value="10">ASTC LDR 4x4</option>
+    <option value="28">ASTC LDR 5x4</option>
+    <option value="29">ASTC LDR 5x5</option>
+    <option value="30">ASTC LDR 6x5</option>
+    <option value="31">ASTC LDR 6x6</option>
+    <option value="32">ASTC LDR 8x5</option>
+    <option value="33">ASTC LDR 8x6</option>
+    <option value="34">ASTC LDR 10x5</option>
+    <option value="35">ASTC LDR 10x6</option>
+    <option value="36">ASTC LDR 8x8</option>
+    <option value="37">ASTC LDR 10x8</option>
+    <option value="38">ASTC LDR 10x10</option>
+    <option value="39">ASTC LDR 12x10</option>
+    <option value="40">ASTC LDR 12x12</option>
+    <option value="23">ASTC HDR 4x4</option>
+    <option value="27">ASTC HDR 6x6</option>
+    </select>
+    <input type="button" value="Download Exported .KTX File" onclick="downloadExportedKTX()">
+
+    <hr style="width: 40%; margin: 10px 0; background-color: #ccc; border: none; height: 1px;">
+    <b>Encode loaded source image directly to .DDS:</b>
+    <br>
+    <label><input type="checkbox" id="dds-encode-download"> Download encoded .DDS file when done</label>
+    <br>
+    DDS Texture Format to Encode: <select id="dds-encode-format" title="Physical DDS format to encode the loaded SOURCE IMAGE into (direct, high-quality; not via KTX2).">
+      <option value="cDDSFmtBC1">BC1</option>
+      <option value="cDDSFmtBC2">BC2</option>
+      <option value="cDDSFmtBC3">BC3</option>
+      <option value="cDDSFmtBC4">BC4 (R)</option>
+      <option value="cDDSFmtBC5">BC5 (RG)</option>
+      <option value="cDDSFmtBC7" selected>BC7</option>
+      <option value="cDDSFmtA8R8G8B8">A8R8G8B8 (BGRA)</option>
+      <option value="cDDSFmtA8B8G8R8">A8B8G8R8 (RGBA)</option>
+      <option value="cDDSFmtR8">R8</option>
+      <option value="cDDSFmtR8G8">R8G8</option>
+      <option value="cDDSFmtR5G6B5">R5G6B5</option>
+      <option value="cDDSFmtA1R5G5B5">A1R5G5B5</option>
+      <option value="cDDSFmtA4R4G4B4">A4R4G4B4</option>
+    </select>
+    <input type="button" value="Encode DDS!" onclick="encodeDDSViaWorker()" title="Encode the loaded source image directly to a .DDS on a background worker, then display it like an opened .dds file.">
+    <br>
+    <br>
+    <span title="BC7-only options (ignored for non-BC7 formats).">
+      <label for="dds-encode-bc7-encoder">BC7 Encoder:</label>
+      <select id="dds-encode-bc7-encoder">
+        <option value="0" selected>bc7f (fast, default)</option>
+        <option value="1">bc7e_scalar (slower, higher quality)</option>
+      </select>
+      <br>
+      <br>
+      <label for="dds-encode-bc7f-level">bc7f options:</label>
+      <select id="dds-encode-bc7f-level" title="bc7f analytical level (only used when the bc7f encoder is selected).">
+        <option value="0">analytical</option>
+        <option value="1" selected>partial</option>
+        <option value="2">non-analytical</option>
+      </select>
+      <br>
+      <br>
+      <label for="dds-encode-bc7e-level">bc7e_scalar level:</label>
+      <select id="dds-encode-bc7e-level" title="bc7e_scalar quality level 0-6, higher=slower/better (only used when the bc7e_scalar encoder is selected).">
+        <option value="0">0</option>
+        <option value="1">1</option>
+        <option value="2" selected>2</option>
+        <option value="3">3</option>
+        <option value="4">4</option>
+        <option value="5">5</option>
+        <option value="6">6</option>
+      </select>
+    </span>
+
+    </details>
+    
+    <hr style="width: 40%; margin: 10px 0; background-color: #ccc; border: none; height: 1px;">
+    <details>
+    <summary style="cursor: pointer; font-weight: bold;">Low-level XUASTC/ASTC LDR 4x4-12x12 Options</summary>
+    
+    <br>
+
+    <label for="xuastc_ldr_effort_level_slider">Effort Level (higher=slower):</label>
+    <input type="range" id="xuastc_ldr_effort_level_slider" min="0" max="10" step="1" value="2">
+    <span id="xuastc_ldr_effort_level_value">2</span> <!-- Displays the current value -->
+    <br>
+
+    <label for="xuastc_ldr_dct_quality_slider">XUASTC Weight Grid DCT Quality (100=no DCT):</label>
+    <input type="range" id="xuastc_ldr_dct_quality_slider" min="1" max="100" step="1" value="80">
+    <span id="xuastc_ldr_dct_quality_value">80</span> <!-- Displays the current value -->
+
+    <br><br>
+        
+    <label for="encoding_deblocking_filter_select">Global Optimization (SCD)/Deblocking (FilterID stored in file):</label>
+    <select id="encoding_deblocking_filter_select">
+    <option value="0">Disabled (no SCD, no filtering)</option> 
+    <option value="1" selected>Auto: Use SCD+filtering only on largest (>=10x8) block sizes</option>  
+    <option value="2">Enable SCD+filtering on all block sizes</option>   
+    <option value="3">Enable SCD, disable filtering</option>   
+    <option value="4">Disable SCD, enable filtering on largest block sizes</option>   
+    <option value="5">Disable SCD, enable filtering on all block sizes</option>   
+    </select>
+    
+    <br>
+    <label for="deblocking-num-passes-slider">Deblocking Passes (2-255, 256=auto depending on effort):</label>
+    <input type="range"
+       id="deblocking-num-passes-slider"
+       min="2"
+       max="256"
+       step="1"
+       value="256"
+       style="width: 300px;">
+    <span id="deblocking-num-passes-value">256</span>
+    
+    <br><br>
+    Bounded/windowed RDO lossy supercompression:
+    <input type="checkbox" id="XUASTCLossySupercompression" checked>
+
+    <br>
+    No RGB dual plane (lower quality, faster encoding/BC7 transcoding):
+    <input type="checkbox" id="XUASTCDisableRGBDualPlane">
+
+    <br>
+    No 2-3 subset usage (lower quality, faster encoding/BC7 transcoding):
+    <input type="checkbox" id="XUASTCDisableSubsets">
+    
+    <br>
+    Enable prefiltering/blurred candidates (higher quality, slower):
+    <input type="checkbox" id="XUASTCUseBlur">
+    
+    <br>
+    Heavy subset usage (higher quality at lowest bitrates, slower):
+    <input type="checkbox" id="XUASTCHeavySubsetUsage">
+    
+    <br><br>
+    <label for="XUASTCLDRCompressor">LDR Compressor:</label>
+    <select id="XUASTCLDRCompressor"
+            title="Selects the encoder backend for XUASTC LDR. The ASTCENC and merged modes require astcenc to have been enabled at compile time.">
+      <option value="cAuto" selected>Auto (tied to effort): ASTCF or merge basisu+ASTCF</option>
+      <option value="cBasisU">Use basisu's original ASTC encoder</option>
+      <option value="cASTCENC">Use ASTCENC</option>
+      <option value="cASTCF">Use ASTCF</option>
+      <option value="cBasisU_and_ASTCENC">Merge basisu+ASTCENC</option>
+      <option value="cBasisU_and_ASTCF">Merge basisu+ASTCF</option>
+      <option value="cUseAll">Merge All</option>
+    </select>
+    
+    <br>
+    
+    <br>
+    <label for="XUASTCSharpenMode">Sharpening Mode:</label>
+    <select id="XUASTCSharpenMode">
+    <option value="0" selected>Disabled</option> 
+    <option value="1">Auto: On 10x8 or larger block sizes</option>    
+    <option value="2">All block sizes</option>  
+    </select>
+    
+    <br>
+    <label>Sharpening Strength: </label>
+    <input type="number" id="XUASTCSharpenAmount" value="1.1" min="0.000125" max="10.0" step="0.1" style="width: 80px;">
+
+    <br><br>
+    <b>ASTC/XUASTC LDR Bounded/Windowed RDO Params:</b>
+
+    <br>
+    Opaque:
+    <br>
+    <label>Min Acceptable PSNR:                 <input type="number" id="xuastc_ldr_min_psnr"               value="35.0" min="0" max="100" step="0.25"></label>
+    <br>
+    <label>Window Size (Simple) PSNR:           <input type="number" id="xuastc_ldr_thresh_psnr"            value="1.5" min="0" max="100" step="0.25"></label>
+    <br>
+    <label>Window Size (Edge) PSNR:             <input type="number" id="xuastc_ldr_thresh_edge_psnr"       value="1.0" min="0" max="100" step="0.25"></label>
+
+    <br>
+
+    <br>Alpha:<br>
+    <label>Min Acceptable Alpha PSNR:           <input type="number" id="xuastc_ldr_min_alpha_psnr"         value="38.0" min="0" max="100" step="0.25"></label>
+    <br>
+    <label>Window Size (Simple) Alpha PSNR:     <input type="number" id="xuastc_ldr_thresh_alpha_psnr"      value="0.75" min="0" max="100" step="0.25"></label>
+    <br>
+    <label>Window Size (Edge) Alpha Edge PSNR:  <input type="number" id="xuastc_ldr_thresh_edge_alpha_psnr" value=".5" min="0" max="100" step="0.25"></label>
+    <br>
+    </details>
+
+    <hr style="width: 40%; margin: 10px 0; background-color: #ccc; border: none; height: 1px;">
+
+    <details>
+    <summary style="cursor: pointer; font-weight: bold;">Low-level XUBC7 Options</summary>
+
+    <br>
+
+    <label for="xubc7_num_stripes_slider">Number of Stripes (1-16, more=faster encode/decode, slightly larger):</label>
+    <input type="range" id="xubc7_num_stripes_slider" min="1" max="16" step="1" value="8">
+    <span id="xubc7_num_stripes_value">8</span> <!-- Displays the current value -->
+    <br>
+    <br>
+
+    <label for="xubc7_encoder_select">BC7 Base Encoder:</label>
+    <select id="xubc7_encoder_select">
+       <option value="0" selected>bc7f (fast, default)</option>
+       <option value="1">bc7e_scalar (slower, higher quality)</option>
+    </select>
+    <br>
+    <br>
+
+    <label for="xubc7_bc7e_scalar_level_slider">bc7e_scalar Level (0-6, higher=slower/better; only used when bc7e_scalar selected):</label>
+    <input type="range" id="xubc7_bc7e_scalar_level_slider" min="0" max="6" step="1" value="2">
+    <span id="xubc7_bc7e_scalar_level_value">2</span> <!-- Displays the current value -->
+    <br>
+    </details>
+
+    <hr style="width: 40%; margin: 10px 0; background-color: #ccc; border: none; height: 1px;">
+
+    <details>
+    <summary style="cursor: pointer; font-weight: bold;">Low-level ETC1S LDR Options</summary>
+    <br>
+    ETC1S Quality:
+    <input type="range" min="1" max="255" value="255" class="slider" id="EncodeQuality" style="width: 300px;">
+    <span id="encode-quality-value">255</span>
+
+    <br>
+    <label for="etc1s-comp-level-slider">Effort Level:</label>
+    <input type="range" id="etc1s-comp-level-slider" min="0" max="6" step="1" value="1">
+    <span id="etc1s-comp-level-slider-value">1</span> <!-- Displays the current value -->
+    </details>
+
+    <hr style="width: 40%; margin: 10px 0; background-color: #ccc; border: none; height: 1px;">
+
+    <details>
+    <summary style="cursor: pointer; font-weight: bold;">Low-level UASTC LDR 4x4 Options</summary>
+
+    <br>
+    UASTC LDR RDO:
+    <input type="checkbox" id="UASTC_LDR_RDO">
+
+    <label for="rdo-quality-slider">RDO Quality:</label>
+    <input type="range" id="rdo-quality-slider" min="0.1" max="10" step="0.1" value="1.0">
+    <span id="rdo-quality-value">1.0</span> <!-- Displays the current value -->
+
+    <br>
+    <label for="uastc-ldr-quality-slider">UASTC LDR Effort:</label>
+    <input type="range" id="uastc-ldr-quality-slider" min="0" max="4" step="1" value="1">
+    <span id="uastc-ldr-quality-value">1</span> <!-- Displays the current value -->
+
+    <br>
+    </details>
+
+    <hr style="width: 40%; margin: 10px 0; background-color: #ccc; border: none; height: 1px;">
+
+    <details>
+    <summary style="cursor: pointer; font-weight: bold;">Low-level UASTC HDR 4x4 Options</summary>
+
+    <br>
+    <label for="uastc-hdr-quality-slider">UASTC HDR Effort:</label>
+    <input type="range" id="uastc-hdr-quality-slider" min="0" max="4" step="1" value="0">
+    <span id="uastc-hdr-quality-value">0</span> <!-- Displays the current value -->
+    <br>
+    </details>
+
+    <hr style="width: 40%; margin: 10px 0; background-color: #ccc; border: none; height: 1px;">
+
+    <details>
+    <summary style="cursor: pointer; font-weight: bold;">Low-level ASTC/UASTC HDR 6x6 Options</summary>
+    <br>
+
+    <label for="astc-hdr6x6-comp-level-slider">Effort Level:</label>
+    <input type="range" id="astc-hdr6x6-comp-level-slider" min="0" max="12" step="1" value="0">
+    <span id="astc-hdr6x6-comp-level-value">0</span> <!-- Displays the current value -->
+    <br>
+
+    RDO Quality (Lambda, 0-50k, try 0-5k, higher=smaller):
+    <input type="text" id="astc6x6-rdo-lambda" value="0.0" size="10">
+    <br>
+        
+    REC 2020 Colorspace (impacts error metrics, KTX2 DFD Gamut):
+    <input type="checkbox" id="Rec2020">
+        
+    </details>
+
+    <hr style="width: 40%; margin: 10px 0; background-color: #ccc; border: none; height: 1px;">
+
+    <details>
+    <summary style="cursor: pointer; font-weight: bold;">LDR->HDR Upconversion Options</summary>
+    <br>
+    Convert LDR images to linear light:
+    <input type="checkbox" id="ConvertLDRToLinear" checked>
+
+    <br>
+    LDR to HDR Upconversion Nit Multiplier:
+    <input type="text" id="ldr-to-hdr-multiplier" value="100.0" size="10"
+        oninput="validateNitMultiplier(this)"
+        placeholder="Enter a value between 0.1 and 1000">
+    <span id="ldr-to-hdr-warning" style="color: red; display: none;">Invalid value!</span>
+    <br>
+    </details>
+
+    <hr style="width: 40%; margin: 10px 0; background-color: #ccc; border: none; height: 1px;">
+    <b>Other Options:</b>
+
+    <br>
+    Image is sRGB/use sRGB perceptual metrics:
+    <input type="checkbox" id="SRGB">
+        
+    <br>
+    Y flip source image:
+    <input type="checkbox" id="YFlip">
+
+    <br>
+    <br>
+    <b>Channel Weights (XUASTC/ASTC/XUBC7/DDS bc7e_scalar):</b>
+    <br>
+    <label>R: <input type="number" id="xuastc_ldr_weight_r" value="9"  min="1" max="32" step="1" style="width: 60px;" onchange="this.value=Math.max(1,Math.min(32,parseInt(this.value)||1))"></label>
+    <label>G: <input type="number" id="xuastc_ldr_weight_g" value="11" min="1" max="32" step="1" style="width: 60px;" onchange="this.value=Math.max(1,Math.min(32,parseInt(this.value)||1))"></label>
+    <label>B: <input type="number" id="xuastc_ldr_weight_b" value="1"  min="1" max="32" step="1" style="width: 60px;" onchange="this.value=Math.max(1,Math.min(32,parseInt(this.value)||1))"></label>
+    <label>A: <input type="number" id="xuastc_ldr_weight_a" value="11" min="1" max="32" step="1" style="width: 60px;" onchange="this.value=Math.max(1,Math.min(32,parseInt(this.value)||1))"></label>
+
+    <br>
+    <br>
+    <b>Channel Swizzle (each output channel's source index 0-3; default 0,1,2,3 = no swizzle):</b>
+    <br>
+    <label>R: <input type="number" id="swizzle_r" value="0" min="0" max="3" step="1" style="width: 60px;" onchange="this.value=Math.max(0,Math.min(3,parseInt(this.value)||0))"></label>
+    <label>G: <input type="number" id="swizzle_g" value="1" min="0" max="3" step="1" style="width: 60px;" onchange="this.value=Math.max(0,Math.min(3,parseInt(this.value)||0))"></label>
+    <label>B: <input type="number" id="swizzle_b" value="2" min="0" max="3" step="1" style="width: 60px;" onchange="this.value=Math.max(0,Math.min(3,parseInt(this.value)||0))"></label>
+    <label>A: <input type="number" id="swizzle_a" value="3" min="0" max="3" step="1" style="width: 60px;" onchange="this.value=Math.max(0,Math.min(3,parseInt(this.value)||0))"></label>
+
+    <br>
+    <br>
+    Debug Output (See Dev Console):
+    <input type="checkbox" id="Debug">
+
+    <br>
+    Clear Dev Console on each encode:
+    <input type="checkbox" id="clear-console-on-encode">
+    <br>
+    Encode on worker thread by default (on image load):
+    <input type="checkbox" id="encode-on-worker-default" checked>
+    <br>
+    Auto-close encode progress dialog when done (uncheck to study debug output):
+    <input type="checkbox" id="encode-modal-autoclose" checked>
+    <br>
+    Compute Stats (slower encoding):
+    <input type="checkbox" id="ComputeStats">
+
+    <br>
+    Print Stats:
+    <input type="checkbox" id="PrintStats">
+
+    <hr style="width: 40%; margin: 10px 0; background-color: #ccc; border: none; height: 1px;">
+
+    <details>
+    <summary style="cursor: pointer; font-weight: bold;">
+      Development Log Output
+      <button type="button"
+              onclick="event.preventDefault(); event.stopPropagation(); logClear();"
+              style="margin-left: 10px; font-weight: normal;">
+        Clear
+      </button>
+    </summary>
+    <div id="log-panel" class="log-panel">
+    </div>
+    </details>
+
+    <div style="margin-top: 6px;">
+      <label><input type="checkbox" id="disable-logging" onchange="setLoggingDisabled(this.checked)" checked> Disable logging</label>
+    </div>
+    <div id="busy-modal" style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background-color: rgba(0,0,0,0.85); z-index: 9999; font-size: 18px; color: white; display: none; padding: 20px 40px; border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.5);">
+    Encoding... Please wait.
+    </div>
+
+    <!-- Modal busy dialog for WORKER encodes. showModal() makes it truly modal
+         (top layer + backdrop + blocks all interaction with the page behind it).
+         oncancel prevents ESC from dismissing it (no cancel during encode). The
+         <progress> is indeterminate ("busy") for now; set .value/.max later for a
+         real progress bar. The log <pre> streams the worker's stdout/stderr live. -->
+    <style>
+      #encode-busy-dialog::backdrop { background: rgba(0,0,0,0.55); }
+      /* Fixed size so the dialog does NOT grow/shrink as the live log streams in. */
+      #encode-busy-dialog { box-sizing: border-box; width: 70vw; border: none; border-radius: 10px; padding: 22px 26px; box-shadow: 0 8px 40px rgba(0,0,0,0.5); }
+      #encode-busy-log { box-sizing: border-box; width: 100%; height: 42vh; margin: 12px 0 0 0; overflow: auto; background: #111; color: #b8f5b8; font: 12px/1.35 ui-monospace, monospace; padding: 8px 10px; border-radius: 6px; white-space: pre-wrap; text-align: left; }
+    </style>
+    <!-- ESC is blocked while the Close button is disabled (i.e. during encoding); allowed once it's enabled. -->
+    <dialog id="encode-busy-dialog" oncancel="if (document.getElementById('encode-busy-close').disabled) event.preventDefault();">
+      <div style="font-size: 18px; font-weight: bold;">Encoding&hellip;</div>
+      <progress id="encode-busy-progress" style="width: 100%; height: 16px; margin-top: 12px;"></progress>
+      <pre id="encode-busy-log"></pre>
+      <div style="margin-top: 12px; display: flex; align-items: center; gap: 16px;">
+        <label style="font-size: 13px;"><input type="checkbox" id="encode-busy-autoclose" checked onchange="var m=document.getElementById('encode-modal-autoclose'); if (m) m.checked = this.checked;"> Automatically close when done</label>
+        <button type="button" id="encode-busy-close" onclick="hideEncodeBusy()" disabled style="margin-left: auto; padding: 8px 28px; font-size: 15px; font-weight: bold; cursor: pointer;">Close</button>
+      </div>
+    </dialog>
+
+  </div>
+    
+  <div class="viewer">
+     <canvas id="canvas"></canvas>
+  </div>
+
+</div>
+
+<script>
+
+// Function to check for WebAssembly threading support
+function isWasmThreadingSupported()
+{
+    try
+    {
+        if (typeof WebAssembly === "object" && typeof WebAssembly.Memory === "function")
+        {
+            const testMemory = new WebAssembly.Memory({
+                initial: 1,
+                maximum: 1,
+                shared: true,
+            });
+            return testMemory instanceof WebAssembly.Memory;
+        }
+        return false;
+    }
+    catch (e)
+    {
+        return false;
+    }
+}
+
+async function loadBasisModule(){
+   
+    // Safari 26.0-26.2 has a WebKit heap-grow bug that crashes multithreaded encoding.
+    // Show a persistent warning; getNumWorkerThreads() forces single-threaded for both
+    // encode paths when this is detected.
+    if (isBuggySafari())
+    {
+        const banner = document.getElementById('safari-bug-banner');
+        if (banner) banner.style.display = 'block';
+    }
+
+    // Determine if WASM threading and WASM64 are available
+    const threadingSupported = window.wasmFeatureDetect ? await wasmFeatureDetect.threads() : isWasmThreadingSupported();
+    const wasm64Supported = window.wasmFeatureDetect ? await wasmFeatureDetect.memory64() : false;
+
+    window.isThreaded = threadingSupported; // Set global variable to indicate threading support
+    window.wasm64 = wasm64Supported;
+
+    // Select WASM module
+    const scriptSrc = (wasm64Supported && threadingSupported) ? "./ktx2_encoder/basis_encoder_threads_wasm64.js" :
+        (threadingSupported ? "./ktx2_encoder/basis_encoder_threads.js" : "./ktx2_encoder/basis_encoder.js");
+
+    const script = document.createElement("script");
+    script.src = scriptSrc;
+    script.onload = () =>
+    {
+        BASIS({
+            onRuntimeInitialized: () => {
+
+                console.warn('isThreaded: ' + window.isThreaded);
+                console.warn('isWASM64: ' + window.wasm64);
+
+                globalInit();
+
+                const threadingIndicator = document.getElementById("threading-indicator");
+
+                if (!threadingSupported)
+                {
+                  threadingIndicator.style.color = "red";
+                  threadingIndicator.innerText = "Multithreading not supported! Running in non-threaded mode.";
+
+                  const threadingCheckbox = document.getElementById("multithreaded_encoding");
+                  threadingCheckbox.checked = false;
+                }
+                else
+                {
+                  threadingIndicator.innerText = "Multithreading is supported.";
+                }
+
+                if (!wasm64Supported)
+                {
+                    threadingIndicator.innerText += " WASM64 is NOT supported. Without WASM64 the maximum image size is limited (to avoid running out of memory).";
+                    // Safari has no WASM64 support yet -- point users to a browser that does.
+                    if (isSafari())
+                        threadingIndicator.innerText += " For WASM64 support, use Chrome or Firefox.";
+                }
+                else
+                    threadingIndicator.innerText += " Using WASM64.";
+
+                if (!threadingSupported)
+                {
+                    const slider = document.getElementById("xuastc_ldr_effort_level_slider");
+                    const label  = document.getElementById("xuastc_ldr_effort_level_value");
+
+                    if (slider && label)
+                    {
+                        slider.value = 0;
+                        label.textContent = "0";
+                    }
+                }
+            }
+
+        }).then(module => { window.Module = module;
+
+          if (module.initializeBasis)
+          {
+             module.initializeBasis();
+             console.log("module.initializeBasis() called successfully.");
+          }
+          else {
+             console.error("module.initializeBasis() is not available on the Module object.");
+          }
+
+          }
+
+        );
+    };
+
+    script.onerror = () => {
+        console.error("Failed to load the Basis module.");
+        updateErrorLine("Failed to load Basis module. Check console for details.");
+    };
+
+    document.head.appendChild(script);
+}
+
+document.addEventListener('DOMContentLoaded', loadBasisModule);
+</script>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const dropArea = document.getElementById('drop-area');
+  const fileInput = document.getElementById('file-input');
+
+  // Prevent default drag behaviors
+  ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+      dropArea.addEventListener(eventName, e => e.preventDefault());
+      dropArea.addEventListener(eventName, e => e.stopPropagation());
+  });
+
+  // Highlight the drop area on dragover
+  dropArea.addEventListener('dragover', () => {
+      dropArea.style.backgroundColor = '#f1f1f1';
+  });
+
+  // Remove highlight on dragleave
+  dropArea.addEventListener('dragleave', () => {
+      dropArea.style.backgroundColor = '';
+  });
+
+  // Handle dropped files
+  dropArea.addEventListener('drop', e => {
+      dropArea.style.backgroundColor = '';
+      const files = e.dataTransfer.files;
+      if (files.length > 0) {
+          processFile(files[0]);
+      }
+  });
+
+  // Open file picker on click
+  dropArea.addEventListener('click', () => {
+      fileInput.value = '';  // Clear so re-selecting the same file triggers 'change'
+      fileInput.click();
+  });
+
+  // Handle file input change
+  fileInput.addEventListener('change', () => {
+      if (fileInput.files.length > 0) {
+          processFile(fileInput.files[0]);
+      }
+  });
+
+  // Function to process the file
+  window.processFile = processFile;
+  function processFile(file)
+  {
+      if (!file)
+         return;
+
+      resetMipmapSliderToZero();
+      resetCubemapFaceToZero();
+      resetArrayLayerToZero();
+      resetDisplayZoom();
+      resetExposure();
+
+      const reader = new FileReader();
+
+      reader.onload = function (e)
+      {
+          const arrayBuffer = e.target.result;
+
+          // Assume you have a function to process the file
+          log('------');
+          log(`Loaded file: ${file.name}`);
+          log(`File size: ${file.size} bytes`);
+          
+          const lowerName = file.name.toLowerCase();
+
+          if (lowerName.endsWith(".ktx2"))
+          {
+              // transcodeTexture() owns the source globals (set on success only), so a
+              // failed load leaves the previously-loaded source intact.
+              transcodeTexture(arrayBuffer, file.name);
+              return;
+          }
+          else if (lowerName.endsWith(".dds"))
+          {
+              // New: view/transcode a .DDS source. transcodeDDSTexture() owns the source
+              // globals (set on success only) and clears the KTX2 source, keeping the
+              // viewer correctly tri-state even on a failed load.
+              transcodeDDSTexture(arrayBuffer, file.name);
+              return;
+          }
+          else
+          {
+              loadAndCompressImage(arrayBuffer, file.name);
+          }
+
+          elem('imagefile').value = '<externally loaded>';
+      };
+
+      reader.onerror = function (e) {
+          log('Error reading file.');
+      };
+
+      reader.readAsArrayBuffer(file);
+  }
+});
+
+</script>
+
+<script>
+// Drag-to-scroll: hold left mouse button and drag to pan the texture view.
+document.addEventListener('DOMContentLoaded', () => {
+  const viewer = document.querySelector('.viewer');
+  let isDragging = false;
+  let startX, startY, scrollLeftStart, scrollTopStart;
+  viewer.addEventListener('mousedown', e => {
+    // Only left button
+    if (e.button !== 0) return;
+    isDragging = true;
+    viewer.classList.add('dragging');
+    startX = e.clientX;
+    startY = e.clientY;
+    scrollLeftStart = viewer.scrollLeft;
+    scrollTopStart = viewer.scrollTop;
+    e.preventDefault();
+  });
+  window.addEventListener('mousemove', e => {
+    if (!isDragging) return;
+    viewer.scrollLeft = scrollLeftStart - (e.clientX - startX);
+    viewer.scrollTop  = scrollTopStart  - (e.clientY - startY);
+  });
+  window.addEventListener('mouseup', e => {
+    if (!isDragging) return;
+    isDragging = false;
+    viewer.classList.remove('dragging');
+  });
+  // Wheel-to-zoom: scroll wheel zooms in/out, preserving the point under the cursor.
+  viewer.addEventListener('wheel', e => {
+    e.preventDefault();
+    const slider = document.getElementById('display-zoom-slider');
+    if (!slider) return;
+
+    const oldSliderVal = parseInt(slider.value, 10);
+    const newSliderVal = e.deltaY < 0
+      ? Math.min(oldSliderVal + 1, parseInt(slider.max, 10))
+      : Math.max(oldSliderVal - 1, parseInt(slider.min, 10));
+
+    if (newSliderVal === oldSliderVal) return;
+
+    const oldZoom = (oldSliderVal === 0) ? 0.5 : oldSliderVal;
+    const newZoom = (newSliderVal === 0) ? 0.5 : newSliderVal;
+
+    // Mouse position relative to the viewer's top-left corner.
+    const rect = viewer.getBoundingClientRect();
+    const mouseX = e.clientX - rect.left;
+    const mouseY = e.clientY - rect.top;
+
+    // The texture-space coordinate currently under the cursor.
+    const texX = (viewer.scrollLeft + mouseX) / oldZoom;
+    const texY = (viewer.scrollTop  + mouseY) / oldZoom;
+
+    // Apply the zoom through the existing slider/function so all state stays in sync.
+    slider.value = newSliderVal;
+    updateDisplayZoom(newSliderVal);
+
+    // Adjust scroll so the same texture-space point remains under the cursor.
+    viewer.scrollLeft = texX * newZoom - mouseX;
+    viewer.scrollTop  = texY * newZoom - mouseY;
+
+  }, { passive: false });
+});
+// Keyboard shortcuts: Ctrl/Cmd+V to paste an image, Ctrl/Cmd+C to copy the framebuffer.
+document.addEventListener('DOMContentLoaded', () => {
+  function isEditableTarget(t)
+  {
+    return t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable);
+  }
+  // Paste: handled via the native 'paste' event for synchronous access to clipboard
+  // data (no permission prompt, works in file:// contexts). Returns a File directly.
+  document.addEventListener('paste', e => {
+    if (isEditableTarget(e.target)) return;
+    const items = e.clipboardData && e.clipboardData.items;
+    if (!items) return;
+    for (const item of items) {
+      if (item.kind === 'file' && item.type.startsWith('image/')) {
+        const file = item.getAsFile();
+        if (!file) continue;
+          e.preventDefault();
+          updateErrorLine('');
+          window.processFile(file);
+        return;
+      }
+    }
+    // No image item found — could be plain text, files of other types, or empty.
+    e.preventDefault();
+    updateErrorLine('Clipboard does not contain a supported bitmap image.');
+  });
+
+  // Copy: routed through the existing async-clipboard path. Skip when text is
+  // selected (user is trying to copy that text, not the framebuffer).
+  document.addEventListener('keydown', e => {
+    const ctrl = e.ctrlKey || e.metaKey;
+    if (!ctrl || e.shiftKey || e.altKey) return;
+    if (isEditableTarget(e.target)) return;
+    if (e.key !== 'c' && e.key !== 'C') return;
+    if (window.getSelection().toString().length > 0) return;
+    e.preventDefault();
+    copyFramebufferToClipboard();
+  });
+});
+</script>
+
+</body>
+</html>

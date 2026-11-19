@@ -82,7 +82,8 @@ export class Pad2D extends Proto {
         this.setSvg( pad, 'stroke', cc.back, 3 )
         this.setSvg( pad, 'stroke', cc.text, 4 )
 
-        this.setSvg( pad, 'viewBox', '0 0 '+this.diam+' '+this.diam )
+        //this.setSvg( pad, 'viewBox', '0 0 '+this.diam+' '+this.diam )
+        this.setSvg( pad, 'viewBox', '0 0 256 256' );
         this.setCss( pad, { width:this.diam, height:this.diam, left:0, top:this.top })
 
         this.c[3] = pad
@@ -100,7 +101,7 @@ export class Pad2D extends Proto {
 
 
 
-        if( l.y <= this.c[ 1 ].offsetHeight ) return 'title';
+        if( this.c[ 1 ] !== undefined && l.y <= this.c[ 1 ].offsetHeight ) return 'title';
         else if ( l.y > this.h - this.c[ 2 ].offsetHeight ) return 'text';
         else return 'pad';
 
@@ -115,6 +116,7 @@ export class Pad2D extends Proto {
     mouseup ( e ) {
 
         this.isDown = false;
+        this.sendEnd();
         return this.mode(0);
 
     }
@@ -132,7 +134,16 @@ export class Pad2D extends Proto {
 
     mousemove ( e ) {
 
-        if( !this.isDown ) return;
+        if ( !this.isDown ) {
+            if ( this.testZone( e ) === 'pad' ) {
+                this.cursor('pointer');
+                return this.mode(1);
+            }
+            this.cursor();
+            return this.mode(0);
+        }
+
+        //if( !this.isDown ) return;
 
         let x = (this.w*0.5) - ( e.clientX - this.zone.x )
         let y = (this.diam*0.5) - ( e.clientY - this.zone.y - this.ytop )
@@ -159,6 +170,15 @@ export class Pad2D extends Proto {
         this.setPos( [ x , y ] );
         
         this.update( true );
+        return true;
+
+    }
+
+    reset () {
+
+        this.isDown = false;
+        this.cursor()
+        return this.mode(0)
 
     }
 
@@ -234,11 +254,13 @@ export class Pad2D extends Proto {
         this.pos.set( p[0]+128 , p[1]+128 );
 
         let r = 1/this.maxPos
+        let m = this.flipY ? 1:-1;
 
-        let m = this.flipY ? 1:-1
+        //this.value[0] = ((p[0]*r)*this.range).toFixed( this.precision );
+        //this.value[1] = m * ((p[1]*r)*this.range).toFixed( this.precision );
 
-        this.value[0] = ((p[0]*r)*this.range).toFixed( this.precision );
-        this.value[1] = m * ((p[1]*r)*this.range).toFixed( this.precision );
+        this.value[0] = ((p[0] * r) * this.range).toFixed( this.precision ) * 1;
+        this.value[1] = m * ((p[1] * r) * this.range).toFixed( this.precision ) * 1;
 
     }
 
@@ -255,6 +277,12 @@ export class Pad2D extends Proto {
 
         this.update( up );
 
+    }
+
+    rSize () {
+        super.rSize();
+        let x = Math.floor( ( this.w - this.diam ) * 0.5 );
+        this.s.left = x + 'px';
     }
 
     /*lerp( s1, s2, d1, d2, c = true ) {

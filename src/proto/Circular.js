@@ -12,6 +12,8 @@ export class Circular extends Proto {
         this.model = o.stype || 0
         if( o.mode !== undefined ) this.model = o.mode
 
+
+
         this.autoWidth = false
         this.minw = this.w
         this.diam = o.diam || this.w 
@@ -58,6 +60,13 @@ export class Circular extends Proto {
         this.setSvg( this.c[3], 'viewBox', '0 0 '+this.diam+' '+this.diam )
         this.setCss( this.c[3], { width:this.diam, height:this.diam, left:0, top:this.top })
 
+        if ( this.model > 0 ) {
+
+            this.colors01 = Tools.unpack( Tools.ColorLuma( cc.text, -0.75) )
+            this.colors02 = Tools.unpack( cc.text )
+            
+        }
+
         this.init()
         this.update()
 
@@ -97,6 +106,8 @@ export class Circular extends Proto {
     reset () {
 
         this.isDown = false;
+        this.cursor();
+        return this.mode(0);
         
     }
 
@@ -104,10 +115,13 @@ export class Circular extends Proto {
 
         let l = this.local;
         if( l.x === -1 && l.y === -1 ) return '';
+        if( this.c[1] && l.y <= this.c[1].offsetHeight ) return 'title';
+        else if ( l.y > this.h - this.c[2].offsetHeight ) return 'text';
+        else return 'circular'; 
         
-        if( l.y <= this.c[ 1 ].offsetHeight ) return 'title';
+        /*if( l.y <= this.c[ 1 ].offsetHeight ) return 'title';
         else if ( l.y > this.h - this.c[ 2 ].offsetHeight ) return 'text';
-        else return 'circular';
+        else return 'circular';*/
 
     }
 
@@ -135,7 +149,14 @@ export class Circular extends Proto {
 
     mousemove ( e ) {
 
-        if( !this.isDown ) return;
+        if( !this.isDown ) {
+            let name = this.testZone( e );
+            if( name === 'circular' || name === 'knob' ) {
+                this.cursor('pointer');
+                return this.mode(1);
+            }
+            return this.reset();
+        }
 
         //console.log('over')
         this.cursor('pointer');
@@ -220,8 +241,10 @@ export class Circular extends Proto {
 
         if ( this.model > 0 ) {
 
+            
+
             let cc = this.colors
-            let color = Tools.pack( Tools.lerpColor( Tools.unpack( Tools.ColorLuma( cc.text, -0.75) ), Tools.unpack( cc.text ), this.percent ) );
+            let color = Tools.pack( Tools.lerpColor( this.colors01, this.colors02, this.percent ) );
             this.setSvg( this.c[3], 'stroke', color, 1 );
         
         }

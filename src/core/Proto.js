@@ -138,7 +138,11 @@ export class Proto {
         this.useFlex = this.isUI ? this.main.useFlex : false 
         let flexible = this.useFlex ? 'display:flex; justify-content:center; align-items:center; text-align:center; flex: 1 100%;' : 'float:left;'
 
-        this.c[0] = Tools.dom( 'div', this.css.basic + flexible + 'position:relative; height:20px;');
+        const virtual = this.isUI ? 'content-visibility:auto; contain-intrinsic-size:auto ' + this.h + 'px;' : '';
+        this.c[0] = Tools.dom( 'div', this.css.basic + flexible + 'position:relative; height:20px;' + virtual );
+
+        //this.c[0] = Tools.dom( 'div', this.css.basic + flexible + 'position:relative; height:20px;');
+        //this.c[0] = Tools.dom( 'div', this.css.basic + flexible + 'position:relative; height:20px; content-visibility:auto; contain-intrinsic-size:auto 24px;' );
 
 
         this.s[0] = this.c[0].style
@@ -150,14 +154,12 @@ export class Proto {
 
         if( this.isUI && this.margin ){ 
             this.s[0].boxSizing = 'content-box'
-            if( marginDiv ){
-                this.mtop = this.margin * 0.5
-                //this.s[0].borderTop = '${this.mtop}px solid transparent'
-                //console.log(`${this.mtop}px solid transparent`)
-                this.s[0].borderTop = this.mtop + 'px solid transparent'
-                this.s[0].borderBottom = this.mtop + 'px solid transparent'
+            if (marginDiv) {
+                this.mtop = this.margin * 0.5;
+                this.s[0].borderTop = `${this.mtop}px solid transparent`;
+                this.s[0].borderBottom = `${this.mtop}px solid transparent`;
             } else {
-                this.s[0].borderBottom =  + 'px solid transparent'
+                this.s[0].borderBottom = `${this.margin}px solid transparent`;
             }
         }
         
@@ -201,7 +203,11 @@ export class Proto {
 
         s[0].height = this.h + 'px';
 
-        if( this.isUI ) s[0].background = this.colors.background
+        //if( this.isUI ) s[0].background = this.colors.background
+        if ( this.isUI ) {
+            s[0].background = this.colors.background;
+            //s[0].backgroundClip = 'padding-box';
+        }
            
 
         if(!this.autoWidth && this.useFlex ){
@@ -458,7 +464,8 @@ export class Proto {
 
     send( v ) {
 
-        v = v || this.value;
+        //v = v || this.value;
+        v = v ?? this.value;
         if( v instanceof Array && v.length === 1 ) v = v[0];
 
         // for list
@@ -476,11 +483,38 @@ export class Proto {
 
     sendEnd( v ) {
 
-        v = v || this.value;
+        if ( this.endCallback === null ) return;
+
+        v = v ?? this.value;
+        if ( v instanceof Array && v.length === 1 ) v = v[0];
+
+        if ( this.refObject ) v = this.refObject[v];
+
+        this.isSend = true;
+        if ( this.objectLink !== null ) { 
+            if ( this.objectLink[ this.objectKey ] && this.objectLink[ this.objectKey ].isColor ) this.objectLink[ this.objectKey ].setHex( v );
+            else this.objectLink[ this.objectKey ] = v;
+        }
+        this.endCallback( v );
+        this.isSend = false;
+
+        /*if( this.endCallback === null ) return;
+
+        //v = v || this.value;
+        v = v ?? this.value;
         if( v instanceof Array && v.length === 1 ) v = v[0];
 
-        if( this.endCallback ) this.endCallback( v );
-        if( this.objectLink !== null ) this.objectLink[ this.objectKey ] = v;
+        if(this.refObject) v = this.refObject[v]
+
+        this.isSend = true
+        if( this.objectLink !== null ){ 
+            if( this.objectLink[ this.objectKey ] && this.objectLink[ this.objectKey ].isColor ) this.objectLink[ this.objectKey ].setHex( v );
+            else this.objectLink[ this.objectKey ] = v
+        }
+        this.endCallback( v )*/
+
+        //if( this.endCallback ) this.endCallback( v );
+        //if( this.objectLink !== null ) this.objectLink[ this.objectKey ] = v;
 
     }
 
@@ -489,6 +523,8 @@ export class Proto {
     // ----------------------
 
     dispose(){
+
+        this.clear();
 
         if( this.isListen ) Roots.removeListen( this );
 
@@ -573,11 +609,15 @@ export class Proto {
 
         this.min = o.min === undefined ? -Infinity : o.min;
         this.max = o.max === undefined ?  Infinity : o.max;
-        this.precision = o.precision === undefined ? 2 : o.precision;
+        //this.precision = o.precision === undefined ? 2 : o.precision;
 
-        let s;
+        //let s;
 
-        switch(this.precision){
+        this.precision = o.precision ?? 2;
+        this.step = o.step ?? Number(Math.pow(10, -this.precision).toFixed(this.precision));
+
+
+        /*switch(this.precision){
             case 0: s = 1; break;
             case 1: s = 0.1; break;
             case 2: s = 0.01; break;
@@ -585,9 +625,9 @@ export class Proto {
             case 4: s = 0.0001; break;
             case 5: s = 0.00001; break;
             case 6: s = 0.000001; break;
-        }
+        }*/
 
-        this.step = o.step === undefined ?  s : o.step;
+        //this.step = o.step === undefined ?  s : o.step;
         this.range = this.max - this.min;
         this.value = this.numValue( this.value );
         

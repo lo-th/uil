@@ -27,9 +27,14 @@ const T = {
     links: "http://www.w3.org/1999/xlink",
     htmls: "http://www.w3.org/1999/xhtml",
 
-    DOM_SIZE: [ 'height', 'width', 'top', 'left', 'bottom', 'right', 'margin-left', 'margin-right', 'margin-top', 'margin-bottom'],
+    //DOM_SIZE: [ 'height', 'width', 'top', 'left', 'bottom', 'right', 'margin-left', 'margin-right', 'margin-top', 'margin-bottom'],
+    /*DOM_SIZE: [ 'height', 'width', 'top', 'left', 'bottom', 'right', 'marginLeft', 'marginRight', 'marginTop', 'marginBottom'],
     SVG_TYPE_D: [ 'pattern', 'defs', 'transform', 'stop', 'animate', 'radialGradient', 'linearGradient', 'animateMotion', 'use', 'filter', 'feColorMatrix' ],
-    SVG_TYPE_G: [ 'svg', 'rect', 'circle', 'path', 'polygon', 'text', 'g', 'line', 'foreignObject' ],
+    SVG_TYPE_G: [ 'svg', 'rect', 'circle', 'path', 'polygon', 'text', 'g', 'line', 'foreignObject' ],*/
+
+    DOM_SIZE: new Set(['height', 'width', 'top', 'left', 'bottom', 'right', 'marginLeft', 'marginRight', 'marginTop', 'marginBottom']),
+    SVG_TYPE_D: new Set(['pattern', 'defs', 'transform', 'stop', 'animate', 'radialGradient', 'linearGradient', 'animateMotion', 'use', 'filter', 'feColorMatrix']),
+    SVG_TYPE_G: new Set(['svg', 'rect', 'circle', 'path', 'polygon', 'text', 'g', 'line', 'foreignObject']),
 
     PI: Math.PI,
     TwoPI: Math.PI*2,
@@ -124,7 +129,7 @@ const T = {
 
         sx: 4,//4
         sy: 0,//2
-        radius:6,//2
+        radius:0,//2
 
         showOver : 1,
         //groupOver : 1,
@@ -159,7 +164,9 @@ const T = {
         //fontFamily: 'Tahoma',
         //fontFamily: 'Consolas, monospace',
         //fontFamily:"'SegoeUI', 'Segoe UI', 'Helvetica Neue', -apple-system, BlinkMacSystemFont, Roboto, Oxygen-Sans, Ubuntu, Cantarell, sans-serif",
-        fontFamily:"Roboto Mono, Source Code Pro, Menlo, Courier, monospace",
+        //fontFamily:"'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace",
+        //fontFamily:"'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+        fontFamily: "'Roboto Mono', Source Code Pro, Menlo, Courier, monospace",
         
         //fontFamily: "'Roboto Mono', 'Source Code Pro', Menlo, Courier, monospace",
         fontWeight: 'normal',
@@ -179,10 +186,11 @@ const T = {
 
     css : {
 
-        basic: 'position:absolute; pointer-events:none; box-sizing:border-box; margin:0; padding:0; overflow:hidden; ' + '-o-user-select:none; -ms-user-select:none; -khtml-user-select:none; -webkit-user-select:none; -moz-user-select:none;',
+        basic: 'position:absolute; pointer-events:none; box-sizing:border-box; margin:0; padding:0; overflow:hidden; ' + '-o-user-select:none; -ms-user-select:none; -khtml-user-select:none; -webkit-user-select:none; -moz-user-select:none;'+'letter-spacing: -0.01em; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; ',
         button:'display:flex; align-items:center; justify-content:center; text-align:center;',
         middle:'display:flex; align-items:center; justify-content:left; text-align:left; flex-direction: row-reverse;',
-        edit:'display:flex; align-items:left; justify-content:left; text-align:left; flex-direction: row | row-reverse | column | column-reverse;'
+        //edit:'display:flex; align-items:left; justify-content:left; text-align:left; flex-direction: row | row-reverse | column | column-reverse;',
+        edit:'display:flex; align-items:right; justify-content:right; text-align:right; flex-direction: row | row-reverse | column | column-reverse;'
     },
 
     // svg path
@@ -315,7 +323,8 @@ const T = {
     setCss: function( dom, css ){
 
         for( let r in css ){
-            if( T.DOM_SIZE.indexOf(r) !== -1 ) dom.style[r] = css[r] + 'px';
+            if(T.DOM_SIZE.has(r)) dom.style[r] = css[r] + 'px';
+            //if( T.DOM_SIZE.indexOf(r) !== -1 ) dom.style[r] = css[r] + 'px';
             else dom.style[r] = css[r];
         }
 
@@ -323,11 +332,17 @@ const T = {
 
     set: function( g, o ){
 
-        for( let att in o ){
+        for (let att in o) {
+            if (att === 'txt') g.textContent = o[att];
+            else if (att === 'link') g.setAttributeNS(T.links, 'xlink:href', o[att]);
+            else g.setAttributeNS(null, att, o[att]);
+        }
+
+        /*for( let att in o ){
             if( att === 'txt' ) g.textContent = o[ att ];
             if( att === 'link' ) g.setAttributeNS( T.links, 'xlink:href', o[ att ] );
             else g.setAttributeNS( null, att, o[ att ] );
-        }
+        }*/
         
     },
 
@@ -346,7 +361,8 @@ const T = {
 
         type = type || 'div';
 
-        if( T.SVG_TYPE_D.indexOf(type) !== -1 || T.SVG_TYPE_G.indexOf(type) !== -1 ){ // is svg element
+        // if( T.SVG_TYPE_D.indexOf(type) !== -1 || T.SVG_TYPE_G.indexOf(type) !== -1 ){ // is svg element
+        if (T.SVG_TYPE_D.has(type) || T.SVG_TYPE_G.has(type)){ // is svg element
 
             if( type ==='svg' ){
 
@@ -384,22 +400,25 @@ const T = {
         let g = document.createElementNS( T.svgns, type );
         T.set( g, o );
         T.get( dom, id ).appendChild( g );
-        if( T.SVG_TYPE_G.indexOf(type) !== -1 ) g.style.pointerEvents = 'none';
+        //if( T.SVG_TYPE_G.indexOf(type) !== -1 ) g.style.pointerEvents = 'none';
+        if( T.SVG_TYPE_G.has(type) ) g.style.pointerEvents = 'none';
         return g;
 
     },
 
     clear : function( dom ){
 
-        T.purge( dom );
+        dom.replaceChildren();
+
+        /*T.purge( dom );
         while (dom.firstChild) {
             if ( dom.firstChild.firstChild ) T.clear( dom.firstChild );
             dom.removeChild( dom.firstChild ); 
-        }
+        }*/
 
     },
 
-    purge : function ( dom ) {
+    /*purge : function ( dom ) {
 
         let a = dom.attributes, i, n;
         if (a) {
@@ -417,7 +436,7 @@ const T = {
             }
         }
 
-    },
+    },*/
 
     // ----------------------
     //   SVG Effects function
@@ -462,9 +481,10 @@ const T = {
     //   Color function
     // ----------------------
 
-    ColorLuma : function ( hex, l ) {
+    ColorLuma : ( hex, l ) => {
 
         //if( hex.substring(0, 3) === 'rgba' ) hex = '#000';
+        if ( typeof hex === 'number' ) hex = T.hexToHtml( hex );
 
         if( hex === 'n' ) hex = '#000';
 
@@ -487,13 +507,9 @@ const T = {
 
     },
 
-    findDeepInver: function ( c ) { 
+    findDeepInver: ( c ) => ( (c[0] * 0.3 + c[1] * .59 + c[2] * .11) <= 0.6 ),
 
-        return (c[0] * 0.3 + c[1] * .59 + c[2] * .11) <= 0.6;
-        
-    },
-
-    lerpColor: function( c1, c2, factor ) {
+    lerpColor: ( c1, c2, factor ) => {
         let newColor = {};
         for ( let i = 0; i < 3; i++ ) {
           newColor[i] = c1[ i ] + ( c2[ i ] - c1[ i ] ) * factor;
@@ -501,78 +517,56 @@ const T = {
         return newColor;
     },
 
-    hexToHtml: function ( v ) { 
-        v = v === undefined ? 0x000000 : v;
-        return "#" + ("000000" + v.toString(16)).substr(-6);
-        
-    },
+    hexToHtml: ( v = 0x000000 ) => ('#' + v.toString(16).padStart(6, '0')),
+    htmlToHex: ( v ) => ( v.toUpperCase().replace("#", "0x") ),
+    u255: ( c, i ) => ( parseInt(c.substring(i, i + 2), 16) / 255 ),
+    u16: ( c, i ) => ( parseInt(c.substring(i, i + 1), 16) / 15 ),
 
-    htmlToHex: function ( v ) { 
-
-        return v.toUpperCase().replace("#", "0x");
-
-    },
-
-    u255: function (c, i) {
-
-        return parseInt(c.substring(i, i + 2), 16) / 255;
-
-    },
-
-    u16: function ( c, i ) {
-
-        return parseInt(c.substring(i, i + 1), 16) / 15;
-
-    },
-
-    unpack: function( c ){
+    unpack: ( c ) => {
 
         if (c.length == 7) return [ T.u255(c, 1), T.u255(c, 3), T.u255(c, 5) ];
         else if (c.length == 4) return [ T.u16(c,1), T.u16(c,2), T.u16(c,3) ];
 
     },
 
-    p255: function ( c ) {
+    p255: ( c ) => {
         let h = Math.round( ( c * 255 ) ).toString( 16 );
         if ( h.length < 2 ) h = '0' + h;
         return h;
     },
 
-    pack: function ( c ) {
+    pack: ( c ) => ( '#' + T.p255( c[ 0 ] ) + T.p255( c[ 1 ] ) + T.p255( c[ 2 ] )),
+    htmlRgb: ( c, a ) => ( 'rgb(' + Math.round(c[0] * 255) + ','+ Math.round(c[1] * 255) + ','+ Math.round(c[2] * 255) + ')'),
 
-        return '#' + T.p255( c[ 0 ] ) + T.p255( c[ 1 ] ) + T.p255( c[ 2 ] );
-
-    },
-
-    htmlRgba: function( c, a ){
+    htmlRgba: ( c, a ) => {
          c = T.unpack(c)
         return 'rgba(' + Math.round(c[0] * 255) + ','+ Math.round(c[1] * 255) + ','+ Math.round(c[2] * 255) + ','+ a + ')';
-
     },
 
-    htmlRgb: function( c, a ){
+    
 
-        return 'rgb(' + Math.round(c[0] * 255) + ','+ Math.round(c[1] * 255) + ','+ Math.round(c[2] * 255) + ')';
-
-    },
-
-    pad: function( n ){
-        if(n.length == 1)n = '0' + n;
+    pad: ( n ) => {
+        if(n.length == 1) n = '0' + n;
         return n;
     },
 
-    rgbToHex : function( c ){
+    rgbToHex : ( c ) => {
 
-        let r = Math.round(c[0] * 255).toString(16);
+        const r = Math.round(c[0] * 255).toString(16).padStart(2, '0');
+        const g = Math.round(c[1] * 255).toString(16).padStart(2, '0');
+        const b = Math.round(c[2] * 255).toString(16).padStart(2, '0');
+        return '#' + r + g + b;
+
+        /*let r = Math.round(c[0] * 255).toString(16);
         let g = Math.round(c[1] * 255).toString(16);
         let b = Math.round(c[2] * 255).toString(16);
-        return '#' + T.pad(r) + T.pad(g) + T.pad(b);
+        return '#' + T.pad(r) + T.pad(g) + T.pad(b);*/
 
        // return '#' + ( '000000' + ( ( c[0] * 255 ) << 16 ^ ( c[1] * 255 ) << 8 ^ ( c[2] * 255 ) << 0 ).toString( 16 ) ).slice( - 6 );
 
     },
 
-    hueToRgb: function( p, q, t ){
+    hueToRgb: ( p, q, t ) => {
 
         if ( t < 0 ) t += 1;
         if ( t > 1 ) t -= 1;
@@ -583,7 +577,7 @@ const T = {
 
     },
 
-    rgbToHsl: function ( c ) {
+    rgbToHsl: ( c ) => {
 
         let r = c[0], g = c[1], b = c[2], min = Math.min(r, g, b), max = Math.max(r, g, b), delta = max - min, h = 0, s = 0, l = (min + max) / 2;
         if (l > 0 && l < 1) s = delta / (l < 0.5 ? (2 * l) : (2 - 2 * l));
@@ -597,7 +591,7 @@ const T = {
 
     },
 
-    hslToRgb: function ( c ) {
+    hslToRgb: ( c ) => {
 
         let p, q, h = c[0], s = c[1], l = c[2];
 

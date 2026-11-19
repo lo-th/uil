@@ -73,6 +73,13 @@ export class Knob extends Proto {
 
         }
 
+        if ( this.model > 0 ) {
+
+            this.colors01 = Tools.unpack( Tools.ColorLuma( cc.text, -0.75) )
+            this.colors02 = Tools.unpack( cc.text )
+            
+        }
+
         this.r = 0;
 
         this.init();
@@ -112,10 +119,24 @@ export class Knob extends Proto {
 
         let l = this.local;
         if( l.x === -1 && l.y === -1 ) return '';
+        if( this.c[1] && l.y <= this.c[1].offsetHeight ) return 'title';
+        else if ( l.y > this.h - this.c[2].offsetHeight ) return 'text';
+        else return 'knob'; 
+
+        /*let l = this.local;
+        if( l.x === -1 && l.y === -1 ) return '';
         if( l.y <= this.c[ 1 ].offsetHeight ) return 'title';
         else if ( l.y > this.h - this.c[ 2 ].offsetHeight ) return 'text';
-        else return 'knob';
+        else return 'knob';*/
 
+    }
+
+    reset () {
+
+        this.isDown = false;
+        this.cursor();
+        return this.mode(0);
+        
     }
 
     // ----------------------
@@ -142,7 +163,16 @@ export class Knob extends Proto {
 
     mousemove ( e ) {
 
-        if( !this.isDown ) return;
+        //if( !this.isDown ) return;
+
+        if( !this.isDown ) {
+            let name = this.testZone( e );
+            if( name === 'circular' || name === 'knob' ) {
+                this.cursor('pointer');
+                return this.mode(1);
+            }
+            return this.reset();
+        }
 
         this.cursor('pointer');
 
@@ -258,7 +288,7 @@ export class Knob extends Proto {
             let big = ea <= Math.PI - this.mPI ? 0 : 1;
             this.setSvg( this.c[3], 'd', 'M ' + x1 + ',' + y1 + ' A ' + 36 + ',' + 36 + ' 1 ' + big + ' 1 ' + x2 + ',' + y2, 5 );
 
-            let color = Tools.pack( Tools.lerpColor( Tools.unpack( Tools.ColorLuma( this.colors.text, -0.75) ), Tools.unpack( this.colors.text ), this.percent ) );
+            let color = Tools.pack( Tools.lerpColor( this.colors01, this.colors02, this.percent ) );
             this.setSvg( this.c[3], 'stroke', color, 5 );
         
         }

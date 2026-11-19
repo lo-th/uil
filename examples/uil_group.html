@@ -33,7 +33,7 @@
 
 <script type="module">
 
-    import {UIL} from '../src/Uil_dev.js';
+    import {UIL} from '../src/Uil_dev.js'
 
     const debug = document.querySelector('#debug');
 
@@ -56,17 +56,18 @@
 
         ui.add( 'slide',  { name:'slide', min:-100, max:100, value:0, precision:0, h:20 })
 
-        let g1 = ui.add('group', { name:'G1', h:30, bg:'#800', open:true });
+        let g1 = ui.add('group', { name:'G1', h:30, mark:'#800', open:true });
+        g1.add( 'slide',  { name:'slide', min:-100, max:100, value:0, precision:0, h:20 })
 
-        let g1_1 = g1.add('group', { name:'G1_1', h:30, bg:'#905', open:true });
+        let g1_1 = g1.add('group', { name:'G1_1', h:30, mark:'#905', open:true });
         g1_1.add( 'slide',  { name:'slide', min:-100, max:100, value:0, precision:0, h:20 })
         g1_1.add( 'slide',  { name:'slide', min:-100, max:100, value:0, precision:0, h:20 })
-        let g1_2 = g1.add('group', { name:'G1_2', h:30, bg:'#950', open:true })
+        let g1_2 = g1.add('group', { name:'G1_2', h:30, mark:'#950', open:true })
         g1_2.add( 'slide',  { name:'slide', min:-100, max:100, value:0, precision:0, h:20 })
         g1_2.add( 'slide',  { name:'slide', min:-100, max:100, value:0, precision:0, h:20 })
 
 
-        let g1_2_1 = g1_2.add('group', { name:'G1_2_1', h:30, bg:'#990', open:true })
+        let g1_2_1 = g1_2.add('group', { name:'G1_2_1', h:30, mark:'#990', open:true })
         g1_2_1.add( 'slide',  { name:'slide', min:-100, max:100, value:0, precision:0, h:20 })
         g1_2_1.add( 'slide',  { name:'slide', min:-100, max:100, value:0, precision:0, h:20 })
         g1_2_1.add( 'slide',  { name:'slide', min:-100, max:100, value:0, precision:0, h:20 })

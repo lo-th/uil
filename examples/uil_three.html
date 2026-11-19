@@ -11,7 +11,7 @@
 
 		<script type="module">
 
-			import * as THREE from './three/build/three.module.js';
+			import * as THREE from '../three/build/three.module.js';
 			//import * as UIL from '../build/uil.module.js';
 			import { UIL } from '../src/Uil_dev.js'
 
@@ -133,7 +133,7 @@
 
 				let m = material
 
-				console.log(m.blendSrc)
+				//console.log(m.blendSrc)
 
 				if(m.blendSrc!==undefined) ui.add( m, 'blendSrc', { type:'list', list:BlendOption }).onChange( ( c )=>{ console.log(m.blendSrc, c) })
 		        if(m.blendDst!==undefined) ui.add( m, 'blendDst', { type:'list', list:BlendOption }).onChange( ( c )=>{ console.log(m.blendDst, c) })

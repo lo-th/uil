@@ -1,4 +1,5 @@
 import { Proto } from '../core/Proto.js';
+import { Roots } from '../core/Roots.js';
 
 export class TextInput extends Proto {
 
@@ -6,10 +7,8 @@ export class TextInput extends Proto {
 
         super( o );
 
-        this.cmode = 0;
-
         this.value = o.value !== undefined ? o.value : '';
-        this.placeHolder = o.placeHolder || '';
+        this.placeHolder = o.placeHolder || 'text';
 
         this.allway = o.allway || false;
         this.editable = o.edit !== undefined ? o.edit : true;
@@ -19,21 +18,13 @@ export class TextInput extends Proto {
         let cc = this.colors
 
         // text
-        this.c[2] = this.dom( 'div', this.css.txtselect + 'top:1px; height:' + (this.h-2) + 'px; color:' + cc.text + '; background:' + cc.back + '; borderColor:' + cc.border+'; border-radius:'+this.radius+'px;' );
+        this.c[2] = this.dom( 'div', this.css.txtselect + 'top:1px; height:' + (this.h-2) + 'px; color:' + cc.text + '; background:' + cc.back + '; border:' + cc.borderSize + 'px solid ' + cc.border + '; border-radius:' + this.radius + 'px;' );
+        //this.c[2] = this.dom( 'div', this.css.txtselect + 'top:1px; height:' + (this.h-2) + 'px; color:' + cc.text + '; background:' + cc.back + '; borderColor:' + cc.border+'; border-radius:'+this.radius+'px;' );
         this.c[2].textContent = this.value;
 
-        // selection
-        this.c[3] = this.dom(  'div', this.css.txtselect + 'position:absolute; top:2px; height:' + (this.h-4) + 'px; padding:0px 0px; width:0px; color:' + cc.textSelect + '; background:' + cc.select + '; border:none; border-radius:0px;');
-
-        // cursor
-        this.c[4] = this.dom( 'div', this.css.basic + 'top:2px; height:' + (this.h-4) + 'px; width:0px; background:'+cc.text+';' );
-
         // fake
-        this.c[5] = this.dom( 'div', this.css.txtselect + 'top:1px; height:' + (this.h-2) + 'px; border:none; justify-content: center; font-style: italic; color:'+cc.border+';' );
-        if( this.value === '' ) this.c[5].textContent = this.placeHolder;
-
-        
-
+        this.c[3] = this.dom( 'div', this.css.txtselect + 'top:1px; height:' + (this.h-2) + 'px; border:none; justify-content: center; font-style: italic; color:'+cc.border+';' );
+        if( this.value === '' ) this.c[3].textContent = this.placeHolder;
 
         this.init();
 
@@ -87,20 +78,25 @@ export class TextInput extends Proto {
 
         let name = this.testZone( e );
 
-        //let l = this.local;
-        //if( l.x === -1 && l.y === -1 ){ return;}
-
-        //if( l.x >= this.sa ) this.cursor('text');
-        //else this.cursor();
-
         let x = 0;
 
         if( name === 'text' ) this.cursor('text');
         else this.cursor();
 
-        if( this.isDown ) x = e.clientX - this.zone.x;
+        if ( this.isDown ) {
+            const el = this.c[ 2 ];
+            const pad = 5 - this.colors.borderSize;
+            Roots.hiddenSizer.innerHTML = el.textContent.replace(/ /g, '&nbsp;');
+            const full = Roots.hiddenSizer.clientWidth;
+            const left = el.clientWidth - pad - full;
+            x = ( e.clientX - this.zone.x - this.sa ) - left;
+        }
 
-        return this.upInput( x - this.sa -3, this.isDown );
+        return this.upInput( x, this.isDown );
+
+       //if( this.isDown ) x = e.clientX - this.zone.x;
+
+        //return this.upInput( x - this.sa -3, this.isDown );
 
     }
 
@@ -122,27 +118,68 @@ export class TextInput extends Proto {
     //   INPUT
     // ----------------------
 
-    select ( c, e, w, t ) {
+    /*select ( c, e, w, t ) {
+        if ( !this.editable ) return;
 
-        let s = this.s;
-        let d = this.sa + 5;
-        s[4].width = '1px';
-        s[4].left = ( d + e ) + 'px';
+        console.log(c,e,w)
+        const cc = this.colors;
+        const pad = 5;
+        const right = this.c[2].clientWidth - pad;
+        const start = right - w - e;
+        const end = right - e;
+        //const cur = right - c;
 
-        s[3].left =  ( d + e )  + 'px';
-        s[3].width =  w  + 'px';
-        this.c[3].innerHTML = t
-    
+        //const start = right + w - e;
+        //const end = right - e;
+        const cur = right + c;
+        //const cur = c - right
+
+        this.s[2].background = `linear-gradient(90deg, 
+            ${cc.backoff} 0px, ${cc.backoff} ${start}px, 
+            ${cc.select} ${start}px, ${cc.select} ${end}px, 
+            ${cc.backoff} ${end}px, ${cc.backoff} ${cur}px, 
+            ${cc.text} ${cur}px, ${cc.text} ${cur + 1}px, 
+            ${cc.backoff} ${cur + 1}px)`;
+    }*/
+
+    select ( c, e, w, t, full ) {
+        if ( !this.editable ) return;
+        const cc = this.colors;
+        const pad = 5 - cc.borderSize;
+        const el = this.c[ 2 ];
+        const st = this.s[ 2 ];
+
+        const left = el.clientWidth - pad - ( full || 0 );
+        const start = left + e;
+        const end = start + w;
+        const cur = left + c;
+
+        st.background = `linear-gradient(90deg, 
+            ${cc.backoff} 0px, ${cc.backoff} ${start}px, 
+            ${cc.select} ${start}px, ${cc.select} ${end}px, 
+            ${cc.backoff} ${end}px, ${cc.backoff} ${cur}px, 
+            ${cc.text} ${cur}px, ${cc.text} ${cur + 1}px, 
+            ${cc.backoff} ${cur + 1}px)`;
     }
 
+    /*select ( c, e, w, t, full ) {
+        const cc = this.colors;
+        const pad = 5;
+        const start = pad + e;
+        const end = start + w;
+        const cur = pad + c;
+
+        this.s[2].background = `linear-gradient(90deg, 
+            ${cc.backoff} 0px, ${cc.backoff} ${start}px, 
+            ${cc.select} ${start}px, ${cc.select} ${end}px, 
+            ${cc.backoff} ${end}px, ${cc.backoff} ${cur}px, 
+            ${cc.text} ${cur}px, ${cc.text} ${cur + 1}px, 
+            ${cc.backoff} ${cur + 1}px)`;
+    }*/
+
     unselect () {
-
-        let s = this.s;
-        if(!s) return;
-        s[3].width =  0  + 'px';
-        this.c[3].innerHTML = 't'
-        s[4].width = 0 + 'px';
-
+        if ( !this.s ) return;
+        this.s[2].background = this.colors.back;
     }
 
     validate ( force ) {
@@ -151,8 +188,8 @@ export class TextInput extends Proto {
 
         this.value = this.c[2].textContent;
 
-        if(this.value !== '') this.c[5].textContent = '';
-        else this.c[5].textContent = this.placeHolder;
+        if(this.value !== '') this.c[3].textContent = '';
+        else this.c[3].textContent = this.placeHolder;
 
         if( !force ) return;
 
@@ -172,8 +209,8 @@ export class TextInput extends Proto {
         s[2].left = this.sa + 'px';
         s[2].width = this.sb + 'px';
 
-        s[5].left = this.sa + 'px';
-        s[5].width = this.sb + 'px';
+        s[3].left = this.sa + 'px';
+        s[3].width = this.sb + 'px';
      
     }
 

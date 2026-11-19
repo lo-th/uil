@@ -21,7 +21,7 @@ export class Button extends Proto {
         // force button width
         this.bw = o.forceWidth || 0
         if(o.bw) this.bw = o.bw
-        this.space = o.space || 3
+        this.space = o.space || this.colors.sx
 
         if( typeof this.values === 'string' ) this.values = [ this.values ]
 
@@ -145,7 +145,7 @@ export class Button extends Proto {
                 if( w ) n = 4
             }
 
-            //if( this.mode( n, i ) ) r = true
+            if( this.mode( n, i ) ) r = true
             r = this.mode( n, i )
 
         }
@@ -187,10 +187,16 @@ export class Button extends Proto {
 
     reset () {
 
+        this.isDown = false;
         this.res = -1
         this.cursor()
         return this.modes()
 
+    }
+
+    setValue ( v ) {
+        this.value = v;
+        this.modes();
     }
 
     label ( string, n ) {
@@ -223,7 +229,7 @@ export class Button extends Proto {
         let d = this.sa;
 
         let i = this.lng;
-        let sx = this.colors.sx //this.space;
+        let sx = this.space;// !== undefined ? this.colors.sx //this.space;
         //let size = Math.floor( ( w-(dc*(i-1)) ) / i );
         let size = ( w-(sx*(i-1)) ) / i 
 
@@ -235,8 +241,13 @@ export class Button extends Proto {
 
         while( i-- ){
 
+            if ( !this.tmp[i] ) this.tmp[i] = [];
+
+            this.tmp[i][0] = ( d + ( size * i ) + ( sx * i ))
+            this.tmp[i][1] = size
+
         	//this.tmp[i] = [ Math.floor( d + ( size * i ) + ( dc * i )), size ];
-            this.tmp[i] = [ ( d + ( size * i ) + ( sx * i )), size ];
+            //this.tmp[i] = [ ( d + ( size * i ) + ( sx * i )), size ];
         	this.tmp[i][2] = this.tmp[i][0] + this.tmp[i][1];
 
             s[i+2].left = this.tmp[i][0] + 'px'

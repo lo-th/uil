@@ -9,19 +9,6 @@ export class Title extends Proto {
 
         this.isTitle = true;
 
-        //let prefix = o.prefix || '';
-        //let color = o.color || this.colors.text;
-
-        //this.c[2] = this.dom( 'div', this.css.txt + ' justify-content:right; width:60px; line-height:'+ (this.h-8) + 'px; color:' + color );
-
-        /*if( this.h === 31 ){
-
-            this.s[0].height = this.h + 'px';
-            this.s[1].top = 8 + 'px';
-            //this.c[2].style.top = 8 + 'px';
-
-        }*/
-
         let s = this.s;
 
         s[1].justifyContent = o.align || 'left';

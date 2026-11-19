@@ -5,8 +5,24 @@ body{
 	font-size:14px; 
 	color:#fff;
 	height: 100vh;
-    background: linear-gradient( #323133 , #121113 );
+    /*background: linear-gradient( #323133 , #121113 );*/
+
+    background: radial-gradient(circle at 50% 15%, #28292e 15%, #121214 85%, #070708 100%);
+  z-index: 1;
     overscroll-behavior: none;
+}
+
+
+body::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: url("./wall_5.png");
+  background-repeat: repeat;
+  background-size: 128px auto; 
+  opacity: 0.1; /* Ajustez la transparence ici (de 0 à 1) */
+  z-index: -1;
+  pointer-events: none;
 }
 
 #logo{ position:absolute; left:50%; margin-left:-32px; top:0px; }

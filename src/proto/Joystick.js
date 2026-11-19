@@ -241,4 +241,9 @@ export class Joystick extends Proto {
 
     }
 
+    dispose(){
+        super.dispose();
+        this.clear()
+    }
+
 }

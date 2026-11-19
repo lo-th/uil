@@ -15,7 +15,6 @@
 <div id='version'></div>
 <div id='debug3'></div>
 
-<!--<script>-->
 <script type="module">
 
 import { UIL } from '../src/Uil_dev.js'
@@ -38,22 +37,22 @@ const callback = function ( v, id ) {
 var ui = new UIL.Gui().onChange( callback )
 
 ui.add( obj1, 'speed', { min:-5, max:5, rename:'speed R' } ).listen();
-ui.add( obj1, 'speed', { min:-5, max:5, stype:1 } ).listen();
-ui.add( obj1, 'speed', { min:-5, max:5, fontColor:'#D4B87B', stype:2 } ).listen();
-ui.add( obj1, 'speed', { type:'Circular', min:-5, max:5, size:120 } ).listen();
-ui.add( obj1, 'speed', { type:'Knob', min:-5, max:5, size:120 } ).listen();
-ui.add( obj1, 'speed', { type:'number', min:-5, max:5, stype:2 } ).listen();
+ui.add( obj1, 'speed', { min:-5, max:5, mode:1 } ).listen();
+ui.add( obj1, 'speed', { min:-5, max:5, mode:2 } ).listen();
+ui.add( obj1, 'speed', { type:'Circular', min:-5, max:5, size:120, mode:1 } ).listen();
+ui.add( obj1, 'speed', { type:'Knob', min:-5, max:5, size:120, mode:2 } ).listen();
+ui.add( obj1, 'speed', { type:'number', min:-5, max:5 } ).listen();
 ui.add( obj2, 'ready', { type:'bool' } ).listen();
 
 //
 
-var ui2 = new UIL.Gui({ css:'left:10px;', bottom:40 }).onChange( callback )
+var ui2 = new UIL.Gui({ css:'left:10px; top:0px;' }).onChange( callback )
 
 ui2.add( obj2, 'speed', { min:-5, max:5, rename:'speed L', fontColor:'#D4B87B' } ).listen();
-ui2.add( obj2, 'speed', { min:-5, max:5, fontColor:'#D4B87B', stype:1 } ).listen();
-ui2.add( obj2, 'speed', { min:-5, max:5, fontColor:'#D4B87B', stype:2 } ).listen();
+ui2.add( obj2, 'speed', { min:-5, max:5, fontColor:'#D4B87B', mode:0 } ).listen();
+ui2.add( obj2, 'speed', { min:-5, max:5, fontColor:'#D4B87B', mode:2 } ).listen();
 ui2.add( obj2, 'speed', { type:'Circular', min:-5, max:5, size:120, fontColor:'#D4B87B' } ).listen();
-ui2.add( obj2, 'speed', { type:'Knob', min:-5, max:5, size:120, fontColor:'#D4B87B' } ).listen();
+ui2.add( obj2, 'speed', { type:'Knob', min:-5, max:5, size:120, fontColor:'#D4B87B', mode:1  } ).listen();
 ui2.add( obj2, 'speed', { type:'number', min:-5, max:5 } ).listen();
 ui2.add( obj2, 'ready', { type:'bool' } ).listen();
 

@@ -21,7 +21,7 @@ import { UIL } from '../src/Uil_dev.js'
 var display = false;
 
 var b = UIL.add('button', { target:document.body, name:'populate', w:100, h:30, radius:10, pos:{left:'200px', top:'5px'}, simple:true }).onChange( populate )
-var w = UIL.add('number',{ target:document.body, name:'max', value:50, min:1, max:200, w:120, h:30, precision:0, pos:{left:'310px', top:'5px' }, simple:false });
+var w = UIL.add('number',{ target:document.body, name:'max', value:200, min:1, max:1000, w:120, h:30, precision:0, pos:{left:'310px', top:'5px' }, simple:false });
 
 var callback = function(v){ debug.innerHTML = v; }
 

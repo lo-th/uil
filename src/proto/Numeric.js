@@ -1,5 +1,6 @@
 import { Proto } from '../core/Proto.js';
 import { Tools } from '../core/Tools.js';
+import { Roots } from '../core/Roots.js';
 
 export class Numeric extends Proto {
 
@@ -47,8 +48,10 @@ export class Numeric extends Proto {
         this.lng = this.value.length
         this.tmp = []
 
-        this.current = -1
-        this.prev = { x:0, y:0, d:0, v:0 }
+        this.current = -1;
+        this.prev = { x:0, y:0, d:0, v:0 };
+
+        this.center = o.center || false;
 
         let cc = this.colors
 
@@ -61,8 +64,11 @@ export class Numeric extends Proto {
         while(i--){
 
             if( this.isAngle ) this.value[i] = (this.value[i] * 180 / Math.PI).toFixed( this.precision )
-            this.c[3+i] = this.dom( 'div', this.css.txtselect + 'top:1px; height:'+(this.h-2)+'px; color:' + cc.text + '; background:' + cc.back + '; borderColor:' + cc.border+'; border-radius:'+this.radius+'px;')
-            if(o.center) this.c[2+i].style.textAlign = 'center'
+            //this.c[3+i] = this.dom( 'div', this.css.txtselect + 'top:1px; height:'+(this.h-2)+'px; color:' + cc.text + '; background:' + cc.back + '; borderColor:' + cc.border+'; border-radius:'+this.radius+'px;')
+            //if(o.center) this.c[2+i].style.textAlign = 'center'
+
+            this.c[3+i] = this.dom( 'div', this.css.txtselect + 'top:1px; height:'+(this.h-2)+'px; color:' + cc.text + '; background:' + cc.back + '; border:' + cc.borderSize + 'px solid ' + cc.border + '; border-radius:'+this.radius+'px;' );
+            if ( o.center ) this.c[3+i].style.justifyContent = 'center';
             this.c[3+i].textContent = this.value[i]
             this.c[3+i].style.color = this.colors.text
             this.c[3+i].isNum = true
@@ -71,12 +77,12 @@ export class Numeric extends Proto {
         }
 
         // selection
-        this.selectId = 3 + this.lng;
+        /*this.selectId = 3 + this.lng;
         this.c[this.selectId] = this.dom(  'div', this.css.txtselect + 'position:absolute; top:2px; height:' + (this.h-4) + 'px; padding:0px 0px; width:0px; color:' + cc.textSelect + '; background:' + cc.select + '; border:none; border-radius:0px;');
 
         // cursor
         this.cursorId = 4 + this.lng;
-        this.c[ this.cursorId ] = this.dom( 'div', this.css.basic + 'top:2px; height:' + (this.h-4) + 'px; width:0px; background:'+cc.text+';' );
+        this.c[ this.cursorId ] = this.dom( 'div', this.css.basic + 'top:2px; height:' + (this.h-4) + 'px; width:0px; background:'+cc.text+';' );*/
 
         this.init();
     }
@@ -109,7 +115,12 @@ export class Numeric extends Proto {
             this.isDown = true
             if( name !== '' ){ 
             	this.current = name
-            	this.prev = { x:e.clientX, y:e.clientY, d:0, v: this.isSingle ? parseFloat(this.value) : parseFloat( this.value[ this.current ] ) }
+                this.prev.x = e.clientX;
+                this.prev.y = e.clientY;
+                this.prev.d = 0;
+                //this.prev.v = parseFloat( this.value[ this.current ] );
+                this.prev.v = this.isSingle ? parseFloat(this.value) : parseFloat( this.value[ this.current ] );
+            	//this.prev = { x:e.clientX, y:e.clientY, d:0, v: this.isSingle ? parseFloat(this.value) : parseFloat( this.value[ this.current ] ) }
             	this.setInput( this.c[ 3 + this.current ] )
             }
             return this.mousemove( e )
@@ -121,10 +132,18 @@ export class Numeric extends Proto {
 
     mouseup ( e ) {
 
-    	if( this.isDown ){
+        if( this.isDown ){
             
             this.isDown = false
-            this.prev = { x:0, y:0, d:0, v:0 }
+            this.prev.x = 0;
+            this.prev.y = 0;
+            this.prev.d = 0;
+            this.prev.v = 0;
+
+            if ( this.isDrag ) {
+                this.current = -1;
+                this.validate( true );
+            }
 
             return this.mousemove( e )
         }
@@ -132,6 +151,23 @@ export class Numeric extends Proto {
         return false
 
     }
+
+    /*mouseup ( e ) {
+
+    	if( this.isDown ){ 
+            this.isDown = false;
+            this.current = -1;
+            this.prev.x = 0;
+            this.prev.y = 0;
+            this.prev.d = 0;
+            this.prev.v = 0;
+            this.validate( true );
+            return this.mousemove( e );
+        }
+
+        return false
+
+    }*/
 
     mousemove ( e ) {
 
@@ -146,8 +182,6 @@ export class Numeric extends Proto {
         	else this.cursor( this.current !== -1 ? 'move' : 'pointer' );
         }
 
-        
-
         if( this.isDrag ){
 
         	if( this.current !== -1 ){
@@ -159,7 +193,8 @@ export class Numeric extends Proto {
                 this.value[ this.current ] = this.numValue(n)
                 this.c[ 3 + this.current ].textContent = this.value[this.current]
 
-                this.validate()
+                //this.validate()
+                this.validate( true );
 
                 this.prev.x = e.clientX
                 this.prev.y = e.clientY
@@ -169,9 +204,17 @@ export class Numeric extends Proto {
 
         } else {
 
-        	if( this.isDown ) x = e.clientX - this.zone.x -3
+            if ( this.isDown && this.current !== -1 ) {
+                const el = this.c[ 3 + this.current ];
+                const full = Roots.hiddenSizer ? Roots.hiddenSizer.clientWidth : 0;
+                const left = this.center ? ( el.clientWidth - full ) * 0.5 : ( el.clientWidth - 5 - full );
+                x = ( e.clientX - this.zone.x - this.tmp[ this.current ][ 0 ] ) - left;
+            }
+            return this.upInput( x, this.isDown );
+
+        	/*if( this.isDown ) x = e.clientX - this.zone.x -3
         	if( this.current !== -1 ) x -= this.tmp[this.current][0]
-        	return this.upInput( x, this.isDown )
+        	return this.upInput( x, this.isDown )*/
 
         }
 
@@ -226,6 +269,20 @@ export class Numeric extends Proto {
 
     send ( v ) {
 
+        v = v ?? ( this.isSingle ? this.value[0] * this.multy : this.value.map( n => n * this.multy ) );
+
+        this.isSend = true;
+        if ( this.objectLink !== null ) {
+            if ( this.isVector ) this.objectLink[ this.objectKey ].fromArray( v );
+            else this.objectLink[ this.objectKey ] = v;
+        }
+        if ( this.callback ) this.callback( v, this.objectKey );
+        this.isSend = false;
+
+    }
+
+    /*send ( v ) {
+
         v = v || this.value
 
         this.isSend = true
@@ -243,14 +300,57 @@ export class Numeric extends Proto {
         if( this.callback ) this.callback( v, this.objectKey )
         this.isSend = false
 
-    }
+    }*/
 
 
     // ----------------------
     //   INPUT
     // ----------------------
 
-    select ( c, e, w, t ) {
+   select ( c, e, w, t, full ) {
+        if ( this.current === -1 ) return;
+        const cc = this.colors;
+        const el = this.c[ 3 + this.current ];
+        const st = this.s[ 3 + this.current ];
+
+        const pad = 5 - this.colors.borderSize;
+        const left = this.center ? ( el.clientWidth - (full || 0) ) * 0.5 : ( el.clientWidth - pad - (full || 0) );
+
+        //const left = this.center ? ( el.clientWidth - (full || 0) ) * 0.5 : ( el.clientWidth - 5 - (full || 0) );
+        const start = left + e;
+        const end = start + w;
+        const cur = left + c;
+
+        st.background = `linear-gradient(90deg, 
+            ${cc.backoff} 0px, ${cc.backoff} ${start}px, 
+            ${cc.select} ${start}px, ${cc.select} ${end}px, 
+            ${cc.backoff} ${end}px, ${cc.backoff} ${cur}px, 
+            ${cc.text} ${cur}px, ${cc.text} ${cur + 1}px, 
+            ${cc.backoff} ${cur + 1}px)`;
+    }
+
+    /*select ( c, e, w, t, full ) {
+        if ( this.current === -1 ) return;
+        const cc = this.colors;
+        const pad = 5;
+        const start = pad + e;
+        const end = start + w;
+        const cur = pad + c;
+
+        this.s[ 3 + this.current ].background = `linear-gradient(90deg, 
+            ${cc.backoff} 0px, ${cc.backoff} ${start}px, 
+            ${cc.select} ${start}px, ${cc.select} ${end}px, 
+            ${cc.backoff} ${end}px, ${cc.backoff} ${cur}px, 
+            ${cc.text} ${cur}px, ${cc.text} ${cur + 1}px, 
+            ${cc.backoff} ${cur + 1}px)`;
+    }*/
+
+    unselect () {
+        if ( !this.s || this.current === -1 ) return;
+        this.s[ 3 + this.current ].background = this.colors.back;
+    }
+
+    /*select ( c, e, w, t ) {
 
         let s = this.s
         let d = this.current !== -1 ? this.tmp[this.current][0] + 5 : 0
@@ -258,7 +358,7 @@ export class Numeric extends Proto {
         s[this.cursorId].left = ( d + c ) + 'px'
         s[this.selectId].left =  ( d + e )  + 'px'
         s[this.selectId].width =  w  + 'px'
-        this.c[this.selectId].innerHTML = t
+        this.c[this.selectId].textContent = t
     
     }
 
@@ -266,11 +366,11 @@ export class Numeric extends Proto {
 
         let s = this.s
         if(!s) return
-        this.c[this.selectId].innerHTML = ''
+        this.c[this.selectId].textContent = ''
         s[this.selectId].width = 0 + 'px'
         s[this.cursorId].width = 0 + 'px'
 
-    }
+    }*/
 
     validate ( force ) {
 
