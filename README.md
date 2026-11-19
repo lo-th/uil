@@ -44,8 +44,6 @@ ui.clear();
 ```
 **6 - other examples**
 
-[**uil module**](http://lo-th.github.io/uil/examples/index_module.html)
-
 [**uil listen**](http://lo-th.github.io/uil/examples/uil_listen.html)
 
 [**uil color**](http://lo-th.github.io/uil/examples/uil_color.html)
@@ -56,9 +54,11 @@ ui.clear();
 
 [**uil to canvas**](http://lo-th.github.io/uil/examples/uil_to_canvas.html)
 
-[**uil to three**](http://lo-th.github.io/uil/examples/uil_3d.html)
+[**uil for three**](http://lo-th.github.io/uil/examples/uil_three.html)
 
-[**uil to three 2**](http://lo-th.github.io/uil/examples/uil_3d_2.html)
+[**uil to 3D three 1**](http://lo-th.github.io/uil/examples/uil_3d_1.html)
+
+[**uil to 3D three 2**](http://lo-th.github.io/uil/examples/uil_3d_2.html)
 
 **7 - uil is on npm**
 ```sh
