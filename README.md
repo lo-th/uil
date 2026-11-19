@@ -46,9 +46,9 @@ ui.clear();
 
 [**uil listen**](http://lo-th.github.io/uil/examples/uil_listen.html)
 
-[**uil color**](http://lo-th.github.io/uil/examples/uil_color.html)
+[**uil style**](http://lo-th.github.io/uil/examples/uil_style.html)
 
-[**uil stresstest**](http://lo-th.github.io/uil/examples/uil_stresstest.html)
+[**uil stresstest**](http://lo-th.github.io/uil/examples/uil_stress.html)
 
 [**uil group**](http://lo-th.github.io/uil/examples/uil_group.html)
 
@@ -67,7 +67,7 @@ npm i uil
 
 **8 - creator Tools**
 
-[**uil icon creator**](http://lo-th.github.io/uil/examples/uil_icon.html)
+[**uil ICON creator**](http://lo-th.github.io/uil/examples/uil_icon.html)
 
 [**uil ARM creator**](http://lo-th.github.io/uil/examples/uil_mapARM.html)
 
