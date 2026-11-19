@@ -48,7 +48,7 @@ ui.clear();
 
 [**uil style**](http://lo-th.github.io/uil/examples/uil_style.html)
 
-[**uil stresstest**](http://lo-th.github.io/uil/examples/uil_stress.html)
+[**uil stress test**](http://lo-th.github.io/uil/examples/uil_stress.html)
 
 [**uil group**](http://lo-th.github.io/uil/examples/uil_group.html)
 
