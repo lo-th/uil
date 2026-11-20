@@ -1057,57 +1057,24 @@ class Files {
         let t = [];
 
         switch( type ){
-            case 'svg':
-            t = [ { accept: { 'image/svg+xml': '.svg'} }, ];
-            break;
-            case 'wav':
-            t = [ { accept: { 'audio/wav': '.wav'} }, ];
-            break;
-            case 'mp3':
-            t = [ { accept: { 'audio/mpeg': '.mp3'} }, ];
-            break;
-            case 'mp4':
-            t = [ { accept: { 'video/mp4': '.mp4'} }, ];
-            break;
-            case 'bin': case 'hex':
-            t = [ { description: 'Binary Files', accept: { 'application/octet-stream': ['.bin', '.hex'] } }, ];
-            break;
-            case 'text':
-            t = [ { description: 'Text Files', accept: { 'text/plain': ['.txt', '.text'], 'text/html': ['.html', '.htm'] } }, ];
-            break;
-            case 'json':
-            t = [ { description: 'JSON Files', accept: { 'application/json': ['.json'] } }, ];//text/plain
-            break;
-            case 'js':
-            t = [ { description: 'JavaScript Files', accept: { 'text/javascript': ['.js'] } }, ];
-            break;
-            case 'ktx2':
-            t = [ { description: 'ktx2', accept: { 'image/ktx2': ['.ktx2'] } }, ];
-            break;
-            case 'image':
-            t = [ { description: 'Images', accept: { 'image/*': ['.png', '.gif', '.jpeg', '.jpg', '.hdr', '.exr'] } }, ];
-            break;
-            case 'gif':
-            t = [ { description: 'Images', accept: { 'image/*': ['.gif'] } }, ];
-            break;
-            case 'png':
-            t = [ { description: 'Images', accept: { 'image/*': ['.png'] } }, ];
-            break;
-            case 'exr':
-            t = [ { description: 'Images', accept: { 'image/exr': ['.exr'] } }, ];
-            break;
-            case 'hdr':
-            t = [ { description: 'Images', accept: { 'image/hdr': ['.hdr'] } }, ];
-            break;
-            case 'jpg':
-            t = [ { description: 'Images', accept: { 'image/*': ['.jpg', '.jpeg'] } }, ];
-            break;
-            case 'icon':
-            t = [ { description: 'Icons', accept: { 'image/x-ico': ['.ico'] } }, ];
-            break;
-            case 'lut':
-            t = [ { description: 'Lut', accept: { 'text/plain': ['.cube', '.3dl'] } }, ];
-            break;
+
+            case 'svg': t = [ { description: 'SVG', accept: { 'image/svg+xml': ['.svg'] } } ]; break;
+            case 'wav': t = [ { description: 'WAV', accept: { 'audio/wav': ['.wav'] } } ]; break;
+            case 'mp3': t = [ { description: 'MP3', accept: { 'audio/mpeg': ['.mp3'] } } ]; break;
+            case 'mp4': t = [ { description: 'MP4', accept: { 'video/mp4': ['.mp4'] } } ]; break;
+            case 'bin': case 'hex': t = [ { description: 'Binary Files', accept: { 'application/octet-stream': ['.bin', '.hex'] } }, ]; break;
+            case 'text': t = [ { description: 'Text Files', accept: { 'text/plain': ['.txt', '.text'], 'text/html': ['.html', '.htm'] } }, ]; break;
+            case 'json': t = [ { description: 'JSON Files', accept: { 'application/json': ['.json'] } }, ]; break;
+            case 'js': t = [ { description: 'JavaScript Files', accept: { 'text/javascript': ['.js'] } }, ]; break;
+            case 'ktx2': t = [ { description: 'ktx2', accept: { 'image/ktx2': ['.ktx2'] } }, ]; break;
+            case 'image': t = [ { description: 'Images', accept: { 'image/*': ['.png', '.gif', '.jpeg', '.jpg', '.hdr', '.exr'] } }, ]; break;
+            case 'gif': t = [ { description: 'Images', accept: { 'image/*': ['.gif'] } }, ]; break;
+            case 'png': t = [ { description: 'Images', accept: { 'image/*': ['.png'] } }, ]; break;
+            case 'exr': t = [ { description: 'Images', accept: { 'image/exr': ['.exr'] } }, ]; break;
+            case 'hdr': t = [ { description: 'Images', accept: { 'image/hdr': ['.hdr'] } }, ]; break;
+            case 'jpg': t = [ { description: 'Images', accept: { 'image/*': ['.jpg', '.jpeg'] } }, ]; break;
+            case 'icon': t = [ { description: 'Icons', accept: { 'image/x-ico': ['.ico'] } }, ]; break;
+            case 'lut': t = [ { description: 'Lut', accept: { 'text/plain': ['.cube', '.3dl'] } }, ]; break;
 
         }
 
@@ -1120,15 +1087,120 @@ class Files {
     //  LOAD
     //-----------------------------
 
-	static async load( o = {} ) {
+    //• Avec await (moderne) : const img = await Files.load({ type: 'image' });
+    //• Avec callback (existant) : Files.load({ type: 'image', callback: (img, name) => ... });
 
-        if (typeof window.showOpenFilePicker !== 'function') {
+
+    /*
+    const res = await Files.load({ type: 'image' });
+    if ( res ) {
+        const { data, name, type, dim, bytes } = res;
+        console.log( name, dim, bytes );
+    }
+    */
+
+    static async load( o = {} ) {
+
+        if ( typeof window.showOpenFilePicker !== 'function' ) {
             window.showOpenFilePicker = Files.showOpenFilePickerPolyfill;
         }
 
         try {
 
-        	let type = o.type || '';
+            let type = o.type || '';
+
+            const options = {
+                excludeAcceptAllOption: Boolean( type ),
+                multiple: false,
+            };
+
+            options.types = Files.autoTypes( type );
+
+            const [ fileHandle ] = await window.showOpenFilePicker( options );
+            const file = await fileHandle.getFile();
+
+            if ( !file ) return null;
+
+            const fname = file.name;
+            const ftype = fname.substring( fname.lastIndexOf('.') + 1 ).toLowerCase();
+            const bytes = file.size;
+
+            const dataUrl = [ 'png', 'jpg', 'jpeg', 'gif', 'webp', 'mp4', 'webm', 'ogg', 'mp3' ];
+            const dataBuf = [ 'sea', 'z', 'hex', 'bvh', 'glb', 'gltf', 'exr', 'ktx2', 'hdr', 'bin' ];
+
+            return await new Promise( ( resolve, reject ) => {
+
+                const reader = new FileReader();
+
+                const cleanup = () => {
+                    reader.removeEventListener( 'load', onLoad );
+                    reader.removeEventListener( 'error', onError );
+                };
+
+                const onError = ( err ) => {
+                    cleanup();
+                    reject( err );
+                };
+
+                const onLoad = ( e ) => {
+                    const content = e.target.result;
+                    cleanup();
+
+                    if ( type === 'image' && typeof content === 'string' ) {
+                        const img = new Image();
+                        img.onload = () => {
+                            const dim = [ img.width, img.height ];
+                            if ( o.callback ) o.callback( img, fname, ftype, dim );
+                            resolve( { data: img, name: fname, type: ftype, bytes, dim } );
+                        };
+                        img.onerror = reject;
+                        img.src = content;
+                    } else if ( type === 'json' ) {
+                        const json = JSON.parse( content );
+                        if ( o.callback ) o.callback( json, fname, ftype );
+                        resolve( { data: json, name: fname, type: ftype, bytes } );
+                    } else {
+                        if ( o.callback ) o.callback( content, fname, ftype );
+                        resolve( { data: content, name: fname, type: ftype, bytes } );
+                    }
+                };
+
+                reader.addEventListener( 'load', onLoad );
+                reader.addEventListener( 'error', onError );
+
+                if ( o.forceType === 'ArrayBuffer' ) {
+                    reader.readAsArrayBuffer( file );
+                } else if ( dataUrl.includes( ftype ) ) {
+                    reader.readAsDataURL( file );
+                } else if ( dataBuf.includes( ftype ) ) {
+                    reader.readAsArrayBuffer( file );
+                } else {
+                    reader.readAsText( file );
+                }
+
+            });
+
+        } catch ( e ) {
+
+            console.log( e );
+            if ( o.always && o.callback ) o.callback( null );
+            return null;
+
+        }
+
+    }
+
+
+
+	/*static async load( o = {} ) {
+
+        if (typeof window.showOpenFilePicker !== 'function') {
+            window.showOpenFilePicker = Files.showOpenFilePickerPolyfill
+        }
+
+        try {
+
+        	let type = o.type || ''
 
             const options = {
                 excludeAcceptAllOption: type ? true : false,
@@ -1136,21 +1208,25 @@ class Files {
                 //startIn:'./assets'
             };
 
-            options.types = Files.autoTypes( type );
+            options.types = Files.autoTypes( type )
 
             // create a new handle
-            const handle = await window.showOpenFilePicker( options );
-            const file = await handle[0].getFile();
+            const handle = await window.showOpenFilePicker( options )
+            const file = await handle[0].getFile()
             //let content = await file.text()
 
             if( !file ) return null
 
             let fname = file.name;
-            let ftype = fname.substring( fname.lastIndexOf('.')+1, fname.length );
-            let realType = '';
+            let ftype = fname.substring( fname.lastIndexOf('.') + 1 ).toLowerCase();
+            //let ftype = fname.substring( fname.lastIndexOf('.')+1, fname.length );
+            let realType = ''
 
-            const dataUrl = [ 'png', 'jpg', 'jpeg', 'mp4', 'webm', 'ogg', 'mp3' ];
-            const dataBuf = [ 'sea', 'z', 'hex', 'bvh', 'BVH', 'glb', 'gltf', 'exr', 'ktx2', 'hdr' ];
+            const dataUrl = [ 'png', 'jpg', 'jpeg', 'gif', 'webp', 'mp4', 'webm', 'ogg', 'mp3' ];
+            const dataBuf = [ 'sea', 'z', 'hex', 'bvh', 'glb', 'gltf', 'exr', 'ktx2', 'hdr', 'bin' ];
+
+            //const dataUrl = [ 'png', 'jpg', 'jpeg', 'mp4', 'webm', 'ogg', 'mp3' ];
+            //const dataBuf = [ 'sea', 'z', 'hex', 'bvh', 'BVH', 'glb', 'gltf', 'exr', 'ktx2', 'hdr' ];
             const reader = new FileReader();
 
             const cleanupReader = () => reader.removeEventListener('load', onLoad);
@@ -1159,15 +1235,15 @@ class Files {
                 reader.readAsArrayBuffer( file );
                 //type = ''
             } else {
-                if( dataUrl.indexOf( ftype ) !== -1 ) reader.readAsDataURL( file );
-                else if( dataBuf.indexOf( ftype ) !== -1 ) reader.readAsArrayBuffer( file );
-                else reader.readAsText( file );
+                if( dataUrl.indexOf( ftype ) !== -1 ) reader.readAsDataURL( file )
+                else if( dataBuf.indexOf( ftype ) !== -1 ) reader.readAsArrayBuffer( file )
+                else reader.readAsText( file )
             }
 
             
             const onLoad = (e) => {
 
-                let content = e.target.result;
+                let content = e.target.result
 
                 cleanupReader();
 
@@ -1177,32 +1253,33 @@ class Files {
                         img.onload = function() {
                             img.width = img.width;
                             img.height = img.height;
-                            if( o.callback ) o.callback( img, fname, ftype, [img.width, img.height] );
-                        };
-                        img.src = content;
+                            if( o.callback ) o.callback( img, fname, ftype, [img.width, img.height] )
+                        }
+                        img.src = content
                     break;
                     case 'json':
-                        if( o.callback ) o.callback( JSON.parse( content ), fname, ftype );
+                        if( o.callback ) o.callback( JSON.parse( content ), fname, ftype )
                     break;
                     default:
                         if( o.callback ) o.callback( content, fname, ftype );
                     break;
                 }
 
-            };
+            }
 
             reader.addEventListener('load', onLoad);
 
         } catch(e) {
 
-            console.log(e);
-            if( o.always && o.callback ) o.callback( null );
+            console.log(e)
+            if( o.always && o.callback ) o.callback( null )
 
         }
 
-    }
+    }*/
 
 	static showOpenFilePickerPolyfill( options ) {
+
         return new Promise((resolve) => {
             const input = document.createElement("input");
             input.type = "file";
@@ -1214,7 +1291,13 @@ class Files {
 
             const cleanup = () => {
                 input.removeEventListener("change", onChange);
+                input.removeEventListener( "cancel", onCancel );
                 if (input.parentNode) input.parentNode.removeChild(input);
+            };
+
+            const onCancel = () => {
+                cleanup();
+                reject( new Error('Cancelled') );
             };
 
             const onChange = (e) => {
@@ -1226,22 +1309,10 @@ class Files {
                 cleanup(); // Nettoyage immédiat
             };
 
-            input.addEventListener("change", onChange);
-
-            /*input.addEventListener("change", () => {
-                resolve(
-                    [...input.files].map((file) => {
-                        return {
-                            getFile: async () =>
-                                new Promise((resolve) => {
-                                    resolve(file);
-                                }),
-                        };
-                    })
-                );
-            });*/
-
+            input.addEventListener( "change", onChange );
+            input.addEventListener( "cancel", onCancel );
             input.click();
+
         })
     }
 
@@ -1269,8 +1340,16 @@ class Files {
             };
 
             options.types = Files.autoTypes( type );
-            options.finalType = Object.keys( options.types[0].accept )[0];
-            options.suggestedName += options.types[0].accept[options.finalType][0];
+
+            if ( options.types.length > 0 ) {
+                options.finalType = Object.keys( options.types[0].accept )[0];
+                const ext = options.types[0].accept[ options.finalType ][0];
+                if ( !options.suggestedName.endsWith( ext ) ) options.suggestedName += ext;
+            } else {
+                options.finalType = 'text/plain';
+            }
+            //options.finalType = Object.keys( options.types[0].accept )[0]
+            //options.suggestedName += options.types[0].accept[options.finalType][0]
 
 
             // create a new handle
@@ -1298,6 +1377,7 @@ class Files {
     }
 
     static showSaveFilePickerPolyfill( options ) {
+
         return new Promise((resolve) => {
             const a = document.createElement("a");
             a.download = options.suggestedName || "my-file.txt";
@@ -1337,8 +1417,10 @@ class Files {
             const handle = await window.showDirectoryPicker();
             const files = [];
             for await (const entry of handle.values()) {
-                const file = await entry.getFile();
-                files.push(file);
+                if ( entry.kind === 'file' ) {
+                    const file = await entry.getFile();
+                    files.push( file );
+                }
             }
 
             console.log(files);
@@ -3643,6 +3725,9 @@ class Circular extends Proto {
         this.c[0].style.width = this.w +'px';
         this.c[0].style.display = 'block';
 
+        this.top = 0;
+        this.isDown = false;
+
         if(this.c[1] !== undefined) {
 
             this.c[1].style.width = '100%';
@@ -3668,7 +3753,7 @@ class Circular extends Proto {
         this.setSvg( this.c[3], 'd', this.makePath(), 1 );
         this.setSvg( this.c[3], 'stroke', cc.text, 1 );
 
-        this.setSvg( this.c[3], 'viewBox', '0 0 '+this.diam+' '+this.diam );
+        this.setSvg( this.c[3], 'viewBox', '0 0 128 128' );
         this.setCss( this.c[3], { width:this.diam, height:this.diam, left:0, top:this.top });
 
         if ( this.model > 0 ) {
@@ -3691,7 +3776,20 @@ class Circular extends Proto {
         let color;
 
         switch( mode ){
+
             case 0: // base
+                this.s[2].color = cc.text;
+                this.setSvg( this.c[3], 'stroke', cc.back, 0 );
+                color = this.model > 0 ? Tools.pack( Tools.lerpColor( this.colors01, this.colors02, this.percent ) ) : cc.text;
+                this.setSvg( this.c[3], 'stroke', color, 1 );
+            break;
+            case 1: // down
+                this.s[2].color = cc.textOver;
+                this.setSvg( this.c[3], 'stroke', cc.backoff, 0 );
+                color = this.model > 0 ? Tools.pack( Tools.lerpColor( this.colors01, this.colors02, this.percent ) ) : cc.textOver;
+                this.setSvg( this.c[3], 'stroke', color, 1 );
+            break;
+            /*case 0: // base
 
                 this.s[2].color = cc.text;
                 this.setSvg( this.c[3], 'stroke', cc.back, 0);
@@ -3703,10 +3801,10 @@ class Circular extends Proto {
 
                 this.s[2].color = cc.textOver;
                 this.setSvg( this.c[3], 'stroke', cc.backoff, 0);
-                color = this.model > 0 ? Tools.pack( Tools.lerpColor( Tools.unpack( Tools.ColorLuma( cc.text, -0.75) ), Tools.unpack( cc.text ), this.percent ) ) : cc.textOver;
+                color = this.model > 0 ? Tools.pack( Tools.lerpColor( Tools.unpack( Tools.ColorLuma( cc.text, -0.75) ), Tools.unpack( cc.text ), this.percent ) ) : cc.textOver
                 this.setSvg( this.c[3], 'stroke', color, 1 );
                 
-            break;
+            break;*/
         }
 
         this.cmode = mode;
@@ -3742,8 +3840,8 @@ class Circular extends Proto {
 
     mouseup ( e ) {
 
+        if ( this.isDown ) this.sendEnd();
         this.isDown = false;
-        this.sendEnd();
         return this.mode(0);
 
     }
@@ -3779,7 +3877,25 @@ class Circular extends Proto {
         this.r = off.angle() - this.pi90;
         this.r = (((this.r%this.twoPi)+this.twoPi)%this.twoPi);
 
-        if( this.oldr !== null ){ 
+        if ( this.oldr !== null ) {
+            let dif = this.r - this.oldr;
+            if ( Math.abs( dif ) > Math.PI ) {
+                if ( !this.isCyclic ) this.r = dif > 0 ? 0 : this.twoPi;
+            }
+        }
+
+        let value = this.r / this.twoPi;
+        let n = Math.trunc( ( ( ( this.range * value ) + this.min ) - this.old ) / this.step );
+
+        if ( n !== 0 ) {
+            this.value = this.numValue( this.old + ( n * this.step ) );
+            this.update( true );
+            this.old = this.value;
+            this.oldr = this.r;
+            return true;
+        }
+
+        /*if( this.oldr !== null ){ 
 
             let dif = this.r - this.oldr;
             this.r = Math.abs(dif) > Math.PI ? this.oldr : this.r;
@@ -3800,7 +3916,10 @@ class Circular extends Proto {
             this.update( true );
             this.old = this.value;
             this.oldr = this.r;
-        }
+            return true;
+        }*/
+
+        return false;
 
     }
 
@@ -3863,6 +3982,13 @@ class Circular extends Proto {
         if( up ) this.send();
         
     }
+
+    /*rSize () {
+
+        super.rSize();
+        this.s[3].left = Math.floor( ( this.w - this.diam ) * 0.5 ) + 'px';
+
+    }*/
 
 }
 
@@ -5902,6 +6028,9 @@ class Knob extends Proto {
         this.c[0].style.width = this.w +'px';
         this.c[0].style.display = 'block';
 
+        this.top = 0;
+        this.isDown = false;
+
 
         if(this.c[1] !== undefined) {
 
@@ -5925,7 +6054,7 @@ class Knob extends Proto {
         this.setSvg( this.c[3], 'stroke', cc.text, 4 );
         this.setSvg( this.c[3], 'd', this.makeGrad(), 4 );
         
-        this.setSvg( this.c[3], 'viewBox', '0 0 ' + this.diam + ' ' + this.diam );
+        this.setSvg( this.c[3], 'viewBox', '0 0 128 128' );
         this.setCss( this.c[3], { width:this.diam, height:this.diam, left:0, top:this.top });
 
         if ( this.model > 0 ) {
@@ -6013,8 +6142,8 @@ class Knob extends Proto {
 
     mouseup ( e ) {
 
+        if ( this.isDown ) this.sendEnd();
         this.isDown = false;
-        this.sendEnd();
         return this.mode(0)
 
     }
@@ -6030,6 +6159,45 @@ class Knob extends Proto {
     }
 
     mousemove ( e ) {
+
+        if ( !this.isDown ) {
+            let name = this.testZone( e );
+            if ( name === 'circular' || name === 'knob' ) {
+                this.cursor('pointer');
+                return this.mode(1);
+            }
+            return this.reset();
+        }
+
+        this.cursor('pointer');
+
+        let off = this.offset;
+        off.x = ( this.w * 0.5 ) - ( e.clientX - this.zone.x );
+        off.y = ( this.diam * 0.5 ) - ( e.clientY - this.zone.y - this.ytop );
+
+        this.r = -Math.atan2( off.x, off.y );
+
+        if ( this.oldr !== null ) this.r = Math.abs( this.r - this.oldr ) > Math.PI ? this.oldr : this.r;
+
+        this.r = this.r > this.mPI ? this.mPI : this.r;
+        this.r = this.r < -this.mPI ? -this.mPI : this.r;
+
+        let value = ( this.r + this.mPI ) / this.cirRange;
+        let n = Math.trunc( ( ( ( this.range * value ) + this.min ) - this.old ) / this.step );
+
+        if ( n !== 0 ) {
+            this.value = this.numValue( this.old + ( n * this.step ) );
+            this.update( true );
+            this.old = this.value;
+            this.oldr = this.r;
+            return true;
+        }
+
+        return false;
+
+    }
+
+    /*mousemove ( e ) {
 
         //if( !this.isDown ) return;
 
@@ -6072,7 +6240,7 @@ class Knob extends Proto {
             this.oldr = this.r;
         }
 
-    }
+    }*/
 
     wheel ( e ) {
 
@@ -6153,7 +6321,8 @@ class Knob extends Proto {
             let y1 = 36 * Math.cos( sa ) + 64;
             let x2 = 36 * sin + 64;
             let y2 = -36 * cos + 64;
-            let big = ea <= Math.PI - this.mPI ? 0 : 1;
+            //let big = ea <= Math.PI - this.mPI ? 0 : 1;
+            let big = ( this.percent * this.cirRange ) > Math.PI ? 1 : 0;
             this.setSvg( this.c[3], 'd', 'M ' + x1 + ',' + y1 + ' A ' + 36 + ',' + 36 + ' 1 ' + big + ' 1 ' + x2 + ',' + y2, 5 );
 
             let color = Tools.pack( Tools.lerpColor( this.colors01, this.colors02, this.percent ) );
@@ -6164,6 +6333,13 @@ class Knob extends Proto {
         if( up ) this.send();
         
     }
+
+    /*rSize () {
+
+        super.rSize();
+        this.s[3].left = Math.floor( ( this.w - this.diam ) * 0.5 ) + 'px';
+
+    }*/
 
 }
 
@@ -8283,6 +8459,29 @@ class Title extends Proto {
 
     constructor( o = {} ) {
 
+        if ( !o.name && !o.txt ) o.name = ' ';
+        super( o );
+
+        this.isTitle = true;
+
+        const s1 = this.s[1];
+        const align = o.align || 'left';
+
+        s1.justifyContent = align === 'right' ? 'flex-start' : ( align === 'center' ? 'center' : 'flex-end' );
+        s1.textAlign = align;
+        if ( o.fontSize ) s1.fontSize = typeof o.fontSize === 'number' ? o.fontSize + 'px' : o.fontSize;
+        s1.fontWeight = o.weight || 'normal';
+        s1.color = o.color || this.colors.text;
+
+        this.text( this.txt );
+        this.init();
+
+    }
+
+    handleEvent () { return false; }
+
+    /*constructor( o = {} ) {
+
         super( o );
 
         this.isTitle = true;
@@ -8296,24 +8495,22 @@ class Title extends Proto {
         s[1].color = o.color || this.colors.text;
 
 
-        this.c[1].innerHTML = this.txt;//.substring(0,1).toUpperCase() + this.txt.substring(1).replace("-", " ");
+        this.c[1].innerHTML = this.txt//.substring(0,1).toUpperCase() + this.txt.substring(1).replace("-", " ");
         //this.c[2].textContent = prefix;
 
         this.init();
 
-    }
+    }*/
 
     text( txt ) {
 
-        this.c[1].innerHTML = txt;
+        const el = this.c[1];
+        if ( !el ) return;
+        if ( typeof txt === 'string' && txt.indexOf( '<' ) !== -1 ) el.innerHTML = txt;
+        else el.textContent = txt;
 
     }
 
-    text2( txt ) {
-
-        //this.c[2].textContent = txt;
-
-    }
 
     rSize() {
 
@@ -8325,7 +8522,6 @@ class Title extends Proto {
 
     setColor( c ) {
         this.s[1].color = c;
-        //this.s[2].color = c
     }
 
 }

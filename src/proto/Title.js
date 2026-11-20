@@ -5,6 +5,29 @@ export class Title extends Proto {
 
     constructor( o = {} ) {
 
+        if ( !o.name && !o.txt ) o.name = ' ';
+        super( o );
+
+        this.isTitle = true;
+
+        const s1 = this.s[1];
+        const align = o.align || 'left';
+
+        s1.justifyContent = align === 'right' ? 'flex-start' : ( align === 'center' ? 'center' : 'flex-end' );
+        s1.textAlign = align;
+        if ( o.fontSize ) s1.fontSize = typeof o.fontSize === 'number' ? o.fontSize + 'px' : o.fontSize;
+        s1.fontWeight = o.weight || 'normal';
+        s1.color = o.color || this.colors.text;
+
+        this.text( this.txt );
+        this.init();
+
+    }
+
+    handleEvent () { return false; }
+
+    /*constructor( o = {} ) {
+
         super( o );
 
         this.isTitle = true;
@@ -23,19 +46,17 @@ export class Title extends Proto {
 
         this.init();
 
-    }
+    }*/
 
     text( txt ) {
 
-        this.c[1].innerHTML = txt;
+        const el = this.c[1];
+        if ( !el ) return;
+        if ( typeof txt === 'string' && txt.indexOf( '<' ) !== -1 ) el.innerHTML = txt;
+        else el.textContent = txt;
 
     }
 
-    text2( txt ) {
-
-        //this.c[2].textContent = txt;
-
-    }
 
     rSize() {
 
@@ -47,7 +68,6 @@ export class Title extends Proto {
 
     setColor( c ) {
         this.s[1].color = c
-        //this.s[2].color = c
     }
 
 }

@@ -12,57 +12,24 @@ export class Files {
         let t = []
 
         switch( type ){
-            case 'svg':
-            t = [ { accept: { 'image/svg+xml': '.svg'} }, ]
-            break;
-            case 'wav':
-            t = [ { accept: { 'audio/wav': '.wav'} }, ]
-            break;
-            case 'mp3':
-            t = [ { accept: { 'audio/mpeg': '.mp3'} }, ]
-            break;
-            case 'mp4':
-            t = [ { accept: { 'video/mp4': '.mp4'} }, ]
-            break;
-            case 'bin': case 'hex':
-            t = [ { description: 'Binary Files', accept: { 'application/octet-stream': ['.bin', '.hex'] } }, ]
-            break;
-            case 'text':
-            t = [ { description: 'Text Files', accept: { 'text/plain': ['.txt', '.text'], 'text/html': ['.html', '.htm'] } }, ]
-            break;
-            case 'json':
-            t = [ { description: 'JSON Files', accept: { 'application/json': ['.json'] } }, ]//text/plain
-            break;
-            case 'js':
-            t = [ { description: 'JavaScript Files', accept: { 'text/javascript': ['.js'] } }, ]
-            break;
-            case 'ktx2':
-            t = [ { description: 'ktx2', accept: { 'image/ktx2': ['.ktx2'] } }, ]
-            break;
-            case 'image':
-            t = [ { description: 'Images', accept: { 'image/*': ['.png', '.gif', '.jpeg', '.jpg', '.hdr', '.exr'] } }, ]
-            break;
-            case 'gif':
-            t = [ { description: 'Images', accept: { 'image/*': ['.gif'] } }, ]
-            break;
-            case 'png':
-            t = [ { description: 'Images', accept: { 'image/*': ['.png'] } }, ]
-            break;
-            case 'exr':
-            t = [ { description: 'Images', accept: { 'image/exr': ['.exr'] } }, ]
-            break;
-            case 'hdr':
-            t = [ { description: 'Images', accept: { 'image/hdr': ['.hdr'] } }, ]
-            break;
-            case 'jpg':
-            t = [ { description: 'Images', accept: { 'image/*': ['.jpg', '.jpeg'] } }, ]
-            break;
-            case 'icon':
-            t = [ { description: 'Icons', accept: { 'image/x-ico': ['.ico'] } }, ]
-            break;
-            case 'lut':
-            t = [ { description: 'Lut', accept: { 'text/plain': ['.cube', '.3dl'] } }, ]
-            break;
+
+            case 'svg': t = [ { description: 'SVG', accept: { 'image/svg+xml': ['.svg'] } } ]; break;
+            case 'wav': t = [ { description: 'WAV', accept: { 'audio/wav': ['.wav'] } } ]; break;
+            case 'mp3': t = [ { description: 'MP3', accept: { 'audio/mpeg': ['.mp3'] } } ]; break;
+            case 'mp4': t = [ { description: 'MP4', accept: { 'video/mp4': ['.mp4'] } } ]; break;
+            case 'bin': case 'hex': t = [ { description: 'Binary Files', accept: { 'application/octet-stream': ['.bin', '.hex'] } }, ]; break;
+            case 'text': t = [ { description: 'Text Files', accept: { 'text/plain': ['.txt', '.text'], 'text/html': ['.html', '.htm'] } }, ]; break;
+            case 'json': t = [ { description: 'JSON Files', accept: { 'application/json': ['.json'] } }, ]; break;
+            case 'js': t = [ { description: 'JavaScript Files', accept: { 'text/javascript': ['.js'] } }, ]; break;
+            case 'ktx2': t = [ { description: 'ktx2', accept: { 'image/ktx2': ['.ktx2'] } }, ]; break;
+            case 'image': t = [ { description: 'Images', accept: { 'image/*': ['.png', '.gif', '.jpeg', '.jpg', '.hdr', '.exr'] } }, ]; break;
+            case 'gif': t = [ { description: 'Images', accept: { 'image/*': ['.gif'] } }, ]; break;
+            case 'png': t = [ { description: 'Images', accept: { 'image/*': ['.png'] } }, ]; break;
+            case 'exr': t = [ { description: 'Images', accept: { 'image/exr': ['.exr'] } }, ]; break;
+            case 'hdr': t = [ { description: 'Images', accept: { 'image/hdr': ['.hdr'] } }, ]; break;
+            case 'jpg': t = [ { description: 'Images', accept: { 'image/*': ['.jpg', '.jpeg'] } }, ]; break;
+            case 'icon': t = [ { description: 'Icons', accept: { 'image/x-ico': ['.ico'] } }, ]; break;
+            case 'lut': t = [ { description: 'Lut', accept: { 'text/plain': ['.cube', '.3dl'] } }, ]; break;
 
         }
 
@@ -75,7 +42,112 @@ export class Files {
     //  LOAD
     //-----------------------------
 
-	static async load( o = {} ) {
+    //• Avec await (moderne) : const img = await Files.load({ type: 'image' });
+    //• Avec callback (existant) : Files.load({ type: 'image', callback: (img, name) => ... });
+
+
+    /*
+    const res = await Files.load({ type: 'image' });
+    if ( res ) {
+        const { data, name, type, dim, bytes } = res;
+        console.log( name, dim, bytes );
+    }
+    */
+
+    static async load( o = {} ) {
+
+        if ( typeof window.showOpenFilePicker !== 'function' ) {
+            window.showOpenFilePicker = Files.showOpenFilePickerPolyfill;
+        }
+
+        try {
+
+            let type = o.type || '';
+
+            const options = {
+                excludeAcceptAllOption: Boolean( type ),
+                multiple: false,
+            };
+
+            options.types = Files.autoTypes( type );
+
+            const [ fileHandle ] = await window.showOpenFilePicker( options );
+            const file = await fileHandle.getFile();
+
+            if ( !file ) return null;
+
+            const fname = file.name;
+            const ftype = fname.substring( fname.lastIndexOf('.') + 1 ).toLowerCase();
+            const bytes = file.size;
+
+            const dataUrl = [ 'png', 'jpg', 'jpeg', 'gif', 'webp', 'mp4', 'webm', 'ogg', 'mp3' ];
+            const dataBuf = [ 'sea', 'z', 'hex', 'bvh', 'glb', 'gltf', 'exr', 'ktx2', 'hdr', 'bin' ];
+
+            return await new Promise( ( resolve, reject ) => {
+
+                const reader = new FileReader();
+
+                const cleanup = () => {
+                    reader.removeEventListener( 'load', onLoad );
+                    reader.removeEventListener( 'error', onError );
+                };
+
+                const onError = ( err ) => {
+                    cleanup();
+                    reject( err );
+                };
+
+                const onLoad = ( e ) => {
+                    const content = e.target.result;
+                    cleanup();
+
+                    if ( type === 'image' && typeof content === 'string' ) {
+                        const img = new Image();
+                        img.onload = () => {
+                            const dim = [ img.width, img.height ];
+                            if ( o.callback ) o.callback( img, fname, ftype, dim );
+                            resolve( { data: img, name: fname, type: ftype, bytes, dim } );
+                        };
+                        img.onerror = reject;
+                        img.src = content;
+                    } else if ( type === 'json' ) {
+                        const json = JSON.parse( content );
+                        if ( o.callback ) o.callback( json, fname, ftype );
+                        resolve( { data: json, name: fname, type: ftype, bytes } );
+                    } else {
+                        if ( o.callback ) o.callback( content, fname, ftype );
+                        resolve( { data: content, name: fname, type: ftype, bytes } );
+                    }
+                };
+
+                reader.addEventListener( 'load', onLoad );
+                reader.addEventListener( 'error', onError );
+
+                if ( o.forceType === 'ArrayBuffer' ) {
+                    reader.readAsArrayBuffer( file );
+                } else if ( dataUrl.includes( ftype ) ) {
+                    reader.readAsDataURL( file );
+                } else if ( dataBuf.includes( ftype ) ) {
+                    reader.readAsArrayBuffer( file );
+                } else {
+                    reader.readAsText( file );
+                }
+
+            });
+
+        } catch ( e ) {
+
+            console.log( e );
+            if ( o.always && o.callback ) o.callback( null );
+            return null;
+
+        }
+
+    }
+
+
+
+	/*static async load( o = {} ) {
 
         if (typeof window.showOpenFilePicker !== 'function') {
             window.showOpenFilePicker = Files.showOpenFilePickerPolyfill
@@ -101,11 +173,15 @@ export class Files {
             if( !file ) return null
 
             let fname = file.name;
-            let ftype = fname.substring( fname.lastIndexOf('.')+1, fname.length );
+            let ftype = fname.substring( fname.lastIndexOf('.') + 1 ).toLowerCase();
+            //let ftype = fname.substring( fname.lastIndexOf('.')+1, fname.length );
             let realType = ''
 
-            const dataUrl = [ 'png', 'jpg', 'jpeg', 'mp4', 'webm', 'ogg', 'mp3' ];
-            const dataBuf = [ 'sea', 'z', 'hex', 'bvh', 'BVH', 'glb', 'gltf', 'exr', 'ktx2', 'hdr' ];
+            const dataUrl = [ 'png', 'jpg', 'jpeg', 'gif', 'webp', 'mp4', 'webm', 'ogg', 'mp3' ];
+            const dataBuf = [ 'sea', 'z', 'hex', 'bvh', 'glb', 'gltf', 'exr', 'ktx2', 'hdr', 'bin' ];
+
+            //const dataUrl = [ 'png', 'jpg', 'jpeg', 'mp4', 'webm', 'ogg', 'mp3' ];
+            //const dataBuf = [ 'sea', 'z', 'hex', 'bvh', 'BVH', 'glb', 'gltf', 'exr', 'ktx2', 'hdr' ];
             const reader = new FileReader();
 
             const cleanupReader = () => reader.removeEventListener('load', onLoad);
@@ -155,9 +231,10 @@ export class Files {
 
         }
 
-    }
+    }*/
 
 	static showOpenFilePickerPolyfill( options ) {
+
         return new Promise((resolve) => {
             const input = document.createElement("input");
             input.type = "file";
@@ -169,7 +246,13 @@ export class Files {
 
             const cleanup = () => {
                 input.removeEventListener("change", onChange);
+                input.removeEventListener( "cancel", onCancel );
                 if (input.parentNode) input.parentNode.removeChild(input);
+            };
+
+            const onCancel = () => {
+                cleanup();
+                reject( new Error('Cancelled') );
             };
 
             const onChange = (e) => {
@@ -181,22 +264,10 @@ export class Files {
                 cleanup(); // Nettoyage immédiat
             };
 
-            input.addEventListener("change", onChange)
-
-            /*input.addEventListener("change", () => {
-                resolve(
-                    [...input.files].map((file) => {
-                        return {
-                            getFile: async () =>
-                                new Promise((resolve) => {
-                                    resolve(file);
-                                }),
-                        };
-                    })
-                );
-            });*/
-
+            input.addEventListener( "change", onChange );
+            input.addEventListener( "cancel", onCancel );
             input.click();
+
         })
     }
 
@@ -224,8 +295,16 @@ export class Files {
             };
 
             options.types = Files.autoTypes( type )
-            options.finalType = Object.keys( options.types[0].accept )[0]
-            options.suggestedName += options.types[0].accept[options.finalType][0]
+
+            if ( options.types.length > 0 ) {
+                options.finalType = Object.keys( options.types[0].accept )[0];
+                const ext = options.types[0].accept[ options.finalType ][0];
+                if ( !options.suggestedName.endsWith( ext ) ) options.suggestedName += ext;
+            } else {
+                options.finalType = 'text/plain';
+            }
+            //options.finalType = Object.keys( options.types[0].accept )[0]
+            //options.suggestedName += options.types[0].accept[options.finalType][0]
 
 
             // create a new handle
@@ -253,6 +332,7 @@ export class Files {
     }
 
     static showSaveFilePickerPolyfill( options ) {
+
         return new Promise((resolve) => {
             const a = document.createElement("a");
             a.download = options.suggestedName || "my-file.txt"
@@ -292,8 +372,10 @@ export class Files {
             const handle = await window.showDirectoryPicker();
             const files = [];
             for await (const entry of handle.values()) {
-                const file = await entry.getFile();
-                files.push(file);
+                if ( entry.kind === 'file' ) {
+                    const file = await entry.getFile();
+                    files.push( file );
+                }
             }
 
             console.log(files)

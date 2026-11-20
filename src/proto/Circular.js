@@ -32,6 +32,9 @@ export class Circular extends Proto {
         this.c[0].style.width = this.w +'px'
         this.c[0].style.display = 'block'
 
+        this.top = 0;
+        this.isDown = false;
+
         if(this.c[1] !== undefined) {
 
             this.c[1].style.width = '100%'
@@ -57,7 +60,7 @@ export class Circular extends Proto {
         this.setSvg( this.c[3], 'd', this.makePath(), 1 )
         this.setSvg( this.c[3], 'stroke', cc.text, 1 )
 
-        this.setSvg( this.c[3], 'viewBox', '0 0 '+this.diam+' '+this.diam )
+        this.setSvg( this.c[3], 'viewBox', '0 0 128 128' );
         this.setCss( this.c[3], { width:this.diam, height:this.diam, left:0, top:this.top })
 
         if ( this.model > 0 ) {
@@ -80,7 +83,20 @@ export class Circular extends Proto {
         let color
 
         switch( mode ){
+
             case 0: // base
+                this.s[2].color = cc.text;
+                this.setSvg( this.c[3], 'stroke', cc.back, 0 );
+                color = this.model > 0 ? Tools.pack( Tools.lerpColor( this.colors01, this.colors02, this.percent ) ) : cc.text;
+                this.setSvg( this.c[3], 'stroke', color, 1 );
+            break;
+            case 1: // down
+                this.s[2].color = cc.textOver;
+                this.setSvg( this.c[3], 'stroke', cc.backoff, 0 );
+                color = this.model > 0 ? Tools.pack( Tools.lerpColor( this.colors01, this.colors02, this.percent ) ) : cc.textOver;
+                this.setSvg( this.c[3], 'stroke', color, 1 );
+            break;
+            /*case 0: // base
 
                 this.s[2].color = cc.text;
                 this.setSvg( this.c[3], 'stroke', cc.back, 0);
@@ -95,7 +111,7 @@ export class Circular extends Proto {
                 color = this.model > 0 ? Tools.pack( Tools.lerpColor( Tools.unpack( Tools.ColorLuma( cc.text, -0.75) ), Tools.unpack( cc.text ), this.percent ) ) : cc.textOver
                 this.setSvg( this.c[3], 'stroke', color, 1 );
                 
-            break;
+            break;*/
         }
 
         this.cmode = mode;
@@ -131,8 +147,8 @@ export class Circular extends Proto {
 
     mouseup ( e ) {
 
+        if ( this.isDown ) this.sendEnd()
         this.isDown = false;
-        this.sendEnd();
         return this.mode(0);
 
     }
@@ -168,7 +184,25 @@ export class Circular extends Proto {
         this.r = off.angle() - this.pi90;
         this.r = (((this.r%this.twoPi)+this.twoPi)%this.twoPi);
 
-        if( this.oldr !== null ){ 
+        if ( this.oldr !== null ) {
+            let dif = this.r - this.oldr;
+            if ( Math.abs( dif ) > Math.PI ) {
+                if ( !this.isCyclic ) this.r = dif > 0 ? 0 : this.twoPi;
+            }
+        }
+
+        let value = this.r / this.twoPi;
+        let n = Math.trunc( ( ( ( this.range * value ) + this.min ) - this.old ) / this.step );
+
+        if ( n !== 0 ) {
+            this.value = this.numValue( this.old + ( n * this.step ) );
+            this.update( true );
+            this.old = this.value;
+            this.oldr = this.r;
+            return true;
+        }
+
+        /*if( this.oldr !== null ){ 
 
             let dif = this.r - this.oldr;
             this.r = Math.abs(dif) > Math.PI ? this.oldr : this.r;
@@ -189,7 +223,10 @@ export class Circular extends Proto {
             this.update( true );
             this.old = this.value;
             this.oldr = this.r;
-        }
+            return true;
+        }*/
+
+        return false;
 
     }
 
@@ -252,5 +289,12 @@ export class Circular extends Proto {
         if( up ) this.send();
         
     }
+
+    /*rSize () {
+
+        super.rSize();
+        this.s[3].left = Math.floor( ( this.w - this.diam ) * 0.5 ) + 'px';
+
+    }*/
 
 }
