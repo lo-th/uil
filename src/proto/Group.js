@@ -191,7 +191,7 @@ export class Group extends Proto {
 
 
 
-            //this.cursor()
+            this.cursor()
 
             //if( this.marginDiv ) e.clientY -= this.margin * 0.5
 
@@ -427,6 +427,7 @@ export class Group extends Proto {
         this.setSvg( this.c[3], 'd', this.svgs.g1 );
 
         this.h = this.baseH;
+        this.zone.h = this.h;
 
         const s = this.s;
         const cc = this.colors;
@@ -516,7 +517,17 @@ export class Group extends Proto {
         s[1].left = this.decal + 'px'
         s[2].left = this.decal + 'px'
 
-        if( this.isOpen ) this.rSizeContent()
+        this.zone.w = w;
+
+        if ( this.isOpen ) {
+            this.rSizeContent( w );
+            this.calcUis();
+        }
+
+        if ( this.isUI && !this.group ) this.main.calc();
+        Roots.needReZone = true;
+
+        //if( this.isOpen ) this.rSizeContent()
 
     }
 

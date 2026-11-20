@@ -121,7 +121,8 @@
 
 				UIL.Tools.texture = THREE.Texture;
 
-				let ui = new UIL.Gui()
+				let ui = new UIL.Gui({topClose: 'right'})
+				ui.add( 'title',  { name:'OPTION ', weight:'bold', align:'center' })
 				ui.add( mesh, 'position',  { h:30 })
 
 				ui.add( setting, 'size', { min:30, max:300, precision:0 } ).onChange( function( s ){ mesh.scale.set(1,1,1).multiplyScalar( s ); } )

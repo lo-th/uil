@@ -3,7 +3,7 @@
  * @author lth / https://github.com/lo-th
  */
 
-export const REVISION = '5.0.0';
+export const REVISION = '5.0.1';
 
 // INTENAL FUNCTION
 
@@ -233,6 +233,7 @@ const R = {
 
     resize: () => {
 
+        R.needResize = false;
         if (R.resizeTimeout) clearTimeout(R.resizeTimeout);
 
         R.resizeTimeout = setTimeout( () => {
@@ -250,7 +251,6 @@ const R = {
             }
 
             R.needReZone = true;
-            R.needResize = false;
             R.resizeTimeout = null;
 
         }, 100);

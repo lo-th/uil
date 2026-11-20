@@ -17,7 +17,10 @@ export class Joystick extends Proto {
         this.joyType = 'analogique';
         this.model = o.mode !== undefined ? o.mode : 0;
 
-        this.precision = o.precision || 2;
+        this.precision = o.precision !== undefined ? o.precision : 2;
+        this.isDown = false;
+        this.cmode = -1;
+
         this.multiplicator = o.multiplicator || 1;
 
         this.pos = new V2();
@@ -50,8 +53,12 @@ export class Joystick extends Proto {
         this.c[2].textContent = this.haveText ? this.value : '';
 
         this.c[3] = this.getJoystick( this.model );
-        this.setSvg( this.c[3], 'viewBox', '0 0 '+this.diam+' '+this.diam );
-        this.setCss( this.c[3], { width:this.diam, height:this.diam, left:0, top:this.top });
+        //this.setSvg( this.c[3], 'viewBox', '0 0 '+this.diam+' '+this.diam );
+        //this.setCss( this.c[3], { width:this.diam, height:this.diam, left:0, top:this.top });
+
+        this.setSvg( this.c[3], 'viewBox', '0 0 128 128' );
+        this.setCss( this.c[3], { width:this.diam, height:this.diam, left:0, top:this.top } );
+        this.ratio = 128 / this.diam;
 
         this.mode(0)
 
@@ -65,6 +72,40 @@ export class Joystick extends Proto {
     }
 
     mode ( mode ) {
+
+        if ( this.cmode === mode ) return false;
+        this.cmode = mode;
+
+        let cc = this.colors;
+
+        switch ( mode ) {
+            case 0: // base
+                if ( this.model === 0 ) {
+                    this.setSvg( this.c[3], 'fill', 'url(#gradIn)', 4 );
+                    this.setSvg( this.c[3], 'stroke', '#000', 4 );
+                } else {
+                    this.setSvg( this.c[3], 'stroke', cc.joyOut, 2 );
+                    this.setSvg( this.c[3], 'stroke', cc.joyOut, 4 );
+                    this.setSvg( this.c[3], 'fill', 'none', 4 );
+                }
+            break;
+            case 1: // over
+                if ( this.model === 0 ) {
+                    this.setSvg( this.c[3], 'fill', 'url(#gradIn2)', 4 );
+                    this.setSvg( this.c[3], 'stroke', 'rgba(0,0,0,0)', 4 );
+                } else {
+                    this.setSvg( this.c[3], 'stroke', cc.joyOver, 2 );
+                    this.setSvg( this.c[3], 'stroke', cc.joySelect, 4 );
+                    this.setSvg( this.c[3], 'fill', cc.joyOver, 4 );
+                }
+            break;
+        }
+
+        return true;
+
+    }
+
+    /*mode ( mode ) {
 
         let cc = this.colors
 
@@ -96,7 +137,7 @@ export class Joystick extends Proto {
             break;
 
         }
-    }
+    }*/
 
     // ----------------------
     //   EVENTS
@@ -105,7 +146,7 @@ export class Joystick extends Proto {
     addInterval (){
         if( this.interval !== null ) this.stopInterval();
         if( this.pos.isZero() ) return;
-        this.interval = setInterval( function(){ this.update(); }.bind(this), 10 );
+        this.interval = setInterval( () => this.update(), 10 )
 
     }
 
@@ -119,15 +160,22 @@ export class Joystick extends Proto {
 
     reset () {
 
+        this.isDown = false;
         this.addInterval();
-        this.mode(0);
+        this.cursor();
+        return this.mode( 0 );
 
     }
 
     mouseup ( e ) {
 
-        this.addInterval();
-        this.isDown = false;
+        if ( this.isDown ) {
+            this.isDown = false;
+            this.addInterval();
+            this.sendEnd();
+            return this.mousemove( e );
+        }
+        return false;
     
     }
 
@@ -140,6 +188,31 @@ export class Joystick extends Proto {
     }
 
     mousemove ( e ) {
+
+        let nup = this.mode( 1 );
+        this.cursor( this.isDown ? 'move' : 'pointer' );
+
+        if ( !this.isDown ) return nup;
+
+        this.tmp.x = ( this.w * 0.5 ) - ( e.clientX - this.zone.x );
+        this.tmp.y = ( this.diam * 0.5 ) - ( e.clientY - this.zone.y - this.ytop );
+
+        let distance = this.tmp.length();
+
+        if ( distance > this.distance ) {
+            let angle = Math.atan2( this.tmp.x, this.tmp.y );
+            this.tmp.x = Math.sin( angle ) * this.distance;
+            this.tmp.y = Math.cos( angle ) * this.distance;
+        }
+
+        this.pos.copy( this.tmp ).divideScalar( this.distance ).negate();
+        this.update();
+
+        return true;
+
+    }
+
+    /*mousemove ( e ) {
 
         this.mode(1);
 
@@ -163,7 +236,7 @@ export class Joystick extends Proto {
 
         this.update();
 
-    }
+    }*/
 
     setValue ( v ) {
 
@@ -242,8 +315,19 @@ export class Joystick extends Proto {
     }
 
     dispose(){
+
+        this.stopInterval();
         super.dispose();
         this.clear()
+        
+    }
+
+    rSize () {
+
+        super.rSize();
+        let x = Math.floor( ( this.w - this.diam ) * 0.5 );
+        this.s[3].left = x + 'px';
+
     }
 
 }

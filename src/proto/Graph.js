@@ -1,5 +1,5 @@
 import { Proto } from '../core/Proto.js';
-import { V2 } from '../core/V2.js';
+//import { V2 } from '../core/V2.js';
 
 export class Graph extends Proto {
 
@@ -49,13 +49,17 @@ export class Graph extends Proto {
         this.gh = this.rh - 28;
         this.gw = this.w - 28;
 
-        //this.c[2] = this.dom( 'div', this.css.txt + 'justify-content:center; text-align: justify; column-count:'+this.lng+'; top:'+(this.h-20)+'px; width:100%; color:'+ this.colors.text );
+      
+        //this.c[2] = this.dom( 'div', this.css.txt + 'display:block; text-align:center; padding:0px 0px; top:'+(this.h-20)+'px; left:14px; width:'+this.gw+'px;  color:'+ this.colors.text );
+        //this.c[2].innerHTML = this.valueToHtml();
 
-        //let colum = 'column-count:'+this.lng+'; column:'+this.lng+'; break-inside: column; top:'
-        this.c[2] = this.dom( 'div', this.css.txt + 'display:block; text-align:center; padding:0px 0px; top:'+(this.h-20)+'px; left:14px; width:'+this.gw+'px;  color:'+ this.colors.text );
-       
-        //this.c[2].textContent = this.value;
-        this.c[2].innerHTML = this.valueToHtml();
+        this.c[ 2 ] = this.dom( 'div', this.css.txt + 'display:flex; justify-content:space-between; text-align:center; padding:0px; top:' + (this.h - 20) + 'px; left:14px; width:' + this.gw + 'px; color:' + this.colors.text );
+        this.txts = [];
+        for ( let i = 0; i < this.lng; i++ ) {
+            const sp = this.dom( 'span', 'flex:1; text-align:center;' );
+            this.c[ 2 ].appendChild( sp );
+            this.txts.push( sp );
+        }
 
         let svg = this.dom( 'svg', this.css.basic , { viewBox:'0 0 '+this.w+' '+this.rh, width:this.w, height:this.rh, preserveAspectRatio:'none' } );
         this.setCss( svg, { width:this.w, height:this.rh, left:0, top:this.top });
@@ -111,7 +115,7 @@ export class Graph extends Proto {
 
     }
 
-    valueToHtml() {
+    /*valueToHtml() {
 
         let i = this.lng, n=0, r = '<table style="width:100%;"><tr>'
         let w = 100 / this.lng
@@ -122,7 +126,7 @@ export class Graph extends Proto {
             n++
         }
         return r
-    }
+    }*/
 
     updateSVG () {
 
@@ -135,10 +139,12 @@ export class Graph extends Proto {
             if( this.neg ) this.value[i] = ( ((this.v[i]*2)-1) * this.multiplicator ).toFixed( this.precision ) * 1;
             else this.value[i] = ( (this.v[i] * this.multiplicator) ).toFixed( this.precision ) * 1;
 
+            this.txts[ (this.lng-1)-i ].textContent = this.value[ i ];
+
         }
 
         //this.c[2].textContent = this.value;
-        this.c[2].innerHTML = this.valueToHtml();
+        //this.c[2].innerHTML = this.valueToHtml();
 
     }
 
@@ -207,8 +213,15 @@ export class Graph extends Proto {
 
     mouseup ( e ) {
 
-        this.isDown = false;
-        if( this.current !== -1 ) return this.reset();
+        if ( this.isDown ) {
+            this.isDown = false;
+            this.sendEnd();
+            return this.mousemove( e );
+        }
+        return false;
+
+        //this.isDown = false;
+        //if( this.current !== -1 ) return this.reset();
         
     }
 
@@ -237,6 +250,7 @@ export class Graph extends Proto {
             if(this.isDown){
             	this.v[name] = this.clamp( 1 - (( e.clientY - this.zone.y - this.ytop - 10 ) / this.gh) , 0, 1 );
             	this.update( true );
+                nup = true;
             }
 
         }
@@ -281,6 +295,33 @@ export class Graph extends Proto {
 
     }
 
+    /*rSize () {
+        super.rSize();
+
+        let s = this.s;
+        if ( this.c[ 1 ] !== undefined ) s[ 1 ].width = this.w + 'px';
+
+        this.gw = this.w - 28;
+        this.iw = ( this.gw - ( 4 * ( this.lng - 1 ) ) ) / this.lng;
+
+        s[ 2 ].width = this.gw + 'px';
+        s[ 3 ].width = this.w + 'px';
+        this.setSvg( this.c[ 3 ], 'viewBox', '0 0 ' + this.w + ' ' + this.rh );
+        this.setSvg( this.c[ 3 ], 'width', this.w );
+        this.setSvg( this.c[ 3 ], 'width', this.gw + 8, 1 );
+
+        for ( let i = 0; i < this.lng; i++ ) {
+            const x = 14 + ( i * this.iw ) + ( i * 4 );
+            this.tmp[ i ][ 0 ] = x;
+            this.tmp[ i ][ 1 ] = this.iw;
+            this.tmp[ i ][ 2 ] = x + this.iw;
+           //this.setSvg( this.c[ 3 ], 'x', x, i + 2 );
+            //this.setSvg( this.c[ 3 ], 'width', this.iw, i + 2 );
+        }
+
+        //this.updateSVG();
+    }*/
+
     rSize () {
 
         super.rSize();
@@ -297,12 +338,17 @@ export class Graph extends Proto {
 
         for( let i = 0; i < this.lng; i++ ){
 
-            t[i] = [ 14 + (i*iw) + (i*4), iw ]
-            t[i][2] = t[i][0] + t[i][1]
+            const x = 14 + ( i * iw ) + ( i * 4 );
+            this.tmp[ i ][ 0 ] = x;
+            this.tmp[ i ][ 1 ] = iw;
+            this.tmp[ i ][ 2 ] = x + iw;
+
+            //t[i] = [ 14 + (i*iw) + (i*4), iw ]
+            //t[i][2] = t[i][0] + t[i][1]
 
         }
 
-        this.tmp = t
+        //this.tmp = t
 
     }
 
