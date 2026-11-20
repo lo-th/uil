@@ -670,7 +670,7 @@ const R = {
 
         if( R.tmpTime !== null ) return;
 
-        if( R.lock ) R.tmpTime = setTimeout( ()=>{ R.tmpTime = null; }, 16 );
+        if( R.lock ) R.tmpTime = setTimeout( ()=>{ R.tmpTime = null; }, 8 );
 
 
         const targetW = Math.round( w * scale );
