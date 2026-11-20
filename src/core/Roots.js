@@ -57,7 +57,7 @@ const R = {
     firstImput: true,
     
     hiddenImput: null,
-    measureCtx: null, // Remplace hiddenSizer pour des mesures sans reflow DOM
+    //measureCtx: null, // Remplace hiddenSizer pour des mesures sans reflow DOM
     hiddenSizer: null,
     hasFocus: false,
     startInput: false,
@@ -868,22 +868,10 @@ const R = {
     textWidth: ( text ) => {
 
         if (!text) return 0;
+        if( R.parent === null ) return 0;
+        if(!R.hiddenSizer) R.setHidden();
 
-        if (!R.measureCtx) {
-            R.measureCtx = document.createElement('canvas').getContext('2d');
-        }
-
-        /*if (R.input) {
-            const s = window.getComputedStyle(R.input);
-            R.measureCtx.font = `${s.fontWeight} ${s.fontSize} ${s.fontFamily}`;
-        }*/
-
-        //if( R.hiddenSizer === null ) return 0;
-        text = text.replace(/ /g, '&nbsp;');
-        R.hiddenSizer.innerHTML = text;
-
-        //console.log(R.hiddenSizer.clientWidth, R.measureCtx.measureText(text).width)
-        //return R.measureCtx.measureText(text).width
+        R.hiddenSizer.innerHTML = text.replace( / /g, '&nbsp;' );
         return R.hiddenSizer.clientWidth;
 
     },

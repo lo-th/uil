@@ -86,8 +86,9 @@ export class TextInput extends Proto {
         if ( this.isDown ) {
             const el = this.c[ 2 ];
             const pad = 5 - this.colors.borderSize;
-            Roots.hiddenSizer.innerHTML = el.textContent.replace(/ /g, '&nbsp;');
-            const full = Roots.hiddenSizer.clientWidth;
+            //Roots.hiddenSizer.innerHTML = el.textContent.replace(/ /g, '&nbsp;');
+            const full = Roots.textWidth( el.textContent );
+            //const full = Roots.hiddenSizer.clientWidth;
             const w = el.clientWidth || ( this.sb - this.colors.borderSize * 2 )
             const left = w - pad - full;
             x = ( e.clientX - this.zone.x - this.sa ) - left;

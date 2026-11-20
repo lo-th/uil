@@ -156,14 +156,10 @@ export class Slide extends Proto {
             let x = 0;
             if ( this.isDown ) {
                 const el = this.c[ 2 ];
-                if ( Roots.hiddenSizer ) Roots.hiddenSizer.innerHTML = el.textContent.replace(/ /g, '&nbsp;');
-                const full = Roots.hiddenSizer ? Roots.hiddenSizer.clientWidth : 0;
+                const full = Roots.textWidth( el.textContent );
                 const elW = el.clientWidth || ( this.sc - 6 );
                 const left = elW - 5 - full;
                 x = ( e.clientX - this.zone.x - ( this.txl + 4 ) ) - left;
-                /*const full = Roots.hiddenSizer ? Roots.hiddenSizer.clientWidth : 0;
-                const left = el.clientWidth - 5 - full;
-                x = ( e.clientX - this.zone.x - 3 - ( this.txl + 4 ) ) - left;*/
             }
             return this.upInput( x, this.isDown );
             /*let x = 0;

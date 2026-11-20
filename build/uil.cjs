@@ -58,7 +58,7 @@ const R = {
     firstImput: true,
     
     hiddenImput: null,
-    measureCtx: null, // Remplace hiddenSizer pour des mesures sans reflow DOM
+    //measureCtx: null, // Remplace hiddenSizer pour des mesures sans reflow DOM
     hiddenSizer: null,
     hasFocus: false,
     startInput: false,
@@ -855,22 +855,10 @@ const R = {
     textWidth: ( text ) => {
 
         if (!text) return 0;
+        if( R.parent === null ) return 0;
+        if(!R.hiddenSizer) R.setHidden();
 
-        if (!R.measureCtx) {
-            R.measureCtx = document.createElement('canvas').getContext('2d');
-        }
-
-        /*if (R.input) {
-            const s = window.getComputedStyle(R.input);
-            R.measureCtx.font = `${s.fontWeight} ${s.fontSize} ${s.fontFamily}`;
-        }*/
-
-        //if( R.hiddenSizer === null ) return 0;
-        text = text.replace(/ /g, '&nbsp;');
-        R.hiddenSizer.innerHTML = text;
-
-        //console.log(R.hiddenSizer.clientWidth, R.measureCtx.measureText(text).width)
-        //return R.measureCtx.measureText(text).width
+        R.hiddenSizer.innerHTML = text.replace( / /g, '&nbsp;' );
         return R.hiddenSizer.clientWidth;
 
     },
@@ -3298,8 +3286,7 @@ class Bool extends Proto {
             let box = this.inh - 2;
             let t = Math.floor( (this.h - box) * 0.5 );
             this.inw = box;
-            this.c[2] = this.dom( 'div', this.css.txt + this.css.middle + 'justify-content:center; background:' + cc.inputBg + '; height:' + box + 'px; width:' + box + 'px; top:' + t + 'px; border-radius:' + this.radius + 'px; border:' + cc.borderSize + 'px solid ' + cc.border + '; font-size:' + (box ) + 'px;' );
-            //this.c[2] = this.dom( 'div', this.css.txt + this.css.button + 'top:1px; background:'+cc.button+'; height:'+(this.h-2)+'px; border:'+cc.borderSize+'px solid '+cc.border+'; border-radius:'+this.radius+'px;' )
+            this.c[2] = this.dom( 'div', this.css.txt + this.css.middle + 'padding:0; line-height:1; justify-content:center; background:' + cc.inputBg + '; height:' + box + 'px; width:' + box + 'px; top:' + t + 'px; border-radius:' + this.radius + 'px; border:' + cc.borderSize + 'px solid ' + cc.border + '; font-size:' + (box - 4) + 'px;' );
         } else {
             this.p = 0;
             if( this.c[1] !== undefined ) this.c[1].textContent = '';
@@ -3316,6 +3303,10 @@ class Bool extends Proto {
     // ----------------------
     //   EVENTS
     // ----------------------
+    mouseup () { 
+        this.sendEnd(); 
+        return false; 
+    }
 
     mousedown ( e ) {
 
@@ -3350,11 +3341,7 @@ class Bool extends Proto {
 
         let change = false;
         let cc = this.colors, s = this.s, v = this.value;
-
         let n = this.isOver ? ( v ? 4 : 3 ) : ( v ? 2 : 1 );
-
-        //if( over ) n = v ? 4 : 3
-        //else n = v ? 2 : 1
 
         if( this.stat !== n ){
 
@@ -3371,18 +3358,18 @@ class Bool extends Proto {
 
                 }
 
-                this.c[2].textContent = v ? this.onName : this.name;
+                if ( this.c[2] !== undefined )  this.c[2].textContent = v ? this.onName : this.name;
 
             } else if ( this.model === 2 ) {
 
                     switch ( n ) {
                         case 1: s[2].background = cc.backoff; s[2].borderColor = cc.border; break; // off out
-                        case 2: s[2].background = cc.back; s[2].borderColor = cc.overoff; s.color = cc.textSelect; break; // on out
+                        case 2: s[2].background = cc.back; s[2].borderColor = cc.overoff; s[2].color = cc.textSelect; break; // on out
                         case 3: s[2].background = cc.back; s[2].borderColor = cc.overoff; break; // off over
                         case 4: s[2].background = cc.backoff; s[2].borderColor = cc.border; s[2].color = cc.textOver; break; // on over
                     }
-                    this.c[2].textContent = v ? '✖' : '';
-                    this.c[1].textContent = v ? this.onName : this.name;
+                    if ( this.c[2] ) this.c[2].textContent = v ? '✖' : '';
+                    if ( this.c[3] ) this.c[1].textContent = v ? this.onName : this.name;
 
             } else {
 
@@ -3395,8 +3382,7 @@ class Bool extends Proto {
 
                 }
 
-                //s[3].marginLeft = v ? '17px' : '2px'
-                s[3].marginLeft = v ? ( this.inw - 19 ) + 'px' : '2px';
+                s[3].marginLeft = v ? ( this.inw - 20 ) + 'px' : '4px';
                 this.c[1].textContent = v ? this.onName : this.name;
 
             }
@@ -5124,6 +5110,14 @@ class Group extends Proto {
 
         super( o );
 
+        const cc = this.colors;
+
+        this.isDefGroup = false;
+        if(!o.mark){ 
+            o.mark = '#47484d';
+            this.isDefGroup = true;
+        }
+
         this.isGroup = true;
 
         this.ADD = o.add;
@@ -5135,9 +5129,9 @@ class Group extends Proto {
         this.proto = null;
         this.isEmpty = true;
 
-        this.borderCC = o.mark ? 6 : 0;
+        this.borderCC = o.mark ? 3 : 0;
 
-        this.decal = o.group ? 8-this.borderCC : 0;
+        this.decal = o.group ? 8 : 0;
         this.baseH = this.h;
         this.radius = 0;
 
@@ -5145,7 +5139,7 @@ class Group extends Proto {
 
         let fltop = Math.floor(this.h*0.5)-3;
 
-        const cc = this.colors;
+        
 
         this.useFlex = true; 
         let flexible = this.useFlex ? 'display:flex; flex-flow: row wrap;' : '';
@@ -5154,6 +5148,8 @@ class Group extends Proto {
         this.c[3] = this.dom( 'path', this.css.basic + 'position:absolute; width:6px; height:6px; left:0; top:'+fltop+'px;', { d:this.svgs.g1, fill:cc.text, stroke:'none'});
 
         this.mtop === 0 ? this.margin : this.mtop;
+
+
 
         
         //this.c[4] = this.dom( 'div', this.css.basic + 'width:100%; left:0; height:'+(bh+1)+'px; top:'+((this.h-1))+'px; background:#f00;')
@@ -5183,8 +5179,11 @@ class Group extends Proto {
 
         //if ( bg !== undefined ) cc.groups = bg;
 
-        const hasBg = bg !== undefined && bg !== 'none';
+        let hasBg = bg !== undefined && bg !== 'none';
+        
         const borderCol = hasBg ? bg : ( cc.gborder !== 'none' ? cc.gborder : 'none' );
+
+        if(this.isDefGroup) hasBg = false;
 
         //s[ 0 ].background = 'none';
         // Fond subtil pour le titre : légèrement teinté si bg est défini, sinon couleur de groupe par défaut
@@ -5196,8 +5195,15 @@ class Group extends Proto {
         this.borderCol = borderCol;
 
         if ( borderCol !== 'none' ) {
-            s[ 1 ].borderLeft = this.borderCC + 'px solid ' + borderCol;
-            s[ 2 ].borderLeft = this.borderCC + 'px solid ' + borderCol;
+
+            this.line = this.dom( 'div', 'position:absolute; left:0; top:2px; bottom:2px; width:' + this.borderCC + 'px; background:' + borderCol + '; pointer-events:none; z-index:10;' );
+
+            //this.line = this.dom( 'div', 'position:absolute; left:0; top:0; bottom:0; width:' + this.borderCC + 'px; background:' + borderCol + '; pointer-events:none; z-index:10;' );
+            this.c[ 0 ].appendChild( this.line );
+            //s[ 1 ].boxShadow =  'inset '+this.borderCC+'px 0 0 0 '+borderCol;
+            //s[ 2 ].boxShadow =  'inset '+this.borderCC+'px 0 0 0 '+borderCol;
+            //s[ 1 ].borderLeft = this.borderCC + 'px solid ' + borderCol;
+            //s[ 2 ].borderLeft = this.borderCC + 'px solid ' + borderCol;
         }
 
         if ( this.radius !== 0 ) {
@@ -5628,6 +5634,8 @@ class Group extends Proto {
             this.rSizeContent( w );
             this.calcUis();
         }
+
+        if ( this.line ) this.line.style.left = this.decal + 'px';
 
         if ( this.isUI && !this.group ) this.main.calc();
         Roots.needReZone = true;
@@ -7600,16 +7608,10 @@ class Numeric extends Proto {
             if ( this.isDown && this.current !== -1 ) {
                 const el = this.c[ 3 + this.current ];
                 const pad = 5 - this.colors.borderSize;
-                if ( Roots.hiddenSizer ) Roots.hiddenSizer.innerHTML = el.textContent.replace(/ /g, '&nbsp;');
-                const full = Roots.hiddenSizer ? Roots.hiddenSizer.clientWidth : 0;
+                const full = Roots.textWidth( el.textContent );
                 const elW = el.clientWidth || ( this.tmp[ this.current ][ 1 ] - this.colors.borderSize * 2 );
                 const left = this.center ? ( elW - full ) * 0.5 : ( elW - pad - full );
                 x = ( e.clientX - this.zone.x - this.tmp[ this.current ][ 0 ] ) - left;
-
-                /*const el = this.c[ 3 + this.current ];
-                const full = Roots.hiddenSizer ? Roots.hiddenSizer.clientWidth : 0;
-                const left = this.center ? ( el.clientWidth - full ) * 0.5 : ( el.clientWidth - 5 - full );
-                x = ( e.clientX - this.zone.x - this.tmp[ this.current ][ 0 ] ) - left;*/
             }
             return this.upInput( x, this.isDown );
 
@@ -7979,14 +7981,10 @@ class Slide extends Proto {
             let x = 0;
             if ( this.isDown ) {
                 const el = this.c[ 2 ];
-                if ( Roots.hiddenSizer ) Roots.hiddenSizer.innerHTML = el.textContent.replace(/ /g, '&nbsp;');
-                const full = Roots.hiddenSizer ? Roots.hiddenSizer.clientWidth : 0;
+                const full = Roots.textWidth( el.textContent );
                 const elW = el.clientWidth || ( this.sc - 6 );
                 const left = elW - 5 - full;
                 x = ( e.clientX - this.zone.x - ( this.txl + 4 ) ) - left;
-                /*const full = Roots.hiddenSizer ? Roots.hiddenSizer.clientWidth : 0;
-                const left = el.clientWidth - 5 - full;
-                x = ( e.clientX - this.zone.x - 3 - ( this.txl + 4 ) ) - left;*/
             }
             return this.upInput( x, this.isDown );
             /*let x = 0;
@@ -8324,8 +8322,9 @@ class TextInput extends Proto {
         if ( this.isDown ) {
             const el = this.c[ 2 ];
             const pad = 5 - this.colors.borderSize;
-            Roots.hiddenSizer.innerHTML = el.textContent.replace(/ /g, '&nbsp;');
-            const full = Roots.hiddenSizer.clientWidth;
+            //Roots.hiddenSizer.innerHTML = el.textContent.replace(/ /g, '&nbsp;');
+            const full = Roots.textWidth( el.textContent );
+            //const full = Roots.hiddenSizer.clientWidth;
             const w = el.clientWidth || ( this.sb - this.colors.borderSize * 2 );
             const left = w - pad - full;
             x = ( e.clientX - this.zone.x - this.sa ) - left;

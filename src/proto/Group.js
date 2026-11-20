@@ -10,6 +10,14 @@ export class Group extends Proto {
 
         super( o );
 
+        const cc = this.colors
+
+        this.isDefGroup = false
+        if(!o.mark){ 
+            o.mark = '#47484d'
+            this.isDefGroup = true
+        }
+
         this.isGroup = true
 
         this.ADD = o.add;
@@ -21,9 +29,9 @@ export class Group extends Proto {
         this.proto = null
         this.isEmpty = true
 
-        this.borderCC = o.mark ? 6 : 0
+        this.borderCC = o.mark ? 3 : 0
 
-        this.decal = o.group ? 8-this.borderCC : 0
+        this.decal = o.group ? 8 : 0
         this.baseH = this.h
         this.radius = 0
 
@@ -31,7 +39,7 @@ export class Group extends Proto {
 
         let fltop = Math.floor(this.h*0.5)-3
 
-        const cc = this.colors
+        
 
         this.useFlex = true 
         let flexible = this.useFlex ? 'display:flex; flex-flow: row wrap;' : ''
@@ -40,6 +48,8 @@ export class Group extends Proto {
         this.c[3] = this.dom( 'path', this.css.basic + 'position:absolute; width:6px; height:6px; left:0; top:'+fltop+'px;', { d:this.svgs.g1, fill:cc.text, stroke:'none'})
 
         let bh = this.mtop === 0 ? this.margin : this.mtop
+
+
 
         
         //this.c[4] = this.dom( 'div', this.css.basic + 'width:100%; left:0; height:'+(bh+1)+'px; top:'+((this.h-1))+'px; background:#f00;')
@@ -69,8 +79,11 @@ export class Group extends Proto {
 
         //if ( bg !== undefined ) cc.groups = bg;
 
-        const hasBg = bg !== undefined && bg !== 'none';
+        let hasBg = bg !== undefined && bg !== 'none';
+        
         const borderCol = hasBg ? bg : ( cc.gborder !== 'none' ? cc.gborder : 'none' );
+
+        if(this.isDefGroup) hasBg = false
 
         //s[ 0 ].background = 'none';
         // Fond subtil pour le titre : légèrement teinté si bg est défini, sinon couleur de groupe par défaut
@@ -82,8 +95,15 @@ export class Group extends Proto {
         this.borderCol = borderCol;
 
         if ( borderCol !== 'none' ) {
-            s[ 1 ].borderLeft = this.borderCC + 'px solid ' + borderCol;
-            s[ 2 ].borderLeft = this.borderCC + 'px solid ' + borderCol;
+
+            this.line = this.dom( 'div', 'position:absolute; left:0; top:2px; bottom:2px; width:' + this.borderCC + 'px; background:' + borderCol + '; pointer-events:none; z-index:10;' );
+
+            //this.line = this.dom( 'div', 'position:absolute; left:0; top:0; bottom:0; width:' + this.borderCC + 'px; background:' + borderCol + '; pointer-events:none; z-index:10;' );
+            this.c[ 0 ].appendChild( this.line );
+            //s[ 1 ].boxShadow =  'inset '+this.borderCC+'px 0 0 0 '+borderCol;
+            //s[ 2 ].boxShadow =  'inset '+this.borderCC+'px 0 0 0 '+borderCol;
+            //s[ 1 ].borderLeft = this.borderCC + 'px solid ' + borderCol;
+            //s[ 2 ].borderLeft = this.borderCC + 'px solid ' + borderCol;
         }
 
         if ( this.radius !== 0 ) {
@@ -523,6 +543,8 @@ export class Group extends Proto {
             this.rSizeContent( w );
             this.calcUis();
         }
+
+        if ( this.line ) this.line.style.left = this.decal + 'px';
 
         if ( this.isUI && !this.group ) this.main.calc();
         Roots.needReZone = true;

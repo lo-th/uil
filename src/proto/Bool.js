@@ -26,8 +26,7 @@ export class Bool extends Proto {
             let box = this.inh - 2;
             let t = Math.floor( (this.h - box) * 0.5 );
             this.inw = box;
-            this.c[2] = this.dom( 'div', this.css.txt + this.css.middle + 'justify-content:center; background:' + cc.inputBg + '; height:' + box + 'px; width:' + box + 'px; top:' + t + 'px; border-radius:' + this.radius + 'px; border:' + cc.borderSize + 'px solid ' + cc.border + '; font-size:' + (box ) + 'px;' );
-            //this.c[2] = this.dom( 'div', this.css.txt + this.css.button + 'top:1px; background:'+cc.button+'; height:'+(this.h-2)+'px; border:'+cc.borderSize+'px solid '+cc.border+'; border-radius:'+this.radius+'px;' )
+            this.c[2] = this.dom( 'div', this.css.txt + this.css.middle + 'padding:0; line-height:1; justify-content:center; background:' + cc.inputBg + '; height:' + box + 'px; width:' + box + 'px; top:' + t + 'px; border-radius:' + this.radius + 'px; border:' + cc.borderSize + 'px solid ' + cc.border + '; font-size:' + (box - 4) + 'px;' );
         } else {
             this.p = 0
             if( this.c[1] !== undefined ) this.c[1].textContent = '';
@@ -44,6 +43,10 @@ export class Bool extends Proto {
     // ----------------------
     //   EVENTS
     // ----------------------
+    mouseup () { 
+        this.sendEnd(); 
+        return false; 
+    }
 
     mousedown ( e ) {
 
@@ -76,13 +79,9 @@ export class Bool extends Proto {
 
         if ( over !== undefined ) this.isOver = over;
 
-        let change = false
-        let cc = this.colors, s = this.s, v = this.value
-
+        let change = false;
+        let cc = this.colors, s = this.s, v = this.value;
         let n = this.isOver ? ( v ? 4 : 3 ) : ( v ? 2 : 1 );
-
-        //if( over ) n = v ? 4 : 3
-        //else n = v ? 2 : 1
 
         if( this.stat !== n ){
 
@@ -99,18 +98,18 @@ export class Bool extends Proto {
 
                 }
 
-                this.c[2].textContent = v ? this.onName : this.name
+                if ( this.c[2] !== undefined )  this.c[2].textContent = v ? this.onName : this.name
 
             } else if ( this.model === 2 ) {
 
                     switch ( n ) {
                         case 1: s[2].background = cc.backoff; s[2].borderColor = cc.border; break; // off out
-                        case 2: s[2].background = cc.back; s[2].borderColor = cc.overoff; s.color = cc.textSelect; break; // on out
+                        case 2: s[2].background = cc.back; s[2].borderColor = cc.overoff; s[2].color = cc.textSelect; break; // on out
                         case 3: s[2].background = cc.back; s[2].borderColor = cc.overoff; break; // off over
                         case 4: s[2].background = cc.backoff; s[2].borderColor = cc.border; s[2].color = cc.textOver; break; // on over
                     }
-                    this.c[2].textContent = v ? '✖' : '';
-                    this.c[1].textContent = v ? this.onName : this.name
+                    if ( this.c[2] ) this.c[2].textContent = v ? '✖' : '';
+                    if ( this.c[3] ) this.c[1].textContent = v ? this.onName : this.name
 
             } else {
 
@@ -123,8 +122,7 @@ export class Bool extends Proto {
 
                 }
 
-                //s[3].marginLeft = v ? '17px' : '2px'
-                s[3].marginLeft = v ? ( this.inw - 19 ) + 'px' : '2px';
+                s[3].marginLeft = v ? ( this.inw - 20 ) + 'px' : '4px';
                 this.c[1].textContent = v ? this.onName : this.name
 
             }
