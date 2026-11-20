@@ -50,7 +50,7 @@
         renderer.setSize( window.innerWidth, window.innerHeight );
         renderer.setClearColor( 0x000000, 0 )
         renderer.toneMapping = THREE.NeutralToneMapping;
-        renderer.toneMappingExposure = 1.0;
+        renderer.toneMappingExposure = 2;
         document.body.appendChild( renderer.domElement )
 
         camera = new THREE.PerspectiveCamera( 45, window.innerWidth / window.innerHeight, 1, 1000 );
@@ -59,11 +59,11 @@
 
         //scene.add(new THREE.AmbientLight( 0x333333, 2 ));
 
-        var pointLight = new THREE.PointLight( 0xaaddff, 1 );
+        /*var pointLight = new THREE.PointLight( 0xaaddff, 5 );
         pointLight.position.set( -10, -30, -20 );
         scene.add(pointLight)
 
-        var pointLight2 = new THREE.PointLight( 0xFFDDAA, 1 );
+        var pointLight2 = new THREE.PointLight( 0xFFDDAA, 4 );
         pointLight2.position.set( 10, 30, -20 );
         scene.add(pointLight2)
 
@@ -74,7 +74,7 @@
         spotLight.penumbra = 0.2;
         spotLight.decay = 2;
         spotLight.distance = 100;
-        scene.add( spotLight )
+        scene.add( spotLight )*/
 
         interactive = new THREE.Group();
         scene.add( interactive );
@@ -96,11 +96,12 @@
 
         new HDRLoader()
         .setPath( './assets/textures/' )
-        .load( 'basic.hdr', function ( texture ) {
+        .load( 'lobe.hdr', function ( texture ) {
 
             texture.mapping = THREE.EquirectangularReflectionMapping;
             //scene.background = texture;
             scene.environment = texture;
+            scene.environmentIntensity = 2;
 
             var s8 = loader.load( './assets/textures/s8px.png' );
             s8.flipY = false;
@@ -108,17 +109,17 @@
             s8.colorSpace = THREE.SRGBColorSpace
             
             mat = {};
-            mat['glass_f'] = new THREE.MeshStandardMaterial( { roughness:0.1, metalness:0.8, color:0x000000, opacity:0.2, transparent:true, depthTest:true } );
-            mat['glass_b'] = new THREE.MeshStandardMaterial( { roughness:0.1, metalness:0.8, color:0x000000 } );
+            mat['glass_f'] = new THREE.MeshStandardMaterial( { roughness:0.03, metalness:0, color:0x000000, opacity:0.2, transparent:true, depthTest:true } );
+            mat['glass_b'] = new THREE.MeshStandardMaterial( { roughness:0.03, metalness:0, color:0x000000 } );
             mat['glass_c'] = mat['glass_b'];
-            mat['cadre'] = new THREE.MeshStandardMaterial( { roughness:0.7, metalness:0.2, color:0x020202} );
-            mat['cadre_pl'] = new THREE.MeshStandardMaterial( { roughness:0.7, metalness:0.2, color:0x050505 } );
+            mat['cadre'] = new THREE.MeshStandardMaterial( { roughness:0.1, metalness:0, color:0x020202} );
+            mat['cadre_pl'] = new THREE.MeshStandardMaterial( { roughness:0.1, metalness:0, color:0x050505 } );
             mat['cadre_side'] = mat['cadre'];
             mat['bouton'] =  mat['cadre']
             mat['screen_back'] = new THREE.MeshBasicMaterial( { color:0x000000 } );
             mat['screen_border'] = mat['screen_back'];
             mat['plane'] = new THREE.MeshBasicMaterial({map:s8});
-            mat['screen'] = new THREE.MeshStandardMaterial({ transparent:true, roughness:0.25, metalness:0.55, depthTest:false });
+            mat['screen'] = new THREE.MeshStandardMaterial({ transparent:true, roughness:0.25, metalness:0.55, depthTest:false,  toneMapped: false, });
 
             loadModel()
 
@@ -250,9 +251,9 @@
         simpleButton = UIL.add( 'button', { target:document.body, name:'populate', w:100, h:30, radius:10, pos:{ left:'10px', top:'10px' }, simple:true }).onChange( populate );
 
         // canvas GUI element
-        let colors = {}// content:'rgba(25,25,25,0.2)',  background:'rgba(25,25,25,0.5)',  backgroundOver:'rgba(25,25,25,0.8)'   }
+        let colors = {content:'rgba(25,25,25,0.2)' ,  background:'rgba(25,25,25,0.5)',  backgroundOver:'rgba(25,25,25,0.8)' }//  }
         let cw = 300, ch = 640;
-        ui = new UIL.Gui( { w:cw, maxHeight:ch, parent:null, isCanvas:true, colors:colors } ).onChange( function( v ){ debug.innerHTML = v; } );
+        ui = new UIL.Gui( { w:cw, maxHeight:ch, parent:null, isCanvas:true, canvasScale:2, colors:colors } ).onChange( function( v ){ debug.innerHTML = v; } );
 
         ui.onDraw = function (){
 
@@ -260,8 +261,10 @@
 
                 screen = new THREE.Texture( this.canvas );
                 screen.flipY = false;
-                //screen.minFilter = THREE.LinearFilter;
+                screen.minFilter = THREE.LinearFilter;
                 screen.colorSpace = THREE.SRGBColorSpace
+                screen.generateMipmaps = false
+                screen.anisotropy = renderer.capabilities.getMaxAnisotropy()
                 mat.screen.map = screen;
                 mat.screen.needsUpdate = true;
 

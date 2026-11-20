@@ -88,7 +88,8 @@ export class TextInput extends Proto {
             const pad = 5 - this.colors.borderSize;
             Roots.hiddenSizer.innerHTML = el.textContent.replace(/ /g, '&nbsp;');
             const full = Roots.hiddenSizer.clientWidth;
-            const left = el.clientWidth - pad - full;
+            const w = el.clientWidth || ( this.sb - this.colors.borderSize * 2 )
+            const left = w - pad - full;
             x = ( e.clientX - this.zone.x - this.sa ) - left;
         }
 
@@ -149,7 +150,8 @@ export class TextInput extends Proto {
         const el = this.c[ 2 ];
         const st = this.s[ 2 ];
 
-        const left = el.clientWidth - pad - ( full || 0 );
+        const width = el.clientWidth || ( this.sb - cc.borderSize * 2 );
+        const left = width - pad - ( full || 0 );
         const start = left + e;
         const end = start + w;
         const cur = left + c;

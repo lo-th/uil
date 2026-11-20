@@ -156,9 +156,14 @@ export class Slide extends Proto {
             let x = 0;
             if ( this.isDown ) {
                 const el = this.c[ 2 ];
+                if ( Roots.hiddenSizer ) Roots.hiddenSizer.innerHTML = el.textContent.replace(/ /g, '&nbsp;');
                 const full = Roots.hiddenSizer ? Roots.hiddenSizer.clientWidth : 0;
+                const elW = el.clientWidth || ( this.sc - 6 );
+                const left = elW - 5 - full;
+                x = ( e.clientX - this.zone.x - ( this.txl + 4 ) ) - left;
+                /*const full = Roots.hiddenSizer ? Roots.hiddenSizer.clientWidth : 0;
                 const left = el.clientWidth - 5 - full;
-                x = ( e.clientX - this.zone.x - 3 - ( this.txl + 4 ) ) - left;
+                x = ( e.clientX - this.zone.x - 3 - ( this.txl + 4 ) ) - left;*/
             }
             return this.upInput( x, this.isDown );
             /*let x = 0;
@@ -169,110 +174,7 @@ export class Slide extends Proto {
         return nup;
     }
 
-    /*mouseup ( e ) {
-        
-        if ( this.isDown ) {
-            this.isDown = false;
-            if ( this.editable && Roots.parent === this ) {
-                this.upInput( 0, false );
-                return;
-            }
-            this.sendEnd();
-        }
-        
-    }
-
-    mousedown ( e ) {
-
-        let name = this.testZone( e );
-
-        if( !name ) return false;
-
-        if( name === 'scroll' ){ 
-            this.isDown = true;
-            this.old = this.value;
-            this.mousemove( e );
-            
-        } else if ( name === 'text' && this.editable ) {
-            this.isDown = true;
-            this.c[2].textContent = this.value; // Affiche la valeur brute sans ° ou h
-            this.setInput( this.c[2] );
-            return this.mousemove( e );
-        }
-
-
-        return true;
-
-    }
-
-    mousemove ( e ) {
-
-        let nup = false;
-
-        let name = this.testZone( e );
-
-        if ( name === 'text' && this.editable ) {
-            this.cursor('text');
-            if ( this.isDown ) {
-                let x = e.clientX - ( this.zone.x + this.txl + 4 );
-                return this.upInput( x, true );
-            }
-            return false;
-        }
-
-        if( name === 'scroll' ) {
-            
-            if ( this.mode(1) ) nup = true;
-            this.cursor('w-resize');
-
-        } else {
-            if ( this.mode(0) ) nup = true;
-            this.cursor();
-        }
-
-        if( this.isDown ){
-
-            let n = ((( e.clientX - (this.zone.x+this.sa) - 3 ) / this.ww ) * this.range + this.min ) - this.old;
-            if(n >= this.step || n <= this.step){ 
-                n = Math.floor( n / this.step );
-                this.value = this.numValue( this.old + ( n * this.step ) );
-                this.update( true );
-                this.old = this.value;
-            }
-            nup = true;
-        }
-
-        return nup;
-
-    }
-
-    wheel ( e ) {
-
-        let name = this.testZone( e );
-    
-        if( name === 'scroll' ) {
-    
-            let v = this.value - this.step * e.delta;
-    
-            if ( v > this.max ) {
-                v = this.isCyclic ? this.min : this.max;
-            } else if ( v < this.min ) {
-                v = this.isCyclic ? this.max : this.min;
-            }
-    
-            this.setValue(v);
-            this.old = v;
-            this.update( true );
-
-            return true;
-    
-        }
-              
-        return false;
-    
-    }*/
-
-    //keydown: function ( e ) { return true; },
+  
 
     // ----------------------
 
@@ -447,7 +349,8 @@ export class Slide extends Proto {
         const el = this.c[ 2 ];
         const st = this.s[ 2 ];
 
-        const left = el.clientWidth - pad - ( full || 0 );
+        const elW = el.clientWidth || ( this.sc - 6 );
+        const left = elW - pad - ( full || 0 );
         const start = left + e;
         const end = start + w;
         const cur = left + c;

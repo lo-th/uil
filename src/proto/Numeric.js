@@ -206,9 +206,17 @@ export class Numeric extends Proto {
 
             if ( this.isDown && this.current !== -1 ) {
                 const el = this.c[ 3 + this.current ];
+                const pad = 5 - this.colors.borderSize;
+                if ( Roots.hiddenSizer ) Roots.hiddenSizer.innerHTML = el.textContent.replace(/ /g, '&nbsp;');
+                const full = Roots.hiddenSizer ? Roots.hiddenSizer.clientWidth : 0;
+                const elW = el.clientWidth || ( this.tmp[ this.current ][ 1 ] - this.colors.borderSize * 2 );
+                const left = this.center ? ( elW - full ) * 0.5 : ( elW - pad - full );
+                x = ( e.clientX - this.zone.x - this.tmp[ this.current ][ 0 ] ) - left;
+
+                /*const el = this.c[ 3 + this.current ];
                 const full = Roots.hiddenSizer ? Roots.hiddenSizer.clientWidth : 0;
                 const left = this.center ? ( el.clientWidth - full ) * 0.5 : ( el.clientWidth - 5 - full );
-                x = ( e.clientX - this.zone.x - this.tmp[ this.current ][ 0 ] ) - left;
+                x = ( e.clientX - this.zone.x - this.tmp[ this.current ][ 0 ] ) - left;*/
             }
             return this.upInput( x, this.isDown );
 
@@ -314,7 +322,9 @@ export class Numeric extends Proto {
         const st = this.s[ 3 + this.current ];
 
         const pad = 5 - this.colors.borderSize;
-        const left = this.center ? ( el.clientWidth - (full || 0) ) * 0.5 : ( el.clientWidth - pad - (full || 0) );
+        const elW = el.clientWidth || ( this.tmp[ this.current ][ 1 ] - cc.borderSize * 2 );
+        const left = this.center ? ( elW - (full || 0) ) * 0.5 : ( elW - pad - (full || 0) );
+        //const left = this.center ? ( el.clientWidth - (full || 0) ) * 0.5 : ( el.clientWidth - pad - (full || 0) );
 
         //const left = this.center ? ( el.clientWidth - (full || 0) ) * 0.5 : ( el.clientWidth - 5 - (full || 0) );
         const start = left + e;

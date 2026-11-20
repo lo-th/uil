@@ -48,8 +48,8 @@
         renderer.setPixelRatio( window.devicePixelRatio );
         renderer.setSize( window.innerWidth, window.innerHeight );
         renderer.setClearColor( 0x000000, 0 )
-        renderer.toneMapping = THREE.NeutralToneMapping;
-        renderer.toneMappingExposure = 1.0;
+        //renderer.toneMapping = THREE.NeutralToneMapping;
+        //renderer.toneMappingExposure = 1.0;
         document.body.appendChild( renderer.domElement )
 
         camera = new THREE.PerspectiveCamera( 45, window.innerWidth / window.innerHeight, 1, 1000 );
@@ -59,7 +59,7 @@
 
         controls.update()
 
-        plane = new THREE.Mesh( new THREE.PlaneGeometry( 10, 15, 1, 1 ), new THREE.MeshBasicMaterial( { transparent:false, alphaToCoverage: true } ) );
+        plane = new THREE.Mesh( new THREE.PlaneGeometry( 10, 15, 1, 1 ), new THREE.MeshBasicMaterial( { transparent:false, toneMapped: false, side:THREE.DoubleSide } ) );
         scene.add( plane )
 
         initGUI()
@@ -188,6 +188,7 @@
                 screen.minFilter = THREE.LinearFilter;
                 screen.magFilter = THREE.LinearFilter;
                 screen.colorSpace = THREE.SRGBColorSpace
+                screen.anisotropy = renderer.capabilities.getMaxAnisotropy()
                 //screen.anisotropy = 8
                 screen.generateMipmaps = false
                 plane.material.map = screen;
