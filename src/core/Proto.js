@@ -365,6 +365,22 @@ export class Proto {
 
     uiout() {
 
+        if ( this.lock || !this.overEffect || this.isGroup || this.isTitle ) return false;
+        if ( this.s ) this.s[0].background = this.colors.background;
+        return true;
+
+    }
+
+    uiover() {
+
+        if ( this.lock || !this.overEffect || this.isGroup || this.isTitle ) return false;
+        if ( this.s ) this.s[0].background = this.colors.backgroundOver;
+        return true;
+
+    }
+
+    /*uiout() {
+
         if( this.lock ) return;
         if(!this.overEffect) return;
         if(this.isGroup)return;
@@ -381,7 +397,7 @@ export class Proto {
         if(this.isTitle)return;
         if(this.s) this.s[0].background = this.colors.backgroundOver;
 
-    }
+    }*/
 
     rename( s ) {
 

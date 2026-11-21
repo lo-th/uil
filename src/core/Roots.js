@@ -645,7 +645,7 @@ const R = {
 
     getZone: ( o ) => {
 
-        if( o.isCanvasOnly ) return;
+        if( o.isCanvasOnly || o.isCanvas ) return;
         if( o.isEmpty ) return;
 
         const element = o.getDom()
@@ -677,28 +677,29 @@ const R = {
 
     toCanvas: ( o, w, h, force, scale = 1 ) => {
 
+        if ( !o.canvas ) return;
+
         if( !R.xmlserializer ) R.xmlserializer = new XMLSerializer()
 
         // prevent exesive redraw
-
         if( force && R.tmpTime !== null ) { clearTimeout(R.tmpTime); R.tmpTime = null;  }
-
         if( R.tmpTime !== null ) return;
+        if( R.lock ) R.tmpTime = setTimeout( ()=>{ R.tmpTime = null; }, 16 );
 
-        if( R.lock ) R.tmpTime = setTimeout( ()=>{ R.tmpTime = null; }, 8 );
-
+        //console.log('up')
 
         const targetW = Math.round( w * scale );
         const targetH = Math.round( h * scale );
+        const isNewSize = ( targetW !== o.canvas.width || targetH !== o.canvas.height );
 
         ///
 
-        let isNewSize = false;
-        if( targetW !== o.canvas.width || targetH !== o.canvas.height ) isNewSize = true;
+        if ( !o._canvasImg ) o._canvasImg = new Image();
+        const img = o._canvasImg;
 
-        if( R.tmpImage === null ) R.tmpImage = new Image();
+        //if( R.tmpImage === null ) R.tmpImage = new Image();
 
-        let img = R.tmpImage; //new Image();
+        //let img = R.tmpImage; //new Image();
 
         let htmlString = R.xmlserializer.serializeToString( o.content );
         //let svg = '<svg xmlns="http://www.w3.org/2000/svg" width="'+targetW+'" height="'+targetH+'"><foreignObject style="pointer-events: none; left:0;" width="'+w+'" height="'+h+'">'+ htmlString +'</foreignObject></svg>';
@@ -709,6 +710,7 @@ const R = {
 
         img.onload = function() {
 
+            if ( !o.canvas ) return;
             let ctx = o.canvas.getContext("2d");
 
             if( isNewSize ){ 
@@ -725,7 +727,7 @@ const R = {
 
         img.src = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svg);
         //img.src = 'data:image/svg+xml;base64,'+ window.btoa( svg );
-        img.crossOrigin = '';
+        //img.crossOrigin = '';
 
 
     },

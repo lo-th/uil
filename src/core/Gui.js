@@ -224,6 +224,8 @@ export class Gui {
 
     addTransition(){
 
+        if ( this.isCanvas ) return;
+
         if( this.transition && !this.isCanvas ){
             this.innerContent.style.transition = 'height '+this.transition+'s ease-out';
             //this.content.style.transition = 'height '+this.transition+'s ease-out';
@@ -388,17 +390,16 @@ export class Gui {
     clearTarget () {
 
     	if( this.current === -1 ) return false;
+        let changed = false;
         if( this.proto.s ){
-            // if no s target is delete !!
-            this.proto.uiout();
-            this.proto.reset();
+            if ( this.proto.uiout() ) changed = true;
+            if ( this.proto.reset() ) changed = true;
         }
-        
         this.proto = null;
         this.current = -1;
-
+        
         Roots.cursor();
-        return true;
+        return changed;
 
     }
 
@@ -493,15 +494,23 @@ export class Gui {
 
                 e.clientY = this.isScroll ? e.clientY + this.decal : e.clientY;
 
-                if( Roots.isMobile && type === 'mousedown' ) this.getNext( e, change )
+                if( Roots.isMobile && type === 'mousedown' ){ 
+                    //this.getNext( e, change )
+                    if ( this.getNext( e ) ) change = true;
+                }
 
 	    		if( this.proto ) protoChange = this.proto.handleEvent( e )
 
-	    		if( type === 'mousemove' ) change = this.mode('def');
-                if( type === 'wheel' && !protoChange && this.isScroll ) change = this.onWheel( e )
+	    		//if( type === 'mousemove' ) change = this.mode('def');
+
+                if ( type === 'mousemove' && this.mode('def') ) change = true;
+                if ( type === 'wheel' && !protoChange && this.isScroll ) change = this.onWheel( e );
+
+                //if( type === 'wheel' && !protoChange && this.isScroll ) change = this.onWheel( e )
                
 	    		if( !Roots.lock ) {
-                    this.getNext( e, change )
+                    if ( this.getNext( e ) ) change = true;
+                    //this.getNext( e, change )
                 }
 
     		break;
@@ -541,16 +550,36 @@ export class Gui {
 
     	}
 
-    	if( this.isDown ) change = true;
+    	//if( this.isDown ) change = true;
     	if( protoChange ) change = true;
-        if( this.isNewTarget ) change = true;
+        //if( this.isNewTarget ){ this.isNewTarget = false; change = true; } // a voir ?
         if( type === 'keyup' || type === 'keydown' ) change = true;
 
     	if( change ) this.draw();
 
     }
 
-    getNext ( e, change ) {
+    getNext ( e ) {
+
+        let next = Roots.findTarget( this.uis, e );
+        let change = false;
+
+        if ( next !== this.current ) {
+            if ( this.clearTarget() ) change = true;
+            this.current = next;
+            this.isNewTarget = true;
+
+            if ( next !== -1 ) {
+                this.proto = this.uis[ this.current ];
+                if ( this.proto.uiover() ) change = true;
+            }
+        }
+
+        return change;
+
+    }
+
+    /*getNext ( e, change ) {
 
         let next = Roots.findTarget( this.uis, e );
 
@@ -567,7 +596,7 @@ export class Gui {
             this.proto.uiover();
         }
 
-    }
+    }*/
 
     onWheel ( e ) {
 
@@ -711,8 +740,11 @@ export class Gui {
 
     dispose() {
 
+        if ( this.tmp ) { clearTimeout( this.tmp ); this.tmp = null; }
+
         this.clear();
         if( this.parent !== null ) this.parent.removeChild( this.content );
+        this.canvas = null;
         Roots.remove( this );
 
     }

@@ -630,7 +630,7 @@ const R = {
 
     getZone: ( o ) => {
 
-        if( o.isCanvasOnly ) return;
+        if( o.isCanvasOnly || o.isCanvas ) return;
         if( o.isEmpty ) return;
 
         const element = o.getDom();
@@ -662,28 +662,29 @@ const R = {
 
     toCanvas: ( o, w, h, force, scale = 1 ) => {
 
+        if ( !o.canvas ) return;
+
         if( !R.xmlserializer ) R.xmlserializer = new XMLSerializer();
 
         // prevent exesive redraw
-
         if( force && R.tmpTime !== null ) { clearTimeout(R.tmpTime); R.tmpTime = null;  }
-
         if( R.tmpTime !== null ) return;
+        if( R.lock ) R.tmpTime = setTimeout( ()=>{ R.tmpTime = null; }, 16 );
 
-        if( R.lock ) R.tmpTime = setTimeout( ()=>{ R.tmpTime = null; }, 8 );
-
+        //console.log('up')
 
         const targetW = Math.round( w * scale );
         const targetH = Math.round( h * scale );
+        const isNewSize = ( targetW !== o.canvas.width || targetH !== o.canvas.height );
 
         ///
 
-        let isNewSize = false;
-        if( targetW !== o.canvas.width || targetH !== o.canvas.height ) isNewSize = true;
+        if ( !o._canvasImg ) o._canvasImg = new Image();
+        const img = o._canvasImg;
 
-        if( R.tmpImage === null ) R.tmpImage = new Image();
+        //if( R.tmpImage === null ) R.tmpImage = new Image();
 
-        let img = R.tmpImage; //new Image();
+        //let img = R.tmpImage; //new Image();
 
         let htmlString = R.xmlserializer.serializeToString( o.content );
         //let svg = '<svg xmlns="http://www.w3.org/2000/svg" width="'+targetW+'" height="'+targetH+'"><foreignObject style="pointer-events: none; left:0;" width="'+w+'" height="'+h+'">'+ htmlString +'</foreignObject></svg>';
@@ -694,6 +695,7 @@ const R = {
 
         img.onload = function() {
 
+            if ( !o.canvas ) return;
             let ctx = o.canvas.getContext("2d");
 
             if( isNewSize ){ 
@@ -710,7 +712,7 @@ const R = {
 
         img.src = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svg);
         //img.src = 'data:image/svg+xml;base64,'+ window.btoa( svg );
-        img.crossOrigin = '';
+        //img.crossOrigin = '';
 
 
     },
@@ -1268,7 +1270,7 @@ class Files {
 
 	static showOpenFilePickerPolyfill( options ) {
 
-        return new Promise((resolve) => {
+        return new Promise((resolve, reject) => {
             const input = document.createElement("input");
             input.type = "file";
             input.multiple = options.multiple;
@@ -2867,6 +2869,22 @@ class Proto {
 
     uiout() {
 
+        if ( this.lock || !this.overEffect || this.isGroup || this.isTitle ) return false;
+        if ( this.s ) this.s[0].background = this.colors.background;
+        return true;
+
+    }
+
+    uiover() {
+
+        if ( this.lock || !this.overEffect || this.isGroup || this.isTitle ) return false;
+        if ( this.s ) this.s[0].background = this.colors.backgroundOver;
+        return true;
+
+    }
+
+    /*uiout() {
+
         if( this.lock ) return;
         if(!this.overEffect) return;
         if(this.isGroup)return;
@@ -2883,7 +2901,7 @@ class Proto {
         if(this.isTitle)return;
         if(this.s) this.s[0].background = this.colors.backgroundOver;
 
-    }
+    }*/
 
     rename( s ) {
 
@@ -3310,7 +3328,8 @@ class Bool extends Proto {
 
         this.value = !this.value;
         this.update( true );
-        return this.mousemove( e )
+        this.mousemove( e );
+        return true 
 
     }
 
@@ -3367,7 +3386,7 @@ class Bool extends Proto {
                         case 4: s[2].background = cc.backoff; s[2].borderColor = cc.border; s[2].color = cc.textOver; break; // on over
                     }
                     if ( this.c[2] ) this.c[2].textContent = v ? '✖' : '';
-                    if ( this.c[3] ) this.c[1].textContent = v ? this.onName : this.name;
+                    if ( this.c[1] ) this.c[1].textContent = v ? this.onName : this.name;
 
             } else {
 
@@ -3568,7 +3587,7 @@ class Button extends Proto {
             }
 
             if( this.mode( n, i ) ) r = true;
-            r = this.mode( n, i );
+            //r = this.mode( n, i )
 
         }
 
@@ -4094,6 +4113,111 @@ class Color extends Proto {
 
 	mousedown ( e ) {
 
+		let name = this.testZone( e.clientX, e.clientY );
+
+		if ( name === 'title' ) {
+			if ( !this.isOpen ) this.open();
+			else this.close();
+			return true;
+		}
+
+		if ( name === 'color' ) {
+			this.isDown = true;
+			this.fistDown = true;
+			return this.mousemove( e );
+		}
+
+		return false;
+
+	}
+
+	mousemove ( e ) {
+
+	    let name = this.testZone( e.clientX, e.clientY );
+	    let off, d, hue, sat, lum, rad, x, y, rr, T = Tools;
+	    let changed = false;
+
+	    if ( name === 'title' ) this.cursor('pointer');
+
+	    if ( name === 'color' ) {
+
+	    	off = this.offset;
+		    off.x = e.clientX - ( this.zone.x + this.decal.x + this.mid );
+		    off.y = e.clientY - ( this.zone.y + this.decal.y + this.mid ) - this.ytop;
+			d = off.length() * this.ratio;
+			rr = off.angle();
+			if ( rr < 0 ) rr += 2 * T.PI;
+
+	    	if ( d < 128 ) this.cursor('crosshair');
+	    	else if ( !this.isDown ) this.cursor();
+
+	    	if ( this.isDown ) {
+
+			    if ( this.fistDown ) {
+			    	this.d = d;
+			    	this.fistDown = false;
+			    }
+
+			    if ( this.d < 128 ) {
+
+				    if ( this.d > this.tr ) { // outside hue
+
+				        hue = ( rr + T.pi90 ) / T.TwoPI;
+				        this.hue = ( hue + 1 ) % 1;
+				        this.setHSL( [ this.hue, this.hsl[1], this.hsl[2] ] );
+				        changed = true;
+
+				    } else { // triangle
+
+				    	x = off.x * this.ratio;
+				    	y = off.y * this.ratio;
+
+				    	let rr = ( this.hue * T.TwoPI ) + T.PI;
+				    	if ( rr < 0 ) rr += 2 * T.PI;
+
+				    	rad = Math.atan2( -y, x );
+				    	if ( rad < 0 ) rad += 2 * T.PI;
+						
+				    	let rad0 = ( rad + T.pi90 + T.TwoPI + rr ) % ( T.TwoPI ),
+				    	rad1 = rad0 % ( (2/3) * T.PI ) - ( T.pi60 ),
+				    	a    = 0.5 * this.tr,
+				    	b    = Math.tan( rad1 ) * a,
+				    	r    = Math.sqrt( x*x + y*y ),
+				    	maxR = Math.sqrt( a*a + b*b );
+
+				    	if ( r > maxR ) {
+							let dx = Math.tan( rad1 ) * r;
+							let rad2 = Math.atan( dx / maxR );
+							if ( rad2 > T.pi60 ) rad2 = T.pi60;
+						    else if ( rad2 < -T.pi60 ) rad2 = -T.pi60;
+						
+							rad += rad2 - rad1;
+
+							rad0 = ( rad + T.pi90 + T.TwoPI + rr ) % ( T.TwoPI );
+							rad1 = rad0 % ( (2/3) * T.PI ) - ( T.pi60 );
+							b = Math.tan( rad1 ) * a;
+							r = maxR = Math.sqrt( a*a + b*b );
+						}
+
+						lum = ( ( Math.sin( rad0 ) * r ) / this.tsl ) + 0.5;
+						let w = 1 - ( Math.abs( lum - 0.5 ) * 2 );
+						sat = w > 0.0001 ? ( ( ( Math.cos( rad0 ) * r ) + ( this.tr / 2 ) ) / ( 1.5 * this.tr ) ) / w : 0;
+						sat = T.clamp( sat, 0, 1 );
+						
+				        this.setHSL( [ this.hsl[0], sat, lum ] );
+				        changed = true;
+
+				    }
+				}
+			}
+		}
+
+		return changed;
+
+	}
+
+	/*mousedown ( e ) {
+
 
 		let name = this.testZone( e.clientX, e.clientY );
 
@@ -4109,7 +4233,7 @@ class Color extends Proto {
 		if( name === 'color' ){
 
 			this.isDown = true;
-			this.fistDown = true;
+			this.fistDown = true
 			this.mousemove( e );
 		}
 	}
@@ -4133,7 +4257,7 @@ class Color extends Proto {
 						
 
 	    	if ( d < 128 ) this.cursor('crosshair');
-	    	else if( !this.isDown ) this.cursor();
+	    	else if( !this.isDown ) this.cursor()
 
 	    	if( this.isDown ){
 
@@ -4188,7 +4312,7 @@ class Color extends Proto {
 						sat = (((Math.cos(rad0) * r) + (this.tr / 2)) / (1.5 * this.tr)) / w;
 						sat = T.clamp( sat, 0, 1 );*/
 
-						let w = 1 - (Math.abs(lum - 0.5) * 2);
+				/*		let w = 1 - (Math.abs(lum - 0.5) * 2);
 						sat = w > 0.0001 ? (((Math.cos(rad0) * r) + (this.tr / 2)) / (1.5 * this.tr)) / w : 0;
 						sat = T.clamp(sat, 0, 1);
 						
@@ -4199,7 +4323,7 @@ class Color extends Proto {
 			}
 		}
 
-	}
+	}*/
 
 	// ----------------------
 
@@ -5261,8 +5385,6 @@ class Group extends Proto {
             if( this.isOpen ) name = 'content';
         }
 
-        
-
         return name;
 
     }
@@ -5270,21 +5392,21 @@ class Group extends Proto {
     clearTarget () {
 
         if( this.current === -1 ) return false;
+        let changed = false;
         if( this.proto.s ){
-            // if no s target is delete !!
-            this.proto.uiout();
-            this.proto.reset();
+            if ( this.proto.uiout() ) changed = true;
+            if ( this.proto.reset() ) changed = true;
         }
         this.proto = null;
         this.current = -1;
         this.cursor();
-        return true;
+        return changed
 
     }
 
     reset () {
 
-        this.clearTarget();
+        return this.clearTarget()
 
     }
 
@@ -5293,6 +5415,73 @@ class Group extends Proto {
     // ----------------------
 
     handleEvent ( e ) {
+
+        let type = e.type;
+        let change = false;
+        let protoChange = false;
+
+        let name = this.testZone( e );
+        if ( !name ) return false;
+
+        switch ( name ) {
+
+            case 'content':
+
+                this.cursor();
+
+                if ( Roots.isMobile && type === 'mousedown' ) {
+                    if ( this.getNext( e ) ) change = true;
+                }
+
+                if ( this.proto ) {
+                    protoChange = this.proto.handleEvent( e );
+                }
+
+                if ( !Roots.lock ) {
+                    if ( this.getNext( e ) ) change = true;
+                }
+
+            break;
+
+            case 'title':
+
+                if ( this.clearTarget() ) change = true;
+                this.cursor( 'pointer' );
+                if ( type === 'mousedown' ) {
+                    if ( this.isOpen ) this.close();
+                    else this.open();
+                    if ( !this.isUI ) change = true;
+                }
+
+            break;
+
+        }
+
+        if ( protoChange ) change = true;
+        return change;
+
+    }
+
+    getNext ( e ) {
+
+        let next = Roots.findTarget( this.uis, e );
+        let change = false;
+
+        if ( next !== this.current ) {
+            if ( this.clearTarget() ) change = true;
+            this.current = next;
+
+            if ( next !== -1 ) {
+                this.proto = this.uis[ this.current ];
+                if ( this.proto.uiover() ) change = true;
+            }
+        }
+
+        return change;
+
+    }
+
+    /*handleEvent ( e ) {
 
         let type = e.type;
 
@@ -5309,26 +5498,26 @@ class Group extends Proto {
 
 
 
-            this.cursor();
+            this.cursor()
 
             //if( this.marginDiv ) e.clientY -= this.margin * 0.5
 
-            if( Roots.isMobile && type === 'mousedown' ) this.getNext( e, change );
+            if( Roots.isMobile && type === 'mousedown' ) this.getNext( e, change )
 
             if( this.proto ){ 
                 //e.clientY -= this.margin
-                protoChange = this.proto.handleEvent( e );
+                protoChange = this.proto.handleEvent( e )
             }
 
-            if( !Roots.lock ) this.getNext( e, change );
+            if( !Roots.lock ) this.getNext( e, change )
 
             break;
             case 'title':
             //this.cursor( this.isOpen ? 'n-resize':'s-resize' );
-            this.cursor('pointer');
+            this.cursor('pointer')
             if( type === 'mousedown' ){
-                if( this.isOpen ) this.close();
-                else this.open();
+                if( this.isOpen ) this.close()
+                else this.open()
             }
             break;
 
@@ -5351,6 +5540,7 @@ class Group extends Proto {
         if( next !== this.current ){
             this.clearTarget();
             this.current = next;
+            change = true;
         }
 
         if( next !== -1 ){ 
@@ -5358,7 +5548,7 @@ class Group extends Proto {
             this.proto.uiover();
         }
 
-    }
+    }*/
 
     // ----------------------
 
@@ -5518,7 +5708,7 @@ class Group extends Proto {
 
         if ( this.borderCol !== 'none' ) ;
         
-        Roots.getZone( this );
+        if ( !this.isUI ) Roots.getZone( this );
         this.zone.w = this.w - this.decal;
         this.calcUis();
         this.parentHeight( this.h - this.baseH );
@@ -5614,10 +5804,13 @@ class Group extends Proto {
 
     rSize () {
 
+        //return
+
         super.rSize();
 
         let s = this.s;
         let w = this.w - this.decal;
+        const oldH = this.h;
 
         s[3].left = ( this.sa + this.sb - 6 ) + 'px';
 
@@ -5635,8 +5828,11 @@ class Group extends Proto {
 
         if ( this.line ) this.line.style.left = this.decal + 'px';
 
-        if ( this.isUI && !this.group ) this.main.calc();
+        if ( this.h !== oldH ) this.parentHeight( this.h - oldH );
         Roots.needReZone = true;
+
+        //if ( this.isUI && !this.group ) this.main.calc();
+        //Roots.needReZone = true;
 
         //if( this.isOpen ) this.rSizeContent()
 
@@ -5878,9 +6074,12 @@ class Joystick extends Proto {
         }
 
         this.pos.copy( this.tmp ).divideScalar( this.distance ).negate();
-        this.update();
+        if ( this.pos.x !== ox || this.pos.y !== oy ) {
+            this.update();
+            return true;
+        }
 
-        return true;
+        return nup;
 
     }
 
@@ -7919,6 +8118,7 @@ class Slide extends Proto {
     // ----------------------
 
     mousedown ( e ) {
+
         let name = this.testZone( e );
         if ( !name ) return false;
 
@@ -7935,9 +8135,11 @@ class Slide extends Proto {
             return this.mousemove( e );
         }
         return false;
+
     }
 
     mouseup ( e ) {
+
         if ( this.isDown ) {
             this.isDown = false;
             if ( this.isScroll ) {
@@ -7951,6 +8153,7 @@ class Slide extends Proto {
     }
 
     mousemove ( e ) {
+        
         let nup = false;
         let name = this.testZone( e );
 
@@ -7968,11 +8171,15 @@ class Slide extends Proto {
             let n = ((( e.clientX - (this.zone.x + this.sa) - 3 ) / this.ww ) * this.range + this.min ) - this.old;
             if ( n >= this.step || n <= -this.step ) {
                 n = Math.floor( n / this.step );
-                this.value = this.numValue( this.old + ( n * this.step ) );
-                this.update( true );
-                this.old = this.value;
+                const nv = this.numValue( this.old + ( n * this.step ) );
+                if ( nv !== this.value ) {
+                    this.value = nv;
+                    this.update( true );
+                    this.old = this.value;
+                    nup = true;
+                }
             }
-            return true;
+            return nup;
         }
 
         if ( this.editable && !this.isScroll ) {
@@ -8903,9 +9110,9 @@ class Bitmap extends Proto {
         if ( this.objectLink === null ) return;
 
         let texture = this.objectLink[ this.objectKey ];
-        let colorSpace = '';
+        let colorSpace = this.colorSpace || ( this.objectKey === 'map' ? 'srgb' : '' );
 
-        if(this.objectKey === 'map') colorSpace = 'srgb';
+        //if(this.objectKey === 'map') colorSpace = 'srgb'
 
 
         if ( this.img ) {
@@ -9687,7 +9894,6 @@ class Pad2D extends Proto {
         //console.log(x,y)
 
         this.setPos( [ x , y ] );
-        
         this.update( true );
         return true;
 
@@ -9798,11 +10004,11 @@ class Pad2D extends Proto {
 
     }
 
-    rSize () {
+    /*rSize () {
         super.rSize();
         let x = Math.floor( ( this.w - this.diam ) * 0.5 );
         this.s.left = x + 'px';
-    }
+    }*/
 
     /*lerp( s1, s2, d1, d2, c = true ) {
 
@@ -10370,6 +10576,8 @@ class Gui {
 
     addTransition(){
 
+        if ( this.isCanvas ) return;
+
         if( this.transition && !this.isCanvas ){
             this.innerContent.style.transition = 'height '+this.transition+'s ease-out';
             //this.content.style.transition = 'height '+this.transition+'s ease-out';
@@ -10534,17 +10742,16 @@ class Gui {
     clearTarget () {
 
     	if( this.current === -1 ) return false;
+        let changed = false;
         if( this.proto.s ){
-            // if no s target is delete !!
-            this.proto.uiout();
-            this.proto.reset();
+            if ( this.proto.uiout() ) changed = true;
+            if ( this.proto.reset() ) changed = true;
         }
-        
         this.proto = null;
         this.current = -1;
-
+        
         Roots.cursor();
-        return true;
+        return changed;
 
     }
 
@@ -10639,15 +10846,23 @@ class Gui {
 
                 e.clientY = this.isScroll ? e.clientY + this.decal : e.clientY;
 
-                if( Roots.isMobile && type === 'mousedown' ) this.getNext( e, change );
+                if( Roots.isMobile && type === 'mousedown' ){ 
+                    //this.getNext( e, change )
+                    if ( this.getNext( e ) ) change = true;
+                }
 
 	    		if( this.proto ) protoChange = this.proto.handleEvent( e );
 
-	    		if( type === 'mousemove' ) change = this.mode('def');
-                if( type === 'wheel' && !protoChange && this.isScroll ) change = this.onWheel( e );
+	    		//if( type === 'mousemove' ) change = this.mode('def');
+
+                if ( type === 'mousemove' && this.mode('def') ) change = true;
+                if ( type === 'wheel' && !protoChange && this.isScroll ) change = this.onWheel( e );
+
+                //if( type === 'wheel' && !protoChange && this.isScroll ) change = this.onWheel( e )
                
 	    		if( !Roots.lock ) {
-                    this.getNext( e, change );
+                    if ( this.getNext( e ) ) change = true;
+                    //this.getNext( e, change )
                 }
 
     		break;
@@ -10687,22 +10902,43 @@ class Gui {
 
     	}
 
-    	if( this.isDown ) change = true;
+    	//if( this.isDown ) change = true;
     	if( protoChange ) change = true;
-        if( this.isNewTarget ) change = true;
+        //if( this.isNewTarget ){ this.isNewTarget = false; change = true; } // a voir ?
         if( type === 'keyup' || type === 'keydown' ) change = true;
 
     	if( change ) this.draw();
 
     }
 
-    getNext ( e, change ) {
+    getNext ( e ) {
+
+        let next = Roots.findTarget( this.uis, e );
+        let change = false;
+
+        if ( next !== this.current ) {
+            if ( this.clearTarget() ) change = true;
+            this.current = next;
+            this.isNewTarget = true;
+
+            if ( next !== -1 ) {
+                this.proto = this.uis[ this.current ];
+                if ( this.proto.uiover() ) change = true;
+            }
+        }
+
+        return change;
+
+    }
+
+    /*getNext ( e, change ) {
 
         let next = Roots.findTarget( this.uis, e );
 
         if( next !== this.current ){
             this.clearTarget();
             this.current = next;
+            change = true;
             this.isNewTarget = true;
 
         }
@@ -10712,7 +10948,7 @@ class Gui {
             this.proto.uiover();
         }
 
-    }
+    }*/
 
     onWheel ( e ) {
 
@@ -10856,8 +11092,11 @@ class Gui {
 
     dispose() {
 
+        if ( this.tmp ) { clearTimeout( this.tmp ); this.tmp = null; }
+
         this.clear();
         if( this.parent !== null ) this.parent.removeChild( this.content );
+        this.canvas = null;
         Roots.remove( this );
 
     }

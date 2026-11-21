@@ -163,8 +163,6 @@ export class Group extends Proto {
             if( this.isOpen ) name = 'content';
         }
 
-        
-
         return name;
 
     }
@@ -172,21 +170,21 @@ export class Group extends Proto {
     clearTarget () {
 
         if( this.current === -1 ) return false;
+        let changed = false;
         if( this.proto.s ){
-            // if no s target is delete !!
-            this.proto.uiout();
-            this.proto.reset();
+            if ( this.proto.uiout() ) changed = true;
+            if ( this.proto.reset() ) changed = true;
         }
         this.proto = null;
         this.current = -1;
         this.cursor();
-        return true;
+        return changed
 
     }
 
     reset () {
 
-        this.clearTarget()
+        return this.clearTarget()
 
     }
 
@@ -195,6 +193,73 @@ export class Group extends Proto {
     // ----------------------
 
     handleEvent ( e ) {
+
+        let type = e.type;
+        let change = false;
+        let protoChange = false;
+
+        let name = this.testZone( e );
+        if ( !name ) return false;
+
+        switch ( name ) {
+
+            case 'content':
+
+                this.cursor();
+
+                if ( Roots.isMobile && type === 'mousedown' ) {
+                    if ( this.getNext( e ) ) change = true;
+                }
+
+                if ( this.proto ) {
+                    protoChange = this.proto.handleEvent( e );
+                }
+
+                if ( !Roots.lock ) {
+                    if ( this.getNext( e ) ) change = true;
+                }
+
+            break;
+
+            case 'title':
+
+                if ( this.clearTarget() ) change = true;
+                this.cursor( 'pointer' );
+                if ( type === 'mousedown' ) {
+                    if ( this.isOpen ) this.close();
+                    else this.open();
+                    if ( !this.isUI ) change = true;
+                }
+
+            break;
+
+        }
+
+        if ( protoChange ) change = true;
+        return change;
+
+    }
+
+    getNext ( e ) {
+
+        let next = Roots.findTarget( this.uis, e );
+        let change = false;
+
+        if ( next !== this.current ) {
+            if ( this.clearTarget() ) change = true;
+            this.current = next;
+
+            if ( next !== -1 ) {
+                this.proto = this.uis[ this.current ];
+                if ( this.proto.uiover() ) change = true;
+            }
+        }
+
+        return change;
+
+    }
+
+    /*handleEvent ( e ) {
 
         let type = e.type;
 
@@ -261,7 +326,7 @@ export class Group extends Proto {
             this.proto.uiover();
         }
 
-    }
+    }*/
 
     // ----------------------
 
@@ -426,7 +491,7 @@ export class Group extends Proto {
             //s[ 1 ].borderBottom = cc.borderSize + 'px solid rgba(0,0,0,0)';
         }
         
-        Roots.getZone( this );
+        if ( !this.isUI ) Roots.getZone( this );
         this.zone.w = this.w - this.decal;
         this.calcUis();
         this.parentHeight( this.h - this.baseH )
@@ -525,10 +590,13 @@ export class Group extends Proto {
 
     rSize () {
 
+        //return
+
         super.rSize()
 
-        let s = this.s
-        let w = this.w - this.decal
+        let s = this.s;
+        let w = this.w - this.decal;
+        const oldH = this.h;
 
         s[3].left = ( this.sa + this.sb - 6 ) + 'px'
 
@@ -546,8 +614,11 @@ export class Group extends Proto {
 
         if ( this.line ) this.line.style.left = this.decal + 'px';
 
-        if ( this.isUI && !this.group ) this.main.calc();
+        if ( this.h !== oldH ) this.parentHeight( this.h - oldH );
         Roots.needReZone = true;
+
+        //if ( this.isUI && !this.group ) this.main.calc();
+        //Roots.needReZone = true;
 
         //if( this.isOpen ) this.rSizeContent()
 

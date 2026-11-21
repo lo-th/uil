@@ -52,7 +52,8 @@ export class Bool extends Proto {
 
         this.value = !this.value
         this.update( true )
-        return this.mousemove( e )
+        this.mousemove( e )
+        return true 
 
     }
 
@@ -109,7 +110,7 @@ export class Bool extends Proto {
                         case 4: s[2].background = cc.backoff; s[2].borderColor = cc.border; s[2].color = cc.textOver; break; // on over
                     }
                     if ( this.c[2] ) this.c[2].textContent = v ? '✖' : '';
-                    if ( this.c[3] ) this.c[1].textContent = v ? this.onName : this.name
+                    if ( this.c[1] ) this.c[1].textContent = v ? this.onName : this.name
 
             } else {
 

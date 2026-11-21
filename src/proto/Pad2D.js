@@ -168,7 +168,6 @@ export class Pad2D extends Proto {
         //console.log(x,y)
 
         this.setPos( [ x , y ] );
-        
         this.update( true );
         return true;
 
@@ -279,11 +278,11 @@ export class Pad2D extends Proto {
 
     }
 
-    rSize () {
+    /*rSize () {
         super.rSize();
         let x = Math.floor( ( this.w - this.diam ) * 0.5 );
         this.s.left = x + 'px';
-    }
+    }*/
 
     /*lerp( s1, s2, d1, d2, c = true ) {
 

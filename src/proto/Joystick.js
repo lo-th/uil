@@ -206,9 +206,12 @@ export class Joystick extends Proto {
         }
 
         this.pos.copy( this.tmp ).divideScalar( this.distance ).negate();
-        this.update();
+        if ( this.pos.x !== ox || this.pos.y !== oy ) {
+            this.update();
+            return true;
+        }
 
-        return true;
+        return nup;
 
     }
 

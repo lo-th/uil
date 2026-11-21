@@ -118,6 +118,111 @@ export class Color extends Proto {
 
 	mousedown ( e ) {
 
+		let name = this.testZone( e.clientX, e.clientY );
+
+		if ( name === 'title' ) {
+			if ( !this.isOpen ) this.open();
+			else this.close();
+			return true;
+		}
+
+		if ( name === 'color' ) {
+			this.isDown = true;
+			this.fistDown = true;
+			return this.mousemove( e );
+		}
+
+		return false;
+
+	}
+
+	mousemove ( e ) {
+
+	    let name = this.testZone( e.clientX, e.clientY );
+	    let off, d, hue, sat, lum, rad, x, y, rr, T = Tools;
+	    let changed = false;
+
+	    if ( name === 'title' ) this.cursor('pointer');
+
+	    if ( name === 'color' ) {
+
+	    	off = this.offset;
+		    off.x = e.clientX - ( this.zone.x + this.decal.x + this.mid );
+		    off.y = e.clientY - ( this.zone.y + this.decal.y + this.mid ) - this.ytop;
+			d = off.length() * this.ratio;
+			rr = off.angle();
+			if ( rr < 0 ) rr += 2 * T.PI;
+
+	    	if ( d < 128 ) this.cursor('crosshair');
+	    	else if ( !this.isDown ) this.cursor();
+
+	    	if ( this.isDown ) {
+
+			    if ( this.fistDown ) {
+			    	this.d = d;
+			    	this.fistDown = false;
+			    }
+
+			    if ( this.d < 128 ) {
+
+				    if ( this.d > this.tr ) { // outside hue
+
+				        hue = ( rr + T.pi90 ) / T.TwoPI;
+				        this.hue = ( hue + 1 ) % 1;
+				        this.setHSL( [ this.hue, this.hsl[1], this.hsl[2] ] );
+				        changed = true;
+
+				    } else { // triangle
+
+				    	x = off.x * this.ratio;
+				    	y = off.y * this.ratio;
+
+				    	let rr = ( this.hue * T.TwoPI ) + T.PI;
+				    	if ( rr < 0 ) rr += 2 * T.PI;
+
+				    	rad = Math.atan2( -y, x );
+				    	if ( rad < 0 ) rad += 2 * T.PI;
+						
+				    	let rad0 = ( rad + T.pi90 + T.TwoPI + rr ) % ( T.TwoPI ),
+				    	rad1 = rad0 % ( (2/3) * T.PI ) - ( T.pi60 ),
+				    	a    = 0.5 * this.tr,
+				    	b    = Math.tan( rad1 ) * a,
+				    	r    = Math.sqrt( x*x + y*y ),
+				    	maxR = Math.sqrt( a*a + b*b );
+
+				    	if ( r > maxR ) {
+							let dx = Math.tan( rad1 ) * r;
+							let rad2 = Math.atan( dx / maxR );
+							if ( rad2 > T.pi60 ) rad2 = T.pi60;
+						    else if ( rad2 < -T.pi60 ) rad2 = -T.pi60;
+						
+							rad += rad2 - rad1;
+
+							rad0 = ( rad + T.pi90 + T.TwoPI + rr ) % ( T.TwoPI );
+							rad1 = rad0 % ( (2/3) * T.PI ) - ( T.pi60 );
+							b = Math.tan( rad1 ) * a;
+							r = maxR = Math.sqrt( a*a + b*b );
+						}
+
+						lum = ( ( Math.sin( rad0 ) * r ) / this.tsl ) + 0.5;
+						let w = 1 - ( Math.abs( lum - 0.5 ) * 2 );
+						sat = w > 0.0001 ? ( ( ( Math.cos( rad0 ) * r ) + ( this.tr / 2 ) ) / ( 1.5 * this.tr ) ) / w : 0;
+						sat = T.clamp( sat, 0, 1 );
+						
+				        this.setHSL( [ this.hsl[0], sat, lum ] );
+				        changed = true;
+
+				    }
+				}
+			}
+		}
+
+		return changed;
+
+	}
+
+	/*mousedown ( e ) {
+
 
 		let name = this.testZone( e.clientX, e.clientY );
 
@@ -212,7 +317,7 @@ export class Color extends Proto {
 						sat = (((Math.cos(rad0) * r) + (this.tr / 2)) / (1.5 * this.tr)) / w;
 						sat = T.clamp( sat, 0, 1 );*/
 
-						let w = 1 - (Math.abs(lum - 0.5) * 2);
+				/*		let w = 1 - (Math.abs(lum - 0.5) * 2);
 						sat = w > 0.0001 ? (((Math.cos(rad0) * r) + (this.tr / 2)) / (1.5 * this.tr)) / w : 0;
 						sat = T.clamp(sat, 0, 1);
 						
@@ -223,7 +328,7 @@ export class Color extends Proto {
 			}
 		}
 
-	}
+	}*/
 
 	// ----------------------
 

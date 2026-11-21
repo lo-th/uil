@@ -146,7 +146,7 @@ export class Button extends Proto {
             }
 
             if( this.mode( n, i ) ) r = true
-            r = this.mode( n, i )
+            //r = this.mode( n, i )
 
         }
 

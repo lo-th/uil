@@ -96,6 +96,7 @@ export class Slide extends Proto {
     // ----------------------
 
     mousedown ( e ) {
+
         let name = this.testZone( e );
         if ( !name ) return false;
 
@@ -112,9 +113,11 @@ export class Slide extends Proto {
             return this.mousemove( e );
         }
         return false;
+
     }
 
     mouseup ( e ) {
+
         if ( this.isDown ) {
             this.isDown = false;
             if ( this.isScroll ) {
@@ -128,6 +131,7 @@ export class Slide extends Proto {
     }
 
     mousemove ( e ) {
+        
         let nup = false;
         let name = this.testZone( e );
 
@@ -145,11 +149,15 @@ export class Slide extends Proto {
             let n = ((( e.clientX - (this.zone.x + this.sa) - 3 ) / this.ww ) * this.range + this.min ) - this.old;
             if ( n >= this.step || n <= -this.step ) {
                 n = Math.floor( n / this.step );
-                this.value = this.numValue( this.old + ( n * this.step ) );
-                this.update( true );
-                this.old = this.value;
+                const nv = this.numValue( this.old + ( n * this.step ) );
+                if ( nv !== this.value ) {
+                    this.value = nv;
+                    this.update( true );
+                    this.old = this.value;
+                    nup = true;
+                }
             }
-            return true;
+            return nup;
         }
 
         if ( this.editable && !this.isScroll ) {

@@ -235,7 +235,7 @@ export class Files {
 
 	static showOpenFilePickerPolyfill( options ) {
 
-        return new Promise((resolve) => {
+        return new Promise((resolve, reject) => {
             const input = document.createElement("input");
             input.type = "file";
             input.multiple = options.multiple;

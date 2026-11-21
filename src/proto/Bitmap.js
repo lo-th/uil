@@ -211,9 +211,9 @@ export class Bitmap extends Proto {
         if ( this.objectLink === null ) return;
 
         let texture = this.objectLink[ this.objectKey ];
-        let colorSpace = ''
+        let colorSpace = this.colorSpace || ( this.objectKey === 'map' ? 'srgb' : '' );
 
-        if(this.objectKey === 'map') colorSpace = 'srgb'
+        //if(this.objectKey === 'map') colorSpace = 'srgb'
 
 
         if ( this.img ) {
