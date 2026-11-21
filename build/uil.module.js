@@ -4007,7 +4007,7 @@ class Color extends Proto {
 
 	    this.ctype = o.ctype || 'hex';
 
-	    this.wfixe = 256;
+	    this.wfixe = 0;//256;
 
 	    this.cw = this.sb > 256 ? 256 : this.sb;
 	    if(o.cw != undefined ) this.cw = o.cw;
@@ -4360,6 +4360,47 @@ class Color extends Proto {
 
 	}
 
+	/*rSize () {
+
+	    super.rSize();
+
+	    let s = this.s;
+
+	    s[2].width = this.sb + 'px';
+	    s[2].left = this.sa + 'px';
+
+	    this.cw = this.sb > 256 ? 256 : this.sb;
+	    this.rSizeColor( this.cw );
+
+	    this.decal.x = Math.floor( ( this.w - this.wfixe ) * 0.5 );
+	    s[2].left = this.decal.x + 'px';
+
+	}
+
+	rSizeColor ( w ) {
+
+		if ( w === this.wfixe ) return;
+
+		const oldH = this.h;
+		this.wfixe = w;
+
+	    this.decal.y = this.side === 'up' ? 2 : this.baseH + 2;
+	    this.mid = Math.floor( this.wfixe * 0.5 );
+
+	    let s = this.s;
+	    this.setSvg( this.c[3], 'viewBox', '0 0 256 256' );
+	    s[3].width = this.wfixe + 'px';
+	    s[3].height = this.wfixe + 'px';
+	    s[3].top = this.decal.y + 'px';
+
+	    this.ratio = 256 / this.wfixe;
+	    this.square = 1 / ( 60 * ( this.wfixe / 256 ) );
+	    this.setHeight();
+
+	    if ( this.isOpen && oldH && this.h !== oldH ) this.parentHeight( this.h - oldH );
+
+	}*/
+
 	rSize () {
 
 	    //Proto.prototype.rSize.call( this );
@@ -4370,16 +4411,10 @@ class Color extends Proto {
 	    s[2].width = this.sb + 'px';
 	    s[2].left = this.sa + 'px';
 
-	    //console.log(this.sb)
-
 	    this.cw = this.sb > 256 ? 256 : this.sb;
-
-
-
 	    this.rSizeColor( this.cw );
-
 	    this.decal.x = Math.floor((this.w - this.wfixe) * 0.5);
-	    //s[3].left = this.decal.x + 'px';
+
 	    
 	}
 
@@ -4388,27 +4423,25 @@ class Color extends Proto {
 
 		if( w === this.wfixe ) return;
 
-
-
+		const oldH = this.h;
 		this.wfixe = w;
-
-
 
 		let s = this.s;
 
-		//this.decal.x = Math.floor((this.w - this.wfixe) * 0.5);
 	    this.decal.y = this.side === 'up' ? 2 : this.baseH + 2;
 	    this.mid = Math.floor( this.wfixe * 0.5 );
 
-	    this.setSvg( this.c[3], 'viewBox', '0 0 '+ this.wfixe + ' '+ this.wfixe );
+	    this.setSvg( this.c[3], 'viewBox', '0 0 256 256' );
 	    s[3].width = this.wfixe + 'px';
 	    s[3].height = this.wfixe + 'px';
-    	//s[3].left = this.decal.x + 'px';
 	    s[3].top = this.decal.y + 'px';
 
 	    this.ratio = 256 / this.wfixe;
 	    this.square = 1 / (60*(this.wfixe/256));
 	    this.setHeight();
+
+	    if ( this.isOpen && oldH && this.h !== oldH ) this.parentHeight( this.h - oldH );
+
 
 	}
 
