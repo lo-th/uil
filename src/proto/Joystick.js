@@ -60,7 +60,7 @@ export class Joystick extends Proto {
         this.mode(0)
 
 
-        this.ratio = 128/this.w;
+        //this.ratio = 128/this.w;
 
         this.init();
 
@@ -202,6 +202,9 @@ export class Joystick extends Proto {
             this.tmp.y = Math.cos( angle ) * this.distance;
         }
 
+        let ox = this.pos.x;
+        let oy = this.pos.y;
+
         this.pos.copy( this.tmp ).divideScalar( this.distance ).negate();
         if ( this.pos.x !== ox || this.pos.y !== oy ) {
             this.update();
@@ -211,6 +214,34 @@ export class Joystick extends Proto {
         return nup;
 
     }
+
+    /*mousemove ( e ) {
+
+        let nup = this.mode( 1 );
+        this.cursor( this.isDown ? 'move' : 'pointer' );
+
+        if ( !this.isDown ) return nup;
+
+        this.tmp.x = ( this.w * 0.5 ) - ( e.clientX - this.zone.x );
+        this.tmp.y = ( this.diam * 0.5 ) - ( e.clientY - this.zone.y - this.ytop );
+
+        let distance = this.tmp.length();
+
+        if ( distance > this.distance ) {
+            let angle = Math.atan2( this.tmp.x, this.tmp.y );
+            this.tmp.x = Math.sin( angle ) * this.distance;
+            this.tmp.y = Math.cos( angle ) * this.distance;
+        }
+
+        this.pos.copy( this.tmp ).divideScalar( this.distance ).negate();
+        if ( this.pos.x !== ox || this.pos.y !== oy ) {
+            this.update();
+            return true;
+        }
+
+        return nup;
+
+    }*/
 
     setValue ( v ) {
 

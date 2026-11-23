@@ -3,7 +3,7 @@
  * @author lth / https://github.com/lo-th
  */
 
-export const REVISION = '5.0.4';
+export const REVISION = '5.0.5';
 
 // INTENAL FUNCTION
 
