@@ -2,7 +2,7 @@
  * @author lth / https://github.com/lo-th
  */
 
-const REVISION = '5.0.3';
+const REVISION = '5.0.4';
 
 // INTENAL FUNCTION
 
@@ -146,17 +146,16 @@ const R = {
 
         if ( R.isEventsInit ) return;
 
-        const dom = document.body;
         R.isMobile = R.testMobile();
         R.now = R.getTime();
 
-        if ( R.isMobile ) dom.style.touchAction = 'none';
+        if ( R.isMobile ) document.body.style.touchAction = 'none';
 
-        dom.addEventListener( 'pointermove', R, { passive: true } );
-        dom.addEventListener( 'pointerdown', R, { passive: true } );
-        dom.addEventListener( 'pointerup', R, { passive: true } );
-        dom.addEventListener( 'pointercancel', R, { passive: true } );
-        dom.addEventListener( 'pointerleave', R, { passive: true } );
+        document.addEventListener( 'pointermove', R, { passive: true } );
+        document.addEventListener( 'pointerdown', R, { passive: true } );
+        document.addEventListener( 'pointerup', R, { passive: true } );
+        document.addEventListener( 'pointercancel', R, { passive: true } );
+        document.addEventListener( 'pointerleave', R, { passive: true } );
 
         R.onResize = () => {
             R.needReZone = true;
@@ -164,10 +163,16 @@ const R = {
             R.resize();
         };
 
+        R.onBlur = () => {
+            R.lock = false;
+            R.clearOldID();
+        };
+
         window.addEventListener( 'resize', R.onResize, { passive: true } );
+        window.addEventListener( 'blur', R.onBlur, { passive: true } );
 
         R.isEventsInit = true;
-        R.dom = dom;
+        R.dom = document;
 
     },
 
@@ -175,17 +180,16 @@ const R = {
 
         if ( !R.isEventsInit ) return;
 
-        const dom = R.dom;
-
         R.setWheel( false );
         R.clearInput();
 
-        dom.removeEventListener( 'pointercancel', R );
-        dom.removeEventListener( 'pointerleave', R );
-        dom.removeEventListener( 'pointermove', R );
-        dom.removeEventListener( 'pointerdown', R );
-        dom.removeEventListener( 'pointerup', R );
+        document.removeEventListener( 'pointercancel', R );
+        document.removeEventListener( 'pointerleave', R );
+        document.removeEventListener( 'pointermove', R );
+        document.removeEventListener( 'pointerdown', R );
+        document.removeEventListener( 'pointerup', R );
         window.removeEventListener( 'resize', R.onResize );
+        window.removeEventListener( 'blur', R.onBlur );
 
         R.isEventsInit = false;
 
@@ -263,9 +267,13 @@ const R = {
             R.prevTime = R.downTime;
             R.forceZone = false;
             R.clearInput();
+            
+            if ( R.ID === null || R.isMobile ) R.findID( e );
+
             R.lock = true;
 
-            if ( R.isMobile ) R.findID( e );
+
+            //if ( R.isMobile ) R.findID( e );
             if ( R.ID !== null && event.target?.setPointerCapture ) {
                 try { event.target.setPointerCapture( event.pointerId ); } catch (_) {}
             }
@@ -4952,6 +4960,9 @@ class Group extends Proto {
             this.isDefGroup = true;
         }
 
+        this.bgAlpha = 1;
+        if( o.bgAlpha ) this.bgAlpha = o.bgAlpha;
+
         this.ADD = o.add;
         this.uis = [];
         this.current = -1;
@@ -4975,54 +4986,28 @@ class Group extends Proto {
         this.c[1].style.color = cc.text;
 
         this.init();
-        this.setBG( o.mark );
+        this.setMark( o.mark );
 
         if( o.open ) this.open();
-        
 
     }
 
-    setBG ( bg ) {
+    setMark ( mark ) {
 
         //return
 
         const cc = this.colors;
         const s = this.s;
-
-        //if ( bg !== undefined ) cc.groups = bg;
-
-        let hasBg = bg !== undefined && bg !== 'none';
         
-        const borderCol = hasBg ? bg : ( cc.gborder !== 'none' ? cc.gborder : 'none' );
+        let titleColor = !this.isDefGroup ? Tools.ColorLuma( mark, -0.65 ) : ( cc.groups === 'none' ? cc.background : cc.groups );
+        if( this.bgAlpha !== 1 ) titleColor = Tools.htmlRgba( mark, this.bgAlpha );
+        s[ 1 ].background = titleColor;
 
-        if(this.isDefGroup) hasBg = false;
+        
 
-        //s[ 0 ].background = 'none';
-        // Fond subtil pour le titre : légèrement teinté si bg est défini, sinon couleur de groupe par défaut
-        s[ 1 ].background = hasBg ? Tools.ColorLuma( bg, -0.65 ) : ( cc.groups === 'none' ? cc.background : cc.groups );
-        // Fond très léger pour le contenu du sous-groupe
-        //s[ 2 ].background = hasBg ? Tools.ColorLuma( bg, -0.8 ) : 'none';
-
-        // Mémorise la couleur de bordure du groupe
-        this.borderCol = borderCol;
-
-        if ( borderCol !== 'none' ) {
-
-            this.line = this.dom( 'div', 'position:absolute; left:0; top:2px; bottom:2px; width:' + this.borderCC + 'px; background:' + borderCol + '; pointer-events:none; z-index:10;' );
-
-            //this.line = this.dom( 'div', 'position:absolute; left:0; top:0; bottom:0; width:' + this.borderCC + 'px; background:' + borderCol + '; pointer-events:none; z-index:10;' );
-            this.c[ 0 ].appendChild( this.line );
-            //s[ 1 ].boxShadow =  'inset '+this.borderCC+'px 0 0 0 '+borderCol;
-            //s[ 2 ].boxShadow =  'inset '+this.borderCC+'px 0 0 0 '+borderCol;
-            //s[ 1 ].borderLeft = this.borderCC + 'px solid ' + borderCol;
-            //s[ 2 ].borderLeft = this.borderCC + 'px solid ' + borderCol;
-        }
-
-        /*if ( this.radius !== 0 ) {
-            s[ 1 ].borderRadius = this.radius + 'px';
-            s[ 2 ].borderRadius = this.radius + 'px';
-        }*/
-
+        this.line = this.dom( 'div', 'position:absolute; left:0; top:2px; bottom:2px; width:' + this.borderCC + 'px; background:' + mark + '; pointer-events:none; z-index:10;' );
+        this.c[ 0 ].appendChild( this.line );
+        
     }
 
     /*setBG ( bg ) {
@@ -5396,7 +5381,7 @@ class Group extends Proto {
 
         }
 
-        if ( this.borderCol !== 'none' ) ;
+        
         
         if ( !this.isUI ) Roots.getZone( this );
         this.zone.w = this.w - this.decal;
@@ -5432,7 +5417,7 @@ class Group extends Proto {
             s[1].border = cc.borderSize+'px solid '+ cc.gborder;
         }
 
-        if ( this.borderCol !== 'none' ) ;
+        
 
         //if(this.radius) s[1].borderRadius = this.radius+'px'
 
@@ -9804,6 +9789,8 @@ class Gui {
         this.cssGui = o.css !== undefined ? o.css : ( this.isCenter ? '' : ( this.retractSide === 'left' ? 'left:10px; right:auto;' : 'right:10px; left:auto;' ) );
 
         this.isOpen = o.open !== undefined ? o.open : true;
+        this.prevOpen = this.isOpen;
+        this.isTransitionInit = false;
         this.isDown = false;
         this.isScroll = false;
 
@@ -9863,7 +9850,9 @@ class Gui {
 
             this.iconOpen  = `<svg width="${sSize}" height="${sSize}" viewBox="0 0 16 16"><path d="M2 2 L14 14 M14 2 L2 14" stroke="currentColor" stroke-width="2.2"/></svg>`;
             this.iconClose = `<svg width="${sSize}" height="${sSize}" viewBox="0 0 16 16"><path d="M1 3 H15 M1 8 H15 M1 13 H15" stroke="currentColor" stroke-width="2.2"/></svg>`;
-            this.topBtn = Tools.dom( 'div', this.css.txt + 'right:0; top:0; left:auto; padding:0; display:flex; align-items:center; justify-content:center; width:' + bSize + 'px; height:' + bSize + 'px; background:' + cc.background + '; color:' + cc.text + ';' );
+
+            const sideCss = this.retractSide === 'left' ? 'left:0; right:auto; z-index:2;' : 'right:0; left:auto; z-index:2;';
+            this.topBtn = Tools.dom( 'div', this.css.txt + sideCss + ' top:0; padding:0; display:flex; align-items:center; justify-content:center; width:' + bSize + 'px; height:' + bSize + 'px; background:' + cc.background + '; color:' + cc.text + ';' );
 
             //this.topBtn.textContent = this.isOpen ? '⛌' : '☰';
             this.topBtn.innerHTML = this.isOpen ? this.iconOpen : this.iconClose;
@@ -9927,12 +9916,19 @@ class Gui {
         if ( this.isCanvas ) return;
 
         if( this.transition && !this.isCanvas ){
-            this.innerContent.style.transition = 'height '+this.transition+'s ease-out';
-            //this.content.style.transition = 'height '+this.transition+'s ease-out';
-            //this.content.style.transition = 'height ' + this.transition + 's ease-out, width ' + this.transition + 's ease-out';
+            this.isTransitionInit = true;
+            this.innerContent.style.transition = 'height ' + this.transition + 's ease-out, opacity 0.15s ease-out';
             this.content.style.transition = 'height ' + this.transition + 's ease-out, width ' + this.transition + 's ease-out, margin-left ' + this.transition + 's ease-out, margin-right ' + this.transition + 's ease-out';
-            this.bottom.style.transition = 'top '+this.transition+'s ease-out';
-            //this.bottom.addEventListener("transitionend", Roots.resize, true);
+            this.bottom.style.transition = 'top ' + this.transition + 's ease-out';
+
+            this.content.addEventListener( 'transitionend', ( e ) => {
+                if ( e.target !== this.content ) return;
+                Roots.needReZone = true;
+                if ( this.isTopClose && this.isOpen ) {
+                    this.innerContent.style.visibility = 'visible';
+                    this.innerContent.style.opacity = '1';
+                }
+            }, { passive: true } );
         }
 
         let i = this.uis.length;
@@ -10134,7 +10130,11 @@ class Gui {
 
         let s = this.isScroll ?  this.zone.w - this.size.s : this.zone.w;
 
-        if ( this.isTopClose && l.y < this.th && l.x > this.zone.w - this.th ) return 'top';
+        if ( this.isTopClose && l.y < this.th ) {
+            if ( this.retractSide === 'left' ? l.x < this.th : l.x > this.zone.w - this.th ) return 'top';
+        }
+
+        //if ( this.isTopClose && l.y < this.th && l.x > this.zone.w - this.th ) return 'top';
         if ( l.y > this.zone.h - this.bh && l.y < this.zone.h ) name = 'bottom';
         else name = l.x > s ? 'scroll' : 'content';
         
@@ -10608,6 +10608,20 @@ class Gui {
         this.isScroll = false;
 
         if ( this.isTopClose ) {
+
+            const stateChanged = this.isOpen !== this.prevOpen;
+            this.prevOpen = this.isOpen;
+
+            if ( stateChanged && this.isTransitionInit && !this.isCanvas ) {
+                // Masque instantanément pendant l'animation de pliage/dépliage
+                this.innerContent.style.visibility = 'hidden';
+                this.innerContent.style.opacity = '0';
+            } else {
+                // Affichage immédiat au démarrage ou lors d'un simple resize
+                this.innerContent.style.visibility = this.isOpen ? 'visible' : 'hidden';
+                this.innerContent.style.opacity = this.isOpen ? '1' : '0';
+            }
+
             const offset = this.isOpen ? 0 : ( this.fullW - this.th );
             this.zone.w = this.isOpen ? this.fullW : this.th;
             this.content.style.width = this.zone.w + 'px';
@@ -10622,6 +10636,22 @@ class Gui {
                 this.content.style.marginRight = ( this.retractSide === 'left' ? offset : 0 ) + 'px';
             }
         }
+
+        /*if ( this.isTopClose ) {
+            const offset = this.isOpen ? 0 : ( this.fullW - this.th );
+            this.zone.w = this.isOpen ? this.fullW : this.th;
+            this.content.style.width = this.zone.w + 'px';
+
+            if ( this.isCenter ) {
+                const half = Math.floor( this.fullW * 0.5 );
+                if ( this.retractSide === 'right' ) this.content.style.marginLeft = ( -half + offset ) + 'px';
+                else if ( this.retractSide === 'left' ) this.content.style.marginLeft = -half + 'px';
+                else this.content.style.marginLeft = -Math.floor( this.zone.w * 0.5 ) + 'px';
+            } else {
+                this.content.style.marginLeft = ( this.retractSide === 'right' ? offset : 0 ) + 'px';
+                this.content.style.marginRight = ( this.retractSide === 'left' ? offset : 0 ) + 'px';
+            }
+        }*/
 
         if( this.isOpen ){
 

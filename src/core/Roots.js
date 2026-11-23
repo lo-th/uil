@@ -3,7 +3,7 @@
  * @author lth / https://github.com/lo-th
  */
 
-export const REVISION = '5.0.3';
+export const REVISION = '5.0.4';
 
 // INTENAL FUNCTION
 
@@ -147,17 +147,16 @@ const R = {
 
         if ( R.isEventsInit ) return;
 
-        const dom = document.body;
         R.isMobile = R.testMobile();
         R.now = R.getTime();
 
-        if ( R.isMobile ) dom.style.touchAction = 'none';
+        if ( R.isMobile ) document.body.style.touchAction = 'none';
 
-        dom.addEventListener( 'pointermove', R, { passive: true } );
-        dom.addEventListener( 'pointerdown', R, { passive: true } );
-        dom.addEventListener( 'pointerup', R, { passive: true } );
-        dom.addEventListener( 'pointercancel', R, { passive: true } );
-        dom.addEventListener( 'pointerleave', R, { passive: true } );
+        document.addEventListener( 'pointermove', R, { passive: true } );
+        document.addEventListener( 'pointerdown', R, { passive: true } );
+        document.addEventListener( 'pointerup', R, { passive: true } );
+        document.addEventListener( 'pointercancel', R, { passive: true } );
+        document.addEventListener( 'pointerleave', R, { passive: true } );
 
         R.onResize = () => {
             R.needReZone = true;
@@ -165,10 +164,16 @@ const R = {
             R.resize();
         };
 
+        R.onBlur = () => {
+            R.lock = false;
+            R.clearOldID();
+        };
+
         window.addEventListener( 'resize', R.onResize, { passive: true } );
+        window.addEventListener( 'blur', R.onBlur, { passive: true } );
 
         R.isEventsInit = true;
-        R.dom = dom;
+        R.dom = document;
 
     },
 
@@ -176,17 +181,16 @@ const R = {
 
         if ( !R.isEventsInit ) return;
 
-        const dom = R.dom;
-
         R.setWheel( false );
         R.clearInput();
 
-        dom.removeEventListener( 'pointercancel', R );
-        dom.removeEventListener( 'pointerleave', R );
-        dom.removeEventListener( 'pointermove', R );
-        dom.removeEventListener( 'pointerdown', R );
-        dom.removeEventListener( 'pointerup', R );
+        document.removeEventListener( 'pointercancel', R );
+        document.removeEventListener( 'pointerleave', R );
+        document.removeEventListener( 'pointermove', R );
+        document.removeEventListener( 'pointerdown', R );
+        document.removeEventListener( 'pointerup', R );
         window.removeEventListener( 'resize', R.onResize );
+        window.removeEventListener( 'blur', R.onBlur );
 
         R.isEventsInit = false;
 
@@ -264,9 +268,13 @@ const R = {
             R.prevTime = R.downTime;
             R.forceZone = false;
             R.clearInput();
+            
+            if ( R.ID === null || R.isMobile ) R.findID( e );
+
             R.lock = true;
 
-            if ( R.isMobile ) R.findID( e );
+
+            //if ( R.isMobile ) R.findID( e );
             if ( R.ID !== null && event.target?.setPointerCapture ) {
                 try { event.target.setPointerCapture( event.pointerId ); } catch (_) {}
             }

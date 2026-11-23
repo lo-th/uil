@@ -23,6 +23,9 @@ export class Group extends Proto {
             this.isDefGroup = true;
         }
 
+        this.bgAlpha = 1;
+        if( o.bgAlpha ) this.bgAlpha = o.bgAlpha;
+
         this.ADD = o.add;
         this.uis = []
         this.current = -1;
@@ -46,14 +49,13 @@ export class Group extends Proto {
         this.c[1].style.color = cc.text;
 
         this.init();
-        this.setBG( o.mark );
+        this.setMark( o.mark );
 
         if( o.open ) this.open();
-        
 
     }
 
-    setBG ( bg ) {
+    setMark ( mark ) {
 
         //return
 
@@ -62,38 +64,17 @@ export class Group extends Proto {
 
         //if ( bg !== undefined ) cc.groups = bg;
 
-        let hasBg = bg !== undefined && bg !== 'none';
+        let hasBg = mark !== undefined && mark !== 'none';
         
-        const borderCol = hasBg ? bg : ( cc.gborder !== 'none' ? cc.gborder : 'none' );
+        let titleColor = !this.isDefGroup ? Tools.ColorLuma( mark, -0.65 ) : ( cc.groups === 'none' ? cc.background : cc.groups );
+        if( this.bgAlpha !== 1 ) titleColor = Tools.htmlRgba( mark, this.bgAlpha );
+        s[ 1 ].background = titleColor;
 
-        if(this.isDefGroup) hasBg = false
+        
 
-        //s[ 0 ].background = 'none';
-        // Fond subtil pour le titre : légèrement teinté si bg est défini, sinon couleur de groupe par défaut
-        s[ 1 ].background = hasBg ? Tools.ColorLuma( bg, -0.65 ) : ( cc.groups === 'none' ? cc.background : cc.groups );
-        // Fond très léger pour le contenu du sous-groupe
-        //s[ 2 ].background = hasBg ? Tools.ColorLuma( bg, -0.8 ) : 'none';
-
-        // Mémorise la couleur de bordure du groupe
-        this.borderCol = borderCol;
-
-        if ( borderCol !== 'none' ) {
-
-            this.line = this.dom( 'div', 'position:absolute; left:0; top:2px; bottom:2px; width:' + this.borderCC + 'px; background:' + borderCol + '; pointer-events:none; z-index:10;' );
-
-            //this.line = this.dom( 'div', 'position:absolute; left:0; top:0; bottom:0; width:' + this.borderCC + 'px; background:' + borderCol + '; pointer-events:none; z-index:10;' );
-            this.c[ 0 ].appendChild( this.line );
-            //s[ 1 ].boxShadow =  'inset '+this.borderCC+'px 0 0 0 '+borderCol;
-            //s[ 2 ].boxShadow =  'inset '+this.borderCC+'px 0 0 0 '+borderCol;
-            //s[ 1 ].borderLeft = this.borderCC + 'px solid ' + borderCol;
-            //s[ 2 ].borderLeft = this.borderCC + 'px solid ' + borderCol;
-        }
-
-        /*if ( this.radius !== 0 ) {
-            s[ 1 ].borderRadius = this.radius + 'px';
-            s[ 2 ].borderRadius = this.radius + 'px';
-        }*/
-
+        this.line = this.dom( 'div', 'position:absolute; left:0; top:2px; bottom:2px; width:' + this.borderCC + 'px; background:' + mark + '; pointer-events:none; z-index:10;' );
+        this.c[ 0 ].appendChild( this.line );
+        
     }
 
     /*setBG ( bg ) {
@@ -467,12 +448,7 @@ export class Group extends Proto {
 
         }
 
-        if ( this.borderCol !== 'none' ) {
-           // s[ 2 ].bordeLeft = 4 + 'px solid ' + this.borderCol;
-           // s[ 1 ].bordeLeft = 4 + 'px solid ' + this.borderCol;
-            //s[ 2 ].borderTop = 'none';
-            //s[ 1 ].borderBottom = cc.borderSize + 'px solid rgba(0,0,0,0)';
-        }
+        
         
         if ( !this.isUI ) Roots.getZone( this );
         this.zone.w = this.w - this.decal;
@@ -508,10 +484,7 @@ export class Group extends Proto {
             s[1].border = cc.borderSize+'px solid '+ cc.gborder
         }
 
-        if ( this.borderCol !== 'none' ) {
-           // s[ 2 ].border = 'none';
-           // s[ 1 ].borderLeft = 4 + 'px solid ' + this.borderCol;
-        }
+        
 
         //if(this.radius) s[1].borderRadius = this.radius+'px'
 

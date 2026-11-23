@@ -105,6 +105,8 @@ export class Gui {
         this.cssGui = o.css !== undefined ? o.css : ( this.isCenter ? '' : ( this.retractSide === 'left' ? 'left:10px; right:auto;' : 'right:10px; left:auto;' ) );
 
         this.isOpen = o.open !== undefined ? o.open : true;
+        this.prevOpen = this.isOpen;
+        this.isTransitionInit = false;
         this.isDown = false;
         this.isScroll = false;
 
@@ -164,7 +166,9 @@ export class Gui {
 
             this.iconOpen  = `<svg width="${sSize}" height="${sSize}" viewBox="0 0 16 16"><path d="M2 2 L14 14 M14 2 L2 14" stroke="currentColor" stroke-width="2.2"/></svg>`;
             this.iconClose = `<svg width="${sSize}" height="${sSize}" viewBox="0 0 16 16"><path d="M1 3 H15 M1 8 H15 M1 13 H15" stroke="currentColor" stroke-width="2.2"/></svg>`;
-            this.topBtn = Tools.dom( 'div', this.css.txt + 'right:0; top:0; left:auto; padding:0; display:flex; align-items:center; justify-content:center; width:' + bSize + 'px; height:' + bSize + 'px; background:' + cc.background + '; color:' + cc.text + ';' );
+
+            const sideCss = this.retractSide === 'left' ? 'left:0; right:auto; z-index:2;' : 'right:0; left:auto; z-index:2;';
+            this.topBtn = Tools.dom( 'div', this.css.txt + sideCss + ' top:0; padding:0; display:flex; align-items:center; justify-content:center; width:' + bSize + 'px; height:' + bSize + 'px; background:' + cc.background + '; color:' + cc.text + ';' );
 
             //this.topBtn.textContent = this.isOpen ? '⛌' : '☰';
             this.topBtn.innerHTML = this.isOpen ? this.iconOpen : this.iconClose;
@@ -228,12 +232,19 @@ export class Gui {
         if ( this.isCanvas ) return;
 
         if( this.transition && !this.isCanvas ){
-            this.innerContent.style.transition = 'height '+this.transition+'s ease-out';
-            //this.content.style.transition = 'height '+this.transition+'s ease-out';
-            //this.content.style.transition = 'height ' + this.transition + 's ease-out, width ' + this.transition + 's ease-out';
+            this.isTransitionInit = true;
+            this.innerContent.style.transition = 'height ' + this.transition + 's ease-out, opacity 0.15s ease-out';
             this.content.style.transition = 'height ' + this.transition + 's ease-out, width ' + this.transition + 's ease-out, margin-left ' + this.transition + 's ease-out, margin-right ' + this.transition + 's ease-out';
-            this.bottom.style.transition = 'top '+this.transition+'s ease-out';
-            //this.bottom.addEventListener("transitionend", Roots.resize, true);
+            this.bottom.style.transition = 'top ' + this.transition + 's ease-out';
+
+            this.content.addEventListener( 'transitionend', ( e ) => {
+                if ( e.target !== this.content ) return;
+                Roots.needReZone = true;
+                if ( this.isTopClose && this.isOpen ) {
+                    this.innerContent.style.visibility = 'visible';
+                    this.innerContent.style.opacity = '1';
+                }
+            }, { passive: true } );
         }
 
         let i = this.uis.length
@@ -435,7 +446,11 @@ export class Gui {
 
         let s = this.isScroll ?  this.zone.w - this.size.s : this.zone.w;
 
-        if ( this.isTopClose && l.y < this.th && l.x > this.zone.w - this.th ) return 'top';
+        if ( this.isTopClose && l.y < this.th ) {
+            if ( this.retractSide === 'left' ? l.x < this.th : l.x > this.zone.w - this.th ) return 'top';
+        }
+
+        //if ( this.isTopClose && l.y < this.th && l.x > this.zone.w - this.th ) return 'top';
         if ( l.y > this.zone.h - this.bh && l.y < this.zone.h ) name = 'bottom';
         else name = l.x > s ? 'scroll' : 'content';
         
@@ -909,6 +924,20 @@ export class Gui {
         this.isScroll = false;
 
         if ( this.isTopClose ) {
+
+            const stateChanged = this.isOpen !== this.prevOpen;
+            this.prevOpen = this.isOpen;
+
+            if ( stateChanged && this.isTransitionInit && !this.isCanvas ) {
+                // Masque instantanément pendant l'animation de pliage/dépliage
+                this.innerContent.style.visibility = 'hidden';
+                this.innerContent.style.opacity = '0';
+            } else {
+                // Affichage immédiat au démarrage ou lors d'un simple resize
+                this.innerContent.style.visibility = this.isOpen ? 'visible' : 'hidden';
+                this.innerContent.style.opacity = this.isOpen ? '1' : '0';
+            }
+
             const offset = this.isOpen ? 0 : ( this.fullW - this.th );
             this.zone.w = this.isOpen ? this.fullW : this.th;
             this.content.style.width = this.zone.w + 'px';
@@ -923,6 +952,22 @@ export class Gui {
                 this.content.style.marginRight = ( this.retractSide === 'left' ? offset : 0 ) + 'px';
             }
         }
+
+        /*if ( this.isTopClose ) {
+            const offset = this.isOpen ? 0 : ( this.fullW - this.th );
+            this.zone.w = this.isOpen ? this.fullW : this.th;
+            this.content.style.width = this.zone.w + 'px';
+
+            if ( this.isCenter ) {
+                const half = Math.floor( this.fullW * 0.5 );
+                if ( this.retractSide === 'right' ) this.content.style.marginLeft = ( -half + offset ) + 'px';
+                else if ( this.retractSide === 'left' ) this.content.style.marginLeft = -half + 'px';
+                else this.content.style.marginLeft = -Math.floor( this.zone.w * 0.5 ) + 'px';
+            } else {
+                this.content.style.marginLeft = ( this.retractSide === 'right' ? offset : 0 ) + 'px';
+                this.content.style.marginRight = ( this.retractSide === 'left' ? offset : 0 ) + 'px';
+            }
+        }*/
 
         if( this.isOpen ){
 
