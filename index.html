@@ -33,7 +33,7 @@
     const callbackSize = function(v){ ui.setWidth( v ); }
     const callbackLogo = function(v){ document.getElementById('logoin').setAttributeNS(null, 'fill', v ); title.setColor(v); }
     const callbackLink = function(v){ let w = window.open("./examples/"+v+".html", ""); }
-    const callbackReturn = function ( data, name ){
+    const callbackReturn = ( data, name )=>{
         // data is text for any textfile or image
         // name is the name of file
         debug.innerHTML = name
@@ -55,7 +55,7 @@
     // single UI element
     const s = UIL.add('slide', { name:'ui size', min:128, max:400, value:240, step:10, w:100, pos:{left:'10px', top:'30px' }, simple:true }).onChange( callbackSize )
     const b = UIL.add('button', { name:'populate', w:100, pos:{left:'10px', top:'60px'}, simple:true }).onChange( populate )
-    const c = UIL.add('button', { w:64, h:64, pos:{right:'10px', top:'10px'}, simple:true }).icon(UIL.Tools.icon('github', '#DEDEDE', 50) ).onChange( function(v){ let w = window.open('https://github.com/lo-th/uil','_blank'); } )
+    const c = UIL.add('button', { w:64, h:64, pos:{ right:'10px', top:'10px' }, radius:'100%', simple:true }).icon(UIL.Tools.icon('github', '#DEDEDE', 50) ).onChange( function(v){ let w = window.open('https://github.com/lo-th/uil','_blank'); } )
 
 
     // you can also use object reference 
@@ -78,7 +78,8 @@
 
             title = ui.add( 'title',  { name:'UIL '+ UIL.REVISION, h:22, align:'center' })
 
-            let gr = ui.add('group', { name:'Examples', h:30, color:'#0FF' }).onChange( callbackLink )
+            // add callback for each element of group
+            let gr = ui.add('group', { name:'Examples', h:30, color:'#0FF', mark:'#0FF', open:true }).onChange( callbackLink )
 
             gr.add( 'button', { value: ['uil_3d_1', 'uil_3d_2'], color: '#EEE' })
             gr.add( 'button', { value: ['uil_style', 'uil_three'] })
@@ -89,6 +90,7 @@
             gr.add( 'button', { value: ['uil_mapARM', 'uil_ktx2'] })
             
             ui.add('fps', { h:22, hplus:70, res:80 });
+
             graph = ui.add('fps', { 
                 name:'custom graph', h:22, hplus:70, custom:true, alpha:1, res:50, 
                 names:['Post','Step','Next'], cc:['50,160,222','222,120,50','222,222,50'], 

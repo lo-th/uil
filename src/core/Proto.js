@@ -11,30 +11,27 @@ export class Proto {
 
     constructor( o = {} ) {
 
-        
-
         // disable mouse controle
         this.lock = o.lock || false;
 
         // for button
-        this.neverlock = false
+        this.neverlock = false;
 
         // only simple space 
-        this.isSpace = o.isSpace || false
+        this.isSpace = o.isSpace || false;
 
-
-
-        // if is on gui or group
+        // if Proto is in gui or group
         this.main = o.main || null;
         this.isUI = o.isUI || false;
         this.group = o.group || null;
 
         this.isListen = false;
+        this.isCanvasOnly = false;
+        this.isSelect = false;
 
-        this.top = 0
-        this.ytop = 0
-
-        this.dx = o.dx || 0
+        this.top = 0;
+        this.ytop = 0;
+        this.dx = o.dx || 0;
 
         this.isSelectMulty = o.selectmulty !== undefined ? o.selectmulty : false
         this.isSelectable = o.selectable !== undefined ? o.selectable : false
@@ -42,20 +39,16 @@ export class Proto {
 
         this.ontop = o.ontop ? o.ontop : false; // 'beforebegin' 'afterbegin' 'beforeend' 'afterend'
 
-        this.css = this.main ? this.main.css : Tools.css
+        this.css = this.main ? this.main.css : Tools.css;
 
-        this.colors = Tools.defineColor( o, this.main ? ( this.group ? this.group.colors : this.main.colors ) : Tools.colors )
+        this.colors = Tools.defineColor( o, this.main ? ( this.group ? this.group.colors : this.main.colors ) : Tools.colors );
 
+        this.overEffect = this.colors.showOver;
 
-        this.overEffect = this.colors.showOver
+        this.svgs = Tools.svgs;
 
-        this.svgs = Tools.svgs
-
-        this.zone = { x:0, y:0, w:0, h:0, d:0 }
-        this.local = new V2().neg()
-
-        this.isCanvasOnly = false
-        this.isSelect = false
+        this.zone = { x:0, y:0, w:0, h:0, d:0 };
+        this.local = new V2();
 
         // percent of title
         this.p = o.p !== undefined ? o.p : Tools.size.p;
@@ -68,7 +61,6 @@ export class Proto {
         if( !this.isSpace ) this.h = this.h < 11 ? 11 : this.h;
         else this.lock = true
 
-
         // decale for canvas only
         this.fw = o.fw || 0
 
@@ -76,7 +68,8 @@ export class Proto {
         this.isOpen = false;//false// open statu
 
         // radius for toolbox
-        this.radius = o.radius || this.colors.radius;
+        const radius = o.radius || this.colors.radius;
+        this.radius = !isNaN(radius) && radius !== '' ? `${radius}px` : radius;
 
         this.transition = o.transition || Tools.transition
 
@@ -94,7 +87,6 @@ export class Proto {
         // no title 
         this.simple = o.simple || false;
         if( this.simple ) this.sa = 0;
-
 
         // define obj size
         this.setSize( this.w )
@@ -119,32 +111,31 @@ export class Proto {
 
         // callback
         this.callback = o.callback === undefined ? null : o.callback;
-        this.endCallback = null;
+        this.endCallback = o.endCallback === undefined ? null : o.endCallback;;
         this.openCallback = o.openCallback === undefined ? null : o.openCallback;
         this.closeCallback = o.closeCallback === undefined ? null : o.closeCallback;
 
-        // if no callback take one from group or gui
-        if( this.callback === null && this.isUI && this.main.callback !== null ){ 
-            this.callback = this.group ? this.group.callback : this.main.callback;
+        // if no callback take one from GUI or Group
+        if( this.callback === null ) { 
+            if( this.isUI && this.main.callback !== null ) this.callback = this.main.callback;
+            if( this.group && this.group.callback !== null ) this.callback = this.group.callback;
         }
 
-        // elements
-        this.c = [];
+        if( this.endCallback === null ) { 
+            if( this.isUI && this.main.endCallback !== null ) this.endCallback = this.main.endCallback;
+            if( this.group && this.group.endCallback !== null ) this.endCallback = this.group.endCallback;
+        }
 
-        // style 
-        this.s = [];
+        this.c = [];// elements
+        this.s = [];// style 
 
 
         this.useFlex = this.isUI ? this.main.useFlex : false 
         let flexible = this.useFlex ? 'display:flex; justify-content:center; align-items:center; text-align:center; flex: 1 100%;' : 'float:left;'
 
         const virtual = this.isUI ? 'content-visibility:auto; contain-intrinsic-size:auto ' + this.h + 'px;' : '';
+
         this.c[0] = Tools.dom( 'div', this.css.basic + flexible + 'position:relative; height:20px;' + virtual );
-
-        //this.c[0] = Tools.dom( 'div', this.css.basic + flexible + 'position:relative; height:20px;');
-        //this.c[0] = Tools.dom( 'div', this.css.basic + flexible + 'position:relative; height:20px; content-visibility:auto; contain-intrinsic-size:auto 24px;' );
-
-
         this.s[0] = this.c[0].style
 
         // bottom margin
@@ -179,12 +170,8 @@ export class Proto {
             this.mono = true;
         }
 
-
-
-
-        if( o.css ) this.s[0].cssText = o.css; 
+        if( o.css ) this.s[0].cssText = o.css;
         
-
     }
 
     // ----------------------
@@ -193,10 +180,9 @@ export class Proto {
     
     init() {
 
-        this.ytop = this.top + this.mtop
-
-        this.zone.h = this.h + this.margin
-        this.zone.w = this.w
+        this.ytop = this.top + this.mtop;
+        this.zone.h = this.h + this.margin;
+        this.zone.w = this.w;
 
         let s = this.s; // style cache
         let c = this.c; // div cach
@@ -379,26 +365,6 @@ export class Proto {
 
     }
 
-    /*uiout() {
-
-        if( this.lock ) return;
-        if(!this.overEffect) return;
-        if(this.isGroup)return;
-        if(this.isTitle)return;
-        if(this.s) this.s[0].background = this.colors.background;
-
-    }
-
-    uiover() {
-
-        if( this.lock ) return;
-        if(!this.overEffect) return;
-        if(this.isGroup)return;
-        if(this.isTitle)return;
-        if(this.s) this.s[0].background = this.colors.backgroundOver;
-
-    }*/
-
     rename( s ) {
 
         if( this.c[1] !== undefined) this.c[1].textContent = s;
@@ -455,6 +421,8 @@ export class Proto {
         return this
 
     }
+
+    onEnd( f ) { return this.onFinishChange(f); }
 
     // ----------------------
     // event on open close
@@ -625,25 +593,9 @@ export class Proto {
 
         this.min = o.min === undefined ? -Infinity : o.min;
         this.max = o.max === undefined ?  Infinity : o.max;
-        //this.precision = o.precision === undefined ? 2 : o.precision;
-
-        //let s;
 
         this.precision = o.precision ?? 2;
         this.step = o.step ?? Number(Math.pow(10, -this.precision).toFixed(this.precision));
-
-
-        /*switch(this.precision){
-            case 0: s = 1; break;
-            case 1: s = 0.1; break;
-            case 2: s = 0.01; break;
-            case 3: s = 0.001; break;
-            case 4: s = 0.0001; break;
-            case 5: s = 0.00001; break;
-            case 6: s = 0.000001; break;
-        }*/
-
-        //this.step = o.step === undefined ?  s : o.step;
         this.range = this.max - this.min;
         this.value = this.numValue( this.value );
         
@@ -671,7 +623,6 @@ export class Proto {
         // TODO !!!!
 
         //if( this.marginDiv ) z.d -= this.margin * 0.5
-
         //if( this.marginDiv ) e.clientY -= this.margin * 0.5
         //if( this.group && this.group.marginDiv ) e.clientY -= this.group.margin * 0.5
 
@@ -693,13 +644,15 @@ export class Proto {
 
     setReferency( obj, key ) {
 
-        this.objectLink = obj
-        this.objectKey = key
+        this.objectLink = obj;
+        this.objectKey = key;
 
     }
 
     display( v = false ) {
-        this.s[0].visibility = v ? 'visible' : 'hidden'
+
+        this.s[0].visibility = v ? 'visible' : 'hidden';
+
     }
 
     // ----------------------
@@ -711,7 +664,7 @@ export class Proto {
         if( this.isOpen ) return
         this.isOpen = true
         Roots.needResize = true
-        if( this.openCallback ) this.openCallback()
+        if( this.openCallback ) this.openCallback();
 
     }
 
@@ -720,19 +673,19 @@ export class Proto {
         if( !this.isOpen ) return
         this.isOpen = false
         Roots.needResize = true
-        if( this.closeCallback ) this.closeCallback()
+        if( this.closeCallback ) this.closeCallback();
 
     }
 
     needZone() {
 
-        Roots.needReZone = true
+        Roots.needReZone = true;
 
     }
 
     rezone() {
 
-        Roots.needReZone = true
+        Roots.needReZone = true;
 
     }
 
@@ -766,7 +719,7 @@ export class Proto {
 
     selected( b ){
 
-        this.isSelect = b || false
+        this.isSelect = b || false;
         
     }
 

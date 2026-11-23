@@ -3,19 +3,9 @@
  * @author lth / https://github.com/lo-th
  */
 
-export const REVISION = '5.0.2';
+export const REVISION = '5.0.3';
 
 // INTENAL FUNCTION
-
-/*const observer = new IntersectionObserver((entries) => {
-    for (const entry of entries) {
-        console.log(entry)
-        //const bounds = entry.boundingClientRect;
-        entry.target.bounds = entry.boundingClientRect;
-    }
-    observer.disconnect();
-})*/
-
 
 const R = {
 
@@ -39,7 +29,6 @@ const R = {
     downTime:0,
     prevTime:0,
 
-    //prevDefault: ['contextmenu', 'wheel'],
     prevDefault: ['contextmenu'],
     pointerEvent: ['pointerdown', 'pointermove', 'pointerup'],
     eventOut: ['pointercancel', 'pointerout', 'pointerleave'],
@@ -68,6 +57,7 @@ const R = {
     startX:-1,
     moveX:-1,
     debugInput:false,
+    isWheelInit: false,
 
     // Animation loo
     isLoop: false,
@@ -134,6 +124,8 @@ const R = {
 
     remove: ( o ) => {
 
+        if ( R.ID === o ) R.clearOldID();
+
         let i = R.ui.indexOf( o );
         
         if ( i !== -1 ) {
@@ -141,12 +133,9 @@ const R = {
             R.ui.splice( i, 1 ); 
         }
 
-        if( R.ui.length === 0 ){
+        if ( R.ui.length === 0 ) {
             R.removeEvents();
-
         }
-
-        //console.log('remove:', R.ui.length)
 
     },
 
@@ -156,78 +145,50 @@ const R = {
 
     initEvents: () => {
 
-        if( R.isEventsInit ) return;
+        if ( R.isEventsInit ) return;
 
-        let dom = document.body;
-
+        const dom = document.body;
         R.isMobile = R.testMobile();
         R.now = R.getTime();
 
+        if ( R.isMobile ) dom.style.touchAction = 'none';
 
-        if(!R.isMobile){
-            dom.addEventListener( 'wheel', R, { passive: false } )
-        } else {
-            dom.style.touchAction = 'none'
-        }
-
-        
-        dom.addEventListener( 'pointercancel', R )
-        dom.addEventListener( 'pointerleave', R )
-        //dom.addEventListener( 'pointerout', R )
-
-        dom.addEventListener( 'pointermove', R )
-        dom.addEventListener( 'pointerdown', R )
-        dom.addEventListener( 'pointerup', R )
-       
-
-        dom.addEventListener( 'keydown', R, false )
-        dom.addEventListener( 'keyup', R, false )
+        dom.addEventListener( 'pointermove', R, { passive: true } );
+        dom.addEventListener( 'pointerdown', R, { passive: true } );
+        dom.addEventListener( 'pointerup', R, { passive: true } );
+        dom.addEventListener( 'pointercancel', R, { passive: true } );
+        dom.addEventListener( 'pointerleave', R, { passive: true } );
 
         R.onResize = () => {
             R.needReZone = true;
             R.needResize = true;
-            R.resize()
-        }
+            R.resize();
+        };
 
-        window.addEventListener( 'resize', R.onResize , { passive: true } )
-
-        //window.onblur = R.out;
-        //window.onfocus = R.in;
-
+        window.addEventListener( 'resize', R.onResize, { passive: true } );
 
         R.isEventsInit = true;
         R.dom = dom;
-
-       
-
-        //console.log('event is add !')
 
     },
 
     removeEvents: () => {
 
-        if( !R.isEventsInit ) return;
+        if ( !R.isEventsInit ) return;
 
-        let dom = document.body;
-            
-        if(!R.isMobile){
-            dom.removeEventListener( 'wheel', R )
-        }
-        
-        
+        const dom = R.dom;
+
+        R.setWheel( false );
+        R.clearInput();
+
         dom.removeEventListener( 'pointercancel', R );
         dom.removeEventListener( 'pointerleave', R );
         dom.removeEventListener( 'pointermove', R );
         dom.removeEventListener( 'pointerdown', R );
         dom.removeEventListener( 'pointerup', R );
-        
-        dom.removeEventListener( 'keydown', R );
-        dom.removeEventListener( 'keyup', R );
         window.removeEventListener( 'resize', R.onResize );
 
         R.isEventsInit = false;
-
-        //console.log('event is remove !')
 
     },
 
@@ -257,20 +218,6 @@ const R = {
 
     },
 
-    out: () => {
-
-        console.log('im am out')
-        R.clearOldID();
-
-    },
-
-    in: () => {
-
-        console.log('im am in')
-      //  R.clearOldID();
-
-    },
-
     // ----------------------
     //   HANDLE EVENTS
     // ----------------------
@@ -280,127 +227,83 @@ const R = {
         R.handleEvent( {type:'pointerup'} )
 
     },
-    
 
     handleEvent: ( event ) => {
 
-        //if(!event.type) return;
+        const type = event.type;
 
-        //if( R.prevDefault.indexOf( event.type ) !== -1 ) event.preventDefault(); 
+        // 1. Sortie immédiate pour le clavier (évite tout calcul de souris/zone)
+        if ( type === 'keydown' ) { R.keydown( event ); return; }
+        if ( type === 'keyup' ) { R.keyup( event ); return; }
 
-        if( R.needResize ) R.resize()
+        // 2. Si on ne surveille aucune UI et qu'on ne clique pas, ignorer le survol vide rapidement
+        if ( R.ui.length === 0 ) return;
 
+        if ( R.needResize ) R.resize();
+        if ( R.needReZone || R.forceZone ) R.findZone( R.forceZone );
 
-        R.findZone( R.forceZone );
-
-        let ptype = event.pointerType // mouse, pen, touch
-       
-        //let e = R.e;
-        // Normalisation propre
-
+        const ptype = event.pointerType;
         const e = R.e;
-        e.type = event.type;
+
         e.pageX = event.pageX || 0;
         e.pageY = event.pageY || 0;
-        e.clientX = (ptype === 'touch' ? event.pageX : event.clientX) || 0;
-        e.clientY = (ptype === 'touch' ? event.pageY : event.clientY) || 0;
+        e.clientX = ( ptype === 'touch' ? event.pageX : event.clientX ) || 0;
+        e.clientY = ( ptype === 'touch' ? event.pageY : event.clientY ) || 0;
         e.pressure = event.pressure || 0;
         e.isPrimary = event.isPrimary !== undefined ? event.isPrimary : true;
         e.pointerType = ptype || '';
-        e.delta = event.type === 'wheel' ? (event.deltaY > 0 ? 1 : -1) : 0
-        /*let e = {
-            type: event.type,
-            clientX: event.clientX,
-            clientY: event.clientY,
-            pageX: event.pageX,
-            pageY: event.pageY,
-            pressure: event.pressure, // ✅ Garde la pression du stylet/toucher
-            isPrimary: event.isPrimary, // ✅ Garde l'info du doigt principal
-            delta: 0,
-            pointerType: ptype
-        };*/
+        e.delta = type === 'wheel' ? ( event.deltaY > 0 ? 1 : -1 ) : 0;
 
-        let leave = false;
-        
-        if( event.type === 'keydown') R.keydown( event );
-        if( event.type === 'keyup') R.keyup( event );
+        if ( type === 'pointerdown' ) {
 
-        if( event.type === 'wheel' ) e.delta = event.deltaY > 0 ? 1 : -1;
-        else e.delta = 0;
+            e.type = 'mousedown';
+            R.downTime = R.now();
 
-        
+            if ( R.downTime - R.prevTime < 200 ) { R.selectAll(); return; }
 
-        e.clientX = ( ptype === 'touch' ? event.pageX : event.clientX ) || 0
-        e.clientY = ( ptype === 'touch' ? event.pageY : event.clientY ) || 0
+            R.prevTime = R.downTime;
+            R.forceZone = false;
+            R.clearInput();
+            R.lock = true;
 
-        e.type = event.type;
-
-        if( R.eventOut.indexOf( event.type ) !== -1 ){ 
-            //leave = true
-            e.type = 'mouseup';
-            R.isLeave = true;
-        }
-
-        if( event.type === 'pointerleave') R.isLeave = true; 
-
-        if( event.type === 'pointerdown') e.type = 'mousedown';
-        if( event.type === 'pointerup') e.type = 'mouseup';
-        if( event.type === 'pointermove'){ 
-            if( R.isLeave ){ 
-                // if user resize outside this document
-                R.isLeave = false;
-                R.resize();
+            if ( R.isMobile ) R.findID( e );
+            if ( R.ID !== null && event.target?.setPointerCapture ) {
+                try { event.target.setPointerCapture( event.pointerId ); } catch (_) {}
             }
+
+        } else if ( type === 'pointerup' || type === 'pointercancel' ) {
+
+            e.type = 'mouseup';
+            R.lock = false;
+
+        } else if ( type === 'pointermove' ) {
+
             e.type = 'mousemove';
+            if ( !R.lock ) R.findID( e );
+
+        } else if ( type === 'pointerleave' ) {
+
+            if ( !R.lock ) R.clearOldID();
+            return;
+
+        } else {
+
+            e.type = type;
+
         }
 
-        // double click test
-        if( e.type === 'mousedown' ) {
-            R.downTime = R.now()
-            let time = R.downTime - R.prevTime
+        if ( R.ID !== null ) {
 
-            // double click on imput
-            if( time < 200 ) { R.selectAll(); return false }
-   
-            R.prevTime = R.downTime
-            R.forceZone = false
-        }
-
-        // for imput
-        if( e.type === 'mousedown' ) R.clearInput()
-
-        // mouse lock
-        if( e.type === 'mousedown' ) R.lock = true;
-        if( e.type === 'mouseup' ) R.lock = false;
-
-        //if( R.current !== null && R.current.neverlock ) R.lock = false;
-
-        /*if( e.type === 'mousedown' && event.button === 1){
-            R.cursor()
-            e.preventDefault();
-            e.stopPropagation();
-        }*/
-
-        if( R.isMobile && e.type === 'mousedown' ) R.findID( e );
-        if( e.type === 'mousemove' && !R.lock ) R.findID( e );
-        
-        if( R.ID !== null ){
-
-            if( R.ID.isCanvasOnly ) {
-
+            if ( R.ID.isCanvasOnly ) {
                 e.clientX = R.ID.mouse.x;
                 e.clientY = R.ID.mouse.y;
-
             }
-
-            //if( R.ID.marginDiv ) e.clientY -= R.ID.margin * 0.5
 
             R.ID.handleEvent( e );
 
         }
 
-        if( R.isMobile && e.type === 'mouseup' ) R.clearOldID();
-        if( leave ) R.clearOldID();
+        if ( R.isMobile && e.type === 'mouseup' ) R.clearOldID();
 
     },
 
@@ -408,50 +311,62 @@ const R = {
     //   ID
     // ----------------------
 
+    setWheel: ( active ) => {
+
+        if ( R.isMobile ) return;
+
+        if ( active && !R.isWheelInit ) {
+            R.dom.addEventListener( 'wheel', R, { passive: false } );
+            R.isWheelInit = true;
+        } else if ( !active && R.isWheelInit ) {
+            R.dom.removeEventListener( 'wheel', R );
+            R.isWheelInit = false;
+        }
+
+    },
+
     findID: ( e ) => {
 
         let i = R.ui.length, next = -1, u, x, y;
 
-        while( i-- ){
+        while ( i-- ) {
 
-            u = R.ui[i]
+            u = R.ui[i];
 
-            if( u.isCanvasOnly ) {
-
+            if ( u.isCanvasOnly ) {
                 x = u.mouse.x;
                 y = u.mouse.y;
-
             } else {
-
                 x = e.clientX;
                 y = e.clientY;
-
             }
 
-            if( R.onZone( u, x, y ) ){ 
-                
+            if ( R.onZone( u, x, y ) ) {
+
                 next = i;
-                
-                if( next !== R.current ){
+
+                if ( next !== R.current ) {
                     R.clearOldID();
                     R.current = next;
                     R.ID = u;
+                    R.setWheel( true ); // Active le wheel uniquement ici
                 }
                 break;
             }
-                
+
         }
 
-        if( next === -1 ) R.clearOldID();
+        if ( next === -1 ) R.clearOldID();
 
     },
 
     clearOldID: () => {
 
-        if( !R.ID ) return;
+        if ( !R.ID ) return;
         R.current = -1;
         R.ID.reset();
         R.ID = null;
+        R.setWheel( false ); // Coupe le wheel dès que la souris sort
         R.cursor();
 
     },
@@ -567,19 +482,6 @@ const R = {
     },
 
 
-	/*findTarget: ( uis, e ) => {
-
-        let i = uis.length;
-
-        while( i-- ){
-            if ( uis[i]._vis === false ) continue;
-            if( R.onZone( uis[i], e.clientX, e.clientY ) ) return i
-        }
-
-        return -1;
-
-    },*/
-
     // ----------------------
     //   ZONE
     // ----------------------
@@ -672,8 +574,6 @@ const R = {
     // ----------------------
     //   CANVAS
     // ----------------------
-
-    
 
     toCanvas: ( o, w, h, force, scale = 1 ) => {
 
@@ -879,41 +779,44 @@ const R = {
     },
 
 
-    clearInput: () => {
-
-        if( R.parent === null ) return;
-        if( !R.firstImput ) R.parent.validate( true );
-
-        R.clearHidden();
-        R.parent.unselect();
-
-        //R.input.style.background = 'none';
-        //R.input.style.background = R.parent.colors.back;
-        R.input.style.background = R.parent.colors.back || 'none';
-        R.input.style.borderColor = R.parent.colors.border;
-        //R.input.style.color = R.parent.colors.text;
-        R.parent.isEdit = false;
-
-        R.input = null;
-        R.parent = null;
-        R.str = '',
-        R.firstImput = true;
-
-    },
-
     setInput: ( Input, parent ) => {
 
         R.clearInput();
-        
+
         R.input = Input;
         R.parent = parent;
 
         R.input.style.background = R.parent.colors.backoff;
         R.input.style.borderColor = R.parent.colors.select;
-        //R.input.style.color = R.parent.colors.textSelect;
         R.str = R.input.textContent;
 
         R.setHidden();
+
+        // Écoute le clavier uniquement pendant la saisie
+        document.addEventListener( 'keydown', R, false );
+        document.addEventListener( 'keyup', R, false );
+
+    },
+
+    clearInput: () => {
+
+        if ( R.parent === null ) return;
+        if ( !R.firstImput ) R.parent.validate( true );
+
+        document.removeEventListener( 'keydown', R, false );
+        document.removeEventListener( 'keyup', R, false );
+
+        R.clearHidden();
+        R.parent.unselect();
+
+        R.input.style.background = R.parent.colors.back || 'none';
+        R.input.style.borderColor = R.parent.colors.border;
+        R.parent.isEdit = false;
+
+        R.input = null;
+        R.parent = null;
+        R.str = '';
+        R.firstImput = true;
 
     },
 
@@ -946,37 +849,6 @@ const R = {
         } else {
             R.hiddenImput.readOnly = false;
         }
-
-       // e.preventDefault();
-
-        // add support for Ctrl/Cmd+A selection
-        //if ( keyCode === 65 && (e.ctrlKey || e.metaKey )) {
-            //R.selectText();
-            //e.preventDefault();
-            //return self.render();
-        //}
-
-        /*if( keyCode === 13 ){ //enter
-
-            R.clearInput();
-
-        //} else if( keyCode === 9 ){ //tab key
-
-           // R.input.textContent = '';
-
-        } else {
-
-            if( R.input.isNum ){
-                if ( ((e.keyCode > 47) && (e.keyCode < 58)) || ((e.keyCode > 95) && (e.keyCode < 106)) || e.keyCode === 190 || e.keyCode === 110 || e.keyCode === 8 || e.keyCode === 109 ){
-                    R.hiddenImput.readOnly = false;
-                } else {
-                    R.hiddenImput.readOnly = true;
-                }
-            } else {
-                R.hiddenImput.readOnly = false;
-            }
-
-        }*/
 
     },
 

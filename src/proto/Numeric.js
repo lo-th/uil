@@ -64,10 +64,8 @@ export class Numeric extends Proto {
         while(i--){
 
             if( this.isAngle ) this.value[i] = (this.value[i] * 180 / Math.PI).toFixed( this.precision )
-            //this.c[3+i] = this.dom( 'div', this.css.txtselect + 'top:1px; height:'+(this.h-2)+'px; color:' + cc.text + '; background:' + cc.back + '; borderColor:' + cc.border+'; border-radius:'+this.radius+'px;')
-            //if(o.center) this.c[2+i].style.textAlign = 'center'
 
-            this.c[3+i] = this.dom( 'div', this.css.txtselect + 'top:1px; height:'+(this.h-2)+'px; color:' + cc.text + '; background:' + cc.back + '; border:' + cc.borderSize + 'px solid ' + cc.border + '; border-radius:'+this.radius+'px;' );
+            this.c[3+i] = this.dom( 'div', this.css.txtselect + 'top:1px; height:'+(this.h-2)+'px; color:' + cc.text + '; background:' + cc.back + '; border:' + cc.borderSize + 'px solid ' + cc.border + '; border-radius:'+this.radius+';' );
             if ( o.center ) this.c[3+i].style.justifyContent = 'center';
             this.c[3+i].textContent = this.value[i]
             this.c[3+i].style.color = this.colors.text

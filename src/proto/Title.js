@@ -26,28 +26,6 @@ export class Title extends Proto {
 
     handleEvent () { return false; }
 
-    /*constructor( o = {} ) {
-
-        super( o );
-
-        this.isTitle = true;
-
-        let s = this.s;
-
-        s[1].justifyContent = o.align || 'left';
-        s[1].textAlign = o.align || 'left';
-        if(o.fontSize) s[1].fontSize = o.fontSize;
-        s[1].fontWeight = o.weight || 'normal';
-        s[1].color = o.color || this.colors.text;
-
-
-        this.c[1].innerHTML = this.txt//.substring(0,1).toUpperCase() + this.txt.substring(1).replace("-", " ");
-        //this.c[2].textContent = prefix;
-
-        this.init();
-
-    }*/
-
     text( txt ) {
 
         const el = this.c[1];

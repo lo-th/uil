@@ -26,7 +26,7 @@ export class Bool extends Proto {
             let box = this.inh - 2;
             let t = Math.floor( (this.h - box) * 0.5 );
             this.inw = box;
-            this.c[2] = this.dom( 'div', this.css.txt + this.css.middle + 'padding:0; line-height:1; justify-content:center; background:' + cc.inputBg + '; height:' + box + 'px; width:' + box + 'px; top:' + t + 'px; border-radius:' + this.radius + 'px; border:' + cc.borderSize + 'px solid ' + cc.border + '; font-size:' + (box - 4) + 'px;' );
+            this.c[2] = this.dom( 'div', this.css.txt + this.css.middle + 'padding:0; line-height:1; justify-content:center; background:' + cc.inputBg + '; height:' + box + 'px; width:' + box + 'px; top:' + t + 'px; border-radius:' + this.radius + '; border:' + cc.borderSize + 'px solid ' + cc.border + '; font-size:' + (box - 4) + 'px;' );
         } else {
             this.p = 0
             if( this.c[1] !== undefined ) this.c[1].textContent = '';

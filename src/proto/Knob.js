@@ -203,51 +203,6 @@ export class Knob extends Proto {
 
     }
 
-    /*mousemove ( e ) {
-
-        //if( !this.isDown ) return;
-
-        if( !this.isDown ) {
-            let name = this.testZone( e );
-            if( name === 'circular' || name === 'knob' ) {
-                this.cursor('pointer');
-                return this.mode(1);
-            }
-            return this.reset();
-        }
-
-        this.cursor('pointer');
-
-        let off = this.offset;
-
-        //off.x = this.radius - ( e.clientX - this.zone.x );
-        //off.y = this.radius - ( e.clientY - this.zone.y - this.top );
-
-        off.x = (this.w*0.5) - ( e.clientX - this.zone.x );
-        off.y = (this.diam*0.5) - ( e.clientY - this.zone.y - this.ytop );
-
-        this.r = - Math.atan2( off.x, off.y );
-
-        if( this.oldr !== null ) this.r = Math.abs(this.r - this.oldr) > Math.PI ? this.oldr : this.r;
-
-        this.r = this.r > this.mPI ? this.mPI : this.r;
-        this.r = this.r < -this.mPI ? -this.mPI : this.r;
-
-        let steps = 1 / this.cirRange;
-        let value = (this.r + this.mPI) * steps;
-
-        let n = ( ( this.range * value ) + this.min ) - this.old;
-
-        if(n >= this.step || n <= this.step){ 
-            n = Math.floor( n / this.step );
-            this.value = this.numValue( this.old + ( n * this.step ) );
-            this.update( true );
-            this.old = this.value;
-            this.oldr = this.r;
-        }
-
-    }*/
-
     wheel ( e ) {
 
         let name = this.testZone( e );

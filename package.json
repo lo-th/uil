@@ -1,27 +1,25 @@
 {
   "name": "uil",
-  "version": "5.0.2",
+  "version": "5.0.3",
   "description": "JavaScript gui library",
   "type": "module",
-  "main": "./build/uil.cjs",
+  "main": "./build/uil.min.js",
   "module": "./build/uil.module.js",
   "exports": {
     ".": {
       "import": "./build/uil.module.js",
-      "require": "./build/uil.cjs"
-    },
-    "./build/*": "./build/*"
+      "require": "./build/uil.min.js",
+      "default": "./build/uil.module.js"
+    }
   },
   "repository": {
     "type": "git",
     "url": "https://github.com/lo-th/uil"
   },
   "files": [
-    "package.json",
-    "LICENSE",
-    "README.md",
     "build"
   ],
+  "sideEffects": false,
   "directories": {
     "doc": "docs",
     "example": "examples"

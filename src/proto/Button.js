@@ -25,31 +25,31 @@ export class Button extends Proto {
 
         if( typeof this.values === 'string' ) this.values = [ this.values ]
 
-        this.isDown = false
-        this.neverlock = true
-        this.res = 0
+        this.isDown = false;
+        this.neverlock = true;
+        this.res = 0;
 
-        this.lng = this.values.length
-        this.tmp = []
-        this.stat = []
+        this.lng = this.values.length;
+        this.tmp = [];
+        this.stat = [];
 
         let sel, cc = this.colors;
 
         for( let i = 0; i < this.lng; i++ ){
 
             sel = false
-            if( this.values[i] === this.value && this.isSelectable ) sel = true
+            if( this.values[i] === this.value && this.isSelectable ) sel = true;
 
-            this.c[i+2] = this.dom( 'div', this.css.txt + this.css.button + 'top:1px; height:'+(this.h-2)+'px; border:'+cc.borderSize+'px solid '+cc.border+'; border-radius:'+this.radius+'px;' )
-            this.c[i+2].style.background = sel ? cc.select : cc.button
-            this.c[i+2].style.color = sel ? cc.textSelect : cc.text
+            this.c[i+2] = this.dom( 'div', this.css.txt + this.css.button + 'top:1px; height:'+(this.h-2)+'px; border:'+cc.borderSize+'px solid '+cc.border+'; border-radius:'+this.radius+';' );
+            this.c[i+2].style.background = sel ? cc.select : cc.button;
+            this.c[i+2].style.color = sel ? cc.textSelect : cc.text;
             this.c[i+2].innerHTML = this.values[i];
             this.stat[i] = sel ? 3:1;
 
         }
 
 
-        if( this.txt==='' ) this.p = 0 
+        if( this.txt==='' ) this.p = 0 ;
 
         if( (!o.value && !o.values) || this.p === 0 ){
             if( this.c[1] !== undefined ) this.c[1].textContent = ''

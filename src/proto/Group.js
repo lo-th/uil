@@ -10,62 +10,45 @@ export class Group extends Proto {
 
         super( o );
 
-        const cc = this.colors
+        const cc = this.colors;
 
-        this.isDefGroup = false
+        this.isGroup = true;
+        this.isDefGroup = false;
+        this.autoHeight = true;
+        this.isEmpty = true;
+        this.useFlex = true ;
+
         if(!o.mark){ 
-            o.mark = '#47484d'
-            this.isDefGroup = true
+            o.mark = '#47484d';
+            this.isDefGroup = true;
         }
 
-        this.isGroup = true
-
         this.ADD = o.add;
-
-        this.autoHeight = true
-
         this.uis = []
-        this.current = -1
-        this.proto = null
-        this.isEmpty = true
-
-        this.borderCC = o.mark ? 3 : 0
-
-        this.decal = o.group ? 8 : 0
-        this.baseH = this.h
-        this.radius = 0
-
-
-
-        let fltop = Math.floor(this.h*0.5)-3
-
+        this.current = -1;
+        this.proto = null;
         
+        this.borderCC = o.mark ? 3 : 0;
+        this.decal = o.group ? 8 : 0;
+        this.baseH = this.h;
+        //this.radius = 20;
 
-        this.useFlex = true 
-        let flexible = this.useFlex ? 'display:flex; flex-flow: row wrap;' : ''
+        let fltop = Math.floor(this.h*0.5)-3;
+        let flexible = this.useFlex ? 'display:flex; flex-flow: row wrap;' : '';
 
-        this.c[2] = this.dom( 'div', this.css.basic + flexible + 'width:100%; left:0;  overflow:hidden; top:'+(this.h)+'px')
-        this.c[3] = this.dom( 'path', this.css.basic + 'position:absolute; width:6px; height:6px; left:0; top:'+fltop+'px;', { d:this.svgs.g1, fill:cc.text, stroke:'none'})
+        this.c[2] = this.dom( 'div', this.css.basic + flexible + 'width:100%; left:0;  overflow:hidden; top:'+(this.h)+'px');
+        this.c[3] = this.dom( 'path', this.css.basic + 'position:absolute; width:6px; height:6px; left:0; top:'+fltop+'px;', { d:this.svgs.g1, fill:cc.text, stroke:'none'});
 
-        let bh = this.mtop === 0 ? this.margin : this.mtop
+        //let bh = this.mtop === 0 ? this.margin : this.mtop;
+        //let s = this.s;
 
-
-
-        
-        //this.c[4] = this.dom( 'div', this.css.basic + 'width:100%; left:0; height:'+(bh+1)+'px; top:'+((this.h-1))+'px; background:#f00;')
-
-        let s = this.s;
-        this.c[1].name = 'group'
+        this.c[1].name = 'group';
         this.c[1].style.color = cc.text;
 
         this.init();
+        this.setBG( o.mark );
 
-
-
-        this.setBG( o.mark )
-
-
-        if( o.open ) this.open()
+        if( o.open ) this.open();
         
 
     }
@@ -106,10 +89,10 @@ export class Group extends Proto {
             //s[ 2 ].borderLeft = this.borderCC + 'px solid ' + borderCol;
         }
 
-        if ( this.radius !== 0 ) {
+        /*if ( this.radius !== 0 ) {
             s[ 1 ].borderRadius = this.radius + 'px';
             s[ 2 ].borderRadius = this.radius + 'px';
-        }
+        }*/
 
     }
 
@@ -465,7 +448,7 @@ export class Group extends Proto {
 
         s[2].top = (this.h+this.mtop) + 'px';
 
-        if(this.radius){
+        /*if(this.radius){
 
             s[1].borderRadius = '0px'
             s[2].borderRadius = '0px'
@@ -474,7 +457,7 @@ export class Group extends Proto {
             s[1].borderTopRightRadius = this.radius+'px'
             s[2].borderBottomLeftRadius = this.radius+'px'
             s[2].borderBottomRightRadius = this.radius+'px'
-        }
+        }*/
 
         if( cc.gborder !== 'none' ){
 
@@ -530,7 +513,7 @@ export class Group extends Proto {
            // s[ 1 ].borderLeft = 4 + 'px solid ' + this.borderCol;
         }
 
-        if(this.radius) s[1].borderRadius = this.radius+'px'
+        //if(this.radius) s[1].borderRadius = this.radius+'px'
 
         this.parentHeight(-t)
 

@@ -1,21 +1,5 @@
-import { REVISION } from './core/Roots.js'
-import { Files } from './core/Files.js'
-import { Tools } from './core/Tools.js'
-import { Gui } from './core/Gui.js'
-import { add } from './core/add.js'
-
-export { REVISION } from './core/Roots.js';
-export { Tools } from './core/Tools.js';
-export { Files } from './core/Files.js';
-export { Gui } from './core/Gui.js';
-export { add } from './core/add.js';
-
-export const UIL = {
-
-	REVISION : REVISION,
-	Tools:Tools,
-	Files:Files,
-	Gui:Gui,
-	add:add,
-
-}
+export { REVISION } from './core/Roots.js'
+export { Files } from './core/Files.js'
+export { Tools } from './core/Tools.js'
+export { Gui } from './core/Gui.js'
+export { add } from './core/add.js'

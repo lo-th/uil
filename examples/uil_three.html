@@ -12,8 +12,7 @@
 		<script type="module">
 
 			import * as THREE from '../three/build/three.module.js';
-			//import * as UIL from '../build/uil.module.js';
-			import { UIL } from '../src/Uil_dev.js'
+			import { UIL } from '../src/Uil.module.js'
 
 			let camera, scene, renderer, texture, mesh, material
 
@@ -119,6 +118,7 @@
 
 			function initGui() {
 
+				UIL.Tools.THREE = THREE;
 				UIL.Tools.texture = THREE.Texture;
 
 				let ui = new UIL.Gui({topClose: 'right'})

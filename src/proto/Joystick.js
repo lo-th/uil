@@ -29,9 +29,6 @@ export class Joystick extends Proto {
         this.interval = null;
         this.c[0].style.display = 'block'
         this.haveText = o.text !== undefined ? o.text : true 
-
-        //this.radius = this.w * 0.5;
-        //this.distance = this.radius*0.25;
         this.distance = (this.diam*0.5)*0.25;
 
         this.h = o.h || this.w + (this.haveText ? 10 : 0);
@@ -215,32 +212,6 @@ export class Joystick extends Proto {
 
     }
 
-    /*mousemove ( e ) {
-
-        this.mode(1);
-
-        if( !this.isDown ) return;
-
-        //this.tmp.x = this.radius - ( e.clientX - this.zone.x );
-        //this.tmp.y = this.radius - ( e.clientY - this.zone.y - this.top );
-
-        this.tmp.x = (this.w*0.5) - ( e.clientX - this.zone.x );
-        this.tmp.y = (this.diam*0.5) - ( e.clientY - this.zone.y - this.ytop );
-
-        let distance = this.tmp.length();
-
-        if ( distance > this.distance ) {
-            let angle = Math.atan2(this.tmp.x, this.tmp.y);
-            this.tmp.x = Math.sin( angle ) * this.distance;
-            this.tmp.y = Math.cos( angle ) * this.distance;
-        }
-
-        this.pos.copy( this.tmp ).divideScalar( this.distance ).negate();
-
-        this.update();
-
-    }*/
-
     setValue ( v ) {
 
         if(v===undefined) v=[0,0];
@@ -279,9 +250,6 @@ export class Joystick extends Proto {
     }
 
     updateSVG () {
-
-        //let x = this.radius - ( -this.pos.x * this.distance );
-        //let y = this.radius - ( -this.pos.y * this.distance );
 
         let x = (this.diam*0.5) - ( -this.pos.x * this.distance );
         let y = (this.diam*0.5) - ( -this.pos.y * this.distance );

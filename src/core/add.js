@@ -50,11 +50,8 @@ export const add = function () {
 
         let name = type.toLowerCase();
 
-        if( name === 'group' ){ 
-            o.add = add;
-            //o.dx = 8
-        }
-
+        if( name === 'group' ) o.add = add;
+        
         switch( name ){
 
             case 'bool': case 'boolean': n = new Bool(o); break;
@@ -82,12 +79,9 @@ export const add = function () {
 
         }
 
-        
-
         if( n !== null ){
 
-            Roots.needResize = true
-
+            Roots.needResize = true;
             if( ref ) n.setReferency( a[0], a[1] );
             return n;
 

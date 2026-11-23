@@ -31,14 +31,8 @@ export class Bitmap extends Proto {
 
         const cc = this.colors
 
-        this.c[2] = this.dom( 'div', this.css.txt + this.css.button + ' top:1px; background:' + cc.button + '; height:' + (this.h - 2) + 'px; border:' + cc.borderSize + 'px solid ' + cc.border + '; border-radius:' + this.radius + 'px; width:30px;' );
-        this.c[3] = this.dom( 'div', this.css.txtselect + 'top:1px; height:' + (this.h - 2) + 'px; background:' + cc.back + '; border:' + cc.borderSize + 'px solid ' + cc.border + '; border-radius:' + this.radius + 'px; justify-content:center;' );
-
-
-        //this.c[2] = this.dom( 'div', this.css.txt + this.css.button + ' top:1px; background:'+cc.button+'; height:'+(this.h-2)+'px; border:'+cc.buttonBorder+'; border-radius:2px; width:30px; ' )
-
-        //this.c[3] = this.dom( 'div', this.css.txtselect + 'height:' + (this.h-4) + 'px; background:' + cc.back + '; borderColor:' + cc.inputBorder+'; border-radius:'+this.radius+'px;' )
-        //this.c[3].textContent = this.value;
+        this.c[2] = this.dom( 'div', this.css.txt + this.css.button + ' top:1px; background:' + cc.button + '; height:' + (this.h - 2) + 'px; border:' + cc.borderSize + 'px solid ' + cc.border + '; border-radius:' + this.radius + '; width:30px;' );
+        this.c[3] = this.dom( 'div', this.css.txtselect + 'top:1px; height:' + (this.h - 2) + 'px; background:' + cc.back + '; border:' + cc.borderSize + 'px solid ' + cc.border + '; border-radius:' + this.radius + '; justify-content:center;' );
         if(!this.img) this.c[3].textContent = 'null';
         
 

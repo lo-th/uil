@@ -31,7 +31,7 @@ export class Color extends Proto {
 
 	    let cc = this.colors
 
-	    this.c[2] = this.dom( 'div', `${this.css.txt} ${this.css.middle} top:1px; height:${this.h-2}px; border-radius:${this.radius}px; text-shadow:none; border:${cc.borderSize}px solid ${cc.border};` )
+	    this.c[2] = this.dom( 'div', `${this.css.txt} ${this.css.middle} top:1px; height:${this.h-2}px; border-radius:${this.radius}; text-shadow:none; border:${cc.borderSize}px solid ${cc.border};` )
 	  
 	    this.c[0].style.display = 'block'
 	    this.c[3] = this.getColorRing()

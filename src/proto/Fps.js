@@ -76,7 +76,7 @@ export class Fps extends Proto {
 
         let panelCss = 'display:none; left:10px; top:'+ this.h + 'px; height:'+(this.hplus - 8)+'px; box-sizing:border-box; background: rgba(0, 0, 0, 0.2); border:1px solid '+ ccc.border +';';
 
-        if( this.radius !== 0 ) panelCss += 'border-radius:' + this.radius+'px;'; 
+        if( this.radius !== '0px' ) panelCss += 'border-radius:' + this.radius; 
 
         this.c[2] = this.dom( 'path', this.css.basic + panelCss , {} );
 
@@ -111,7 +111,7 @@ export class Fps extends Proto {
         //s[1].paddingLeft = '18px';
         //s[1].fontWeight = 'bold';
 
-        if( this.radius !== 0 )  s[0].borderRadius = this.radius+'px';
+        if( this.radius !== '0px' )  s[0].borderRadius = this.radius;
         if( this.colors.gborder!=='none') s[0].border = '1px solid ' + ccc.gborder;
 
 

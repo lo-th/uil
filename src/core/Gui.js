@@ -42,6 +42,7 @@ export class Gui {
         this.canvasScale = o.canvasScale || 1
         
         this.callback = o.callback  === undefined ? null : o.callback
+        this.endCallback = o.endCallback  === undefined ? null : o.endCallback
 
         this.autoShow = o.autoShow  === undefined ? true : o.autoShow
 
@@ -143,7 +144,7 @@ export class Gui {
         this.scrollBG = Tools.dom( 'div', this.css.basic + 'right:0; top:0; width:' + sw + 'px; height:10px; display:none; background:' + cc.content + '; border-left:1px solid ' + cc.background + ';' );
         this.content.appendChild( this.scrollBG );
 
-        this.scroll = Tools.dom( 'div', this.css.basic + 'background:' + cc.button + '; left:2px; top:0; width:' + (sw - 4) + 'px; height:10px; border-radius:' + Math.max(2, r) + 'px;' );
+        this.scroll = Tools.dom( 'div', this.css.basic + 'background:' + cc.text + '; left:2px; top:0; width:' + (sw - 4) + 'px; height:10px; border-radius:' + Math.max(2, r) + 'px;' );
         this.scrollBG.appendChild( this.scroll );
 
         // bottom button
@@ -316,14 +317,26 @@ export class Gui {
         this.content.style.visibility = v ? 'visible' : 'hidden'
     }
 
-    onChange ( f ) {
+    // ----------------------
+    //   CALLBACK
+    // ----------------------
 
-        
+    onChange ( f ) {
 
         this.callback = f || null;
         return this;
 
     }
+
+    onFinishChange( f ) {
+
+        this.callback = null
+        this.endCallback = f
+        return this
+
+    }
+
+    onEnd( f ) { return this.onFinishChange(f); }
 
     // ----------------------
     //   STYLES
@@ -342,8 +355,8 @@ export class Gui {
 
 	    		case 'def':
                    Roots.cursor();
-	    		   this.scroll.style.background = cc.button; 
-	    		   this.bottom.style.background = cc.background
+	    		   this.scroll.style.background = cc.text; 
+	    		   this.bottom.style.background = cc.background;
 	    		   this.bottom.style.color = cc.text
                    if ( this.topBtn ) {
                         this.topBtn.style.background = cc.background;
@@ -353,10 +366,10 @@ export class Gui {
 
 	    		case 'scrollOver': 
                     Roots.cursor('ns-resize');
-                    this.scroll.style.background = cc.select
+                    this.scroll.style.background = cc.select;
                 break;
 	    		case 'scrollDown': 
-                    this.scroll.style.background = cc.select
+                    this.scroll.style.background = cc.select;
                 break;
 
 	    		case 'bottomOver': 
