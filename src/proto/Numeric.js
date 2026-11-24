@@ -8,17 +8,18 @@ export class Numeric extends Proto {
 
         super( o )
 
-        this.setTypeNumber( o )
+        this.setTypeNumber( o );
 
-        this.allway = o.allway || false
+        this.allway = o.allway || false;
 
-        this.isDown = false
-        this.value = [0]
-        this.multy = 1
-        this.invmulty = 1
-        this.isSingle = true
-        this.isAngle = false
-        this.isVector = false
+        this.isDown = false;
+        this.value = [0];
+        this.multy = 1;
+        this.invmulty = 1;
+        this.isSingle = true;
+        this.isAngle = false;
+        this.isVector = false;
+        this.haveInput = true;
 
         if( o.isAngle ){
             this.isAngle = true
@@ -53,37 +54,33 @@ export class Numeric extends Proto {
 
         this.center = o.center || false;
 
-        let cc = this.colors
+        let cc = this.colors;
 
         // bg
-        this.c[2] = this.dom( 'div', this.css.basic + ' background:' + cc.select + '; top:4px; width:0px; height:' + (this.h-8) + 'px;' )
+        this.c[2] = this.dom( 'div', this.css.basic + ' background:' + cc.select + '; top:4px; width:0px; height:' + (this.h-8) + 'px;' );
 
-        this.cMode = []
-        
-        let i = this.lng
-        while(i--){
+        this.cMode = [];
+
+        for(let i = 0; i<this.lng; i++){
 
             if( this.isAngle ) this.value[i] = (this.value[i] * 180 / Math.PI).toFixed( this.precision )
 
             this.c[3+i] = this.dom( 'div', this.css.txtselect + 'top:1px; height:'+(this.h-2)+'px; color:' + cc.text + '; background:' + cc.back + '; border:' + cc.borderSize + 'px solid ' + cc.border + '; border-radius:'+this.radius+';' );
             if ( o.center ) this.c[3+i].style.justifyContent = 'center';
-            this.c[3+i].textContent = this.value[i]
-            this.c[3+i].style.color = this.colors.text
-            this.c[3+i].isNum = true
-            this.cMode[i] = 0
+            this.c[3+i].textContent = this.value[i];
+            this.c[3+i].style.color = this.colors.text;
+            this.c[3+i].isNum = true;
+            this.cMode[i] = 0;
+
+            this.addInput( this.c[3+i] )
 
         }
 
-        // selection
-        /*this.selectId = 3 + this.lng;
-        this.c[this.selectId] = this.dom(  'div', this.css.txtselect + 'position:absolute; top:2px; height:' + (this.h-4) + 'px; padding:0px 0px; width:0px; color:' + cc.textSelect + '; background:' + cc.select + '; border:none; border-radius:0px;');
-
-        // cursor
-        this.cursorId = 4 + this.lng;
-        this.c[ this.cursorId ] = this.dom( 'div', this.css.basic + 'top:2px; height:' + (this.h-4) + 'px; width:0px; background:'+cc.text+';' );*/
-
         this.init();
+
     }
+
+    //----> ZONE
 
     testZone ( e ) {
 
@@ -101,9 +98,7 @@ export class Numeric extends Proto {
 
     }
 
-    // ----------------------
-    //   EVENTS
-    // ----------------------
+    //----> EVENTS
 
     mousedown ( e ) {
 
@@ -150,23 +145,6 @@ export class Numeric extends Proto {
 
     }
 
-    /*mouseup ( e ) {
-
-    	if( this.isDown ){ 
-            this.isDown = false;
-            this.current = -1;
-            this.prev.x = 0;
-            this.prev.y = 0;
-            this.prev.d = 0;
-            this.prev.v = 0;
-            this.validate( true );
-            return this.mousemove( e );
-        }
-
-        return false
-
-    }*/
-
     mousemove ( e ) {
 
         let nup = false
@@ -212,58 +190,53 @@ export class Numeric extends Proto {
             }
             return this.upInput( x, this.isDown );
 
-        	/*if( this.isDown ) x = e.clientX - this.zone.x -3
-        	if( this.current !== -1 ) x -= this.tmp[this.current][0]
-        	return this.upInput( x, this.isDown )*/
-
         }
 
         return nup
 
     }
 
-    // ----------------------
+    //----> ACTION
 
     reset () {
 
-        let nup = false
-        return nup
+        let nup = false;
+        return nup;
 
     }
-
 
     setValue ( v ) {
 
         if( this.isVector ){
-            if( v.x !== undefined ) this.value[0] = v.x
-            if( v.y !== undefined ) this.value[1] = v.y
-            if( v.z !== undefined ) this.value[2] = v.z
-            if( v.w !== undefined ) this.value[3] = v.w
+            if( v.x !== undefined ) this.value[0] = v.x;
+            if( v.y !== undefined ) this.value[1] = v.y;
+            if( v.z !== undefined ) this.value[2] = v.z;
+            if( v.w !== undefined ) this.value[3] = v.w;
         } else {
-            this.value = this.isSingle ? [v] : v  
+            this.value = this.isSingle ? [v] : v ;
         }
 
-        this.update()
+        this.update();
 
     }
 
     sameStr ( str ){
 
-        let i = this.value.length
-        while(i--) this.c[ 3 + i ].textContent = str
+        let i = this.value.length;
+        while(i--) this.c[ 3 + i ].textContent = str;
 
     }
 
     update ( up ) {
 
-        let i = this.value.length
+        let i = this.value.length;
 
         while(i--){
-             this.value[i] = this.numValue( this.value[i] * this.invmulty )
-             this.c[ 3 + i ].textContent = this.value[i]
+             this.value[i] = this.numValue( this.value[i] * this.invmulty );
+             this.c[ 3 + i ].textContent = this.value[i];
         }
 
-        if( up ) this.send()
+        if( up ) this.send();
 
     }
 
@@ -281,33 +254,58 @@ export class Numeric extends Proto {
 
     }
 
-    /*send ( v ) {
+    validate ( force ) {
 
-        v = v || this.value
+        let ar = [];
+        let i = this.lng;
 
-        this.isSend = true
+        if( this.allway ) force = true;
 
-        if( this.objectLink !== null ){ 
-
-            if( this.isVector ){
-                this.objectLink[ this.objectKey ].fromArray( v )
-            } else {
-                this.objectLink[ this.objectKey ] = v
+        while(i--){
+            if(!isNaN( this.c[ 3 + i ].textContent )){ 
+                let nx = this.numValue( this.c[ 3 + i ].textContent );
+                this.c[ 3 + i ].textContent = nx;
+                this.value[i] = nx;
+            } else { // not number
+                this.c[ 3 + i ].textContent = this.value[i];
             }
 
+            ar[i] = this.value[i] * this.multy;
         }
 
-        if( this.callback ) this.callback( v, this.objectKey )
-        this.isSend = false
+        if( !force ) return
+        this.send( this.isSingle ? ar[0] : ar );
 
-    }*/
+    }
 
+    //----> REZISE
 
-    // ----------------------
-    //   INPUT
-    // ----------------------
+    rSize () {
 
-   select ( c, e, w, t, full ) {
+        super.rSize()
+        let sx = this.colors.sx;
+        let ss = sx * (this.lng-1);
+        let w = (this.sb-ss) / this.lng;
+        let s = this.s;
+        let i = this.lng;
+
+        while(i--){
+            //this.tmp[i] = [ Math.floor( this.sa + ( w * i )+( 5 * i )), w ];
+            this.tmp[i] = [ ( this.sa + ( w * i )+( sx * i )), w ];
+            this.tmp[i][2] = this.tmp[i][0] + this.tmp[i][1];
+            s[ 3 + i ].left = this.tmp[i][0] + 'px';
+            s[ 3 + i ].width = this.tmp[i][1] + 'px';
+        }
+
+    }
+
+    //----> INPUT-
+
+    select ( c, e, w, t, full ) {
+
+        const idx = this.c.indexOf( Roots.input );
+        if ( idx >= 3 ) this.current = idx - 3;
+
         if ( this.current === -1 ) return;
         const cc = this.colors;
         const el = this.c[ 3 + this.current ];
@@ -329,96 +327,14 @@ export class Numeric extends Proto {
             ${cc.backoff} ${end}px, ${cc.backoff} ${cur}px, 
             ${cc.text} ${cur}px, ${cc.text} ${cur + 1}px, 
             ${cc.backoff} ${cur + 1}px)`;
+
     }
 
-    /*select ( c, e, w, t, full ) {
-        if ( this.current === -1 ) return;
-        const cc = this.colors;
-        const pad = 5;
-        const start = pad + e;
-        const end = start + w;
-        const cur = pad + c;
-
-        this.s[ 3 + this.current ].background = `linear-gradient(90deg, 
-            ${cc.backoff} 0px, ${cc.backoff} ${start}px, 
-            ${cc.select} ${start}px, ${cc.select} ${end}px, 
-            ${cc.backoff} ${end}px, ${cc.backoff} ${cur}px, 
-            ${cc.text} ${cur}px, ${cc.text} ${cur + 1}px, 
-            ${cc.backoff} ${cur + 1}px)`;
-    }*/
-
     unselect () {
+
         if ( !this.s || this.current === -1 ) return;
         this.s[ 3 + this.current ].background = this.colors.back;
-    }
-
-    /*select ( c, e, w, t ) {
-
-        let s = this.s
-        let d = this.current !== -1 ? this.tmp[this.current][0] + 5 : 0
-        s[this.cursorId].width = '1px'
-        s[this.cursorId].left = ( d + c ) + 'px'
-        s[this.selectId].left =  ( d + e )  + 'px'
-        s[this.selectId].width =  w  + 'px'
-        this.c[this.selectId].textContent = t
     
-    }
-
-    unselect () {
-
-        let s = this.s
-        if(!s) return
-        this.c[this.selectId].textContent = ''
-        s[this.selectId].width = 0 + 'px'
-        s[this.cursorId].width = 0 + 'px'
-
-    }*/
-
-    validate ( force ) {
-
-        let ar = []
-        let i = this.lng
-
-        if( this.allway ) force = true
-
-        while(i--){
-        	if(!isNaN( this.c[ 3 + i ].textContent )){ 
-                let nx = this.numValue( this.c[ 3 + i ].textContent );
-                this.c[ 3 + i ].textContent = nx
-                this.value[i] = nx
-            } else { // not number
-                this.c[ 3 + i ].textContent = this.value[i]
-            }
-
-        	ar[i] = this.value[i] * this.multy
-        }
-
-        if( !force ) return
-        this.send( this.isSingle ? ar[0] : ar )
-
-    }
-
-    // ----------------------
-    //   REZISE
-    // ----------------------
-
-    rSize () {
-
-        super.rSize()
-        let sx = this.colors.sx
-        let ss = sx * (this.lng-1)
-        let w = (this.sb-ss) / this.lng//(( this.sb + sx ) / this.lng )-sx
-        let s = this.s
-        let i = this.lng
-
-        while(i--){
-            //this.tmp[i] = [ Math.floor( this.sa + ( w * i )+( 5 * i )), w ];
-            this.tmp[i] = [ ( this.sa + ( w * i )+( sx * i )), w ]
-            this.tmp[i][2] = this.tmp[i][0] + this.tmp[i][1]
-            s[ 3 + i ].left = this.tmp[i][0] + 'px'
-            s[ 3 + i ].width = this.tmp[i][1] + 'px'
-        }
-
     }
 
 }

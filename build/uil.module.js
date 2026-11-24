@@ -2,7 +2,7 @@
  * @author lth / https://github.com/lo-th
  */
 
-const REVISION = '5.0.5';
+const REVISION = '5.0.6';
 
 // INTENAL FUNCTION
 
@@ -45,7 +45,6 @@ const R = {
     firstImput: true,
     
     hiddenImput: null,
-    //measureCtx: null, // Remplace hiddenSizer pour des mesures sans reflow DOM
     hiddenSizer: null,
     hasFocus: false,
     startInput: false,
@@ -61,6 +60,8 @@ const R = {
     // Animation loo
     isLoop: false,
     listens: [],
+    inputs: [],
+    keys: new Set(),
 
     e:{
         type:null,
@@ -164,6 +165,7 @@ const R = {
         };
 
         R.onBlur = () => {
+            R.keys.clear();
             R.lock = false;
             R.clearOldID();
         };
@@ -643,6 +645,68 @@ const R = {
     //   INPUT
     // ----------------------
 
+    addInput: function ( input, parent ) {
+
+        input.setAttribute( 'tabindex', '0' );
+        R.inputs.push( { input: input, parent: parent } );
+
+        // Permet d'entrer dans le premier champ avec Tab depuis l'extérieur
+        /*input.addEventListener( 'focus', () => {
+            if ( R.parent !== parent ) {
+                R.setInput( input, parent );
+                R.selectAll();
+            }
+        });*/
+
+    },
+
+    removeInput: function ( parent ) {
+
+        R.inputs = R.inputs.filter( item => item.parent !== parent );
+
+    },
+
+    setInput: ( Input, parent ) => {
+
+        R.clearInput();
+
+        R.input = Input;
+        R.parent = parent;
+
+        R.input.style.background = R.parent.colors.backoff;
+        R.input.style.borderColor = R.parent.colors.select;
+        R.str = R.input.textContent;
+
+        R.setHidden();
+
+        // Écoute le clavier uniquement pendant la saisie
+        document.addEventListener( 'keydown', R, false );
+        document.addEventListener( 'keyup', R, false );
+
+    },
+
+    clearInput: () => {
+
+        if ( R.parent === null ) return;
+        if ( !R.firstImput ) R.parent.validate( true );
+
+        document.removeEventListener( 'keydown', R, false );
+        document.removeEventListener( 'keyup', R, false );
+
+        R.clearHidden();
+        R.parent.unselect();
+
+        R.input.style.background = R.parent.colors.back || 'none';
+        R.input.style.borderColor = R.parent.colors.border;
+        R.parent.isEdit = false;
+
+        R.input = null;
+        R.parent = null;
+        R.str = '';
+        R.firstImput = true;
+
+    },
+
     setHidden: () => {
 
 
@@ -753,7 +817,7 @@ const R = {
         if(!R.parent) return
 
         R.str = R.input.textContent;
-        R.inputRange = [0, R.str.length ];
+        R.inputRange = [ 0, R.str.length ];
         R.hasFocus = true;
         R.hiddenImput.focus();
         R.hiddenImput.selectionStart = R.inputRange[0];
@@ -785,57 +849,105 @@ const R = {
 
     },
 
-
-    setInput: ( Input, parent ) => {
-
-        R.clearInput();
-
-        R.input = Input;
-        R.parent = parent;
-
-        R.input.style.background = R.parent.colors.backoff;
-        R.input.style.borderColor = R.parent.colors.select;
-        R.str = R.input.textContent;
-
-        R.setHidden();
-
-        // Écoute le clavier uniquement pendant la saisie
-        document.addEventListener( 'keydown', R, false );
-        document.addEventListener( 'keyup', R, false );
-
-    },
-
-    clearInput: () => {
-
-        if ( R.parent === null ) return;
-        if ( !R.firstImput ) R.parent.validate( true );
-
-        document.removeEventListener( 'keydown', R, false );
-        document.removeEventListener( 'keyup', R, false );
-
-        R.clearHidden();
-        R.parent.unselect();
-
-        R.input.style.background = R.parent.colors.back || 'none';
-        R.input.style.borderColor = R.parent.colors.border;
-        R.parent.isEdit = false;
-
-        R.input = null;
-        R.parent = null;
-        R.str = '';
-        R.firstImput = true;
-
-    },
+    // ----------------------
+    //   KEY
+    // ----------------------
 
     keydown: ( e ) => {
 
+        if ( R.parent === null ) return;
+
+        if ( e.key === 'Shift' ) { 
+            R.keys.add( e.key );
+            return;
+        }
+
+        const isShift = R.keys.has( 'Shift' );
+
+        if ( e.key === 'Enter' ) {
+            R.clearInput();
+            return;
+        }
+
+        if ( e.key === 'Tab' ) {
+            e.preventDefault();
+
+            let visible = R.inputs.filter( item => item.input.offsetParent !== null );
+            if ( visible.length === 0 ) return;
+
+            let idx = visible.findIndex( item => item.input === R.input );
+            let nextIdx = isShift ? idx - 1 : idx + 1;
+
+            if ( nextIdx >= visible.length ) nextIdx = 0;
+            if ( nextIdx < 0 ) nextIdx = visible.length - 1;
+
+            let next = visible[ nextIdx ];
+
+            R.setInput( next.input, next.parent );
+            R.parent.isEdit = true;
+            R.selectAll();
+            return;
+        }
+
+        R.firstImput = false;
+
+        if ( R.hasFocus ) {
+            window.focus();
+            R.hiddenImput.focus();
+        }
+
+        R.parent.isEdit = true;
+
+        if ( R.input.isNum ) {
+            const ok = /^[0-9.\-]$/.test(e.key) || ['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight'].includes(e.key) || e.ctrlKey || e.metaKey;
+            R.hiddenImput.readOnly = !ok;
+        } else {
+            R.hiddenImput.readOnly = false;
+        }
+
+    },
+
+    keyup: ( e ) => {
+
+        if ( R.parent === null ) return;
+
+        if ( e.key === 'Shift' ) { 
+            R.keys.delete( e.key );
+            return;
+        }
+
+        // Ne pas écraser la sélection faite par Tab
+        if ( e.key === 'Tab' ) return;
+
+        R.str = R.hiddenImput.value;
+
+        if ( R.parent.allEqual ) R.parent.sameStr( R.str );
+        else R.input.textContent = R.str;
+
+        R.cursorId = R.hiddenImput.selectionStart;
+        R.inputRange = [ R.hiddenImput.selectionStart, R.hiddenImput.selectionEnd ];
+
+        R.selectParent();
+
+        R.parent.validate();
+
+    },
+
+    /*keydown: ( e ) => {
+
         if( R.parent === null ) return;
+
+        if (e.key === 'Shift'){ 
+            R.keys.add(e.key);
+        }
 
         //let keyCode = e.which, isShift = e.shiftKey;
 
-        //console.log( keyCode )
+        //console.log(e.key)
 
         R.firstImput = false;
+
+        const isShift = R.keys.has('Shift');
 
 
         if (R.hasFocus) {
@@ -845,13 +957,36 @@ const R = {
 
         }
 
-
         R.parent.isEdit = true;
 
         if (e.key === 'Enter') {
             R.clearInput();
+        } else if (e.key === 'Tab') {
+            console.log('is Tab')
+
+             e.preventDefault();
+
+            // Ne garder que les champs visibles à l'écran
+            let visible = R.inputs.filter( item => item.input.offsetParent !== null );
+            if ( visible.length === 0 ) return;
+
+            let idx = visible.findIndex( item => item.input === R.input );
+            let nextIdx = isShift ? idx - 1 : idx + 1;
+
+            // Boucler au début ou à la fin
+            if ( nextIdx >= visible.length ) nextIdx = 0;
+            if ( nextIdx < 0 ) nextIdx = visible.length - 1;
+
+            let next = visible[ nextIdx ];
+
+            R.setInput( next.input, next.parent );
+            R.parent.isEdit = true;
+            R.selectAll(); // Sélectionne le texte du champ suivant
+
+             return;
+
         } else if (R.input.isNum) {
-            const ok = /^[0-9.\-]$/.test(e.key) || ['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'Tab'].includes(e.key) || e.ctrlKey || e.metaKey;
+            const ok = /^[0-9.\-]$/.test(e.key) || ['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight'].includes(e.key) || e.ctrlKey || e.metaKey;
             R.hiddenImput.readOnly = !ok;
         } else {
             R.hiddenImput.readOnly = false;
@@ -862,6 +997,10 @@ const R = {
     keyup: ( e ) => {
 
         if( R.parent === null ) return;
+
+        if (e.key === 'Shift'){ 
+            R.keys.delete(e.key);
+        }
 
         R.str = R.hiddenImput.value;
 
@@ -876,7 +1015,7 @@ const R = {
         //if( R.parent.allway ) 
         R.parent.validate();
 
-    },
+    },*/
 
     // ----------------------
     //
@@ -2376,6 +2515,9 @@ class Proto {
         // only simple space 
         this.isSpace = o.isSpace || false;
 
+        // if proto have imput
+        this.haveInput = false;
+
         // if Proto is in gui or group
         this.main = o.main || null;
         this.isUI = o.isUI || false;
@@ -2866,6 +3008,7 @@ class Proto {
         this.clear();
 
         if( this.isListen ) Roots.removeListen( this );
+        if( this.haveInput ) Roots.removeInput( this );
 
         Tools.clear( this.c[0] );
 
@@ -3047,6 +3190,12 @@ class Proto {
     // ----------------------
     //  INPUT
     // ----------------------
+
+    addInput( Input ) {
+
+        Roots.addInput( Input, this );
+
+    }
 
     select() {
     
@@ -7246,6 +7395,7 @@ class Numeric extends Proto {
         this.isSingle = true;
         this.isAngle = false;
         this.isVector = false;
+        this.haveInput = true;
 
         if( o.isAngle ){
             this.isAngle = true;
@@ -7286,9 +7436,8 @@ class Numeric extends Proto {
         this.c[2] = this.dom( 'div', this.css.basic + ' background:' + cc.select + '; top:4px; width:0px; height:' + (this.h-8) + 'px;' );
 
         this.cMode = [];
-        
-        let i = this.lng;
-        while(i--){
+
+        for(let i = 0; i<this.lng; i++){
 
             if( this.isAngle ) this.value[i] = (this.value[i] * 180 / Math.PI).toFixed( this.precision );
 
@@ -7299,18 +7448,15 @@ class Numeric extends Proto {
             this.c[3+i].isNum = true;
             this.cMode[i] = 0;
 
+            this.addInput( this.c[3+i] );
+
         }
 
-        // selection
-        /*this.selectId = 3 + this.lng;
-        this.c[this.selectId] = this.dom(  'div', this.css.txtselect + 'position:absolute; top:2px; height:' + (this.h-4) + 'px; padding:0px 0px; width:0px; color:' + cc.textSelect + '; background:' + cc.select + '; border:none; border-radius:0px;');
-
-        // cursor
-        this.cursorId = 4 + this.lng;
-        this.c[ this.cursorId ] = this.dom( 'div', this.css.basic + 'top:2px; height:' + (this.h-4) + 'px; width:0px; background:'+cc.text+';' );*/
-
         this.init();
+
     }
+
+    //----> ZONE
 
     testZone ( e ) {
 
@@ -7328,9 +7474,7 @@ class Numeric extends Proto {
 
     }
 
-    // ----------------------
-    //   EVENTS
-    // ----------------------
+    //----> EVENTS
 
     mousedown ( e ) {
 
@@ -7377,23 +7521,6 @@ class Numeric extends Proto {
 
     }
 
-    /*mouseup ( e ) {
-
-    	if( this.isDown ){ 
-            this.isDown = false;
-            this.current = -1;
-            this.prev.x = 0;
-            this.prev.y = 0;
-            this.prev.d = 0;
-            this.prev.v = 0;
-            this.validate( true );
-            return this.mousemove( e );
-        }
-
-        return false
-
-    }*/
-
     mousemove ( e ) {
 
         let nup = false;
@@ -7439,25 +7566,20 @@ class Numeric extends Proto {
             }
             return this.upInput( x, this.isDown );
 
-        	/*if( this.isDown ) x = e.clientX - this.zone.x -3
-        	if( this.current !== -1 ) x -= this.tmp[this.current][0]
-        	return this.upInput( x, this.isDown )*/
-
         }
 
         return nup
 
     }
 
-    // ----------------------
+    //----> ACTION
 
     reset () {
 
         let nup = false;
-        return nup
+        return nup;
 
     }
-
 
     setValue ( v ) {
 
@@ -7467,7 +7589,7 @@ class Numeric extends Proto {
             if( v.z !== undefined ) this.value[2] = v.z;
             if( v.w !== undefined ) this.value[3] = v.w;
         } else {
-            this.value = this.isSingle ? [v] : v;  
+            this.value = this.isSingle ? [v] : v ;
         }
 
         this.update();
@@ -7508,33 +7630,58 @@ class Numeric extends Proto {
 
     }
 
-    /*send ( v ) {
+    validate ( force ) {
 
-        v = v || this.value
+        let ar = [];
+        let i = this.lng;
 
-        this.isSend = true
+        if( this.allway ) force = true;
 
-        if( this.objectLink !== null ){ 
-
-            if( this.isVector ){
-                this.objectLink[ this.objectKey ].fromArray( v )
-            } else {
-                this.objectLink[ this.objectKey ] = v
+        while(i--){
+            if(!isNaN( this.c[ 3 + i ].textContent )){ 
+                let nx = this.numValue( this.c[ 3 + i ].textContent );
+                this.c[ 3 + i ].textContent = nx;
+                this.value[i] = nx;
+            } else { // not number
+                this.c[ 3 + i ].textContent = this.value[i];
             }
 
+            ar[i] = this.value[i] * this.multy;
         }
 
-        if( this.callback ) this.callback( v, this.objectKey )
-        this.isSend = false
+        if( !force ) return
+        this.send( this.isSingle ? ar[0] : ar );
 
-    }*/
+    }
 
+    //----> REZISE
 
-    // ----------------------
-    //   INPUT
-    // ----------------------
+    rSize () {
 
-   select ( c, e, w, t, full ) {
+        super.rSize();
+        let sx = this.colors.sx;
+        let ss = sx * (this.lng-1);
+        let w = (this.sb-ss) / this.lng;
+        let s = this.s;
+        let i = this.lng;
+
+        while(i--){
+            //this.tmp[i] = [ Math.floor( this.sa + ( w * i )+( 5 * i )), w ];
+            this.tmp[i] = [ ( this.sa + ( w * i )+( sx * i )), w ];
+            this.tmp[i][2] = this.tmp[i][0] + this.tmp[i][1];
+            s[ 3 + i ].left = this.tmp[i][0] + 'px';
+            s[ 3 + i ].width = this.tmp[i][1] + 'px';
+        }
+
+    }
+
+    //----> INPUT-
+
+    select ( c, e, w, t, full ) {
+
+        const idx = this.c.indexOf( Roots.input );
+        if ( idx >= 3 ) this.current = idx - 3;
+
         if ( this.current === -1 ) return;
         const cc = this.colors;
         const el = this.c[ 3 + this.current ];
@@ -7556,96 +7703,14 @@ class Numeric extends Proto {
             ${cc.backoff} ${end}px, ${cc.backoff} ${cur}px, 
             ${cc.text} ${cur}px, ${cc.text} ${cur + 1}px, 
             ${cc.backoff} ${cur + 1}px)`;
+
     }
 
-    /*select ( c, e, w, t, full ) {
-        if ( this.current === -1 ) return;
-        const cc = this.colors;
-        const pad = 5;
-        const start = pad + e;
-        const end = start + w;
-        const cur = pad + c;
-
-        this.s[ 3 + this.current ].background = `linear-gradient(90deg, 
-            ${cc.backoff} 0px, ${cc.backoff} ${start}px, 
-            ${cc.select} ${start}px, ${cc.select} ${end}px, 
-            ${cc.backoff} ${end}px, ${cc.backoff} ${cur}px, 
-            ${cc.text} ${cur}px, ${cc.text} ${cur + 1}px, 
-            ${cc.backoff} ${cur + 1}px)`;
-    }*/
-
     unselect () {
+
         if ( !this.s || this.current === -1 ) return;
         this.s[ 3 + this.current ].background = this.colors.back;
-    }
-
-    /*select ( c, e, w, t ) {
-
-        let s = this.s
-        let d = this.current !== -1 ? this.tmp[this.current][0] + 5 : 0
-        s[this.cursorId].width = '1px'
-        s[this.cursorId].left = ( d + c ) + 'px'
-        s[this.selectId].left =  ( d + e )  + 'px'
-        s[this.selectId].width =  w  + 'px'
-        this.c[this.selectId].textContent = t
     
-    }
-
-    unselect () {
-
-        let s = this.s
-        if(!s) return
-        this.c[this.selectId].textContent = ''
-        s[this.selectId].width = 0 + 'px'
-        s[this.cursorId].width = 0 + 'px'
-
-    }*/
-
-    validate ( force ) {
-
-        let ar = [];
-        let i = this.lng;
-
-        if( this.allway ) force = true;
-
-        while(i--){
-        	if(!isNaN( this.c[ 3 + i ].textContent )){ 
-                let nx = this.numValue( this.c[ 3 + i ].textContent );
-                this.c[ 3 + i ].textContent = nx;
-                this.value[i] = nx;
-            } else { // not number
-                this.c[ 3 + i ].textContent = this.value[i];
-            }
-
-        	ar[i] = this.value[i] * this.multy;
-        }
-
-        if( !force ) return
-        this.send( this.isSingle ? ar[0] : ar );
-
-    }
-
-    // ----------------------
-    //   REZISE
-    // ----------------------
-
-    rSize () {
-
-        super.rSize();
-        let sx = this.colors.sx;
-        let ss = sx * (this.lng-1);
-        let w = (this.sb-ss) / this.lng;//(( this.sb + sx ) / this.lng )-sx
-        let s = this.s;
-        let i = this.lng;
-
-        while(i--){
-            //this.tmp[i] = [ Math.floor( this.sa + ( w * i )+( 5 * i )), w ];
-            this.tmp[i] = [ ( this.sa + ( w * i )+( sx * i )), w ];
-            this.tmp[i][2] = this.tmp[i][0] + this.tmp[i][1];
-            s[ 3 + i ].left = this.tmp[i][0] + 'px';
-            s[ 3 + i ].width = this.tmp[i][1] + 'px';
-        }
-
     }
 
 }
@@ -7666,6 +7731,7 @@ class Slide extends Proto {
         this.allway = o.allway || false;
 
         this.editable = o.editable !== undefined ? o.editable : false;
+        this.haveInput = this.editable;
 
         this.autoValue = true;
         if( o.autoValue!==undefined ) this.autoValue = false;
@@ -7687,6 +7753,8 @@ class Slide extends Proto {
         this.c[2].isNum = true;
         this.c[2].style.height = (this.h-2) + 'px';
         this.c[2].style.lineHeight = (this.h-10) + 'px';
+
+        if(this.editable) this.addInput( this.c[2] );
 
         if ( this.model > 0 ) {
 
@@ -7719,6 +7787,8 @@ class Slide extends Proto {
 
     }
 
+    //----> ZONE
+
     testZone ( e ) {
 
         let l = this.local;
@@ -7731,9 +7801,7 @@ class Slide extends Proto {
 
     }
 
-    // ----------------------
-    //   EVENTS
-    // ----------------------
+    //----> EVENTS
 
     mousedown ( e ) {
 
@@ -7818,9 +7886,7 @@ class Slide extends Proto {
 
     }
 
-  
-
-    // ----------------------
+    //----> ACTION
 
     formatOutput(){
 
@@ -7843,8 +7909,6 @@ class Slide extends Proto {
 
     }
 
-    // ----------------------
-
     validate ( force ) {
 
         if ( this.allway ) force = true;
@@ -7857,7 +7921,6 @@ class Slide extends Proto {
         }
 
     }
-
 
     reset () {
 
@@ -7881,17 +7944,6 @@ class Slide extends Proto {
 
     }
 
-    /*update ( up ) {
-        const pct = this.range > 0 ? ( this.value - this.min ) / this.range : 0;
-        const ww = this.ww * pct; // Sans Math.floor pour une glisse fluide
-
-        if ( this.model !== 3 ) this.s[5].width = ww + 'px';
-        if ( this.s[6] ) this.s[6].transform = `translate3d(${this.sa + ww + 3}px, 0, 0)`;
-        if ( !this.isEdit && this.autoValue ) this.c[2].textContent = this.formatOutput();
-
-        if ( up ) this.send();
-    }*/
-
     update ( up ) {
 
         const pct = this.range > 0 ? ( this.value - this.min ) / this.range : 0;
@@ -7912,47 +7964,7 @@ class Slide extends Proto {
 
     }
 
-    /*update ( up ) {
-
-        const pct = this.range > 0 ? ( this.value - this.min ) / this.range : 0;
-        let ww = Math.floor( this.ww * pct );
-
-        if(this.model !== 3) this.s[5].width = ww + 'px';
-        if(this.s[6]) this.s[6].left = ( this.sa + ww + 3 ) + 'px';
-        if( !this.isEdit && this.autoValue) this.c[2].textContent = this.formatOutput();
-
-        if( up ) this.send();
-        
-    }*/
-
-
-    select ( c, e, w, t, full ) {
-        
-        if ( !this.editable ) return;
-        const cc = this.colors;
-        const pad = 5;
-        const el = this.c[ 2 ];
-        const st = this.s[ 2 ];
-
-        const elW = el.clientWidth || ( this.sc - 6 );
-        const left = elW - pad - ( full || 0 );
-        const start = left + e;
-        const end = start + w;
-        const cur = left + c;
-
-        st.background = `linear-gradient(90deg, 
-            ${cc.backoff} 0px, ${cc.backoff} ${start}px, 
-            ${cc.select} ${start}px, ${cc.select} ${end}px, 
-            ${cc.backoff} ${end}px, ${cc.backoff} ${cur}px, 
-            ${cc.text} ${cur}px, ${cc.text} ${cur + 1}px, 
-            ${cc.backoff} ${cur + 1}px)`;
-    }
-
-    unselect () {
-        if ( !this.s ) return;
-        this.s[2].background = 'none';
-        if ( this.autoValue ) this.c[2].textContent = this.formatOutput();
-    }
+    //----> REZISE
 
     rSize () {
 
@@ -7980,6 +7992,39 @@ class Slide extends Proto {
 
     }
 
+    //----> INPUT
+
+    select ( c, e, w, t, full ) {
+        
+        if ( !this.editable ) return;
+        const cc = this.colors;
+        const pad = 5;
+        const el = this.c[ 2 ];
+        const st = this.s[ 2 ];
+
+        const elW = el.clientWidth || ( this.sc - 6 );
+        const left = elW - pad - ( full || 0 );
+        const start = left + e;
+        const end = start + w;
+        const cur = left + c;
+
+        st.background = `linear-gradient(90deg, 
+            ${cc.backoff} 0px, ${cc.backoff} ${start}px, 
+            ${cc.select} ${start}px, ${cc.select} ${end}px, 
+            ${cc.backoff} ${end}px, ${cc.backoff} ${cur}px, 
+            ${cc.text} ${cur}px, ${cc.text} ${cur + 1}px, 
+            ${cc.backoff} ${cur + 1}px)`;
+
+    }
+
+    unselect () {
+
+        if ( !this.s ) return;
+        this.s[2].background = 'none';
+        if ( this.autoValue ) this.c[2].textContent = this.formatOutput();
+
+    }
+
 }
 
 class TextInput extends Proto {
@@ -7987,6 +8032,8 @@ class TextInput extends Proto {
     constructor( o = {} ) {
 
         super( o );
+
+        this.haveInput = true;
 
         this.value = o.value !== undefined ? o.value : '';
         this.placeHolder = o.placeHolder || 'text';
@@ -8006,9 +8053,13 @@ class TextInput extends Proto {
         this.c[3] = this.dom( 'div', this.css.txtselect + 'top:1px; height:' + (this.h-2) + 'px; border:none; justify-content: center; font-style: italic; color:'+cc.border+';' );
         if( this.value === '' ) this.c[3].textContent = this.placeHolder;
 
+        this.addInput( this.c[2] );
+
         this.init();
 
     }
+
+    //----> ZONE
 
     testZone ( e ) {
 
@@ -8019,9 +8070,7 @@ class TextInput extends Proto {
 
     }
 
-    // ----------------------
-    //   EVENTS
-    // ----------------------
+    //----> EVENTS
 
     mouseup ( e ) {
 
@@ -8066,9 +8115,7 @@ class TextInput extends Proto {
         if ( this.isDown ) {
             const el = this.c[ 2 ];
             const pad = 5 - this.colors.borderSize;
-            //Roots.hiddenSizer.innerHTML = el.textContent.replace(/ /g, '&nbsp;');
             const full = Roots.textWidth( el.textContent );
-            //const full = Roots.hiddenSizer.clientWidth;
             const w = el.clientWidth || ( this.sb - this.colors.borderSize * 2 );
             const left = w - pad - full;
             x = ( e.clientX - this.zone.x - this.sa ) - left;
@@ -8076,11 +8123,9 @@ class TextInput extends Proto {
 
         return this.upInput( x, this.isDown );
 
-       //if( this.isDown ) x = e.clientX - this.zone.x;
-
-        //return this.upInput( x - this.sa -3, this.isDown );
-
     }
+
+    //----> ACTION
 
     update ( ) {
 
@@ -8088,7 +8133,12 @@ class TextInput extends Proto {
         
     }
 
-    // ----------------------
+    dispose() {
+        
+        super.dispose();
+
+
+    }
 
     reset () {
 
@@ -8096,35 +8146,36 @@ class TextInput extends Proto {
 
     }
 
-    // ----------------------
-    //   INPUT
-    // ----------------------
+    validate ( force ) {
 
-    /*select ( c, e, w, t ) {
-        if ( !this.editable ) return;
+        if( this.allway ) force = true; 
+        this.value = this.c[2].textContent;
+        if(this.value !== '') this.c[3].textContent = '';
+        else this.c[3].textContent = this.placeHolder;
+        if( !force ) return;
+        this.send();
 
-        console.log(c,e,w)
-        const cc = this.colors;
-        const pad = 5;
-        const right = this.c[2].clientWidth - pad;
-        const start = right - w - e;
-        const end = right - e;
-        //const cur = right - c;
+    }
 
-        //const start = right + w - e;
-        //const end = right - e;
-        const cur = right + c;
-        //const cur = c - right
+    //----> REZISE
 
-        this.s[2].background = `linear-gradient(90deg, 
-            ${cc.backoff} 0px, ${cc.backoff} ${start}px, 
-            ${cc.select} ${start}px, ${cc.select} ${end}px, 
-            ${cc.backoff} ${end}px, ${cc.backoff} ${cur}px, 
-            ${cc.text} ${cur}px, ${cc.text} ${cur + 1}px, 
-            ${cc.backoff} ${cur + 1}px)`;
-    }*/
+    rSize () {
+
+        super.rSize();
+
+        let s = this.s;
+        s[2].left = this.sa + 'px';
+        s[2].width = this.sb + 'px';
+
+        s[3].left = this.sa + 'px';
+        s[3].width = this.sb + 'px';
+     
+    }
+
+    //----> INPUT
 
     select ( c, e, w, t, full ) {
+
         if ( !this.editable ) return;
         const cc = this.colors;
         const pad = 5 - cc.borderSize;
@@ -8143,60 +8194,15 @@ class TextInput extends Proto {
             ${cc.backoff} ${end}px, ${cc.backoff} ${cur}px, 
             ${cc.text} ${cur}px, ${cc.text} ${cur + 1}px, 
             ${cc.backoff} ${cur + 1}px)`;
+
     }
-
-    /*select ( c, e, w, t, full ) {
-        const cc = this.colors;
-        const pad = 5;
-        const start = pad + e;
-        const end = start + w;
-        const cur = pad + c;
-
-        this.s[2].background = `linear-gradient(90deg, 
-            ${cc.backoff} 0px, ${cc.backoff} ${start}px, 
-            ${cc.select} ${start}px, ${cc.select} ${end}px, 
-            ${cc.backoff} ${end}px, ${cc.backoff} ${cur}px, 
-            ${cc.text} ${cur}px, ${cc.text} ${cur + 1}px, 
-            ${cc.backoff} ${cur + 1}px)`;
-    }*/
 
     unselect () {
+
         if ( !this.s ) return;
         this.s[2].background = this.colors.back;
-    }
-
-    validate ( force ) {
-
-        if( this.allway ) force = true; 
-
-        this.value = this.c[2].textContent;
-
-        if(this.value !== '') this.c[3].textContent = '';
-        else this.c[3].textContent = this.placeHolder;
-
-        if( !force ) return;
-
-        this.send();
 
     }
-
-    // ----------------------
-    //   REZISE
-    // ----------------------
-
-    rSize () {
-
-        super.rSize();
-
-        let s = this.s;
-        s[2].left = this.sa + 'px';
-        s[2].width = this.sb + 'px';
-
-        s[3].left = this.sa + 'px';
-        s[3].width = this.sb + 'px';
-     
-    }
-
 
 }
 

@@ -20,6 +20,9 @@ export class Proto {
         // only simple space 
         this.isSpace = o.isSpace || false;
 
+        // if proto have imput
+        this.haveInput = false;
+
         // if Proto is in gui or group
         this.main = o.main || null;
         this.isUI = o.isUI || false;
@@ -511,6 +514,7 @@ export class Proto {
         this.clear();
 
         if( this.isListen ) Roots.removeListen( this );
+        if( this.haveInput ) Roots.removeInput( this );
 
         Tools.clear( this.c[0] );
 
@@ -692,6 +696,12 @@ export class Proto {
     // ----------------------
     //  INPUT
     // ----------------------
+
+    addInput( Input ) {
+
+        Roots.addInput( Input, this );
+
+    }
 
     select() {
     

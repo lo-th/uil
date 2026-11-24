@@ -17,6 +17,7 @@ export class Slide extends Proto {
         this.allway = o.allway || false;
 
         this.editable = o.editable !== undefined ? o.editable : false;
+        this.haveInput = this.editable;
 
         this.autoValue = true
         if( o.autoValue!==undefined ) this.autoValue = false
@@ -38,6 +39,8 @@ export class Slide extends Proto {
         this.c[2].isNum = true;
         this.c[2].style.height = (this.h-2) + 'px';
         this.c[2].style.lineHeight = (this.h-10) + 'px';
+
+        if(this.editable) this.addInput( this.c[2] );
 
         if ( this.model > 0 ) {
 
@@ -70,6 +73,8 @@ export class Slide extends Proto {
 
     }
 
+    //----> ZONE
+
     testZone ( e ) {
 
         let l = this.local;
@@ -82,9 +87,7 @@ export class Slide extends Proto {
 
     }
 
-    // ----------------------
-    //   EVENTS
-    // ----------------------
+    //----> EVENTS
 
     mousedown ( e ) {
 
@@ -169,9 +172,7 @@ export class Slide extends Proto {
 
     }
 
-  
-
-    // ----------------------
+    //----> ACTION
 
     formatOutput(){
 
@@ -194,8 +195,6 @@ export class Slide extends Proto {
 
     }
 
-    // ----------------------
-
     validate ( force ) {
 
         if ( this.allway ) force = true;
@@ -208,7 +207,6 @@ export class Slide extends Proto {
         }
 
     }
-
 
     reset () {
 
@@ -232,17 +230,6 @@ export class Slide extends Proto {
 
     }
 
-    /*update ( up ) {
-        const pct = this.range > 0 ? ( this.value - this.min ) / this.range : 0;
-        const ww = this.ww * pct; // Sans Math.floor pour une glisse fluide
-
-        if ( this.model !== 3 ) this.s[5].width = ww + 'px';
-        if ( this.s[6] ) this.s[6].transform = `translate3d(${this.sa + ww + 3}px, 0, 0)`;
-        if ( !this.isEdit && this.autoValue ) this.c[2].textContent = this.formatOutput();
-
-        if ( up ) this.send();
-    }*/
-
     update ( up ) {
 
         const pct = this.range > 0 ? ( this.value - this.min ) / this.range : 0;
@@ -263,47 +250,7 @@ export class Slide extends Proto {
 
     }
 
-    /*update ( up ) {
-
-        const pct = this.range > 0 ? ( this.value - this.min ) / this.range : 0;
-        let ww = Math.floor( this.ww * pct );
-
-        if(this.model !== 3) this.s[5].width = ww + 'px';
-        if(this.s[6]) this.s[6].left = ( this.sa + ww + 3 ) + 'px';
-        if( !this.isEdit && this.autoValue) this.c[2].textContent = this.formatOutput();
-
-        if( up ) this.send();
-        
-    }*/
-
-
-    select ( c, e, w, t, full ) {
-        
-        if ( !this.editable ) return;
-        const cc = this.colors;
-        const pad = 5;
-        const el = this.c[ 2 ];
-        const st = this.s[ 2 ];
-
-        const elW = el.clientWidth || ( this.sc - 6 );
-        const left = elW - pad - ( full || 0 );
-        const start = left + e;
-        const end = start + w;
-        const cur = left + c;
-
-        st.background = `linear-gradient(90deg, 
-            ${cc.backoff} 0px, ${cc.backoff} ${start}px, 
-            ${cc.select} ${start}px, ${cc.select} ${end}px, 
-            ${cc.backoff} ${end}px, ${cc.backoff} ${cur}px, 
-            ${cc.text} ${cur}px, ${cc.text} ${cur + 1}px, 
-            ${cc.backoff} ${cur + 1}px)`;
-    }
-
-    unselect () {
-        if ( !this.s ) return;
-        this.s[2].background = 'none';
-        if ( this.autoValue ) this.c[2].textContent = this.formatOutput();
-    }
+    //----> REZISE
 
     rSize () {
 
@@ -328,6 +275,39 @@ export class Slide extends Proto {
         s[5].left = (this.sa + 3) + 'px';
 
         this.update();
+
+    }
+
+    //----> INPUT
+
+    select ( c, e, w, t, full ) {
+        
+        if ( !this.editable ) return;
+        const cc = this.colors;
+        const pad = 5;
+        const el = this.c[ 2 ];
+        const st = this.s[ 2 ];
+
+        const elW = el.clientWidth || ( this.sc - 6 );
+        const left = elW - pad - ( full || 0 );
+        const start = left + e;
+        const end = start + w;
+        const cur = left + c;
+
+        st.background = `linear-gradient(90deg, 
+            ${cc.backoff} 0px, ${cc.backoff} ${start}px, 
+            ${cc.select} ${start}px, ${cc.select} ${end}px, 
+            ${cc.backoff} ${end}px, ${cc.backoff} ${cur}px, 
+            ${cc.text} ${cur}px, ${cc.text} ${cur + 1}px, 
+            ${cc.backoff} ${cur + 1}px)`;
+
+    }
+
+    unselect () {
+
+        if ( !this.s ) return;
+        this.s[2].background = 'none';
+        if ( this.autoValue ) this.c[2].textContent = this.formatOutput();
 
     }
 

@@ -3,7 +3,7 @@
  * @author lth / https://github.com/lo-th
  */
 
-export const REVISION = '5.0.5';
+export const REVISION = '5.0.6';
 
 // INTENAL FUNCTION
 
@@ -46,7 +46,6 @@ const R = {
     firstImput: true,
     
     hiddenImput: null,
-    //measureCtx: null, // Remplace hiddenSizer pour des mesures sans reflow DOM
     hiddenSizer: null,
     hasFocus: false,
     startInput: false,
@@ -62,6 +61,8 @@ const R = {
     // Animation loo
     isLoop: false,
     listens: [],
+    inputs: [],
+    keys: new Set(),
 
     e:{
         type:null,
@@ -165,6 +166,7 @@ const R = {
         };
 
         R.onBlur = () => {
+            R.keys.clear();
             R.lock = false;
             R.clearOldID();
         };
@@ -644,6 +646,68 @@ const R = {
     //   INPUT
     // ----------------------
 
+    addInput: function ( input, parent ) {
+
+        input.setAttribute( 'tabindex', '0' );
+        R.inputs.push( { input: input, parent: parent } );
+
+        // Permet d'entrer dans le premier champ avec Tab depuis l'extérieur
+        /*input.addEventListener( 'focus', () => {
+            if ( R.parent !== parent ) {
+                R.setInput( input, parent );
+                R.selectAll();
+            }
+        });*/
+
+    },
+
+    removeInput: function ( parent ) {
+
+        R.inputs = R.inputs.filter( item => item.parent !== parent );
+
+    },
+
+    setInput: ( Input, parent ) => {
+
+        R.clearInput();
+
+        R.input = Input;
+        R.parent = parent;
+
+        R.input.style.background = R.parent.colors.backoff;
+        R.input.style.borderColor = R.parent.colors.select;
+        R.str = R.input.textContent;
+
+        R.setHidden();
+
+        // Écoute le clavier uniquement pendant la saisie
+        document.addEventListener( 'keydown', R, false );
+        document.addEventListener( 'keyup', R, false );
+
+    },
+
+    clearInput: () => {
+
+        if ( R.parent === null ) return;
+        if ( !R.firstImput ) R.parent.validate( true );
+
+        document.removeEventListener( 'keydown', R, false );
+        document.removeEventListener( 'keyup', R, false );
+
+        R.clearHidden();
+        R.parent.unselect();
+
+        R.input.style.background = R.parent.colors.back || 'none';
+        R.input.style.borderColor = R.parent.colors.border;
+        R.parent.isEdit = false;
+
+        R.input = null;
+        R.parent = null;
+        R.str = '';
+        R.firstImput = true;
+
+    },
+
     setHidden: () => {
 
 
@@ -754,13 +818,13 @@ const R = {
         if(!R.parent) return
 
         R.str = R.input.textContent;
-        R.inputRange = [0, R.str.length ]
+        R.inputRange = [ 0, R.str.length ];
         R.hasFocus = true;
         R.hiddenImput.focus();
         R.hiddenImput.selectionStart = R.inputRange[0];
         R.hiddenImput.selectionEnd = R.inputRange[1];
-        R.cursorId = R.inputRange[1]
-        R.selectParent()
+        R.cursorId = R.inputRange[1];
+        R.selectParent();
 
     },
 
@@ -786,57 +850,105 @@ const R = {
 
     },
 
-
-    setInput: ( Input, parent ) => {
-
-        R.clearInput();
-
-        R.input = Input;
-        R.parent = parent;
-
-        R.input.style.background = R.parent.colors.backoff;
-        R.input.style.borderColor = R.parent.colors.select;
-        R.str = R.input.textContent;
-
-        R.setHidden();
-
-        // Écoute le clavier uniquement pendant la saisie
-        document.addEventListener( 'keydown', R, false );
-        document.addEventListener( 'keyup', R, false );
-
-    },
-
-    clearInput: () => {
-
-        if ( R.parent === null ) return;
-        if ( !R.firstImput ) R.parent.validate( true );
-
-        document.removeEventListener( 'keydown', R, false );
-        document.removeEventListener( 'keyup', R, false );
-
-        R.clearHidden();
-        R.parent.unselect();
-
-        R.input.style.background = R.parent.colors.back || 'none';
-        R.input.style.borderColor = R.parent.colors.border;
-        R.parent.isEdit = false;
-
-        R.input = null;
-        R.parent = null;
-        R.str = '';
-        R.firstImput = true;
-
-    },
+    // ----------------------
+    //   KEY
+    // ----------------------
 
     keydown: ( e ) => {
 
+        if ( R.parent === null ) return;
+
+        if ( e.key === 'Shift' ) { 
+            R.keys.add( e.key );
+            return;
+        }
+
+        const isShift = R.keys.has( 'Shift' );
+
+        if ( e.key === 'Enter' ) {
+            R.clearInput();
+            return;
+        }
+
+        if ( e.key === 'Tab' ) {
+            e.preventDefault();
+
+            let visible = R.inputs.filter( item => item.input.offsetParent !== null );
+            if ( visible.length === 0 ) return;
+
+            let idx = visible.findIndex( item => item.input === R.input );
+            let nextIdx = isShift ? idx - 1 : idx + 1;
+
+            if ( nextIdx >= visible.length ) nextIdx = 0;
+            if ( nextIdx < 0 ) nextIdx = visible.length - 1;
+
+            let next = visible[ nextIdx ];
+
+            R.setInput( next.input, next.parent );
+            R.parent.isEdit = true;
+            R.selectAll();
+            return;
+        }
+
+        R.firstImput = false;
+
+        if ( R.hasFocus ) {
+            window.focus();
+            R.hiddenImput.focus();
+        }
+
+        R.parent.isEdit = true;
+
+        if ( R.input.isNum ) {
+            const ok = /^[0-9.\-]$/.test(e.key) || ['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight'].includes(e.key) || e.ctrlKey || e.metaKey;
+            R.hiddenImput.readOnly = !ok;
+        } else {
+            R.hiddenImput.readOnly = false;
+        }
+
+    },
+
+    keyup: ( e ) => {
+
+        if ( R.parent === null ) return;
+
+        if ( e.key === 'Shift' ) { 
+            R.keys.delete( e.key );
+            return;
+        }
+
+        // Ne pas écraser la sélection faite par Tab
+        if ( e.key === 'Tab' ) return;
+
+        R.str = R.hiddenImput.value;
+
+        if ( R.parent.allEqual ) R.parent.sameStr( R.str );
+        else R.input.textContent = R.str;
+
+        R.cursorId = R.hiddenImput.selectionStart;
+        R.inputRange = [ R.hiddenImput.selectionStart, R.hiddenImput.selectionEnd ];
+
+        R.selectParent();
+
+        R.parent.validate();
+
+    },
+
+    /*keydown: ( e ) => {
+
         if( R.parent === null ) return;
+
+        if (e.key === 'Shift'){ 
+            R.keys.add(e.key);
+        }
 
         //let keyCode = e.which, isShift = e.shiftKey;
 
-        //console.log( keyCode )
+        //console.log(e.key)
 
         R.firstImput = false;
+
+        const isShift = R.keys.has('Shift');
 
 
         if (R.hasFocus) {
@@ -846,13 +958,36 @@ const R = {
 
         }
 
-
         R.parent.isEdit = true;
 
         if (e.key === 'Enter') {
             R.clearInput();
+        } else if (e.key === 'Tab') {
+            console.log('is Tab')
+
+             e.preventDefault();
+
+            // Ne garder que les champs visibles à l'écran
+            let visible = R.inputs.filter( item => item.input.offsetParent !== null );
+            if ( visible.length === 0 ) return;
+
+            let idx = visible.findIndex( item => item.input === R.input );
+            let nextIdx = isShift ? idx - 1 : idx + 1;
+
+            // Boucler au début ou à la fin
+            if ( nextIdx >= visible.length ) nextIdx = 0;
+            if ( nextIdx < 0 ) nextIdx = visible.length - 1;
+
+            let next = visible[ nextIdx ];
+
+            R.setInput( next.input, next.parent );
+            R.parent.isEdit = true;
+            R.selectAll(); // Sélectionne le texte du champ suivant
+
+             return;
+
         } else if (R.input.isNum) {
-            const ok = /^[0-9.\-]$/.test(e.key) || ['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'Tab'].includes(e.key) || e.ctrlKey || e.metaKey;
+            const ok = /^[0-9.\-]$/.test(e.key) || ['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight'].includes(e.key) || e.ctrlKey || e.metaKey;
             R.hiddenImput.readOnly = !ok;
         } else {
             R.hiddenImput.readOnly = false;
@@ -863,6 +998,10 @@ const R = {
     keyup: ( e ) => {
 
         if( R.parent === null ) return;
+
+        if (e.key === 'Shift'){ 
+            R.keys.delete(e.key);
+        }
 
         R.str = R.hiddenImput.value;
 
@@ -877,7 +1016,7 @@ const R = {
         //if( R.parent.allway ) 
         R.parent.validate();
 
-    },
+    },*/
 
     // ----------------------
     //
