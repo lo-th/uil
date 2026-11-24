@@ -43,7 +43,11 @@ ui.add( obj, 'slider', { type:'slide' }).onEnd( (v)=>{} )
 ```sh
 ui.clear();
 ```
-**6 - other examples**
+**6 - uil is on npm**
+```sh
+npm i uil
+```
+**7 - examples**
 
 [**uil listen**](http://lo-th.github.io/uil/examples/uil_listen.html)
 
@@ -60,11 +64,6 @@ ui.clear();
 [**uil to 3D three 1**](http://lo-th.github.io/uil/examples/uil_3d_1.html)
 
 [**uil to 3D three 2**](http://lo-th.github.io/uil/examples/uil_3d_2.html)
-
-**7 - uil is on npm**
-```sh
-npm i uil
-```
 
 **8 - creator Tools**
 
