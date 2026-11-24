@@ -4,8 +4,10 @@
 
 <p align="center"><a href="http://lo-th.github.io/uil/"><img src="http://lo-th.github.io/uil/examples/assets/uil.jpg"/></a></p>
 
-uil.js is a lightweight ui for javascript with a complete 3d display support.<br>
-totally customizable, only 6 events, auto resize<br>
+uil.js is a lightweight ui for javascript.<br>
+Customizable, 6 events Max, auto resize, 3d display support.<br>
+( 50 x faster than Dat.gui / 4 x faster than tweakpane on 4,000 slides test ) <br>
+<br>
 [**MAIN EXAMPLE**](http://lo-th.github.io/uil/index.html) | [**DOC**](DOC.md)
 
 **1 - init engine**
