@@ -6,7 +6,7 @@
 
 uil.js is a lightweight ui for javascript.<br>
 Customizable, 6 events Max, auto resize, 3d display support.<br>
-( 50 x faster than Dat.gui / 4 x faster than tweakpane on 4,000 slides test ) <br>
+( 50 x faster than Dat.gui on 4,000 slides test ) <br>
 <br>
 [**MAIN EXAMPLE**](http://lo-th.github.io/uil/index.html) | [**DOC**](DOC.md)
 
