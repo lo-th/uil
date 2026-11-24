@@ -462,6 +462,45 @@ export class Gui {
     }
 
     // ----------------------
+    //   CUSTOM EVENTS
+    // ----------------------
+
+    _computeXY(u, v, flipY) {
+        const x = this.zone.x + Math.round(u * this.zone.w);
+        const y = this.zone.y + Math.round((flipY ? 1 - v : v) * this.zone.h);
+        if (isNaN(x) || isNaN(y)) {
+            console.warn("Gui._computeXY: invalid coordinates", u, v);
+            return null;
+        }
+        return { x, y };
+    }
+
+    removeEvents(){
+        if ( Roots.isEventsInit ) Roots.removeEvents();
+    }
+
+    triggerMouseUV( type, u, v, flipY = true ){
+
+        // type can be "down", "up", "move"
+
+        const etype = 'pointer' + type;
+
+        const coords = this._computeXY(u, v, flipY);
+
+        Roots.handleEvent({
+
+            type: etype,
+            clientX: coords.x,
+            clientY: coords.y,
+            delta: 0,
+            key: null,
+            keyCode: NaN,
+
+        });
+    
+    }
+
+    // ----------------------
     //   EVENTS
     // ----------------------
 
@@ -606,25 +645,6 @@ export class Gui {
         return change;
 
     }
-
-    /*getNext ( e, change ) {
-
-        let next = Roots.findTarget( this.uis, e );
-
-        if( next !== this.current ){
-            this.clearTarget();
-            this.current = next;
-            change = true;
-            this.isNewTarget = true;
-
-        }
-
-        if( next !== -1 ){ 
-            this.proto = this.uis[ this.current ];
-            this.proto.uiover();
-        }
-
-    }*/
 
     onWheel ( e ) {
 
