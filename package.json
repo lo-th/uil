@@ -21,7 +21,6 @@
   ],
   "sideEffects": false,
   "directories": {
-    "doc": "docs",
     "example": "examples"
   },
   "scripts": {

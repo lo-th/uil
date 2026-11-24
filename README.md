@@ -36,7 +36,8 @@ ui.add( obj, 'vector', { type:'number' })
 ```
 **4 - callback return the value**
 ```sh
-ui.add('number', { name:'Vector4', value:[0,0,0,0] }).onChange( function(v){ debug.innerHTML = v; } )
+ui.add('number', { name:'Vector4', value:[0,0,0,0] }).onChange( (v)=>{} )
+ui.add( obj, 'slider', { type:'slide' }).onEnd( (v)=>{} )
 ```
 **5 - you can reset all value**
 ```sh
