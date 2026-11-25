@@ -3236,7 +3236,7 @@ class Bool extends Proto {
         super( o );
         
         this.value = o.value || false;
-        this.model = o.mode !== undefined ? o.mode : 0;
+        this.model = o.mode !== undefined ? o.mode : 2;
 
         this.onName = o.rename || this.txt;
         if( o.onName ) o.onname = o.onName;

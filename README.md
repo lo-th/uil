@@ -2,7 +2,7 @@
 [![Build Size][build-size]][build-size-url]
 [![NPM Downloads][npm-downloads]][npmtrends-url]
 
-<p align="center"><a href="http://lo-th.github.io/uil/"><img src="http://lo-th.github.io/uil/examples/assets/uil.jpg"/></a></p>
+<p align="center"><a href="http://lo-th.github.io/uil/"><img src="http://lo-th.github.io/uil/examples/assets/view.png"/></a></p>
 
 uil.js is a lightweight ui for javascript.<br>
 Customizable, 6 events Max, auto resize, 3d display support.<br>
