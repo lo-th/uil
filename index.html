@@ -22,8 +22,15 @@
 
     let title, ny =0, graph, graphUp, display = false
 
-    const list = ['item-0', 'item-1', 'item-2', 'item-3', 'item-4', 'item-5', 'item-6', 'item-7', 'item-8', 'item-9', 'item-10', 'item-11', 'item-12']
-    const listE = ['💪', '📦', '😅', '🌸', '🧩', '😎', '❤️‍🩹', '⚖️', '🔴', '💚', '🍓', '🟢', '👇']
+    const randInt = ( low, high ) => ( low + Math.floor( Math.random() * ( high - low + 1 ) ) )
+    const emojii = ['💪', '📦', '😅', '🌸', '🧩', '😎', '❤️‍🩹', '⚖️', '🔴', '💚', '🍓', '🟢', '👇'];
+    const listE = [];
+    const list = [];
+
+    for(let i = 0; i<200; i++){
+        list.push('item-'+i)
+        listE.push(emojii[randInt(0,12)])
+    }
     const list2 = ['item-0', 'item-1', 'item-2']
 
     const debug = document.getElementById('debug')
