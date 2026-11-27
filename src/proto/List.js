@@ -532,8 +532,12 @@ export class List extends Proto {
         let listBoost = Math.max( 1, Math.floor( this.length / 50 ) );
 
         // Calcul du déplacement final
+
+
         let itemsToScroll = listBoost * this.wheelSpeed;
-        let step = itemsToScroll * ( this.itemHeight + 1 ) * this.ratio;
+        let scrollRatio = this.range / ( this.max - this.maxHeight );
+        let step = itemsToScroll * ( this.itemHeight + 1 ) * scrollRatio;
+        //let step = itemsToScroll * ( this.itemHeight + 1 ) * this.ratio;
 
         this.py += ( e.delta > 0 ? 1 : -1 ) * step;
         this.update( this.py );
@@ -930,6 +934,23 @@ export class List extends Proto {
         y = y < 0 ? 0 : y;
         y = y > this.range ? this.range : y;
 
+        let scrollPercent = this.range > 0 ? y / this.range : 0;
+        this.topList = -Math.floor( scrollPercent * ( this.max - this.maxHeight ) );
+
+        this.listIn.style.transform = 'translate3d(0, ' + this.topList + 'px, 0)';
+        this.scroller.style.transform = 'translate3d(0, ' + Math.floor( y ) + 'px, 0)';
+
+        this.py = y;
+
+    }
+
+    /*update ( y ) {
+
+        if( !this.scroll ) return;
+
+        y = y < 0 ? 0 : y;
+        y = y > this.range ? this.range : y;
+
         this.topList = -Math.floor( y / this.ratio );
 
         //this.listIn.style.top = this.topList+'px';
@@ -944,7 +965,7 @@ export class List extends Proto {
 
         this.py = y;
 
-    }
+    }*/
 
     parentHeight ( t ) {
 
